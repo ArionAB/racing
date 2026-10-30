@@ -349,6 +349,14 @@ const BASELINE := {
 	#
 	# Baza = cifra masurata, FARA marja. Sabotaj verificat la armare.
 	"Ha Long (Track22)": 1,
+	# Carrara (Track23), armata la montajul valului 1 al kitului (27 oct 2026): 9 raportari,
+	# masurate de 3 ori INAINTE de montaj si de 3 ori DUPA, identic. Toate sunt hazarde
+	# intentionate ale pistei, niciuna din piesele montate: 4 la frac 0.050 (`@StaticBody3D`,
+	# corpul EXCAVATORULUI pe dreapta piazzale-ului: lat=+1.7 si INAINTE la 2,59 m pe cele trei
+	# inaltimi) si 5 la frac 0.685 (`@AnimatableBody3D`, CAMIONUL 2 pe banda lui, la intrarea
+	# pe pod). Derrick-ul, sania, portalurile, viaductul si decorul din A/C/F nu apar.
+	# Baza = cifra masurata, FARA marja. Sabotaj (`--sabotaj`) verificat la armare.
+	"Carrara (Track23)": 9,
 }
 
 

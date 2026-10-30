@@ -811,7 +811,7 @@ point_count = {len(c_)}
         hz_ext = (
             '[ext_resource type="Script" path="res://scenes/hazards/bus_hazard.gd" id="7_bus"]\n'
             '[ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="9_marker"]\n'
-            '[ext_resource type="PackedScene" path="res://assets/models/baikal/vehicles/kamaz_truck.glb" id="8_kamaz"]\n')
+            '[ext_resource type="PackedScene" path="res://assets/models/carrara/vehicles/quarry_truck.glb" id="8_kamaz"]\n')
         hz_sub = curve_sub("Curve3D_camion1", c1) + curve_sub("Curve3D_camion2", c2)
         # perioada 118 s (brief par.2: ~110), ascuns la t = 3 s (reapare la ~44 s, dupa ce plutonul a trecut de C); pod: perioada 60 s (nu e multiplu al turului de ~68 s),
         # ascuns la t = 7 s
@@ -828,6 +828,357 @@ excavator_ai_dice = true
 excavator_soft_contact = true
 """
         print(f"  excavator: frac 0.050 la x {brow[ie][0]:.1f} (grila x ~ -190..-160, linia de start x -148)")
+
+        # ==================================================================================
+        # MONTAJUL VALULUI 1 AL KITULUI (docs/asset_briefs/carrara_inventory.md, „Montajul valului 1
+        # pe Track23"). Totul se DERIVA din axa coapta (`brow`), ca sa supravietuiasca regenerarii si
+        # sa urmeze traseul daca se muta. Singurele cifre masurate pe teren sunt cotele decorului
+        # (`KIT_Y`, din `tools/ProbeCarraraMontaj.tscn -- --decor`) si coborarea turnului derrick-ului
+        # (`DERRICK_DROP`): se REMASOARA daca se schimba relieful sau traseul in zonele A, C, F.
+        # ==================================================================================
+        def b_dir(i):
+            j, k = min(i + 1, nb - 1), max(i - 1, 0)
+            dx, dz = brow[j][0] - brow[k][0], brow[j][2] - brow[k][2]
+            l_ = math.hypot(dx, dz)
+            return dx / l_, dz / l_
+
+        def rot_y(fx, fz, deg):
+            # Rotatie in jurul lui +Y (sensul Godot: -Z spre -X la unghi pozitiv).
+            a = math.radians(deg)
+            return fx * math.cos(a) + fz * math.sin(a), -fx * math.sin(a) + fz * math.cos(a)
+
+        def xf_rows(bx, by, bz, o):
+            # Transform3D in .tscn = RANDURILE bazei (memoria tscn-transform-e-pe-randuri).
+            return "Transform3D(%s, %s)" % (", ".join(
+                repr(round(v, 5)) for v in (bx[0], by[0], bz[0], bx[1], by[1], bz[1], bx[2], by[2], bz[2])),
+                ", ".join(repr(round(v, 3)) for v in o))
+
+        def yaw_xf(fx, fz, o, yaw=0.0):
+            """Baza cu -Z local pe (fx, fz) rotit cu `yaw` grade, +X = dreapta acelei directii, Y sus."""
+            fx, fz = rot_y(fx, fz, yaw)
+            return xf_rows((-fz, 0.0, fx), (0.0, 1.0, 0.0), (-fx, 0.0, -fz), o)
+
+        def tilt_xf(fx, fz, o, yaw, grade):
+            """Ca `yaw_xf`, dar inclinat cu panta drumului (`grade` = dy pe metru INAINTE): modulul de berma
+            de 6 m urmeaza cota drumului in lung, in loc sa se ingroape la un capat."""
+            fx, fz = rot_y(fx, fz, yaw)
+            g = grade * math.cos(math.radians(yaw))
+            n_ = math.sqrt(1.0 + g * g)
+            bz = (-fx / n_, -g / n_, -fz / n_)
+            by = (-g * fx / n_, 1.0 / n_, -g * fz / n_)
+            bx = (by[1] * bz[2] - by[2] * bz[1], by[2] * bz[0] - by[0] * bz[2], by[0] * bz[1] - by[1] * bz[0])
+            return xf_rows(bx, by, bz, o)
+
+        def road_pt(fr_, lat, along=0.0):
+            """Punctul la fractia (pe INDEX) `fr_`, `lat` m la DREAPTA sensului, `along` m inainte."""
+            i_ = b_frac(fr_)
+            fx, fz = b_dir(i_)
+            rx, rz = -fz, fx
+            x, y, z = brow[i_][0], brow[i_][1], brow[i_][2]
+            return (x + rx * lat + fx * along, y, z + rz * lat + fz * along), (fx, fz), i_
+
+        kit_ext = (
+            '[ext_resource type="Script" path="res://scenes/hazards/crane_hazard.gd" id="10_crane"]\n'
+            '[ext_resource type="Script" path="res://scenes/props/world_prop.gd" id="14_prop"]\n')
+        kit_glb = {}
+
+        def glb(path):
+            stem = path.rsplit("/", 1)[1].replace(".glb", "")
+            if stem not in kit_glb:
+                kit_glb[stem] = path
+            return f'ExtResource("k_{stem}")'
+
+        kit_sub = ""
+        kit_nodes = ""
+        # Cotele MASURATE ale pieselor asezate pe teren (baza = terenul minim de sub amprenta - 3 cm; portalurile:
+        # terenul minim de sub stalpi - 5 cm), din `ProbeCarraraMontaj -- --decor --portals --no-manual-batch`.
+        # O piesa care lipseste de aici sta la cota drumului - 0.3 (umarul tipic) pana se masoara.
+        KIT_Y = {
+            "GalerieIntrare": 3.24, "GalerieIesire": 44.64, "MarmiferaIntrare": 26.63, "MarmiferaIesire": 25.10,
+            "A_StivaS1": 24.65, "A_BlocS2": 24.64, "A_StivaS3": 24.63, "A_StivaS4": 24.62, "A_BlocS5": 24.63,
+            "A_StivaS6": 24.62, "A_StivaD1": 24.67, "A_StivaD2": 24.67, "A_BlocD3": 24.67, "A_StivaD4": 24.67,
+            "A_StivaD5": 24.67, "A_Container": 24.66, "A_Rezervor": 24.65, "A_Lampa": 24.67,
+            "C_Informe1": 1.05, "C_Informe2": 1.63, "C_Informe3": 1.66, "C_Informe4": 1.66, "C_Informe5": 1.59,
+            "F_BermaE_D": 44.06, "F_BermaE_S": 44.06, "F_BermaV_D": 41.89, "F_BermaV_S": 41.89,
+        }
+
+        # ---- 1. DERRICK-UL (POI C): CraneHazard pe dreapta de 41 m a fundului carierei (x 103 -> 144, spre E).
+        # Turnul pe STANGA (tower_side -1, singura latura validata de probe_carrara_derrick.gd), la 7 m de axa.
+        # Cotele de cod sunt pe scara modelului: model_scale 0.7256 + hook_radius 17.9 = brat de 12.99 m in joc
+        # (decizia 2 a coordonatorului). Sarcina trece axa la z = +-10.9 m de turn, deci centrul sta la
+        # x ~ 128, ca AMBELE treceri sa cada pe dreapta (117 si 139 < 144, unde incepe cotul 1).
+        # Terenul de sub turn (lat -5.7 .. -8.3, +-6 m in lungul drumului) e cu 0.30 m sub asfalt (scan);
+        # nodul coboara pe teren, iar load_clearance creste cu exact atat: talpa sarcinii ramane la 0.6 m
+        # peste ASFALT (contractul sondei), iar baza de barne nu pluteste.
+        DERRICK_DROP = 0.30
+        i_d = b_near(128.0, -20.0)
+        fxd, fzd = b_dir(i_d)
+        od = (brow[i_d][0], brow[i_d][1] - DERRICK_DROP, brow[i_d][2])
+        kit_ext += ('[ext_resource type="PackedScene" path="res://assets/models/carrara/structures/derrick.glb" id="11_derrick"]\n'
+                    '[ext_resource type="PackedScene" path="res://assets/models/carrara/props/marble_block_hooked.glb" id="12_hooked"]\n')
+        # Picioarele din spate (decizia 3): talpa de barne + picioarele A-frame-ului ies din colizorul catargului
+        # (3.6 x 3.6 la scara de model = 2.61 m) spre +Z local, pana la +7.85 m de model = +5.70 m in joc, pe
+        # X +-1.78 de model = +-1.29 m. Cutie de la marginea colizorului catargului (+1.31) pana la +5.70,
+        # 3 m inaltime (talpa e la 0-0.73 m, picioarele urca aproape vertical deasupra ei).
+        MS = 0.7256
+        leg_z0, leg_z1 = 3.6 * MS * 0.5, 7.85 * MS
+        kit_sub += f"""
+[sub_resource type="BoxShape3D" id="Box_DerrickLegs"]
+size = Vector3({r3(3.56 * MS)}, 3.0, {r3(leg_z1 - leg_z0)})
+"""
+        kit_nodes += f"""
+[node name="Derrick" type="Node3D" parent="Hazarduri"]
+transform = {yaw_xf(fxd, fzd, od)}
+script = ExtResource("10_crane")
+period = 23.0
+road_half_width = 4.5
+tower_offset = 7.0
+tower_side = -1
+hook_radius = 17.9
+load_clearance = {r2(0.6 + DERRICK_DROP)}
+crane_model = ExtResource("11_derrick")
+slab_model = ExtResource("12_hooked")
+model_scale = {MS}
+
+[node name="PicioareSpate" type="StaticBody3D" parent="Hazarduri/Derrick"]
+
+[node name="Talpa" type="CollisionShape3D" parent="Hazarduri/Derrick/PicioareSpate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.0, 1.5, {r3((leg_z0 + leg_z1) * 0.5)})
+shape = SubResource("Box_DerrickLegs")
+"""
+        print(f"  derrick: x {od[0]:.1f} z {od[2]:.1f} y {od[1]:.2f} (drum {brow[i_d][1]:.2f}), frac {brow[i_d][4]:.4f}, "
+              f"dir ({fxd:+.3f}, {fzd:+.3f})")
+
+        # ---- 2. SANIA DE LIZZATURA (POI G): RockfallHazard cu traseu, modelul ALUNECA (rock_roll_model = false).
+        # Pe dreapta de dupa coltul SV (x ~ -330, spre N). Jgheabul e DREPT, la 40 de grade fata de axa (unghiul
+        # sondei probe_carrara_sled.gd), vine din DREAPTA si din SPATE (in sus pe panta: drumul coboara spre N,
+        # deci sania coboara si ea, 36.6 -> 36.1 -> 35.5) si se opreste pe platoul din stanga. Cotele: din teren
+        # (rock_stick_to_ground). ATENTIE: versantul de 30 de grade din brief NU exista pe teren (ravaneto-ul nu
+        # s-a construit; scan: +1 m pe 40 m in dreapta); jgheabul de azi e aproape plat, mecanica e aceeasi.
+        SLED_SPEED = 6.5
+        SLED_CYCLE = 41.0
+        SLED_ANG = math.radians(40.0)
+        S_START, S_STOP = -27.0, 16.0
+        ps, (fxs, fzs), i_s = road_pt(0.815, 0.0)
+        rxs, rzs = -fzs, fxs
+        dxs = -math.sin(SLED_ANG) * rxs + math.cos(SLED_ANG) * fxs
+        dzs = -math.sin(SLED_ANG) * rzs + math.cos(SLED_ANG) * fzs
+        chute = [(dxs * s_, 0.0, dzs * s_) for s_ in (S_START, -10.0, 0.0, 8.0, S_STOP)]
+        chute_len = S_STOP - S_START
+        t_acc = SLED_SPEED / 4.0                       # RockfallHazard.ROUTE_ACCEL = 4
+        d_acc = 0.5 * SLED_SPEED * t_acc
+        travel = t_acc + (chute_len - d_acc) / SLED_SPEED
+        sled_pause = round(SLED_CYCLE - travel, 2)
+        kit_ext += '[ext_resource type="PackedScene" path="res://assets/models/carrara/props/lizza_sled.glb" id="13_sled"]\n'
+        kit_sub += curve_sub("Curve3D_jgheab", chute)
+        kit_nodes += f"""
+[node name="Sanie" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {r2(ps[0])}, {r2(ps[1])}, {r2(ps[2])})
+script = ExtResource("9_marker")
+kind = 1
+model = ExtResource("13_sled")
+rock_speed = {SLED_SPEED}
+rock_pause = {sled_pause}
+rock_roll_model = false
+
+[node name="Jgheab" type="Path3D" parent="Hazarduri/Sanie"]
+curve = SubResource("Curve3D_jgheab")
+"""
+        print(f"  sania: trecere la x {ps[0]:.1f} z {ps[2]:.1f} (frac {brow[i_s][4]:.4f}), jgheab {chute_len:.0f} m la 40 grade, "
+              f"{travel:.2f} s de mers + pauza {sled_pause} s = {SLED_CYCLE} s")
+
+        # ---- DecorManual: viaductul, portalurile, decorul de cariera (world_prop.gd, coliziune la rulare)
+        kit_nodes += """
+[node name="DecorManual" type="Node3D" parent="."]
+script = ExtResource("14_prop")
+"""
+
+        # ---- 3. VIADUCTUL (POI F): ponti_di_vara sub tablierul din cod, peste rapa 0 (cheiul).
+        # Originea pe axa drumului, la cota lui, Z-ul modelului in lungul drumului. Drumul COBOARA pe pod
+        # (~4%, concav), iar viaductul e un corp rigid cu fata de sus la -0.06: se INCLINA cu panta drumului
+        # (dreapta de sub profil, cu cel mai mic gol maxim) ca nicio fata sa nu iasa peste asfalt.
+        # `Viaduct_Parapet` stins: pe pod sta berma de moloz din cod (custom_parapets stil 2, 0.688-0.740, ambele
+        # parti) exact la |x| 4.6-7, unde ar sta si parapetul (4.7-5.3) — doua margini una in alta, iar berma e
+        # cea pe care o citeste AI-ul si pe care a trecut ProbeRace. Coliziune `mesh` (decizia 6).
+        f_mid = (ravines[0][0] + ravines[0][1]) * 0.5
+        i_v = b_frac(f_mid)
+        fxv, fzv = b_dir(i_v)
+        cxv, czv = brow[i_v][0], brow[i_v][2]
+        near_pts = []
+        for k_ in range(nb):
+            u = (brow[k_][0] - cxv) * fxv + (brow[k_][2] - czv) * fzv
+            w = -(brow[k_][0] - cxv) * fzv + (brow[k_][2] - czv) * fxv
+            if abs(u) <= 18.5 and abs(w) < 1.0:
+                near_pts.append((u, brow[k_][1]))
+        best_v = None
+        for k_ in range(-1000, 1001):
+            s_ = k_ / 10000.0
+            off = min(y_ - s_ * u for u, y_ in near_pts)
+            gap = max(y_ - (s_ * u + off) for u, y_ in near_pts)
+            if best_v is None or gap < best_v[0]:
+                best_v = (gap, s_, off)
+        gap_v, slope_v, y0_v = best_v
+        nrm = math.sqrt(1.0 + slope_v * slope_v)
+        zv = (-fxv / nrm, -slope_v / nrm, -fzv / nrm)      # +Z model = INAPOI pe drum (simetric oricum)
+        yv = (-slope_v * fxv / nrm, 1.0 / nrm, -slope_v * fzv / nrm)
+        # +X = Y x Z
+        xv = (yv[1] * zv[2] - yv[2] * zv[1], yv[2] * zv[0] - yv[0] * zv[2], yv[0] * zv[1] - yv[1] * zv[0])
+        kit_nodes += f"""
+[node name="Viaduct" type="Node3D" parent="DecorManual"]
+
+[node name="PontiDiVara" parent="DecorManual/Viaduct" instance={glb("res://assets/models/carrara/structures/ponti_di_vara.glb")}]
+transform = {xf_rows(xv, yv, zv, (cxv, y0_v, czv))}
+metadata/coliziune = "mesh"
+metadata/keep_variants = PackedStringArray("Viaduct_Brick", "Viaduct_Marble", "Viaduct_MarbleBase", "Viaduct_Rust", "Viaduct_Void")
+
+[node name="Viaduct_Parapet" parent="DecorManual/Viaduct/PontiDiVara"]
+visible = false
+"""
+        print(f"  viaduct: centru x {cxv:.1f} z {czv:.1f} (frac {brow[i_v][4]:.4f}), {len(near_pts)} puncte de drum pe +-18.5 m, "
+              f"panta {slope_v:+.4f} ({math.degrees(math.atan(slope_v)):+.2f} grade), cota la centru {y0_v:.3f}, "
+              f"golul max drum - fata viaductului {gap_v + 0.06:.3f} m")
+
+        # ---- 4. PORTALURILE: peste rama de beton din cod (`Track._build_tunnel` / `_tun_frame`). Aceeasi
+        # plimbare pe axa coapta ca builderul: capacul la 0.3 m in afara primului / ultimului punct al
+        # intervalului, rama iese inca 1.2 m spre exterior. Fata GLB-ului (planul z = 0, -Z = spre exterior)
+        # sta pe fata din fata a ramei codului; spatele (2.65 / 2.30 m) intra in munte. Golul GLB-ului
+        # (10.30 x 10.85 / 10.20 x 9.60) e mai mare decat rama codului (9.6 x 9.8 / 9.6 x 7.8): rama ramane
+        # captuseala interioara. Coliziune `mesh` + camera_blocker (precedentul Track21).
+        def tunnel_mouths(ox, oz, length):
+            i0 = b_near(ox, oz)
+            acc, iw = 0.0, i0
+            while acc < length:
+                acc += math.dist((brow[iw][0], brow[iw][1], brow[iw][2]),
+                                 (brow[iw + 1][0], brow[iw + 1][1], brow[iw + 1][2]))
+                iw += 1
+            out = []
+            for end in (0, 1):
+                if end == 0:
+                    a_, b_ = brow[i0], brow[i0 + 1]
+                    t_ = [b_[c] - a_[c] for c in (0, 1, 2)]
+                    lt = math.sqrt(sum(v * v for v in t_))
+                    t_ = [v / lt for v in t_]
+                    c_ = [a_[c] - t_[c] * 0.3 for c in (0, 1, 2)]
+                    nxt = [(a_[c] + b_[c]) * 0.5 for c in (0, 1, 2)]
+                else:
+                    a_, b_ = brow[iw - 1], brow[iw]
+                    t_ = [b_[c] - a_[c] for c in (0, 1, 2)]
+                    lt = math.sqrt(sum(v * v for v in t_))
+                    t_ = [v / lt for v in t_]
+                    c_ = [b_[c] + t_[c] * 0.3 for c in (0, 1, 2)]
+                    nxt = [(a_[c] + b_[c]) * 0.5 for c in (0, 1, 2)]
+                ow = [c_[c] - nxt[c] for c in (0, 1, 2)]
+                lo = math.sqrt(sum(v * v for v in ow))
+                ow = [v / lo for v in ow]
+                face = [c_[c] + ow[c] * 1.2 for c in (0, 1, 2)]
+                hl = math.hypot(ow[0], ow[2])
+                out.append((face, (ow[0] / hl, ow[2] / hl), brow[i0 if end == 0 else iw][4]))
+            return out
+
+        kit_nodes += """
+[node name="Portaluri" type="Node3D" parent="DecorManual"]
+"""
+        def tun_xz(tag):
+            x_, y_ = pos_at(tag_s[tag])
+            return x_, -y_
+
+        tun = {
+            "Galerie": (b_near(*tun_xz("D portal jos")), dist_between("D portal jos", "D portal sus (E inceput)"), "res://assets/models/carrara/structures/gallery_portal.glb", None),
+            "Marmifera": (b_near(*tun_xz("H portal intrare")), dist_between("H portal intrare", "H portal iesire"), "res://assets/models/carrara/structures/marmifera_portal.glb",
+                          ("Portal_Stone", "Portal_Moss", "Portal_Glow", "Portal_Void")),
+        }
+        for tname, (i0, tlen, path, keep) in tun.items():
+            for (face, (ox_, oz_), fr_), end in zip(tunnel_mouths(brow[i0][0], brow[i0][2], tlen), ("Intrare", "Iesire")):
+                nm = f"{tname}{end}"
+                # Cota: baza GLB-ului pe terenul cel mai jos de sub stalpi (umerii sunt cu ~0.3 m sub asfalt),
+                # nu pe asfalt, altfel stalpii plutesc (masurat cu `--portals`). Planul fetei nu se misca.
+                face = (face[0], KIT_Y.get(nm, face[1]), face[2])
+                kit_nodes += f"""
+[node name="{nm}" parent="DecorManual/Portaluri" instance={glb(path)}]
+transform = {yaw_xf(ox_, oz_, face)}
+metadata/coliziune = "mesh"
+metadata/camera_blocker = true
+"""
+                if keep:
+                    # Sinele ies 5 m in fata portalului, PE drum (7 cm), in afara tubului: se taie (decizia 6).
+                    kit_nodes += f"""metadata/keep_variants = PackedStringArray({", ".join('"%s"' % k for k in keep)})
+
+[node name="Portal_Rail" parent="DecorManual/Portaluri/{nm}"]
+visible = false
+"""
+                print(f"  portal {nm}: fata la ({face[0]:.2f}, {face[1]:.2f}, {face[2]:.2f}), spre exterior ({ox_:+.3f}, {oz_:+.3f}), frac {fr_:.4f}")
+
+        # ---- 5. DECORUL DE CARIERA (trecere usoara): A = coridorul de blocuri stivuite pe ambele parti, containerul,
+        # rezervorul, lampa; C = blocuri informi pe margini; F = module de berma la capetele podului.
+        # (nume, glb, frac pe INDEX, lateral + = dreapta, yaw relativ, cota). Laterale: in afara drumului (A: 10 m,
+        # C/F: 9 m de drum) si in afara bermei din cod; coridorul din stanga se opreste inainte de iesirea camionului
+        # 1 (x > -50, lat -7 .. -34) si totul in C sta la > 15 m de turnul derrick-ului (raza sarcinii 13 m).
+        # Cota = terenul MINIM sub amprenta minus 3 cm (masurat cu `--decor`): nicio parte nu pluteste.
+        R = "res://assets/models/carrara/"
+        decor = {
+            "ZonaA": [
+                ("A_StivaS1", R + "rocks/block_stack_b.glb", 0.012, -9.0, 3.0),
+                ("A_BlocS2", R + "rocks/marble_block_c.glb", 0.018, -8.6, -4.0),
+                ("A_StivaS3", R + "rocks/block_stack_a.glb", 0.024, -9.2, 5.0),
+                ("A_StivaS4", R + "rocks/block_stack_b.glb", 0.031, -9.0, -2.0),
+                ("A_BlocS5", R + "rocks/marble_block_b.glb", 0.036, -8.5, 7.0),
+                ("A_StivaS6", R + "rocks/block_stack_a.glb", 0.042, -9.1, -5.0),
+                ("A_StivaD1", R + "rocks/block_stack_a.glb", 0.014, 9.2, -3.0),
+                ("A_StivaD2", R + "rocks/block_stack_b.glb", 0.021, 9.4, 4.0),
+                ("A_BlocD3", R + "rocks/marble_block_c.glb", 0.027, 9.0, 2.0),
+                ("A_StivaD4", R + "rocks/block_stack_b.glb", 0.034, 9.4, -6.0),
+                ("A_StivaD5", R + "rocks/block_stack_a.glb", 0.040, 9.2, 3.0),
+                ("A_Container", R + "buildings/office_container.glb", 0.004, -13.0, 90.0),
+                ("A_Rezervor", R + "props/fuel_tank.glb", 0.0085, -12.5, 0.0),
+                ("A_Lampa", R + "props/work_lamp.glb", 0.046, 9.5, 180.0),
+            ],
+            "ZonaC": [
+                # Pe dreapta podeaua e plata (1.1-1.7) pana la 13 m; pe stanga peretele ravenei urca de la -10 m.
+                # Blocurile stau la 12.5 m pe dreapta: la 8.5 m, C_Informe3 (0.375, iesirea din cotul 2 la
+                # stanga, exteriorul e DREAPTA) a dat o ejectare-perete la 30 m/s pe ProbeRace (s5, ambele serii).
+                # Pe stanga doar unde e INTERIORUL cotului (0.370, cotul 2); exteriorul cotului 1 (0.345) ramane gol.
+                ("C_Informe1", R + "rocks/block_informe_a.glb", 0.298, 12.5, 20.0),
+                ("C_Informe2", R + "rocks/block_informe_b.glb", 0.338, 12.5, -35.0),
+                ("C_Informe3", R + "rocks/block_informe_a.glb", 0.375, 12.5, 50.0),
+                ("C_Informe4", R + "rocks/block_informe_b.glb", 0.370, -8.8, 10.0),
+                ("C_Informe5", R + "rocks/block_informe_b.glb", 0.352, 12.5, 50.0),
+            ],
+            "ZonaF": [
+                # -X al modulului (panta) spre drum: pe dreapta yaw 0 (+X = dreapta), pe stanga 180. Usor deschise.
+                # Capatul de E inainte de buza cheiului (la 0.7045 modulul de 6 m cadea 0.9 m pe lungime, la 0.7025 0.5 m).
+                ("F_BermaE_D", R + "structures/safety_berm.glb", 0.7008, 8.2, -15.0),
+                ("F_BermaE_S", R + "structures/safety_berm.glb", 0.7008, -8.2, 195.0),
+                ("F_BermaV_D", R + "structures/safety_berm.glb", 0.7230, 8.2, 15.0),
+                ("F_BermaV_S", R + "structures/safety_berm.glb", 0.7230, -8.2, 165.0),
+            ],
+        }
+        truck_pts = [(a, c) for a, b, c in c1 + c2]
+        for zname, items in decor.items():
+            kit_nodes += f"""
+[node name="{zname}" type="Node3D" parent="DecorManual"]
+"""
+            for nm, path, fr_, lat, yaw in items:
+                p_, (fx_, fz_), i_ = road_pt(fr_, lat)
+                y_ = KIT_Y.get(nm, brow[i_][1] - 0.3)
+                if zname == "ZonaF":
+                    j1, j0 = min(i_ + 2, nb - 1), max(i_ - 2, 0)
+                    grade = (brow[j1][1] - brow[j0][1]) / max(1e-6, math.hypot(brow[j1][0] - brow[j0][0], brow[j1][2] - brow[j0][2]))
+                    xf_txt = tilt_xf(fx_, fz_, (p_[0], y_, p_[2]), yaw, grade)
+                else:
+                    xf_txt = yaw_xf(fx_, fz_, (p_[0], y_, p_[2]), yaw)
+                kit_nodes += f"""
+[node name="{nm}" parent="DecorManual/{zname}" instance={glb(path)}]
+transform = {xf_txt}
+"""
+                dt = min(math.hypot(p_[0] - a, p_[2] - c) for a, c in truck_pts)
+                dd = math.hypot(p_[0] - od[0] - (-fzd) * -7.0, p_[2] - od[2] - fxd * -7.0)
+                flag = "" if dt > 6.0 and dd > 15.0 else "  <-- PREA APROAPE"
+                print(f"  {zname}/{nm:12s} frac {brow[i_][4]:.4f} lat {lat:+5.1f} y {y_:6.2f}  camion {dt:5.1f} m  turn derrick {dd:5.1f} m{flag}")
+
+        kit_ext += "".join(f'[ext_resource type="PackedScene" path="{p}" id="k_{s}"]\n' for s, p in kit_glb.items())
+        hz_ext += kit_ext
+        hz_sub += kit_sub
+        hz_nodes += kit_nodes
         # zonele pentru sonde (fractii pe INDEX): metadata citita de tools/probe_carrara.gd
         zz = [("A", IDX("H portal iesire"), IDX("A iesire coridor")),
               ("T1", IDX("A iesire coridor"), IDX("B T1 sfarsit plat")),

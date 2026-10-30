@@ -7,6 +7,24 @@
 [ext_resource type="Script" path="res://scenes/hazards/bus_hazard.gd" id="7_bus"]
 [ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="9_marker"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/vehicles/quarry_truck.glb" id="8_kamaz"]
+[ext_resource type="Script" path="res://scenes/hazards/crane_hazard.gd" id="10_crane"]
+[ext_resource type="Script" path="res://scenes/props/world_prop.gd" id="14_prop"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/structures/derrick.glb" id="11_derrick"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/props/marble_block_hooked.glb" id="12_hooked"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/props/lizza_sled.glb" id="13_sled"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/structures/ponti_di_vara.glb" id="k_ponti_di_vara"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/structures/gallery_portal.glb" id="k_gallery_portal"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/structures/marmifera_portal.glb" id="k_marmifera_portal"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/rocks/block_stack_b.glb" id="k_block_stack_b"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/rocks/marble_block_c.glb" id="k_marble_block_c"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/rocks/block_stack_a.glb" id="k_block_stack_a"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/rocks/marble_block_b.glb" id="k_marble_block_b"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/buildings/office_container.glb" id="k_office_container"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/props/fuel_tank.glb" id="k_fuel_tank"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/props/work_lamp.glb" id="k_work_lamp"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/rocks/block_informe_a.glb" id="k_block_informe_a"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/rocks/block_informe_b.glb" id="k_block_informe_b"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/structures/safety_berm.glb" id="k_safety_berm"]
 
 
 [sub_resource type="BoxShape3D" id="Box_PlasaA"]
@@ -34,6 +52,16 @@ _data = {
 "tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
 point_count = 30
+
+[sub_resource type="BoxShape3D" id="Box_DerrickLegs"]
+size = Vector3(2.583, 3.0, 4.39)
+
+[sub_resource type="Curve3D" id="Curve3D_jgheab"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 15.73, 0.0, 21.94, 0, 0, 0, 0, 0, 0, 5.83, 0.0, 8.13, 0, 0, 0, 0, 0, 0, -0.0, 0.0, -0.0, 0, 0, 0, 0, 0, 0, -4.66, 0.0, -6.5, 0, 0, 0, 0, 0, 0, -9.32, 0.0, -13.0),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0)
+}
+point_count = 5
 
 [sub_resource type="Curve3D" id="Curve3D_carrara"]
 closed = true
@@ -179,3 +207,152 @@ script = ExtResource("9_marker")
 kind = 7
 excavator_ai_dice = true
 excavator_soft_contact = true
+
+[node name="Derrick" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 128.475, 1.7, -20.0)
+script = ExtResource("10_crane")
+period = 23.0
+road_half_width = 4.5
+tower_offset = 7.0
+tower_side = -1
+hook_radius = 17.9
+load_clearance = 0.9
+crane_model = ExtResource("11_derrick")
+slab_model = ExtResource("12_hooked")
+model_scale = 0.7256
+
+[node name="PicioareSpate" type="StaticBody3D" parent="Hazarduri/Derrick"]
+
+[node name="Talpa" type="CollisionShape3D" parent="Hazarduri/Derrick/PicioareSpate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.0, 1.5, 3.501)
+shape = SubResource("Box_DerrickLegs")
+
+[node name="Sanie" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -329.84, 36.1, 61.77)
+script = ExtResource("9_marker")
+kind = 1
+model = ExtResource("13_sled")
+rock_speed = 6.5
+rock_pause = 33.57
+rock_roll_model = false
+
+[node name="Jgheab" type="Path3D" parent="Hazarduri/Sanie"]
+curve = SubResource("Curve3D_jgheab")
+
+[node name="DecorManual" type="Node3D" parent="."]
+script = ExtResource("14_prop")
+
+[node name="Viaduct" type="Node3D" parent="DecorManual"]
+
+[node name="PontiDiVara" parent="DecorManual/Viaduct" instance=ExtResource("k_ponti_di_vara")]
+transform = Transform3D(-0.0, -0.04286, 0.99908, 0.0, 0.99908, 0.04286, -1.0, 0.0, -0.0, -152.5, 42.92, 112.0)
+metadata/coliziune = "mesh"
+metadata/keep_variants = PackedStringArray("Viaduct_Brick", "Viaduct_Marble", "Viaduct_MarbleBase", "Viaduct_Rust", "Viaduct_Void")
+
+[node name="Viaduct_Parapet" parent="DecorManual/Viaduct/PontiDiVara"]
+visible = false
+
+[node name="Portaluri" type="Node3D" parent="DecorManual"]
+
+[node name="GalerieIntrare" parent="DecorManual/Portaluri" instance=ExtResource("k_gallery_portal")]
+transform = Transform3D(-0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.0, 290.136, 3.24, 36.0)
+metadata/coliziune = "mesh"
+metadata/camera_blocker = true
+
+[node name="GalerieIesire" parent="DecorManual/Portaluri" instance=ExtResource("k_gallery_portal")]
+transform = Transform3D(-0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.0, 99.816, 44.64, 112.0)
+metadata/coliziune = "mesh"
+metadata/camera_blocker = true
+
+[node name="MarmiferaIntrare" parent="DecorManual/Portaluri" instance=ExtResource("k_marmifera_portal")]
+transform = Transform3D(-0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.0, -250.299, 26.63, -105.0)
+metadata/coliziune = "mesh"
+metadata/camera_blocker = true
+metadata/keep_variants = PackedStringArray("Portal_Stone", "Portal_Moss", "Portal_Glow", "Portal_Void")
+
+[node name="Portal_Rail" parent="DecorManual/Portaluri/MarmiferaIntrare"]
+visible = false
+
+[node name="MarmiferaIesire" parent="DecorManual/Portaluri" instance=ExtResource("k_marmifera_portal")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, -199.3, 25.1, -105.0)
+metadata/coliziune = "mesh"
+metadata/camera_blocker = true
+metadata/keep_variants = PackedStringArray("Portal_Stone", "Portal_Moss", "Portal_Glow", "Portal_Void")
+
+[node name="Portal_Rail" parent="DecorManual/Portaluri/MarmiferaIesire"]
+visible = false
+
+[node name="ZonaA" type="Node3D" parent="DecorManual"]
+
+[node name="A_StivaS1" parent="DecorManual/ZonaA" instance=ExtResource("k_block_stack_b")]
+transform = Transform3D(0.05234, 0.0, -0.99863, 0.0, 1.0, 0.0, 0.99863, 0.0, 0.05234, -124.0, 24.65, -114.0)
+
+[node name="A_BlocS2" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(-0.06976, 0.0, -0.99756, 0.0, 1.0, 0.0, 0.99756, 0.0, -0.06976, -110.185, 24.64, -113.6)
+
+[node name="A_StivaS3" parent="DecorManual/ZonaA" instance=ExtResource("k_block_stack_a")]
+transform = Transform3D(0.08716, 0.0, -0.99619, 0.0, 1.0, 0.0, 0.99619, 0.0, 0.08716, -98.185, 24.63, -114.2)
+
+[node name="A_StivaS4" parent="DecorManual/ZonaA" instance=ExtResource("k_block_stack_b")]
+transform = Transform3D(-0.0349, 0.0, -0.99939, 0.0, 1.0, 0.0, 0.99939, 0.0, -0.0349, -84.64, 24.62, -114.0)
+
+[node name="A_BlocS5" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_b")]
+transform = Transform3D(0.12187, 0.0, -0.99255, 0.0, 1.0, 0.0, 0.99255, 0.0, 0.12187, -74.185, 24.63, -113.5)
+
+[node name="A_StivaS6" parent="DecorManual/ZonaA" instance=ExtResource("k_block_stack_a")]
+transform = Transform3D(-0.08716, 0.0, -0.99619, 0.0, 1.0, 0.0, 0.99619, 0.0, -0.08716, -62.185, 24.62, -114.1)
+
+[node name="A_StivaD1" parent="DecorManual/ZonaA" instance=ExtResource("k_block_stack_a")]
+transform = Transform3D(-0.05234, 0.0, -0.99863, 0.0, 1.0, 0.0, 0.99863, 0.0, -0.05234, -120.64, 24.67, -95.8)
+
+[node name="A_StivaD2" parent="DecorManual/ZonaA" instance=ExtResource("k_block_stack_b")]
+transform = Transform3D(0.06976, 0.0, -0.99756, 0.0, 1.0, 0.0, 0.99756, 0.0, 0.06976, -103.36, 24.67, -95.6)
+
+[node name="A_BlocD3" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(0.0349, 0.0, -0.99939, 0.0, 1.0, 0.0, 0.99939, 0.0, 0.0349, -91.36, 24.67, -96.0)
+
+[node name="A_StivaD4" parent="DecorManual/ZonaA" instance=ExtResource("k_block_stack_b")]
+transform = Transform3D(-0.10453, 0.0, -0.99452, 0.0, 1.0, 0.0, 0.99452, 0.0, -0.10453, -77.815, 24.67, -95.6)
+
+[node name="A_StivaD5" parent="DecorManual/ZonaA" instance=ExtResource("k_block_stack_a")]
+transform = Transform3D(0.05234, 0.0, -0.99863, 0.0, 1.0, 0.0, 0.99863, 0.0, 0.05234, -65.815, 24.67, -95.8)
+
+[node name="A_Container" parent="DecorManual/ZonaA" instance=ExtResource("k_office_container")]
+transform = Transform3D(1.0, 0.0, -0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -139.212, 24.66, -118.0)
+
+[node name="A_Rezervor" parent="DecorManual/ZonaA" instance=ExtResource("k_fuel_tank")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, -130.0, 24.65, -117.5)
+
+[node name="A_Lampa" parent="DecorManual/ZonaA" instance=ExtResource("k_work_lamp")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, -52.0, 24.67, -95.5)
+
+[node name="ZonaC" type="Node3D" parent="DecorManual"]
+
+[node name="C_Informe1" parent="DecorManual/ZonaC" instance=ExtResource("k_block_informe_a")]
+transform = Transform3D(0.2683, 0.0, -0.96333, 0.0, 1.0, 0.0, 0.96333, 0.0, 0.2683, 96.713, 1.05, -7.966)
+
+[node name="C_Informe2" parent="DecorManual/ZonaC" instance=ExtResource("k_block_informe_b")]
+transform = Transform3D(-0.91913, 0.0, -0.39395, 0.0, 1.0, 0.0, 0.39395, 0.0, -0.91913, 171.94, 1.63, -0.484)
+
+[node name="C_Informe3" parent="DecorManual/ZonaC" instance=ExtResource("k_block_informe_a")]
+transform = Transform3D(0.68514, 0.0, -0.72841, 0.0, 1.0, 0.0, 0.72841, 0.0, 0.68514, 238.826, 1.66, 47.957)
+
+[node name="C_Informe4" parent="DecorManual/ZonaC" instance=ExtResource("k_block_informe_b")]
+transform = Transform3D(-0.16992, 0.0, -0.98546, 0.0, 1.0, 0.0, 0.98546, 0.0, -0.16992, 233.183, 1.66, 24.801)
+
+[node name="C_Informe5" parent="DecorManual/ZonaC" instance=ExtResource("k_block_informe_b")]
+transform = Transform3D(0.07824, 0.0, -0.99693, 0.0, 1.0, 0.0, 0.99693, 0.0, 0.07824, 192.546, 1.59, 18.201)
+
+[node name="ZonaF" type="Node3D" parent="DecorManual"]
+
+[node name="F_BermaE_D" parent="DecorManual/ZonaF" instance=ExtResource("k_safety_berm")]
+transform = Transform3D(0.25882, -0.05887, 0.96413, 0.0, 0.99814, 0.06094, -0.96593, -0.01577, 0.25834, -126.685, 44.06, 103.8)
+
+[node name="F_BermaE_S" parent="DecorManual/ZonaF" instance=ExtResource("k_safety_berm")]
+transform = Transform3D(0.25882, -0.05887, -0.96413, 0.0, 0.99814, -0.06094, 0.96593, 0.01577, 0.25834, -126.685, 44.06, 120.2)
+
+[node name="F_BermaV_D" parent="DecorManual/ZonaF" instance=ExtResource("k_safety_berm")]
+transform = Transform3D(-0.25882, -0.03033, 0.96545, 0.0, 0.99951, 0.0314, -0.96593, 0.00813, -0.25869, -173.14, 41.89, 103.8)
+
+[node name="F_BermaV_S" parent="DecorManual/ZonaF" instance=ExtResource("k_safety_berm")]
+transform = Transform3D(-0.25882, -0.03033, -0.96545, 0.0, 0.99951, -0.0314, 0.96593, -0.00813, -0.25869, -173.14, 41.89, 120.2)

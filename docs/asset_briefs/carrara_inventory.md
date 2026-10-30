@@ -144,6 +144,28 @@ Detaliile pe piese sunt în `carrara_inventory_crr-a.md`, `_crr-b.md`,
    `Viaduct_Parapet` se stinge dacă rămâne berma din cod pe pod; șinele din
    portalul Marmifera se taie dacă încurcă.
 
+### Clasele cablate (coordonator, 27 oct 2026)
+
+`CLASSES_CARRARA` în `scenes/props/world_prop.gd` (scopat pe tema `carrara`,
+celelalte piste neatinse): `*_Marble` → `carrara_marble` pe blocuri, stive,
+blocurile informe, moloz, bermă, conducte, portalul galeriei și pilele
+viaductului; prefixul `X_Marble` prinde și `X_MarbleBase`, deci **dunga gri a
+patinei dispare în joc** (decizia 1 închisă). `Portal_Stone` (Marmifera) →
+`tf_stone`. `Viaduct_Brick` → **`ok_roof`**: pe atlas ieșea portocaliu-viu, pe
+`roof_tiles` (fără tentă pe temă) aproape alb, pe `ok_roof` cărămidă roșie.
+
+| captură | ce arată |
+|---|---|
+| `clase_A_coridor.png` | stivele citesc piatră tăiată cu vene, nu lemn. Containerul și rezervorul de motorină rămân pe atlas, dungate (piese de metal, fără clasă) |
+| `clase_viaduct_sus_a.png`, `_sus_b.png` | arcele de cărămidă roșie pe pile de marmură, în V-ul cheiului, sub tablier |
+| `clase_viaduct_chei_b.png` | camera a ieșit sub teren (vedere nevalidă ca joc); arată doar că pilele citesc marmură |
+| `clase_C_blocuri.png`, `clase_galerie_iesire.png` | pentru comparație cu capturile de dinainte |
+
+Materiale pe pistă (`probe_decor --track=23`): **21** (≤ 38).
+Hazardele (blocul derrick-ului, sania, camionul) iau clasele prin
+`prop_classes()`, nu prin tema pistei: blocurile lor de marmură rămân pe atlas
+până se adaugă acolo.
+
 ## Stare la oprire
 
 - Pilotul e complet: harnasul, GLB-ul, garda, comparațiile. `bash
@@ -155,3 +177,173 @@ Detaliile pe piese sunt în `carrara_inventory_crr-a.md`, `_crr-b.md`,
   citesc mai bine în joc, cu AO și umbră decât în preview).
 - Neverificat: aspectul în Godot (clasa de marmură, umbre) și coliziunea pe
   ProbeRace.
+
+## Montajul valului 1 pe Track23 (27 oct 2026)
+
+Ramura `carrara/kit-montaj` (din `carrara/kit-val1`). Integratorul a montat pe pistă
+derrick-ul, sania, viaductul, cele patru portaluri și o primă trecere ușoară a
+kitului de carieră. Fracțiile de mai jos sunt **pe index** (`TrackRoute.frac_at`, ca
+în `metadata/zones`), nu ale brief-ului.
+
+### Cum supraviețuiește regenerării
+
+Track23 e **generat** (`tools/gen_carrara_route.py` rescrie tot `.tscn`-ul). Montajul
+e scris **în generator**, nu de mână în scenă: un bloc nou (secțiunea „MONTAJUL
+VALULUI 1") derivă fiecare transformare din axa coaptă (`tools/data/carrara_baked.csv`)
+și din etichetele traseului, deci piesele urmează drumul dacă se mută. Scena de pe
+ramură e exact ieșirea generatorului. Tot acolo, camionul: generatorul scria încă
+`kamaz_truck.glb`, iar schimbarea pe `quarry_truck.glb` fusese făcută de mână în
+scenă, deci o regenerare ar fi întors-o. Acum o scrie generatorul.
+
+Două lucruri sunt **măsurate pe teren** și scrise ca cifre: `KIT_Y` (cota fiecărei
+piese de decor și a portalurilor) și `DERRICK_DROP` (0,30 m). Se remăsoară cu
+`tools/ProbeCarraraMontaj.tscn -- --decor --portals --no-manual-batch` (și `--scan=...`
+pentru teren) dacă se schimbă relieful sau traseul în A, C, D, F, H. O piesă fără
+intrare în `KIT_Y` cade pe „drum − 0,3".
+
+**Cod partajat atins (un singur loc, implicit neschimbat):** `HazardMarker.rock_roll_model`
+(export, implicit `true`) + o linie în `Track._build_rockfall`. `RockfallHazard.roll_model`
+exista, dar nodul nu-l putea seta. Cheia intră în spec doar când e stinsă, deci
+celelalte piste rămân bit-identice. Commit separat.
+
+### Ce s-a montat
+
+| piesă | unde | setări | coliziune |
+|---|---|---|---|
+| **derrick** (`CraneHazard`, `Hazarduri/Derrick`) | frac 0,3124, x 128,5 z −20,0, pe dreapta de 41 m a fundului C (x 103 → 144, spre E); −Z al nodului pe sensul de mers (0,0° măsurat) | `crane_model` derrick.glb, `slab_model` marble_block_hooked.glb, `model_scale` 0,7256, `hook_radius` 17,9 (rază 12,99 m), `tower_side` −1, `tower_offset` 7, `period` 23, `road_half_width` 4,5, `load_clearance` 0,9 | catargul: colizorul din cod; picioarele din spate: `PicioareSpate`, cutie 2,58 × 3,0 × 4,39 m pe +Z local (talpa de bârne + picioarele A-frame-ului, +1,31 … +5,70 m), marginea dinspre drum la 5,71 m de axă (decizia 3) |
+| **sania** (`HazardMarker` kind ROCKFALL, `Hazarduri/Sanie` + `Jgheab`) | trecerea la frac 0,8153 (x −329,8 z 61,8), după colțul SV, drumul spre N | `model` lizza_sled.glb, scara 1, `rock_speed` 6,5, `rock_pause` 33,57 (7,43 s de mers + pauză = **41,0 s**), `rock_roll_model` false, `rock_stick_to_ground` true; jgheab drept de 43 m la 40° față de axă, vine din dreapta-spate (în sus pe pantă) și se oprește pe platoul din stânga | sfera clasei; lovitura = strivirea de 3 s a clasei |
+| **viaduct** (`DecorManual/Viaduct/PontiDiVara`) | centrul la frac 0,7137 (x −152,5 z 112), peste rapa 0 (0,706–0,721) | originea pe axă, Z-ul modelului în lungul drumului, **înclinat cu panta drumului** (−2,46°, dreapta de sub profilul concav cu golul maxim cel mai mic): drumul coboară ~1,5 m pe cei 36 m, iar un viaduct orizontal ar fi ieșit cu ~0,6 m prin asfalt la capătul de V. `Viaduct_Parapet` **stins** (`visible = false` + `keep_variants`) | `mesh` |
+| **portaluri** (`DecorManual/Portaluri`) | `GalerieIntrare` frac 0,4004 (fața la x 290,14), `GalerieIesire` 0,5909 (x 99,82), `MarmiferaIntrare` 0,9516 (x −250,30), `MarmiferaIesire` 0,9748 (x −199,30) | aceeași plimbare pe axa coaptă ca `Track._build_tunnel` (capacul la 0,3 m în afara capătului, rama încă 1,2 m): planul feței GLB = fața ramei de beton din cod (**0,00 m** măsurat cu o rază pe axă), −Z spre exterior; baza pe terenul minim de sub stâlpi − 5 cm (umerii stau cu ~0,3 m sub asfalt). Marmifera: `Portal_Rail` **tăiat** (șinele ieșeau 5 m pe drum în afara tubului) | `mesh` + `camera_blocker` |
+| **coridorul A** (`DecorManual/ZonaA`) | 0,012–0,042: 6 piese pe stânga (lat −8,5 … −9,2), 5 pe dreapta (lat +9,0 … +9,4, pe bancul dintre berma din cod și buza de 13 m) — `block_stack_a/b`, `marble_block_b/c`, yaw ±2–7°; `office_container` (0,004, −13, lungul pe drum), `fuel_tank` (0,0087, −12,5), `work_lamp` (0,046, +9,5, lângă excavator) | coridorul din stânga se oprește înainte de ieșirea camionului 1 (x > −50); toate la ≥ 27 m de curbele camioanelor | `hull` (implicit) |
+| **blocuri informi C** (`DecorManual/ZonaC`) | 4 pe dreapta la lat +12,5 (0,298 / 0,338 / 0,352 / 0,375), unul pe stânga la −8,8 (0,370, interiorul cotului 2); toate la ≥ 37 m de turnul derrick-ului (raza sarcinii 13 m) | prima variantă la 8–8,5 m: `C_Informe3` (0,375, exteriorul ieșirii din cotul 2) a dat o ejectare-perete la 30 m/s pe ProbeRace, identică în două serii → mutate la 12,5 m | `hull` |
+| **berme la capetele podului** (`DecorManual/ZonaF`) | 4 × `safety_berm`, la 0,7012 și 0,7234, lat ±8,2 (dincolo de berma din cod), deschise ±15°, înclinate cu panta drumului; panta modulului (−X) spre drum | punctuație; berma din cod rămâne marginea AI-ului | `hull` |
+
+Nemontat, cum cere scopul: satul, creasta, utilajele valului 2, colțul de muzeu, și
+**blocul basculat din D** — trăiește în sala de 16 m din galerie, care nu s-a construit
+(tubul are 8 m pe toată lungimea).
+
+### Măsurătorile montajului (`ProbeCarraraMontaj`, înainte de orice cursă)
+
+| | rezultat |
+|---|---|
+| turnul derrick-ului | lateral −7,00 m (stânga, drumul ±4,5), −Z al nodului la 0,0° de sensul de mers; baza la 1,70, terenul sub turn 1,71, asfaltul 2,00 |
+| sarcina | 392 de cadre peste drum pe o perioadă (6,5 s), lateral −4,49 … +4,49 (ambele benzi), **talpa la 0,64–0,67 m peste asfalt**, 2 treceri pe perioadă |
+| sania | perioada 41,00 s, `roll_model` stins, abaterea de la jgheab 0,00 m, traversează −4,50 … +4,46, la 35,7° față de axă la intrarea pe drum; golul sub tălpi **0,04 m în afara marginii drumului**, 0,32 m pe banda de margine (treapta de 0,3 m dintre asfalt și umăr: o talpă rigidă de 2,4 m are un colț în aer sau în asfalt câteva cadre, oricum) |
+| viaduct | 85 de puncte de drum peste el; cea mai înaltă față a lui e la **−0,060 m** sub asfalt |
+| portaluri | stâlpii nu plutesc (−0,05 pe toate patru); fața GLB = fața ramei din cod (±0,00) |
+| decor (27 de piese) | plutire max −0,03 (nimic în aer); îngropare 1–9% (blocuri), 31–46% la capătul din deal al modulelor de bermă |
+
+### Gărzile — înainte (ramura cum am găsit-o) / după
+
+| gardă | înainte | după |
+|---|---|---|
+| `ProbeLaneClear --track=15` | 9 blocate × 3 rulări (**fără linie de bază**: ieșea 0 orice ar fi găsit) | 9 × 3, aceleași 9 (excavatorul la 0,050 ×4, camionul 2 la 0,685 ×5); **armată**: `"Carrara (Track23)": 9`, `--sabotaj` → `REGRESIE — 12 > 9`, ieșire 1 |
+| `ProbeBuried --track=15` | OK, 0 îngropate, 198 tavane | OK, 0 îngropate, 198 tavane |
+| `ProbeDecorBuried --track=15` | PICAT: „pista n-are DecorManual" | TRECUT: 0 îngropate din 28 |
+| `probe_decor --track=23` (materiale) | **16** materiale, 43 de prop-uri | **19** materiale (≤ 38), 125 de prop-uri |
+| `probe_solid --track=23` | „fără DecorManual" | 28 de corpuri (23 hull, 5 mesh), gabaritul trece liber pe toată linia |
+| `probe_decor_overlap --track=23 --manual` | — | 66 de piese, 0 peste asfalt, 0 una în alta |
+| `bash tools/verify_local.sh --no-import` | — | **`VERIFICARE LOCALA: OK (57 pasi)`**, ieșire 0 (pe starea comisă) |
+| `probe_manual --track=23` | nu compilează în modul `--script` (`GameState` lipsă), și pe ramura de bază | idem — înlocuită de `ProbeDecorBuried` |
+
+### ProbeRace A/B (`SEEDS=16 PAR=5`, 210 s, 8 mașini)
+
+Linia de bază = ramura cum am găsit-o. „după 1" și „după 2" = montajul cu blocurile
+din C la 8–8,5 m (aceleași 16 seed-uri, de două ori: majoritatea seed-urilor au dat
+**aceleași** evenimente la aceeași secundă, deci diferențele față de bază sunt
+sistematice, nu zgomot Jolt). „după 3" = **starea comisă** (blocurile din C mutate la
+12,5 m). Loviturile de hazard sunt numărate DISCRET de contorul nou din `probe_race.gd`.
+
+| | bază | după 1 | după 2 | **după 3 (final)** |
+|---|---:|---:|---:|---:|
+| repuneri | 13 | 12 | 12 | **6** |
+| ejectări | 5 | 5 | 5 | **2** |
+| `[blocaj]` total / la excavator (0,047–0,051) | 16 / 11 | 11 / 8 | 13 / 12 | **12 / 11** |
+| `[blocaj]` pe zone | A 11, T1 2, T2 3 | A 9, F 2 | A 13 | **A 12** |
+| repuneri pe zone | A 8, C 1, H1 1, T1 1, T2 2 | A 3, C 2, E 4, T2 3 | A 5, C 2, E 3, T2 2 | **A 4, T2 2** |
+| ejectări pe zone | A 4, C 1 | A 2, C 2, F 1 | A 2, C 2, F 1 | **A 1, F 1** |
+| ture | 301 | 300 | 300 | 302 |
+| tur minim / mediu (mediana pe seed-uri) | 65,07 / 69,50 s | 65,04 / 69,77 | 65,22 / 69,91 | **65,11 / 70,04** |
+| timp pe felii (mediana mașinii, față de bază) | — | −0,08 s | −0,03 s | **−0,11 s** |
+| cadre de contact cu camioanele | 127 | 242 (124 într-un singur seed) | 326 | 214 (76 într-un seed) |
+| lovituri derrick / sanie | — | 21 / 15 | 23 / 13 | **17 / 10** |
+
+Atribuirea fiecărui eveniment nou:
+- **Derrick:** 17–23 de lovituri pe 16 curse (~1 la 15 treceri prin C), la 0,305–0,317,
+  exact unde sarcina trece axa (0,307 și 0,317). Felia 0,30–0,35 are aceeași viteză
+  mediană ca în bază (31,7 → 32,1 m/s): **teatru apropiat**, pedeapsa o plătește doar
+  cine e lovit. Trei lovituri la rând pe aceeași mașină încetinită (s12, 6–8 m/s,
+  1,6 s) — sarcina lentă o prinde din nou după `hit_cooldown`; fără blocaj.
+  Zero `[blocaj]`/repuneri lângă turn sau lângă colizorul picioarelor.
+- **Sania:** 10–15 lovituri pe 16 curse, grupate la t ≈ 127–128 s și ≈ 209 s: ciclul
+  de 41 s e determinist și cade pe sosirea plutonului în turul 2 și 3 (faza vine din
+  fracție, `Track._build_rockfall`). Felia 0,80–0,85 −0,3 m/s mediană. **Pedeapsă
+  reală, rară** — aproximativ o lovitură pe cursă.
+- **Ejectarea din F (0,704, s8, în toate trei seriile):** NU e a podului. Urmărită la
+  0,1 s (`PROBE_RACE_TRACE=2`, seed 8, reproductibilă): la t = 76,7 s mașina trece pe
+  lângă **excavator** (x −43, frac 0,050), viteza cade 36,8 → 21,7 m/s și e **împinsă
+  prin asfalt** (y 25,0 → 22,0 în 0,4 s); apoi merge **3 m sub drum** cu 14,5 m/s un tur
+  întreg (40% „în afara șoselei") și la 0,704 lovește fața de capăt a viaductului (singurul
+  corp de sub drum pe care îl întâlnește) → ejectare + repunere. Cauza e excavatorul
+  (problemă deschisă din brief §7 pasul 5); coliziunea viaductului doar a terminat o
+  mașină-fantomă.
+- **Repunerile din E (după 1–2: s1, s11, s15) și blocajul din F (s11):** mașini ieșite pe
+  DREAPTA bermei din cod la x −63 … −120 (cu 15–70 m înaintea podului), atingând
+  `Parapet` (berma din cod), nicio piesă montată la mai puțin de 7 m. Orele se potrivesc
+  exact cu **camionul 2 venind din față** spre capătul lui de la E (reapare la 39,7 s și
+  99,7 s, 8 m/s → la x −110 pe la 56 s și la x −70 pe la 124 s). Ipoteză: hazardele noi
+  mută puțin sosirea plutonului (+0,3 s/tur la coada distribuției) și întâlnirea cap în
+  cap cu camionul se schimbă. În după 3 nu mai apar deloc — sensibilitate de calendar a
+  unui hazard existent, nu geometrie nouă.
+- **Ejectările din C (după 1–2):** s5, 0,374, 30 m/s, la 1,5 m de colțul lui
+  `C_Informe3` (8,5 m pe dreapta, exteriorul ieșirii din cotul 2) → **a mea**, reparată
+  (blocurile la 12,5 m; în după 3 dispare). s7, 0,398 (gura de jos a galeriei, lat +6,
+  în spatele aripii din cod): aceeași clasă exista în bază (s8 0,398); în după 3 nu mai apare.
+- **Excavatorul** (0,047–0,051): 11 / 8 / 12 / 11 blocaje, în banda cunoscută (7–15).
+
+### Capturi (`docs/asset_briefs/img/carrara_montaj/`, cu fereastră, camera de joc)
+
+Unealta: `tools/snapshot.gd` (`--gamecam` = parametrii reali ai camerei de urmărire;
+`--eye/--look` pentru vederile pe care camera de joc nu le are; `--crane-at` e nou,
+`--rock-at` exista). Toate privite. Fără clasele de material (vezi „Deschise"),
+deci marmura e pe atlas.
+
+| fișier | ce arată | verdict |
+|---|---|---|
+| `derrick_C_bloc_peste_drum.png` | camera de joc la 0,300, `--crane-at=13.58` (sarcina pe axă) | blocul în chingi atârnă deasupra drumului, catargul pe stânga, cablul vertical. Se citește |
+| `derrick_C_ansamblu.png` | camera liberă din dreapta | A-frame-ul deschis în lungul drumului, brațul galben, blocul la ~0,6 m de asfalt; baza de bârne stă pe teren (nodul coborât cu 0,30 m) |
+| `C_blocuri_informi.png` | camera de joc la 0,355 | blocurile la 12,5 m, pe podea; citesc gri-albăstrui pe partea umbrită, nu crem |
+| `sanie_G_traversare.png` | camera de joc la 0,803, `--rock-at=4.97` | sania pe asfalt, la jumătatea traversării, în diagonală |
+| `sanie_G_jgheab.png` | `--rock-at=1.6` | sania în dreapta, pe jgheab. **Jgheabul nu se vede**: terenul e plat acolo (vezi „Deschise"); piesa citește „ladă pe palet", cum a spus acceptarea |
+| `viaduct_F_apropiere.png` | camera de joc la 0,697 | de pe drum viaductul nu se vede (e sub tablier); se văd bermele din cod pe pod și modulele `safety_berm` la capăt. Nimic nu iese prin asfalt |
+| `viaduct_F_lateral.png`, `viaduct_F_din_chei.png`, `viaduct_F_dreapta.png` | camere libere din chei și din cariera de sus | trei arce de cărămidă pe pile de marmură, culeele intră în maluri, pilele intră în V-ul cheiului (cheiul real are ~13 m adâncime, nu 26: restul pilelor e în teren). Cărămida iese portocaliu viu (atlas, fără `roof_tiles`) |
+| `galerie_intrare.png` | camera de joc la 0,392 | portalul în peretele rapei C, rama de beton și aripile codului în gol; laturile GLB-ului intră în pereții rapei. Așezat bine |
+| `galerie_iesire.png` | camera liberă din E | portalul stă pe banc, cu movila tubului în spate; **fără munte în spate**, citește ca o fațadă liberă deasupra movilei (masivul galeriei e departe de gura de sus) |
+| `marmifera_intrare.png`, `marmifera_iesire.png` | camera de joc la 0,944 / camera liberă dinspre piazzale | arcul de piatră cu mușchi peste rama din cod, fără șine pe drum; colțurile de sus ale ramei de beton intră puțin în bolțari (rama e 9,6 × 7,8 m peste asfalt; cu portalul coborât 0,33–0,38 m pe umeri, arcul are ~7,6 m lățime la 7,8 m peste asfalt). Colțurile se pierd în piatră, nu ies în față |
+| `A_coridor.png`, `A_coridor_mijloc.png` | camera de joc la 0,004 / 0,022 | coridorul de stive pe ambele părți, containerul și rezervorul la start, lampa lângă excavator; totul pe teren, cu umbră de contact. Blocurile citesc **dungate ca lemnul** (detaliul triplanar al lumii, fără clasa de marmură), iar treimea de jos (`*_MarbleBase`) e o bandă gri-albastră tare |
+
+### Deschise
+
+1. **Jgheabul saniei nu are pantă.** Versantul de deșeu („ravaneto") din dreapta lui G nu
+   există pe teren: măsurat, +1 m pe 40 m (0,81–0,85, lat +40 … +130). Jgheabul de azi
+   coboară 36,6 → 35,5 pe 43 m (~1,5°). Mecanica (perioadă, traversare, lovitură) nu
+   depinde de pantă — viteza e a traseului — dar „sania coboară jgheabul de 30°" nu se
+   vede. Cere relieful POI G (un `TerrainPeak`/platou în dreapta), apoi doar `Jgheab`
+   se regenerează. Clopotul de 2 s nu există în cod (telegraful clasei e umbra de 1,4 s).
+2. **Clasele de material nu sunt cablate** (decizia 1 a rămas nejudecată). Piesele stau pe
+   atlas: blocurile citesc dungate ca lemnul, `*_MarbleBase` e o bandă gri-albastră tare
+   pe stive, portaluri și viaduct, cărămida viaductului e portocaliu viu. Cablarea e o
+   intrare în `CLASSES_CARRARA` (`world_prop.gd`, cod partajat, în afara permisiunii
+   mele): `*_Marble`/`*_MarbleBase` → `carrara_marble` (deja pe pistă: tubul, nisipul),
+   `Viaduct_Brick` → `roof_tiles`, `Portal_Stone` → `tf_stone`. Abia după ea se poate
+   decide banda de patină. Metadata `clasa_triplanara` per instanță nu ajută: pune clasa
+   pe TOT modelul (și pe `Portal_Glow`/`_Void`/`_Rust`).
+3. **Gura de sus a galeriei** stă ca o fațadă liberă: în spate e doar movila tubului
+   (~12 m), masivul galeriei e departe. Cere teren, nu GLB.
+4. **Excavatorul împinge mașini prin asfalt** (vezi atribuirea) — nou găsit, nereparat.
+5. Marmifera: colțurile de sus ale ramei de beton din cod intră în bolțari (se pierd în
+   piatră). Galeria: laturile de 18 m intră în pereții rapei C la gura de jos (natural).
+6. `lizza_sled` rămâne „de refăcut" (acceptarea): montată așa cum e.
+7. Blocul basculat din D nu s-a montat: sala de 16 m nu există.
+8. `tools/probe_manual.gd` nu compilează în `--script` (autoload-uri lipsă) și pe
+   ramura de bază; am folosit `ProbeDecorBuried` + modul `--decor` al sondei noi.

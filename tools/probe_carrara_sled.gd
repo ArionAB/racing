@@ -540,8 +540,12 @@ func _measure_hits(clr: Dictionary) -> void:
 		var n := 0
 		for a in primary:
 			if a["speed"] == v:
-				mins[snappedf(a["v_min"], 0.001)] = true
-				lats[snappedf(a["lat_max"], 0.001)] = true
+				# 0,01 mm, nu 1 mm: verdictul prinde mecanismul NECONECTAT (cifre
+				# identice la bit), nu doua mase care raspund aproape la fel. Sania v2
+				# (raza 1,200) da 1,05298 / 1,05314 m deviere la Muscle / Pompieri:
+				# diferite, dar egale la rotunjirea de 1 mm.
+				mins[snappedf(a["v_min"], 0.00001)] = true
+				lats[snappedf(a["lat_max"], 0.00001)] = true
 				n += 1
 		_verdict(mins.size() == n and lats.size() == n and n >= 4,
 			"la %.0f m/s cifrele difera intre masini (%d valori distincte de viteza-minim, %d de deviere laterala, din %d)"

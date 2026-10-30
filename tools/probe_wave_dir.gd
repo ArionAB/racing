@@ -103,12 +103,17 @@ func _one(w: WaveSurge) -> void:
 	w.set("_time", period * (span * 0.5 - phase) - 0.5)
 	var peak := 0.0
 	var v0 := car.velocity.dot(right)
+	var disp := 0.0
 	for i in 120:
 		await get_tree().physics_frame
+		var lat := (car.global_position - anchor).dot(right)
+		if absf(lat) > absf(disp):
+			disp = lat
 		var dv := car.velocity.dot(right) - v0
 		if absf(dv) > absf(peak):
 			peak = dv
-	print("  impingere laterala (dreapta masinii): %+.2f m/s" % peak)
+	print("  impingere laterala (dreapta masinii): %+.2f m/s; deplasare maxima %+.1f m (semilatime drum %.1f)"
+		% [peak, disp, _track.width_at(_track.frac_at(idx))])
 	_check(absf(peak) > 1.0, "valul chiar impinge masina lateral")
 	if _expect == "left":
 		_check(peak < 0.0, "impingerea e spre STANGA masinii")

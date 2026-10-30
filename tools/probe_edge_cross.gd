@@ -96,6 +96,7 @@ func _run() -> void:
 	var en_bad := 0
 	var en_none := 0
 	var lines: Array[String] = []
+	var dry_wall := 0
 	for k in count:
 		var frac := float(k) * _frac_step
 		var idx := int(frac * float(n)) % n
@@ -122,6 +123,13 @@ func _run() -> void:
 				why_out = "ma opreste: %s | %s" % [r_out["stuck"], _scan(here, out_dir, dir, hw, sea_y)]
 			if r_in["status"] == "bad":
 				why_in = "ma opreste: %s | %s" % [r_in["stuck"], _scan(here, out_dir, dir, hw, sea_y)]
+			# ZID INVIZIBIL PE USCAT: peretele de margine (`OuterWall`) e justificat
+			# doar langa apa. Daca masina a fost oprita de el si dincolo de
+			# margine nu e apa (aceeasi regula ca `_build_walls`), e bug.
+			for why: String in [why_out, why_in]:
+				if why.contains("OuterWall") and not _wet_near(idx, s, sea_y):
+					dry_wall += 1
+					lines.append("  ^ ZID INVIZIBIL PE USCAT la frac %.3f %s" % [frac, tag_side])
 			match r_out["status"]:
 				"ok": ex_ok += 1
 				"bad": ex_bad += 1
@@ -139,9 +147,11 @@ func _run() -> void:
 	for l in lines:
 		print(l)
 	print("")
+	print("zid invizibil pe uscat: %d" % dry_wall)
 	print("TOTAL %s  exit ok %d / blocat %d / fara-teren %d   |   intrare ok %d / blocata %d / fara-teren %d" % [
 		_tag, ex_ok, ex_bad, ex_none, en_ok, en_bad, en_none])
-	get_tree().quit(0)
+	print("VERDICT: ", "PICAT" if dry_wall > 0 else "OK")
+	get_tree().quit(1 if dry_wall > 0 else 0)
 
 
 func HEAD_EGE() -> float:
@@ -274,3 +284,28 @@ func _what_stops(car: Car, tgt: Vector3) -> String:
 			if not names.has(nm):
 				names.append(nm)
 	return ", ".join(names) if not names.is_empty() else "nimic-gasit"
+
+
+## Ca `_wet_beyond`, dar si pe vecinii din +-20 m: peretele se emite pe segmente
+## de ~1 m, iar masina il atinge la cativa metri de capatul lui.
+func _wet_near(idx: int, side_sign: int, sea_y: float) -> bool:
+	var baked: PackedVector3Array = _track.baked
+	var n := baked.size()
+	for di: int in [-20, -10, 0, 10, 20]:
+		var i := (idx + di + n * 2) % n
+		var d := baked[(i + 4) % n] - baked[i]
+		d.y = 0.0
+		var out_dir: Vector3 = d.normalized().cross(Vector3.UP).normalized() * float(side_sign)
+		if _wet_beyond(baked[i], out_dir, _track.width_at_index(i), sea_y):
+			return true
+	return false
+
+
+## Dincolo de marginea soselei e apa? (regula din `_build_walls`: fundul sub
+## oglinda marii la 3, 8 sau 15 m in afara).
+func _wet_beyond(axis: Vector3, out_dir: Vector3, hw: float, sea_y: float) -> bool:
+	for k: float in [3.0, 8.0, 15.0]:
+		var q := axis + out_dir * (hw + k)
+		if _track._sampler.ground_y(q.x, q.z) < sea_y:
+			return true
+	return false

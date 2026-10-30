@@ -97,6 +97,27 @@ var _cross_best: float = 1e9
 ## vede de treaba, ecranul sta nemiscat.
 var _splashes: int = 0
 var _splash_max: float = 0.0
+## Volan minimal: tine masina pe axa soselei, fara gaz.
+class AxisKeeper extends CarController:
+	var _track: Track
+	func _init(t: Track) -> void:
+		_track = t
+	func get_steer() -> float:
+		var n: int = _track.baked.size()
+		var i: int = _track.closest_index_global(car.global_position)
+		var target: Vector3 = _track.baked[(i + 10) % n]
+		var f := -car.global_transform.basis.z
+		f.y = 0.0
+		var t := target - car.global_position
+		t.y = 0.0
+		if f.length() < 0.01 or t.length() < 0.01:
+			return 0.0
+		var ang := atan2(f.normalized().cross(t.normalized()).y, f.normalized().dot(t.normalized()))
+		return clampf(ang * 2.0, -1.0, 1.0)
+	func get_throttle() -> float:
+		return 0.0
+
+
 var _phase: int = 0 # 0 = val singur, 1 = trecere cu val, 2 = trecere fara
 var _failed: bool = false
 
@@ -308,7 +329,16 @@ func _start_pass(hit: bool) -> void:
 	# ambele rulari. O masina lansata si lasata sa ruleze n-are pareri — orice
 	# metru lateral si orice km/h in minus vin de la ce a intalnit pe drum, adica
 	# exact ce vrem sa citim.
-	_drive_car.race_active = false
+	#
+	# DAR o masina fara volan se duce in ce o duce soseaua: pe Track20 (digul se
+	# curbeaza) ajungea langa parapetul din STANGA exact cand venea valul, iar
+	# cand valul vine din DREAPTA o lipea de parapet — diferenta dintre rulari
+	# disparea (0.1 m) fara ca valul sa fi slabit (probe_wave_dir: -3.3 m pe
+	# masina oprita). Deci masina tine axa cu un volan minimal, identic in
+	# ambele rulari, fara gaz (gazul ar schimba viteza de intrare). Pe Track05
+	# si Track08 soseaua e dreapta in sector si controlul nu muta nimic.
+	_drive_car.race_active = true
+	_drive_car.set_controller(AxisKeeper.new(track))
 	_splashes = 0
 	_splash_max = 0.0
 	_drive_car.splashed.connect(func(_c: Car, strength: float) -> void:

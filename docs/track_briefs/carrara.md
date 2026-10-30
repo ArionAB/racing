@@ -1,4 +1,4 @@
-# Track brief — Carrara / bazinul de marmură Fantiscritti (`Track23`, temă `carrara`) — v0.2 (concept, paletă caldă asumată)
+# Track brief — Carrara / bazinul de marmură Fantiscritti (`Track23`, temă `carrara`) — v0.3 (concept, paletă caldă asumată, contracte din cod)
 
 > Concept de pistă, înaintea listei de assets. Scheletul e cel din
 > `serengeti.md` / `fiordland.md`; secțiunile de assets (§5) sunt schițate,
@@ -437,18 +437,80 @@ tine), scrâșnetul cupei, clopotul saniei (2 s înainte), pernele
 pneumatice (telegraph-ul blocului), ecoul din galerie (reverb în
 `CameraZone`), pulberea sub roți pe ravaneto. Fără voci.
 
-### 5.6 Trecerea de contracte (de făcut la pasul 1 din §7, memoria `brief-cere-glb-cod-il-face-deja`)
+### 5.6 Trecerea de contracte — FĂCUTĂ (25 oct 2026, din cod citit pe main @ 9e935513)
 
-Înainte de primul GLB, un agent de explorare citește **consumatorul**
-fiecărei piese din §5.2 și dă verdictul ARE CONSUMATOR (fișier:linie) /
-decor pur / CONFLICT. Trei locuri unde codul **ar putea face singur**
-piesa, de verificat: (1) `TrackChannel` construiește tablier **și
-turnuri** — cu `build_towers = false` arcele vin din GLB, dar dacă builderul
-pune și pile, GLB-ul le dublează; (2) `TunnelSignalHazard` / builderul
-tunelului de la Fiordland construiește **tubul și portalurile** — galeria D
-și tunelul H poate n-au nevoie de `gallery_portal.glb` / `marmifera_portal.glb`
-deloc; (3) `ExcavatorHazard` are placeholder procedural dacă GLB-ul nu are
-`arm` — un model fără nodul ăsta trece `verify_glb.py` și nu mișcă nimic.
+Memoria `brief-cere-glb-cod-il-face-deja`. Agent de explorare, verdicte cu
+fișier:linie, citările-cheie reverificate de coordonator. **Concluzia:**
+șapte lucruri pe care v0.2 le numea „zero cod” cer cod — mic, dar real.
+Hazardele rămân reuse; ce lipsește sunt **parametri**, nu clase.
+
+| piesă | verdict | contractul real (din cod) | ce era greșit în v0.2 |
+|---|---|---|---|
+| `quarry_truck` | ARE CONSUMATOR — `PathMover._build_model` (path_mover.gd:285-321) | botul pe −Z (corecție `model_yaw`), originea jos la mijloc, coliziunea = **o cutie din AABB-ul modelului** (`body_size` ignorat); nasul oblic iese ~1,3 m în fața modelului (bus_hazard.gd:198-218) | „buclă” — vezi mai jos |
+| `quarry_excavator` | ARE CONSUMATOR, **legat de alt model** | `_build_excavator` încarcă fix `rusted_digger.glb` (track.gd:15388), parchează **pe DREAPTA** (`dir.cross(UP)`, :15394-15405), toate mesh-urile forțate pe `rust_metal` (excavator_hazard.gd:37), coliziunea brațului = cutie fixă calibrată pe rusted_digger (:68-74); `period`/`raise_angle` sunt `var`, nu export, cu praguri literale 0–2,5–3,5–6–7 s | „parcat pe stânga”, „zero cod”, „GLB nou” — nu există cârlig pentru model, latură sau fază |
+| `derrick` | ARE CONSUMATOR — `CraneHazard._build_tower` (crane_hazard.gd:157-198), nod în .tscn (nu HazardMarker) | `JIB_HEIGHT = 22.05` e **constantă** (:48) — pivotul, coliziunea catargului și cablul o folosesc; nodul `Jib` cu originea în balama; cablul îl desenează codul | catarg de 16 m „zero cod” — merge **doar** cu `model_scale` 0,726 + `hook_radius` ≈ 17,9 (sau JIB_HEIGHT devine export) |
+| `marble_block_hooked` | ARE CONSUMATOR — `slab_model` (:124, :234-240) | originea în cârlig, coliziunea = **constanta** `SLAB_SIZE` 4,6 × 2,99 × 2,2 (:53) | un bloc de 2,5 m primește un colizor invizibil de 4,6 m dacă nu se modelează în anvelopă sau constanta nu devine export |
+| `lizza_sled` | ARE CONSUMATOR — `RockfallHazard._rock_model` (rockfall_hazard.gd:266-326) | raza = max(AABB.x, AABB.z)/2 (:341) dă **sfera** de coliziune și cota centrului: o sanie de 3 m plutește ~0,9 m; nimic nu o rotește spre mers; lovitura = **strivire 3 s** (:707-727), telegraph fix 1,4 s | „3 linii” — realist 10–20: flag + yaw spre mers + așezare pe talpă + colizor cutie (+ lovitură mai ușoară) |
+| `wire_saw` | DECOR PUR | nimic nu pornește `AnimationPlayer` într-un GLB de decor; singurul consumator de „rotește un copil” e `windmill.gd` (nod `Blades`, `axis`, `rpm`) | nod `flywheel` / animație `Spin` — fără consumator; se numește `Blades` și primește scriptul morii |
+| `chain_saw_crawler`, `drill_rig`, `quarry_sign_block` | DECOR PUR | coliziune `hull` implicită (world_prop.gd:4357-4378) | — |
+| `ponti_di_vara` | DECOR PUR, coliziune de suprascris | `hull` implicit = bloc plin peste chei → `coliziune = "mesh"` sau `"none"` pe instanță | „fără coliziune proprie” nu se întâmplă singur |
+| `marmifera_portal`, `gallery_portal` | CONFLICT parțial — codul face rama | `_tun_frame` (track.gd:12902-12990) construiește rama de beton + aripi de 14 m, fără export de oprire; precedent Transfăgărășan: GLB-ul pus **peste** rama codului, deschiderea mai mare decât tubul, coliziune `mesh` | portal 8 × 8 într-un tub de 10 m = treaptă vizibilă |
+| `gallery_pillar` | DECOR PUR | `hull` = corect pentru stâlp plin; AI-ul nu-l vede → ProbeRace | — |
+| `museum_set` | DECOR PUR | **`keep_variants` nu există** în world_prop (doar metadată moartă în gen_mont_scena.gd:289): toate cele 3 noduri se randează | variantele se livrează ca 3 GLB sau se acceptă toate trei |
+| `colonnata_*` | DECOR PUR | clasele există (`tf_stone`, `roof_tiles`), dar se aplică pe **nume de mesh** printr-o intrare `CLASSES_BY_THEME["carrara"]` (precedent `_TF_HOUSE`, world_prop.gd:2223) | — (intrarea se scrie odată cu tema) |
+
+**Corecturi la §3 care decurg:**
+- **Camioanele nu fac buclă.** `BusHazard` ignoră `travel_mode`: merge o
+  dată 0 → capăt, se ascunde `period − lungime/viteză` s (coliziune oprită)
+  și reapare la capătul 0 (bus_hazard.gd:325-351). Curba e **deschisă**, cu
+  capetele în spatele unui perete; „drumul de serviciu” nu trebuie. Două
+  camioane = două noduri pe aceeași `Curve3D`; `phase` decalează doar
+  pornirea, deci jumătate de ciclu iese numai dacă `period` ≈ timpul de
+  parcurs. Terasele B și podul F stau pe aceeași curbă, în ordinea vizitei.
+- **Podul nu e plat.** `LiftBridgeHazard` cu `static_deck` construiește
+  **necondiționat** pilele (lift_bridge_hazard.gd:252, la 11 m pe maluri),
+  rampele de lemn și un tablier la **+1,6 m peste drum** (cocoașă), lat cât
+  `custom_half_width` global, nu cât drumul local; și își face singur
+  `RespawnZone` (:666-681). Pentru „viaduct de 6 m, drum plat” trebuie
+  `build_piers`/`build_ramps` ca export și lățimea din `width_at(frac)` —
+  sau podul se face altfel (tablier ca drum normal peste o `custom_ravine`
+  + arcele ca decor `mesh`), de decis la construcția POI F.
+- **Galeria și tunelul cer cod în builderul de tunel**: `TunnelSignalHazard`
+  aduce mereu autobuz + semafor (nu există declarație „doar tub”),
+  materialul e fix `wet_gneiss` (track.gd:12780, rece-închis — opusul
+  marmurei calde), `tunnel_ceiling` are plafon 12 m (tunnel_signal_hazard.gd:392)
+  și nu există lărgire pe interval.
+- **Sala (decizia din §3): lărgire în builder, nu GLB.** Un GLB de sală nu
+  poate sta în tubul continuu (pereții tubului la ±3,5 m taie sala de 16 m);
+  ar cere tăierea tubului în două declarații, fiecare cu autobuzul și ramele
+  ei în mijlocul sălii. Lărgirea: profilele tubului au număr fix de vertecși,
+  deci interpolarea pe secțiuni e sigură topologic; estimat 25–40 de linii în
+  3 funcții (`_collect_tunnels`, `_build_tunnel`, exporturile nodului), plus
+  reluarea ProbeBuried / ProbeLaneClear. Drumul se lărgește deja prin
+  `custom_width_segments`. Stâlpii rămân GLB cu `hull`. `CameraZone` are tot
+  ce cere brief-ul (`ceiling` 0–40, `ceiling_dist`, `darkness`, interval pe
+  fracții) — dar builderul de tunel își pune deja o zonă proprie
+  (`darkness` 0,5 fix), deci a doua se suprapune: se aliniază la construcție.
+- **Excavatorul**: pe un drum de 10 m brațul închide jumătatea dreaptă plus
+  ~1,7 m din stânga, lasă ~3,3 m liberi — „strecurătoarea” e a codului, nu
+  o întâmplare. Cele 4 lipsuri (model, latură, fază, clasă) se rezolvă cu o
+  intrare de spec pe `HazardMarker`, nu cu clasă nouă.
+
+**Lista de cod (mic, fără clase noi), în ordinea POI-urilor:**
+1. `ExcavatorHazard` / `_build_excavator`: model, latură, fază, clasă de
+   material din spec; implicitele = comportamentul de azi, bit-identic.
+2. `CraneHazard`: `JIB_HEIGHT` și `SLAB_SIZE` ca exporturi cu implicitele
+   de azi (sau rămâne trucul `model_scale` dacă sonda îl validează).
+3. `RockfallHazard`: modul „sanie” (fără rostogolire, yaw spre mers,
+   așezat pe talpă, colizor cutie, lovitură = ghiont fără strivire),
+   implicit neschimbat.
+4. `LiftBridgeHazard`: `build_piers`, `build_ramps`, lățime locală — sau
+   pod fără `TrackChannel`.
+5. Tunel: declarație „doar tub”, clasă de material pe tunel, plafon > 12,
+   lărgire pe interval.
+6. `wire_saw`: volantul numit `Blades` + `windmill.gd`.
+7. Tema `carrara2` + clasa `carrara_marble` + intrările de remap (există pe
+   ramura `carrara/mostra`, de adus).
 
 ## 6. Bugete
 
@@ -568,6 +630,227 @@ deloc; (3) `ExcavatorHazard` are placeholder procedural dacă GLB-ul nu are
    sol, trecere prin el = învârtit, nu oprit (contractul 22 → 1,1 m/s e
    **eșecul**, nu reușita); (e) decizia **sală**: citit builderul tunelului,
    ales (a) sau (b) din §3.
+
+   **Rezultatul pasului 1 (25 oct 2026, ramurile `carrara/sonde-ai` și
+   `carrara/sonde-mec`, pushate, fără PR).** Trecerea de contracte e la
+   §5.6. Sondele, pe piste sintetice (memoria
+   `harnas-sintetic-comportament-emergent`: cifrele dovedesc mecanismul și
+   ordinul de mărime, verdictul de flotă se dă pe Track23), 8 mașini din
+   garajul real, 16 seed-uri, cu / fără hazard pe aceeași scenă:
+
+   | hazard | verdict | cifrele care decid |
+   |---|---|---|
+   | **(a) camioanele din față, în ace** | **PICAT** | AI-ul nu vede camionul: fiecare contact frontal (apropiere ~36 m/s, corp cinematic = masă infinită) **ejectează șoferul** → repunere. Fără indiciu: 27,8 repuneri/seed (față de 0,25), contact în 55% din întâlnirile din ac și 62% pe terase, +5–7 s pe tur. Indiciul din brief (bandă pe ace ±20 m): ace 28%, terase tot 63%. Bandă dreaptă pe **toată coborârea**: +0,2–1,0 s pe tur, dar tot 4,5–6,8 repuneri/seed și culoar de un singur șir |
+   | **(b) cupa excavatorului** | **PICAT așa cum e construit, TRECUT cu culoar** | AI-ul nu citește brațul: 1% din treceri pe banda liberă, 30 `[blocaj]`, 205 din 291 opriți sub braț coborât (pierdere mediană 4,25 s). Coliziunea brațului e conectată (0,1 m/s jos vs 26,6 sus). Cu `custom_lane_corridors` pe banda liberă: 0 blocaje, 94% pe banda liberă, 0,13 s — dar atunci **doar jucătorul** are decizia de timing. Brațul blochează **45%** din ciclu (nu 36%). Pe un drum de 7 m (terase) închide practic tot → excavatorul stă numai pe piazzale (10 m) |
+   | **(c) sania de lizzatura** | **TRECUT** (cu ~28 de linii, nu 3) | Fără aliniere, sania plutea ±0,98 m pe jgheabul de 30°; cu `roll_model = false` + aliniere la mers și pantă + așezare pe talpă: +0,009 m plutire, −0,11 m la genunchiul concav. Traversează fiecare bandă (0,72 s în fiecare), 0 răsturnări, 0 repuneri, pierdere +0,86…+1,41 s, diferită pe mase. Implicitul `true` bit-identic (hash pe 480 de cadre). **Dar** lovitura e strivirea de 3 s a clasei: mașina cade la 15–32% din viteză în 0,5 s — nu „ghiontul” din §3. Telegraph-ul e fix 1,4 s (nu 2) |
+   | **(d) derrick-ul de 16 m** | **TRECUT, zero cod**, cu condiție | `tower_crane.glb` × 0,7256, `hook_radius` 17,9 → braț efectiv 13,0 m, blocul la 0,64 m de drum, 3,54 m/s. **Turnul pe STÂNGA** sensului: 86–100% din viteză păstrată, învârtit 1,08 s, pierdere ≤ 0,11 s. **Pe dreapta**: mașinile ușoare păstrează 54% (pică pragul de 60% de la Chongqing). Calibrarea „≈ +1,5 s” din §3 nu există: pe stânga derrick-ul e aproape teatru |
+
+   **Descoperire fără legătură cu hazardele:** pe terasele cu gol neprotejat
+   (varianta „Terase”, fără niciun hazard) AI-ul **cade singur** de pe muchie:
+   51 `[blocaj]` și 12 repuneri pe 16 seed-uri. Regula din §2.0 „berma doar
+   ca punctuație” nu ține pentru AI — terasele cer o margine pe care AI-ul o
+   respectă (bermă continuă, perete scund sau tratament de margine în AI).
+
+   **Ce rămâne de decis de dezvoltator (înainte de traseu):** (1) camioanele
+   — păstrăm „vine din față” cu cod de AI nou (citirea benzii camionului,
+   tiparul `_signal_lane_keep`, + contact frontal care nu ejectează) sau le
+   întoarcem în sensul cursei (precedentul validat de la Machu Picchu) sau
+   le scoatem de pe bandă; (2) excavatorul — culoar fix pentru AI (doar
+   jucătorul pândește brațul) sau cod de AI care citește brațul; (3)
+   marginea teraselor — bermă continuă vs perete scund vs cod de AI; (4)
+   sania — strivire 3 s (ca acum) sau ghiont ușor (cod mic, în spatele
+   aceluiași flag); (5) derrick-ul pe stânga = aproape teatru, pe dreapta =
+   pedeapsă reală care pică pragul.
+
+   **Deciziile dezvoltatorului (25 oct 2026, după pasul 1):**
+   1. **Camioanele rămân din față, cu cod de AI nou**: AI-ul citește banda
+      camionului care vine (aceeași informație ca jucătorul — corpul
+      vizibil, nu faza), pe tiparul `_signal_lane_keep`; contactul frontal
+      cu camionul **nu mai ejectează** (flag pe `BusHazard`, implicit stins,
+      Machu Picchu bit-identic). Momentul „vine spre tine” e păstrat.
+   2. **Excavatorul: AI-ul dă cu zarul** la fiecare apropiere (1–6,
+      determinist pe seed): 1–3 nu trece pe sub braț (ia banda liberă),
+      4–6 trece și riscă brațul, ca jucătorul. Zarul e decizia, nu
+      informația — AI-ul nu citește faza brațului. Rămâne pe piazzale
+      (10 m), pe dreapta, cum îl construiește codul.
+   3. **Bermă continuă de moloz** pe toată marginea teraselor dinspre gol
+      (înlocuiește „berma doar ca punctuație” din §2.0, care nu ținea
+      pentru AI); golul se vede peste ea.
+   4. **Sania lovește cu strivirea de 3 s** a clasei, ca acum: un bloc de
+      2 t pe sanie te oprește, coerent cu masa.
+   Derrick-ul rămâne cu turnul pe stânga sensului (singura poziție care
+   trece pragul); calibrarea lui din §3 se corectează la „aproape teatru”.
+
+   **Runda 2 după decizii (25 oct 2026, `carrara/sonde-ai` @ 41f155c5,
+   pushată, fără PR).** Cod nou, toate în spatele unor flag-uri implicit
+   stinse (Machu Picchu bit-identic, dovedit cu hash pe 6 rulări):
+   `Car._process_contacts` — un corp cu meta `soft_hit_crush` dă strivire
+   scurtă în loc de ejectare; `BusHazard.soft_contact` / `ai_reads_lane`;
+   `ExcavatorHazard.soft_contact` / `ai_dice` (prin `HazardMarker`);
+   `AIController._bus_line` (citește corpul vizibil al camionului care vine,
+   ≤ 90 m, ia culoarul liber, fără drift și turbo cât ține banda) și
+   `_exc_line` (zarul 1–6, RNG propriu pe seed, nu consumă RNG-ul cursei);
+   `custom_parapets` stilul 2 = berma de 0,6 m, subțiată 10 m la capete.
+
+   | | runda 1 | runda 2 | contract |
+   |---|---|---|---|
+   | camioane: repuneri atribuibile / 16 seed-uri | 426 | **2** | ✔ |
+   | camioane: contact în ac / pe terase | 55% / 62% | **14% / 17%** | — |
+   | camioane: pierdere per întâlnire cu contact (mediană) | 4,16 s | **1,11 s** | ✔ (≤ 2 s) |
+   | camioane: `[blocaj]` atribuibile | 37 | **8** (3 cu faza mutată) | ✘ (zero) |
+   | camioane: delta pe tur, grele / ușoare | +6,7 / +5,1 s | **+1,0 / +1,0 s** | — |
+   | excavator: pe banda liberă | 1% | **48%** (zarul: 80/78/86/78/78/82) | ✔ |
+   | excavator: `[blocaj]` / repuneri | 30 / 221 | **7 / 8** | ✘ / ≈ |
+   | excavator 4–6 cu brațul jos: pierdere mediană | 4,25 s | **2,21 s** | ✘ (≤ 1,5 s) |
+   | terase fără hazard: `[blocaj]` / repuneri | 51 / 12 | **26 / 20** (bermă) | ✘ |
+   | terase + camioane: căderi > 3 m | 35 | **1** | ✔ |
+
+   **Citirea coordonatorului:** (1) camioanele sunt rezolvate în substanță;
+   5 din cele 8 blocaje sunt la start, când tot plutonul întâlnește camionul
+   pe prima terasă — pe Track23 faza camioanelor se alege ca la start să nu
+   fie niciunul pe B (cu faza mutată rămân 3). (2) La excavator, blocajele
+   și cele 2,2 s sunt **chiar prețul zarului**: AI-ul care dă 4–6 și ajunge
+   la începutul fazei închise așteaptă ~3 s, exact ca un jucător care
+   riscă și pierde; contractul „zero blocaj” a fost scris înainte de decizia
+   zarului și nu se mai aplică ca atare — se urmărește doar ca nimeni să nu
+   rămână blocat peste o fază (≤ 3,5 s). (3) **Berma singură nu rezolvă
+   marginile** pe bucla sintetică: AI-ul iese larg din ace și lovește
+   începutul bermei (ejectare la ~40 m/s); prelungită pe exteriorul acelor
+   a fost mai rău (74 de blocaje). Cauza e geometria acelor sintetice
+   (6 m lățime, ieșire scurtă), nu berma — **se rezolvă pe traseul real**,
+   cu ProbeRace la pasul 3: ace mai late la ieșire, berma începută după
+   ieșirea din ac, nu pe ea.
+
+   **Pasul 1 e închis.** Codul de la ambele ramuri de sonde intră în
+   ramura de construcție a pistei (pasul 2), nu separat în main.
+
+   **Rezultatul pașilor 2–3 (25 oct 2026, ramura `carrara/track` @
+   15a9cd03, pushată, fără PR).** Track23 = **indexul 15**, 2072 m, orar,
+   din `tools/gen_carrara_route.py`. ProbeLayout OK (rază min 17,2 m, pantă
+   max 11,8%, apropiere de sine 37,8 m), ProbeBuried OK, `verify_local` OK,
+   15 materiale. Tema `carrara` e singura (testele scoase); umbra S 0,07
+   (de la 0,25), sol `carrara_gravel` (= `surface_gravel.png`, prin
+   `terrain_alt_class`). Tunelurile D și H sunt „doar tub” (exporturi noi
+   `tube_only`, `tube_class`, tavan până la 24 m; Track16 și Track21
+   identice la hash). ProbeRace pe pista goală, 7 runde de geometrie:
+   27 → **2 repuneri**, 6 → **0 ejectări**, **3 `[blocaj]`** (o mașină, un
+   eveniment) pe 16 seed-uri; tur 67–70 s.
+
+   Abateri de la §2, toate pentru contactele AI-ului: terase, ace și pod la
+   9 m (nu 6–7), tunelurile la 8 m, E **fără S-uri** (puneau peretele pe
+   interior), **fără poartă de start** (stâlpii ejectau), bermă și pe pod,
+   plase `RespawnZone` sub muchiile teraselor (o cădere devine repunere,
+   nu mașină blocată).
+
+   **Ce nu e încă pista din brief:** capturile arată că terenul **nu e un
+   amfiteatru**. Samplerul face pante netede între drumurile vecine, nu
+   gradoni cu fețe verticale; de pe E se vede un șanț pe dreapta, nu
+   cariera cu bălțile; terasele B sunt drumuri pe o pantă de nisip, nu
+   trepte tăiate. Asta e exact verificarea pasului 4 („captura de pe E: se
+   vede fundul?”) și se rezolvă acolo, cu fețe verticale construite
+   (`cliff_face` / `TerrainBluff` / clasa `carrara_marble` pe pereți), nu
+   cu decor.
+
+4. **Rezultatul pasului 4 (26 oct 2026, `carrara/track` @ 40459855,
+   pushată).** Mecanism nou, nu `CliffFace` (foaie vizuală fără coliziune,
+   lipită de marginea drumului): **`custom_bench_patches`** — dreptunghiuri
+   în care terenul ia cota locală a drumului, cu muchie tare între două
+   petice vecine — plus **rânduri fine** de teren (rândul de grilă care
+   ține o muchie tare se împarte în 8 sub-rânduri de 0,99 m, deci treapta
+   iese ~84° în loc de rampa de ~50° a grilei de 7,92 m), coliziunea
+   urmează mesh-ul. Fețele abrupte iau clasa `carrara_marble` cu dungi de
+   fir din cota lumii (perioadă 0,7 m) și AO pe față. Celelalte piste sunt
+   identice la hash (Track01, 08, 13, 14, 15, 16, 17, 20, 22).
+
+   | contract | înainte | după |
+   |---|---|---|
+   | profile de bancă (≥ 5 m, ≥ 70°, bancă plată ≥ 4 m) | 6/44 | **70/70** (fețe 82–84°, bancă 4–6 m) |
+   | E: puncte din care se vede fundul (≤ +8 m) | 10/14 | **13/14** (singurul fără = camera în portal) |
+   | E: % din cadru pe fund | 8,6% | **10,5%** (ținta 15% — ratată) |
+   | ProbeRace: `[blocaj]` / repuneri / ejectări pe 16 seed-uri | 3 / 2 / 0 | **0 / 1 / 1** (ejectarea la portalurile tunelurilor, prezentă și înainte) |
+
+   E are acum o scară de **5 fețe** (+45 → +36 → +27 → +18 → +10 → fund
+   +0,8); fundul carierei s-a lărgit spre vest până la x = −190. Treptele
+   din ace nu au fețe (muchiile tari merg doar pe axele E–V / N–S).
+
+   **Criticii orbi (doi, 9 capturi Carrara amestecate cu Monument Valley și
+   Baikal):** teren „făcut de om / tăiat” **16 din 18**, „cădere sub drum”
+   de pe E și F **10 din 10**, iarnă **0 din 18**, confuzie cu deșertul
+   roșu **0**; cuvintele lor, nesugerate: „quarry face”, „open-pit mine
+   bench system”, „excavation”. Comparat cu mostra (deșert 10/10), pista
+   **se citește carieră**. Deci dezvăluirea funcționează vizual chiar dacă
+   cifra de 15% nu e atinsă — cifra e o aproximare a citirii, iar citirea
+   a trecut. Rămân: (1) pereții în umbră citesc „cărămidă / plăci
+   albastru-gri” — dungile de fir + tenta de umbră pe marmură, de reglat la
+   arta POI-urilor; (2) ceața aplatizează căderea; (3) anotimpul e
+   „neclar” peste tot fiindcă nu există încă vegetație (castanii și
+   ginestra vin cu decorul); (4) G (ravaneto) e o câmpie plată
+   „ambiguă” — are nevoie de moloz și de flancul verde; (5) soarele (yaw
+   −10) pune fundul și scara E în umbră pe ~110 m — azimutul e o pârghie
+   pentru dezvăluire, de remăsurat.
+
+   **Planul adnotat** (intrarea diorama-ei, memoria
+   `diorama-din-geometria-reala`): `tools/annotate_carrara_plan.py`, din
+   Track23.tscn + harta de fracții. **X nu e oglindit**: traseul Carrara e
+   scris direct în coordonate Godot, deci captura de sus are deja estul la
+   dreapta.
+
+5. **Rezultatul pasului 5 (26 oct 2026, `carrara/track` @ a05eb27d,
+   pushată).** Hazardele sunt generate din `tools/gen_carrara_route.py`
+   (supraviețuiesc regenerării). 16 seed-uri × 230 s, bază pe aceeași pistă
+   și același cod.
+
+   | | bază | camioane | excavator |
+   |---|---|---|---|
+   | `[blocaj]` | 0 | **0** | 35 (toate la braț) |
+   | repuneri (atribuibile) | 1 | 2 (1) | 4 (4) |
+   | ejectări | 1 | 2 | 1 |
+
+   **Camioanele trec contractul.** Camionul 1 urcă B pe o curbă deschisă
+   de 603 m (`period` 118, ascuns la start — plutonul îl întâlnește abia în
+   turul 2); camionul 2 vine din față pe E–F–G, 218 m peste pod (`period`
+   60). 561 de întâlniri: contact 2% în ace, 3% pe terase, 6% pe pod;
+   pierdere per întâlnire mediană 0,15 s (cu contact 0,33 s), delta pe tur
+   +0,2…+0,8 s pe clase; 99–100% din mașini pe banda opusă camionului în
+   ace. **Lecția de geometrie:** pe banda stângă în acul 1 camionul dădea
+   50% contacte și 23 de căderi de 9,5 m — mașinile alunecă spre exterior
+   în arc. Fixul: camionul ia **interiorul acului 1** (banda dreaptă a
+   cursei, cu rampă de schimbare pe T2) și `nose_side` −1 împinge spre
+   interior, nu spre gol → 1% contacte, 0 căderi. Viteza, driftul și berma
+   prelungită n-au mișcat cifra.
+
+   **Excavatorul nu trece:** zarul se distribuie corect (86/83/93/82/82/85,
+   49% pe banda liberă), ramura 4–6 pierde 2,4 s median, dar la **start**
+   plutonul strâns face coadă la braț: mașinile 4–6 așteaptă una în spatele
+   alteia câte un ciclu de braț — 7 așteptări peste 3,5 s (max 8,8 s) în
+   primele 15 s, 1 mai târziu. Schimbare în AI: ramura 4–6 **așteaptă** la
+   braț în loc să dea înapoi (manevra de mers înapoi urca mașinile pe
+   bermă). Decizia rămasă e a dezvoltatorului (regula „o dată pe trecere”
+   e a lui).
+
+   **Decizia dezvoltatorului (26 oct 2026): „renunță după o așteptare”.**
+   O mașină care a dat 4–6 și a stat oprită în zona brațului (−2…30 m,
+   deci și cea din coadă) o fază închisă întreagă (`EXC_GIVE_UP_S` = 3,5 s)
+   trece pe banda liberă până la capătul trecerii; zarul rămâne o dată pe
+   trecere, faza brațului nu se citește (`carrara/track` @ 43a456a3).
+   Măsurat pe Track23, 16 seed-uri × 230 s, „înainte” = același cod cu
+   pragul la infinit:
+
+   | | înainte | după |
+   |---|---|---|
+   | `[blocaj]` la braț (doar excavator / ambele hazarde) | 35 / 22 | **21 / 16** |
+   | așteptare maximă | 8,8 s | **7,3 s** |
+   | așteptări peste 5 s | 7 | **3** |
+   | așteptări peste 3,5 s la start | 7 | 6 |
+   | contacte noi cu corpul excavatorului | — | 0 |
+
+   **Contractul nu e atins:** regula costă ea însăși 3,5 s + ~1 s de
+   pornire, deci „peste 3,5 s” nu poate ajunge la zero; și două mașini
+   (seed 14) rămân prinse între corpul excavatorului și bermă, de unde banda
+   liberă e de neatins cât brațul e jos. Pârghii netestate: prag mai scurt
+   (~2,5 s), ieșire din pană cu marșarier, sau excavatorul mutat unde
+   plutonul e deja răsfirat.
+
 2. `Track23.tscn` din `TrackFromPath` (`tools/gen_carrara_route.py`, schela
    `gen_fiordland_route.py`: pas 12 m, viraje > 90° pe arc), temă `carrara`
    (doar lumina, cerul, ceața, solul), traseul din §2, `custom_ravines` pe
@@ -670,30 +953,161 @@ deloc; (3) `ExcavatorHazard` are placeholder procedural dacă GLB-ul nu are
   dezvoltatorului (§2 din `mod_cariera.md`: regruparea e o editare de
   `.tres`); până atunci, ca Ha Long, **doar cursă rapidă**.
 
-## 9. Prompt pentru ChatGPT (dioramă de referință) — se scrie la pasul 4
+## 9. Prompt pentru ChatGPT (dioramă de referință) — v0.1, paste-ready, acceptată la iter2
 
-Decizia din memoria `diorama-din-geometria-reala` (Serengeti, 6 sep 2026):
-imaginea dată pentru dioramă e **captura reală de sus din Godot**
-(`snapshot.gd --track=15`) peste care se desenează legenda (POI, culoarea
-hazardului, loturile, nordul, scara), **după** ce traseul trece de
-ProbeLayout și ProbeRace — nu un plan de propunere. Promptul complet vine
-cu v0.2, odată cu captura. Ce e fix de acum, paragraful de stil:
+Se atașează `plan_adnotat.png` (planul real al pistei, de sus, din
+`tools/annotate_carrara_plan.py`). Geometria din imagine e obligatorie;
+literele sunt legenda.
 
-> *Stylized toy-diorama, low-poly, single low golden-hour sun from the
-> side with long blue shadows, deep blue sky fading to peach at the
-> horizon. A marble quarry amphitheatre cut into a mountain in flat
-> terraces: every vertical cut face is warm cream, almost golden where the
-> sun hits it and blue-grey in shadow, with horizontal wire-saw stripes
-> and rust drip stains; every horizontal surface (terraces, haul roads,
-> yard) is warm beige dust with tyre tracks; cream-grey rubble slopes;
-> faded-yellow and rusty toy machines (excavator with block forks, dump
-> truck with blocks, A-frame derrick swinging a block, wire-saw machine
-> with a flywheel and a water jet); stacked marble cubes with small
-> orange paint marks; opaque milky turquoise slurry pools on the quarry
-> floor; one dark tunnel portal in the cream wall; a brick railway viaduct
-> over a gorge; on one flank only, a warm green chestnut forest with
+> *Make a stylized toy-diorama of the racing track in the attached
+> top-down plan. The plan is the real geometry from the game and is
+> mandatory: keep the route, its order, the positions of A to H, the
+> terrace levels and the pit exactly where they are; the letters are a
+> legend, do not paint them. Camera: three-quarter view from the
+> south-east, high, the whole track in frame.*
+>
+> *Place: an open-pit marble quarry in the Apuan Alps, high summer,
+> golden-hour sun low from the side with long blue-grey shadows, deep
+> blue sky fading to warm white at the horizon. Every vertical cut face
+> is warm cream marble, almost golden where lit and soft grey-blue in
+> shadow, with fine horizontal wire-saw stripes and rust drip stains;
+> every horizontal surface (terraces, haul roads, yard) is warm beige
+> gravel dust with tyre tracks. Nothing in the image is white and nothing
+> reads as snow or winter.*
+>
+> *A — the quarry yard at +25 m: stacked marble cubes in neat rows, a
+> faded-yellow rusty excavator with block forks parked on the right of
+> the road, a site container, an open-air museum corner (a mine cart with
+> a block, an old wire-saw wheel, a wooden sled). B — three flat
+> terraces (+25, +16, +7) joined by two hairpins, separated by vertical
+> cut faces 9 m high, a low rubble berm along each drop edge, a loaded
+> dump truck climbing toward the viewer on the terraces. C — the quarry
+> floor at +1 m: opaque milky turquoise slurry pools, an A-frame derrick
+> swinging a marble block over the road, a crawler chainsaw cutting into
+> the wall. D — a square dark portal cut straight into the marble wall:
+> the road climbs inside the mountain (dashed in the plan: underground).
+> E — the top terrace at +45 m with a staircase of five 9 m marble steps
+> down to the floor on its pit side. F — a brick railway viaduct with
+> marble piers over a gorge with a pale stream. G — a long descent on a
+> slope of cream-grey marble rubble, with a warm green chestnut forest,
 > yellow broom bushes and a small stone village with terracotta roofs and
-> a church tower. High summer, golden light: nothing in the image is
-> white, nothing reads as snow or winter. No text, no brand names, no
-> people. The geometry in the attached top-down capture is mandatory;
-> letters are the legend.*
+> a church tower on the hillside on one flank only. H — an old stone
+> railway tunnel portal leading back to the yard.*
+>
+> *Low-poly toy look, chunky shapes, painted textures, soft ambient
+> occlusion. No text, no brand names, no people.*
+
+Se atașează `plan_adnotat.png` = `img/carrara_plan_adnotat.png` (regenerat
+pe 27 oct cu `tools/annotate_carrara_plan.py` din captura pasului 4,
+identic la pixel cu cel de atunci).
+
+### 9.0.1 Corectura după prima generare — paste-ready
+
+Prima generare (`img/carrara_plan/diorama_v01_iter1.jpg`) avea traseul în
+ordinea bună, dar E la nivelul fundului, scara E urcând spre peretele de
+nord și D ca drum deschis. Corectura, în aceeași conversație:
+
+> *Good start: keep the route order, the yard, the three terraces with the
+> truck, the slurry pools, the derrick, the viaduct, the village and the
+> warm golden palette exactly as they are. Fix the heights and one tunnel:
+> (1) E is the HIGHEST road on the whole track, a rim 45 m above the quarry
+> floor and 20 m above the yard; raise it to the top of the cut. (2) The
+> five 9 m marble steps go down FROM E's road TO the quarry floor, on the
+> pit side of E. (3) D is NOT an open road: the road enters a square dark
+> portal at floor level on the east side of the pit and comes out of a
+> second portal onto E, high on the rim, with no visible road between
+> them. (4) Wire-saw stripes are HORIZONTAL. (5) On the quarry floor,
+> replace the second excavator with a low crawler chainsaw. (6) The forest
+> and the village stay on the west flank only. Same camera, same light,
+> same toy-diorama style. No text, no brand names, no people.*
+
+### 9.1 Prompt pentru ChatGPT (planșa de inventar de assets) — v0.1, paste-ready
+
+Se dă **în aceeași conversație**, după ce diorama e acceptată. Numele de
+fișier sunt contractul (`assets/models/carrara/`, §5). Ce face codul sau ce
+se refolosește **nu** intră în planșă (§5.3, `docs/asset_briefs/carrara_kit.md`
+§1.7): castanii, ginestra, molozul mare, zidurile de sprijin, Kamaz-ul.
+
+> *Now make an asset inventory sheet for this diorama, in the same low-poly
+> toy style and warm palette: every distinct object drawn once, isolated, on
+> a plain light-grey background, in a neat grid, in a 3/4 view, all at the
+> same scale (a toy car shown for scale in one corner), with small simple
+> text labels under each object using exactly these file names (labels are
+> the only text allowed). No brand names or logos on any machine; machines
+> are faded yellow and rusty, not bright construction yellow.*
+>
+> *Hero machines: quarry_truck (heavy dump truck, 3.6 x 3 x 7 m, two marble
+> blocks in the bed, front facing the viewer-left), quarry_excavator (70 t tracked excavator, ~4 m tall,
+> with a two-prong BLOCK FORK instead of a bucket, arm drawn raised),
+> derrick (a single 16 m A-frame mast with a long swinging boom and a
+> hanging cable — NOT a gantry with two legs and a beam), marble_block_hooked
+> (a 2.5 m marble block in lifting straps hanging from a hook), lizza_sled (a
+> wooden log sled carrying a 2 m block, with ropes), wire_saw (diamond
+> wire-saw machine: a small chassis on two rails, a 1 m flywheel, the wire
+> loop and a water jet), chain_saw_crawler (low tracked machine with a long
+> chainsaw arm cutting into a wall), drill_rig (drilling machine with a 6 m
+> mast).*
+> *Structures: ponti_di_vara (railway viaduct, 30 m long and 25 m tall,
+> three brick arches on cream marble piers), marmifera_portal (old stone
+> railway tunnel portal with a round arch, 7 x 6.5 m), gallery_portal (a
+> square opening 8 x 8 m cut straight into a marble face, with a single work
+> lamp), gallery_pillar (a square marble pillar 3 x 3 x 18 m with sawn
+> faces), museum_set (three separate pieces side by side: a mine cart on
+> rails carrying a block, an old helical-wire saw wheel, an old wooden
+> sled), quarry_sign_block (one marble block with one polished face, no
+> text).*
+> *Village: colonnata_church (stone church with a 14 m bell tower,
+> terracotta tile roof), colonnata_house_a, colonnata_house_b,
+> colonnata_house_c (small stone houses with terracotta tile roofs, all
+> different).*
+> *Quarry kit: marble_block_a, marble_block_b, marble_block_c (simple cubes
+> of 1.5, 2 and 3 m with saw marks), block_stack_a, block_stack_b (stacks of
+> blocks 2-3 high), block_informe_a, block_informe_b (irregular broken marble
+> chunks), rubble_pile_a, rubble_pile_b, safety_berm (a 6 m long low rubble
+> berm, sloped toward the road), work_lamp (tripod with a floodlight),
+> cable_reel, water_tank, fuel_tank, office_container (site office
+> container), quarry_sign_a, quarry_sign_b (warning signs with only a
+> chevron or a hanging-block pictogram, no text), pipe_run (a straight
+> section of water pipes on small supports).*
+> *Background: apuan_ridge (a strip of 2-3 cream-grey limestone peaks with
+> pale rubble streaks down their flanks, warm green forest at the base, NO
+> snow caps).*
+
+### 9.2 Rezultatul: diorama și planșa acceptate (27 oct 2026)
+
+În `img/carrara_plan/`:
+- `diorama_v01_iter1.jpg` (prima generare, respinsă: E jos, D deschis);
+- `diorama_v01_iter2.jpg` (**acceptată**);
+- `inventar_v01_a.jpg` (**planșa acceptată**);
+- `inventar_v01_b.jpg` (a doua generare, referință pentru utilaje și
+  creastă).
+
+**Diorama, iter2:** D a devenit galerie (portal jos pe fund, portal sus pe
+flanc, fără drum vizibil între ele), dungile de fir sunt orizontale,
+ferăstrăul-lanț a luat locul celui de-al doilea excavator, pădurea a rămas
+pe flancul de vest. **Abaterea acceptată:** E e tot la nivelul fundului —
+ChatGPT a mutat căderea de 45 m în afara lui E, spre chei, nu în carieră.
+Același defect de două ori la rând, deci bucla se oprește (memoria
+`criticul-cere-ce-zona-nu-poate-da`): o margine înaltă aproape de o cameră
+din sud-est ar ascunde fundul, iar generatorul sacrifică una din două.
+Cotele vin din `Track23`, nu din dioramă (precedentul Transfăgărășan
+§9.2); diorama dă paleta, atmosfera și inventarul.
+
+**Planșa, `_a`:** cele trei verificări trec — derrick-ul e un catarg cu
+braț (nu portal), excavatorul are furcă, creasta n-are calotă albă. Are
+mașinuța de scară (lipsește pe `_b`), iar derrick-ul n-are bloc (pe `_b`
+ține unul, dublând `marble_block_hooked`). Ce corectează modelatorul, nu
+ChatGPT (kit, „Corecturi decise de coordonator”): galbenul saturat al
+utilajelor → `DRY_VEGETATION` 13, rezervorul albastru → `PAINTED_METAL`,
+vegetația și bolovanii lipiți pe clădiri și viaduct se scot, cotele
+relative ale planșei nu se folosesc.
+
+**Contractul de kit** e `docs/asset_briefs/carrara_kit.md`, cu decupările
+în `img/carrara_assets_v1/` (`tools/blender/crop_carrara_sheet.py`). Patru
+cote ale schiței din §5.2 s-au schimbat la trecerea prin cod: camionul are
+**≤ 2,9 m** lățime (anvelopa Kamaz-ului pe care s-au măsurat contractele
+camioanelor, nu 3,6), derrick-ul se modelează la **22,05 m** și intră în joc
+cu `model_scale` 0,7256 (constanta `JIB_HEIGHT`), portalul galeriei are
+golul **≥ 10 × 10,5 m** (rama de beton a tubului din cod are 9,6 × 9,8),
+iar viaductul are **36 m** pe un gol măsurat de 31 m și pile de 26 m.
+`gallery_pillar` e amânat: sala de 16 m nu s-a construit.

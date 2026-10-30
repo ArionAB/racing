@@ -890,12 +890,15 @@ excavator_soft_contact = true
                 repr(round(v, 5)) for v in (bx[0], by[0], bz[0], bx[1], by[1], bz[1], bx[2], by[2], bz[2])),
                 ", ".join(repr(round(v, 3)) for v in o))
 
-        def yaw_xf(fx, fz, o, yaw=0.0):
+        def sc3(v, k):
+            return v if k == 1.0 else tuple(c * k for c in v)
+
+        def yaw_xf(fx, fz, o, yaw=0.0, k=1.0):
             """Baza cu -Z local pe (fx, fz) rotit cu `yaw` grade, +X = dreapta acelei directii, Y sus."""
             fx, fz = rot_y(fx, fz, yaw)
-            return xf_rows((-fz, 0.0, fx), (0.0, 1.0, 0.0), (-fx, 0.0, -fz), o)
+            return xf_rows(sc3((-fz, 0.0, fx), k), sc3((0.0, 1.0, 0.0), k), sc3((-fx, 0.0, -fz), k), o)
 
-        def tilt_xf(fx, fz, o, yaw, grade):
+        def tilt_xf(fx, fz, o, yaw, grade, k=1.0):
             """Ca `yaw_xf`, dar inclinat cu panta drumului (`grade` = dy pe metru INAINTE): modulul de berma
             de 6 m urmeaza cota drumului in lung, in loc sa se ingroape la un capat."""
             fx, fz = rot_y(fx, fz, yaw)
@@ -904,7 +907,7 @@ excavator_soft_contact = true
             bz = (-fx / n_, -g / n_, -fz / n_)
             by = (-g * fx / n_, 1.0 / n_, -g * fz / n_)
             bx = (by[1] * bz[2] - by[2] * bz[1], by[2] * bz[0] - by[0] * bz[2], by[0] * bz[1] - by[1] * bz[0])
-            return xf_rows(bx, by, bz, o)
+            return xf_rows(sc3(bx, k), sc3(by, k), sc3(bz, k), o)
 
         def road_pt(fr_, lat, along=0.0):
             """Punctul la fractia (pe INDEX) `fr_`, `lat` m la DREAPTA sensului, `along` m inainte."""
@@ -932,12 +935,18 @@ excavator_soft_contact = true
         # O piesa care lipseste de aici sta la cota drumului - 0.3 (umarul tipic) pana se masoara.
         KIT_Y = {
             "GalerieIntrare": 3.24, "GalerieIesire": 44.64, "MarmiferaIntrare": 26.63, "MarmiferaIesire": 25.10,
-            "A_StivaS1": 24.65, "A_BlocS2": 24.64, "A_StivaS3": 24.63, "A_StivaS4": 24.62, "A_BlocS5": 24.63,
-            "A_StivaS6": 24.62, "A_StivaD1": 24.67, "A_StivaD2": 24.67, "A_BlocD3": 24.67, "A_StivaD4": 24.67,
-            "A_StivaD5": 24.67, "A_Container": 24.66, "A_Rezervor": 24.65, "A_Lampa": 24.67,
-            "C_Informe1": 1.05, "C_Informe2": 1.63, "C_Informe3": 1.66, "C_Informe4": 1.66, "C_Informe5": 1.59,
-            "F_BermaE_D": 44.06, "F_BermaE_S": 44.06, "F_BermaV_D": 41.89, "F_BermaV_S": 41.89,
         }
+        # Decorul per POI (tools/carrara_decor/zona_<x>.py): un fisier per zona, ca gauntlet-ul de POI-uri
+        # sa lucreze in paralel fara conflicte. Fiecare zona isi aduce si cotele masurate.
+        import importlib
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        decor_zones = []
+        for zl in "abcdefgh":
+            zm = importlib.import_module(f"carrara_decor.zona_{zl}")
+            decor_zones.append((f"Zona{zl.upper()}", list(zm.ITEMS)))
+            for k_, v_ in zm.KIT_Y.items():
+                assert k_ not in KIT_Y, f"cota dublata: {k_}"
+                KIT_Y[k_] = v_
 
         # ---- 1. DERRICK-UL (POI C): CraneHazard pe dreapta de 41 m a fundului carierei (x 103 -> 144, spre E).
         # Turnul pe STANGA (tower_side -1, singura latura validata de probe_carrara_derrick.gd), la 7 m de axa.
@@ -1353,61 +1362,33 @@ visible = false
         # 1 (x > -50, lat -7 .. -34) si totul in C sta la > 15 m de turnul derrick-ului (raza sarcinii 13 m).
         # Cota = terenul MINIM sub amprenta minus 3 cm (masurat cu `--decor`): nicio parte nu pluteste.
         R = "res://assets/models/carrara/"
-        decor = {
-            "ZonaA": [
-                ("A_StivaS1", R + "rocks/block_stack_b.glb", 0.012, -9.0, 3.0),
-                ("A_BlocS2", R + "rocks/marble_block_c.glb", 0.018, -8.6, -4.0),
-                ("A_StivaS3", R + "rocks/block_stack_a.glb", 0.024, -9.2, 5.0),
-                ("A_StivaS4", R + "rocks/block_stack_b.glb", 0.031, -9.0, -2.0),
-                ("A_BlocS5", R + "rocks/marble_block_b.glb", 0.036, -8.5, 7.0),
-                ("A_StivaS6", R + "rocks/block_stack_a.glb", 0.042, -9.1, -5.0),
-                ("A_StivaD1", R + "rocks/block_stack_a.glb", 0.014, 9.2, -3.0),
-                ("A_StivaD2", R + "rocks/block_stack_b.glb", 0.021, 9.4, 4.0),
-                ("A_BlocD3", R + "rocks/marble_block_c.glb", 0.027, 9.0, 2.0),
-                ("A_StivaD4", R + "rocks/block_stack_b.glb", 0.034, 9.4, -6.0),
-                ("A_StivaD5", R + "rocks/block_stack_a.glb", 0.040, 9.2, 3.0),
-                ("A_Container", R + "buildings/office_container.glb", 0.004, -13.0, 90.0),
-                ("A_Rezervor", R + "props/fuel_tank.glb", 0.0085, -12.5, 0.0),
-                ("A_Lampa", R + "props/work_lamp.glb", 0.046, 9.5, 180.0),
-            ],
-            "ZonaC": [
-                # Pe dreapta podeaua e plata (1.1-1.7) pana la 13 m; pe stanga peretele ravenei urca de la -10 m.
-                # Blocurile stau la 12.5 m pe dreapta: la 8.5 m, C_Informe3 (0.375, iesirea din cotul 2 la
-                # stanga, exteriorul e DREAPTA) a dat o ejectare-perete la 30 m/s pe ProbeRace (s5, ambele serii).
-                # Pe stanga doar unde e INTERIORUL cotului (0.370, cotul 2); exteriorul cotului 1 (0.345) ramane gol.
-                ("C_Informe1", R + "rocks/block_informe_a.glb", 0.298, 12.5, 20.0),
-                ("C_Informe2", R + "rocks/block_informe_b.glb", 0.338, 12.5, -35.0),
-                ("C_Informe3", R + "rocks/block_informe_a.glb", 0.375, 12.5, 50.0),
-                ("C_Informe4", R + "rocks/block_informe_b.glb", 0.370, -8.8, 10.0),
-                ("C_Informe5", R + "rocks/block_informe_b.glb", 0.352, 12.5, 50.0),
-            ],
-            "ZonaF": [
-                # -X al modulului (panta) spre drum: pe dreapta yaw 0 (+X = dreapta), pe stanga 180. Usor deschise.
-                # Capatul de E inainte de buza cheiului (la 0.7045 modulul de 6 m cadea 0.9 m pe lungime, la 0.7025 0.5 m).
-                ("F_BermaE_D", R + "structures/safety_berm.glb", 0.7008, 8.2, -15.0),
-                ("F_BermaE_S", R + "structures/safety_berm.glb", 0.7008, -8.2, 195.0),
-                ("F_BermaV_D", R + "structures/safety_berm.glb", 0.7230, 8.2, 15.0),
-                ("F_BermaV_S", R + "structures/safety_berm.glb", 0.7230, -8.2, 165.0),
-            ],
-        }
         truck_pts = [(a, c) for a, b, c in c1 + c2]
-        for zname, items in decor.items():
+        for zname, items in decor_zones:
+            if not items:
+                continue
             kit_nodes += f"""
 [node name="{zname}" type="Node3D" parent="DecorManual"]
 """
-            for nm, path, fr_, lat, yaw in items:
-                p_, (fx_, fz_), i_ = road_pt(fr_, lat)
-                y_ = KIT_Y.get(nm, brow[i_][1] - 0.3)
-                if zname == "ZonaF":
+            for it_ in items:
+                nm, path, fr_, lat, yaw = it_[:5]
+                opt = it_[5] if len(it_) > 5 else {}
+                if not path.startswith("res://"):
+                    path = R + path
+                p_, (fx_, fz_), i_ = road_pt(fr_, lat, opt.get("along", 0.0))
+                y_ = opt.get("y", KIT_Y.get(nm, brow[i_][1] - 0.3))
+                k_ = float(opt.get("scale", 1.0))
+                if opt.get("tilt", False):
                     j1, j0 = min(i_ + 2, nb - 1), max(i_ - 2, 0)
                     grade = (brow[j1][1] - brow[j0][1]) / max(1e-6, math.hypot(brow[j1][0] - brow[j0][0], brow[j1][2] - brow[j0][2]))
-                    xf_txt = tilt_xf(fx_, fz_, (p_[0], y_, p_[2]), yaw, grade)
+                    xf_txt = tilt_xf(fx_, fz_, (p_[0], y_, p_[2]), yaw, grade, k_)
                 else:
-                    xf_txt = yaw_xf(fx_, fz_, (p_[0], y_, p_[2]), yaw)
+                    xf_txt = yaw_xf(fx_, fz_, (p_[0], y_, p_[2]), yaw, k_)
                 kit_nodes += f"""
 [node name="{nm}" parent="DecorManual/{zname}" instance={glb(path)}]
 transform = {xf_txt}
 """
+                if "coliziune" in opt:
+                    kit_nodes += f'metadata/coliziune = "{opt["coliziune"]}"\n'
                 dt = min(math.hypot(p_[0] - a, p_[2] - c) for a, c in truck_pts)
                 dd = math.hypot(p_[0] - od[0] - (-fzd) * -7.0, p_[2] - od[2] - fxd * -7.0)
                 flag = "" if dt > 6.0 and dd > 15.0 else "  <-- PREA APROAPE"

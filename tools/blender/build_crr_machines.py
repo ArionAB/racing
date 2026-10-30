@@ -9,6 +9,7 @@
   carrara/vehicles/wire_saw.glb       masina de fir (decor; volantul `Blades` se roteste, windmill.gd)
   carrara/vehicles/chain_saw_crawler.glb  ferastraul-lant pe senile (decor)
   carrara/vehicles/drill_rig.glb      masina de forat (decor)
+  carrara/props/museum_set_{cart,wheel,sled}.glb  coltul de muzeu (trei GLB-uri separate)
 
 Rulare:
     D:/Blender/blender.exe --background --factory-startup \\
@@ -1528,6 +1529,234 @@ def build_drill_rig():
             black.to_object("Drill_Black"), mast.to_object("Drill_Mast")]
 
 
+# ---------------------------------------------------------------------------
+# coltul de muzeu (kit §1.4): TREI GLB-uri separate (world_prop n-are
+# keep_variants: un GLB cu trei noduri le-ar randa pe toate trei)
+# ---------------------------------------------------------------------------
+
+AO_MUSEUM = dict(samples=16, dist=0.8, gradient="vertical", low=0.55, high=0.95,
+                 power=0.8, floor=0.35, z_range=(0.0, 2.2))
+
+
+def _tapered_strip(b, x_bot, x_top, y_bot, y_top, z0, z1, t, slot, side):
+    """Scandura de perete evazat (vagonetul): fata exterioara intre (x_bot, z0)
+    si (x_top, z1), lungimea pe Y de la +-y_bot la +-y_top, grosimea t spre
+    interior. `side` = +1 / -1 (peretele de pe +X sau -X)."""
+    pts = []
+    for (x, y, z) in ((x_bot, y_bot, z0), (x_top, y_top, z1)):
+        for sy in (-1, 1):
+            for dx in (0.0, -t):
+                pts.append(Vector((side * (x + dx), sy * y, z)))
+    _hull(b, pts, slot)
+
+
+def _tapered_end(b, x_bot, x_top, y_bot, y_top, z0, z1, t, slot, side):
+    """Scandura peretelui de capat (pe +-Y), intre peretii laterali."""
+    pts = []
+    for (x, y, z) in ((x_bot, y_bot, z0), (x_top, y_top, z1)):
+        for sx in (-1, 1):
+            for dy in (0.0, -t):
+                pts.append(Vector((sx * x, side * (y + dy), z)))
+    _hull(b, pts, slot)
+
+
+def build_museum_set_cart():
+    """LISTA DE ELEMENTE (felia `museum_set_cart` din decuparea `museum_set.png`;
+    scrisa INAINTE de geometrie; kit §1.4: vagonet 2 m pe 3 m de sina, bloc de
+    1 m; rugina si lemn vechi, MAI INCHISE decat utilajele vii):
+
+     1. SINA: 2 fire de rugina de 3 m (ecartament 0,6), pe 5 TRAVERSE de lemn
+        intunecat (planșa: traverse scurte, una iese stramb).
+     2. TRENUL DE ROTI: 4 roti de fier (2 osii; runda 3: r 0,25, iesite in
+        afara ramei), cu buza pe interior, osii de
+        rugina, 2 lonjeroane de lemn intunecat sub cutie.
+     3. CUTIA vagonetului (2,0 m sus, 1,7 m jos: EVAZATA ca pe planșa): 3
+        SCANDURI pe fiecare perete, cu rosturi de 2 cm (relief), podeaua.
+     4. FIERARIA: 4 colturi de fier, 2 benzi verticale pe fiecare perete lung,
+        rama de sus, manerul pe capatul din spate (-Y).
+     5. BLOCUL de marmura de ~1 m (runda 2: 0,74 x 1,00 x 0,85, incape intre
+        pereti) in cutie, iese ~0,5 m
+        peste rama, un colt spart; `Cart_Marble` / `Cart_MarbleBase` (patina
+        pe treimea de jos, ascunsa mai mult in cutie).
+     6. Culori: lemn WOOD_WEATHERED cu capetele si traversele LOG_DARK, fier
+        RUST_METAL. Fara CAR_YELLOW, fara FOAM_WHITE, fara text.
+    """
+    wood, rust, marble, mbase = Builder(), Builder(), Builder(), Builder()
+    W, D, R = CRR_WOOD, CRR_WOOD_DARK, CRR_RUST
+
+    # --- 1. sina --------------------------------------------------------------------
+    for k, yy in enumerate((-1.25, -0.65, 0.0, 0.62, 1.22)):
+        tilted_box(wood, (0.0, yy, 0.05), (1.00, 0.16, 0.10), D, rot_z=(7.0 if k == 3 else 0.0))
+    for sx in (-1, 1):
+        rust.box((sx * 0.33, 0.0, 0.14), (0.06, 3.0, 0.08), R)
+    # --- 2. rotile ---------------------------------------------------------------------
+    # runda 3: roti mai mari (r 0,25), iesite in afara ramei, ca pe planșa
+    for yy in (-0.58, 0.58):
+        rust.cylinder((0.0, yy, 0.43), 0.045, 0.84, R, segments=8, axis="X")
+        for sx in (-1, 1):
+            rust.cylinder((sx * 0.33, yy, 0.43), 0.25, 0.08, R, segments=14, axis="X")
+            rust.cylinder((sx * 0.28, yy, 0.43), 0.29, 0.02, R, segments=14, axis="X")
+            rust.cylinder((sx * 0.38, yy, 0.43), 0.09, 0.04, R, segments=8, axis="X")    # butucul
+            rust.box((sx * 0.25, yy, 0.50), (0.08, 0.20, 0.12), R)                # cutia de osie
+    for sx in (-1, 1):
+        wood.box((sx * 0.20, 0.0, 0.50), (0.12, 1.90, 0.12), D)
+    # --- 3. cutia ------------------------------------------------------------------------
+    wood.box((0.0, 0.0, 0.565), (0.92, 1.72, 0.07), W)                           # podeaua
+    xb, xt, yb, yt = 0.46, 0.575, 0.86, 1.00
+    z0, z1 = 0.60, 1.20
+    for k in range(3):
+        za = z0 + (z1 - z0) * k / 3.0
+        zb = z0 + (z1 - z0) * (k + 1) / 3.0 - 0.02
+        fa, fb = (za - z0) / (z1 - z0), (zb - z0) / (z1 - z0)
+        xa, xb2 = xb + (xt - xb) * fa, xb + (xt - xb) * fb
+        ya, yb2 = yb + (yt - yb) * fa, yb + (yt - yb) * fb
+        for s in (-1, 1):
+            _tapered_strip(wood, xa, xb2, ya, yb2, za, zb, 0.06, W if k != 1 else D, s)
+            _tapered_end(wood, xa - 0.06, xb2 - 0.06, ya, yb2, za, zb, 0.06, W, s)
+    # --- 4. fieraria -------------------------------------------------------------------------
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            p0 = Vector((sx * (xb + 0.015), sy * (yb + 0.015), z0))
+            p1 = Vector((sx * (xt + 0.015), sy * (yt + 0.015), z1 + 0.02))
+            rust.beam(p0, p1, 0.07, R)
+        for yy in (-0.35, 0.35):
+            rust.beam((sx * (xb + 0.012), yy, z0), (sx * (xt + 0.012), yy, z1), (0.02, 0.07), R)
+    for sx in (-1, 1):
+        rust.box((sx * (xt - 0.02), 0.0, z1 + 0.01), (0.06, 2 * yt - 0.04, 0.04), R)
+    for sy in (-1, 1):
+        rust.box((0.0, sy * (yt - 0.02), z1 + 0.01), (2 * xt, 0.06, 0.04), R)
+    polyline_beam(rust, [(-0.25, -yt - 0.02, 0.95), (-0.25, -yt - 0.16, 0.98),
+                         (0.25, -yt - 0.16, 0.98), (0.25, -yt - 0.02, 0.95)], 0.035, R)
+    # --- 5. blocul ------------------------------------------------------------------------------
+    # runda 2: blocul de 0,98 lat iesea prin peretii laterali (interiorul cutiei
+    # are 0,80 la podea); acum 0,74 x 1,00 x 0,85, latura de 1 m pe lungime
+    cut_marble_block(marble, mbase, (0.0, 0.04), (0.74, 1.00, 0.85), z0=z0, yaw_deg=1.5,
+                     chip=0.14, chip_corner=(1, 1))
+    return [wood.to_object("Cart_Wood"), rust.to_object("Cart_Rust"),
+            marble.to_object("Cart_Marble"), mbase.to_object("Cart_MarbleBase")]
+
+
+MW_R = 1.0               # roata de fir elicoidal: Ø 2,0
+MW_HUB_Z = MW_R + 0.12
+
+
+def build_museum_set_wheel():
+    """LISTA DE ELEMENTE (felia `museum_set_wheel` din `museum_set.png`; scrisa
+    INAINTE de geometrie; kit §1.4: roata de fir elicoidal Ø 2 m pe suport):
+
+     1. ROATA (`Pulley_Rust`, axa pe X; runda 2: janta de 0,48, spite late): janta DUBLA (planșa: doua coroane
+        alaturate) -- doua flanse, canalul dintre ele si banda interioara, 16
+        segmente; 8 SPITE groase care se ingusteaza spre janta; BUTUC mare (12
+        laturi) cu capac; 16 suruburi pe fiecare fata a jantei.
+     2. SUPORTUL (`Pulley_Wood`): planșa nu-l arata (roata sta rezemata), dar
+        kitul cere roata „pe suport": un LEAGAN de lemn jos -- doua talpi,
+        doua legaturi si 4 PENE care prind janta pe dedesubt (runda 3; in
+        runda 2 erau capre in A pana la butuc si ascundeau fata rotii).
+     3. Roata nu atinge solul (0,12 m dedesubt); nu se roteste (piesa de muzeu,
+        fara `Blades`).
+     4. Culori: rugina RUST_METAL, lemn LOG_DARK / WOOD_WEATHERED. Fara text.
+    """
+    wheel, stand = Builder(), Builder()
+    R, D, W = CRR_RUST, CRR_WOOD_DARK, CRR_WOOD
+    c = (0.0, 0.0, MW_HUB_Z)
+    # --- 1. roata ---------------------------------------------------------------------
+    # runda 2: janta mai lata (0,48) si spite LATE (planșa: disc cu goluri in
+    # forma de lacrima, nu spite subtiri)
+    for dx in (-0.21, 0.21):
+        ring_x(wheel, (dx, 0.0, MW_HUB_Z), MW_R - 0.12, MW_R, 0.06, R)
+    ring_x(wheel, c, MW_R - 0.16, MW_R - 0.07, 0.36, R, a0=math.pi / 16)
+    ring_x(wheel, c, MW_R - 0.22, MW_R - 0.14, 0.48, R)
+    for k in range(8):
+        spoke_x(wheel, c, 2 * math.pi * k / 8 + math.pi / 8, 0.20, MW_R - 0.18, 0.40, 0.32, 0.16, R)
+    wheel.cylinder(c, 0.24, 0.46, R, segments=12, axis="X")
+    for sx in (-1, 1):
+        wheel.cylinder((sx * 0.24, 0.0, MW_HUB_Z), 0.12, 0.04, R, segments=8, axis="X")
+        for k in range(16):
+            a = 2 * math.pi * (k + 0.5) / 16
+            wheel.box((sx * 0.25, math.cos(a) * (MW_R - 0.18), MW_HUB_Z + math.sin(a) * (MW_R - 0.18)),
+                      (0.03, 0.05, 0.05), R)
+    # --- 2. suportul --------------------------------------------------------------------
+    # runda 3: LEAGAN jos, sub janta (runda 2 avea capre in A pana la butuc si
+    # ascundeau fata rotii; planșa arata roata intreaga)
+    for sx in (-1, 1):
+        stand.box((sx * 0.34, 0.0, 0.06), (0.16, 1.70, 0.12), D)                  # talpile
+    for sy in (-1, 1):
+        stand.box((0.0, sy * 0.72, 0.06), (0.90, 0.16, 0.12), D)                  # legaturile
+        for sx in (-1, 1):                                                          # penele sub janta
+            y_in, y_out = sy * 0.30, sy * 0.62
+            z_in = MW_HUB_Z - math.sqrt(MW_R ** 2 - 0.30 ** 2)
+            z_out = MW_HUB_Z - math.sqrt(MW_R ** 2 - 0.62 ** 2)
+            pts = []
+            for x in (sx * 0.12, sx * 0.40):
+                pts += [Vector((x, y_in, 0.12)), Vector((x, y_out, 0.12)),
+                        Vector((x, y_in, z_in)), Vector((x, y_out, z_out))]
+            _hull(stand, pts, W)
+    return [wheel.to_object("Pulley_Rust"), stand.to_object("Pulley_Wood")]
+
+
+def build_museum_set_sled():
+    """LISTA DE ELEMENTE (felia `museum_set_sled` din `museum_set.png`; scrisa
+    INAINTE de geometrie; kit §1.4: sania veche 2,5 m cu funii):
+
+     1. TALPILE: doua barne groase (0,24) de 2,5 m pe Y, varful din fata (+Y)
+        intors in sus.
+     2. TRAVERSELE: 5 barne culcate pe talpi, cu capetele iesite lateral, de
+        lungimi diferite (1,5-1,8 m) si usor rasucite (planșa: barnele ies in
+        toate partile, gramada).
+     3. AL DOILEA RAND: 2 barne lungi peste traverse si un capat scurt (planșa:
+        lemnaria stivuita).
+     4. COLACUL DE FRANGHIE (`OldSled_Rope`): 6 spire stivuite (Ø ~1 m, 0,7 m
+        inalt) si o spirala stransa deasupra; 2 funii de legatura peste colac,
+        legate de barne. Canepa deschisa (SAND_MID), ca pe planșa.
+     5. FIERARIA (`OldSled_Rust`): coltare la imbinarile talpa/traversa, 2
+        scoabe pe varfurile talpilor.
+     6. 2 TARUSI scurti in spate (runda 2: 0,6 m, nu stalpi).
+     7. Culori: lemn WOOD_WEATHERED cu capete LOG_DARK, fier RUST_METAL, mai
+        inchise decat utilajele vii. Fara text.
+    """
+    wood, rope, rust = Builder(), Builder(), Builder()
+    W, D, R, H = CRR_WOOD, CRR_WOOD_DARK, CRR_RUST, CRR_HEMP
+    # --- 1. talpile -----------------------------------------------------------------
+    for sx in (-1, 1):
+        x = sx * 0.55
+        wood.box((x, -0.22, 0.12), (0.24, 2.06, 0.24), W)                          # Y -1,25..0,81
+        tilted_box(wood, (x, 0.98, 0.25), (0.24, 0.50, 0.24), D, rot_x=32.0)       # varful
+        rust.box((x, 1.10, 0.46), (0.26, 0.10, 0.06), R, )
+    # --- 2. traversele ------------------------------------------------------------------
+    for k, (yy, L, yaw) in enumerate(((-1.05, 1.62, 3.0), (-0.55, 1.80, -4.0), (-0.05, 1.55, 2.0),
+                                      (0.42, 1.74, -2.5), (0.78, 1.50, 4.5))):
+        tilted_box(wood, (0.03 * (k % 2), yy, 0.34), (L, 0.20, 0.20), D if k % 2 else W, rot_z=yaw)
+        for sx in (-1, 1):
+            rust.box((sx * 0.55, yy, 0.255), (0.28, 0.24, 0.03), R)              # coltarele
+    # --- 3. al doilea rand ------------------------------------------------------------------
+    for sx, y0, y1 in ((-1, -1.10, 0.70), (1, -0.95, 0.85)):
+        wood.box((sx * 0.36, (y0 + y1) / 2, 0.54), (0.20, y1 - y0, 0.20), W)
+    tilted_box(wood, (0.0, -1.0, 0.74), (0.90, 0.18, 0.18), D, rot_z=6.0)
+    # --- 4. colacul de franghie -----------------------------------------------------------------
+    cy, zc = -0.08, 0.64
+    for k in range(6):
+        rope.torus((0.0, cy, zc + 0.07 + k * 0.12), 0.47 - 0.006 * k, 0.07, H, major_seg=14, minor_seg=8)
+    rope.cylinder((0.0, cy, zc + 0.38), 0.40, 0.72, H, segments=14)               # miezul colacului
+    for k, r in enumerate((0.36, 0.25, 0.14)):
+        rope.torus((0.0, cy, zc + 0.78), r, 0.055, H, major_seg=12, minor_seg=8)
+    # runda 2: funiile de legatura STRANG colacul (urca pe flancul lui, trec
+    # peste capac, coboara pe partea cealalta), nu fac un cort peste el
+    for sx in (-1, 1):
+        polyline_beam(rope, [(sx * 0.18, cy - 0.66, 0.64), (sx * 0.18, cy - 0.52, 0.75),
+                             (sx * 0.18, cy - 0.52, 1.36), (sx * 0.18, cy - 0.30, 1.48),
+                             (sx * 0.18, cy + 0.30, 1.48), (sx * 0.18, cy + 0.52, 1.36),
+                             (sx * 0.18, cy + 0.52, 0.75), (sx * 0.18, cy + 0.66, 0.64)], 0.07, H)
+    for sy in (-1, 1):
+        polyline_beam(rope, [(-0.52, cy + sy * 0.18, 0.75), (-0.52, cy + sy * 0.18, 1.36),
+                             (-0.30, cy + sy * 0.18, 1.48), (0.30, cy + sy * 0.18, 1.48),
+                             (0.52, cy + sy * 0.18, 1.36), (0.52, cy + sy * 0.18, 0.75)], 0.06, H)
+    # --- 6. tarusii ---------------------------------------------------------------------------
+    for sx in (-1, 1):
+        wood.box((sx * 0.55, -1.12, 0.42), (0.12, 0.12, 0.36), D)
+    return [wood.to_object("OldSled_Wood"), rope.to_object("OldSled_Rope"),
+            rust.to_object("OldSled_Rust")]
+
+
 clear_built()
 if not ONLY or ONLY == "derrick":
     emit_fixed(build_derrick(), "structures/derrick.glb",
@@ -1574,4 +1803,11 @@ if not ONLY or ONLY == "drill_rig":
     emit_crr(build_drill_rig(), "vehicles/drill_rig.glb", AO_DR, bevel=0.03,
              bevels={"_Black": 0.02}, smooth_angle=40.0, center_y=False)
     clear_built()
+for _nm, _fn in (("museum_set_cart", "build_museum_set_cart"),
+                 ("museum_set_wheel", "build_museum_set_wheel"),
+                 ("museum_set_sled", "build_museum_set_sled")):
+    if not ONLY or ONLY == _nm:
+        emit_crr(globals()[_fn](), "props/%s.glb" % _nm, AO_MUSEUM, bevel=0.025,
+                 bevels={"_Marble": 0.0, "_MarbleBase": 0.0, "_Rope": 0.0}, smooth_angle=40.0)
+        clear_built()
 report_crr()

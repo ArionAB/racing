@@ -15,6 +15,11 @@ extends Node
 ##     `Track._LANDMARKS`) pune pe `Blades` clasa `rust_metal` PE UV, la fel ca
 ##     la moara. De aceea volantul are UV-uri reale (cube_uvs), nu triplanar.
 ##
+## In plus (6): numele nodurilor din TOATE piesele crr-d trecute prin
+## `WorldProp.prop_classes()` -- o mapare GLOBALA pe prefix de nume (memoria
+## „numele de noduri nu sunt unice"). Doar `Blades` are voie sa prinda o clasa
+## acolo; restul se mapeaza pe fisier, in CLASSES_CARRARA, la integrare.
+##
 ## Ce masoara, dupa 20 de cadre la 30 rpm (60 de grade):
 ##   1. volantul s-a rotit (unghiul din baza);
 ##   2. pivotul n-a plecat (originea e in butuc: pozitia globala a lui `Blades`
@@ -41,7 +46,8 @@ func _ready() -> void:
 	var good := await _run(Vector3(1, 0, 0), "axa X (contractul)")
 	var sab := await _run(Vector3(0, 0, 1), "axa Z (implicitul morii, SABOTAJ)")
 	print("")
-	var ok: bool = good["ok"] and not sab["ok"]
+	var names_ok := _class_names()
+	var ok: bool = good["ok"] and not sab["ok"] and names_ok
 	print("configuratia corecta: %s; sabotajul: %s" % [
 		"OK" if good["ok"] else "PICA",
 		"PICA, cum trebuie" if not sab["ok"] else "TRECE (sonda nu masoara!)"])
@@ -131,3 +137,45 @@ func _world_box(mi: MeshInstance3D) -> AABB:
 
 func _v(v: Vector3) -> String:
 	return "(%.3f, %.3f, %.3f)" % [v.x, v.y, v.z]
+
+
+const CRR_D := [
+	"res://assets/models/carrara/vehicles/wire_saw.glb",
+	"res://assets/models/carrara/vehicles/chain_saw_crawler.glb",
+	"res://assets/models/carrara/vehicles/drill_rig.glb",
+	"res://assets/models/carrara/props/museum_set_cart.glb",
+	"res://assets/models/carrara/props/museum_set_wheel.glb",
+	"res://assets/models/carrara/props/museum_set_sled.glb",
+]
+
+
+func _class_names() -> bool:
+	print("
+-- numele nodurilor fata de WorldProp.prop_classes() (mapare globala) --")
+	var mapping := WorldProp.prop_classes()
+	var ok := true
+	for path: String in CRR_D:
+		if not ResourceLoader.exists(path):
+			print("  !! lipseste %s" % path)
+			ok = false
+			continue
+		var inst := (load(path) as PackedScene).instantiate()
+		var hits: Array[String] = []
+		for n in _all(inst):
+			if n is MeshInstance3D:
+				var cls := Palette._class_for(String(n.name), mapping)
+				if not cls.is_empty():
+					hits.append("%s -> %s" % [n.name, cls])
+					if String(n.name) != "Blades":
+						ok = false
+		print("  %-22s %s" % [path.get_file(), ", ".join(hits) if hits else "nimic (atlas)"])
+		inst.free()
+	print("  %s" % ("OK: doar Blades prinde o clasa globala" if ok else "PROBLEMA: alt nod prinde o clasa globala"))
+	return ok
+
+
+func _all(n: Node) -> Array[Node]:
+	var out: Array[Node] = [n]
+	for c in n.get_children():
+		out.append_array(_all(c))
+	return out

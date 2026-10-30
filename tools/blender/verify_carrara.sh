@@ -243,6 +243,9 @@ crr_d() {  # crr_d <cale> <garda> <noduri,...> [flag verify...]
 crr_d "vehicles/wire_saw.glb" wire_saw "Blades,Saw_Paint,Saw_Rail,Saw_Rust,Saw_Water" --class-parts=Blades
 crr_d "vehicles/chain_saw_crawler.glb" crawler "Crawler_Black,Crawler_Blade,Crawler_Paint,Crawler_Rust"
 crr_d "vehicles/drill_rig.glb" drill "Drill_Black,Drill_Mast,Drill_Paint,Drill_Rust"
+crr_d "props/museum_set_cart.glb" cart "Cart_Marble,Cart_MarbleBase,Cart_Rust,Cart_Wood"
+crr_d "props/museum_set_wheel.glb" wheel "Pulley_Rust,Pulley_Wood"
+crr_d "props/museum_set_sled.glb" sled "OldSled_Rope,OldSled_Rust,OldSled_Wood"
 
 echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="

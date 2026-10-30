@@ -271,6 +271,19 @@ grep -E "^== |: (OK|PROBLEME)$|!!" /tmp/crr_e_$$.txt; rm -f /tmp/crr_e_$$.txt
 [ "$rc" -eq 0 ] || fail=1
 
 echo
+echo "== val 2, crr-f: fundalul (kit §1.6) =="
+# Fara exceptii la verify_glb: fiecare creasta e un nod-radacina cu originea la
+# BAZA (bbox centrat pe X/Z, Y min 0). Garda de cote (measure_crr_horizon.py):
+# numele celor 3 noduri, lungime 160-240, inaltime 35-60, 2-3 varfuri mari,
+# sloturi doar 29/19/21/13 (fara FOAM_WHITE), siluete diferite; --selftest
+# dovedeste ca garda pica pe trei copii sabotate (redenumit, ridicat, scalat).
+check "effects/carrara_horizon.glb"
+if [ -f "$ROOT/effects/carrara_horizon.glb" ]; then
+  python tools/blender/measure_crr_horizon.py "$ROOT/effects/carrara_horizon.glb" || fail=1
+  python tools/blender/measure_crr_horizon.py --selftest "$ROOT/effects/carrara_horizon.glb" || fail=1
+fi
+
+echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then
   while IFS= read -r f; do

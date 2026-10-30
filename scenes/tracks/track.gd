@@ -4373,7 +4373,29 @@ static func themes() -> Dictionary:
 		"scarp_fade_deg": 10.0,
 		"dust_color": null, # null = derivat din ground_tint (umerii soselei, praful din roti)
 		"loose_grip": 7.0,
-		"horizon_model": "",
+		# FUNDALUL (kit carrara_kit.md §1.6, brief §5.4): crestele Apuanilor din
+		# `carrara_horizon.glb` (3 noduri, copii directi ai radacinii), PROVIZORIU pana la
+		# testul de anotimp (brief §6). Calcar crem-gri cu dare de moloz deschise si padure
+		# la baza, FARA calota (calota = Alpi). Clasa goala = atlasul modelului: sloturile
+		# pictate (29/19/21/13) raman; o clasa de roca le-ar sterge.
+		#
+		# Un inel per creasta, cu azimut FIX (conventia `_build_horizon`: cos pe X, sin pe Z
+		# fata de centroid; E = 0, S = +90, N = -90) si lungimea TANGENTA la cerc
+		# (`yaw_deg` = 90 - unghi), alese cu tools/ProbeCarraraHorizon.tscn ca fiecare din
+		# fractiile de contract (A 0.02, E 0.62, F 0.70, G 0.80, G 0.88) sa aiba o creasta
+		# in cadrul camerei de joc, neacoperita de teren. Cotele legate (memoria
+		# efecte-de-fundal-cote-legate): fog_end 300 < FAR_PLANE 380; `_build_horizon`
+		# stinge aruncarea de umbra (memoria caster-departat-fura-umbra).
+		"horizon_model": "res://assets/models/carrara/effects/carrara_horizon.glb",
+		"horizon_class": "",
+		"horizon_rings": [
+			{"near": 200.0, "far": 300.0, "count": 1, "scale": 0.9, "clear": 130.0,
+				"picks": ["ApuanRidge_C"], "angle_deg": -60.0, "yaw_deg": 0.0},
+			{"near": 230.0, "far": 330.0, "count": 1, "scale": 0.9, "clear": 140.0,
+				"picks": ["ApuanRidge_A"], "angle_deg": 128.0, "yaw_deg": 0.0},
+			{"near": 300.0, "far": 480.0, "count": 1, "scale": 0.85, "clear": 170.0,
+				"picks": ["ApuanRidge_B"], "angle_deg": 185.0, "yaw_deg": 90.0},
+		],
 		"walls": false,
 		"kerbs": false,
 		"cliffs": false,

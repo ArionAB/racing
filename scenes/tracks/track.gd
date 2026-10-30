@@ -3962,6 +3962,12 @@ static func themes() -> Dictionary:
 		# stinge, deci solul ramane `ground_tint` CORAL_SAND pe toata pista.
 		"kerbs": false,
 		"wall_visible": false,
+		# Issue #608 (30 oct 2026, de la volan): „nu pot iesi de pe drum". Cauza,
+		# masurata cu `tools/ProbeEdgeCross.tscn`: soseaua sta la +1,6..2,0 m, deci
+		# regula „exterior SAU inaltat > 1 m" punea gardul invizibil pe AMBELE
+		# parti, pe tot turul — si pe uscat, unde nu era nicio apa de oprit.
+		# Acum ramane doar langa apa (dig, pod, mal), ca pe Ha Long.
+		"walls_water_only": true,
 		"inland_tint": null,
 		# Soare de dupa-amiaza tarzie din VSV, ~25 grade. Aceeasi cifra ca
 		# `custom_sun_rotation_deg` din Track20.tscn (conventia busolei din

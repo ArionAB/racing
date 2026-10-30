@@ -6,6 +6,7 @@
   carrara/props/lizza_sled.glb        sania de lizzatura (RockfallHazard, roll_model=false)
   carrara/rocks/block_informe_a.glb   blocul informe care se rostogoleste (RockfallHazard)
   carrara/vehicles/quarry_excavator.glb  excavatorul cu furca (ExcavatorHazard, rigul rusted_digger)
+  carrara/vehicles/wire_saw.glb       masina de fir (decor; volantul `Blades` se roteste, windmill.gd)
 
 Rulare:
     D:/Blender/blender.exe --background --factory-startup \\
@@ -979,6 +980,288 @@ def build_quarry_excavator():
     return meshes, [body, arm]
 
 
+# ---------------------------------------------------------------------------
+# crr-d (val 2): utilajele de decor (kit §1.2) si coltul de muzeu (kit §1.4)
+# ---------------------------------------------------------------------------
+# Muzeul sta tot aici, nu in build_crr_buildings.py: acela e al grupei crr-e
+# (satul), care lucreaza in paralel pe alt worktree. Doua grupe pe acelasi
+# fisier = conflict la integrare.
+
+CRR_PAINTED = PAINTED            # 11: tabla vopsita veche (sinele masinii de fir)
+CRR_WATER = REEF_SHALLOW         # 17: jetul de apa al firului
+CRR_WOOD = WOOD                  # 9: lemnul vechi
+CRR_WOOD_DARK = LOG_DARK         # 28: lemnul umbrit, capetele barnelor
+CRR_HEMP = SAND_MID              # 1: franghia de canepa a saniei de muzeu
+
+
+def ring_x(b, c, r_in, r_out, w, slot, seg=16, a0=0.0):
+    """Inel cu sectiune dreptunghiulara in jurul axei X (planul YZ): `seg`
+    tronsoane convexe. Janta volantului, flansele rotilor de fir."""
+    cx, cy, cz = c
+    for k in range(seg):
+        pts = []
+        for a in (a0 + 2 * math.pi * k / seg, a0 + 2 * math.pi * (k + 1) / seg):
+            for r in (r_in, r_out):
+                for dx in (-w / 2, w / 2):
+                    pts.append(Vector((cx + dx, cy + math.cos(a) * r, cz + math.sin(a) * r)))
+        _hull(b, pts, slot)
+
+
+def spoke_x(b, c, a, r0, r1, w0, w1, t, slot):
+    """Spita in planul YZ (axa rotii pe X), de la raza r0 la r1, latimea
+    tangentiala w0 -> w1, grosimea t pe X."""
+    cx, cy, cz = c
+    d = Vector((0.0, math.cos(a), math.sin(a)))
+    tg = Vector((0.0, -math.sin(a), math.cos(a)))
+    pts = []
+    for r, w in ((r0, w0), (r1, w1)):
+        for s in (-1, 1):
+            for dx in (-t / 2, t / 2):
+                pts.append(Vector((cx + dx, cy, cz)) + d * r + tg * (s * w / 2))
+    _hull(b, pts, slot)
+
+
+def emit_pivot(objs, path, aos, uv_cube=None, bevels=None, bevel=0.03, smooth_angle=40.0,
+               center_y=True):
+    """Ca `emit_crr` (offset calculat O DATA pe ansamblu: amprenta centrata pe X
+    si, daca `center_y`, pe Y; talpa la Z = 0), dar nodurile cu `location`
+    nenula -- PIVOTUL volantului -- se muta prin `location`, nu prin varfuri:
+    originea lor ramane in butuc (contractul `Blades` / windmill.gd).
+
+    `uv_cube` = {nume: latura}: dupa finish, UV-uri REALE prin proiectie cubica
+    (cube_uvs), pentru nodul care primeste o clasa pe UV (`Blades` ->
+    `rust_metal`: un nod care se roteste NU poate lua triplanar de lume)."""
+    objs = [o for o in objs if o is not None and len(o.data.vertices) > 0]
+    bpy.context.view_layer.update()
+    pts = [o.matrix_world @ v.co for o in objs for v in o.data.vertices]
+    place = Vector((-(min(p.x for p in pts) + max(p.x for p in pts)) * 0.5,
+                    -(min(p.y for p in pts) + max(p.y for p in pts)) * 0.5 if center_y else 0.0,
+                    -min(p.z for p in pts)))
+    for o in objs:
+        if o.location.length > 1e-9:
+            o.location = o.location + place
+        else:
+            for v in o.data.vertices:
+                v.co += place
+    bpy.context.view_layer.update()
+    total, per_node = 0, {}
+    for o in objs:
+        bw = bevel
+        for suf, w in (bevels or {}).items():
+            if o.name.endswith(suf):
+                bw = w
+        ao = aos.get(o.name, aos.get(""))
+        st = finish(o, bevel=bw, ao=ao, origin=None, smooth_angle=smooth_angle)
+        if uv_cube and o.name in uv_cube:
+            cube_uvs(o, uv_cube[o.name])
+        total += st["tris"]
+        per_node[o.name] = st["tris"]
+    lo, hi = _world_dims(objs)
+    _, sz = export_glb(objs, "carrara/" + path)
+    CRR_RESULTS.append((path, total, hi - lo, per_node, sz / 1024.0))
+    print("    %s: lume Blender X %.3f..%.3f  Y %.3f..%.3f  Z %.3f..%.3f" %
+          (path, lo.x, hi.x, lo.y, hi.y, lo.z, hi.z))
+    for o in objs:
+        if o.location.length > 1e-9:
+            print("    pivot %s: (%.3f, %.3f, %.3f) Blender" % ((o.name,) + tuple(o.location)))
+    return total
+
+
+def crawler_track(paint, rust, black, x, y0, y1, h, w, n_shoes=32, rollers=4, side=1):
+    """Senila completa (vocabularul excavatorului, `_track_belt`): zalele negre,
+    cadrul vopsit, roata de intindere si roata motoare de rugina pe fata
+    exterioara si `rollers` role jos."""
+    _track_belt(black, x, y0, y1, h, w, n_shoes=n_shoes)
+    xo = x + side * (w / 2 - 0.08)
+    r = h / 2
+    paint.box((x, (y0 + y1) / 2, h * 0.5), (w - 0.16, (y1 - y0) - 2 * r + 0.2, h * 0.42), CRR_PAINT)
+    for yy in (y1 - r, y0 + r):
+        rust.cylinder((xo, yy, r), r * 0.70, 0.12, CRR_RUST, segments=12, axis="X")
+        black.cylinder((xo + side * 0.065, yy, r), r * 0.22, 0.05, CRR_BLACK, segments=8, axis="X")
+    span = (y1 - y0) - 2 * r
+    for k in range(rollers):
+        yy = y0 + r + span * (k + 0.5) / rollers
+        rust.cylinder((xo, yy, h * 0.27), h * 0.16, 0.10, CRR_RUST, segments=10, axis="X")
+
+
+# ---------------------------------------------------------------------------
+# wire_saw -- masina de fir diamantat (decor; volantul se roteste: `Blades`)
+# ---------------------------------------------------------------------------
+
+WS_RAIL_L = 6.0          # sinele (kit §1.2)
+WS_RAIL_X = 0.75         # axa sinelor (ecartament 1,5 m)
+WS_RAIL_TOP = 0.22       # traversa 0,06 + sina 0,16
+WS_BOX_X = 0.80          # sasiul 1,6 lat
+WS_BOX_Y = (-2.55, -0.05)  # 2,5 lung
+WS_BOX_TOP = WS_RAIL_TOP + 1.40   # 1,4 peste sina
+WS_R = 0.90              # volantul: diametrul 1,8
+WS_HUB = (0.42, 1.00, 1.30)       # butucul (Blender, inainte de recentrare)
+
+AO_WS = dict(samples=16, dist=1.0, gradient="vertical", low=0.62, high=1.0,
+             power=0.8, floor=0.38, z_range=(0.0, WS_HUB[2] + WS_R))
+AO_WS_BLADES = dict(samples=20, dist=0.8, gradient="none", floor=0.5)
+
+
+def build_wire_saw():
+    """LISTA DE ELEMENTE (decuparea `wire_saw.png`, detaliul din `wire_saw_b.png`;
+    scrisa INAINTE de geometrie; corecturile kitului: vopsea DRY_VEGETATION, nu
+    galbenul planșei, fara text):
+
+     1. SINELE: doua sine-profil (talpa, inima, ciuperca) de 6 m pe Y, ecartament
+        1,5 m, `Saw_Rail` (PAINTED_METAL); 8 TRAVERSE-placi de otel sub ele, la
+        0,8 m, intunecate (`Saw_Rust`). Planșa: sinele ies mult in fata si in
+        spatele masinii.
+     2. CARUCIORUL: rama joasa (vopsita) pe 4 roti mici de rugina care stau pe
+        sine (2 axe), cutii de osie.
+     3. MOTORUL-CUTIE (sasiul de 2,5 x 1,6 x 1,4 peste sina): cutie lunga cu
+        muchiile de sus tesite, capac cu nervura, 2 panouri de usa in relief
+        pe flancul +X, grila neagra (5 lamele) spre spate, 5 pete de rugina pe
+        flancuri, busonul si teava de esapament (rugina) sus-spate. Planșa:
+        cutia ocupa jumatatea din spate a masinii, galbena cu rugina.
+     4. TRANSMISIA: cutia de viteze pe fata cutiei (rugina), PIEDESTALUL de
+        rugina (A pe doua picioare) pe o sub-rama de rugina care prelungeste
+        caruciorul spre fata, cu inca 2 roti; ARBORELE de rugina pe X, din
+        piedestal in butuc (volantul e in consola, ca sa i se vada fata);
+        teava indoita din capacul cutiei in piedestal (planșa: teava in L).
+     5. VOLANTUL (`Blades`, RUST_METAL, rotit de windmill.gd pe axa X): Ø 1,8,
+        vertical, in planul sinelor, in fata cutiei; janta cu DOUA flanse si
+        canal pentru fir (16 segmente), banda interioara, 6 SPITE late care
+        se ingusteaza spre janta, butuc (12 laturi) cu capac si 6 suruburi,
+        12 suruburi pe fata jantei. Originea nodului = centrul butucului.
+     6. FIRUL: bucla subtire (2 fire, `Saw_Rail` pe VOLCANIC_BLACK) din janta
+        spre ROLA DE GHIDARE de la capatul din fata al sinelor (rola de
+        rugina pe un stalp scurt), apoi spre perete (capetele taiate la
+        capatul sinelor: peretele il pune integrarea).
+     7. APA (`Saw_Water`, REEF_SHALLOW): 3 FASII scurte de jet din duza de pe
+        stalpul rolei pe fir + balta plata sub fata masinii (planșa: apa
+        stropeste si balteste sub rola).
+     8. Ce iese din contur: nimic peste sine pe Y (6 m); pe X traversele (2 m).
+    """
+    paint, rust, rail, water = Builder(), Builder(), Builder(), Builder()
+    bl = paint                      # negrul (grila, capacele) sta pe nodul vopselei, pe atlas
+    P, R, K = CRR_PAINT, CRR_RUST, CRR_BLACK
+    hx, hy, hz = WS_HUB
+    yl = WS_RAIL_L / 2
+
+    # --- 1. sinele + traversele ---------------------------------------------------
+    for k in range(8):
+        rust.box((0.0, -2.8 + k * 0.8, 0.03), (2.0, 0.24, 0.06), R)
+    for sx in (-1, 1):
+        x = sx * WS_RAIL_X
+        rail.box((x, 0.0, 0.075), (0.18, WS_RAIL_L, 0.03), CRR_PAINTED)       # talpa
+        rail.box((x, 0.0, 0.14), (0.035, WS_RAIL_L, 0.10), CRR_PAINTED)       # inima
+        rail.box((x, 0.0, 0.205), (0.09, WS_RAIL_L, 0.03), CRR_PAINTED)       # ciuperca
+
+    # --- 2. caruciorul ------------------------------------------------------------------
+    yb0, yb1 = WS_BOX_Y
+    paint.box((0.0, (yb0 + yb1) / 2, 0.55), (1.24, yb1 - yb0 - 0.1, 0.14), P)   # rama: Z 0,48..0,62
+    for sx in (-1, 1):
+        for yy in (yb0 + 0.45, yb1 - 0.45):
+            rust.cylinder((sx * WS_RAIL_X, yy, 0.42), 0.20, 0.09, R, segments=12, axis="X")
+            bl.cylinder((sx * (WS_RAIL_X + 0.05), yy, 0.42), 0.07, 0.03, K, segments=8, axis="X")
+            rust.box((sx * 0.66, yy, 0.50), (0.08, 0.26, 0.16), R)             # cutia de osie
+
+    # --- 3. motorul-cutie ---------------------------------------------------------------------
+    zb, zt = 0.62, WS_BOX_TOP
+    box = []
+    for sx in (-1, 1):
+        for yy in (yb0, yb1):
+            box.append(Vector((sx * WS_BOX_X, yy, zb)))
+            box.append(Vector((sx * WS_BOX_X, yy, zt - 0.12)))
+            box.append(Vector((sx * (WS_BOX_X - 0.12), yy + (0.12 if yy == yb0 else -0.12), zt)))
+    _hull(paint, box, P)
+    paint.box((0.0, (yb0 + yb1) / 2, zt + 0.02), (1.10, 0.10, 0.04), P)         # nervura capacului
+    paint.box((0.0, yb0 + 0.55, zt + 0.02), (1.10, 0.08, 0.04), P)
+    for k, (y0d, y1d) in enumerate(((-1.95, -1.15), (-1.05, -0.30))):         # usile pe +X
+        paint.box((WS_BOX_X + 0.012, (y0d + y1d) / 2, 1.08), (0.025, y1d - y0d, 0.62), P)
+        rust.box((WS_BOX_X + 0.03, y1d - 0.10, 1.10), (0.02, 0.05, 0.16), R)  # maner
+    for k in range(5):                                                         # grila
+        bl.box((WS_BOX_X + 0.01, -2.30, 0.86 + k * 0.12), (0.02, 0.36, 0.06), K)
+    for (xx, yy, zz, sy, sz) in ((1, -1.55, 0.78, 0.30, 0.16), (1, -0.55, 1.42, 0.22, 0.12),
+                                 (-1, -2.05, 1.20, 0.40, 0.20), (-1, -0.80, 0.80, 0.25, 0.14),
+                                 (1, -2.35, 1.40, 0.18, 0.10)):
+        rust.box((xx * (WS_BOX_X + 0.005), yy, zz), (0.02, sy, sz), R)       # pete de rugina
+    rust.cylinder((-0.45, -2.20, zt + 0.06), 0.07, 0.12, R, segments=8)           # busonul
+    polyline_beam(rust, [(-0.35, -2.30, zt), (-0.35, -2.30, zt + 0.16),
+                         (0.35, -2.30, zt + 0.16), (0.35, -2.30, zt)], 0.05, R)  # manerul de ridicare
+
+    # --- 4. transmisia: cutia de viteze, sub-rama, piedestal, arbore, teava --------------
+    rust.box((-0.15, yb1 + 0.17, 1.12), (0.50, 0.34, 0.60), R)                     # cutia de viteze (rugina: sasiul ramane 2,5)
+    for xx in (-0.50, 0.68):                                                       # sub-rama (pe +X
+        rust.box((xx, 0.95, 0.55), (0.12, 2.1, 0.14), R)                           # trece pe langa volant)
+    rust.box((0.09, 1.85, 0.55), (1.30, 0.12, 0.14), R)
+    rust.box((-0.18, 0.95, 0.59), (0.76, 1.9, 0.06), R)                            # puntea piedestalului
+    for sx in (-1, 1):
+        rust.cylinder((sx * WS_RAIL_X, 1.55, 0.42), 0.20, 0.09, R, segments=12, axis="X")
+    px = hx - 0.42                                                                 # piedestalul, pe -X de volant
+    for yy in (hy - 0.55, hy + 0.55):
+        rust.beam((px, yy, 0.60), (px, hy, hz - 0.05), (0.14, 0.14), R)
+    rust.box((px, hy, hz), (0.22, 0.34, 0.30), R)                                  # lagarul
+    rust.box((px, hy, 0.66), (0.20, 1.25, 0.10), R)                                # talpa piedestalului
+    rust.cylinder(((px + hx) / 2, hy, hz), 0.07, hx - px, R, segments=10, axis="X")  # arborele
+    polyline_beam(rust, [(-0.15, yb1 + 0.17, 1.42), (-0.15, yb1 + 0.17, 1.70),
+                         (px, hy - 0.25, 1.70), (px, hy - 0.25, hz + 0.12)], 0.07, R)
+
+    # --- 5. volantul (Blades), in jurul originii; pivotul se pune pe butuc -------------
+    O = (0.0, 0.0, 0.0)
+    wheel = Builder()
+    for dx in (-0.08, 0.08):                                                       # flansele
+        ring_x(wheel, (dx, 0.0, 0.0), WS_R - 0.10, WS_R, 0.06, R)
+    ring_x(wheel, O, WS_R - 0.13, WS_R - 0.05, 0.12, R, a0=math.pi / 16)           # fundul canalului
+    ring_x(wheel, O, WS_R - 0.17, WS_R - 0.10, 0.22, R)                            # banda interioara
+    for k in range(6):
+        spoke_x(wheel, O, 2 * math.pi * k / 6 + math.pi / 12, 0.14, WS_R - 0.15,
+                0.36, 0.24, 0.10, R)          # runda 2: spite late, goluri ovale mici
+    wheel.cylinder(O, 0.18, 0.32, R, segments=12, axis="X")                        # butucul
+    wheel.cylinder((0.18, 0.0, 0.0), 0.10, 0.06, R, segments=8, axis="X")          # capacul
+    for k in range(6):
+        a = 2 * math.pi * k / 6
+        wheel.box((0.165, math.cos(a) * 0.13, math.sin(a) * 0.13), (0.03, 0.04, 0.04), R)
+    for k in range(12):
+        a = 2 * math.pi * (k + 0.5) / 12
+        wheel.box((0.115, math.cos(a) * (WS_R - 0.13), math.sin(a) * (WS_R - 0.13)),
+                  (0.03, 0.05, 0.05), R)
+
+    # --- 6. firul + rola de ghidare -----------------------------------------------------------
+    gy, gz, gr = yl - 0.35, 0.62, 0.20
+    rust.box((hx + 0.16, gy, 0.36), (0.08, 0.20, 0.72), R)                         # stalpul rolei
+    rust.box((hx + 0.16, gy, 0.03), (0.40, 0.40, 0.06), R)                         # talpa lui
+    ring_x(rust, (hx, gy, gz), gr - 0.06, gr, 0.08, R, seg=12)                     # rola
+    rust.cylinder((hx, gy, gz), 0.06, 0.24, R, segments=8, axis="X")
+    rust.cylinder((hx + 0.16, gy, 0.98), 0.04, 0.30, R, segments=8, axis="Y")      # duza
+    # runda 2: STALPUL DE INTINDERE in fata volantului, cu rola sus (planșa: firul
+    # urca peste rola din varful stalpului si coboara la rola de jos)
+    ty, tz = hy + WS_R + 0.12, 1.95
+    rust.beam((hx + 0.16, ty, 0.62), (hx + 0.16, ty, tz + 0.05), (0.10, 0.10), R)
+    rust.beam((hx + 0.16, ty - 0.45, 0.62), (hx + 0.16, ty, 1.25), (0.08, 0.08), R)
+    ring_x(rust, (hx, ty, tz), 0.06, 0.13, 0.07, R, seg=12)
+    a_top, a_bot = math.radians(80), math.radians(-40)
+    t_top = (hx, hy + math.cos(a_top) * (WS_R - 0.05), hz + math.sin(a_top) * (WS_R - 0.05))
+    t_bot = (hx, hy + math.cos(a_bot) * (WS_R - 0.05), hz + math.sin(a_bot) * (WS_R - 0.05))
+    wt = 0.05
+    rail.beam(t_top, (hx, ty, tz + 0.13), wt, K)
+    rail.beam((hx, ty + 0.13, tz), (hx, gy, gz + gr), wt, K)
+    rail.beam(t_bot, (hx, gy, gz - gr), wt, K)
+    rail.beam((hx, gy, gz + gr), (hx, yl - 0.06, 0.30), wt, K)                     # spre perete
+    rail.beam((hx, gy, gz - gr), (hx, yl - 0.06, 0.10), wt, K)
+
+    # --- 7. apa ---------------------------------------------------------------------------------
+    for k, (dz, dy) in enumerate(((0.00, 0.00), (-0.06, 0.10), (0.05, -0.08))):
+        tilted_box(water, (hx + 0.08, gy + 0.10 + dy, 0.84 + dz), (0.05, 0.42, 0.02), CRR_WATER,
+                   rot_x=-35.0 - 12 * k, rot_z=8.0 * (k - 1))
+    puddle = []
+    for (xx, yy) in ((-0.9, 1.4), (0.2, 1.1), (0.95, 1.6), (0.98, 2.95), (0.0, 3.0), (-0.95, 2.5)):
+        for zz in (0.0, 0.012):
+            puddle.append(Vector((xx, yy, zz)))
+    _hull(water, puddle, CRR_WATER)
+
+    objs = [paint.to_object("Saw_Paint"), rust.to_object("Saw_Rust"),
+            rail.to_object("Saw_Rail"), water.to_object("Saw_Water")]
+    blades = wheel.to_object("Blades")
+    blades.location = Vector(WS_HUB)
+    return objs + [blades]
+
+
 clear_built()
 if not ONLY or ONLY == "derrick":
     emit_fixed(build_derrick(), "structures/derrick.glb",
@@ -1010,5 +1293,11 @@ if not ONLY or ONLY == "quarry_truck":
     emit_crr(build_quarry_truck(), "vehicles/quarry_truck.glb", AO_TRUCK,
              bevel=0.035, bevels={"_Marble": 0.0, "_MarbleBase": 0.0, "_Black": 0.03},
              smooth_angle=40.0)
+    clear_built()
+# --- crr-d (val 2) -------------------------------------------------------------
+if not ONLY or ONLY == "wire_saw":
+    emit_pivot(build_wire_saw(), "vehicles/wire_saw.glb", {"": AO_WS, "Blades": AO_WS_BLADES},
+               uv_cube={"Blades": 2.2}, bevel=0.03, bevels={"_Rail": 0.015, "_Water": 0.0},
+               smooth_angle=40.0)
     clear_built()
 report_crr()

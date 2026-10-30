@@ -190,6 +190,10 @@ run_step "Serengeti: animalele nu stau in copaci si stanci" animal_overlap.log '
 # regruparea fara pierderi, raftul numarat in scena si lacatul cursei.
 run_step "Cariera: config, persistenta, gating, raft" career.log 'VERDICT:' -- \
 	--headless --path . res://tools/ProbeCareer.tscn -- --check
+# WORLD CUP: cupele (piste valide, fara dubluri, fara cele excluse), adversarii
+# trasi fara repetare (garda armata pe lineup-ul vechi cu doua autobuze),
+# baremul 6-5-4-3-2-1 si o cursa reala in cupa (grila, titlu, departajare).
+run_step "World Cup: cupe, adversari unici, puncte, cursa" world_cup.log 'VERDICT:' -- \n	--headless --fixed-fps 60 --path . res://tools/ProbeWorldCup.tscn
 
 # Decorul asezat pe solul de la generare ramane sub teren cand terenul creste
 # dupa aceea: padurea Lerai ajunsese la 20-30 m sub peretele craterului.

@@ -2229,6 +2229,8 @@ const _TF_JNEAPAN_BUSH := {"Jneapan_Needles": _TF_JNEAPAN}
 ## iar conurile de moloz stau pe marmura la baza peretilor; marmura pistei in sine nu trece pe
 ## aici (fetele pistei sunt cod, nu GLB-uri).
 const _CRR_MARBLE: String = Palette.TRI_PREFIX + "carrara_marble"
+const _CRR_RUST: String = Palette.TRI_PREFIX + "rust_metal"
+const _CRR_HOUSE := {"House_Stone": _TF_STONE, "House_Roof": _OK_ROOF}
 const CLASSES_CARRARA := {
 	"beech_tree_a": {"Beech_Leaves": _TF_BEECH},
 	"beech_tree_b": {"Beech_Leaves": _TF_BEECH},
@@ -2253,6 +2255,23 @@ const CLASSES_CARRARA := {
 	"ponti_di_vara": {"Viaduct_Marble": _CRR_MARBLE,
 		"Viaduct_Brick": Palette.TRI_PREFIX + "ok_roof"},
 	"marmifera_portal": {"Portal_Stone": _TF_STONE},
+	# Valul 2 al kitului (carrara_inventory_crr-d/e.md). Satul Colonnata: zidaria pe `tf_stone`,
+	# tigla pe `ok_roof`, ca la viaduct (`roof_tiles` iese aproape alb pe tema asta, iar `ok_roof`
+	# e deja pe Track23, deci satul nu adauga material). `House_Stone`/`House_Roof` sunt si chei
+	# GLOBALE (`village_house` din `Track._LANDMARKS`); intrarea pe fisier de aici le suprascrie.
+	"colonnata_church": {"Church_Stone": _TF_STONE, "Church_Roof": _OK_ROOF},
+	"colonnata_house_a": _CRR_HOUSE,
+	"colonnata_house_b": _CRR_HOUSE,
+	"colonnata_house_c": _CRR_HOUSE,
+	"quarry_sign_block": {"Sign_Marble": _CRR_MARBLE},
+	"museum_set_cart": {"Cart_Marble": _CRR_MARBLE},
+	# Rugina utilajelor de decor pe triplanar, doar pe nodurile cu UN slot. `Blades` (volantul care
+	# se roteste) ramane pe clasa globala pe UV, iar `*_Paint`/`*_Wood`/`Crawler_Blade` au doua
+	# sloturi pe acelasi nod, pe care o clasa l-ar sterge pe al doilea.
+	"wire_saw": {"Saw_Rust": _CRR_RUST},
+	"chain_saw_crawler": {"Crawler_Rust": _CRR_RUST},
+	"drill_rig": {"Drill_Rust": _CRR_RUST},
+	"museum_set_wheel": {"Pulley_Rust": _CRR_RUST},
 }
 const CLASSES_TRANSFAGARASAN := {
 	"schist_outcrop_a": _TF_OUTCROP, "schist_outcrop_b": _TF_OUTCROP,
@@ -3762,6 +3781,8 @@ func _glow_spec(model: Node3D) -> String:
 ## respingea hull-ul la unele rotatii (`zid82_col`, 30 sep 2026). Vezi
 ## `TrackDecor.add_hull_collision`.
 const HULL_SKIP_PARTS := {
+	# Carrara: firul masinii de fir urca la 2,1 m si sinele de 6 m ar face din hull o pana invizibila.
+	"wire_saw": ["Saw_Water", "Saw_Rail"],
 	"fort_wall_segment": ["Wall_Glow"],
 	"fort_wall_turret": ["Turret_Glow"],
 	# Monument Valley: la monolitii mari fusta de grohotis si calota nu au corp

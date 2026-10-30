@@ -56,7 +56,7 @@ func _ready() -> void:
 	var n := route.count()
 	print("=== %s, cut_thick %s%s ===" % [path.get_file(),
 		"scena" if _thick < 0.0 else str(_thick), " SABOTAJ" if _sabotage else ""])
-	var step_i := maxi(int(round(3.0 / maxf(route.length() / float(n), 0.1))), 1)
+	var step_i := maxi(int(round(5.0 / maxf(route.length() / float(n), 0.1))), 1)
 	for node in track.find_children("*", "CliffFace", true, false):
 		var cf := node as CliffFace
 		if not cf.cut_wall:
@@ -68,9 +68,10 @@ func _ready() -> void:
 		var vs: PackedVector3Array = (wm.mesh as ArrayMesh).surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
 		var gt := wm.global_transform
 		var wv := PackedVector3Array()
-		for k in range(0, vs.size(), 3):
+		for k in range(0, vs.size(), 9):
 			wv.append(gt * vs[k])
 		var tmesh := wm.mesh.generate_triangle_mesh()
+		var box_area := (gt * wm.get_aabb()).grow(24.0)
 		var tested := 0
 		var misses := 0
 		var intrude := 0
@@ -80,6 +81,8 @@ func _ready() -> void:
 		while i < n:
 			var p: Vector3 = track.point_at(i)
 			i += step_i
+			if not box_area.has_point(p):
+				continue
 			# Cel mai apropiat varf de perete, ORIZONTAL, ca sa dea directia.
 			var best := 22.0
 			var bv := Vector3.ZERO

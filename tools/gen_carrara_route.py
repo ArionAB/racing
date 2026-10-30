@@ -513,6 +513,31 @@ if OUT_PATH:
     floors = [(0, 17.0), (1, 2.0)]
     widths = [(0, 60.0), (1, 70.0)]
 
+    # ---- RAVANETO-UL (POI G, brief par.2 randul G): panta de moloz care urca pe DREAPTA sensului, din
+    # interiorul buclei. Mecanismul e DEBLEUL (`custom_cuttings`, TrackSideSampler._lift_cuttings): un umar plat
+    # dincolo de asfalt, apoi un perete PLAN cu panta data pana la o buza la cota absoluta, numai pe latura
+    # declarata (+1 = dreapta). De ce debleul si nu altul:
+    #   - `TerrainPeak` e un dom mascat langa sosea (PEAK_ROAD_CLEAR 6 -> FULL 32 m): panta lui nu e constanta si
+    #     moare exact pe primii 30 m, unde trebuie sa fie jgheabul;
+    #   - `custom_bench_patches` au cota functie doar de x (lume), deci un perete paralel cu un drum E-V nu se
+    #     poate scrie, iar pe coltul SV (arc) nici unul N-S;
+    #   - `custom_ravines` doar sapa (o rapa pe dreapta ar cobori interiorul, nu l-ar ridica).
+    # Debleul urmareste drumul (distanta de la asfalt), deci peretele merge pe dreapta de-a lungul dreptei E-V,
+    # pe interiorul coltului SV si pe dreapta N-S pana dupa S1, si NU atinge stanga (padurea si Colonnata, valul 2).
+    # Forma (umar, panta, intindere): umarul de 5 m tine pragul de grila sub 0,3 m la marginea asfaltului
+    # ((7.92 - 5)^2 / 4 * 0.86 / 7.92 = 0.23 m, vezi comentariul din _lift_cuttings). Panta 0.86 m/m (40,7 grade)
+    # e aleasa pentru JGHEAB: sania coboara la 40 de grade fata de axa, deci taie peretele pe o directie cu
+    # componenta laterala sin(40) = 0.643 -> 0.86 x 0.643 = 0.553, plus coborarea drumului (3,3% x cos 40 = 0.025)
+    # = 0.578 = tan(30 grade). Sub pragul de marmura al temei (scarp_slope_deg 52, fade 10): moloz, nu gradon.
+    # Buza la +55 absolut: 13-20 m de perete pe G (drumul coboara 42 -> 35), platou de RAV_REACH m, apoi se stinge.
+    RAV_SHOULDER, RAV_SLOPE, RAV_REACH = 5.0, 0.86, 40.0
+    RAV_LIP = 55.0
+    # Intervalul (pe LUNGIME): de la 45 m dupa centrul podului (cheiul se termina la +15; peretele creste pe primii
+    # ~20 m, deci e plin de la ~+65, dincolo de berma podului, care sta oricum pe umar, sub d = 5 m) pana la
+    # 15 m dupa varful lui S1 (dupa el dreapta devine EXTERIORUL lui S2, unde masinile ies largi).
+    cuttings = [(LEN("F pod", 45.0), LEN("G S1", 15.0), RAV_LIP, 1)]
+    cut_txt = ", ".join(V4(*c) for c in cuttings)
+
     # ---- berma continua de moloz (stil 2): doar pe marginile cu gol, NU pe ace, si DUPA iesirea din ac
     parapets = [
         # Prima berma incepe LA IESIREA din tunel (peste linia de start, interval cu trecere): fara ea,
@@ -686,6 +711,15 @@ size = Vector3({r2(abs(lat1 - lat0))}, {r2(y_hi - y_lo)}, {r2(length)})
     patch("T3", -60.0, 28.0, LIP3, LIP2, l3, 25.0, 25.0, 0.0, 0.0)
     patch("T2", -86.0, 8.0, LIP2, LIP1, l2, 22.0, 22.0, 0.0, 0.0)
     patch("T1", -150.0, 12.0, LIP1, Y_T1 + 8.0, l1, 25.0, 28.0, 12.0, 0.0)
+    # Coama ravaneto-ului (POI G): interiorul coltului SV, la cota buzei debleului (RAV_LIP). Fara ea, debleul
+    # (perete + platou de RAV_REACH m, apoi stins) iesea un DIG in L cu spatele cazut la loc in camp — un tumul
+    # de 15 m vazut de pe pod (captura v1_f0.70). Cu ea, peretele de pe dreapta e marginea unui platou care
+    # coboara spre cariera (est) si spre S1-S2 (nord) in pante de moloz moi, ca in diorama (dreapta lui G =
+    # muchia de sus a amfiteatrului). Toate marginile MOI (fara treapta, fara randuri fine); fiecare se opreste
+    # la >= 7 m de asfalt (S: drumul E-V la y -107.5; N: bratul S1-S2), iar spre est la ~5 m de muchia carierei
+    # (x -190), care ramane cum era. Panta lui se compune cu debleul prin max (debleul se aplica DUPA platouri),
+    # iar sub jgheab rampa platoului ramane sub perete (verificat in generator, mai jos), deci nu-i strica panta.
+    patch("RavCoama", -290.0, -215.0, -80.0, -55.0, const_level(RAV_LIP + 0.30), 10.0, 20.0, 30.0, 20.0)
 
     def fnum(v_):
         return repr(round(float(v_), 3))
@@ -706,7 +740,7 @@ size = Vector3({r2(abs(lat1 - lat0))}, {r2(y_hi - y_lo)}, {r2(length)})
     #   godot ... res://tools/ProbeCarrara.tscn -- --scene=res://scenes/tracks/Track23.tscn --dump-route=<csv>
     # ======================================================================================
     BAKED = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "carrara_baked.csv")
-    hz_ext = hz_sub = hz_nodes = zones_meta = ""
+    hz_ext = hz_sub = hz_nodes = zones_meta = lizza_node = ""
     if os.path.exists(BAKED):
         import csv as _csv
         brow = [tuple(map(float, r.values())) for r in _csv.DictReader(open(BAKED, encoding="utf-8"))]
@@ -953,21 +987,206 @@ shape = SubResource("Box_DerrickLegs")
               f"dir ({fxd:+.3f}, {fzd:+.3f})")
 
         # ---- 2. SANIA DE LIZZATURA (POI G): RockfallHazard cu traseu, modelul ALUNECA (rock_roll_model = false).
-        # Pe dreapta de dupa coltul SV (x ~ -330, spre N). Jgheabul e DREPT, la 40 de grade fata de axa (unghiul
-        # sondei probe_carrara_sled.gd), vine din DREAPTA si din SPATE (in sus pe panta: drumul coboara spre N,
-        # deci sania coboara si ea, 36.6 -> 36.1 -> 35.5) si se opreste pe platoul din stanga. Cotele: din teren
-        # (rock_stick_to_ground). ATENTIE: versantul de 30 de grade din brief NU exista pe teren (ravaneto-ul nu
-        # s-a construit; scan: +1 m pe 40 m in dreapta); jgheabul de azi e aproape plat, mecanica e aceeasi.
+        # Jgheabul e DREPT, la 40 de grade fata de axa (unghiul sondei probe_carrara_sled.gd), vine din DREAPTA si
+        # din SPATE, coboara RAVANETO-UL (debleul de mai sus) la ~30 de grade, taie drumul si se opreste pe stanga.
+        #
+        # TRECEREA s-a mutat de la 0.815 (dreapta N-S de dupa coltul SV) la dreapta E-V dinaintea coltului. Motivul
+        # e geometric, masurat pe axa coapta: la 0.815 o linie la 40 de grade spre dreapta-spate intra in
+        # INTERIORUL coltului SV (viraj la dreapta, R 41 m), deci se departeaza de drum doar pana la 13 m de axa
+        # (u = 30 m) si apoi se APROPIE iar (1 m de axa la u = 60). Pe un perete care urca cu distanta de la
+        # drum, jgheabul de acolo ar fi avut ~5 m de cadere, nu 30 de grade. Pe dreapta E-V (0.76-0.78) distanta
+        # creste liniar (0.643 m pe metru de jgheab) pana la u = 60 m: peretele e taiat drept, pe toata inaltimea.
+        # Tot in POI G (0.70-0.90), pe coborarea spre coltul SV.
         SLED_SPEED = 6.5
         SLED_CYCLE = 41.0
         SLED_ANG = math.radians(40.0)
-        S_START, S_STOP = -27.0, 16.0
-        ps, (fxs, fzs), i_s = road_pt(0.815, 0.0)
+        S_STOP = 16.0          # capatul de jos: 10,3 m in stanga axei, pe platoul din stanga
+        # Sania APARE pe platou, la SLED_PLATEAU m (in plan) deasupra varfului rampei. Pornita direct pe rampa (2 m sub
+        # varf) era mai rau, nu mai bine: la aparitie terenul de grila de langa muchie e mai sus decat planul, iar
+        # primul cadru o prinde neinclinata (+0.71 m un colt, runda v6, fata de +0.33 m la muchie pornind de pe platou).
+        SLED_PLATEAU = 4.0
+        ps, (fxs, fzs), i_s = road_pt(IDX("G colt SV", -55.0), 0.0)
         rxs, rzs = -fzs, fxs
         dxs = -math.sin(SLED_ANG) * rxs + math.cos(SLED_ANG) * fxs
         dzs = -math.sin(SLED_ANG) * rzs + math.cos(SLED_ANG) * fzs
-        chute = [(dxs * s_, 0.0, dzs * s_) for s_ in (S_START, -10.0, 0.0, 8.0, S_STOP)]
-        chute_len = S_STOP - S_START
+        cut_f0, cut_f1 = cuttings[0][0], cuttings[0][1]
+
+        def ring_win(f_, f0_, f1_, fade_):
+            span_ = (f1_ - f0_) % 1.0
+            into_ = (f_ - f0_) % 1.0
+            if into_ > span_:
+                return 0.0
+            return max(0.0, min(1.0, min(into_, span_ - into_) / fade_))
+
+        def terrain_model(gx, gz):
+            """Cota terenului (lume) dupa formula debleului (TrackSideSampler._lift_cuttings), pe axa coapta:
+            drumul la cota lui, stanga la cota umarului, dreapta = min(buza, umar + panta * (d - umar)) in fereastra.
+            Doar pentru cota punctelor jgheabului (lungimea 3D a traseului si sonda de teren a saniei la aparitie);
+            sania insasi se aseaza pe teren cu raza (rock_stick_to_ground)."""
+            i_ = b_near(gx, gz)
+            fx_, fz_ = b_dir(i_)
+            rx_, rz_ = -fz_, fx_
+            ox, oz = gx - brow[i_][0], gz - brow[i_][2]
+            lat_ = ox * rx_ + oz * rz_
+            along_ = ox * fx_ + oz * fz_
+            j1, j0 = min(i_ + 2, nb - 1), max(i_ - 2, 0)
+            grade_ = (brow[j1][1] - brow[j0][1]) / max(1e-6, math.hypot(brow[j1][0] - brow[j0][0], brow[j1][2] - brow[j0][2]))
+            road_y = brow[i_][1] + grade_ * along_
+            d_ = abs(lat_) - brow[i_][3]
+            if d_ <= 0.0:
+                return road_y
+            base = road_y - 0.30                       # TrackSideSampler.GROUND_DROP
+            # platourile de banc (TrackSideSampler._apply_benches), peste campul ~ cota umarului
+            y_ = base
+            for (_n, px0, px1, pz0, pz1, lvl_, sw_, se_, sn_, ss_) in patches:
+                if gx < px0 - sw_ or gx > px1 + se_ or gz < pz0 - sn_ or gz > pz1 + ss_:
+                    continue
+                m_ = 1.0
+                if gx < px0:
+                    m_ *= sstep(px0 - sw_, px0, gx)
+                elif gx > px1:
+                    m_ *= 1.0 - sstep(px1, px1 + se_, gx)
+                if gz < pz0:
+                    m_ *= sstep(pz0 - sn_, pz0, gz)
+                elif gz > pz1:
+                    m_ *= 1.0 - sstep(pz1, pz1 + ss_, gz)
+                y_ += (lvl_[0][1] - 0.30 - y_) * m_    # doar platouri cu cota constanta pe G
+            if lat_ < 0.0:
+                return y_
+            w_ = ring_win(brow[i_][4], cut_f0, cut_f1, 0.01)
+            wall = base + RAV_SLOPE * max(0.0, d_ - RAV_SHOULDER)
+            reach_ = max(0.0, min(1.0, (d_ - RAV_REACH) / 16.0))
+            reach_ = 1.0 - reach_ * reach_ * (3.0 - 2.0 * reach_)
+            target = min(RAV_LIP, wall)
+            if target <= y_:
+                return y_
+            return y_ + (target - y_) * w_ * reach_
+
+        def chute_xz(s_, x_=0.0):
+            # punctul de pe jgheab la `s_` m (in plan, + = in jos) si `x_` m lateral (+ = latura din AMONTE)
+            return ps[0] + dxs * s_ - dzs * x_, ps[2] + dzs * s_ + dxs * x_
+
+        # Profilul peretelui (debleu + coama) pe axa jgheabului, cu pasul de 5 cm: buza (unde atinge platoul) si
+        # piciorul (capatul umarului). Intre ele e un plan, la 30 de grade pe directia jgheabului.
+        prof0 = [(k * -0.05, terrain_model(*chute_xz(k * -0.05))) for k in range(0, 2000)]
+        s_lip = next(s_ for s_, y_ in prof0 if y_ >= RAV_LIP - 0.02)
+        s_foot = next(prof0[k - 1][0] for k in range(1, len(prof0))
+                      if prof0[k][0] < -6.0 and prof0[k][1] - prof0[k - 1][1] > 0.02)
+        y_lip, y_foot = terrain_model(*chute_xz(s_lip)), terrain_model(*chute_xz(s_foot))
+        g_wall = (y_lip - y_foot) / (s_foot - s_lip)            # cota pe metru de jgheab (in plan), ~tan 30
+        # PANTA TRANSVERSALA: peretele urca perpendicular pe drum, iar jgheabul il taie la 40 de grade, deci de-a
+        # curmezisul jgheabului terenul urca si el, cu RAV_SLOPE * cos 40 = 0.66 m/m (33 de grade). Sania se aliniaza
+        # doar la mers si la panta in lung (RockfallHazard._slide_align), nu si in ruliu: pe peretele gol plutea cu
+        # un colt si intra in sol cu celalalt, +-0.65 m (ProbeCarraraMontaj --sled, runda v2). De aici VIA DI LIZZA:
+        # o rampa PLANA, fara panta transversala, taiata in perete pe directia jgheabului (TerrainBluff = plafon cu
+        # directie oarecare: un taluz liniar pe `run`, apoi podeaua). Planul ei e paralel cu axa peretelui, dar cu
+        # LIZZA_OFF mai jos, ca pe toata latimea podelei (+-LIZZA_HALF) terenul sa fie deasupra lui si sa fie taiat:
+        # pe latura din aval peretele coboara cu 0.66 m/m, deci OFF = 0.66 x HALF. Latimea nu e de gust: grila de
+        # teren are 7.92 m, deci varfurile triunghiurilor de sub talpi (+-1.7 m) pot sta pana la ~11 m lateral
+        # (7.92 x (cos 40 + sin 40)); toate trebuie sa fie pe podea.
+        g_cross = RAV_SLOPE * math.cos(SLED_ANG)
+        LIZZA_HALF, LIZZA_SIDE_FADE, LIZZA_CLEAR = 13.0, 4.0, -3.0
+        LIZZA_OFF = g_cross * LIZZA_HALF
+        # PRAGUL DE JOS (intre piciorul rampei si umarul drumului): planul ajunge la cota drumului cu ~15 m inainte de
+        # piciorul peretelui (e cu LIZZA_OFF sub el), deci intre ele ramane o podea. Plata, n-are cota buna nicaieri:
+        # la cota umarului de la jgheab sapa pana la 0.8 m sub umarul de langa asfalt mai la est (drumul urca 3,3%, iar
+        # banda il atinge pe +-25 m); la +0.6 nu sapa, dar lasa o treapta de 0.9 m de-a curmezisul saniei, unde
+        # podeaua intalneste umarul (+-0.5 m sub talpi, runda v4). Asa ca pragul COBOARA spre drum, cu LIZZA_APRON
+        # (terasele abruptului, cu treapta mica: pe grila de 7.92 m ies o rampa), de la piciorul rampei pana la cota
+        # umarului exact unde jgheabul trece de capatul lui. Spre est (amonte pe jgheab) pragul e mai sus, ca si
+        # drumul, deci nu sapa sub umar; protectia asfaltului poate fi negativa (plin de la 5 m de asfalt), altfel
+        # peretele ramanea netaiat pe jumatate la piciorul rampei (+-0.6 m la lateral 8-18 m, runda v3).
+        # m pe m de jgheab (in plan). La 0.15 (genunchi mai moale, 30 -> 8.5 grade) sapa 0.24 m sub umar si muta
+        # treapta sub talpi la intalnirea cu umarul (+0.32 m, runda v6): 0.075 e mai bun pe ambele.
+        LIZZA_APRON = 0.075
+        LIZZA_TREAD = 2.0
+        apron_len = LIZZA_OFF / (g_wall - LIZZA_APRON)          # din (g - a) * L = OFF, cu piciorul peretelui la cota umarului
+        lizza_foot = y_foot + LIZZA_APRON * apron_len
+        s_crest = s_lip - LIZZA_OFF / g_wall                      # unde planul iese din platou (cota buzei)
+        s_p0 = s_foot - apron_len                                 # unde rampa de 30 de grade intalneste pragul
+        cx_, cz_ = chute_xz(s_crest)
+        lizza_run = s_p0 - s_crest
+        lizza_steps = int(math.ceil(apron_len / LIZZA_TREAD)) + 1
+        bluff_spec = (cx_, cz_, dxs, dzs, RAV_LIP, LIZZA_HALF, LIZZA_SIDE_FADE, lizza_run, RAV_LIP - lizza_foot,
+                      LIZZA_TREAD, LIZZA_APRON * LIZZA_TREAD, float(lizza_steps), -s_crest + 2.0, 4.0, LIZZA_CLEAR)
+
+        def lizza_model(gx, gz):
+            """terrain_model + abruptul (TrackSideSampler._carve_bluffs: plafon, dupa tot restul)."""
+            y_ = terrain_model(gx, gz)
+            bx_, bz_, fdx, fdz, crest_, hw_, sf_, run_, drop_, tread_, rise_, cnt_, len_, ef_, clr_ = bluff_spec
+            rx_, rz_ = gx - bx_, gz - bz_
+            s_ = rx_ * fdx + rz_ * fdz
+            lat_ = abs(rz_ * fdx - rx_ * fdz)
+            if not (0.0 < s_ < len_ + ef_ and lat_ < hw_ + sf_):
+                return y_
+            i_ = b_near(gx, gz)
+            edge_ = math.hypot(gx - brow[i_][0], gz - brow[i_][2]) - brow[i_][3]
+            mix_ = (1.0 - sstep(hw_, hw_ + sf_, lat_)) * (1.0 - sstep(len_, len_ + ef_, s_)) * sstep(clr_, clr_ + 8.0, edge_)
+            if s_ < run_:
+                c_ = crest_ - drop_ * s_ / run_
+            else:
+                foot_ = crest_ - drop_
+                tr_ = max(tread_, 1.0)
+                last_ = cnt_ - 1.0
+                u_ = (s_ - run_) / tr_
+                st_ = math.floor(u_)
+                if st_ >= last_:
+                    c_ = foot_ - rise_ * last_
+                else:
+                    riser_ = min(4.0, tr_ * 0.5) / tr_
+                    c_ = foot_ - rise_ * (st_ + max(0.0, min(1.0, (u_ - st_ - (1.0 - riser_)) / riser_)))
+            return min(y_, y_ + (c_ - y_) * mix_)
+
+        def chute_pt(s_):
+            gx, gz = chute_xz(s_)
+            return (gx, lizza_model(gx, gz), gz)
+
+        # Muchiile profilului sub sanie: start (pe platou), varful rampei, piciorul ei, marginile asfaltului. Intre ele
+        # terenul e PLAN, deci o linie franta prin ele are lungimea 3D exacta (a traseului coapt de RockfallHazard;
+        # viteza e pe lungimea 3D).
+        S_START = round(s_crest - SLED_PLATEAU, 2)
+        s_keys = [S_START, s_crest, s_p0, -6.0, 0.0, 6.0, S_STOP]
+        chute_w = [chute_pt(s_) for s_ in s_keys]
+        chute = [(round(p_[0] - ps[0], 2), round(p_[1] - ps[1], 2), round(p_[2] - ps[2], 2)) for p_ in chute_w]
+        chute_len = sum(math.dist(a_, b_) for a_, b_ in zip(chute, chute[1:]))
+        rc_, rp_ = chute_pt(s_crest), chute_pt(s_p0)           # varful si piciorul rampei
+        wall_h = rc_[1] - rp_[1]
+        wall_run = math.hypot(rc_[0] - rp_[0], rc_[2] - rp_[2])
+        wall_deg = math.degrees(math.atan2(wall_h, wall_run))
+        prof = [(k * -0.05, chute_pt(k * -0.05)) for k in range(0, 2000)]
+        # Rampa trebuie sa fie PLANA in lung (abaterea de la dreapta varf -> picior, pe pasul de 0,5 m) si FARA panta
+        # transversala sub talpi (diferenta de cota la +-1.7 m lateral, pe toata rampa).
+        wall_dev = max(abs(p_[1] - (rc_[1] + (rp_[1] - rc_[1]) * (s_ - s_crest) / (s_p0 - s_crest)))
+                       for s_, p_ in prof if s_p0 >= s_ >= s_crest)
+        cross_dev = max(abs(lizza_model(*chute_xz(s_, 1.7)) - lizza_model(*chute_xz(s_, -1.7)))
+                        for s_, _p in prof[::10] if s_p0 + 1.0 >= s_ >= s_crest - 1.0)
+        # Garda pe umar: plafonul nu are voie sa sape langa asfalt (umarul de 5 m, ambele laturi, pe toata banda).
+        dig_max = 0.0
+        for k_ in range(nb):
+            if abs(brow[k_][0] - ps[0]) > 60.0 or abs(brow[k_][2] - ps[2]) > 60.0:
+                continue
+            fx_, fz_ = b_dir(k_)
+            for side_ in (-1.0, 1.0):
+                for e_ in (0.5, 2.0, 3.5, 5.0):
+                    gx_ = brow[k_][0] - fz_ * side_ * (brow[k_][3] + e_)
+                    gz_ = brow[k_][2] + fx_ * side_ * (brow[k_][3] + e_)
+                    dig_max = max(dig_max, terrain_model(gx_, gz_) - lizza_model(gx_, gz_))
+        lizza_node = f"""
+[node name="ViaDiLizza" type="Marker3D" parent="Peaks"]
+transform = {xf_rows((dzs, 0.0, -dxs), (0.0, 1.0, 0.0), (dxs, 0.0, dzs), (cx_, RAV_LIP, cz_))}
+gizmo_extents = {LIZZA_HALF}
+script = ExtResource("3_bluff")
+half_width_m = {LIZZA_HALF}
+side_fade_m = {LIZZA_SIDE_FADE}
+run_m = {r3(lizza_run)}
+drop_m = {r3(RAV_LIP - lizza_foot)}
+terrace_count = {lizza_steps}
+terrace_tread_m = {LIZZA_TREAD}
+terrace_rise_m = {r3(LIZZA_APRON * LIZZA_TREAD)}
+length_m = {r3(-s_crest + 2.0)}
+end_fade_m = 4.0
+road_clear_m = {LIZZA_CLEAR}
+"""
         t_acc = SLED_SPEED / 4.0                       # RockfallHazard.ROUTE_ACCEL = 4
         d_acc = 0.5 * SLED_SPEED * t_acc
         travel = t_acc + (chute_len - d_acc) / SLED_SPEED
@@ -987,8 +1206,16 @@ rock_roll_model = false
 [node name="Jgheab" type="Path3D" parent="Hazarduri/Sanie"]
 curve = SubResource("Curve3D_jgheab")
 """
-        print(f"  sania: trecere la x {ps[0]:.1f} z {ps[2]:.1f} (frac {brow[i_s][4]:.4f}), jgheab {chute_len:.0f} m la 40 grade, "
-              f"{travel:.2f} s de mers + pauza {sled_pause} s = {SLED_CYCLE} s")
+        print(f"  sania: trecere la x {ps[0]:.1f} z {ps[2]:.1f} y {ps[1]:.2f} (frac {brow[i_s][4]:.4f}), jgheab {chute_len:.1f} m (3D) "
+              f"la 40 grade de axa, {travel:.2f} s de mers + pauza {sled_pause} s = {SLED_CYCLE} s")
+        print(f"         s: start {S_START} (platou), buza {s_lip:.2f}, piciorul peretelui {s_foot:.2f}, stop {S_STOP}; "
+              f"rampa: {wall_h:.2f} m pe {wall_run:.2f} m in plan = {wall_deg:.1f} grade, abatere de la plan {wall_dev:.3f} m, "
+              f"panta transversala sub talpi max {cross_dev:.3f} m pe 3.4 m")
+        print(f"         via di lizza (TerrainBluff): varf s {s_crest:.2f}, picior s {s_p0:.2f}, podea +-{LIZZA_HALF} m, "
+              f"{LIZZA_OFF:.2f} m sub axa peretelui; peretele gol: {g_wall:.3f} m/m in lung, {g_cross:.3f} m/m transversal; "
+              f"sapatura max pe umar {dig_max:.3f} m")
+        for s_, p_ in zip(s_keys, chute_w):
+            print(f"         s {s_:7.2f}: ({p_[0]:8.2f}, {p_[1]:6.2f}, {p_[2]:7.2f})")
 
         # ---- DecorManual: viaductul, portalurile, decorul de cariera (world_prop.gd, coliziune la rulare)
         kit_nodes += """
@@ -1204,6 +1431,7 @@ transform = {xf_txt}
 
 [ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
+[ext_resource type="Script" path="res://scenes/tracks/terrain_bluff.gd" id="3_bluff"]
 [ext_resource type="Script" path="res://scenes/hazards/tunnel_signal_hazard.gd" id="5_signal"]
 [ext_resource type="Script" path="res://scenes/hazards/respawn_zone.gd" id="6_respawn"]
 {hz_ext}
@@ -1235,6 +1463,8 @@ custom_viaduct_ravines = Array[int]([{", ".join(str(i) for i in viaduct)}])
 custom_viaduct_net_margin = 12.0
 custom_ravine_floors = Array[Vector2]([{fl_txt}])
 custom_ravine_widths = Array[Vector2]([{rw_txt}])
+custom_cuttings = Array[Vector4]([{cut_txt}])
+custom_cutting_shape = Vector3({RAV_SHOULDER}, {RAV_SLOPE}, {RAV_REACH})
 custom_bench_patches = Array[Dictionary]([{patch_txt}])
 custom_width_segments = Array[Vector3]([{w_txt}])
 custom_parapets = Array[Vector4]([{par_txt}])
@@ -1245,7 +1475,7 @@ terrain_pad_m = 160.0
 curve = SubResource("Curve3D_carrara")
 
 [node name="Peaks" type="Node3D" parent="."]
-{peaks_txt}
+{peaks_txt}{lizza_node}
 [node name="Hazarduri" type="Node3D" parent="."]
 {tunnels_txt}{"".join(nets)}{hz_nodes}"""
     with open(OUT_PATH, "w", encoding="utf-8", newline="\n") as f:

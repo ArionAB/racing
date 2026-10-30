@@ -147,6 +147,24 @@ var stick_to_ground: bool = true
 ## aceeasi. Modelul isi pune -Z pe directia de mers si se inclina cu panta
 ## (vezi `_slide_align`), iar talpa lui sta pe suprafata.
 @export var roll_model: bool = true
+## Cu traseu: clopotul de avertizare suna cu atatea secunde INAINTE de fiecare
+## plecare, pozitional, din capatul de sus al traseului (de unde porneste
+## piatra/sania). E informatia pentru fereastra de timing: sania de lizzatura
+## (Carrara, POI G) suna „2 s inainte" (brief carrara.md §5.5). 0 = fara clopot,
+## si atunci nimic din hazard nu se schimba (pistele cu bolovani de dinainte).
+##
+## Momentul se ia din ACELASI ceas care muta piatra (`_time`, citit in
+## `_physics_process` inainte si dupa pas), deci nu se poate decala fata de
+## plecare: plecarea e cadrul in care ceasul trece de `period`, clopotul cel in
+## care trece de `period - warn_bell_s`. Peste pauza (warn > route_pause)
+## clopotul suna tot la plecare - warn, adica in timp ce trecerea precedenta e
+## inca pe traseu; plafonul e `period` (un ciclu intreg inainte). Daca hazardul
+## porneste deja IN fereastra (plecarea la < warn de la start), prima plecare
+## n-are clopot: momentul lui a fost inainte sa existe hazardul, iar un clopot
+## intarziat ar minti despre timing.
+@export var warn_bell_s: float = 0.0
+## Cate clopote au sunat de la `_ready` (sonde).
+var warn_bells: int = 0
 
 ## Modelul bolovanului: GLB-ul, piesa din el (gol = tot), scara. Null = cel
 ## implicit (`DEFAULT_MODEL`). Vin de pe HazardMarker, grupul „Model".
@@ -434,8 +452,11 @@ func _route_pos(d: float) -> Vector3:
 func _physics_process(delta: float) -> void:
 	if _rock == null:
 		return
+	var prev_time := _time
 	_time = fposmod(_time + delta, period)
 	if _route_local != null:
+		if warn_bell_s > 0.0:
+			_tick_warn_bell(prev_time, delta)
 		_process_route(delta)
 		return
 	var t := _time
@@ -518,6 +539,36 @@ func _process_route(delta: float) -> void:
 	_tick_cooldowns(delta)
 	if moving:
 		_hit_cars()
+
+
+## Clopotul de avertizare: suna in cadrul al carui pas de ceas [prev, prev +
+## delta) contine momentul `period - warn_bell_s`. Plecarea e cadrul care contine
+## `period` (acolo `fposmod` intoarce ceasul la 0 si piatra incepe sa se miste),
+## deci intre ele sunt `warn_bell_s * fps` cadre (+-1 din rotunjirea ceasului
+## adunat pe float; masurat in ProbeSledBell). Intervalul e inchis la stanga ca
+## un hazard pornit fix pe moment sa sune din primul cadru.
+func _tick_warn_bell(prev: float, delta: float) -> void:
+	var at := period - minf(warn_bell_s, period)
+	# Doua candidate: momentul din ciclul curent si acelasi moment dupa
+	# intoarcerea ceasului (cand `at` cade in primul pas al ciclului urmator).
+	for t: float in [at, at + period]:
+		if prev <= t and t < prev + delta:
+			_ring_warn_bell()
+			return
+
+
+func _ring_warn_bell() -> void:
+	warn_bells += 1
+	if Engine.is_editor_hint() or _route_local == null:
+		return
+	var top := to_global(_route_local.get_point_position(0))
+	# Ca `hazard_contact`: in afara razei nu se aude oricum, iar pool-ul de
+	# playere 3D are doar 4 locuri, care nu se dau unui sunet pe care nu-l
+	# aude nimeni. Prioritatea 3 (hazard), fara zgomot de pitch: e un clopot,
+	# o nota, nu un zgomot de impact.
+	if not AudioManager.in_range(top, AudioManager.pool3d_max_distance):
+		return
+	AudioManager.play_sfx_at(&"crossing_bell", top, 1.0, AudioManager.hazard_db, 3, 0.0)
 
 
 ## Cota piatrei lipita de teren, cu cadere libera cand terenul dispare de sub

@@ -370,7 +370,44 @@ func _mm_add(stem: String, folder: String, b: Basis, pos: Vector3) -> void:
 		_mm_xf.append(v)
 
 
+## COLIZIUNEA GARDULUI (issue #606). `shiba_fence` e `none` in PROP_COLLISION
+## si MultiMesh-ul nu are corpuri, deci gardul din padure se vedea dar masina
+## trecea prin el. Corpul sta aici, pe langa MultiMesh: o cutie pe modul, cu
+## forma gardului (subtire, lung de 3 m), nu un hull umflat. Grosimea e 0,30
+## (panoul are 0,19): destul cat un impact la viteza sa nu treaca de o placa
+## de 19 cm, dar gardul sta la 1,7 m de bordura, deci nu intra pe asfalt.
+## Numele se termina in `_col`, sub zona DecorManual, ca sa-l vada ProbeSolid.
+const FENCE_BOX := Vector3(0.30, 1.115, 3.0)
+const FENCE_BOX_ID := "poig_fence_box"
+var _fence_boxes: Array[Transform3D] = []
+
+
+func _fence_collision() -> void:
+	if _fence_boxes.is_empty():
+		return
+	var sub := '[sub_resource type="BoxShape3D" id="%s"]' % FENCE_BOX_ID
+	if not _ext_extra.has(sub):
+		_ext_extra.append(sub)
+		_ext_extra.append("size = Vector3(%s, %s, %s)" % [FENCE_BOX.x, FENCE_BOX.y, FENCE_BOX.z])
+	_out.append('[node name="GardG_col" type="StaticBody3D" parent="DecorManual/ZoneG_Bambus"]')
+	_out.append('metadata/mod_coliziune = "box"')
+	_out.append("")
+	var i := 0
+	for t in _fence_boxes:
+		var c := t * Transform3D(Basis.IDENTITY, Vector3(0.0, FENCE_BOX.y * 0.5, 0.0))
+		var b := t.basis
+		_out.append('[node name="b%d" type="CollisionShape3D" parent="DecorManual/ZoneG_Bambus/GardG_col"]' % i)
+		_out.append("transform = Transform3D(%.5f, %.5f, %.5f, %.5f, %.5f, %.5f, %.5f, %.5f, %.5f, %.5f, %.5f, %.5f)" % [
+			b.x.x, b.y.x, b.z.x, b.x.y, b.y.y, b.z.y, b.x.z, b.y.z, b.z.z,
+			c.origin.x, c.origin.y, c.origin.z])
+		_out.append('shape = SubResource("%s")' % FENCE_BOX_ID)
+		_out.append("")
+		i += 1
+	print("; gard: %d cutii de coliziune" % i)
+
+
 func _mm_node() -> void:
+	_fence_collision()
 	if _mm_xf.is_empty():
 		return
 	var ms: Array[String] = []
@@ -433,6 +470,7 @@ func _fence(side: float) -> void:
 			var pos := Vector3(mid.x, minf(a.y, b.y) - 0.06 + absf(a.y - b.y) * 0.5, mid.z)
 			# Runda 2: gardul e `none` -> MultiMesh (CityFill explicit_xforms).
 			_mm_add("shiba_fence", "props", Basis(x, y, z), pos)
+			_fence_boxes.append(Transform3D(Basis(x, y, z), pos))
 			count += 1
 		s = s2
 		a = b

@@ -24,6 +24,14 @@
 [ext_resource type="PackedScene" path="res://assets/models/carrara/buildings/office_container.glb" id="k_office_container"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/props/fuel_tank.glb" id="k_fuel_tank"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/props/work_lamp.glb" id="k_work_lamp"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/buildings/colonnata_house_b.glb" id="k_colonnata_house_b"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/props/museum_set_sled.glb" id="k_museum_set_sled"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/props/museum_set_cart.glb" id="k_museum_set_cart"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/props/museum_set_wheel.glb" id="k_museum_set_wheel"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/props/water_tank.glb" id="k_water_tank"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/plants/beech_tree_a.glb" id="k_beech_tree_a"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/plants/beech_tree_b.glb" id="k_beech_tree_b"]
+[ext_resource type="PackedScene" path="res://assets/models/stromboli/plants/ginestra_bush.glb" id="k_ginestra_bush"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/rocks/block_informe_a.glb" id="k_block_informe_a"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/rocks/block_informe_b.glb" id="k_block_informe_b"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/structures/safety_berm.glb" id="k_safety_berm"]
@@ -347,6 +355,66 @@ transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, -130.0, 
 
 [node name="A_Lampa" parent="DecorManual/ZonaA" instance=ExtResource("k_work_lamp")]
 transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, -52.0, 24.67, -95.5)
+
+[node name="A_Turn" parent="DecorManual/ZonaA" instance=ExtResource("k_colonnata_house_b")]
+transform = Transform3D(-0.8, 0.0, -0.0, 0.0, 0.8, 0.0, 0.0, 0.0, -0.8, -101.815, 24.42, -132.0)
+
+[node name="A_MagazieA" parent="DecorManual/ZonaA" instance=ExtResource("k_office_container")]
+transform = Transform3D(1.0, 0.0, -0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -86.185, 24.37, -125.0)
+
+[node name="A_MagazieB" parent="DecorManual/ZonaA" instance=ExtResource("k_office_container")]
+transform = Transform3D(1.0, 0.0, -0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -79.16, 24.37, -125.0)
+
+[node name="A_MuzeuSanie" parent="DecorManual/ZonaA" instance=ExtResource("k_museum_set_sled")]
+transform = Transform3D(0.32352, 0.0, -1.20741, 0.0, 1.25, 0.0, 1.20741, 0.0, 0.32352, -76.0, 24.43, -122.5)
+
+[node name="A_MuzeuVagonet" parent="DecorManual/ZonaA" instance=ExtResource("k_museum_set_cart")]
+transform = Transform3D(-0.0, 0.0, -1.25, 0.0, 1.25, 0.0, 1.25, 0.0, -0.0, -70.0, 24.49, -121.0)
+
+[node name="A_MuzeuRoata" parent="DecorManual/ZonaA" instance=ExtResource("k_museum_set_wheel")]
+transform = Transform3D(-0.0, 0.0, -1.25, 0.0, 1.25, 0.0, 1.25, 0.0, -0.0, -64.0, 24.45, -122.0)
+
+[node name="A_CisternaA" parent="DecorManual/ZonaA" instance=ExtResource("k_water_tank")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, -120.64, 24.55, -120.5)
+
+[node name="A_CisternaB" parent="DecorManual/ZonaA" instance=ExtResource("k_water_tank")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, -113.815, 24.47, -123.0)
+
+[node name="A_BlocP1" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(0.20791, 0.0, -0.97815, 0.0, 1.0, 0.0, 0.97815, 0.0, 0.20791, -91.36, 24.49, -121.0)
+
+[node name="A_BlocD6" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(1.0, 0.0, -0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -84.64, 24.67, -94.0)
+
+[node name="A_StivaD7" parent="DecorManual/ZonaA" instance=ExtResource("k_block_stack_a")]
+transform = Transform3D(0.13917, 0.0, -0.99027, 0.0, 1.0, 0.0, 0.99027, 0.0, 0.13917, -58.0, 24.67, -94.1)
+
+[node name="A_Castan1" parent="DecorManual/ZonaA" instance=ExtResource("k_beech_tree_a")]
+transform = Transform3D(0.5, 0.0, -0.86603, 0.0, 1.0, 0.0, 0.86603, 0.0, 0.5, -89.815, 14.12, -84.0)
+metadata/coliziune = "trunk"
+
+[node name="A_Castan2" parent="DecorManual/ZonaA" instance=ExtResource("k_beech_tree_b")]
+transform = Transform3D(-0.64279, 0.0, -0.76604, 0.0, 1.0, 0.0, 0.76604, 0.0, -0.64279, -74.185, 14.72, -82.0)
+metadata/coliziune = "trunk"
+
+[node name="A_Castan3" parent="DecorManual/ZonaA" instance=ExtResource("k_beech_tree_a")]
+transform = Transform3D(0.93969, 0.0, 0.34202, 0.0, 1.0, 0.0, -0.34202, 0.0, 0.93969, -53.815, 15.62, -84.0)
+metadata/coliziune = "trunk"
+
+[node name="A_Ginestra1" parent="DecorManual/ZonaA" instance=ExtResource("k_ginestra_bush")]
+transform = Transform3D(-0.0, 0.0, -1.3, 0.0, 1.3, 0.0, 1.3, 0.0, -0.0, -139.212, 24.2, -88.0)
+
+[node name="A_Ginestra2" parent="DecorManual/ZonaA" instance=ExtResource("k_ginestra_bush")]
+transform = Transform3D(1.2216, 0.0, -0.44463, 0.0, 1.3, 0.0, 0.44463, 0.0, 1.2216, -130.0, 23.35, -86.0)
+
+[node name="A_Ginestra3" parent="DecorManual/ZonaA" instance=ExtResource("k_ginestra_bush")]
+transform = Transform3D(0.83562, 0.0, 0.99586, 0.0, 1.3, 0.0, -0.99586, 0.0, 0.83562, -120.64, 23.0, -87.5)
+
+[node name="A_Ginestra4" parent="DecorManual/ZonaA" instance=ExtResource("k_ginestra_bush")]
+transform = Transform3D(-0.65, 0.0, 1.12583, 0.0, 1.3, 0.0, -1.12583, 0.0, -0.65, -110.185, 21.65, -87.0)
+
+[node name="A_Ginestra5" parent="DecorManual/ZonaA" instance=ExtResource("k_ginestra_bush")]
+transform = Transform3D(-1.28025, 0.0, -0.22574, 0.0, 1.3, 0.0, 0.22574, 0.0, -1.28025, -136.0, 23.55, -84.0)
 
 [node name="ZonaC" type="Node3D" parent="DecorManual"]
 

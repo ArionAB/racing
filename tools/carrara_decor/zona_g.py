@@ -119,13 +119,14 @@ ITEMS = [
 ]
 
 KIT_Y = {
-    # pe panta ravaneto-ului: terenul la 3 m SPRE DRUM de centru (marginea din vale, cea vazuta), din --scan
-    "G_Panta1": 39.65,
-    "G_Panta2": 43.15,
-    "G_Panta3": 39.25,
-    "G_Panta4": 44.55,
-    "G_Panta5": 36.75,
-    "G_Panta6": 39.85,
+    # pe panta ravaneto-ului (0,86 m/m): terenul sub ORIGINE - 1,9 m (probe_manual cere < 2 m sub teren); marginea
+    # din vale, cea vazuta de pe drum, ramane la cel mult ~0,5 m peste moloz
+    "G_Panta1": 40.36,
+    "G_Panta2": 43.91,
+    "G_Panta3": 39.99,
+    "G_Panta4": 45.32,
+    "G_Panta5": 37.41,
+    "G_Panta6": 40.75,
     "G_Panta7": 36.25,
     "G_Turn": 41.02,
     "G_CisternaA": 41.29,

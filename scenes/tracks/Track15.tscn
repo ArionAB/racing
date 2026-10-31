@@ -295,6 +295,32 @@ half_rail = 65.0
 road_half_width = 0.6
 ground_drop = PackedFloat32Array(-4.6, -3, -1.6, -0.3, 0.8, 1.7, 3, 3.6, 3.2, 2.8, 2.4, 2, 1.6, 1.2, 0.8, 0.5, 0.2, 0, -0.4)
 
+[node name="GalerieVest" type="Node3D" parent="Hazarduri/TrenPeruRail"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 0, 0)
+script = ExtResource("bus_depot")
+has_door = false
+wall_slot = 29
+roof_slot = 12
+lintel_slot = 15
+yaw_deg = 90.0
+depth = 70.5
+inner_width = 5.2
+inner_height = 5.6
+apron_length = 0.0
+
+[node name="GalerieEst" type="Node3D" parent="Hazarduri/TrenPeruRail"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 63.5, 0, 0)
+script = ExtResource("bus_depot")
+has_door = false
+wall_slot = 29
+roof_slot = 12
+lintel_slot = 15
+yaw_deg = -90.0
+depth = 46.5
+inner_width = 5.2
+inner_height = 5.6
+apron_length = 0.0
+
 [node name="AutobuzConsettur" type="Path3D" parent="Hazarduri"]
 script = ExtResource("bus")
 curve = SubResource("Curve3D_autobuz")
@@ -9455,10 +9481,6 @@ metadata/coliziune = "trunk"
 
 [node name="FMalVale39" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_polylepis_a")]
 transform = Transform3D(-0.688998, 0, -0.858220, 0, 1.100573, 0, 0.858220, 0, -0.688998, -196.855240, -32.741119, -184.375671)
-metadata/coliziune = "trunk"
-
-[node name="FMalValeFund40" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_polylepis_b")]
-transform = Transform3D(-0.962638, 0, 0.165366, 0, 0.976738, 0, -0.165366, 0, -0.962638, -204.293793, -32.023575, -201.166962)
 metadata/coliziune = "trunk"
 
 [node name="FMalVale41" parent="DecorManual/ZoneF_MalulRaului" instance=ExtResource("s_bamboo_clump")]

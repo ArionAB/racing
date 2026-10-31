@@ -501,7 +501,13 @@ if OUT_PATH:
     # adevarate sunt `custom_bench_patches` (fata verticala, bancul plat de BENCH_W m inaintea ei).
     ravines = [
         # 0: cheiul Ponti di Vara: viaduct pe ambele parti, 30 m de gol, podea la +17.
-        (LEN("F pod", -15.0), LEN("F pod", 15.0), 40, 0),
+        # ADANCIMEA 400, nu 40 (POI F, gauntlet 31 oct 2026): sapatura in lung e `_ring_window` cu
+        # RAVINE_FADE_FRAC 0,02 (~42 m de rampa), iar o rapa de 30 m ajunge doar la 0,36 din ea. Cu 40
+        # declarati cheiul iesea un BOL de 14 m (fundul la +28,4, scan --under), deci arcele de margine ale
+        # viaductului (nasterea la +37,5) stateau ingropate si pilele de 26 m in pamant pana la jumatate.
+        # Cu 400 podeaua (+17) e atinsa la ~2,7 m de capat: peretii cad aproape drept la culei (+-13,2 m) si
+        # toate trei arcele raman libere. Intervalul +-16 (nu 15): peretele de 2,7 m sta in culee, nu in arc.
+        (LEN("F pod", -16.0), LEN("F pod", 16.0), 400, 0),
         # 1: fundul carierei C, pe DREAPTA (S): baltile stau pe podea, nu pe un platou de +20.
         (LEN("C intrare podea", -20.0), LEN("D rampa jos"), 40, 1),
     ]
@@ -557,6 +563,21 @@ if OUT_PATH:
                    '"water_dim": 0.95,\n"water_foam": 0.0,\n"water_crest": 0.0,\n"water_band": 0.0,\n'
                    '"water_wave_amp_k": 0.0,\n"water_glint": 0.08\n}')
 
+    # ---- TORENTUL DE SUB PONTI DI VARA (POI F, gauntlet 31 oct 2026; brief par.2 randul F: "parau alb-gri jos",
+    # bara_poi_F: torent turcoaz printre bolovani). Apa rapei 0 (cheiul) la TORENT_Y, cu 35 cm peste podeaua de
+    # +16,7 si cu 13 cm peste talpa pilelor viaductului (+16,92): pilele stau IN apa, nu deasupra ei. Podeaua e
+    # plata pe toata latimea, deci apa o acopera toata (celulele de grila au 7,9 m; un parau mai ingust decat
+    # podeaua de ~15 m nu se poate desena cu ele). Stil PROPRIU, nu cel al baltilor, numai pentru `fill_circle`:
+    # semintele apei sunt celulele sub cota a caror sosea cea mai apropiata e in intervalul rapei, iar treptele
+    # E3-E5 ale amfiteatrului (+18 .. +9, la dreapta podului, lat 30-45) ar fi intrat si ele, cu o panza de apa
+    # plutind la +17 peste cariera. Cercul (centrul pe podea, raza 31 m) tine apa intre peretii cheiului.
+    # Costul: +1 material (al doilea stil de apa). Aceiasi parametri ca baltile (turcoaz opac, mat).
+    TORENT_Y = 17.05
+    torent_circle = (-153.0, 134.0, 31.0)     # Godot x, z, raza: podeaua cheiului, lat -52 .. +9
+    torent_style = balti_style.replace('"ravines": Array[int]([1]),',
+                                       '"ravines": Array[int]([0]),\n"fill_circle": Vector3(%s, %s, %s),' % torent_circle)
+    assert torent_style != balti_style
+
     # ---- RAVANETO-UL (POI G, brief par.2 randul G): panta de moloz care urca pe DREAPTA sensului, din
     # interiorul buclei. Mecanismul e DEBLEUL (`custom_cuttings`, TrackSideSampler._lift_cuttings): un umar plat
     # dincolo de asfalt, apoi un perete PLAN cu panta data pana la o buza la cota absoluta, numai pe latura
@@ -601,10 +622,13 @@ if OUT_PATH:
         (LEN("F pod", -55.0), LEN("F pod", 55.0), 0, 2),
     ]
 
-    # ---- sol: drum de praf peste tot, mai putin podul si Marmifera; umed pe C
+    # ---- sol: drum de praf peste tot, mai putin Marmifera; umed pe C.
+    # Podul e tot PRAF (POI F, gauntlet 31 oct 2026): pe +-62 m era asfaltul implicit al pistei, adica banda
+    # albastru-inchis cu linie de mijloc alba intrerupta (`_build_center_line`) pe un viaduct de caramida
+    # din 1876 din mijlocul carierei — off-paleta si citea autostrada. Pe praf soseaua ia materialul
+    # `DirtRoad` deja existent (zero materiale noi) si pierde marcajele. Intervalul trece peste linia de start.
     dirt = [
-        (IDX("F pod", 62.0), IDX("H portal intrare", -2.0)),
-        (IDX("H portal iesire", 2.0), IDX("F pod", -62.0)),
+        (IDX("H portal iesire", 2.0), IDX("H portal intrare", -2.0)),
     ]
     # Ud doar pana cu 40 m inainte de portal: masinile care alunecau in cotul ud iesisera cu botul
     # pe diagonala in cadrul portalului (ejectare 31 m/s, runda 0).
@@ -1583,8 +1607,8 @@ custom_viaduct_ravines = Array[int]([{", ".join(str(i) for i in viaduct)}])
 custom_viaduct_net_margin = 12.0
 custom_ravine_floors = Array[Vector2]([{fl_txt}])
 custom_ravine_widths = Array[Vector2]([{rw_txt}])
-custom_ravine_water = Array[Vector3]([Vector3(1, {BALTI_Y}, 20.0)])
-custom_water_styles = Array[Dictionary]([{balti_style}])
+custom_ravine_water = Array[Vector3]([Vector3(1, {BALTI_Y}, 20.0), Vector3(0, {TORENT_Y}, 16.0)])
+custom_water_styles = Array[Dictionary]([{balti_style}, {torent_style}])
 custom_cuttings = Array[Vector4]([{cut_txt}])
 custom_cutting_shape = Vector3({RAV_SHOULDER}, {RAV_SLOPE}, {RAV_REACH})
 custom_bench_patches = Array[Dictionary]([{patch_txt}])

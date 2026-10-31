@@ -85,6 +85,30 @@ extends Node3D
 ## (artar 2696 -> 718 in loc de 1348), dar schimbarea la `lod_near_m` se vede
 ## mai mult. Masurat: la 0,5 valea D trecea de 1,6M triunghiuri (vezi `lod_near_m`).
 @export_range(0.2, 0.7, 0.01) var mid_lod_ratio: float = MID_LOD_RATIO_DEFAULT
+## CELULELE DE DEPARTE (HLOD, 31 oct 2026). Treapta grosiera feliata ca mai sus
+## costa in desene, nu in triunghiuri: banda apropiata e taiata in felii de 20 m,
+## deci in valea D se vedeau ~210 felii departate cu 3-5 arbori fiecare (cedrul:
+## 123 de desene pentru 7k triunghiuri). Peste felii se pune o celula de
+## `far_cell_m` cu aceiasi arbori pe treapta grosiera, un MultiMesh pe specie;
+## feliile ii sunt copii prin `visibility_parent`, deci se vad doar cat camera e
+## mai aproape de celula decat pragul ei. Pragul e pe acelasi contract ca
+## `lod_m`: `lod_m` + intinderea celulei, adica schimbarea se face cand CEL MAI
+## APROPIAT arbore e la `lod_m` — exact ce garantau deja feliile. 0 = fara celule.
+## Masurat (camera de joc, 24 de puncte, impreuna cu `far_shadow` oprit): valea
+## D 683+283 -> 491+209 desene (frac 0,29), 680+260 -> 443+158 (0,375); media
+## pe tur 406+182 -> 336+152. Marimea celulei abia conteaza (50 m: 347, 80 m:
+## 338, 120 m: 336, 180 m: 338 de desene in medie): ce ramane sunt feliile
+## dintre 65 m si pragul celulei, nu celulele. Garda: `ProbeForestFar`.
+@export_range(0.0, 400.0, 1.0, "suffix:m") var far_cell_m: float = 120.0
+## Treapta FOARTE DEPARTATA a celulelor: de la `xfar_m` (tot pana la cel mai
+## apropiat arbore) coroanele devin bulgari — cate o bipiramida pe componenta
+## (vezi `_with_blobs`). 0 sau <= `lod_m` = fara treapta.
+@export_range(0.0, 400.0, 1.0, "suffix:m") var xfar_m: float = 110.0
+## Treapta grosiera arunca umbra (doar pe arborii din `shadow_m` ai zonei). Oprit:
+## incepe la `lod_m` (65 m) de cel mai apropiat arbore, iar pe telefon umbra se
+## opreste oricum la 55 m (`GameState.SHADOW_DISTANCE_MOBILE`). Celulele nu
+## arunca niciodata.
+@export var far_shadow: bool = false
 ## Cat intra trunchiul in pamant (m): relieful palpaie sub radacina.
 @export_range(0.0, 1.0, 0.01, "suffix:m") var sink_m: float = 0.25
 ## Cat de mult mai multa marja fata de o sosea obisnuita cere o scurtatura
@@ -106,6 +130,8 @@ var _sampler: TrackSideSampler = null
 var done: bool = false
 var instance_count: int = 0
 var slice_count: int = 0
+## MultiMesh-urile celulelor de departe (toate treptele, toate speciile).
+var hlod_count: int = 0
 var counts_by_species: Dictionary = {}
 var counts_by_zone: Dictionary = {}
 var tris_by_species: Dictionary = {}
@@ -132,6 +158,7 @@ var _occ: Dictionary = {}
 var _species_mesh: Dictionary = {}   # stem -> ArrayMesh
 var _species_mid: Dictionary = {}    # stem -> ArrayMesh la nivelul MEDIU (sau acelasi)
 var _species_far: Dictionary = {}    # stem -> ArrayMesh la cel mai grosier (sau acelasi)
+var _species_xfar: Dictionary = {}   # stem -> ArrayMesh cu bulgari (sau acelasi cu far)
 var _species_tris: Dictionary = {}   # stem -> int
 var _claims: Array[Vector3] = []     # (x, z, raza) ale zonelor cu claim
 var _bounds: Rect2 = Rect2()
@@ -182,8 +209,15 @@ func _build() -> void:
 		return
 	var t0 := Time.get_ticks_msec()
 	# A/B din sonde (ProbePerf), fara sa editam scena: --forest-near=, --forest-far=,
-	# --forest-slice-near=, --forest-mid-ratio=. Doar pe sesiune.
+	# --forest-slice-near=, --forest-mid-ratio=, --forest-far-cell=, --forest-xfar=,
+	# --forest-far-shadow=0/1. Doar pe sesiune.
 	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--forest-far-cell="):
+			far_cell_m = float(a.trim_prefix("--forest-far-cell="))
+		elif a.begins_with("--forest-xfar="):
+			xfar_m = float(a.trim_prefix("--forest-xfar="))
+		elif a.begins_with("--forest-far-shadow="):
+			far_shadow = a.trim_prefix("--forest-far-shadow=") == "1"
 		if a.begins_with("--forest-near="):
 			lod_near_m = float(a.trim_prefix("--forest-near="))
 		elif a.begins_with("--forest-far="):
@@ -204,8 +238,8 @@ func _build() -> void:
 	build_ms = Time.get_ticks_msec() - t0
 	done = true
 	if verbose:
-		print("MeshForest %s: %d instante, %d felii, %d triunghiuri totale, %d ms | specii %s | LOD tri/instanta (intreg, mediu, grosier) %s | zone %s | respinse %s" % [
-			name, instance_count, slice_count, total_tris, build_ms,
+		print("MeshForest %s: %d instante, %d felii, %d MultiMesh de celule, %d triunghiuri totale, %d ms | specii %s | LOD tri/instanta (intreg, mediu, grosier, bulgari) %s | zone %s | respinse %s" % [
+			name, instance_count, slice_count, hlod_count, total_tris, build_ms,
 			counts_by_species, tris_by_lod, counts_by_zone, rejected])
 	built.emit()
 
@@ -299,6 +333,7 @@ func _build_species(theme: String) -> void:
 	_species_mesh.clear()
 	_species_mid.clear()
 	_species_far.clear()
+	_species_xfar.clear()
 	_species_tris.clear()
 	for ps in scenes:
 		if ps == null:
@@ -317,6 +352,10 @@ func _build_species(theme: String) -> void:
 			mid = mesh
 		if far != mesh and _mesh_tris(far) >= _mesh_tris(mesh):
 			far = mesh
+		# Bulgarii pornesc de la treapta grosiera (trunchiul si tulpinile raman
+		# ale ei) si se fac INAINTE de netezire, ca normala bipiramidei sa iasa
+		# din aceeasi mediere pe pozitie ca a coroanei grosiere.
+		var xfar := _blob_mesh(far) if far != mesh else far
 		# Netezirea coroanei (Palette.SMOOTH_FOLIAGE) DUPA LOD: simplificarea
 		# facuta pe normale netede sudeaza varfurile altfel si lasa coroana
 		# departata in cioburi plate (vazut pe captura, oct 2026).
@@ -326,15 +365,18 @@ func _build_species(theme: String) -> void:
 		var foliage := Palette.foliage_surfaces(mesh)
 		if not foliage.is_empty():
 			var smooth := Palette.smoothed_mesh(mesh, foliage)
-			far = smooth if far == mesh else Palette.smoothed_mesh(far, Palette.foliage_surfaces(far))
+			var far_s: ArrayMesh = smooth if far == mesh else Palette.smoothed_mesh(far, Palette.foliage_surfaces(far))
+			xfar = far_s if xfar == far else Palette.smoothed_mesh(xfar, Palette.foliage_surfaces(xfar))
+			far = far_s
 			mid = smooth if mid == mesh else Palette.smoothed_mesh(mid, Palette.foliage_surfaces(mid))
 			mesh = smooth
 		_species_mesh[stem] = mesh
 		_species_mid[stem] = mid
 		_species_far[stem] = far
+		_species_xfar[stem] = xfar
 		var tris := _mesh_tris(mesh)
 		_species_tris[stem] = tris
-		tris_by_lod[stem] = [tris, _mesh_tris(mid), _mesh_tris(far)]
+		tris_by_lod[stem] = [tris, _mesh_tris(mid), _mesh_tris(far), _mesh_tris(xfar)]
 
 
 static func _mesh_tris(mesh: ArrayMesh) -> int:
@@ -671,6 +713,159 @@ static func _with_prisms(arr: Array, comps: Dictionary, base_idx: PackedInt32Arr
 				out_idx.append_array(PackedInt32Array([b0, b1, t0, b1, t1, t0]))
 			else:
 				out_idx.append_array(PackedInt32Array([b0, t0, b1, b1, t0, t1]))
+	out[Mesh.ARRAY_VERTEX] = nv
+	if not normals.is_empty():
+		out[Mesh.ARRAY_NORMAL] = normals
+	if not tangents.is_empty():
+		out[Mesh.ARRAY_TANGENT] = tangents
+	if not colors.is_empty():
+		out[Mesh.ARRAY_COLOR] = colors
+	if not uvs.is_empty():
+		out[Mesh.ARRAY_TEX_UV] = uvs
+	if not uv2s.is_empty():
+		out[Mesh.ARRAY_TEX_UV2] = uv2s
+	out[Mesh.ARRAY_INDEX] = out_idx
+	return out
+
+
+## Fetele bipiramidei care inlocuieste o componenta de coroana pe treapta de
+## bulgari: 2 x BLOB_SIDES triunghiuri (6 -> 12, fata de ~20-40 cat lasa
+## generatorul pe o componenta de artar). Raza fata de semi-latura cutiei
+## componentei: o bipiramida hexagonala vazuta din lateral acopera ~1,87 a*b,
+## elipsa ~3,14 a*b, dar coroana grosiera nu umple cutia — castigul se
+## potriveste pe silueta masurata, nu pe calcul (vezi `ProbeForestFar`): la
+## 1,1 bulgarii acopereau 0,87-0,94 din grosier, la 1,2 acopera 0,98-1,02.
+## Triunghiuri pe arbore, grosier -> bulgari: momiji_a 348 -> 124, momiji_b
+## 242 -> 112, momiji_c 212 -> 100, ginkgo 484 -> 112.
+const BLOB_SIDES: int = 6
+const BLOB_GAIN: float = 1.2
+## O componenta mai mica (in triunghiuri, pe treapta grosiera) ramane cum e.
+const BLOB_MIN_TRIS: int = 2 * BLOB_SIDES + 1
+
+## Treapta de bulgari a unei specii: pe suprafetele de coroana
+## (`Palette.foliage_surfaces`), fiecare componenta destul de mare devine o
+## bipiramida; trunchiul, tulpinile si cardurile raman ale treptei grosiere.
+## Intoarce chiar `far` daca nu castiga nimic.
+static func _blob_mesh(far: ArrayMesh, gain: float = BLOB_GAIN) -> ArrayMesh:
+	var foliage := Palette.foliage_surfaces(far)
+	if foliage.is_empty():
+		return far
+	var out := ArrayMesh.new()
+	var changed := false
+	for si in far.get_surface_count():
+		var arr := far.surface_get_arrays(si)
+		if foliage.has(si):
+			var b: Variant = _with_blobs(arr, gain)
+			if b != null:
+				arr = b
+				changed = true
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		out.surface_set_material(si, far.surface_get_material(si))
+	if not changed or _mesh_tris(out) >= _mesh_tris(far):
+		return far
+	return out
+
+
+## Array-urile cu componentele de coroana inlocuite de bipiramide pe axa Y a
+## cutiei lor. Fiecare varf nou ia culoarea si UV-urile varfului componentei
+## cel mai apropiat de el: varful de jos ramane in AO-ul de sub coroana, cel de
+## sus in lumina — media pe componenta ar fi sters gradientul. null = nimic de
+## inlocuit (sau array-uri pe care nu stim sa le prelungim).
+static func _with_blobs(arr: Array, gain: float = BLOB_GAIN) -> Variant:
+	if arr[Mesh.ARRAY_INDEX] == null:
+		return null
+	for a in [Mesh.ARRAY_BONES, Mesh.ARRAY_WEIGHTS, Mesh.ARRAY_CUSTOM0,
+			Mesh.ARRAY_CUSTOM1, Mesh.ARRAY_CUSTOM2, Mesh.ARRAY_CUSTOM3]:
+		if arr[a] != null:
+			return null
+	var comps := _components(arr)
+	if comps["cards"] == true:
+		return null
+	var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+	var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+	var comp_of_tri: PackedInt32Array = comps["comp_of_tri"]
+	var tris: PackedInt32Array = comps["tris"]
+	var is_stalk := {}
+	for c in (comps["stalks"] as PackedInt32Array):
+		is_stalk[c] = true
+	var members := {}   # componenta -> PackedInt32Array de varfuri folosite
+	for t in comp_of_tri.size():
+		var c := comp_of_tri[t]
+		if tris[c] < BLOB_MIN_TRIS or is_stalk.has(c):
+			continue
+		var m: PackedInt32Array = members.get(c, PackedInt32Array())
+		for j in 3:
+			m.append(idx[3 * t + j])
+		members[c] = m
+	if members.is_empty():
+		return null
+	var out_idx := PackedInt32Array()
+	for t in comp_of_tri.size():
+		if not members.has(comp_of_tri[t]):
+			out_idx.append_array(PackedInt32Array([idx[3 * t], idx[3 * t + 1], idx[3 * t + 2]]))
+	var out := arr.duplicate()
+	var nv: PackedVector3Array = v.duplicate()
+	var normals: PackedVector3Array = (arr[Mesh.ARRAY_NORMAL] as PackedVector3Array).duplicate() \
+		if arr[Mesh.ARRAY_NORMAL] != null else PackedVector3Array()
+	var tangents: PackedFloat32Array = (arr[Mesh.ARRAY_TANGENT] as PackedFloat32Array).duplicate() \
+		if arr[Mesh.ARRAY_TANGENT] != null else PackedFloat32Array()
+	var colors: PackedColorArray = (arr[Mesh.ARRAY_COLOR] as PackedColorArray).duplicate() \
+		if arr[Mesh.ARRAY_COLOR] != null else PackedColorArray()
+	var uvs: PackedVector2Array = (arr[Mesh.ARRAY_TEX_UV] as PackedVector2Array).duplicate() \
+		if arr[Mesh.ARRAY_TEX_UV] != null else PackedVector2Array()
+	var uv2s: PackedVector2Array = (arr[Mesh.ARRAY_TEX_UV2] as PackedVector2Array).duplicate() \
+		if arr[Mesh.ARRAY_TEX_UV2] != null else PackedVector2Array()
+	var keys := members.keys()
+	keys.sort()
+	for c: int in keys:
+		var m: PackedInt32Array = members[c]
+		var lo := v[m[0]]
+		var hi := v[m[0]]
+		for i in m:
+			lo = lo.min(v[i])
+			hi = hi.max(v[i])
+		var center := (lo + hi) * 0.5
+		var half := (hi - lo) * 0.5 * gain
+		# Varfurile: 0 = sus, 1 = jos, 2.. = inelul la mijloc.
+		var pts: Array[Vector3] = [center + Vector3(0.0, half.y, 0.0), center - Vector3(0.0, half.y, 0.0)]
+		for k in BLOB_SIDES:
+			var ang := TAU * float(k) / float(BLOB_SIDES)
+			pts.append(center + Vector3(cos(ang) * half.x, 0.0, sin(ang) * half.z))
+		var base := nv.size()
+		for p in pts:
+			var best := m[0]
+			var best_d := INF
+			for i in m:
+				var d := v[i].distance_squared_to(p)
+				if d < best_d:
+					best_d = d
+					best = i
+			nv.append(p)
+			var radial := (p - center) / Vector3(maxf(half.x, 0.01), maxf(half.y, 0.01), maxf(half.z, 0.01))
+			radial = radial.normalized()
+			if not normals.is_empty():
+				normals.append(radial)
+			if not tangents.is_empty():
+				var tg := Vector3.UP.cross(radial)
+				tg = tg.normalized() if tg.length_squared() > 1e-6 else Vector3.RIGHT
+				tangents.append_array(PackedFloat32Array([tg.x, tg.y, tg.z, 1.0]))
+			if not colors.is_empty():
+				colors.append(colors[best])
+			if not uvs.is_empty():
+				uvs.append(uvs[best])
+			if not uv2s.is_empty():
+				uv2s.append(uv2s[best])
+		for k in BLOB_SIDES:
+			var r0 := base + 2 + k
+			var r1 := base + 2 + (k + 1) % BLOB_SIDES
+			for apex in [base, base + 1]:
+				# Sensul fetei ca la prisme: normala triunghiului iese din centru.
+				var outward := nv[apex] + nv[r0] + nv[r1] - 3.0 * center
+				var n_tri := (nv[r0] - nv[apex]).cross(nv[r1] - nv[apex])
+				if n_tri.dot(outward) >= 0.0:
+					out_idx.append_array(PackedInt32Array([apex, r0, r1]))
+				else:
+					out_idx.append_array(PackedInt32Array([apex, r1, r0]))
 	out[Mesh.ARRAY_VERTEX] = nv
 	if not normals.is_empty():
 		out[Mesh.ARRAY_NORMAL] = normals
@@ -1030,6 +1225,10 @@ func _occupied(c: Vector2, min_sep: float) -> bool:
 
 func _emit(groups: Dictionary) -> void:
 	slice_count = 0
+	hlod_count = 0
+	# Celulele de departe: "zona|cx|cz" -> arborii lor pe specie si MultiMesh-urile
+	# feliilor care le devin copii (vezi `far_cell_m`).
+	var cells: Dictionary = {}
 	var keys := groups.keys()
 	keys.sort()
 	for key in keys:
@@ -1073,6 +1272,7 @@ func _emit(groups: Dictionary) -> void:
 			if far != steps[-1][0]:
 				steps[-1][2] = lod_m + ext_far
 				steps.append([far, lod_m + ext_far, 0.0, "_far"])
+		var kids: Array[MultiMeshInstance3D] = []
 		for k in steps.size():
 			var begin := float(steps[k][1])
 			var end := float(steps[k][2])
@@ -1080,25 +1280,104 @@ func _emit(groups: Dictionary) -> void:
 				end = z.view_m if end <= 0.0 else minf(end, z.view_m)
 				if begin >= end:
 					continue
-			var mm := MultiMesh.new()
-			mm.transform_format = MultiMesh.TRANSFORM_3D
-			mm.mesh = steps[k][0]
-			mm.instance_count = xfs.size()
-			for i in xfs.size():
-				mm.set_instance_transform(i, xfs[i])
-			var mmi := MultiMeshInstance3D.new()
-			mmi.name = String(key).replace("|", "_") + String(steps[k][3])
-			mmi.multimesh = mm
-			mmi.custom_aabb = union.grow(LOD_AABB_GROW_M)
-			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if bool(g["shadow"]) 				else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			# Hysteresis (pe Mobile `fade_mode` DISABLED = margini de hysteresis):
-			# pragul se trece la +1 m la indepartare si la -1 m la apropiere,
-			# deci o camera care sta pe prag nu palpaie intre doua mesh-uri.
-			if begin > 0.0:
-				mmi.visibility_range_begin = begin
-				mmi.visibility_range_begin_margin = LOD_HYSTERESIS_M
-			if end > 0.0:
-				mmi.visibility_range_end = end
-				mmi.visibility_range_end_margin = LOD_HYSTERESIS_M
+			var shadow := bool(g["shadow"]) and (far_shadow or String(steps[k][3]) != "_far")
+			var mmi := _slice_mmi(String(key).replace("|", "_") + String(steps[k][3]),
+				steps[k][0], xfs, union, begin, end, shadow)
 			add_child(mmi)
+			kids.append(mmi)
 		slice_count += 1
+		# Doar feliile care ajung pe treapta grosiera intra in celula: una fara
+		# LOD s-ar vedea intreaga pana la `view_m` si in celula ar fi grosiera.
+		if far_cell_m > 0.0 and steps.size() > 1 and String(steps[-1][3]) == "_far" \
+				and not kids.is_empty() and kids[-1].name.ends_with("_far"):
+			var ck := "%d|%d|%d" % [int(g["zone"]), floori(cen.x / far_cell_m), floori(cen.z / far_cell_m)]
+			if not cells.has(ck):
+				cells[ck] = {"zone": int(g["zone"]), "xf": {}, "edge": {},
+					"kids": [] as Array[MultiMeshInstance3D]}
+			var cell: Dictionary = cells[ck]
+			if not (cell["xf"] as Dictionary).has(stem):
+				cell["xf"][stem] = [] as Array[Transform3D]
+				cell["edge"][stem] = [] as Array[float]
+			(cell["xf"][stem] as Array[Transform3D]).append_array(xfs)
+			(cell["edge"][stem] as Array[float]).append_array(edges)
+			(cell["kids"] as Array[MultiMeshInstance3D]).append_array(kids)
+	var cks := cells.keys()
+	cks.sort()
+	for ck in cks:
+		_emit_cell(String(ck), cells[ck])
+
+
+## Un MultiMesh de felie (sau de celula) cu pragurile lui de vizibilitate.
+func _slice_mmi(nm: String, mesh: Mesh, xfs: Array[Transform3D], union: AABB,
+		begin: float, end: float, shadow: bool) -> MultiMeshInstance3D:
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = mesh
+	mm.instance_count = xfs.size()
+	for i in xfs.size():
+		mm.set_instance_transform(i, xfs[i])
+	var mmi := MultiMeshInstance3D.new()
+	mmi.name = nm
+	mmi.multimesh = mm
+	mmi.custom_aabb = union.grow(LOD_AABB_GROW_M)
+	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadow \
+		else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# Hysteresis (pe Mobile `fade_mode` DISABLED = margini de hysteresis):
+	# pragul se trece la +1 m la indepartare si la -1 m la apropiere,
+	# deci o camera care sta pe prag nu palpaie intre doua mesh-uri.
+	if begin > 0.0:
+		mmi.visibility_range_begin = begin
+		mmi.visibility_range_begin_margin = LOD_HYSTERESIS_M
+	if end > 0.0:
+		mmi.visibility_range_end = end
+		mmi.visibility_range_end_margin = LOD_HYSTERESIS_M
+	return mmi
+
+
+## Celula de departe: un MultiMesh pe specie cu toti arborii ei pe treapta
+## grosiera, de la `lod_m` + intinderea celulei, iar peste el (daca `xfar_m`
+## o cere) acelasi lucru cu bulgari de la `xfar_m` + intindere. Lantul de
+## `visibility_parent`: felie -> celula grosiera -> celula de bulgari; Godot
+## arata un nod doar cat parintele lui e ascuns FIINDCA e mai aproape decat
+## `visibility_range_begin` al lui, deci la orice distanta se vede exact un nivel.
+## Toate speciile unei trepte au aceeasi cutie (a celulei), deci acelasi centru
+## si acelasi prag: comuta impreuna, si oricare poate fi parintele.
+func _emit_cell(ck: String, cell: Dictionary) -> void:
+	var z := zones[int(cell["zone"])]
+	var stems: Array = (cell["xf"] as Dictionary).keys()
+	stems.sort()
+	var union := AABB()
+	var first := true
+	for stem: String in stems:
+		var box := (_species_mesh[stem] as ArrayMesh).get_aabb()
+		for xf: Transform3D in cell["xf"][stem]:
+			union = xf * box if first else union.merge(xf * box)
+			first = false
+	var cen := union.get_center()
+	# Intinderea, ca la felii: doar arborii de care camera se poate apropia.
+	var ext := 0.0
+	for stem: String in stems:
+		var box := (_species_mesh[stem] as ArrayMesh).get_aabb()
+		var xfs: Array[Transform3D] = cell["xf"][stem]
+		var edges: Array[float] = cell["edge"][stem]
+		for i in xfs.size():
+			if edges[i] < lod_m:
+				ext = maxf(ext, cen.distance_to((xfs[i] * box).get_center()))
+	var levels: Array = [[_species_far, lod_m + ext, "_celula"]]
+	if xfar_m > lod_m:
+		levels.append([_species_xfar, xfar_m + ext, "_bulgari"])
+	var children: Array[MultiMeshInstance3D] = cell["kids"]
+	for lv in levels:
+		var begin := float(lv[1])
+		if z.view_m > 0.0 and begin >= z.view_m:
+			break
+		var made: Array[MultiMeshInstance3D] = []
+		for stem: String in stems:
+			var mmi := _slice_mmi("celula_" + ck.replace("|", "_") + "_" + stem + String(lv[2]),
+				(lv[0] as Dictionary)[stem], cell["xf"][stem], union, begin, z.view_m, false)
+			add_child(mmi)
+			made.append(mmi)
+		for kid in children:
+			kid.visibility_parent = kid.get_path_to(made[0])
+		children = made
+		hlod_count += made.size()

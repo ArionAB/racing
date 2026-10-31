@@ -62,6 +62,10 @@ func _ready() -> void:
 				level = "mid"
 			elif mmi.name.ends_with("_far"):
 				level = "far"
+			elif mmi.name.ends_with("_celula"):
+				level = "celula"
+			elif mmi.name.ends_with("_bulgari"):
+				level = "bulgari"
 			if not per_level.has(level):
 				per_level[level] = {"mmi": 0, "tris": 0, "begin_m": [INF, 0.0], "end_m": [INF, 0.0]}
 			var d: Dictionary = per_level[level]

@@ -10507,7 +10507,9 @@ func _branch_corridor_points() -> PackedVector3Array:
 func _branch_carve_points() -> PackedVector3Array:
 	var out := PackedVector3Array()
 	for i in range(1, routes.size()):
-		if routes[i].surface != "sand" and not routes[i].elevated:
+		# "deck" pe uscat (Ha Long, #594) pastreaza comportamentul lui "sand":
+		# se schimba doar ce se VEDE, nu terenul din jur.
+		if routes[i].surface != "sand" and routes[i].surface != "deck" 				and not routes[i].elevated:
 			out.append_array(routes[i].baked)
 	return out
 
@@ -12948,9 +12950,14 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 			if door:
 				ball.rotation.y += PI * 0.5
 		add_child(ball)
-		ball.center = p
+		# Pe apa (HazardMarker.on_water, Ha Long #596): cota hazardului e oglinda
+		# marii, nu asfaltul — coca sta pe canal, vela matura soseaua.
+		var boat_p := p
+		if bool(kind.get("on_water", false)):
+			boat_p.y = _sampler.mean_road_y() + sea_level_offset
+		ball.center = boat_p
 		ball.travel = side * hw * 0.9
-		ball.global_position = p
+		ball.global_position = boat_p
 	elif ResourceLoader.exists("res://assets/models/vehicles/rusted_digger.glb"):
 		_build_excavator(frac)
 	else:

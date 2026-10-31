@@ -90,7 +90,6 @@ ITEMS += [
     # portal"): blocuri informe MARI, ingropate ~1 m, pe umerii movilei (profilul tubului: lat 7.5 -> +9.5 m peste
     # asfalt; sonda nu vede movila, cota de mana) si pe flancurile masivului de langa capac. Toate fantoma.
     _world("H_StancaSus", "rocks/block_informe_a.glb", -246.0, -98.5, yaw_rel=10.0, scale=2.4, coliziune="none", y=34.0),
-    _world("H_StancaSusS", "rocks/block_informe_b.glb", -246.0, -112.0, yaw_rel=-25.0, scale=2.4, coliziune="none", y=34.0),
     _world("H_CragS1", "rocks/block_informe_b.glb", -249.5, -122.0, yaw_rel=40.0, scale=3.0, coliziune="none"),
     _world("H_CragS2", "rocks/block_informe_a.glb", -253.5, -126.0, yaw_rel=-15.0, scale=2.6, coliziune="none"),
     _world("H_CragD1", "rocks/block_informe_b.glb", -249.5, -88.0, yaw_rel=-50.0, scale=2.8, coliziune="none"),
@@ -108,8 +107,8 @@ KIT_Y = {
     "H_CastanS": 26.97, "H_CastanD": 29.71, "H_GinestraS": 30.38, "H_GinestraD": 29.17,
     # H_StancaS2: 3 din 9 raze cad intr-o gaura de teren de la piciorul capacului (t_min -47.5) -> terenul vecin
     "H_StancaS1": 26.87, "H_StancaS2": 28.0, "H_StancaD1": 26.63, "H_StancaD2": 26.86,
-    # H_CragS1/S2: aceeasi gaura de sub capac (raze la -47.5) -> cota din scan (`--scan`, lat -14..-20 la
-    # 0.949-0.951: 29.2 / 32.8 / 35.4 / 38.3), ingropate ~1 m pe partea de jos a pantei
-    "H_CragS1": 29.5, "H_CragS2": 33.0, "H_CragD1": 27.45,
+    # H_CragS1/S2: aceeasi gaura de sub capac (raze la -47.5) -> terenul de sub ORIGINE din probe_manual
+    # (33.41 / 40.14) - 0.8 m: pe panta, partea de jos ramane ingropata, cea de sus nu pluteste
+    "H_CragS1": 32.6, "H_CragS2": 39.3, "H_CragD1": 27.45,
     "H_Stiva": 27.01, "H_Bloc": 27.22, "H_Excavator": 27.10,
 }

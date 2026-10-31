@@ -102,8 +102,9 @@ ITEMS += [
 
 # ---- 2. IN TUB: conducta de serviciu lipita de peretele din DREAPTA (interiorul acului, peretele pe care
 # masinile il ating mai rar decat pe cel de la iesirea larga din ac). Modulul `pipe_run` (0.8 lat, 1.52
-# inalt, 6 m) cu axa la lat +4.25: intra 0.15 m in banda, restul e in perete. Fantoma: o masina lipita
-# de perete trece prin 15 cm de teava, nu se agata (memoria `obstacol-pe-drum-poate-fi-gimmick`).
+# inalt, 6 m) cu axa la lat +3.9: tevile (0.4 m) ies 0.5 m in banda, suportii intra in perete (la +4.25
+# se vedeau doar varfurile suportilor, un sir de cuie). Fantoma: o masina lipita
+# de perete trece prin 50 cm de teava, nu se agata (memoria `obstacol-pe-drum-poate-fi-gimmick`).
 # Pe dreptele tubului, nu in ac: in ac un modul drept de 6 m ar iesi din peretele curb. Pas 6 m
 # (0.0029 din tur de 2070 m), inclinat cu panta (11%), cota = drumul - 3 cm.
 def _pipe_run(prefix, f0, n):
@@ -121,7 +122,7 @@ def _pipe_run(prefix, f0, n):
             i += 1
         t = d / _math.dist(_ROWS[i][:3], _ROWS[i + 1][:3])
         y = _ROWS[i][1] + (_ROWS[i + 1][1] - _ROWS[i][1]) * t
-        out.append((f"{prefix}{k + 1}", "props/pipe_run.glb", _ROWS[i0][4], 4.25, 0.0,
+        out.append((f"{prefix}{k + 1}", "props/pipe_run.glb", _ROWS[i0][4], 3.9, 0.0,
                     {"along": 6.0 * k, "tilt": True, "coliziune": "none", "y": round(y - 0.03, 2)}))
     return out
 

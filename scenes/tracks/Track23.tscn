@@ -587,6 +587,78 @@ transform = Transform3D(6.59372, 0.0, -0.28789, 0.0, 6.6, 0.0, 0.28789, 0.0, 6.5
 [node name="A_Perete3_4" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
 transform = Transform3D(6.99973, 0.0, 0.06109, 0.0, 7.0, 0.0, -0.06109, 0.0, 6.99973, -66.0, 24.4, -169.0)
 
+[node name="A_CiobL1" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(0.17101, 0.0, -0.46985, 0.0, 0.5, 0.0, 0.46985, 0.0, 0.17101, -137.0, 24.62, -112.6)
+metadata/coliziune = "none"
+
+[node name="A_CiobL2" parent="DecorManual/ZonaA" instance=ExtResource("k_rubble_pile_b")]
+transform = Transform3D(-0.0, 0.0, -0.5, 0.0, 0.5, 0.0, 0.5, 0.0, -0.0, -134.0, 24.62, -114.2)
+metadata/coliziune = "none"
+
+[node name="A_CiobL3" parent="DecorManual/ZonaA" instance=ExtResource("k_block_informe_b")]
+transform = Transform3D(0.38302, 0.0, -0.32139, 0.0, 0.5, 0.0, 0.32139, 0.0, 0.38302, -131.0, 24.62, -112.4)
+metadata/coliziune = "none"
+
+[node name="A_CiobL4" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_b")]
+transform = Transform3D(-0.16905, 0.0, -0.36252, 0.0, 0.4, 0.0, 0.36252, 0.0, -0.16905, -128.0, 24.62, -113.2)
+metadata/coliziune = "none"
+
+[node name="A_CiobL5" parent="DecorManual/ZonaA" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(0.42286, 0.0, -0.15391, 0.0, 0.45, 0.0, 0.15391, 0.0, 0.42286, -121.0, 24.62, -113.4)
+metadata/coliziune = "none"
+
+[node name="A_CiobL6" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(0.10419, 0.0, -0.59088, 0.0, 0.6, 0.0, 0.59088, 0.0, 0.10419, -116.0, 24.62, -112.6)
+metadata/coliziune = "none"
+
+[node name="A_CiobL7" parent="DecorManual/ZonaA" instance=ExtResource("k_block_informe_a")]
+transform = Transform3D(-0.32139, 0.0, -0.38302, 0.0, 0.5, 0.0, 0.38302, 0.0, -0.32139, -99.0, 24.62, -113.0)
+metadata/coliziune = "none"
+
+[node name="A_CiobL8" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(0.25811, 0.0, -0.36862, 0.0, 0.45, 0.0, 0.36862, 0.0, 0.25811, -95.0, 24.62, -114.5)
+metadata/coliziune = "none"
+
+[node name="A_CiobL9" parent="DecorManual/ZonaA" instance=ExtResource("k_rubble_pile_b")]
+transform = Transform3D(0.43301, 0.0, 0.25, 0.0, 0.5, 0.0, -0.25, 0.0, 0.43301, -90.0, 24.62, -112.8)
+metadata/coliziune = "none"
+
+[node name="A_CiobL10" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_b")]
+transform = Transform3D(0.11647, 0.0, -0.43467, 0.0, 0.45, 0.0, 0.43467, 0.0, 0.11647, -78.0, 24.62, -113.2)
+metadata/coliziune = "none"
+
+[node name="A_CiobL11" parent="DecorManual/ZonaA" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(-0.51962, 0.0, -0.3, 0.0, 0.6, 0.0, 0.3, 0.0, -0.51962, -135.0, 24.62, -116.0)
+metadata/coliziune = "none"
+
+[node name="A_CiobM1" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(0.4, 0.0, -0.69282, 0.0, 0.8, 0.0, 0.69282, 0.0, 0.4, -138.0, 24.62, -129.0)
+metadata/coliziune = "none"
+
+[node name="A_CiobM2" parent="DecorManual/ZonaA" instance=ExtResource("k_block_informe_b")]
+transform = Transform3D(-0.27362, 0.0, -0.75175, 0.0, 0.8, 0.0, 0.75175, 0.0, -0.27362, -130.0, 24.62, -132.0)
+metadata/coliziune = "none"
+
+[node name="A_CiobR1" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(-0.12941, 0.0, -0.48296, 0.0, 0.5, 0.0, 0.48296, 0.0, -0.12941, -136.0, 24.62, -96.4)
+metadata/coliziune = "none"
+
+[node name="A_CiobR2" parent="DecorManual/ZonaA" instance=ExtResource("k_rubble_pile_b")]
+transform = Transform3D(0.32139, 0.0, -0.38302, 0.0, 0.5, 0.0, 0.38302, 0.0, 0.32139, -128.5, 24.62, -95.5)
+metadata/coliziune = "none"
+
+[node name="A_CiobR3" parent="DecorManual/ZonaA" instance=ExtResource("k_block_informe_b")]
+transform = Transform3D(0.4924, 0.0, -0.08682, 0.0, 0.5, 0.0, 0.08682, 0.0, 0.4924, -125.5, 24.62, -92.4)
+metadata/coliziune = "none"
+
+[node name="A_CiobR4" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_b")]
+transform = Transform3D(0.16905, 0.0, -0.36252, 0.0, 0.4, 0.0, 0.36252, 0.0, 0.16905, -113.5, 24.62, -96.0)
+metadata/coliziune = "none"
+
+[node name="A_CiobR5" parent="DecorManual/ZonaA" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(-0.25, 0.0, -0.43301, 0.0, 0.5, 0.0, 0.43301, 0.0, -0.25, -111.0, 24.62, -93.0)
+metadata/coliziune = "none"
+
 [node name="A_RGa" parent="DecorManual/ZonaA" instance=ExtResource("k_block_stack_a")]
 transform = Transform3D(0.08371, 0.0, -1.19708, 0.0, 1.2, 0.0, 1.19708, 0.0, 0.08371, -165.0, 24.72, -95.0)
 metadata/coliziune = "none"

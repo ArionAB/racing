@@ -128,6 +128,28 @@ ITEMS = [
     ('A_Perete3_2', 'rocks/marble_block_c.glb', _F0, -64.0, 91.0, {'along': 40.0, 'scale': 7.0}),
     ('A_Perete3_3', 'rocks/marble_block_c.glb', _F0, -64.0, 87.5, {'along': 61.0, 'scale': 6.6}),
     ('A_Perete3_4', 'rocks/marble_block_c.glb', _F0, -64.0, 90.5, {'along': 82.0, 'scale': 7.0}),
+    # ---- Runda 4 (criticul orb r3: "benzi late de praf gol pe ambii umeri; in bara podeaua e plina de
+    # blocuri mici, aschii si moloz"): cioburi si moloz marunt pe umeri si in curte. FANTOME: pe stanga nu e
+    # berma, iar un cub de 0,75 m solid la 2-3 m de asfalt ar lansa o masina impinsa din pluton; sunt sub
+    # 0,8 m, deci o roata care trece prin ele nu se citeste ca perete.
+    ('A_CiobL1', 'rocks/marble_block_a.glb', _F0, -7.6, 20.0, {'coliziune': 'none', 'along': 11.0, 'scale': 0.5}),
+    ('A_CiobL2', 'rocks/rubble_pile_b.glb', _F0, -9.2, 0.0, {'coliziune': 'none', 'along': 14.0, 'scale': 0.5}),
+    ('A_CiobL3', 'rocks/block_informe_b.glb', _F0, -7.4, 50.0, {'coliziune': 'none', 'along': 17.0, 'scale': 0.5}),
+    ('A_CiobL4', 'rocks/marble_block_b.glb', _F0, -8.2, -25.0, {'coliziune': 'none', 'along': 20.0, 'scale': 0.4}),
+    ('A_CiobL5', 'rocks/rubble_pile_a.glb', _F0, -8.4, 70.0, {'coliziune': 'none', 'along': 27.0, 'scale': 0.45}),
+    ('A_CiobL6', 'rocks/marble_block_a.glb', _F0, -7.6, 10.0, {'coliziune': 'none', 'along': 32.0, 'scale': 0.6}),
+    ('A_CiobL7', 'rocks/block_informe_a.glb', _F0, -8.0, -40.0, {'coliziune': 'none', 'along': 49.0, 'scale': 0.5}),
+    ('A_CiobL8', 'rocks/marble_block_a.glb', _F0, -9.5, 35.0, {'coliziune': 'none', 'along': 53.0, 'scale': 0.45}),
+    ('A_CiobL9', 'rocks/rubble_pile_b.glb', _F0, -7.8, 120.0, {'coliziune': 'none', 'along': 58.0, 'scale': 0.5}),
+    ('A_CiobL10', 'rocks/marble_block_b.glb', _F0, -8.2, 15.0, {'coliziune': 'none', 'along': 70.0, 'scale': 0.45}),
+    ('A_CiobL11', 'rocks/rubble_pile_a.glb', _F0, -11.0, -60.0, {'coliziune': 'none', 'along': 13.0, 'scale': 0.6}),
+    ('A_CiobM1', 'rocks/marble_block_a.glb', _F0, -24.0, 30.0, {'coliziune': 'none', 'along': 10.0, 'scale': 0.8}),
+    ('A_CiobM2', 'rocks/block_informe_b.glb', _F0, -27.0, -20.0, {'coliziune': 'none', 'along': 18.0, 'scale': 0.8}),
+    ('A_CiobR1', 'rocks/marble_block_a.glb', _F0, 8.6, -15.0, {'coliziune': 'none', 'along': 12.0, 'scale': 0.5}),
+    ('A_CiobR2', 'rocks/rubble_pile_b.glb', _F0, 9.5, 40.0, {'coliziune': 'none', 'along': 19.5, 'scale': 0.5}),
+    ('A_CiobR3', 'rocks/block_informe_b.glb', _F0, 12.6, 80.0, {'coliziune': 'none', 'along': 22.5, 'scale': 0.5}),
+    ('A_CiobR4', 'rocks/marble_block_b.glb', _F0, 9.0, 25.0, {'coliziune': 'none', 'along': 34.5, 'scale': 0.4}),
+    ('A_CiobR5', 'rocks/rubble_pile_a.glb', _F0, 12.0, -30.0, {'coliziune': 'none', 'along': 37.0, 'scale': 0.5}),
     # ---- dreapta: cordonul de blocuri pe banca dintre berma si buza (FANTOME, dincolo de berma).
     ('A_RGa', 'rocks/block_stack_a.glb', _F0, 10.0, 4.0, {'coliziune': 'none', 'along': -17.0, 'scale': 1.2}),
     ('A_RGb', 'rocks/marble_block_c.glb', _F0, 10.4, 88.0, {'coliziune': 'none', 'along': -13.2}),
@@ -190,6 +212,8 @@ KIT_Y = {
     # Runda 3, peretele: din scanul lateral -60..-30 (teren 24,3-24,9; capetele spre faleza portalului urca).
     "A_Perete1_0": 24.75, "A_Perete1_1": 24.30, "A_Perete1_2": 24.30, "A_Perete1_3": 24.30, "A_Perete1_4": 24.30, "A_Perete1_5": 24.30, "A_Perete1_6": 24.30, "A_Perete1_7": 24.30, "A_Perete1_8": 24.30, "A_Perete2_0": 24.75, "A_Perete2_1": 24.30, "A_Perete2_2": 24.30, "A_Perete2_3": 24.30, "A_Perete2_4": 24.30, "A_Perete2_5": 24.30, "A_Perete2_6": 24.30,
     "A_Perete3_0": 24.40, "A_Perete3_1": 24.40, "A_Perete3_2": 24.40, "A_Perete3_3": 24.40, "A_Perete3_4": 24.40,
+    # Runda 4, cioburile: terenul de pe umeri e 24,6-24,7 (scanul de platou).
+    "A_CiobL1": 24.62, "A_CiobL2": 24.62, "A_CiobL3": 24.62, "A_CiobL4": 24.62, "A_CiobL5": 24.62, "A_CiobL6": 24.62, "A_CiobL7": 24.62, "A_CiobL8": 24.62, "A_CiobL9": 24.62, "A_CiobL10": 24.62, "A_CiobL11": 24.62, "A_CiobM1": 24.62, "A_CiobM2": 24.62, "A_CiobR1": 24.62, "A_CiobR2": 24.62, "A_CiobR3": 24.62, "A_CiobR4": 24.62, "A_CiobR5": 24.62,
     "A_P1a": 24.62, "A_P1b": 24.61, "A_P1f": 24.56,
     "A_P1g": 24.62, 
     "A_P2f": 24.49, "A_P2g": 24.60, "A_R1a": 24.67, "A_R1b": 24.67, "A_R1c": 24.67, "A_R1d": 24.67,

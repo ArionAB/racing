@@ -1092,6 +1092,8 @@ excavator_soft_contact = true
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         decor_zones = []
         zone_meta = {}
+        forest_zones = []   # G: padurea in masa (MeshForest), vezi blocul "G: PADUREA IN MASA" mai jos
+        forest_glbs = {}
         for zl in "abcdefgh":
             zm = importlib.import_module(f"carrara_decor.zona_{zl}")
             decor_zones.append((f"Zona{zl.upper()}", list(zm.ITEMS)))
@@ -1099,6 +1101,8 @@ excavator_soft_contact = true
             # probe_manual, cand decorul sta pe peretii unei rape pe care sampler-ul nu-i modeleaza). Zonele fara
             # ea ies identic.
             zone_meta[f"Zona{zl.upper()}"] = dict(getattr(zm, "ZONE_META", {}))
+            forest_zones += list(getattr(zm, "FOREST", []))
+            forest_glbs.update(getattr(zm, "FOREST_GLBS", {}))
             for k_, v_ in zm.KIT_Y.items():
                 assert k_ not in KIT_Y, f"cota dublata: {k_}"
                 KIT_Y[k_] = v_
@@ -1570,6 +1574,67 @@ transform = {xf_txt}
                 dd = math.hypot(p_[0] - od[0] - (-fzd) * -7.0, p_[2] - od[2] - fxd * -7.0)
                 flag = "" if dt > 6.0 and dd > 15.0 else "  <-- PREA APROAPE"
                 print(f"  {zname}/{nm:12s} frac {brow[i_][4]:.4f} lat {lat:+5.1f} y {y_:6.2f}  camion {dt:5.1f} m  turn derrick {dd:5.1f} m{flag}")
+
+        # === G: PADUREA IN MASA (MeshForest, scenes/props/mesh_forest.gd) ====================================
+        # Castanii si ginestra versantilor lui G (brief par.2 randul G: „aici se decide daca pista citeste vara")
+        # sunt sute de arbori: noduri de scena peste ~1000 de piese blocheaza incarcarea (memoria
+        # `decor-in-masa-cere-multimesh`), deci merg in MultiMesh feliat, ca valea de artari de pe Kyoto
+        # (gen_kyoto_route.py, GRUPA PADUREA IN MASA). Zonele sunt DATE, in fisierul zonei (`FOREST`, cu
+        # `FOREST_GLBS` = stem -> GLB); plasarea pe teren real, distanta fata de asfalt si zidul lumii se rezolva
+        # la rulare. Toti arborii de aici sunt FANTOME (MeshForest n-are corpuri): primul rand de langa drum ramane
+        # in ITEMS, cu trunchi. Fara nicio zona `FOREST`, Track23 iese identic la bit.
+        # Treapta grosiera a castanului: cel mai grosier nivel generat (188 de triunghiuri din 4244) topea
+        # coroana in cioburi (vezi `MeshForest.far_lod_min_ratio`); ramane la nivelul care pastreaza macar atat.
+        FOREST_FAR_MIN = 0.12
+        if forest_zones:
+            kit_ext += ('[ext_resource type="Script" path="res://scenes/props/mesh_forest.gd" id="mf_script"]\n'
+                        '[ext_resource type="Script" path="res://scenes/props/mesh_forest_zone.gd" id="mf_zone"]\n')
+            for stem_, path_ in forest_glbs.items():
+                if not path_.startswith("res://"):
+                    path_ = R + path_
+                kit_ext += f'[ext_resource type="PackedScene" path="{path_}" id="mf_{stem_}"]\n'
+            for k_, d_ in enumerate(forest_zones):
+                sp_txt = ", ".join('"%s"' % s_ for s_ in d_.get("species", ()))
+                zw_txt = ", ".join(str(float(w_)) for w_ in d_.get("weights", ()))
+                kit_sub += f"""
+[sub_resource type="Resource" id="MFZ_{k_}"]
+script = ExtResource("mf_zone")
+label = "{d_['label']}"
+kind = {1 if d_.get('kind') == 'disc' else 0}
+species = PackedStringArray({sp_txt})
+weights = PackedFloat32Array({zw_txt})
+spacing = {float(d_.get('spacing', 8.0))}
+edge_clear_m = {float(d_.get('edge_clear_m', 14.0))}
+shadow_m = {float(d_.get('shadow_m', 25.0))}
+view_m = {float(d_.get('view_m', 330.0))}
+max_below_road_m = {float(d_.get('max_below_road_m', 200.0))}
+claim = {"true" if d_.get('claim') else "false"}
+scale_min = {float(d_.get('scale_min', 0.85))}
+scale_max = {float(d_.get('scale_max', 1.2))}
+seed_value = {int(d_.get('seed', 1))}
+"""
+                if d_.get("kind") == "disc":
+                    if "at" in d_:   # (frac pe INDEX, lateral + dreapta): centrul fata de drum, ca piesele din ITEMS
+                        p_c, _d, _i = road_pt(d_["at"][0], d_["at"][1])
+                        cx_, cz_ = p_c[0], p_c[2]
+                    else:
+                        cx_, cz_ = d_["center"]
+                    kit_sub += f"center = Vector3({cx_:.2f}, 0, {cz_:.2f})\nradius = {float(d_['radius'])}\n"
+                else:
+                    kit_sub += (f"frac_from = {d_['frac_from']:.4f}\nfrac_to = {d_['frac_to']:.4f}\n"
+                                f"side = {int(d_.get('side', 0))}\n"
+                                f"lat_min = {float(d_['lat_min'])}\nlat_max = {float(d_['lat_max'])}\n")
+            scenes_txt = ", ".join(f'ExtResource("mf_{s_}")' for s_ in forest_glbs)
+            zones_txt = ", ".join(f'SubResource("MFZ_{k_}")' for k_ in range(len(forest_zones)))
+            kit_nodes += f"""
+[node name="PadureMasa" type="Node3D" parent="."]
+script = ExtResource("mf_script")
+scenes = Array[PackedScene]([{scenes_txt}])
+zones = Array[ExtResource("mf_zone")]([{zones_txt}])
+far_lod_min_ratio = {FOREST_FAR_MIN}
+"""
+            print(f"  padurea in masa: {len(forest_zones)} zone, specii {list(forest_glbs)}")
+        # === sfarsit G: PADUREA IN MASA =====================================================================
 
         kit_ext += "".join(f'[ext_resource type="PackedScene" path="{p}" id="k_{s}"]\n' for s, p in kit_glb.items())
         hz_ext += kit_ext

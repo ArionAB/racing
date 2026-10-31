@@ -2275,6 +2275,10 @@ const CLASSES_CARRARA := {
 	# Rezervorul de motorina de la start (POI A): slotul lui portocaliu-saturat citea jucarie in prim-plan
 	# (criticul orb, runda 2 a gauntlet-ului); pe rugina mata, ca utilajele. Un singur nod.
 	"fuel_tank": {"FuelTank_Body": _CRR_RUST},
+	# Biroul de santier (POI A, runda 3): pe `world_material()` stratul triplanar de fibra peste tabla
+	# vopsita (CONCRETE 8 + rama ASPHALT_EDGE) citea scandura maro, „lazi de lemn". `plain` pastreaza
+	# sloturile si opreste doar stratul de detaliu (ca la cruise_boat, Fiordland).
+	"office_container": {"Office_Body": Palette.PLAIN_PREFIX},
 }
 const CLASSES_TRANSFAGARASAN := {
 	"schist_outcrop_a": _TF_OUTCROP, "schist_outcrop_b": _TF_OUTCROP,

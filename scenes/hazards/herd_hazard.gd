@@ -640,6 +640,7 @@ func _build_pool() -> void:
 		var body := AnimatableBody3D.new()
 		body.name = "HerdBody%d" % b
 		body.sync_to_physics = true
+		body.set_meta(Car.HERD_ANIMAL_META, true) # ejectarea de sofer il ignora (#614)
 		var shape := CollisionShape3D.new()
 		var box := BoxShape3D.new()
 		box.size = Vector3(ANIMAL_WIDTH, ANIMAL_HEIGHT * 0.8, ANIMAL_LEN)

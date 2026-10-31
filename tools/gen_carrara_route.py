@@ -622,13 +622,15 @@ if OUT_PATH:
         (LEN("F pod", -55.0), LEN("F pod", 55.0), 0, 2),
     ]
 
-    # ---- sol: drum de praf peste tot, mai putin Marmifera; umed pe C.
-    # Podul e tot PRAF (POI F, gauntlet 31 oct 2026): pe +-62 m era asfaltul implicit al pistei, adica banda
-    # albastru-inchis cu linie de mijloc alba intrerupta (`_build_center_line`) pe un viaduct de caramida
-    # din 1876 din mijlocul carierei — off-paleta si citea autostrada. Pe praf soseaua ia materialul
-    # `DirtRoad` deja existent (zero materiale noi) si pierde marcajele. Intervalul trece peste linia de start.
+    # ---- sol: drum de praf pe TOATA bucla; umed pe C.
+    # Valul 2 (31 oct 2026) a scos ultimele doua bucati de asfalt implicit, fiecare constructor pe a lui:
+    # podul F (+-62 m: banda albastru-inchis cu linia de mijloc alba `_build_center_line` pe un viaduct
+    # de caramida din 1876) si tunelul Marmifera H (citea sosea de oras in muntele de marmura, nu fosta
+    # linie ferata de cariera). Doua intervale, nu `custom_road_surface = "dirt"`: tema ramane pe calea
+    # testata de ambii constructori (DirtRoad existent, grip din `loose_grip`, zero materiale noi).
     dirt = [
-        (IDX("H portal iesire", 2.0), IDX("H portal intrare", -2.0)),
+        (IDX("F pod", 62.0), IDX("F pod", -62.0)),
+        (IDX("F pod", -62.0), IDX("F pod", 62.0)),
     ]
     # Ud doar pana cu 40 m inainte de portal: masinile care alunecau in cotul ud iesisera cu botul
     # pe diagonala in cadrul portalului (ejectare 31 m/s, runda 0).
@@ -665,7 +667,11 @@ wall_m = {w_}
 """ for n_, x_, z_, r_, w_, f_ in BALTI)
 
     # ---- tunelurile: noduri doar-tub la linia de oprire (originea = capatul dinspre start)
-    def tunnel_node(name, tag, tag_end, hw, ceil_h, tail):
+    # Rama si aripile portalului (`frame_class`, `wing_end_height_m`, POI D/H 31 oct 2026): pe clasa
+    # portalului GLB, nu pe beton, iar aripile coboara spre capat (zid-aripa care tine molozul din spate,
+    # zona_d/zona_h). Ambele portaluri GLB sunt pe marmura (`gallery_portal`; `marmifera_portal` din POI H
+    # runda 3, CLASSES_CARRARA), deci rama si aripile la fel. Zero materiale noi.
+    def tunnel_node(name, tag, tag_end, hw, ceil_h, tail, frame_cls="carrara_marble"):
         x, y = pos_at(tag_s[tag])
         x2, y2 = pos_at(tag_s[tag] + 3.0)
         dx, dz = (x2 - x), -(y2 - y)   # directia de mers in lume (gx, gz)
@@ -687,6 +693,8 @@ tunnel_ceiling = {ceil_h}
 camera_tail_m = {tail}
 tube_only = true
 tube_class = "carrara_marble"
+frame_class = "{frame_cls}"
+wing_end_height_m = 1.1
 """
     tunnels_txt = tunnel_node("TunelGalerie", "D portal jos", "D portal sus (E inceput)", 4.0, 9.0, 14.0) \
         + tunnel_node("TunelMarmifera", "H portal intrare", "H portal iesire", 4.0, 7.0, 12.0)
@@ -1495,9 +1503,13 @@ metadata/camera_blocker = true
 """
                 if keep:
                     # Sinele ies 5 m in fata portalului, PE drum (7 cm), in afara tubului: se taie (decizia 6).
+                    # Muschiul (pete verzi saturate pe arc) citea „plastic vopsit" (criticul orb, POI H r1-r2): stins.
                     kit_nodes += f"""metadata/keep_variants = PackedStringArray({", ".join('"%s"' % k for k in keep)})
 
 [node name="Portal_Rail" parent="DecorManual/Portaluri/{nm}"]
+visible = false
+
+[node name="Portal_Moss" parent="DecorManual/Portaluri/{nm}"]
 visible = false
 """
                 print(f"  portal {nm}: fata la ({face[0]:.2f}, {face[1]:.2f}, {face[2]:.2f}), spre exterior ({ox_:+.3f}, {oz_:+.3f}), frac {fr_:.4f}")

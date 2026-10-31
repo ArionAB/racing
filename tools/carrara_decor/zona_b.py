@@ -250,7 +250,7 @@ KIT_Y = {
     "B_ST3S16": 6.67, "B_ST3S17": 6.65, "B_ST3S18": 6.64, "B_ST3S19": 6.58, "B_ST3S20": 6.53,
     "B_ST3S21": 6.48, "B_ST3S22": 6.44, "B_MF11": 15.7, "B_MF12": 15.67, "B_MF13": 15.67,
     "B_MF14": 15.67, "B_MF15": 15.66, "B_MF16": 15.64, "B_MF17": 15.5, "B_MF18": 15.17,
-    "B_MF19": 14.72, "B_ML_T1": -47.57, "B_ML_T1S": 23.82, "B_ML_Ac1": 19.27, "B_ML_T3": -47.57,
+    "B_MF19": 14.72, "B_ML_T1": 24.67, "B_ML_T1S": 23.82, "B_ML_Ac1": 19.27, "B_ML_T3": 6.67,
     # mosoarele nu apar in --decor (mesh-ul lor intra in coacerea DecorManual): cota din --scan, teren plat
     "B_T1_Mosor": 24.67, "B_T2_Mosor": 15.67, "B_T1_Mosor2": 24.37, "B_Ac2_Mosor": 11.07, "B_T3_Mosor": 6.67,
 }

@@ -124,6 +124,7 @@ custom_name = "Stromboli"
 custom_theme = "stromboli"
 custom_road_surface = "dirt"
 custom_sea_level_offset = -22.95
+branch_smooth_level = true
 custom_loose_ranges = Array[Vector2]([Vector2(0.05, 0.13), Vector2(0.44, 0.66)])
 custom_ravines = Array[Vector4]([Vector4(0.045, 0.125, 16, 1), Vector4(0.7, 0.86, 14, 1)])
 custom_cornice_ravines = Array[int]([0, 1])

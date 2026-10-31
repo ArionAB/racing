@@ -4924,6 +4924,12 @@ func _code_points() -> Array[Vector3]:
 ## iar in canal — bucla masurata pe Track17 seed 2 (6 repuneri, 1 ejectare).
 @export var ai_progress_reset_on_respawn: bool = false
 
+## Terenul de langa o banda secundara urmareste PANTA ei, nu treptele punctelor
+## coapte (vezi `TrackSideSampler.smooth_branch_level`). Fals = bit-identic pe
+## pistele existente. Pornit pe Stromboli (#616): scurtatura de 17% avea un prag
+## de pana la 0,9 m la marginea drumului si nu se putea urca inapoi pe ea.
+@export var branch_smooth_level: bool = false
+
 ## Muchii FARA PARAPET pe care AI-ul le trateaza ca pe o prapastie, nu ca pe
 ## o margine de asfalt: fiecare e (frac_start, frac_end, latura, margine_m),
 ## fractii pe LUNGIME (ca in ProbeRace), latura -1 = stanga sensului de mers,
@@ -5709,6 +5715,7 @@ func rebuild() -> void:
 	# lista de argumente, si date DUPA constructie — samplerul le ridica dupa
 	# rape. Goala pe orice pista fara noduri cu flagul.
 	_sampler.late_peaks = _island_peaks
+	_sampler.smooth_branch_level = branch_smooth_level
 	# Debleele, tot dupa constructie: lista goala pe orice pista fara ele.
 	_sampler.cuttings = _cuttings()
 	_sampler.ravine_capes = _ravine_capes()

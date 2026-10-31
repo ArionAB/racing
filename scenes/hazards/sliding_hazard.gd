@@ -216,6 +216,9 @@ var _time: float = 0.0
 var _pivot: Node3D
 ## AnimationPlayer-ul modelului, daca GLB-ul are schelet. Vezi ANIM_* sus.
 var _anim: AnimationPlayer
+## Pasul legat de distanta (elefantul: picioarele nu patineaza, #613). Null la
+## modelele fara oasele de picior numite (vaca, camila: pasul vine din clip).
+var _stride: StrideDriver
 var _anim_rest: StringName = &""
 var _stand_started: bool = false
 var _walk_cycle_speed: float = WALK_CYCLE_SPEED
@@ -466,6 +469,12 @@ func _hook_animation(model: Node3D) -> void:
 	for anim_name: StringName in [ANIM_WALK, ANIM_RUN, _anim_rest]:
 		if anim_name != &"" and _anim.has_animation(anim_name):
 			_anim.get_animation(anim_name).loop_mode = Animation.LOOP_LINEAR
+	var driver := StrideDriver.new()
+	if driver.attach(model, _anim.get_animation(ANIM_WALK)):
+		_stride = driver
+		add_child(driver)
+	else:
+		driver.free()
 
 ## Pasul urmeaza nodul: ce animatie si in ce ritm, din viteza reala (m/s).
 func _animate(speed: float) -> void:
@@ -553,6 +562,8 @@ func _physics_process(delta: float) -> void:
 			_pivot.global_rotate(axis, -flat.length() / roll_radius)
 	if _anim != null and delta > 0.0:
 		_animate(moved.length() / delta)
+	if _stride != null:
+		_stride.advance(moved.length(), delta)
 	# `next_pos`, NU `global_position`: cu sync_to_physics getterul intoarce
 	# transformul de acum UN PAS (scrierea de mai sus ajunge in nod abia la
 	# sincronizarea fizicii), deci `moved` de la pasul urmator ar fi acoperit

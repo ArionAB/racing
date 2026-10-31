@@ -2640,6 +2640,12 @@ static func split_accents(mi: MeshInstance3D, keep_slot) -> bool:
 	accents.material_override = world_material()
 	mi.mesh = pair[0]
 	mi.add_child(accents)
+	# Un mesh cu schelet isi cere pielea si calea spre schelet si pe partea rupta
+	# (calea e relativa la nodul accentului, copil al lui `mi`).
+	if mi.skin != null:
+		accents.skin = mi.skin
+		if not mi.skeleton.is_empty():
+			accents.skeleton = NodePath("../" + String(mi.skeleton))
 	return true
 
 
@@ -2655,7 +2661,11 @@ static func _mesh_with_indices(src: Array, indices: PackedInt32Array) -> ArrayMe
 	var out: Array = []
 	out.resize(Mesh.ARRAY_MAX)
 	for k: int in [Mesh.ARRAY_VERTEX, Mesh.ARRAY_NORMAL, Mesh.ARRAY_TANGENT,
-			Mesh.ARRAY_COLOR, Mesh.ARRAY_TEX_UV, Mesh.ARRAY_TEX_UV2]:
+			Mesh.ARRAY_COLOR, Mesh.ARRAY_TEX_UV, Mesh.ARRAY_TEX_UV2,
+			Mesh.ARRAY_BONES, Mesh.ARRAY_WEIGHTS]:
+		# BONES/WEIGHTS: fara ele mesh-ul rupt iese NESCHELETAT si ramane in poza
+		# de repaus cat se misca oasele — elefantul din Serengeti aluneca fara
+		# sa-si miste un picior (#613).
 		out[k] = src[k]
 	out[Mesh.ARRAY_INDEX] = indices
 	var mesh := ArrayMesh.new()

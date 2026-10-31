@@ -379,6 +379,8 @@ static func themes() -> Dictionary:
 		return _themes_cache
 	_themes_cache = {
 		"desert": {
+			# Rampele de saritura (issue #610): Dunele: piatra rosie a canionului, cu buza de tabla ruginita din minele ei.
+			"ramp_style": {"body": "rock", "lip": "rust_metal"},
 			# DUNELE = banc de test: contactul ramane pe vechiul disc MUL (octogon
 			# inchis), bit-identic. Restul temelor au `prop_contact_soft` implicit
 			# (vezi `_build_prop_contact`).
@@ -455,6 +457,8 @@ static func themes() -> Dictionary:
 			"water": false,
 		},
 		"serengeti": {
+			# Rampele de saritura (issue #610): Serengeti: lespede de granit de kopje, cu buza de argila de termitiera.
+			"ramp_style": {"body": "granite", "lip": "termite_clay"},
 			# SAVANA SUB CER DE FURTUNA (docs/track_briefs/serengeti.md §4).
 			# Prima trecere: doar lumina, cerul, solul si apa; kitul de
 			# savana si clasele de textura vin cu POI-urile. `decor` e stins
@@ -1171,6 +1175,8 @@ static func themes() -> Dictionary:
 			"water": false,
 		},
 		"fiordland": {
+			# Rampele de saritura (issue #610): Fiordland: debarcader de lemn ud, cu rosturi de scanduri.
+			"ramp_style": {"body": "wet_wood", "planks": true},
 			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
 			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
 			"prop_contact_skip": ["chasm_bridge_rail"],
@@ -1388,6 +1394,8 @@ static func themes() -> Dictionary:
 			"water": true,
 		},
 		"jodhpur": {
+			# Rampele de saritura (issue #610): Jodhpur: gresie rosie de fort, cu buza din gresia roz.
+			"ramp_style": {"body": "red_sandstone", "lip": "rose_sandstone"},
 			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
 			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
 			"prop_contact_skip": ["laundry_line", "textile_strip"],
@@ -1671,6 +1679,8 @@ static func themes() -> Dictionary:
 			"water_dusk_dim": 0.55,
 		},
 		"kyoto": {
+			# Rampele de saritura (issue #610): Kyoto: lemn de machiya, cu buza in rosu shu (pe punte ia lemnul puntii).
+			"ramp_style": {"body": "machiya_wood", "lip": "shu_red", "planks": true},
 			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
 			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
 			"prop_contact_skip": ["shiba_fence"],
@@ -1870,6 +1880,8 @@ static func themes() -> Dictionary:
 			"water_lit_wave_len": 1.4,
 		},
 		"monumentvalley": {
+			# Rampele de saritura (issue #610): Monument Valley: gresia mesei, cu buza din calota ei.
+			"ramp_style": {"body": "mv_sandstone", "lip": "mv_cap"},
 			# MONUMENT VALLEY, DUPA-AMIAZA TARZIE (docs/track_briefs/monument_valley.md
 			# §0.1, §4). Pasul 1-2 din §7: lumina, cerul, solul, clasa de gresie si
 			# fundalul provizoriu. Decorul procedural e doar rar (props
@@ -2033,6 +2045,8 @@ static func themes() -> Dictionary:
 		# incidenta mai buna si se supraexpun la aceeasi energie. Diferenta
 		# e vizibila pe umarul masivului, unde panta e de 35-40%.
 		"alpine": {
+			# Rampele de saritura (issue #610): Alpii: granit, cu buza de zapada batatorita.
+			"ramp_style": {"body": "alpine_granite", "lip": "snow"},
 			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
 			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
 			"prop_contact_skip": ["stream_bridge", "mountain_tunnel"],
@@ -2315,6 +2329,8 @@ static func themes() -> Dictionary:
 		#   godot --path . res://tools/Snapshot.tscn -- --track=1 --size=300
 		# si compara nisipul cu #E9DCC0.
 		"island": {
+			# Rampele de saritura (issue #610): Okinawa: mal de recif/calcar, cu buza de scanduri de barca.
+			"ramp_style": {"body": "ok_limestone", "lip": "wood"},
 			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
 			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
 			"prop_contact_skip": ["fence_ranch"],
@@ -2503,6 +2519,8 @@ static func themes() -> Dictionary:
 		# integrarea celor 12 piese de flanc; a stat provizoriu pe props insulare
 		# — palmieri si coral — exact cum Baikal a stat pe props alpine.
 		"stromboli": {
+			# Rampele de saritura (issue #610): Stromboli: piatra vulcanica, cu buza de grinzi de lemn.
+			"ramp_style": {"body": "volcanic_rock", "lip": "wood"},
 			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
 			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
 			"prop_contact_skip": ["vine_row"],
@@ -3339,6 +3357,8 @@ static func themes() -> Dictionary:
 		#    canale de cremul cerut in brief (#E8D9B8): sub pragul de 12 din
 		#    style_bible §5, deci cea mai buna potrivire din paleta existenta.
 		"cappadocia": {
+			# Rampele de saritura (issue #610): Cappadocia: tuf crem sapat, cu buza din tuful rosu al vaii.
+			"ramp_style": {"body": "tuff_cream", "lip": "red_valley_tuff"},
 			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
 			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
 			"prop_contact_skip": ["vine_row"],
@@ -4147,6 +4167,8 @@ static func themes() -> Dictionary:
 				"picks": ["FagarasPlain_A"], "angle_deg": -90.0, "yaw_deg": 0.0, "dy": 12.0},
 		],
 	}, true)
+	# Rampele de saritura (issue #610): piatra de drum de munte, cu buza de beton.
+	tf["ramp_style"] = {"body": "tf_stone", "lip": "concrete"}
 	_themes_cache["transfagarasan"] = tf
 	# HA LONG (Track22, docs/track_briefs/halong.md §4, pasul 3 din §7): pleaca
 	# din COPIA lui "okinawa", singura tema cu mare cu ADANCIMI (water_*_slot,
@@ -12668,8 +12690,69 @@ func _build_rail_posts(spots: Array[Vector3]) -> void:
 	add_child(mesh)
 
 
+const RampVisual := preload("res://scenes/tracks/ramp_visual.gd")
+
+## Stilul vizual al rampelor de saritura, din tema (`ramp_style`, issue #610):
+## `body` = clasa triplanara a corpului, `lip` = clasa benzii de buza (in
+## contrast cu corpul, ca rampa sa se citeasca de departe; "" = fara banda),
+## `planks` = rosturi de scanduri pe suprafata de rulare. Doar clase care exista
+## deja pe pista (garda numara materialele): rampa nu aduce niciodata o textura
+## proprie. Tema fara cheie cade pe roca ei, sau pe `rock`.
+func _ramp_style() -> Dictionary:
+	var raw: Dictionary = theme_flag("ramp_style", {}) as Dictionary
+	var body := String(raw.get("body", ""))
+	if body == "":
+		body = String(theme_flag("rock_class", ""))
+	if body == "" or not Palette.CLASS_TRIPLANAR_SCALE.has(body):
+		body = "rock"
+	var lip := String(raw.get("lip", ""))
+	if lip != "" and not Palette.CLASS_TRIPLANAR_SCALE.has(lip):
+		lip = ""
+	return {"body": body, "lip": lip, "planks": bool(raw.get("planks", false))}
+
+
+## Piciorul unui varf de rampa: acelasi (x, z), cota sub drumul din jur.
+func _ramp_foot(p: Vector3, hint: int) -> Vector3:
+	return Vector3(p.x, RampVisual.floor_y(baked, hint, p), p.z)
+
+
+## Pune vizualul rampei (corp + banda) si corpul fizic cu mesh-ul de coliziune
+## dat. `wood` = puntea de lemn din Kyoto: corpul ia materialul de punte (cu
+## UV), nu clasa temei, si nu mai are banda.
+func _ramp_emit(rv: RefCounted, col_mesh: ArrayMesh, body_name: String,
+		wood: bool = false) -> void:
+	var style := _ramp_style()
+	rv.body.generate_normals()
+	var body_mesh: ArrayMesh = RampVisual.commit(rv.body)
+	if body_mesh != null:
+		var inst := MeshInstance3D.new()
+		inst.name = body_name + "Vis"
+		inst.mesh = body_mesh
+		inst.material_override = _wood_deck_material() if wood \
+			else Palette.triplanar_class_material(String(style["body"]))
+		add_child(inst)
+	if not wood and String(style["lip"]) != "":
+		rv.cap.generate_normals()
+		var cap_mesh: ArrayMesh = RampVisual.commit(rv.cap)
+		if cap_mesh != null:
+			var cap_inst := MeshInstance3D.new()
+			cap_inst.name = body_name + "Lip"
+			cap_inst.mesh = cap_mesh
+			cap_inst.material_override = Palette.triplanar_class_material(String(style["lip"]))
+			cap_inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			add_child(cap_inst)
+	# Doar fizica: corpul poarta numele pe care il cunosc garzile (ProbeLaneClear).
+	_add_mesh_with_collision(col_mesh, Color.WHITE, null, 1.0, 0.5,
+		BaseMaterial3D.CULL_DISABLED, null, null, false, null, body_name)
+
+
 ## Rampa pe jumatatea exterioara a soselei: alegi intre linia sigura si
 ## saritura (airtime).
+##
+## Coliziunea e prisma de 6 triunghiuri de dintotdeauna (profilul de rulare,
+## deci airtime-ul, nu se atinge). Vizualul (issue #610) e un volum INCHIS in
+## stilul temei (`ramp_style`): corpul in clasa ei de material, fustele
+## coborate sub drum, banda de buza in contrast. Vezi RampVisual.
 func _build_ramp(frac: float) -> void:
 	var n := baked.size()
 	var idx := int(frac * float(n)) % n
@@ -12696,9 +12779,39 @@ func _build_ramp(frac: float) -> void:
 	st.add_vertex(fl); st.add_vertex(bl); st.add_vertex(bl_low)
 	st.add_vertex(fr); st.add_vertex(br_low); st.add_vertex(br)
 	st.generate_normals()
-	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1),
-		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
-		null, null, true, null, "Ramp")
+	var col_mesh := st.commit()
+
+	# --- vizual: volum inchis ---
+	var style := _ramp_style()
+	var rv := RampVisual.new()
+	var white := Color.WHITE
+	var dk := RampVisual.shade(RampVisual.AO)
+	var fl_b := _ramp_foot(fl, idx)
+	var fr_b := _ramp_foot(fr, idx)
+	var bl_b := _ramp_foot(bl, idx)
+	var br_b := _ramp_foot(br, idx)
+	# Suprafata de rulare, cu rosturi de scanduri unde stilul le cere.
+	var segs := 7 if bool(style["planks"]) else 1
+	for k in segs:
+		var t0 := float(k) / float(segs)
+		var t1 := float(k + 1) / float(segs)
+		var c0 := dk if segs > 1 else white
+		rv.quad(rv.body, Vector3.UP, fl.lerp(bl, t0), fr.lerp(br, t0),
+			fr.lerp(br, t1), fl.lerp(bl, t1), c0, c0, white, white)
+	rv.quad(rv.body, -side, fl, bl, bl_b, fl_b, white, white, dk, dk)
+	rv.quad(rv.body, side, fr, br, br_b, fr_b, white, white, dk, dk)
+	rv.quad(rv.body, dir, bl, br, br_b, bl_b, white, white, dk, dk)
+	rv.quad(rv.body, -dir, fl, fr, fr_b, fl_b, white, white, dk, dk)
+	# Banda de buza: ultimii metri de pe rampa + marginea de sus a peretelui.
+	var tb := 1.0 - RampVisual.CAP_RUN / (2.0 * half_l)
+	var lift := Vector3.UP * RampVisual.CAP_LIFT
+	rv.stripes(rv.cap, Vector3.UP, fl.lerp(bl, tb) + lift, fr.lerp(br, tb) + lift,
+		bl + lift, br + lift)
+	var fwd := dir * RampVisual.CAP_LIFT
+	var drop := Vector3.UP * 0.4
+	rv.quad(rv.cap, dir, bl + fwd, br + fwd, br - drop + fwd, bl - drop + fwd)
+	_ramp_emit(rv, col_mesh, "Ramp")
+
 
 ## TOROS (Baikal): creasta de gheata impinsa de vant peste culoar — un
 ## kicker natural, mic. Prisma asimetrica pe TOATA latimea benzii (+1 m de
@@ -14065,6 +14178,11 @@ const CHANNEL_JUMP_MAX: float = 13.0
 
 ## Trambulina de peste un canal declarat cu `jump: true`.
 ##
+## Cat coboara MINIM peretele buzei trambulinei peste canal (culeea), in metri:
+## vizual, ca sub buza sa nu se vada prin ea (de obicei coboara pana la apa, vezi
+## `_build_channel_kicker`). Coliziunea nu il stie.
+const CHANNEL_KICKER_ABUTMENT: float = 3.0
+
 ## Spre deosebire de [method _build_ramp], care aseaza o rampa pe JUMATATE de
 ## sosea (alegere de linie, o poti ocoli), asta tine toata latimea: golul e pe
 ## toata soseaua, deci si lansarea trebuie sa fie. Cine intra incet tot cade —
@@ -14094,10 +14212,9 @@ func _build_channel_kicker(ch: Dictionary) -> void:
 		# Laturile.
 		bl, tl, lip - side * hw, br, lip + side * hw, tr,
 	]
-	# Pe puntea de lemn (Kyoto) trambulina e din aceleasi scanduri ca scena, nu
-	# portocaliul rampelor: altfel capatul scenei iesea un bloc galben peste
-	# esafodaj. UV-urile au aceeasi scara ca soseaua (3,5 m) si scandurile de-a
-	# latul; fara tema de lemn mesh-ul e exact cel de dinainte.
+	# Pe puntea de lemn (Kyoto) trambulina e din aceleasi scanduri ca scena: UV-urile
+	# au aceeasi scara ca soseaua (3,5 m) si scandurile de-a latul; fara tema de
+	# lemn mesh-ul de coliziune e exact cel de dinainte.
 	var on_wood := _frac_in_ranges(frac_at(near_i), _wood_deck_ranges())
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -14107,23 +14224,53 @@ func _build_channel_kicker(ch: Dictionary) -> void:
 			st.set_uv(Vector2(rel.dot(side), rel.dot(dir) + rel.y) / 3.5)
 		st.add_vertex(v)
 	st.generate_normals()
-	# Acelasi portocaliu ca rampele si creasta: jucatorul stie ca portocaliu
-	# inseamna "sari", si e singurul cod de culoare cu care e antrenat.
-	# Opt-in pe tema (`kicker_dirt_color`): pe drumul de pamant (Monument) rampa
-	# ia culoarea drumului, nu portocaliul aprins care iesea o placa straina.
-	var kicker_color := Color(0.95, 0.6, 0.1)
-	var kicker_spec := 0.5
-	if bool(theme_flag("kicker_dirt_color", false)):
-		# Culoarea drumului, mai inchisa: materialul plat nu imparte la media
-		# texturii macro ca soseaua de pamant, deci la aceeasi valoare iese mai
-		# luminos. Fara luciu (specular 0): fetele laterale reflectau cerul gri.
-		kicker_color = dirt_road_color() * 0.72
-		kicker_color.a = 1.0
-		kicker_spec = 0.0
-	_add_mesh_with_collision(st.commit(), kicker_color,
-		null, 1.0, kicker_spec, BaseMaterial3D.CULL_DISABLED,
-		null, null, true, _wood_deck_material() if on_wood else null,
-		"ChannelKicker")
+	var col_mesh := st.commit()
+
+	# Vizualul (issue #610), in stilul temei. Inainte era o pana portocalie
+	# plutind peste gol: sub buza nu era nimic, deci din canal sau de pe malul
+	# de aterizare se vedea prin ea. Acum peretele buzei coboara ca un
+	# culee pana in canal, iar laturile si fusta se opresc sub drum.
+	var rv := RampVisual.new()
+	rv.uv_on = on_wood
+	rv.uv_base = base
+	rv.uv_side = side
+	rv.uv_dir = dir
+	var style := _ramp_style()
+	var white := Color.WHITE
+	var dk := RampVisual.shade(RampVisual.AO)
+	var ll := lip - side * hw
+	var lr := lip + side * hw
+	# Culeea coboara pana la apa (sau la fundul albiei uscate), nu o adancime fixa:
+	# altfel peretele plutea peste oglinda apei ca o lada.
+	var origin_y := (ch["origin"] as Vector3).y
+	var bottom_y := origin_y - float(ch["depth"])
+	if ch.has("water_y_drop"):
+		bottom_y = origin_y - float(ch["water_y_drop"])
+	var abut := clampf(lip.y - bottom_y + 1.0, CHANNEL_KICKER_ABUTMENT, 28.0)
+	var ll_b := ll - Vector3.UP * abut
+	var lr_b := lr - Vector3.UP * abut
+	var bl_b := _ramp_foot(bl, near_i)
+	var br_b := _ramp_foot(br, near_i)
+	var segs := 7 if (bool(style["planks"]) and not on_wood) else 1
+	for k in segs:
+		var t0 := float(k) / float(segs)
+		var t1 := float(k + 1) / float(segs)
+		var c0 := dk if segs > 1 else white
+		rv.quad(rv.body, Vector3.UP, bl.lerp(tl, t0), br.lerp(tr, t0),
+			br.lerp(tr, t1), bl.lerp(tl, t1), c0, c0, white, white)
+	rv.quad(rv.body, dir, tl, tr, lr_b, ll_b, white, white, dk, dk)
+	rv.quad(rv.body, -side, bl, tl, ll_b, bl_b, white, white, dk, dk)
+	rv.quad(rv.body, side, br, tr, lr_b, br_b, white, white, dk, dk)
+	rv.quad(rv.body, -dir, bl, br, br_b, bl_b, white, white, dk, dk)
+	rv.quad(rv.body, Vector3.DOWN, bl_b, br_b, lr_b, ll_b, dk, dk, dk, dk)
+	var tb := 1.0 - RampVisual.CAP_RUN / run
+	var lift := Vector3.UP * RampVisual.CAP_LIFT
+	rv.stripes(rv.cap, Vector3.UP, bl.lerp(tl, tb) + lift, br.lerp(tr, tb) + lift,
+		tl + lift, tr + lift)
+	var fwd := dir * RampVisual.CAP_LIFT
+	var drop := Vector3.UP * 0.4
+	rv.quad(rv.cap, dir, tl + fwd, tr + fwd, tr - drop + fwd, tl - drop + fwd)
+	_ramp_emit(rv, col_mesh, "ChannelKicker", on_wood)
 
 	var kicker := FlyoffKicker.new()
 	kicker.name = "Trambulina_%s" % String(ch.get("label", "canal"))
@@ -14282,6 +14429,13 @@ func _build_flyoff(frac: float) -> void:
 	var steps := maxi(2, int(FLYOFF_RISE_LEN / spacing))
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	# Vizualul (issue #610): volum inchis in stilul temei, in paralel cu mesh-ul
+	# de coliziune (care ramane exact cel de dinainte).
+	var rv := RampVisual.new()
+	var white := Color.WHITE
+	var dk := RampVisual.shade(RampVisual.AO)
+	var lift := Vector3.UP * RampVisual.CAP_LIFT
+	var cap_steps := maxi(1, int(RampVisual.CAP_RUN / spacing))
 	for k in steps:
 		var i := (idx + k) % n
 		var j := (idx + k + 1) % n
@@ -14297,6 +14451,15 @@ func _build_flyoff(frac: float) -> void:
 		# fata de rulare
 		st.add_vertex(l0); st.add_vertex(r0); st.add_vertex(l1)
 		st.add_vertex(r0); st.add_vertex(r1); st.add_vertex(l1)
+		var gl0 := _ramp_foot(baked[i] - s0, i)
+		var gr0 := _ramp_foot(baked[i] + s0, i)
+		var gl1 := _ramp_foot(baked[j] - s1, i)
+		var gr1 := _ramp_foot(baked[j] + s1, i)
+		rv.quad(rv.body, Vector3.UP, l0, r0, r1, l1)
+		rv.quad(rv.body, -s0, l0, l1, gl1, gl0, white, white, dk, dk)
+		rv.quad(rv.body, s0, r0, r1, gr1, gr0, white, white, dk, dk)
+		if k >= steps - cap_steps:
+			rv.stripes(rv.cap, Vector3.UP, l0 + lift, r0 + lift, l1 + lift, r1 + lift)
 		# flancurile, coborate pe asfalt — altfel creasta se vede pe dedesubt
 		for pair: Array in [[l0, l1, -s0, -s1], [r0, r1, s0, s1]]:
 			var b0: Vector3 = baked[i] + (pair[2] as Vector3)
@@ -14315,10 +14478,15 @@ func _build_flyoff(frac: float) -> void:
 	st.add_vertex(top_l); st.add_vertex(top_r); st.add_vertex(lip_l)
 	st.add_vertex(top_r); st.add_vertex(lip_r); st.add_vertex(lip_l)
 	st.generate_normals()
-	# Portocaliul rampelor: jucatorul stie deja ca portocaliu = sari.
-	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1),
-		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
-		null, null, true, null, "FlyoffRamp")
+	# Peretele buzei, pana sub drum; banda de buza peste marginea lui de sus.
+	var fdir := (baked[(last + 1) % n] - baked[last]).normalized()
+	var lip_lb := _ramp_foot(lip_l, last)
+	var lip_rb := _ramp_foot(lip_r, last)
+	rv.quad(rv.body, fdir, top_l, top_r, lip_rb, lip_lb, white, white, dk, dk)
+	var fwd := fdir * RampVisual.CAP_LIFT
+	var drop := Vector3.UP * 0.4
+	rv.quad(rv.cap, fdir, top_l + fwd, top_r + fwd, top_r - drop + fwd, top_l - drop + fwd)
+	_ramp_emit(rv, st.commit(), "FlyoffRamp")
 	_build_flyoff_kicker(last)
 	_build_flyoff_net(idx)
 

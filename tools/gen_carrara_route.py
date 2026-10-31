@@ -1387,6 +1387,18 @@ visible = false
 [node name="{nm}" parent="DecorManual/{zname}" instance={glb(path)}]
 transform = {xf_txt}
 """
+                # "spin": {"axis": (x, y, z), "rpm": r, "phase": grade} roteste nodul `Blades` al GLB-ului cu
+                # windmill.gd (wire_saw: axa X, carrara_inventory_crr-d.md). Scriptul inaintea proprietatilor lui.
+                if "spin" in opt:
+                    sp_ = opt["spin"]
+                    ax_ = sp_.get("axis", (1.0, 0.0, 0.0))
+                    if "16_windmill" not in kit_ext:
+                        kit_ext += '[ext_resource type="Script" path="res://scenes/props/windmill.gd" id="16_windmill"]\n'
+                    kit_nodes += (f'script = ExtResource("16_windmill")\n'
+                                  f'rpm = {float(sp_.get("rpm", 30.0))}\n'
+                                  f'axis = Vector3({float(ax_[0])}, {float(ax_[1])}, {float(ax_[2])})\n')
+                    if sp_.get("phase", 0.0):
+                        kit_nodes += f'phase_offset_deg = {float(sp_["phase"])}\n'
                 if "coliziune" in opt:
                     kit_nodes += f'metadata/coliziune = "{opt["coliziune"]}"\n'
                 dt = min(math.hypot(p_[0] - a, p_[2] - c) for a, c in truck_pts)

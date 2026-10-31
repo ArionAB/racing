@@ -944,7 +944,7 @@ transform = Transform3D(-0.61221, 0.0, -0.7907, 0.0, 1.0, 0.0, 0.7907, 0.0, -0.6
 metadata/coliziune = "none"
 
 [node name="C_BlocPerete3" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
-transform = Transform3D(-0.0, 0.0, -0.8, 0.0, 0.8, 0.0, 0.8, 0.0, -0.0, 282.5, -47.57, 48.0)
+transform = Transform3D(-0.0, 0.0, -0.8, 0.0, 0.8, 0.0, 0.8, 0.0, -0.0, 283.0, 2.95, 45.8)
 metadata/coliziune = "none"
 
 [node name="ZonaF" type="Node3D" parent="DecorManual"]

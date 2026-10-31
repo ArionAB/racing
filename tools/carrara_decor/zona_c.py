@@ -244,7 +244,9 @@ ITEMS += [
     # blocuri taiate la piciorul peretelui din fund, langa conul lui
     _world("C_BlocPerete1", "rocks/marble_block_b.glb", 229.0, 68.5, yaw_rel=20.0, coliziune="none"),
     _world("C_BlocPerete2", "rocks/marble_block_a.glb", 215.5, 66.0, yaw_rel=-15.0, coliziune="none"),
-    _world("C_BlocPerete3", "rocks/marble_block_c.glb", 282.5, 48.0, yaw_rel=0.0, scale=0.8, coliziune="none"),
+    # la z 48 statea pe panta peretelui (3.1 -> 8.8 m pe 2.4 m) si `--decor` a dat cota -47.57 (raza pornea din
+    # stanca): mutat la piciorul pantei, cota din ProbeCarraraHmap --sample (teren minim 2.9 - 0.03).
+    _world("C_BlocPerete3", "rocks/marble_block_c.glb", 283.0, 45.8, yaw_rel=0.0, scale=0.8, coliziune="none"),
 ]
 
 KIT_Y = {
@@ -286,7 +288,7 @@ KIT_Y = {
     "C_InelP4_107": 0.29, "C_InelP4_108": 0.3, "C_InelP4_109": 0.33, "C_InelP4_110": 0.34,
     "C_InelP4_111": 0.19, "C_ConPortal": 2.41, "C_ConTaietura": 1.57, "C_ConFund": 1.67,
     "C_ConCot1": 1.86, "C_BlocTaiat1": 1.48, "C_BlocTaiat2": 1.3, "C_BlocTaiat3": 1.7,
-    "C_BlocPerete1": 1.67, "C_BlocPerete2": 1.67, "C_BlocPerete3": -47.57,
+    "C_BlocPerete1": 1.67, "C_BlocPerete2": 1.67, "C_BlocPerete3": 2.95,
     # lampile nu ies in `--decor` (AABB nul dupa coacerea DecorManual, ca A_Lampa): terenul minim din
     # ProbeCarraraHmap --sample pe 3x3 puncte ale amprentei (1.6 x 1.5 m), minus 3 cm.
     "C_LampaGalerieD": 3.4, "C_LampaGalerieS": 4.22,

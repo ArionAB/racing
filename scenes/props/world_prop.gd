@@ -2244,7 +2244,7 @@ const _TF_JNEAPAN_BUSH := {"Jneapan_Needles": _TF_JNEAPAN}
 ## aici (fetele pistei sunt cod, nu GLB-uri).
 const _CRR_MARBLE: String = Palette.TRI_PREFIX + "carrara_marble"
 const _CRR_RUST: String = Palette.TRI_PREFIX + "rust_metal"
-const _CRR_HOUSE := {"House_Stone": _TF_STONE, "House_Roof": _OK_ROOF}
+const _CRR_HOUSE := {"House_Stone": _CRR_MARBLE, "House_Roof": Palette.ATLAS_PREFIX}
 const CLASSES_CARRARA := {
 	"beech_tree_a": {"Beech_Leaves": _TF_BEECH},
 	"beech_tree_b": {"Beech_Leaves": _TF_BEECH},
@@ -2269,11 +2269,19 @@ const CLASSES_CARRARA := {
 	"ponti_di_vara": {"Viaduct_Marble": _CRR_MARBLE,
 		"Viaduct_Brick": Palette.TRI_PREFIX + "ok_roof"},
 	"marmifera_portal": {"Portal_Stone": _TF_STONE},
-	# Valul 2 al kitului (carrara_inventory_crr-d/e.md). Satul Colonnata: zidaria pe `tf_stone`,
-	# tigla pe `ok_roof`, ca la viaduct (`roof_tiles` iese aproape alb pe tema asta, iar `ok_roof`
-	# e deja pe Track23, deci satul nu adauga material). `House_Stone`/`House_Roof` sunt si chei
-	# GLOBALE (`village_house` din `Track._LANDMARKS`); intrarea pe fisier de aici le suprascrie.
-	"colonnata_church": {"Church_Stone": _TF_STONE, "Church_Roof": _OK_ROOF},
+	# Valul 2 al kitului (carrara_inventory_crr-d/e.md). Satul Colonnata (POI G, 31 oct 2026): zidaria pe
+	# marmura carierei, tigla pe ATLAS (TILE_TERRACOTTA 23). Masurat pe captura de aproape a satului, fata
+	# in soare / fata in umbra / acoperisul (bara_poi_G: zidurile H 28-36, tigla H 23-26 S 0,62-0,71):
+	#   tf_stone + ok_roof (vechiul)   zid H 224-227 S 0,23 (ALBASTRU)       tigla H 4 S 0,82 (rosu)
+	#   atlas + atlas                  zid H 22-24 S 0,16-0,18, dungi ondulate ca de scandura
+	#   garden_stone + atlas           zid H 24-26 S 0,30 dar V 0,34-0,37 (inchis) si +1 material
+	#   carrara_marble + atlas (ales)  zid H 27-29 S 0,24-0,30 V 0,48-0,53, asize de bloc; tigla H 21 S 0,79
+	# `tf_stone` e tentat spre albastru ca sa compenseze soarele portocaliu al Transfagarasanului, iar pe
+	# Carrara fata din umbra ia si ambientul albastru. Marmura e deja clasa turnului si a blocurilor: zero
+	# materiale noi, iar cand se regleaza culoarea marmurei (decizia deschisa 1) se regleaza si satul.
+	# `House_Stone`/`House_Roof` sunt si chei GLOBALE (`village_house` din `Track._LANDMARKS`); intrarea pe
+	# fisier de aici le suprascrie.
+	"colonnata_church": {"Church_Stone": _CRR_MARBLE, "Church_Roof": Palette.ATLAS_PREFIX},
 	"colonnata_house_a": _CRR_HOUSE,
 	"colonnata_house_b": _CRR_HOUSE,
 	"colonnata_house_c": _CRR_HOUSE,

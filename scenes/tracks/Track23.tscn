@@ -16,6 +16,11 @@
 [ext_resource type="PackedScene" path="res://assets/models/carrara/props/marble_block_hooked.glb" id="12_hooked"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/props/lizza_sled.glb" id="13_sled"]
 [ext_resource type="Script" path="res://scenes/props/windmill.gd" id="16_windmill"]
+[ext_resource type="Script" path="res://scenes/props/mesh_forest.gd" id="mf_script"]
+[ext_resource type="Script" path="res://scenes/props/mesh_forest_zone.gd" id="mf_zone"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/plants/chestnut_tree_a.glb" id="mf_chestnut_tree_a"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/plants/chestnut_tree_b.glb" id="mf_chestnut_tree_b"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/plants/ginestra_fiorita.glb" id="mf_ginestra_fiorita"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/structures/ponti_di_vara.glb" id="k_ponti_di_vara"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/structures/gallery_portal.glb" id="k_gallery_portal"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/structures/marmifera_portal.glb" id="k_marmifera_portal"]
@@ -49,6 +54,10 @@
 [ext_resource type="PackedScene" path="res://assets/models/carrara/props/pipe_run.glb" id="k_pipe_run"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/vehicles/chain_saw_crawler.glb" id="k_chain_saw_crawler"]
 [ext_resource type="PackedScene" path="res://assets/models/transfagarasan/rocks/scree_cone.glb" id="k_scree_cone"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/buildings/colonnata_church.glb" id="k_colonnata_church"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/buildings/colonnata_house_a.glb" id="k_colonnata_house_a"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/buildings/colonnata_house_b.glb" id="k_colonnata_house_b"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/buildings/colonnata_house_c.glb" id="k_colonnata_house_c"]
 
 
 [sub_resource type="BoxShape3D" id="Box_PlasaA"]
@@ -92,6 +101,435 @@ _data = {
 "tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0)
 }
 point_count = 7
+
+[sub_resource type="Resource" id="MFZ_0"]
+script = ExtResource("mf_zone")
+label = "lizza 0"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(-222.96, 0, 75.46)
+radius = 8.0
+
+[sub_resource type="Resource" id="MFZ_1"]
+script = ExtResource("mf_zone")
+label = "lizza 1"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(-229.30, 0, 80.80)
+radius = 8.0
+
+[sub_resource type="Resource" id="MFZ_2"]
+script = ExtResource("mf_zone")
+label = "lizza 2"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(-235.70, 0, 86.20)
+radius = 8.0
+
+[sub_resource type="Resource" id="MFZ_3"]
+script = ExtResource("mf_zone")
+label = "lizza 3"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(-242.09, 0, 91.52)
+radius = 8.0
+
+[sub_resource type="Resource" id="MFZ_4"]
+script = ExtResource("mf_zone")
+label = "lizza 4"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(-248.70, 0, 97.10)
+radius = 8.0
+
+[sub_resource type="Resource" id="MFZ_5"]
+script = ExtResource("mf_zone")
+label = "lizza 5"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(-255.30, 0, 102.60)
+radius = 8.0
+
+[sub_resource type="Resource" id="MFZ_6"]
+script = ExtResource("mf_zone")
+label = "lizza 6"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(-261.90, 0, 108.14)
+radius = 8.0
+
+[sub_resource type="Resource" id="MFZ_7"]
+script = ExtResource("mf_zone")
+label = "lizza 7"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(-271.10, 0, 115.86)
+radius = 8.0
+
+[sub_resource type="Resource" id="MFZ_8"]
+script = ExtResource("mf_zone")
+label = "lizza 8"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(-278.76, 0, 122.28)
+radius = 8.0
+
+[sub_resource type="Resource" id="MFZ_9"]
+script = ExtResource("mf_zone")
+label = "lizza 9"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(-283.40, 0, 126.20)
+radius = 8.0
+
+[sub_resource type="Resource" id="MFZ_10"]
+script = ExtResource("mf_zone")
+label = "camion2 0"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(-217.00, 0, 118.00)
+radius = 8.0
+
+[sub_resource type="Resource" id="MFZ_11"]
+script = ExtResource("mf_zone")
+label = "camion2 1"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(-222.00, 0, 124.00)
+radius = 8.0
+
+[sub_resource type="Resource" id="MFZ_12"]
+script = ExtResource("mf_zone")
+label = "camion2 2"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(-227.00, 0, 130.00)
+radius = 8.0
+
+[sub_resource type="Resource" id="MFZ_13"]
+script = ExtResource("mf_zone")
+label = "camion2 3"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(-233.00, 0, 137.00)
+radius = 8.0
+
+[sub_resource type="Resource" id="MFZ_14"]
+script = ExtResource("mf_zone")
+label = "camion2 4"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(-239.00, 0, 144.00)
+radius = 8.0
+
+[sub_resource type="Resource" id="MFZ_15"]
+script = ExtResource("mf_zone")
+label = "camion2 5"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(-245.00, 0, 151.00)
+radius = 8.0
+
+[sub_resource type="Resource" id="MFZ_16"]
+script = ExtResource("mf_zone")
+label = "sat S2"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(-338.00, 0, -18.00)
+radius = 26.0
+
+[sub_resource type="Resource" id="MFZ_17"]
+script = ExtResource("mf_zone")
+label = "sat SV"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(-360.00, 0, 124.00)
+radius = 24.0
+
+[sub_resource type="Resource" id="MFZ_18"]
+script = ExtResource("mf_zone")
+label = "ginestra margini"
+kind = 0
+species = PackedStringArray("ginestra_fiorita")
+weights = PackedFloat32Array(1.0)
+spacing = 3.6
+edge_clear_m = 2.5
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 1.2
+scale_max = 1.8
+seed_value = 71
+frac_from = 0.7280
+frac_to = 0.9250
+side = 0
+lat_min = 7.5
+lat_max = 13.0
+
+[sub_resource type="Resource" id="MFZ_19"]
+script = ExtResource("mf_zone")
+label = "castani stanga"
+kind = 0
+species = PackedStringArray("chestnut_tree_a", "chestnut_tree_b")
+weights = PackedFloat32Array(0.5, 0.5)
+spacing = 8.5
+edge_clear_m = 12.0
+shadow_m = 30.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 72
+frac_from = 0.7280
+frac_to = 0.9250
+side = -1
+lat_min = 15.0
+lat_max = 140.0
+
+[sub_resource type="Resource" id="MFZ_20"]
+script = ExtResource("mf_zone")
+label = "castani coama"
+kind = 0
+species = PackedStringArray("chestnut_tree_a", "chestnut_tree_b")
+weights = PackedFloat32Array(0.5, 0.5)
+spacing = 9.0
+edge_clear_m = 24.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.9
+scale_max = 1.25
+seed_value = 73
+frac_from = 0.7380
+frac_to = 0.8380
+side = 1
+lat_min = 30.0
+lat_max = 80.0
+
+[sub_resource type="Resource" id="MFZ_21"]
+script = ExtResource("mf_zone")
+label = "castani dreapta S"
+kind = 0
+species = PackedStringArray("chestnut_tree_a", "chestnut_tree_b")
+weights = PackedFloat32Array(0.5, 0.5)
+spacing = 8.5
+edge_clear_m = 12.0
+shadow_m = 30.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 74
+frac_from = 0.8430
+frac_to = 0.9050
+side = 1
+lat_min = 15.0
+lat_max = 100.0
+
+[sub_resource type="Resource" id="MFZ_22"]
+script = ExtResource("mf_zone")
+label = "ginestra versant"
+kind = 0
+species = PackedStringArray("ginestra_fiorita")
+weights = PackedFloat32Array(1.0)
+spacing = 5.5
+edge_clear_m = 8.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 1.2
+scale_max = 1.9
+seed_value = 75
+frac_from = 0.7280
+frac_to = 0.9250
+side = -1
+lat_min = 13.0
+lat_max = 60.0
 
 [sub_resource type="Curve3D" id="Curve3D_carrara"]
 closed = true
@@ -2155,3 +2593,137 @@ transform = Transform3D(-0.25882, -0.03033, 0.96545, 0.0, 0.99951, 0.0314, -0.96
 
 [node name="F_BermaV_S" parent="DecorManual/ZonaF" instance=ExtResource("k_safety_berm")]
 transform = Transform3D(-0.25882, -0.03033, -0.96545, 0.0, 0.99951, -0.0314, 0.96593, -0.00813, -0.25869, -173.14, 41.89, 120.2)
+
+[node name="ZonaG" type="Node3D" parent="DecorManual"]
+
+[node name="G_Turn" parent="DecorManual/ZonaG" instance=ExtResource("k_stone_tower")]
+transform = Transform3D(-0.25882, 0.0, 0.96593, 0.0, 1.0, 0.0, -0.96593, 0.0, -0.25882, -198.685, 41.02, 133.0)
+
+[node name="G_CisternaA" parent="DecorManual/ZonaG" instance=ExtResource("k_water_tank")]
+transform = Transform3D(-0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.0, -191.86, 41.29, 128.0)
+
+[node name="G_CisternaB" parent="DecorManual/ZonaG" instance=ExtResource("k_water_tank")]
+transform = Transform3D(-0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.0, -193.06, 41.25, 130.6)
+
+[node name="G_Bloc1" parent="DecorManual/ZonaG" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(-0.13917, 0.0, 0.99027, 0.0, 1.0, 0.0, -0.99027, 0.0, -0.13917, -203.86, 40.9, 122.5)
+
+[node name="G_Bloc2" parent="DecorManual/ZonaG" instance=ExtResource("k_marble_block_b")]
+transform = Transform3D(0.08716, 0.0, 0.99619, 0.0, 1.0, 0.0, -0.99619, 0.0, 0.08716, -210.685, 40.67, 122.6)
+
+[node name="G_Bloc3" parent="DecorManual/ZonaG" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(-0.20791, 0.0, 0.97815, 0.0, 1.0, 0.0, -0.97815, 0.0, -0.20791, -215.86, 40.5, 122.4)
+
+[node name="G_CastanL01" parent="DecorManual/ZonaG" instance=ExtResource("k_chestnut_tree_a")]
+transform = Transform3D(-0.34202, 0.0, 0.93969, 0.0, 1.0, 0.0, -0.93969, 0.0, -0.34202, -248.5, 39.41, 131.0)
+metadata/coliziune = "trunk"
+
+[node name="G_CastanL03" parent="DecorManual/ZonaG" instance=ExtResource("k_chestnut_tree_a")]
+transform = Transform3D(0.84829, 0.0, -0.52954, 0.0, 1.0, 0.0, 0.52954, 0.0, 0.84829, -301.742, 37.81, 127.429)
+metadata/coliziune = "trunk"
+
+[node name="G_CastanL04" parent="DecorManual/ZonaG" instance=ExtResource("k_chestnut_tree_b")]
+transform = Transform3D(-0.468, 0.0, 0.88373, 0.0, 1.0, 0.0, -0.88373, 0.0, -0.468, -320.764, 37.32, 121.82)
+metadata/coliziune = "trunk"
+
+[node name="G_CastanL05" parent="DecorManual/ZonaG" instance=ExtResource("k_chestnut_tree_a")]
+transform = Transform3D(0.65832, 0.0, -0.75274, 0.0, 1.0, 0.0, 0.75274, 0.0, 0.65832, -346.076, 36.22, 81.251)
+metadata/coliziune = "trunk"
+
+[node name="G_CastanL06" parent="DecorManual/ZonaG" instance=ExtResource("k_chestnut_tree_b")]
+transform = Transform3D(0.99787, 0.0, 0.06528, 0.0, 1.0, 0.0, -0.06528, 0.0, 0.99787, -345.477, 35.61, 57.393)
+metadata/coliziune = "trunk"
+
+[node name="G_CastanL07" parent="DecorManual/ZonaG" instance=ExtResource("k_chestnut_tree_a")]
+transform = Transform3D(-0.99678, 0.0, -0.08022, 0.0, 1.0, 0.0, 0.08022, 0.0, -0.99678, -343.327, 35.07, 37.698)
+metadata/coliziune = "trunk"
+
+[node name="G_CastanL08" parent="DecorManual/ZonaG" instance=ExtResource("k_chestnut_tree_b")]
+transform = Transform3D(0.49963, 0.0, 0.86624, 0.0, 1.0, 0.0, -0.86624, 0.0, 0.49963, -332.062, 34.35, 15.865)
+metadata/coliziune = "trunk"
+
+[node name="G_CastanL09" parent="DecorManual/ZonaG" instance=ExtResource("k_chestnut_tree_a")]
+transform = Transform3D(0.2192, 0.0, -0.97568, 0.0, 1.0, 0.0, 0.97568, 0.0, 0.2192, -317.768, 33.64, -1.184)
+metadata/coliziune = "trunk"
+
+[node name="G_CastanL10" parent="DecorManual/ZonaG" instance=ExtResource("k_chestnut_tree_b")]
+transform = Transform3D(-0.74738, 0.0, -0.6644, 0.0, 1.0, 0.0, 0.6644, 0.0, -0.74738, -308.081, 31.86, -31.751)
+metadata/coliziune = "trunk"
+
+[node name="G_CastanL11" parent="DecorManual/ZonaG" instance=ExtResource("k_chestnut_tree_a")]
+transform = Transform3D(-0.18147, 0.0, 0.9834, 0.0, 1.0, 0.0, -0.9834, 0.0, -0.18147, -318.512, 31.29, -39.154)
+metadata/coliziune = "trunk"
+
+[node name="G_CastanL12" parent="DecorManual/ZonaG" instance=ExtResource("k_chestnut_tree_b")]
+transform = Transform3D(0.75484, 0.0, -0.65591, 0.0, 1.0, 0.0, 0.65591, 0.0, 0.75484, -338.726, 30.63, -49.04)
+metadata/coliziune = "trunk"
+
+[node name="G_CastanL13" parent="DecorManual/ZonaG" instance=ExtResource("k_chestnut_tree_a")]
+transform = Transform3D(-0.55222, 0.0, 0.8337, 0.0, 1.0, 0.0, -0.8337, 0.0, -0.55222, -352.883, 29.87, -78.617)
+metadata/coliziune = "trunk"
+
+[node name="G_CastanL14" parent="DecorManual/ZonaG" instance=ExtResource("k_chestnut_tree_b")]
+transform = Transform3D(-0.99951, 0.0, -0.03143, 0.0, 1.0, 0.0, 0.03143, 0.0, -0.99951, -345.401, 29.36, -106.029)
+metadata/coliziune = "trunk"
+
+[node name="G_CastanR01" parent="DecorManual/ZonaG" instance=ExtResource("k_chestnut_tree_a")]
+transform = Transform3D(0.87755, 0.0, 0.47948, 0.0, 1.0, 0.0, -0.47948, 0.0, 0.87755, -286.609, 33.62, 16.644)
+metadata/coliziune = "trunk"
+
+[node name="G_CastanR02" parent="DecorManual/ZonaG" instance=ExtResource("k_chestnut_tree_b")]
+transform = Transform3D(-0.98651, 0.0, 0.16368, 0.0, 1.0, 0.0, -0.16368, 0.0, -0.98651, -269.923, 32.9, -4.207)
+metadata/coliziune = "trunk"
+
+[node name="G_CastanR03" parent="DecorManual/ZonaG" instance=ExtResource("k_chestnut_tree_a")]
+transform = Transform3D(0.75988, 0.0, -0.65006, 0.0, 1.0, 0.0, 0.65006, 0.0, 0.75988, -268.859, 32.29, -29.794)
+metadata/coliziune = "trunk"
+
+[node name="G_CastanR04" parent="DecorManual/ZonaG" instance=ExtResource("k_chestnut_tree_b")]
+transform = Transform3D(0.15502, 0.0, 0.98791, 0.0, 1.0, 0.0, -0.98791, 0.0, 0.15502, -285.759, 31.19, -56.786)
+metadata/coliziune = "trunk"
+
+[node name="G_CastanR05" parent="DecorManual/ZonaG" instance=ExtResource("k_chestnut_tree_a")]
+transform = Transform3D(-0.86203, 0.0, -0.50687, 0.0, 1.0, 0.0, 0.50687, 0.0, -0.86203, -301.746, 30.45, -68.733)
+metadata/coliziune = "trunk"
+
+[node name="G_CastanR06" parent="DecorManual/ZonaG" instance=ExtResource("k_chestnut_tree_b")]
+transform = Transform3D(0.62948, 0.0, -0.77702, 0.0, 1.0, 0.0, 0.77702, 0.0, 0.62948, -315.77, 30.18, -75.459)
+metadata/coliziune = "trunk"
+
+[node name="G_Biserica" parent="DecorManual/ZonaG" instance=ExtResource("k_colonnata_church")]
+transform = Transform3D(0.28873, 0.0, -0.95741, 0.0, 1.0, 0.0, 0.95741, 0.0, 0.28873, -334.864, 31.36, -22.084)
+
+[node name="G_CasaA1" parent="DecorManual/ZonaG" instance=ExtResource("k_colonnata_house_a")]
+transform = Transform3D(0.50468, 0.0, -0.86331, 0.0, 1.0, 0.0, 0.86331, 0.0, 0.50468, -322.919, 31.5, -26.753)
+
+[node name="G_CasaB1" parent="DecorManual/ZonaG" instance=ExtResource("k_colonnata_house_b")]
+transform = Transform3D(0.78741, 0.0, -0.61643, 0.0, 1.0, 0.0, 0.61643, 0.0, 0.78741, -334.557, 30.98, -33.108)
+
+[node name="G_CasaC1" parent="DecorManual/ZonaG" instance=ExtResource("k_colonnata_house_c")]
+transform = Transform3D(0.50873, 0.0, -0.86092, 0.0, 1.0, 0.0, 0.86092, 0.0, 0.50873, -347.258, 30.87, -31.472)
+
+[node name="G_CasaB2" parent="DecorManual/ZonaG" instance=ExtResource("k_colonnata_house_b")]
+transform = Transform3D(0.44981, 0.0, -0.89313, 0.0, 1.0, 0.0, 0.89313, 0.0, 0.44981, -323.331, 32.42, -15.443)
+
+[node name="G_CasaA2" parent="DecorManual/ZonaG" instance=ExtResource("k_colonnata_house_a")]
+transform = Transform3D(0.49075, 0.0, -0.8713, 0.0, 1.0, 0.0, 0.8713, 0.0, 0.49075, -330.713, 33.55, -1.213)
+
+[node name="G_CasaC2" parent="DecorManual/ZonaG" instance=ExtResource("k_colonnata_house_c")]
+transform = Transform3D(0.33305, 0.0, -0.94291, 0.0, 1.0, 0.0, 0.94291, 0.0, 0.33305, -354.677, 31.93, -15.504)
+
+[node name="G_CasaA3" parent="DecorManual/ZonaG" instance=ExtResource("k_colonnata_house_a")]
+transform = Transform3D(0.17416, 0.0, -0.98472, 0.0, 1.0, 0.0, 0.98472, 0.0, 0.17416, -323.426, 32.8, -12.061)
+
+[node name="G_CasaSV1" parent="DecorManual/ZonaG" instance=ExtResource("k_colonnata_house_c")]
+transform = Transform3D(-0.20672, 0.0, 0.9784, 0.0, 1.0, 0.0, -0.9784, 0.0, -0.20672, -347.979, 36.92, 123.281)
+
+[node name="G_CasaSV2" parent="DecorManual/ZonaG" instance=ExtResource("k_colonnata_house_b")]
+transform = Transform3D(-0.33556, 0.0, 0.94202, 0.0, 1.0, 0.0, -0.94202, 0.0, -0.33556, -368.132, 36.41, 115.522)
+
+[node name="G_TurnSV" parent="DecorManual/ZonaG" instance=ExtResource("k_stone_tower")]
+transform = Transform3D(0.11419, 0.0, 0.99346, 0.0, 1.0, 0.0, -0.99346, 0.0, 0.11419, -343.857, 37.03, 146.028)
+
+[node name="PadureMasa" type="Node3D" parent="."]
+script = ExtResource("mf_script")
+scenes = Array[PackedScene]([ExtResource("mf_chestnut_tree_a"), ExtResource("mf_chestnut_tree_b"), ExtResource("mf_ginestra_fiorita")])
+zones = Array[ExtResource("mf_zone")]([SubResource("MFZ_0"), SubResource("MFZ_1"), SubResource("MFZ_2"), SubResource("MFZ_3"), SubResource("MFZ_4"), SubResource("MFZ_5"), SubResource("MFZ_6"), SubResource("MFZ_7"), SubResource("MFZ_8"), SubResource("MFZ_9"), SubResource("MFZ_10"), SubResource("MFZ_11"), SubResource("MFZ_12"), SubResource("MFZ_13"), SubResource("MFZ_14"), SubResource("MFZ_15"), SubResource("MFZ_16"), SubResource("MFZ_17"), SubResource("MFZ_18"), SubResource("MFZ_19"), SubResource("MFZ_20"), SubResource("MFZ_21"), SubResource("MFZ_22")])

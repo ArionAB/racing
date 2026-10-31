@@ -277,6 +277,19 @@ const FogCorridorHazardScript = preload("res://scenes/hazards/fog_corridor_hazar
 ## refolosit aici).
 @export var impact_sfx: StringName = &"splash"
 
+@export_group("Efect in calm (fara fizica plina)")
+## Un efect MIC, simtit, cat `_physics_enabled` e false (Torrent: CALM si
+## TELEGRAPH, issue #493 — fara el, jumatate din ciclu trecea prin apa fara sa
+## se simta nimic). NU e SURGE: fara forta in jos, fara albire, fara yaw. Toate
+## implicit 0 (cascadele de ploaie/teatru raman inerte); `TorrentCycle` le
+## seteaza din propriile `calm_*`. Franare orizontala (1/s), ca `drag`.
+@export_range(0.0, 1.0, 0.01) var calm_drag: float = 0.0
+## Impingere laterala la intrare (m/s, pe `push_dir`), o singura data.
+@export_range(0.0, 6.0, 0.1) var calm_push_speed: float = 0.0
+## Shake + strop la intrare (`Car.splash`) si picurat dupa iesire (s).
+@export_range(0.0, 1.0, 0.05) var calm_splash_trauma: float = 0.0
+@export_range(0.0, 6.0, 0.5) var calm_douse_seconds: float = 0.0
+
 @export_group("Albire")
 ## Cat ar trebui sa tina albirea vizuala (s) — vezi antetul: efectiv, albirea
 ## e ceata locala cat esti in zona, nu un ceas separat. Export pastrat pentru
@@ -405,6 +418,7 @@ func _physics_process(delta: float) -> void:
 			_visual.trigger_splash_burst()
 		_cars_inside[car] = true
 		if not _physics_enabled:
+			_apply_calm_effect(car, entering, delta)
 			continue
 		# IMPACTUL la intrare (runda 3, verdict la volan): lateral + yaw +
 		# shake + picurat + sfx, o SINGURA data per intrare, nu la fiecare
@@ -532,6 +546,28 @@ func _apply_entry_impact(car: Car) -> void:
 		car.douse(douse_seconds)
 	if impact_sfx != &"":
 		AudioManager.play_sfx(impact_sfx)
+
+
+## Efectul mic din faza calma (vezi grupul `calm_*`): franare usoara continua
+## + la intrare o impingere laterala mica, splash/shake mic si picurat. Fara
+## sfx (un fir de apa nu loveste), fara forta in jos, fara yaw. Acelasi apel
+## pentru orice `Car` (AI onest).
+func _apply_calm_effect(car: Car, entering: bool, delta: float) -> void:
+	if calm_drag > 0.0:
+		var v := car.velocity
+		car.velocity = Vector3(
+			v.x * (1.0 - calm_drag * delta), v.y, v.z * (1.0 - calm_drag * delta))
+	if not entering:
+		return
+	if calm_push_speed > 0.0 and push_dir.length_squared() > 0.0001:
+		var world_dir := global_transform.basis * push_dir.normalized()
+		world_dir.y = 0.0
+		if world_dir.length_squared() > 0.0001:
+			car.apply_sweep(world_dir.normalized() * calm_push_speed)
+	if calm_splash_trauma > 0.0:
+		car.splash(calm_splash_trauma)
+	if calm_douse_seconds > 0.0:
+		car.douse(calm_douse_seconds)
 
 
 # ---------------------------------------------------------------- pentru sonde

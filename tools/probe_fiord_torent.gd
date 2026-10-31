@@ -20,6 +20,8 @@ const TRACK := "res://scenes/tracks/Track16.tscn"
 const CAR_SCENE := "res://scenes/cars/Car.tscn"
 const WaypointDriver := preload("res://tools/probe_waypoint_driver.gd")
 
+const CALM_LOSS_MIN: float = 8.0
+const CALM_LOSS_MAX: float = 18.0
 var _failed: bool = false
 ## Reglaj din linia de comanda (vezi antetul): `--only=a|b|c` ruleaza o singura
 ## verificare; `--drag=`, `--force=` suprascriu calibrarea perdelei in (b);
@@ -28,6 +30,10 @@ var _only: String = ""
 var _drag_override: float = -1.0
 var _force_override: float = -1.0
 var _car_override: String = ""
+## `--calm-zero`: SABOTAJ — toate `calm_*` pe zero; garda (b) trebuie sa pice.
+var _calm_zero: bool = false
+## `--calm-drag=` suprascrie franarea calma (tunare).
+var _calm_drag_override: float = -1.0
 
 
 func _parse_args() -> void:
@@ -38,6 +44,10 @@ func _parse_args() -> void:
 			_drag_override = float(arg.trim_prefix("--drag="))
 		elif arg.begins_with("--force="):
 			_force_override = float(arg.trim_prefix("--force="))
+		elif arg == "--calm-zero":
+			_calm_zero = true
+		elif arg.begins_with("--calm-drag="):
+			_calm_drag_override = float(arg.trim_prefix("--calm-drag="))
 		elif arg.begins_with("--car="):
 			_car_override = arg.trim_prefix("--car=")
 
@@ -164,9 +174,12 @@ func _test_physics() -> void:
 	print("  CALM : pierdere viteza=%.1f%% fog_amount=%.3f" % [calm.loss_pct, calm.fog_max])
 	print("  SURGE: pierdere viteza=%.1f%% fog_amount=%.3f" % [surge.loss_pct, surge.fog_max])
 
-	var calm_ok: bool = float(calm.loss_pct) < 3.0 and float(calm.fog_max) <= 0.001
+	# Issue #493: CALM nu mai e gol. Un efect mic, simtit (franare usoara, fara
+	# albire), strict sub SURGE. Fereastra masurata cu gaz plin (masina
+	# recupereaza o parte din viteza), nu pierderea bruta din `calm_drag`.
+	var calm_ok: bool = float(calm.loss_pct) >= CALM_LOSS_MIN 		and float(calm.loss_pct) <= CALM_LOSS_MAX 		and float(calm.loss_pct) < float(surge.loss_pct) 		and float(calm.fog_max) <= 0.001
 	var surge_ok: bool = float(surge.loss_pct) > 12.0 and float(surge.fog_max) > 0.0
-	print("  CALM contract (pierdere<3%%, fog=0): %s" % ("OK" if calm_ok else "<-- PICAT"))
+	print("  CALM contract (pierdere %.0f..%.0f%%, < SURGE, fog=0): %s" % [CALM_LOSS_MIN, CALM_LOSS_MAX, "OK" if calm_ok else "<-- PICAT"])
 	print("  SURGE contract (pierdere>12%%, fog>0): %s" % ("OK" if surge_ok else "<-- PICAT"))
 	if not calm_ok or not surge_ok:
 		_failed = true
@@ -230,6 +243,13 @@ func _run_physics_case(force_surge: bool) -> Dictionary:
 		torrent.drag = _drag_override
 	if _force_override >= 0.0:
 		torrent.force_accel = _force_override
+	if _calm_drag_override >= 0.0:
+		torrent.calm_drag = _calm_drag_override
+	if _calm_zero:
+		torrent.calm_drag = 0.0
+		torrent.calm_push_speed = 0.0
+		torrent.calm_splash_trauma = 0.0
+		torrent.calm_douse_seconds = 0.0
 	add_child(torrent)
 	# Fara [Track] parinte, `_place()` nu gaseste nicio ruta si nu construieste
 	# `_hazard` — aici pozitionarea nu e ce testam (vezi antetul), asa ca

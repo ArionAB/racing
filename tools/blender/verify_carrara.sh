@@ -219,6 +219,71 @@ done
 python tools/blender/measure_crr_kit.py || fail=1
 
 echo
+echo "== val 2, crr-d: utilajele de decor (kit §1.2) si coltul de muzeu (kit §1.4) =="
+# Exceptii crr-d, cu motiv:
+#   --origin=assembly   noduri pe rol (*_Paint/_Rust/_Black, *_Wood/_Rope,
+#                       *_Marble/_MarbleBase); offsetul de origine e calculat O
+#                       DATA pe ansamblu, iar piesele de sus nu ating solul.
+#   wire_saw --class-parts=Blades: volantul are UV-uri REALE (cube_uvs), fiindca
+#                       WorldProp.prop_classes() ii pune clasa `rust_metal` PE UV
+#                       (aceeasi intrare ca la roata morii, din Track._LANDMARKS),
+#                       iar un nod care se roteste nu poate lua triplanar de lume.
+#                       `Blades` are pivot propriu (butucul), deci verify_glb il
+#                       citeste in spatiul lui; contractul (rotatie identitate,
+#                       originea in butuc, axa X, Ø 1,8) e in
+#                       measure_carrara_crr_d.py wire_saw, iar rotatia reala pe
+#                       windmill.gd in tools/ProbeWireSaw.tscn.
+crr_d() {  # crr_d <cale> <garda> <noduri,...> [flag verify...]
+  local f="$1" kind="$2" nodes="$3"; shift 3
+  check "$f" --origin=assembly "$@"
+  [ -f "$ROOT/$f" ] || return
+  python tools/blender/measure_carrara_crr_d.py "$kind" "$ROOT/$f" || fail=1
+  crr_nodes "$f" "$nodes"
+}
+crr_d "vehicles/wire_saw.glb" wire_saw "Blades,Saw_Paint,Saw_Rail,Saw_Rust,Saw_Water" --class-parts=Blades
+crr_d "vehicles/chain_saw_crawler.glb" crawler "Crawler_Black,Crawler_Blade,Crawler_Paint,Crawler_Rust"
+crr_d "vehicles/drill_rig.glb" drill "Drill_Black,Drill_Mast,Drill_Paint,Drill_Rust"
+crr_d "props/museum_set_cart.glb" cart "Cart_Marble,Cart_MarbleBase,Cart_Rust,Cart_Wood"
+crr_d "props/museum_set_wheel.glb" wheel "Pulley_Rust,Pulley_Wood"
+crr_d "props/museum_set_sled.glb" sled "OldSled_Rope,OldSled_Rust,OldSled_Wood"
+
+echo
+echo "== val 2, crr-e: satul Colonnata si blocul-semn (kit §1.4) =="
+# Exceptii crr-e, cu motiv:
+#   --origin=assembly   noduri pe rol (*_Stone/_Roof/_Wood/_Shutter/_Void,
+#                       Sign_Marble/_MarbleBase): originea pe centrul corpului
+#                       principal (nava, casa), baza ansamblului la 0; tigla,
+#                       obloanele si golurile nu ating solul. Biserica NU e
+#                       centrata pe bbox: pronaosul si anexa ies in fata si pe -X,
+#                       clopotnita pe +X (originea = centrul navei).
+#   cotele              measure_crr_buildings.py (pe GLB, coordonate Godot):
+#                       varful crucii 14,0, clopotnita 4 x 4, coama navei 10,0,
+#                       nava 8 x 14, usa pe -Z; casele 9x7 / 7x8 / 10x7 cu coama
+#                       8,0 / 8,5 / 7,5 si axa coamei, hornul mare la B, scara si
+#                       terasa la C; blocul 3 x 2 x 2 cu fata slefuita intreaga pe
+#                       -Z, fara patina pe ea. Plus noduri, sloturi pe nod, fara
+#                       FOAM_WHITE 22 si CAR_* 14-16.
+for f in buildings/colonnata_church.glb buildings/colonnata_house_a.glb          buildings/colonnata_house_b.glb buildings/colonnata_house_c.glb props/quarry_sign_block.glb; do
+  check "$f" --origin=assembly
+done
+python tools/blender/measure_crr_buildings.py > /tmp/crr_e_$$.txt 2>&1; rc=$?
+grep -E "^== |: (OK|PROBLEME)$|!!" /tmp/crr_e_$$.txt; rm -f /tmp/crr_e_$$.txt
+[ "$rc" -eq 0 ] || fail=1
+
+echo
+echo "== val 2, crr-f: fundalul (kit §1.6) =="
+# Fara exceptii la verify_glb: fiecare creasta e un nod-radacina cu originea la
+# BAZA (bbox centrat pe X/Z, Y min 0). Garda de cote (measure_crr_horizon.py):
+# numele celor 3 noduri, lungime 160-240, inaltime 35-60, 2-3 varfuri mari,
+# sloturi doar 29/19/21/13 (fara FOAM_WHITE), siluete diferite; --selftest
+# dovedeste ca garda pica pe trei copii sabotate (redenumit, ridicat, scalat).
+check "effects/carrara_horizon.glb"
+if [ -f "$ROOT/effects/carrara_horizon.glb" ]; then
+  python tools/blender/measure_crr_horizon.py "$ROOT/effects/carrara_horizon.glb" || fail=1
+  python tools/blender/measure_crr_horizon.py --selftest "$ROOT/effects/carrara_horizon.glb" || fail=1
+fi
+
+echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then
   while IFS= read -r f; do

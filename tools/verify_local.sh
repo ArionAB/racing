@@ -109,6 +109,10 @@ run_step "Garda de draw call-uri (materiale per pista)" probe_decor.log 'VERDICT
 	--headless --path . --script res://tools/probe_decor.gd
 run_step "Anti-blocaj in peretii de canion" cliff.log 'VERDICT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeRace.tscn -- --mode=cliff --track=0
+run_step "Taieturi (cut_wall) cu corp solid: Cappadocia" cut_wall_13.log 'VERDICT' -- --headless --fixed-fps 60 --path . res://tools/ProbeCutWall.tscn -- --track=13
+run_step "Taieturi (cut_wall) cu corp solid: Serengeti" cut_wall_14.log 'VERDICT' -- --headless --fixed-fps 60 --path . res://tools/ProbeCutWall.tscn -- --track=14
+run_step "Taieturi (cut_wall) cu corp solid: Machu Picchu" cut_wall_15.log 'VERDICT' -- --headless --fixed-fps 60 --path . res://tools/ProbeCutWall.tscn -- --track=15
+run_step "Taieturi (cut_wall) cu corp solid: Fiordland" cut_wall_16.log 'VERDICT' -- --headless --fixed-fps 60 --path . res://tools/ProbeCutWall.tscn -- --track=16
 run_step "Coliziunea stancilor urmareste silueta" rockfit.log 'VERDICT:' -- \
 	--headless --fixed-fps 60 --path . --script res://tools/probe_rock_fit.gd -- --no-batch
 run_step "Decorul nu intra peste asfalt" overlap.log 'VERDICT:' -- \

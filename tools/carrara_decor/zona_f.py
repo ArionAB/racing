@@ -144,18 +144,21 @@ ITEMS = [
     ("F_MolozP3", "rocks/rubble_pile_b.glb", _FC, -15.0, 220.0, {"along": 8.5, "coliziune": "none"}),
     # ---- malurile din stanga (buza amonte la along -21, aval la +18): castani si ginestra cu coroana peste
     # gol, ca pe versantii din bara; de pe pod se vad in jos, de la intrare incadreaza cheiul.
-    ("F_CastanM1", "plants/chestnut_tree_b.glb", _FC, -14.0, 10.0, {"along": -24.0, "coliziune": "trunk"}),
+    # ProbeRace 32 (seed 13): o masina scoasa pe stanga de camionul 2 la capul podului s-a oprit intre modulul de
+    # berma F_BermaE_S (lat -8,2, hull), ginestra M1 (lat -11, hull) si trunchiul lui M1 (lat -14): buzunar. Deci
+    # ginestra de pe maluri e fantoma, iar castanii cei mai apropiati stau la >= 18 m de axa.
+    ("F_CastanM1", "plants/chestnut_tree_b.glb", _FC, -18.5, 10.0, {"along": -24.0, "coliziune": "trunk"}),
     ("F_CastanM2", "plants/chestnut_tree_a.glb", _FC, -23.0, 200.0, {"along": -23.0, "coliziune": "trunk"}),
     ("F_CastanM5", "plants/chestnut_tree_b.glb", _FC, -33.0, 70.0, {"along": -23.5, "coliziune": "trunk"}),
     ("F_CastanM6", "plants/chestnut_tree_a.glb", _FC, -43.0, 130.0, {"along": -24.0, "coliziune": "trunk"}),
-    ("F_GinestraM1", "plants/ginestra_fiorita.glb", _FC, -11.0, 60.0, {"along": -27.5, "scale": 1.3}),
-    ("F_GinestraM3", "plants/ginestra_fiorita.glb", _FC, -28.0, 20.0, {"along": -22.0, "scale": 1.4}),
-    ("F_GinestraM4", "plants/ginestra_fiorita.glb", _FC, -38.0, 160.0, {"along": -22.5, "scale": 1.4}),
-    ("F_CastanM3", "plants/chestnut_tree_a.glb", _FC, -15.0, 120.0, {"along": 20.0, "coliziune": "trunk"}),
+    ("F_GinestraM1", "plants/ginestra_fiorita.glb", _FC, -11.0, 60.0, {"along": -27.5, "scale": 1.3, "coliziune": "none"}),
+    ("F_GinestraM3", "plants/ginestra_fiorita.glb", _FC, -28.0, 20.0, {"along": -22.0, "scale": 1.4, "coliziune": "none"}),
+    ("F_GinestraM4", "plants/ginestra_fiorita.glb", _FC, -38.0, 160.0, {"along": -22.5, "scale": 1.4, "coliziune": "none"}),
+    ("F_CastanM3", "plants/chestnut_tree_a.glb", _FC, -18.5, 120.0, {"along": 20.0, "coliziune": "trunk"}),
     ("F_CastanM4", "plants/chestnut_tree_b.glb", _FC, -25.0, -20.0, {"along": 19.5, "coliziune": "trunk"}),
     ("F_CastanM7", "plants/chestnut_tree_a.glb", _FC, -36.0, 40.0, {"along": 20.0, "coliziune": "trunk"}),
-    ("F_GinestraM2", "plants/ginestra_fiorita.glb", _FC, -11.5, 10.0, {"along": 24.0, "scale": 1.3}),
-    ("F_GinestraM5", "plants/ginestra_fiorita.glb", _FC, -30.5, 100.0, {"along": 19.0, "scale": 1.4}),
+    ("F_GinestraM2", "plants/ginestra_fiorita.glb", _FC, -11.5, 10.0, {"along": 24.0, "scale": 1.3, "coliziune": "none"}),
+    ("F_GinestraM5", "plants/ginestra_fiorita.glb", _FC, -30.5, 100.0, {"along": 19.0, "scale": 1.4, "coliziune": "none"}),
 ] + _vegetatie_perete()
 
 # Podeaua cheiului e plata la +16,70 (`--decor --no-manual-batch` + `--scan=0.703,0.724,0.001,-52,12,4 --under`,

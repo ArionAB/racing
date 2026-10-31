@@ -3291,7 +3291,7 @@ transform = Transform3D(0.64279, 0.0, -0.76604, 0.0, 1.0, 0.0, 0.76604, 0.0, 0.6
 metadata/coliziune = "none"
 
 [node name="F_CastanM1" parent="DecorManual/ZonaF" instance=ExtResource("k_chestnut_tree_b")]
-transform = Transform3D(-0.17365, 0.0, 0.98481, 0.0, 1.0, 0.0, -0.98481, 0.0, -0.17365, -128.5, 43.5, 126.0)
+transform = Transform3D(-0.17365, 0.0, 0.98481, 0.0, 1.0, 0.0, -0.98481, 0.0, -0.17365, -128.5, 43.5, 130.5)
 metadata/coliziune = "trunk"
 
 [node name="F_CastanM2" parent="DecorManual/ZonaF" instance=ExtResource("k_chestnut_tree_a")]
@@ -3308,15 +3308,18 @@ metadata/coliziune = "trunk"
 
 [node name="F_GinestraM1" parent="DecorManual/ZonaF" instance=ExtResource("k_ginestra_fiorita")]
 transform = Transform3D(-1.12583, 0.0, 0.65, 0.0, 1.3, 0.0, -0.65, 0.0, -1.12583, -125.0, 44.0, 123.0)
+metadata/coliziune = "none"
 
 [node name="F_GinestraM3" parent="DecorManual/ZonaF" instance=ExtResource("k_ginestra_fiorita")]
 transform = Transform3D(-0.47883, 0.0, 1.31557, 0.0, 1.4, 0.0, -1.31557, 0.0, -0.47883, -130.5, 43.5, 140.0)
+metadata/coliziune = "none"
 
 [node name="F_GinestraM4" parent="DecorManual/ZonaF" instance=ExtResource("k_ginestra_fiorita")]
 transform = Transform3D(-0.47883, 0.0, -1.31557, 0.0, 1.4, 0.0, 1.31557, 0.0, -0.47883, -130.0, 43.45, 150.0)
+metadata/coliziune = "none"
 
 [node name="F_CastanM3" parent="DecorManual/ZonaF" instance=ExtResource("k_chestnut_tree_a")]
-transform = Transform3D(-0.86603, 0.0, -0.5, 0.0, 1.0, 0.0, 0.5, 0.0, -0.86603, -172.5, 41.95, 127.0)
+transform = Transform3D(-0.86603, 0.0, -0.5, 0.0, 1.0, 0.0, 0.5, 0.0, -0.86603, -172.5, 41.95, 130.5)
 metadata/coliziune = "trunk"
 
 [node name="F_CastanM4" parent="DecorManual/ZonaF" instance=ExtResource("k_chestnut_tree_b")]
@@ -3329,9 +3332,11 @@ metadata/coliziune = "trunk"
 
 [node name="F_GinestraM2" parent="DecorManual/ZonaF" instance=ExtResource("k_ginestra_fiorita")]
 transform = Transform3D(-0.22574, 0.0, 1.28025, 0.0, 1.3, 0.0, -1.28025, 0.0, -0.22574, -176.5, 41.85, 123.5)
+metadata/coliziune = "none"
 
 [node name="F_GinestraM5" parent="DecorManual/ZonaF" instance=ExtResource("k_ginestra_fiorita")]
 transform = Transform3D(-1.37873, 0.0, -0.24311, 0.0, 1.4, 0.0, 0.24311, 0.0, -1.37873, -171.5, 41.95, 142.5)
+metadata/coliziune = "none"
 
 [node name="F_Stanca00" parent="DecorManual/ZonaF" instance=ExtResource("k_block_informe_a")]
 transform = Transform3D(-1.78894, 0.0, 1.34807, 0.0, 2.24, 0.0, -1.34807, 0.0, -1.78894, -163.6, 20.63, 131.0)

@@ -1536,6 +1536,9 @@ transform = {xf_txt}
         # `FOREST_GLBS` = stem -> GLB); plasarea pe teren real, distanta fata de asfalt si zidul lumii se rezolva
         # la rulare. Toti arborii de aici sunt FANTOME (MeshForest n-are corpuri): primul rand de langa drum ramane
         # in ITEMS, cu trunchi. Fara nicio zona `FOREST`, Track23 iese identic la bit.
+        # Treapta grosiera a castanului: cel mai grosier nivel generat (188 de triunghiuri din 4244) topea
+        # coroana in cioburi (vezi `MeshForest.far_lod_min_ratio`); ramane la nivelul care pastreaza macar atat.
+        FOREST_FAR_MIN = 0.12
         if forest_zones:
             kit_ext += ('[ext_resource type="Script" path="res://scenes/props/mesh_forest.gd" id="mf_script"]\n'
                         '[ext_resource type="Script" path="res://scenes/props/mesh_forest_zone.gd" id="mf_zone"]\n')
@@ -1581,6 +1584,7 @@ seed_value = {int(d_.get('seed', 1))}
 script = ExtResource("mf_script")
 scenes = Array[PackedScene]([{scenes_txt}])
 zones = Array[ExtResource("mf_zone")]([{zones_txt}])
+far_lod_min_ratio = {FOREST_FAR_MIN}
 """
             print(f"  padurea in masa: {len(forest_zones)} zone, specii {list(forest_glbs)}")
         # === sfarsit G: PADUREA IN MASA =====================================================================

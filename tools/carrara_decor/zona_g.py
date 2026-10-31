@@ -243,9 +243,15 @@ FOREST = (
         # Castanii: coronament inchis (pas 7 m, coroana de 10-13 m). Trunchiurile la >= 9 m de asfalt,
         # coroanele ajung la ~3 m de margine, niciodata pe banda.
         dict(label='castani stanga', kind='ring', frac_from=0.728, frac_to=0.925, side=-1,
-             lat_min=13.0, lat_max=140.0, spacing=6.5, edge_clear_m=9.0, shadow_m=30.0,
+             lat_min=13.0, lat_max=60.0, spacing=6.5, edge_clear_m=9.0, shadow_m=30.0,
              species=('chestnut_tree_a', 'chestnut_tree_b'), weights=(0.5, 0.5),
              scale_min=0.9, scale_max=1.35, seed=72),
+        # Dincolo de 60 m (ceata incepe la 120): mai rar si fara umbra. Pana la 100 m, nu 140: ProbePerf
+        # --mobile, varful de 1,57M triunghiuri la 0,70 (G vazut de pe pod) venea din padure.
+        dict(label='castani stanga departe', kind='ring', frac_from=0.728, frac_to=0.925, side=-1,
+             lat_min=60.0, lat_max=100.0, spacing=8.0, edge_clear_m=9.0, shadow_m=0.0,
+             species=('chestnut_tree_a', 'chestnut_tree_b'), weights=(0.5, 0.5),
+             scale_min=1.0, scale_max=1.4, seed=79),
         dict(label='castani coama', kind='ring', frac_from=0.738, frac_to=0.838, side=1,
              lat_min=27.0, lat_max=85.0, spacing=7.5, edge_clear_m=22.0, shadow_m=0.0,
              species=('chestnut_tree_a', 'chestnut_tree_b'), weights=(0.5, 0.5),

@@ -14,6 +14,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/carrara/structures/derrick.glb" id="11_derrick"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/props/marble_block_hooked.glb" id="12_hooked"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/props/lizza_sled.glb" id="13_sled"]
+[ext_resource type="Script" path="res://scenes/props/windmill.gd" id="16_windmill"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/structures/ponti_di_vara.glb" id="k_ponti_di_vara"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/structures/gallery_portal.glb" id="k_gallery_portal"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/structures/marmifera_portal.glb" id="k_marmifera_portal"]
@@ -24,9 +25,17 @@
 [ext_resource type="PackedScene" path="res://assets/models/carrara/buildings/office_container.glb" id="k_office_container"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/props/fuel_tank.glb" id="k_fuel_tank"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/props/work_lamp.glb" id="k_work_lamp"]
-[ext_resource type="PackedScene" path="res://assets/models/carrara/rocks/block_informe_a.glb" id="k_block_informe_a"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/props/cable_reel.glb" id="k_cable_reel"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/vehicles/wire_saw.glb" id="k_wire_saw"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/rocks/block_informe_b.glb" id="k_block_informe_b"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/rocks/marble_block_a.glb" id="k_marble_block_a"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/rocks/rubble_pile_a.glb" id="k_rubble_pile_a"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/rocks/block_informe_a.glb" id="k_block_informe_a"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/structures/safety_berm.glb" id="k_safety_berm"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/props/pipe_run.glb" id="k_pipe_run"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/rocks/rubble_pile_b.glb" id="k_rubble_pile_b"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/vehicles/drill_rig.glb" id="k_drill_rig"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/vehicles/chain_saw_crawler.glb" id="k_chain_saw_crawler"]
 
 
 [sub_resource type="BoxShape3D" id="Box_PlasaA"]
@@ -347,6 +356,207 @@ transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, -130.0, 
 
 [node name="A_Lampa" parent="DecorManual/ZonaA" instance=ExtResource("k_work_lamp")]
 transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, -52.0, 24.67, -95.5)
+
+[node name="ZonaB" type="Node3D" parent="DecorManual"]
+
+[node name="B_T1_Rand1" parent="DecorManual/ZonaB" instance=ExtResource("k_marble_block_b")]
+transform = Transform3D(0.13917, 0.0, -0.99027, 0.0, 1.0, 0.0, 0.99027, 0.0, 0.13917, -22.0, 24.67, -94.0)
+
+[node name="B_T1_Rand2" parent="DecorManual/ZonaB" instance=ExtResource("k_block_stack_a")]
+transform = Transform3D(-0.08716, 0.0, -0.99619, 0.0, 1.0, 0.0, 0.99619, 0.0, -0.08716, -12.64, 24.67, -94.2)
+
+[node name="B_T1_Mosor" parent="DecorManual/ZonaB" instance=ExtResource("k_cable_reel")]
+transform = Transform3D(0.5, 0.0, -0.86603, 0.0, 1.0, 0.0, 0.86603, 0.0, 0.5, -5.815, 24.7, -96.4)
+
+[node name="B_T1_Sarma" parent="DecorManual/ZonaB" instance=ExtResource("k_wire_saw")]
+transform = Transform3D(-0.5, 0.0, 0.86603, 0.0, 1.0, 0.0, -0.86603, 0.0, -0.5, -0.64, 24.67, -95.1)
+script = ExtResource("16_windmill")
+rpm = 30.0
+axis = Vector3(1.0, 0.0, 0.0)
+
+[node name="B_T1_Taiat" parent="DecorManual/ZonaB" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(1.0, 0.0, -0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 8.0, 24.6, -94.4)
+
+[node name="B_T1_Rand3" parent="DecorManual/ZonaB" instance=ExtResource("k_block_informe_b")]
+transform = Transform3D(0.34202, 0.0, -0.93969, 0.0, 1.0, 0.0, 0.93969, 0.0, 0.34202, 18.185, 24.23, -94.7)
+
+[node name="B_T1_Rand4" parent="DecorManual/ZonaB" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(-0.2002, 0.0, -0.97976, 0.0, 1.0, 0.0, 0.97976, 0.0, -0.2002, 23.449, 23.77, -93.814)
+
+[node name="B_T1_Rand5" parent="DecorManual/ZonaB" instance=ExtResource("k_block_stack_b")]
+transform = Transform3D(0.12986, 0.0, -0.99153, 0.0, 1.0, 0.0, 0.99153, 0.0, 0.12986, 34.104, 22.82, -94.214)
+
+[node name="B_T1_S1" parent="DecorManual/ZonaB" instance=ExtResource("k_block_stack_b")]
+transform = Transform3D(0.20791, 0.0, -0.97815, 0.0, 1.0, 0.0, 0.97815, 0.0, 0.20791, -7.36, 24.46, -120.0)
+
+[node name="B_T1_S2" parent="DecorManual/ZonaB" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(0.93969, 0.0, -0.34202, 0.0, 1.0, 0.0, 0.34202, 0.0, 0.93969, 6.185, 24.24, -122.0)
+
+[node name="B_T1_S3" parent="DecorManual/ZonaB" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 18.185, 24.04, -119.5)
+
+[node name="B_T1_S4" parent="DecorManual/ZonaB" instance=ExtResource("k_block_informe_a")]
+transform = Transform3D(0.56328, 0.0, -0.82626, 0.0, 1.0, 0.0, 0.82626, 0.0, 0.56328, 30.387, 23.4, -121.027)
+
+[node name="B_Ac1_Berma1" parent="DecorManual/ZonaB" instance=ExtResource("k_safety_berm")]
+transform = Transform3D(0.84775, 0.03515, 0.52923, 0.0, 0.9978, -0.06628, -0.5304, 0.05619, 0.84588, 64.649, 21.72, -101.318)
+
+[node name="B_Ac1_Berma2" parent="DecorManual/ZonaB" instance=ExtResource("k_safety_berm")]
+transform = Transform3D(0.99904, 0.00299, 0.04368, 0.0, 0.99767, -0.06827, -0.04378, 0.06821, 0.99671, 68.913, 20.98, -86.483)
+
+[node name="B_Ac1_Berma3" parent="DecorManual/ZonaB" instance=ExtResource("k_safety_berm")]
+transform = Transform3D(0.88313, -0.03205, -0.46803, 0.0, 0.99766, -0.06832, 0.46913, 0.06033, 0.88107, 65.894, 19.99, -73.123)
+
+[node name="B_Ac1_Bloc1" parent="DecorManual/ZonaB" instance=ExtResource("k_marble_block_b")]
+transform = Transform3D(-0.91938, 0.0, -0.39338, 0.0, 1.0, 0.0, 0.39338, 0.0, -0.91938, 71.965, 20.97, -91.406)
+
+[node name="B_Ac1_Bloc2" parent="DecorManual/ZonaB" instance=ExtResource("k_block_stack_a")]
+transform = Transform3D(-0.92228, 0.0, 0.38651, 0.0, 1.0, 0.0, -0.38651, 0.0, -0.92228, 71.789, 20.1, -78.811)
+
+[node name="B_R1_Rand1" parent="DecorManual/ZonaB" instance=ExtResource("k_marble_block_b")]
+transform = Transform3D(-0.1119, 0.0, 0.99372, 0.0, 1.0, 0.0, -0.99372, 0.0, -0.1119, 32.303, 17.6, -57.054)
+
+[node name="B_R1_Rand2" parent="DecorManual/ZonaB" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(0.15643, 0.0, 0.98769, 0.0, 1.0, 0.0, -0.98769, 0.0, 0.15643, 17.57, 17.21, -57.1)
+
+[node name="B_R1_Rand3" parent="DecorManual/ZonaB" instance=ExtResource("k_block_informe_b")]
+transform = Transform3D(-0.42262, 0.0, 0.90631, 0.0, 1.0, 0.0, -0.90631, 0.0, -0.42262, 1.385, 16.38, -57.2)
+
+[node name="B_T2_Taiat1" parent="DecorManual/ZonaB" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, -1.0, 5.57, 16.64, -77.6)
+
+[node name="B_T2_Sarma1" parent="DecorManual/ZonaB" instance=ExtResource("k_wire_saw")]
+transform = Transform3D(0.5, 0.0, -0.86603, 0.0, 1.0, 0.0, 0.86603, 0.0, 0.5, -2.245, 16.1, -76.8)
+script = ExtResource("16_windmill")
+rpm = 30.0
+axis = Vector3(1.0, 0.0, 0.0)
+phase_offset_deg = 120.0
+
+[node name="B_T2_Teava" parent="DecorManual/ZonaB" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(-0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.0, -14.245, 15.71, -75.7)
+
+[node name="B_T2_Mosor" parent="DecorManual/ZonaB" instance=ExtResource("k_cable_reel")]
+transform = Transform3D(-0.25882, 0.0, 0.96593, 0.0, 1.0, 0.0, -0.96593, 0.0, -0.25882, -22.615, 15.694, -76.0)
+
+[node name="B_T2_Moloz" parent="DecorManual/ZonaB" instance=ExtResource("k_rubble_pile_b")]
+transform = Transform3D(-0.64279, 0.0, 0.76604, 0.0, 1.0, 0.0, -0.76604, 0.0, -0.64279, -27.79, 15.67, -78.5)
+
+[node name="B_T2_Sarma2" parent="DecorManual/ZonaB" instance=ExtResource("k_wire_saw")]
+transform = Transform3D(0.5, 0.0, -0.86603, 0.0, 1.0, 0.0, 0.86603, 0.0, 0.5, -36.43, 15.67, -77.0)
+script = ExtResource("16_windmill")
+rpm = 30.0
+axis = Vector3(1.0, 0.0, 0.0)
+phase_offset_deg = 240.0
+
+[node name="B_T2_Taiat2" parent="DecorManual/ZonaB" instance=ExtResource("k_block_informe_a")]
+transform = Transform3D(-0.42262, 0.0, 0.90631, 0.0, 1.0, 0.0, -0.90631, 0.0, -0.42262, -45.07, 15.66, -78.0)
+
+[node name="B_T2_Foraj" parent="DecorManual/ZonaB" instance=ExtResource("k_drill_rig")]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, 1.0, -57.07, 15.6, -77.0)
+
+[node name="B_T2_Bloc" parent="DecorManual/ZonaB" instance=ExtResource("k_marble_block_b")]
+transform = Transform3D(0.10453, 0.0, 0.99452, 0.0, 1.0, 0.0, -0.99452, 0.0, 0.10453, -63.79, 15.32, -77.5)
+
+[node name="B_T2_R1" parent="DecorManual/ZonaB" instance=ExtResource("k_marble_block_b")]
+transform = Transform3D(-0.08716, 0.0, 0.99619, 0.0, 1.0, 0.0, -0.99619, 0.0, -0.08716, -18.43, 15.67, -57.0)
+
+[node name="B_T2_R2" parent="DecorManual/ZonaB" instance=ExtResource("k_block_stack_a")]
+transform = Transform3D(0.13917, 0.0, 0.99027, 0.0, 1.0, 0.0, -0.99027, 0.0, 0.13917, -30.43, 15.67, -57.0)
+
+[node name="B_T2_R3" parent="DecorManual/ZonaB" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(-0.17365, 0.0, 0.98481, 0.0, 1.0, 0.0, -0.98481, 0.0, -0.17365, -39.79, 15.67, -56.8)
+
+[node name="B_T2_R4" parent="DecorManual/ZonaB" instance=ExtResource("k_block_informe_b")]
+transform = Transform3D(-0.5, 0.0, 0.86603, 0.0, 1.0, 0.0, -0.86603, 0.0, -0.5, -51.79, 15.64, -57.0)
+
+[node name="B_T2_R5" parent="DecorManual/ZonaB" instance=ExtResource("k_marble_block_b")]
+transform = Transform3D(0.06976, 0.0, 0.99756, 0.0, 1.0, 0.0, -0.99756, 0.0, 0.06976, -63.79, 15.32, -56.8)
+
+[node name="B_Ac2_Berma1" parent="DecorManual/ZonaB" instance=ExtResource("k_safety_berm")]
+transform = Transform3D(-0.98543, -0.01131, 0.16968, 0.0, 0.99779, 0.0665, -0.17006, 0.06553, -0.98325, -113.603, 12.41, -52.768)
+
+[node name="B_Ac2_Berma2" parent="DecorManual/ZonaB" instance=ExtResource("k_safety_berm")]
+transform = Transform3D(-0.9566, 0.01995, -0.29072, 0.0, 0.99765, 0.06848, 0.2914, 0.06551, -0.95435, -112.626, 11.78, -39.536)
+
+[node name="B_Ac2_Berma3" parent="DecorManual/ZonaB" instance=ExtResource("k_safety_berm")]
+transform = Transform3D(-0.72351, 0.04583, -0.68879, -0.0, 0.99779, 0.06639, 0.69031, 0.04803, -0.72192, -106.062, 11.15, -27.999)
+
+[node name="B_Ac2_Bloc1" parent="DecorManual/ZonaB" instance=ExtResource("k_block_stack_b")]
+transform = Transform3D(-0.95353, 0.0, -0.30131, 0.0, 1.0, 0.0, 0.30131, 0.0, -0.95353, -117.239, 11.93, -43.847)
+
+[node name="B_Ac2_Bloc2" parent="DecorManual/ZonaB" instance=ExtResource("k_marble_block_b")]
+transform = Transform3D(-0.98061, 0.0, -0.19597, 0.0, 1.0, 0.0, 0.19597, 0.0, -0.98061, -114.057, 11.46, -33.392)
+
+[node name="B_R2_Rand1" parent="DecorManual/ZonaB" instance=ExtResource("k_marble_block_b")]
+transform = Transform3D(-0.06156, 0.0, -0.9981, 0.0, 1.0, 0.0, 0.9981, 0.0, -0.06156, -78.767, 9.55, -18.701)
+
+[node name="B_R2_Rand2" parent="DecorManual/ZonaB" instance=ExtResource("k_block_informe_b")]
+transform = Transform3D(0.25882, 0.0, -0.96593, 0.0, 1.0, 0.0, 0.96593, 0.0, 0.25882, -62.945, 8.47, -19.0)
+
+[node name="B_R2_Rand3" parent="DecorManual/ZonaB" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(0.06976, 0.0, -0.99756, 0.0, 1.0, 0.0, 0.99756, 0.0, 0.06976, -47.315, 7.47, -18.8)
+
+[node name="B_R2_S1" parent="DecorManual/ZonaB" instance=ExtResource("k_rubble_pile_b")]
+transform = Transform3D(0.3422, 0.0, -0.93963, 0.0, 1.0, 0.0, 0.93963, 0.0, 0.3422, -67.132, 8.78, -40.799)
+
+[node name="B_T3_R1" parent="DecorManual/ZonaB" instance=ExtResource("k_block_stack_b")]
+transform = Transform3D(-0.06976, 0.0, -0.99756, 0.0, 1.0, 0.0, 0.99756, 0.0, -0.06976, -33.77, 6.78, -18.2)
+
+[node name="B_T3_Sarma" parent="DecorManual/ZonaB" instance=ExtResource("k_wire_saw")]
+transform = Transform3D(-0.5, 0.0, 0.86603, 0.0, 1.0, 0.0, -0.86603, 0.0, -0.5, -19.13, 6.67, -19.1)
+script = ExtResource("16_windmill")
+rpm = 30.0
+axis = Vector3(1.0, 0.0, 0.0)
+phase_offset_deg = 60.0
+
+[node name="B_T3_Taiat" parent="DecorManual/ZonaB" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(1.0, 0.0, -0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -11.315, 6.67, -18.2)
+
+[node name="B_T3_R2" parent="DecorManual/ZonaB" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(0.12187, 0.0, -0.99255, 0.0, 1.0, 0.0, 0.99255, 0.0, 0.12187, 0.685, 6.67, -17.8)
+
+[node name="B_T3_R3" parent="DecorManual/ZonaB" instance=ExtResource("k_block_informe_b")]
+transform = Transform3D(-0.34047, 0.0, -0.94026, 0.0, 1.0, 0.0, 0.94026, 0.0, -0.34047, 10.888, 6.67, -18.2)
+
+[node name="B_T3_R4" parent="DecorManual/ZonaB" instance=ExtResource("k_marble_block_b")]
+transform = Transform3D(0.06993, 0.0, -0.99755, 0.0, 1.0, 0.0, 0.99755, 0.0, 0.06993, 20.868, 6.6, -18.041)
+
+[node name="B_T3_R5" parent="DecorManual/ZonaB" instance=ExtResource("k_block_stack_a")]
+transform = Transform3D(-0.16975, 0.0, -0.98549, 0.0, 1.0, 0.0, 0.98549, 0.0, -0.16975, 28.335, 6.45, -18.029)
+
+[node name="B_T3_S1" parent="DecorManual/ZonaB" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, -28.49, 6.72, -41.0)
+
+[node name="B_T3_S2" parent="DecorManual/ZonaB" instance=ExtResource("k_marble_block_b")]
+transform = Transform3D(0.20791, 0.0, -0.97815, 0.0, 1.0, 0.0, 0.97815, 0.0, 0.20791, -16.49, 6.67, -40.5)
+
+[node name="B_T3_Moloz1" parent="DecorManual/ZonaB" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(0.5, 0.0, -0.86603, 0.0, 1.0, 0.0, 0.86603, 0.0, 0.5, -4.49, 6.67, -51.5)
+
+[node name="B_T3_Teava" parent="DecorManual/ZonaB" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(0.98481, 0.0, -0.17365, 0.0, 1.0, 0.0, 0.17365, 0.0, 0.98481, 0.685, 6.67, -45.0)
+
+[node name="B_T3_Lant" parent="DecorManual/ZonaB" instance=ExtResource("k_chain_saw_crawler")]
+transform = Transform3D(1.0, 0.0, -0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 4.87, 6.57, -50.2)
+
+[node name="B_T3_Bloc1" parent="DecorManual/ZonaB" instance=ExtResource("k_block_informe_a")]
+transform = Transform3D(0.26042, 0.0, -0.9655, 0.0, 1.0, 0.0, 0.9655, 0.0, 0.26042, 10.845, 6.67, -44.0)
+
+[node name="B_T3_Mosor" parent="DecorManual/ZonaB" instance=ExtResource("k_cable_reel")]
+transform = Transform3D(-0.3319, 0.0, -0.94331, 0.0, 1.0, 0.0, 0.94331, 0.0, -0.3319, 14.043, 6.711, -46.518)
+
+[node name="B_T3_Moloz2" parent="DecorManual/ZonaB" instance=ExtResource("k_rubble_pile_b")]
+transform = Transform3D(-0.16637, 0.0, -0.98606, 0.0, 1.0, 0.0, 0.98606, 0.0, -0.16637, 16.703, 6.64, -52.05)
+
+[node name="B_T3_Sarma2" parent="DecorManual/ZonaB" instance=ExtResource("k_wire_saw")]
+transform = Transform3D(0.99966, 0.0, -0.02623, 0.0, 1.0, 0.0, 0.02623, 0.0, 0.99966, 25.207, 6.53, -48.947)
+script = ExtResource("16_windmill")
+rpm = 30.0
+axis = Vector3(1.0, 0.0, 0.0)
+phase_offset_deg = 180.0
+
+[node name="B_T3_Stiva" parent="DecorManual/ZonaB" instance=ExtResource("k_block_stack_b")]
+transform = Transform3D(0.0911, 0.0, -0.99584, 0.0, 1.0, 0.0, 0.99584, 0.0, 0.0911, 29.535, 6.61, -42.8)
 
 [node name="ZonaC" type="Node3D" parent="DecorManual"]
 

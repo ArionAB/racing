@@ -17612,7 +17612,39 @@ func recovery_transform(index: int, backoff_m: float,
 		var clamped := _clamp_respawn_past_gap(index, backoff_m)
 		if clamped >= 0:
 			return r.recovery_transform(clamped, 0.0)
+		backoff_m = _runup_backoff(index, backoff_m)
 	return r.recovery_transform(index, backoff_m)
+
+
+## Retragerea de repunere ridicata astfel incat masina sa porneasca la cel putin
+## `respawn_runup_m` metri inaintea buzei unei sarituri (canal cu elan declarat),
+## daca n-a trecut inca golul. Intoarce `backoff_m` neschimbat cand regula nu se
+## aplica: niciun canal cu `respawn_runup_m`, masina e deja dincolo de buza de
+## aterizare, sau retragerea ei ajunge deja destul de departe. Cresterea e
+## relativa la `backoff_m`, deci reincercarile `_clear_recovery_transform` (care
+## mai retrag cu 4 m) merg mai departe decat punctul minim, nu pe loc.
+func _runup_backoff(index: int, backoff_m: float) -> float:
+	if _channels.is_empty():
+		return backoff_m
+	var n := baked.size()
+	if n < 2 or _dists.size() <= n or _dists[n] <= 0.0:
+		return backoff_m
+	var spacing := _dists[n] / float(n)
+	for ch: Dictionary in _channels:
+		var runup := float(ch.get("respawn_runup_m", 0.0))
+		if runup <= 0.0 or not bool(ch.get("jump", false)) or bool(ch.get("ford", false)):
+			continue
+		var near: int = ch["near"]
+		var far: int = ch["far"]
+		# Pozitia masinii fata de buza de plecare, in indici, cu semn (pe bucla).
+		var rel := posmod(index - near + n / 2, n) - n / 2
+		if rel > posmod(far - near, n):
+			continue # a trecut golul: regula lui respawn_past_gap, nu a elanului
+		# +1 pas: recovery_transform rotunjeste retragerea in jos la un numar intreg de puncte.
+		var need := (float(rel) * spacing) + runup + spacing
+		if need > backoff_m:
+			backoff_m = need
+	return backoff_m
 
 
 ## Cat de departe DUPA buza de aterizare se opreste o repunere care ar fi cazut

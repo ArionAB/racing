@@ -142,6 +142,19 @@ extends Marker3D
 ## prinde [RespawnZone] cu elanul ei). Oprit (implicit) = bit-identic.
 @export var respawn_past_gap: bool = false
 
+## Elanul minim, in metri inaintea buzei de desprindere, cu care e repusa o masina
+## care NU a trecut inca golul. Retragerea implicita a repunerii e de 12-14 m, iar
+## repunerea porneste de la 9 m/s: pe Stromboli (#617) saritura peste cuva cere
+## ~18-19 m/s la buza (autobuzul pica sub 17, Muscle sub 19), iar de la 14 m masina
+## ajunge cu 13-15. Masurat cu abateri laterale de ±2,5 m (ProbeStromboliRamp
+## `--mode=stat`): 14 m in spate = 7 din 7 cad (autobuz si Muscle); 25 m = 2 si 5
+## din 7; 40 m = 0 din 7. Cu valoarea asta, orice repunere al carei punct ar cadea
+## mai aproape de buza decat atat (cazut in cuva, butonul de repunere, blocaj,
+## ejectare, lava) e mutata inapoi pana la `m` metri de buza; cine e deja mai in
+## spate se repune ca inainte. 0 (implicit) = oprit, bit-identic. Vezi
+## [method Track._runup_backoff].
+@export var respawn_runup_m: float = 0.0
+
 ## Elanul sariturii, in metri inaintea buzei de desprindere, pe care AI-ul nu
 ## traverseaza PE LANGA o masina aflata alaturi (`AIController._avoid_line`):
 ## trece pe partea pe care e deja, nu pe cea „mai aproape de axa". Pe Devkund
@@ -253,6 +266,7 @@ func to_spec(track: Node3D) -> Dictionary:
 		"ship_bow_neg_z": ship_bow_neg_z,
 		"respect_branch": respect_branch,
 		"respawn_past_gap": respawn_past_gap,
+		"respawn_runup_m": respawn_runup_m,
 		"ai_keep_side_run_m": ai_keep_side_run_m,
 	}
 	if ford:

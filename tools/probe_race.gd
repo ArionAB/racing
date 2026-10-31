@@ -234,6 +234,8 @@ var _train_cam: bool = false
 var _train_meter: Node = null
 ## `--no-tub`: scoate `ShishiOdoshiHazard` din scena (A/B-ul tubului, Kyoto).
 var _no_tub: bool = false
+## `--no-calm`: zero pe `TorrentCycle.calm_*` (A/B-ul efectului din CALM, #493).
+var _no_calm: bool = false
 ## `--no-haboob`: scoate `HaboobHazard` din scena INAINTE de prima fizica (A/B-ul
 ## zidului de praf, Monument Valley). `--haboob-at=<t>`: ceasul lui INGHETAT la t
 ## secunde din ciclu (>= 0); fara el ruleaza de la `start_clock` (liniste la start,
@@ -434,6 +436,8 @@ func _ready() -> void:
 			_traffic = int(arg.trim_prefix("--traffic="))
 		elif arg.begins_with("--dusk="):
 			_force_dusk = float(arg.trim_prefix("--dusk="))
+		elif arg == "--no-calm":
+			_no_calm = true
 		elif arg == "--no-tub":
 			_no_tub = true
 		elif arg == "--no-rim":
@@ -676,6 +680,15 @@ func _setup_kyoto() -> void:
 		if tt != null:
 			tt.get_parent().remove_child(tt)
 			tt.free()
+	if _no_calm:
+		for n in get_tree().get_nodes_in_group(TorrentCycle.AI_GROUP):
+			var tc := n as TorrentCycle
+			if tc != null:
+				tc.calm_drag = 0.0
+				tc.calm_push_speed = 0.0
+				tc.calm_splash_trauma = 0.0
+				tc.calm_douse_seconds = 0.0
+				print("--no-calm: calm_* pe zero (torent)")
 	for n in get_tree().get_nodes_in_group(ShishiOdoshiHazard.AI_GROUP):
 		var hz := n as ShishiOdoshiHazard
 		if hz == null:

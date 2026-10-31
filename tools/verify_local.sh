@@ -205,6 +205,8 @@ run_step "Serengeti: niciun decor ingropat sub teren" decor_buried.log 'VERDICT:
 # jucatorului (cu contra-probe pe alte masini), datele sabotate dau cate o
 # problema, foaia pistei se activeaza, pistele reale au sursa semnalului.
 run_step "Provocari: tracker-ul numara doar ce trebuie" challenge.log 'VERDICT:' -- 	--headless --path . res://tools/ProbeChallenge.tscn
+# Torentul Fiordland (#493): fizica doar in puls + efect mic in CALM (sabotaj: --calm-zero pica).
+run_step "Torent Fiordland: CALM simtit, SURGE mai dur" torrent_b.log 'REZULTAT FINAL' -- --headless --fixed-fps 60 --path . res://tools/ProbeFiordTorent.tscn -- --only=b
 
 echo
 if [ ${#FAILED[@]} -eq 0 ]; then

@@ -2268,7 +2268,10 @@ const CLASSES_CARRARA := {
 	# Caramida viaductului pe `ok_roof` (olanele Okinawa, tinta #B8452E): pe atlas iesea portocaliu-viu, iar pe `roof_tiles` (fara tenta pe tema) iesea aproape alba.
 	"ponti_di_vara": {"Viaduct_Marble": _CRR_MARBLE,
 		"Viaduct_Brick": Palette.TRI_PREFIX + "ok_roof"},
-	"marmifera_portal": {"Portal_Stone": _TF_STONE},
+	# Portalul Marmiferei pe marmura carierei, nu pe `tf_stone`: tenta Transfagarasan a clasei (0.67, 0.77,
+	# 0.96) il facea albastru-gri saturat, „plastic vopsit" langa praful bej (criticul orb, POI H runda 2);
+	# rama si aripile tubului (`frame_class`) sunt pe aceeasi clasa. Zero materiale noi.
+	"marmifera_portal": {"Portal_Stone": _CRR_MARBLE},
 	# Valul 2 al kitului (carrara_inventory_crr-d/e.md). Satul Colonnata: zidaria pe `tf_stone`,
 	# tigla pe `ok_roof`, ca la viaduct (`roof_tiles` iese aproape alb pe tema asta, iar `ok_roof`
 	# e deja pe Track23, deci satul nu adauga material). `House_Stone`/`House_Roof` sunt si chei

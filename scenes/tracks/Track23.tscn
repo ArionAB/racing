@@ -401,6 +401,9 @@ metadata/keep_variants = PackedStringArray("Portal_Stone", "Portal_Moss", "Porta
 [node name="Portal_Rail" parent="DecorManual/Portaluri/MarmiferaIntrare"]
 visible = false
 
+[node name="Portal_Moss" parent="DecorManual/Portaluri/MarmiferaIntrare"]
+visible = false
+
 [node name="MarmiferaIesire" parent="DecorManual/Portaluri" instance=ExtResource("k_marmifera_portal")]
 transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, -199.3, 25.1, -105.0)
 metadata/coliziune = "mesh"
@@ -408,6 +411,9 @@ metadata/camera_blocker = true
 metadata/keep_variants = PackedStringArray("Portal_Stone", "Portal_Moss", "Portal_Glow", "Portal_Void")
 
 [node name="Portal_Rail" parent="DecorManual/Portaluri/MarmiferaIesire"]
+visible = false
+
+[node name="Portal_Moss" parent="DecorManual/Portaluri/MarmiferaIesire"]
 visible = false
 
 [node name="ZonaA" type="Node3D" parent="DecorManual"]
@@ -2326,6 +2332,42 @@ metadata/coliziune = "none"
 
 [node name="H_GinestraD" parent="DecorManual/ZonaH" instance=ExtResource("k_ginestra_fiorita")]
 transform = Transform3D(1.3, 0.0, -0.0, 0.0, 1.3, 0.0, 0.0, 0.0, 1.3, -247.0, 29.17, -90.0)
+metadata/coliziune = "none"
+
+[node name="H_StancaS1" parent="DecorManual/ZonaH" instance=ExtResource("k_block_informe_a")]
+transform = Transform3D(0.97508, 0.0, -1.39256, 0.0, 1.7, 0.0, 1.39256, 0.0, 0.97508, -250.995, 26.87, -114.5)
+metadata/coliziune = "none"
+
+[node name="H_StancaS2" parent="DecorManual/ZonaH" instance=ExtResource("k_block_informe_b")]
+transform = Transform3D(-0.68404, 0.0, -1.87939, 0.0, 2.0, 0.0, 1.87939, 0.0, -0.68404, -250.595, 28.0, -119.0)
+metadata/coliziune = "none"
+
+[node name="H_StancaD1" parent="DecorManual/ZonaH" instance=ExtResource("k_block_informe_b")]
+transform = Transform3D(-0.9, 0.0, -1.55885, 0.0, 1.8, 0.0, 1.55885, 0.0, -0.9, -250.995, 26.63, -95.5)
+metadata/coliziune = "none"
+
+[node name="H_StancaD2" parent="DecorManual/ZonaH" instance=ExtResource("k_block_informe_a")]
+transform = Transform3D(1.38564, 0.0, -0.8, 0.0, 1.6, 0.0, 0.8, 0.0, 1.38564, -250.595, 26.86, -91.0)
+metadata/coliziune = "none"
+
+[node name="H_StancaSus" parent="DecorManual/ZonaH" instance=ExtResource("k_block_informe_a")]
+transform = Transform3D(0.41676, 0.0, -2.36354, 0.0, 2.4, 0.0, 2.36354, 0.0, 0.41676, -246.0, 34.0, -98.5)
+metadata/coliziune = "none"
+
+[node name="H_StancaSusS" parent="DecorManual/ZonaH" instance=ExtResource("k_block_informe_b")]
+transform = Transform3D(-1.01428, 0.0, -2.17514, 0.0, 2.4, 0.0, 2.17514, 0.0, -1.01428, -246.0, 34.0, -112.0)
+metadata/coliziune = "none"
+
+[node name="H_CragS1" parent="DecorManual/ZonaH" instance=ExtResource("k_block_informe_b")]
+transform = Transform3D(1.92836, 0.0, -2.29813, 0.0, 3.0, 0.0, 2.29813, 0.0, 1.92836, -249.5, 29.5, -122.0)
+metadata/coliziune = "none"
+
+[node name="H_CragS2" parent="DecorManual/ZonaH" instance=ExtResource("k_block_informe_a")]
+transform = Transform3D(-0.67293, 0.0, -2.51141, 0.0, 2.6, 0.0, 2.51141, 0.0, -0.67293, -253.5, 33.0, -126.0)
+metadata/coliziune = "none"
+
+[node name="H_CragD1" parent="DecorManual/ZonaH" instance=ExtResource("k_block_informe_b")]
+transform = Transform3D(-2.14492, 0.0, -1.79981, 0.0, 2.8, 0.0, 1.79981, 0.0, -2.14492, -249.5, 27.45, -88.0)
 metadata/coliziune = "none"
 
 [node name="H_Stiva" parent="DecorManual/ZonaH" instance=ExtResource("k_block_stack_a")]

@@ -79,6 +79,21 @@ ITEMS += [
     _world("H_CastanD", "plants/chestnut_tree_b.glb", -241.0, -92.5, yaw_rel=-60.0, coliziune="none"),
     _world("H_GinestraS", "plants/ginestra_fiorita.glb", -248.0, -119.5, yaw_rel=0.0, scale=1.3, coliziune="none"),
     _world("H_GinestraD", "plants/ginestra_fiorita.glb", -247.0, -90.0, yaw_rel=90.0, scale=1.3, coliziune="none"),
+    # runda 2 (criticul: "portalul sta pe o pana neteda de panta, fara fata de stanca taiata"): blocuri
+    # informe mari lipite de capacul movilei, de o parte si de alta a arcului (capacul e planul x ~ -249.1,
+    # fata GLB-ului la -250.3), si unul pe flancul movilei: fata plana a capacului devine stanca rupta.
+    _world("H_StancaS1", "rocks/block_informe_a.glb", -251.0, -114.5, yaw_rel=35.0, scale=1.7, coliziune="none"),
+    _world("H_StancaS2", "rocks/block_informe_b.glb", -250.6, -119.0, yaw_rel=-20.0, scale=2.0, coliziune="none"),
+    _world("H_StancaD1", "rocks/block_informe_b.glb", -251.0, -95.5, yaw_rel=-30.0, scale=1.8, coliziune="none"),
+    _world("H_StancaD2", "rocks/block_informe_a.glb", -250.6, -91.0, yaw_rel=60.0, scale=1.6, coliziune="none"),
+    # runda 4 (criticul r3, ca r1: "panta n-are fata de stanca; vrea stanci rupte care flancheaza si atarna peste
+    # portal"): blocuri informe MARI, ingropate ~1 m, pe umerii movilei (profilul tubului: lat 7.5 -> +9.5 m peste
+    # asfalt; sonda nu vede movila, cota de mana) si pe flancurile masivului de langa capac. Toate fantoma.
+    _world("H_StancaSus", "rocks/block_informe_a.glb", -246.0, -98.5, yaw_rel=10.0, scale=2.4, coliziune="none", y=34.0),
+    _world("H_StancaSusS", "rocks/block_informe_b.glb", -246.0, -112.0, yaw_rel=-25.0, scale=2.4, coliziune="none", y=34.0),
+    _world("H_CragS1", "rocks/block_informe_b.glb", -249.5, -122.0, yaw_rel=40.0, scale=3.0, coliziune="none"),
+    _world("H_CragS2", "rocks/block_informe_a.glb", -253.5, -126.0, yaw_rel=-15.0, scale=2.6, coliziune="none"),
+    _world("H_CragD1", "rocks/block_informe_b.glb", -249.5, -88.0, yaw_rel=-50.0, scale=2.8, coliziune="none"),
     # in fata, pe dreapta: stiva de blocuri, un bloc si excavatorul parcat (bara), departe de banda (lat >= 11)
     _world("H_Stiva", "rocks/block_stack_a.glb", -261.0, -93.8, yaw_rel=6.0, coliziune="none"),
     _world("H_Bloc", "rocks/marble_block_c.glb", -265.5, -92.0, yaw_rel=-12.0, coliziune="none"),
@@ -91,5 +106,10 @@ KIT_Y = {
     "H_MolozAripaS1": 26.62, "H_MolozAripaS2": 26.89, "H_MolozAripaS3": 27.32,
     "H_MolozAripaD1": 26.62, "H_MolozAripaD2": 26.81, "H_MolozAripaD3": 26.98,
     "H_CastanS": 26.97, "H_CastanD": 29.71, "H_GinestraS": 30.38, "H_GinestraD": 29.17,
+    # H_StancaS2: 3 din 9 raze cad intr-o gaura de teren de la piciorul capacului (t_min -47.5) -> terenul vecin
+    "H_StancaS1": 26.87, "H_StancaS2": 28.0, "H_StancaD1": 26.63, "H_StancaD2": 26.86,
+    # H_CragS1/S2: aceeasi gaura de sub capac (raze la -47.5) -> cota din scan (`--scan`, lat -14..-20 la
+    # 0.949-0.951: 29.2 / 32.8 / 35.4 / 38.3), ingropate ~1 m pe partea de jos a pantei
+    "H_CragS1": 29.5, "H_CragS2": 33.0, "H_CragD1": 27.45,
     "H_Stiva": 27.01, "H_Bloc": 27.22, "H_Excavator": 27.10,
 }

@@ -91,6 +91,6 @@ KIT_Y = {
     "A_P1g": 24.62, "A_P2a": 24.59, "A_P2b": 24.59, "A_P2c": 24.60, "A_P2d": 24.48, "A_P2e": 24.49,
     "A_P2f": 24.49, "A_P2g": 24.60, "A_R1a": 24.67, "A_R1b": 24.67, "A_R1c": 24.67, "A_R1d": 24.67,
     "A_R1e": 24.67, "A_R2a": 24.67, "A_R2b": 24.67, "A_R2c": 24.67, "A_R2d": 24.67,
-    "A_Castan1": 13.63, "A_Castan2": 14.72, "A_Castan3": 15.62,
-    "A_Ginestra1": 13.17, "A_Ginestra2": 13.17, "A_Ginestra3": 13.17, "A_Ginestra4": 13.15, "A_Ginestra5": 13.17,
+    "A_Castan1": 20.17, "A_Castan2": 20.17, "A_Castan3": 20.17,
+    "A_Ginestra1": 20.17, "A_Ginestra2": 20.17, "A_Ginestra3": 20.17, "A_Ginestra4": 20.17, "A_Ginestra5": 20.17,
 }

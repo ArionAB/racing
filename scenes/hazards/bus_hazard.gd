@@ -100,6 +100,11 @@ extends "res://scenes/props/path_mover.gd"
 ## m/s adaugati lateral masinii care intra in zona de ghiont (o data, cu
 ## cooldown — dezechilibrarea).
 @export_range(0.0, 12.0, 0.5) var shove: float = 3.0
+## Cat sta autobuzul pe loc dupa ce e ARATAT sus (s), inainte sa plece. Zero =
+## porneste imediat (Carrara, Fiordland: comportament neschimbat). Cu o cochera
+## cu usa (`BusDepot`, Machu Picchu #600) timpul asta e cat se ridica usa:
+## autobuzul e deja in cochera, dupa usa inchisa, si pleaca abia cand drumul e liber.
+@export_range(0.0, 6.0, 0.1) var dwell_s: float = 0.0
 ## Acceleratia laterala SUSTINUTA (m/s^2) cat masina sta in zona de ghiont.
 ## Ghiontul singur nu deplaseaza: grip-ul lateral al masinii (~10/s) stinge
 ## un delta-v de 5.5 m/s in ~0.1 s, adica ~0.5 m. Impingerea „cu masa" din
@@ -153,6 +158,7 @@ const APEX_FOLLOW: float = 4.0
 
 var _hidden: bool = false
 var _hide_left: float = 0.0
+var _dwell_left: float = 0.0
 var _shove_area: Area3D
 var _cooldown: Dictionary = {}
 var _box_size: Vector3 = Vector3.ZERO
@@ -288,6 +294,7 @@ func _physics_process(delta: float) -> void:
 	if not _started:
 		_started = true
 		_dist = phase * length
+		_dwell_left = dwell_s if phase <= 0.0 else 0.0
 	_time += delta
 	_advance(delta, length)
 	var pos := to_global(curve.sample_baked(_dist, true))
@@ -350,6 +357,9 @@ func _advance(delta: float, length: float) -> void:
 		if _hide_left <= 0.0:
 			_show()
 		return
+	if _dwell_left > 0.0:
+		_dwell_left -= delta
+		return
 	_dist += speed * delta
 	if _dist >= length:
 		# Teleportarea sus se face DOAR stins (vezi antet).
@@ -370,6 +380,7 @@ func _hide(seconds: float) -> void:
 
 func _show() -> void:
 	_hidden = false
+	_dwell_left = dwell_s
 	_body.collision_layer = 1
 	_body.visible = true
 	if _shove_area != null:

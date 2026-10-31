@@ -53,6 +53,13 @@ ITEMS = [
     ("A_CisternaB", "props/water_tank.glb", 0.0165, -18.0, 0.0),
     # Blocuri raslete pe platou, langa magazie.
     ("A_BlocP1", "rocks/marble_block_c.glb", 0.027, -16.0, 12.0),
+    # Depozitul de blocuri din spatele magaziei (platoul gol din cadrul de la 0.01): stive de 2-3 si blocuri
+    # raslete la 26-34 m de ax, toate inainte de x -50.
+    ("A_DepozitS1", "rocks/block_stack_b.glb", 0.036, -28.0, 6.0),
+    ("A_DepozitS2", "rocks/block_stack_a.glb", 0.0385, -31.0, -9.0),
+    ("A_DepozitB3", "rocks/marble_block_c.glb", 0.041, -27.5, 80.0),
+    ("A_DepozitS4", "rocks/block_stack_b.glb", 0.043, -32.0, 14.0),
+    ("A_DepozitB5", "rocks/marble_block_a.glb", 0.0395, -25.0, 30.0),
     # Marginea dinspre gol: inca doua piese pe buza (lat 12,5), doar DUPA 0.025, unde e fata verticala:
     # pe 0.00-0.02 panta lina din dreapta e dezvaluirea de la start si ramane libera.
     ("A_BlocD6", "rocks/marble_block_c.glb", 0.0305, 11.0, 90.0),
@@ -63,7 +70,8 @@ ITEMS = [
      {"coliziune": "trunk"}),
     ("A_Castan2", "res://assets/models/transfagarasan/plants/beech_tree_b.glb", 0.036, 23.0, -40.0,
      {"coliziune": "trunk"}),
-    ("A_Castan3", "res://assets/models/transfagarasan/plants/beech_tree_a.glb", 0.045, 21.0, 110.0,
+    # Al treilea dupa excavator (0.055), ca liziera sa intre si in cadrul de la 0.05.
+    ("A_Castan3", "res://assets/models/transfagarasan/plants/beech_tree_a.glb", 0.055, 22.0, 110.0,
      {"coliziune": "trunk"}),
     # Ginestra pe panta lina 0.00-0.02 (joasa: nu acopera vederea spre balti).
     ("A_Ginestra1", "res://assets/models/stromboli/plants/ginestra_bush.glb", 0.004, 17.0, 0.0, {"scale": 1.3}),
@@ -85,5 +93,6 @@ KIT_Y.update({
     "A_Turn": 24.42, "A_MagazieA": 24.37, "A_MagazieB": 24.37, "A_MuzeuSanie": 24.43, "A_MuzeuVagonet": 24.49, "A_MuzeuRoata": 24.45,
     "A_CisternaA": 24.55, "A_CisternaB": 24.47, "A_BlocP1": 24.49, "A_BlocD6": 24.67, "A_StivaD7": 24.67,
     "A_Castan1": 14.12, "A_Castan2": 14.72, "A_Castan3": 15.62,
+    "A_DepozitS1": 24.32, "A_DepozitS2": 24.31, "A_DepozitB3": 24.30, "A_DepozitS4": 24.31, "A_DepozitB5": 24.30,
     "A_Ginestra1": 24.20, "A_Ginestra2": 23.35, "A_Ginestra3": 23.00, "A_Ginestra4": 21.65, "A_Ginestra5": 23.55,
 })

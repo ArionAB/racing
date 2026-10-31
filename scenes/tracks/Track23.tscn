@@ -29,6 +29,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/carrara/props/museum_set_cart.glb" id="k_museum_set_cart"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/props/museum_set_wheel.glb" id="k_museum_set_wheel"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/props/water_tank.glb" id="k_water_tank"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/rocks/marble_block_a.glb" id="k_marble_block_a"]
 [ext_resource type="PackedScene" path="res://assets/models/transfagarasan/plants/beech_tree_a.glb" id="k_beech_tree_a"]
 [ext_resource type="PackedScene" path="res://assets/models/transfagarasan/plants/beech_tree_b.glb" id="k_beech_tree_b"]
 [ext_resource type="PackedScene" path="res://assets/models/stromboli/plants/ginestra_bush.glb" id="k_ginestra_bush"]
@@ -383,6 +384,21 @@ transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, -113.815
 [node name="A_BlocP1" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
 transform = Transform3D(0.20791, 0.0, -0.97815, 0.0, 1.0, 0.0, 0.97815, 0.0, 0.20791, -91.36, 24.49, -121.0)
 
+[node name="A_DepozitS1" parent="DecorManual/ZonaA" instance=ExtResource("k_block_stack_b")]
+transform = Transform3D(0.10453, 0.0, -0.99452, 0.0, 1.0, 0.0, 0.99452, 0.0, 0.10453, -74.185, 24.32, -133.0)
+
+[node name="A_DepozitS2" parent="DecorManual/ZonaA" instance=ExtResource("k_block_stack_a")]
+transform = Transform3D(-0.15643, 0.0, -0.98769, 0.0, 1.0, 0.0, 0.98769, 0.0, -0.15643, -67.36, 24.31, -136.0)
+
+[node name="A_DepozitB3" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(0.98481, 0.0, -0.17365, 0.0, 1.0, 0.0, 0.17365, 0.0, 0.98481, -64.0, 24.3, -132.5)
+
+[node name="A_DepozitS4" parent="DecorManual/ZonaA" instance=ExtResource("k_block_stack_b")]
+transform = Transform3D(0.24192, 0.0, -0.9703, 0.0, 1.0, 0.0, 0.9703, 0.0, 0.24192, -60.64, 24.31, -137.0)
+
+[node name="A_DepozitB5" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(0.5, 0.0, -0.86603, 0.0, 1.0, 0.0, 0.86603, 0.0, 0.5, -65.815, 24.3, -130.0)
+
 [node name="A_BlocD6" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
 transform = Transform3D(1.0, 0.0, -0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -84.64, 24.67, -94.0)
 
@@ -398,7 +414,7 @@ transform = Transform3D(-0.64279, 0.0, -0.76604, 0.0, 1.0, 0.0, 0.76604, 0.0, -0
 metadata/coliziune = "trunk"
 
 [node name="A_Castan3" parent="DecorManual/ZonaA" instance=ExtResource("k_beech_tree_a")]
-transform = Transform3D(0.93969, 0.0, 0.34202, 0.0, 1.0, 0.0, -0.34202, 0.0, 0.93969, -53.815, 15.62, -84.0)
+transform = Transform3D(0.93969, 0.0, 0.34202, 0.0, 1.0, 0.0, -0.34202, 0.0, 0.93969, -34.0, 15.62, -83.0)
 metadata/coliziune = "trunk"
 
 [node name="A_Ginestra1" parent="DecorManual/ZonaA" instance=ExtResource("k_ginestra_bush")]

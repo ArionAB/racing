@@ -90,12 +90,12 @@ KIT_Y = { "A_Nume": 24.63, ... }
 
 `--import` înaintea oricărei serii (memoria `import-invechit-falsifica-masuratoarea`).
 
-| gardă | comandă | linia de bază pe main (31 oct 2026) |
+| gardă | comandă | linia de bază pe main (31 oct 2026, după valul POI A/B/C; vezi `carrara_stare_poi.md`) |
 |---|---|---|
-| ProbeRace | `SEEDS=16 PAR=5 bash tools/carrara_race_run.sh <dir>`, apoi `python tools/carrara_race_sum.py <dir>` | **7 / 2 / 14** (repuneri / ejectări / blocaje), aproape toate la excavator (~0,048) și în acul de la 0,15; 6 lovituri de sanie. Contractul: **zero `[blocaj]`/repuneri noi atribuibile zonei** (citește unde sunt, nu doar totalul; memoria `zero-repuneri-ascunde-blocajul`). Nedeterminism: compară distribuții (memoria `proberace-nedeterminism`) |
-| probe_decor | `--headless --path . --script res://tools/probe_decor.gd -- --track=23` | **23 materiale** (≤ 38) |
+| ProbeRace | `SEEDS=16 PAR=5 bash tools/carrara_race_run.sh <dir>`, apoi `python tools/carrara_race_sum.py <dir>` | per 16 seed-uri ~**9 / 2 / 8** (repuneri / ejectări / blocaje; serie integrată A/B/C: 10/4/10), aproape toate la excavator (0,036–0,055), pe E/F (0,67–0,70) și în acul de la 0,147; o ejectare rară în rama portalului galeriei (0,398, 2 din 96 de seed-uri, deschisă). Contractul: **zero `[blocaj]`/repuneri noi atribuibile zonei** (citește unde sunt, nu doar totalul; memoria `zero-repuneri-ascunde-blocajul`). Nedeterminism: compară distribuții (memoria `proberace-nedeterminism`) |
+| probe_decor | `--headless --path . --script res://tools/probe_decor.gd -- --track=23` | **25 de materiale** (≤ 38), 858 de desene |
 | probe_manual | `--headless --path . --script res://tools/probe_manual.gd -- --track=23` | **5** (viaductul și cele 4 portaluri, care stau PESTE drum prin construcție). Contractul: **zero noi** |
-| ProbeCarraraMontaj | `res://tools/ProbeCarraraMontaj.tscn -- --decor` | OK, 25 de piese |
+| ProbeCarraraMontaj | `res://tools/ProbeCarraraMontaj.tscn -- --decor` | OK, 381 de piese |
 | ProbeLaneClear | `res://tools/ProbeLaneClear.tscn -- --track=15` | **9** (exact linia de bază) |
 | ProbeBuried | `res://tools/ProbeBuried.tscn -- --track=15` | OK, 0 îngropate |
 | ProbeLayout | `res://tools/ProbeLayout.tscn -- --track=15` | OK |

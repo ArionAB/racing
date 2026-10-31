@@ -42,6 +42,9 @@ const TRUNK_MIN_RADIUS: float = 0.22
 ## de 12 m ar da 12 x 0,13 = 1,6 m raza (stalp invizibil de 3,2 m). Valorile sunt
 ## masurate pe nodul de trunchi din GLB (baza evazata, Ø ~1-1,9 m la artar).
 const TRUNK_RADIUS := {
+	# Carrara: castanii (build_crr_kit_a_lipsa.py) au coroana de 10-13 m pe un trunchi de
+	# O 1,0-1,15 m; raza masurata pe `Chestnut_Bark` sub 1 m (fara pintenii de radacina).
+	"chestnut_tree_a": 0.5, "chestnut_tree_b": 0.58,
 	"momiji_a": 0.6, "momiji_b": 0.55, "momiji_c": 0.55,
 	"ginkgo": 0.6, "niwaki_pine": 0.5,
 	"moso_culm": 0.16, "bamboo_crown": 1.2,
@@ -522,6 +525,12 @@ const PROP_COLLISION := {
 	"cabana_balea_lac": "hull", "cabana_balea_cascada": "hull",
 	"arges_house_a": "hull", "arges_house_b": "hull",
 	"schist_outcrop_a": "hull", "schist_outcrop_b": "hull", "schist_outcrop_c": "hull",
+	# --- Carrara: piesele lipsa (tools/blender/build_crr_kit_a_lipsa.py) ------
+	# Turnul si magazia: hull per nod (lemnaria si golurile sar, HULL_SKIP_PARTS);
+	# castanii pe trunchi, ca fagii; ginestra inflorita e tufa prin care se trece.
+	"stone_tower": "hull", "tin_shed": "hull",
+	"chestnut_tree_a": "trunk", "chestnut_tree_b": "trunk",
+	"ginestra_fiorita": "none",
 }
 
 ## Corpuri fizice automate pentru tot ce e asezat de mana dedesubt.
@@ -2284,6 +2293,23 @@ const CLASSES_CARRARA := {
 	# vopsita (CONCRETE 8 + rama ASPHALT_EDGE) citea scandura maro, „lazi de lemn". `plain` pastreaza
 	# sloturile si opreste doar stratul de detaliu (ca la cruise_boat, Fiordland).
 	"office_container": {"Office_Body": Palette.PLAIN_PREFIX},
+	# Piesele lipsa (carrara_stare_poi.md punctul 6, build_crr_kit_a_lipsa.py). Turnul: zidaria
+	# pe `tf_stone` ca satul, pietrele de colt / braul / cornisa pe marmura carierei. Magazia ramane
+	# pe ATLAS (tabla gri MARBLE_GREY, acoperis PAINTED_METAL gri-albastrui cu doua foi RUST): o
+	# clasa ar sterge foile ruginite si soclul de beton. Ginestra inflorita: tijele pe `macchia`
+	# (ca `ginestra_bush`), florile raman pe atlas, galbene. Zero materiale noi: toate exista pe pista.
+	"stone_tower": {"StoneTower_Stone": _CRR_MARBLE},
+	"ginestra_fiorita": {"GinestraBloom_Stems": Palette.TRI_PREFIX + "macchia"},
+	# Castanul (inlocuieste fagul Transfagarasan pe Carrara). Masurat pe captura de joc (--vitrina,
+	# fractia 0,01), pixelii coroanei: fagul pe `tf_beech` iese H 112 / S 0,69 (verde saturat,
+	# „blob verde"), bara_poi_G.png are coroanele la H ~70 / S ~0,40. Castanul pe atlas
+	# (CACTUS_GREEN 12) iesea H 95 / S 0,82 si cu stratul de detaliu al atlasului in dungi drepte.
+	# Pe `macchia` (frunza lata, deja pe pista prin ginestra) cu tenta oliv COAPTA in vertex color
+	# (G si B taiate, build_crr_kit_a_lipsa.py `_leaf_tint`): H 84 / S 0,57, varfurile galben-oliv.
+	# Zero materiale noi (macchia exista); clasa `tf_beech` nu poate ajunge la oliv: dala ei n-are
+	# rosu, iar vertex color-ul doar intuneca.
+	"chestnut_tree_a": {"Chestnut_Leaves": Palette.TRI_PREFIX + "macchia"},
+	"chestnut_tree_b": {"Chestnut_Leaves": Palette.TRI_PREFIX + "macchia"},
 }
 ## Clasele kitului Ha Long (Track22): piatra de carst, pe FISIER si pe numele
 ## nodului. Pana la #598 pista n-avea NICIO intrare aici, deci turnurile,
@@ -2740,6 +2766,10 @@ const SPLIT_MODELS_BY_THEME := {
 	"fiordland": {
 		"moss_boulder_b": true,
 	},
+	# Carrara: florile ginestrei (vezi ACCENT_SPLIT_BY_THEME mai jos).
+	"carrara": {
+		"ginestra_bush": true,
+	},
 	# Kyoto, valul 2 de materiale (docs/track_briefs/kyoto_materiale.md §Valul 2):
 	# nodurile MIXTE ale templelor si podurilor se rup PE SLOT, ca vermilionul /
 	# lemnul / tulpina sa ia clasa fara sa stearga restul. Ruptura e pe triunghi
@@ -2766,6 +2796,17 @@ const ACCENT_SPLIT_BY_THEME := {
 		# VOLCANIC_BLACK (3 si 29 mutate acolo); capacul de muschi ramane pe 21
 		# TROPICAL_GREEN si pleaca in `_Accente`.
 		"Moss_Boulder_B": Palette.VOLCANIC_BLACK,
+	},
+	# Carrara: ginestra (reuse `stromboli/plants/ginestra_bush.glb`) iesea „smoc verde
+	# tepos, fara galben" (carrara_stare_poi.md, punctul 6). Cauza NU era o remapare de
+	# slot pe tema, ci clasa GLOBALA `Ginestra_` -> `macchia` (STROMBOLI_CLASSES, intra in
+	# `prop_classes()` pe orice pista): o clasa triplanara inlocuieste culoarea slotului,
+	# deci varfurile pe DRY_VEGETATION 13 (13-14% din arie) deveneau tot frunzis verde.
+	# Aici tijele (TROPICAL_GREEN 21) raman pe `macchia`, iar varfurile pleaca in
+	# `_Accente`, pe atlas: slotul 13 iese galben-auriu sub soarele temei (la fel ca
+	# vopseaua excavatorului, acelasi slot). Zero materiale noi (atlasul e deja pe pista).
+	"carrara": {
+		"Ginestra_": Palette.TROPICAL_GREEN,
 	},
 	# Valoarea = sloturile care raman pe CORP (si primesc clasa corpului); restul
 	# pleaca in `_Accente` (atlas, sau clasa numita explicit in CLASSES_BY_THEME).
@@ -3814,6 +3855,11 @@ func _glow_spec(model: Node3D) -> String:
 ## respingea hull-ul la unele rotatii (`zid82_col`, 30 sep 2026). Vezi
 ## `TrackDecor.add_hull_collision`.
 const HULL_SKIP_PARTS := {
+	# Carrara: lemnaria turnului (usa pe +Y si grinda cu scripete pe +X) si a magaziei (usile,
+	# sina) sta pe fete diferite: un hull pe nodul ei ar fi o pana convexa intre ele, in aer.
+	# Corpul de zidarie / tabla acopera deja amprenta. Golurile stau in perete.
+	"stone_tower": ["StoneTower_Wood", "StoneTower_Void"],
+	"tin_shed": ["TinShed_Wood", "TinShed_Void"],
 	# Carrara: firul masinii de fir urca la 2,1 m si sinele de 6 m ar face din hull o pana invizibila.
 	"wire_saw": ["Saw_Water", "Saw_Rail"],
 	"fort_wall_segment": ["Wall_Glow"],

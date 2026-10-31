@@ -104,3 +104,26 @@ Pe `carrara/poi-abc`, cu main (#624) adus în ramură:
 (`a|b|c/r1..r3/` capturile, `sheets/plansa_*` planșele oarbe cu cheile).
 Scratchpad-ul sesiunii nu e permanent; capturile finale reprezentative sunt
 copiate în `docs/track_briefs/img/carrara_poi/`.
+
+## Runda 1b (31 oct 2026): deciziile dezvoltatorului, aplicate
+
+Dezvoltatorul a raspuns la deciziile de mai sus: decor permis langa grila (2), fete verticale pe trepte (3),
+asseturile lipsa se fac (6), desenele raman asa (7), baltile de langa derrick sunt ok (5). Raman deschise:
+culoarea marmurei (1) si bariera de pe panta de dupa acul 1 (4). Trei constructori Opus, integrati pe
+`carrara/poi-abc-v2`.
+
+| ramura | ce | ieșire orb |
+|---|---|---|
+| `carrara/a-grila` | curtea pe tot drumul vazut de la grila (x -170..-60), patru planuri: margine la 4-6 m, curte la 13-27 m, depozit la 28-34 m, perete de blocuri in trei trepte (8/11/14 m) pe stanga; dreapta = fantome dincolo de berma. 116 piese | 0/4, (c): de doua ori „solul gri-albastru rece si lumina plata” — tema, nu decorul |
+| `carrara/trepte-verticale` | fetele ERAU verticale (82-86 grade); se citeau panta fiindca fetele care coboara de la drum nu se vad din chase cam, iar cele vizibile se terminau in racorduri de 22-28 m. Fetele continua dincolo de ace, fiecare banc de 21 m e in doua trepte (polite T2N +20,5, M +12,5), `BENCH_FINE_DIV` 8 -> 16, plase noi PlasaM/PlasaMCapat. In cadrul de joc: panta lina 6,0 -> 2,9 %, fata verticala 15 -> 22 % | 0/2, (c): „o singura stanca, fara ritm de trepte” — ramane textura fetei (strate, nu blocuri taiate) si unghiul camerei |
+| `carrara/kit-a-lipsa` | `stone_tower.glb`, `tin_shed.glb`, `chestnut_tree_a/b.glb` (macchia cu tenta oliv: H 112/S 0,69 -> H 84/S 0,57), `ginestra_fiorita.glb` (~92 % galben); `ginestra_bush` pierdea florile din cauza maparii globale `Ginestra_ -> macchia`, reparat pe tema carrara | — |
+
+**Integrarea** (`e6800129`): inlocuitorii lui A -> asseturile noi; treptele lui B au pus o buza la lat +12,5 pe
+dreapta startului (polita la +20,2), deci A_Castan7/8 coboara pe polita, iar A_RGc, A_MuzeuRoata, A_RSc,
+A_CiobR3/R5 se muta sub buza (masurat pe toate piesele, inclusiv cele coapte).
+
+**Garzi pe scena integrata:** verify_local OK (66 de pasi); probe_decor 24 de materiale, 226 de desene,
+509k triunghiuri; probe_manual 5; ProbeLaneClear 9; ProbeBuried/ProbeLayout OK. ProbeRace 32 de seed-uri:
+13 / 4 / 24 (repuneri / ejectari / blocaje) — 21 din 24 de blocaje la excavator (0,046-0,052, hazardul
+lui A, ca pe main), zero atingeri de decor, zero incidente la buza T1 (0,078) si la portalul galeriei (0,398).
+Capturi: `img/carrara_poi/a_int2_f001.jpg`, `b_int2_f016.jpg`.

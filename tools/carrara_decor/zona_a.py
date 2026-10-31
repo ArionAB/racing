@@ -101,6 +101,33 @@ ITEMS = [
     ('A_D8c', 'rocks/block_stack_a.glb', _F0, -33.5, 8.0, {'along': 60.0, 'scale': 2.0}),
     ('A_D9', 'rocks/block_stack_b.glb', _F0, -30.0, 3.0, {'along': 70.0, 'scale': 2.0}),
     ('A_D10', 'rocks/block_stack_a.glb', _F0, -33.0, -6.0, {'along': 77.0, 'scale': 2.0}),
+    # ---- 4. Runda 3 (criticul orb r2: "nimic nu inchide curtea: recuzita pe o campie plata, cu golul cetii
+    # in spate; in bara curtea e o terasa taiata in marmura, cu peretele crem in trepte"). Peretele carierei
+    # din blocuri uriase pe stanga, dupa depozit: treapta 1 la lat -40 (12 x 8 x 8 m, fata la -36), treapta 2
+    # la lat -50 (16,5 x 11 m), deci un perete in doua trepte, 8 si 11 m. Marmura e triplanara de lume
+    # (`carrara_marble`), deci scala nu intinde dungile. Se opreste inainte de iesirea camionului 1 (x > -50).
+    ('A_Perete1_0', 'rocks/marble_block_c.glb', _F0, -40.0, 91.5, {'along': -14.0, 'scale': 4.0}),
+    ('A_Perete1_1', 'rocks/marble_block_c.glb', _F0, -40.0, 88.0, {'along': -2.0, 'scale': 3.6}),
+    ('A_Perete1_2', 'rocks/marble_block_c.glb', _F0, -40.0, 90.5, {'along': 10.0, 'scale': 4.3}),
+    ('A_Perete1_3', 'rocks/marble_block_c.glb', _F0, -40.0, 92.5, {'along': 22.0, 'scale': 3.8}),
+    ('A_Perete1_4', 'rocks/marble_block_c.glb', _F0, -40.0, 89.0, {'along': 34.0, 'scale': 4.1}),
+    ('A_Perete1_5', 'rocks/marble_block_c.glb', _F0, -40.0, 91.0, {'along': 46.0, 'scale': 3.7}),
+    ('A_Perete1_6', 'rocks/marble_block_c.glb', _F0, -40.0, 87.5, {'along': 58.0, 'scale': 4.2}),
+    ('A_Perete1_7', 'rocks/marble_block_c.glb', _F0, -40.0, 90.0, {'along': 70.0, 'scale': 3.9}),
+    ('A_Perete1_8', 'rocks/marble_block_c.glb', _F0, -40.0, 92.0, {'along': 82.0, 'scale': 4.0}),
+    ('A_Perete2_0', 'rocks/marble_block_c.glb', _F0, -50.5, 88.5, {'along': -8.0, 'scale': 5.5}),
+    ('A_Perete2_1', 'rocks/marble_block_c.glb', _F0, -50.5, 92.0, {'along': 7.0, 'scale': 5.2}),
+    ('A_Perete2_2', 'rocks/marble_block_c.glb', _F0, -50.5, 89.5, {'along': 22.0, 'scale': 5.5}),
+    ('A_Perete2_3', 'rocks/marble_block_c.glb', _F0, -50.5, 87.5, {'along': 37.0, 'scale': 5.2}),
+    ('A_Perete2_4', 'rocks/marble_block_c.glb', _F0, -50.5, 91.0, {'along': 52.0, 'scale': 5.5}),
+    ('A_Perete2_5', 'rocks/marble_block_c.glb', _F0, -50.5, 89.0, {'along': 67.0, 'scale': 5.2}),
+    ('A_Perete2_6', 'rocks/marble_block_c.glb', _F0, -50.5, 92.5, {'along': 82.0, 'scale': 5.5}),
+    # Treapta 3 la lat -64 (21 x 14 m): peretele urca 8 -> 11 -> 14 m si umple banda de ceata din stanga.
+    ('A_Perete3_0', 'rocks/marble_block_c.glb', _F0, -64.0, 92.0, {'along': -2.0, 'scale': 7.0}),
+    ('A_Perete3_1', 'rocks/marble_block_c.glb', _F0, -64.0, 88.5, {'along': 19.0, 'scale': 6.6}),
+    ('A_Perete3_2', 'rocks/marble_block_c.glb', _F0, -64.0, 91.0, {'along': 40.0, 'scale': 7.0}),
+    ('A_Perete3_3', 'rocks/marble_block_c.glb', _F0, -64.0, 87.5, {'along': 61.0, 'scale': 6.6}),
+    ('A_Perete3_4', 'rocks/marble_block_c.glb', _F0, -64.0, 90.5, {'along': 82.0, 'scale': 7.0}),
     # ---- dreapta: cordonul de blocuri pe banca dintre berma si buza (FANTOME, dincolo de berma).
     ('A_RGa', 'rocks/block_stack_a.glb', _F0, 10.0, 4.0, {'coliziune': 'none', 'along': -17.0, 'scale': 1.2}),
     ('A_RGb', 'rocks/marble_block_c.glb', _F0, 10.4, 88.0, {'coliziune': 'none', 'along': -13.2}),
@@ -160,6 +187,9 @@ KIT_Y = {
     # Runda 2, acelasi scan.
     "A_SopronA": 24.52, "A_SopronB": 24.52, "A_CisternaC": 24.52, "A_CisternaD": 24.52, "A_Castan4": 24.42, "A_Castan5": 24.32, "A_Castan6": 24.62, "A_Ginestra6": 24.52, "A_Ginestra7": 24.42, "A_Castan7": 24.22, "A_Castan8": 24.62,
     "A_Rezervor": 24.39, "A_Foreza": 24.37,
+    # Runda 3, peretele: din scanul lateral -60..-30 (teren 24,3-24,9; capetele spre faleza portalului urca).
+    "A_Perete1_0": 24.75, "A_Perete1_1": 24.30, "A_Perete1_2": 24.30, "A_Perete1_3": 24.30, "A_Perete1_4": 24.30, "A_Perete1_5": 24.30, "A_Perete1_6": 24.30, "A_Perete1_7": 24.30, "A_Perete1_8": 24.30, "A_Perete2_0": 24.75, "A_Perete2_1": 24.30, "A_Perete2_2": 24.30, "A_Perete2_3": 24.30, "A_Perete2_4": 24.30, "A_Perete2_5": 24.30, "A_Perete2_6": 24.30,
+    "A_Perete3_0": 24.40, "A_Perete3_1": 24.40, "A_Perete3_2": 24.40, "A_Perete3_3": 24.40, "A_Perete3_4": 24.40,
     "A_P1a": 24.62, "A_P1b": 24.61, "A_P1f": 24.56,
     "A_P1g": 24.62, 
     "A_P2f": 24.49, "A_P2g": 24.60, "A_R1a": 24.67, "A_R1b": 24.67, "A_R1c": 24.67, "A_R1d": 24.67,

@@ -524,6 +524,69 @@ transform = Transform3D(0.10467, 0.0, -1.99726, 0.0, 2.0, 0.0, 1.99726, 0.0, 0.1
 [node name="A_D10" parent="DecorManual/ZonaA" instance=ExtResource("k_block_stack_a")]
 transform = Transform3D(-0.20906, 0.0, -1.98904, 0.0, 2.0, 0.0, 1.98904, 0.0, -0.20906, -71.0, 24.22, -138.0)
 
+[node name="A_Perete1_0" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(3.99863, 0.0, 0.10471, 0.0, 4.0, 0.0, -0.10471, 0.0, 3.99863, -162.0, 24.75, -145.0)
+
+[node name="A_Perete1_1" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(3.59781, 0.0, -0.12564, 0.0, 3.6, 0.0, 0.12564, 0.0, 3.59781, -150.0, 24.3, -145.0)
+
+[node name="A_Perete1_2" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(4.29984, 0.0, 0.03752, 0.0, 4.3, 0.0, -0.03752, 0.0, 4.29984, -138.0, 24.3, -145.0)
+
+[node name="A_Perete1_3" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(3.79638, 0.0, 0.16575, 0.0, 3.8, 0.0, -0.16575, 0.0, 3.79638, -126.0, 24.3, -145.0)
+
+[node name="A_Perete1_4" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(4.09938, 0.0, -0.07155, 0.0, 4.1, 0.0, 0.07155, 0.0, 4.09938, -114.0, 24.3, -145.0)
+
+[node name="A_Perete1_5" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(3.69944, 0.0, 0.06457, 0.0, 3.7, 0.0, -0.06457, 0.0, 3.69944, -102.0, 24.3, -145.0)
+
+[node name="A_Perete1_6" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(4.196, 0.0, -0.1832, 0.0, 4.2, 0.0, 0.1832, 0.0, 4.196, -90.0, 24.3, -145.0)
+
+[node name="A_Perete1_7" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(3.9, 0.0, -0.0, 0.0, 3.9, 0.0, 0.0, 0.0, 3.9, -78.0, 24.3, -145.0)
+
+[node name="A_Perete1_8" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(3.99756, 0.0, 0.1396, 0.0, 4.0, 0.0, -0.1396, 0.0, 3.99756, -66.0, 24.3, -145.0)
+
+[node name="A_Perete2_0" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(5.49812, 0.0, -0.14397, 0.0, 5.5, 0.0, 0.14397, 0.0, 5.49812, -156.0, 24.75, -155.5)
+
+[node name="A_Perete2_1" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(5.19683, 0.0, 0.18148, 0.0, 5.2, 0.0, -0.18148, 0.0, 5.19683, -141.0, 24.3, -155.5)
+
+[node name="A_Perete2_2" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(5.49979, 0.0, -0.048, 0.0, 5.5, 0.0, 0.048, 0.0, 5.49979, -126.0, 24.3, -155.5)
+
+[node name="A_Perete2_3" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(5.19505, 0.0, -0.22682, 0.0, 5.2, 0.0, 0.22682, 0.0, 5.19505, -111.0, 24.3, -155.5)
+
+[node name="A_Perete2_4" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(5.49916, 0.0, 0.09599, 0.0, 5.5, 0.0, -0.09599, 0.0, 5.49916, -96.0, 24.3, -155.5)
+
+[node name="A_Perete2_5" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(5.19921, 0.0, -0.09075, 0.0, 5.2, 0.0, 0.09075, 0.0, 5.19921, -81.0, 24.3, -155.5)
+
+[node name="A_Perete2_6" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(5.49477, 0.0, 0.23991, 0.0, 5.5, 0.0, -0.23991, 0.0, 5.49477, -66.0, 24.3, -155.5)
+
+[node name="A_Perete3_0" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(6.99574, 0.0, 0.2443, 0.0, 7.0, 0.0, -0.2443, 0.0, 6.99574, -150.0, 24.4, -169.0)
+
+[node name="A_Perete3_1" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(6.59774, 0.0, -0.17277, 0.0, 6.6, 0.0, 0.17277, 0.0, 6.59774, -129.0, 24.4, -169.0)
+
+[node name="A_Perete3_2" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(6.99893, 0.0, 0.12217, 0.0, 7.0, 0.0, -0.12217, 0.0, 6.99893, -108.0, 24.4, -169.0)
+
+[node name="A_Perete3_3" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(6.59372, 0.0, -0.28789, 0.0, 6.6, 0.0, 0.28789, 0.0, 6.59372, -87.0, 24.4, -169.0)
+
+[node name="A_Perete3_4" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(6.99973, 0.0, 0.06109, 0.0, 7.0, 0.0, -0.06109, 0.0, 6.99973, -66.0, 24.4, -169.0)
+
 [node name="A_RGa" parent="DecorManual/ZonaA" instance=ExtResource("k_block_stack_a")]
 transform = Transform3D(0.08371, 0.0, -1.19708, 0.0, 1.2, 0.0, 1.19708, 0.0, 0.08371, -165.0, 24.72, -95.0)
 metadata/coliziune = "none"

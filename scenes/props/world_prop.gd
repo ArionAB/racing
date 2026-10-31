@@ -2272,6 +2272,9 @@ const CLASSES_CARRARA := {
 	"chain_saw_crawler": {"Crawler_Rust": _CRR_RUST},
 	"drill_rig": {"Drill_Rust": _CRR_RUST},
 	"museum_set_wheel": {"Pulley_Rust": _CRR_RUST},
+	# Rezervorul de motorina de la start (POI A): slotul lui portocaliu-saturat citea jucarie in prim-plan
+	# (criticul orb, runda 2 a gauntlet-ului); pe rugina mata, ca utilajele. Un singur nod.
+	"fuel_tank": {"FuelTank_Body": _CRR_RUST},
 }
 const CLASSES_TRANSFAGARASAN := {
 	"schist_outcrop_a": _TF_OUTCROP, "schist_outcrop_b": _TF_OUTCROP,

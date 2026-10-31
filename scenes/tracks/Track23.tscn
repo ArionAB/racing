@@ -362,13 +362,13 @@ transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, -107.0, 
 transform = Transform3D(-0.34202, 0.0, -0.93969, 0.0, 1.0, 0.0, 0.93969, 0.0, -0.34202, -100.1, 24.63, -114.8)
 
 [node name="A_Foreza" parent="DecorManual/ZonaA" instance=ExtResource("k_drill_rig")]
-transform = Transform3D(0.5, 0.0, -0.86603, 0.0, 1.0, 0.0, 0.86603, 0.0, 0.5, -89.815, 24.36, -126.0)
+transform = Transform3D(0.5, 0.0, -0.86603, 0.0, 1.0, 0.0, 0.86603, 0.0, 0.5, -91.36, 24.37, -133.0)
 
 [node name="A_MuzeuRoata" parent="DecorManual/ZonaA" instance=ExtResource("k_museum_set_wheel")]
-transform = Transform3D(1.31064, 0.0, -0.91772, 0.0, 1.6, 0.0, 0.91772, 0.0, 1.31064, -93.315, 24.51, -120.5)
+transform = Transform3D(1.31064, 0.0, -0.91772, 0.0, 1.6, 0.0, 0.91772, 0.0, 1.31064, -115.36, 24.61, -119.0)
 
 [node name="A_MuzeuVagonet" parent="DecorManual/ZonaA" instance=ExtResource("k_museum_set_cart")]
-transform = Transform3D(0.54723, 0.0, -1.50351, 0.0, 1.6, 0.0, 1.50351, 0.0, 0.54723, -86.815, 24.52, -120.0)
+transform = Transform3D(0.54723, 0.0, -1.50351, 0.0, 1.6, 0.0, 1.50351, 0.0, 0.54723, -111.86, 24.56, -121.5)
 
 [node name="A_L2a" parent="DecorManual/ZonaA" instance=ExtResource("k_block_stack_a")]
 transform = Transform3D(-0.0785, 0.0, -1.49794, 0.0, 1.5, 0.0, 1.49794, 0.0, -0.0785, -76.0, 24.59, -116.0)

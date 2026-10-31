@@ -39,11 +39,12 @@ ITEMS = [
     ('A_L1f', 'rocks/block_informe_a.glb', 0.02, -14.6, 40.0, {'along': 4.6}),
     ('A_L1g', 'rocks/rubble_pile_b.glb', 0.02, -17.4, 0.0, {'along': -1.0}),
     ('A_L1h', 'rocks/block_informe_b.glb', 0.02, -9.8, -20.0, {'along': 5.9}),
-    # Utilajele intre L1 si L2: masina de forat (utilajul mare de lucru) si coltul de muzeu la scara mare
-    # (roata de fir 3,2 m, vagonetul cu bloc), langa gramada L2.
-    ('A_Foreza', 'vehicles/drill_rig.glb', 0.028, -21.0, 30.0),
-    ('A_MuzeuRoata', 'props/museum_set_wheel.glb', 0.028, -15.5, 55.0, {'along': -3.5, 'scale': 1.6}),
-    ('A_MuzeuVagonet', 'props/museum_set_cart.glb', 0.028, -15.0, 20.0, {'along': 3.0, 'scale': 1.6}),
+    # Utilajele: coltul de muzeu la scara mare (roata de fir 3,2 m, vagonetul cu bloc) la piciorul gramezii L1,
+    # pe partea dinspre start (in spatele ei nu se vedeau din 0.01), si masina de forat (utilajul mare de lucru)
+    # la stanga lui L1, in afara umbrei ei din cadrul de la 0.01.
+    ('A_Foreza', 'vehicles/drill_rig.glb', 0.027, -28.0, 30.0),
+    ('A_MuzeuRoata', 'props/museum_set_wheel.glb', 0.0155, -14.0, 55.0, {'scale': 1.6}),
+    ('A_MuzeuVagonet', 'props/museum_set_cart.glb', 0.0155, -16.5, 20.0, {'along': 3.5, 'scale': 1.6}),
     # Gramada L2.
     ('A_L2a', 'rocks/block_stack_a.glb', 0.035, -11.0, -3.0, {'along': 0.0, 'scale': 1.5}),
     ('A_L2b', 'rocks/block_stack_b.glb', 0.035, -11.0, 7.0, {'along': -3.4, 'scale': 1.3}),
@@ -89,7 +90,7 @@ KIT_Y = {
     "A_Container": 24.66, "A_Rezervor": 24.65, "A_Lampa": 24.67,
     "A_Castan1": 14.12, "A_Castan2": 14.72, "A_Castan3": 15.62,
     "A_L1a": 24.62, "A_L1b": 24.62, "A_L1c": 24.63, "A_L1d": 24.56, "A_L1e": 24.59, "A_L1f": 24.54, "A_L1g": 24.52,
-    "A_L1h": 24.63, "A_Foreza": 24.36, "A_MuzeuRoata": 24.51, "A_MuzeuVagonet": 24.52, "A_L2a": 24.59, "A_L2b": 24.60, "A_L2c": 24.59,
+    "A_L1h": 24.63, "A_Foreza": 24.37, "A_MuzeuRoata": 24.61, "A_MuzeuVagonet": 24.56, "A_L2a": 24.59, "A_L2b": 24.60, "A_L2c": 24.59,
     "A_L2d": 24.51, "A_L2e": 24.49, "A_L2f": 24.48, "A_L2g": 24.61, "A_L3a": 24.30, "A_L3b": 24.31, "A_L3c": 24.31,
     "A_L3d": 24.31, "A_L3e": 24.30, "A_L3f": 24.31, "A_MagazieA": 24.47, "A_MagazieB": 24.47, "A_CisternaA": 24.55, "A_CisternaB": 24.55,
     "A_R1a": 24.67, "A_R1b": 24.67, "A_R1c": 24.67, "A_R1d": 24.67, "A_R1e": 24.67, "A_R2a": 24.67, "A_R2b": 24.67,

@@ -601,10 +601,12 @@ if OUT_PATH:
         (LEN("F pod", -55.0), LEN("F pod", 55.0), 0, 2),
     ]
 
-    # ---- sol: drum de praf peste tot, mai putin podul si Marmifera; umed pe C
+    # ---- sol: drum de praf peste tot, mai putin podul; umed pe C
+    # Marmifera (H) e pe praf ca galeria D (POI H, 31 oct 2026): asfaltul inchis cu linie alba de mijloc
+    # din tunel citea sosea de oras in muntele de marmura, nu o fosta linie ferata de cariera. Un singur
+    # interval, cu trecere peste linia de start; grip-ul tunelului drept = cel al ravaneto-ului de dinainte.
     dirt = [
-        (IDX("F pod", 62.0), IDX("H portal intrare", -2.0)),
-        (IDX("H portal iesire", 2.0), IDX("F pod", -62.0)),
+        (IDX("F pod", 62.0), IDX("F pod", -62.0)),
     ]
     # Ud doar pana cu 40 m inainte de portal: masinile care alunecau in cotul ud iesisera cu botul
     # pe diagonala in cadrul portalului (ejectare 31 m/s, runda 0).
@@ -663,6 +665,8 @@ tunnel_ceiling = {ceil_h}
 camera_tail_m = {tail}
 tube_only = true
 tube_class = "carrara_marble"
+frame_class = "carrara_marble"
+wing_end_height_m = 1.1
 """
     tunnels_txt = tunnel_node("TunelGalerie", "D portal jos", "D portal sus (E inceput)", 4.0, 9.0, 14.0) \
         + tunnel_node("TunelMarmifera", "H portal intrare", "H portal iesire", 4.0, 7.0, 12.0)

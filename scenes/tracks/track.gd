@@ -13241,6 +13241,14 @@ var _tunnel_camera_tail: Dictionary = {}
 ## pentru tunelurile care cer alta clasa (`TunnelSignalHazard.tube_class`, Carrara: marmura).
 var _tunnel_tube_class: Dictionary = {}
 
+## Clasa triplanara a ramei si a aripilor, per tunel (aceeasi cheie). Goala = beton pe toate
+## (bit-identic). Plina doar pentru `TunnelSignalHazard.frame_class` nevid (Carrara: marmura).
+var _tunnel_frame_class: Dictionary = {}
+
+## Inaltimea capatului departat al aripilor, per tunel (aceeasi cheie). Goala = TUNNEL_WING_HEIGHT_M
+## pe toata lungimea (bit-identic). Plina doar pentru `TunnelSignalHazard.wing_end_height_m` >= 0.
+var _tunnel_wing_end_h: Dictionary = {}
+
 
 ## Tunelurile declarate ca noduri [TunnelSignalHazard], in aceleasi patru
 ## numere. Cautare recursiva si manuala, ca la varfuri.
@@ -13264,6 +13272,10 @@ func _collect_tunnels(node: Node, out: Array[Vector4]) -> void:
 				_tunnel_camera_tail[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = sig.camera_tail_m # cheia trece prin float32, ca spec.x
 			if sig.tube_class != "wet_gneiss":
 				_tunnel_tube_class[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = sig.tube_class
+			if sig.frame_class != "":
+				_tunnel_frame_class[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = sig.frame_class
+			if sig.wing_end_height_m >= 0.0:
+				_tunnel_wing_end_h[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = sig.wing_end_height_m
 		_collect_tunnels(child, out)
 
 
@@ -13363,7 +13375,8 @@ func _build_tunnel(spec: Vector4) -> void:
 		var kn := 1 if end == 0 else count - 2
 		var outward := (centers[k] - centers[kn]).normalized()
 		_tun_cap(rock, centers[k], sides[k], inner, mound, outward)
-		_tun_frame(concrete, centers[k], sides[k], hw, ceil_h, outward)
+		_tun_frame(concrete, centers[k], sides[k], hw, ceil_h, outward,
+			float(_tunnel_wing_end_h.get(spec.x, TUNNEL_WING_HEIGHT_M)))
 
 	rock.generate_normals()
 	_add_mesh_with_collision(rock.commit(), Color.WHITE, null, 0.9, 0.5,
@@ -13371,9 +13384,14 @@ func _build_tunnel(spec: Vector4) -> void:
 		Palette.triplanar_class_material(String(_tunnel_tube_class.get(spec.x, "wet_gneiss"))),
 		"TunnelBore")
 	concrete.generate_normals()
+	# Rama + aripile: beton (implicit) sau clasa declarata pe nod (`frame_class`, Carrara). Acelasi
+	# mesh, aceeasi coliziune, acelasi nume de corp: se schimba doar materialul.
+	var frame_cls := String(_tunnel_frame_class.get(spec.x, ""))
 	_add_mesh_with_collision(concrete.commit(), Palette.color(Palette.CONCRETE),
 		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
-		null, null, true, null, "TunnelPortal")
+		null, null, true,
+		Palette.triplanar_class_material(frame_cls) if frame_cls != "" else null,
+		"TunnelPortal")
 
 	# Zona de camera pe EXACT intervalul tubului (brief §2.0: „tunelul e
 	# intuneric, deci camera coboara"; memoria `camera-zone-tavan-per-sala`:
@@ -13492,7 +13510,8 @@ func _tun_cap(st: SurfaceTool, c: Vector3, s: Vector3, inner: Array[Vector2],
 ## `TUNNEL_FRAME_DEPTH_M` in afara capacului, cu peretii grosi de
 ## `TUNNEL_FRAME_THICK_M` IN AFARA golului (gura ramane cea din contract).
 func _tun_frame(st: SurfaceTool, c: Vector3, s: Vector3, hw: float,
-		ceil_h: float, outward: Vector3) -> void:
+		ceil_h: float, outward: Vector3,
+		wing_end_h: float = TUNNEL_WING_HEIGHT_M) -> void:
 	var th := TUNNEL_FRAME_THICK_M
 	var foot := -TUNNEL_FOOT_DROP_M
 	var inner_p: Array[Vector2] = [Vector2(-hw, foot), Vector2(-hw, ceil_h),
@@ -13525,7 +13544,9 @@ func _tun_frame(st: SurfaceTool, c: Vector3, s: Vector3, hw: float,
 		var a_hi := _tun_pt(c2, s, Vector2(sgn * hw, top))
 		var far := c2 + outward * TUNNEL_WING_LEN_M
 		var b_lo := _tun_pt(far, s, Vector2(sgn * (hw + TUNNEL_WING_SPREAD_M), foot))
-		var b_hi := _tun_pt(far, s, Vector2(sgn * (hw + TUNNEL_WING_SPREAD_M), top))
+		# Capatul departat al aripii: implicit la fel de inalt ca radacina (bit-identic); cu
+		# `wing_end_h` mai mic muchia de sus coboara spre capat, ca un zid-aripa de tunel real.
+		var b_hi := _tun_pt(far, s, Vector2(sgn * (hw + TUNNEL_WING_SPREAD_M), wing_end_h))
 		# Fata dinspre drum (cea care conduce masina), normala spre axa.
 		_tun_quad(st, a_lo, a_hi, b_hi, b_lo, -s * sgn, col, col, col, col)
 		# Fata din spate, grosime 0.5 m, normala in afara.

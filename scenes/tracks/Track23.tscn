@@ -111,7 +111,7 @@ custom_gate_model = "none"
 custom_sun_rotation_deg = Vector3(-22, -10, 0)
 custom_sea_level_offset = -30.86
 custom_wet_ranges = Array[Vector2]([Vector2(0.296, 0.381)])
-custom_dirt_ranges = Array[Vector2]([Vector2(0.744, 0.951), Vector2(0.976, 0.684)])
+custom_dirt_ranges = Array[Vector2]([Vector2(0.744, 0.684)])
 custom_ravines = Array[Vector4]([Vector4(0.706, 0.721, 40, 0), Vector4(0.286, 0.388, 40, 1)])
 custom_cornice_ravines = Array[int]([0])
 custom_scarp_ravines = Array[int]([])
@@ -231,6 +231,8 @@ tunnel_ceiling = 9.0
 camera_tail_m = 14.0
 tube_only = true
 tube_class = "carrara_marble"
+frame_class = "carrara_marble"
+wing_end_height_m = 1.1
 
 [node name="TunelMarmifera" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(-0.0, 0, 1.0, 0, 1, 0, -1.0, 0, -0.0, -248.8, 26.96, -105.0)
@@ -241,6 +243,8 @@ tunnel_ceiling = 7.0
 camera_tail_m = 12.0
 tube_only = true
 tube_class = "carrara_marble"
+frame_class = "carrara_marble"
+wing_end_height_m = 1.1
 
 [node name="PlasaA" type="Area3D" parent="Hazarduri"]
 transform = Transform3D(0.001, 0, 1.0, 0, 1, 0, -1.0, 0, 0.001, -76.03, 17.0, -86.16)
@@ -2142,6 +2146,132 @@ metadata/coliziune = "none"
 transform = Transform3D(-0.0, 0.0, -0.8, 0.0, 0.8, 0.0, 0.8, 0.0, -0.0, 283.0, 2.95, 45.8)
 metadata/coliziune = "none"
 
+[node name="ZonaD" type="Node3D" parent="DecorManual"]
+
+[node name="D_MolozAripaS1" parent="DecorManual/ZonaD" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(-0.54723, 0.0, -1.50351, 0.0, 1.6, 0.0, 1.50351, 0.0, -0.54723, 288.74, 2.87, 27.8)
+metadata/coliziune = "none"
+
+[node name="D_MolozAripaS2" parent="DecorManual/ZonaD" instance=ExtResource("k_rubble_pile_b")]
+transform = Transform3D(0.8999, 0.0, -1.07246, 0.0, 1.4, 0.0, 1.07246, 0.0, 0.8999, 283.84, 2.83, 27.68)
+metadata/coliziune = "none"
+
+[node name="D_MolozAripaS3" parent="DecorManual/ZonaD" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(-1.06252, 0.0, -0.2847, 0.0, 1.1, 0.0, 0.2847, 0.0, -1.06252, 278.94, 3.01, 26.35)
+metadata/coliziune = "none"
+
+[node name="D_MolozAripaD1" parent="DecorManual/ZonaD" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(0.54723, 0.0, -1.50351, 0.0, 1.6, 0.0, 1.50351, 0.0, 0.54723, 288.74, 2.86, 44.2)
+metadata/coliziune = "none"
+
+[node name="D_MolozAripaD2" parent="DecorManual/ZonaD" instance=ExtResource("k_rubble_pile_b")]
+transform = Transform3D(-0.8999, 0.0, -1.07246, 0.0, 1.4, 0.0, 1.07246, 0.0, -0.8999, 283.84, 2.7, 44.33)
+metadata/coliziune = "none"
+
+[node name="D_MolozAripaD3" parent="DecorManual/ZonaD" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(1.06252, 0.0, -0.2847, 0.0, 1.1, 0.0, 0.2847, 0.0, 1.06252, 278.94, 2.66, 45.65)
+metadata/coliziune = "none"
+
+[node name="D_StivaS" parent="DecorManual/ZonaD" instance=ExtResource("k_block_stack_b")]
+transform = Transform3D(0.99939, 0.0, -0.0349, 0.0, 1.0, 0.0, 0.0349, 0.0, 0.99939, 284.0, 3.81, 25.2)
+metadata/coliziune = "none"
+
+[node name="D_MosorS" parent="DecorManual/ZonaD" instance=ExtResource("k_cable_reel")]
+transform = Transform3D(0.5, 0.0, -0.86603, 0.0, 1.0, 0.0, 0.86603, 0.0, 0.5, 275.0, 2.93, 27.0)
+metadata/coliziune = "none"
+
+[node name="D_TeviS1" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(0.00239, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.00239, 265.004, 2.82, 25.002)
+metadata/coliziune = "none"
+
+[node name="D_TeviS2" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 271.0, 3.12, 25.0)
+metadata/coliziune = "none"
+
+[node name="D_InformeD" parent="DecorManual/ZonaD" instance=ExtResource("k_block_informe_b")]
+transform = Transform3D(0.42262, 0.0, -0.90631, 0.0, 1.0, 0.0, 0.90631, 0.0, 0.42262, 281.005, 2.86, 46.6)
+metadata/coliziune = "none"
+
+[node name="D_TeavaA1" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(-0.0, -0.11395, -0.99349, 0.0, 0.99349, -0.11395, 1.0, -0.0, -0.0, 300.27, 4.41, 40.25)
+metadata/coliziune = "none"
+
+[node name="D_TeavaA2" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(-0.0, -0.11395, -0.99349, 0.0, 0.99349, -0.11395, 1.0, -0.0, -0.0, 306.27, 5.07, 40.25)
+metadata/coliziune = "none"
+
+[node name="D_TeavaA3" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(-0.0, -0.11395, -0.99349, 0.0, 0.99349, -0.11395, 1.0, -0.0, -0.0, 312.27, 5.73, 40.25)
+metadata/coliziune = "none"
+
+[node name="D_TeavaA4" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(-0.0, -0.11395, -0.99349, 0.0, 0.99349, -0.11395, 1.0, -0.0, -0.0, 318.27, 6.38, 40.25)
+metadata/coliziune = "none"
+
+[node name="D_TeavaA5" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(-0.0, -0.11395, -0.99349, 0.0, 0.99349, -0.11395, 1.0, -0.0, -0.0, 324.27, 7.03, 40.25)
+metadata/coliziune = "none"
+
+[node name="D_TeavaA6" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(-0.0, -0.11395, -0.99349, 0.0, 0.99349, -0.11395, 1.0, -0.0, -0.0, 330.27, 7.68, 40.25)
+metadata/coliziune = "none"
+
+[node name="D_TeavaB1" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(0.00024, 0.10809, 0.99414, -0.0, 0.99414, -0.10809, -1.0, 3e-05, 0.00024, 330.87, 21.47, 107.72)
+metadata/coliziune = "none"
+
+[node name="D_TeavaB2" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(0.00024, 0.10809, 0.99414, -0.0, 0.99414, -0.10809, -1.0, 3e-05, 0.00024, 324.87, 22.12, 107.719)
+metadata/coliziune = "none"
+
+[node name="D_TeavaB3" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(0.00024, 0.10809, 0.99414, -0.0, 0.99414, -0.10809, -1.0, 3e-05, 0.00024, 318.87, 22.77, 107.717)
+metadata/coliziune = "none"
+
+[node name="D_TeavaB4" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(0.00024, 0.10809, 0.99414, -0.0, 0.99414, -0.10809, -1.0, 3e-05, 0.00024, 312.87, 23.43, 107.716)
+metadata/coliziune = "none"
+
+[node name="D_TeavaB5" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(0.00024, 0.10809, 0.99414, -0.0, 0.99414, -0.10809, -1.0, 3e-05, 0.00024, 306.87, 24.08, 107.714)
+metadata/coliziune = "none"
+
+[node name="D_TeavaB6" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(0.00024, 0.10809, 0.99414, -0.0, 0.99414, -0.10809, -1.0, 3e-05, 0.00024, 300.87, 24.73, 107.713)
+metadata/coliziune = "none"
+
+[node name="D_TeavaB7" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(0.00024, 0.10809, 0.99414, -0.0, 0.99414, -0.10809, -1.0, 3e-05, 0.00024, 294.87, 25.38, 107.711)
+metadata/coliziune = "none"
+
+[node name="D_TeavaB8" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(0.00024, 0.10809, 0.99414, -0.0, 0.99414, -0.10809, -1.0, 3e-05, 0.00024, 288.87, 26.03, 107.71)
+metadata/coliziune = "none"
+
+[node name="D_TeavaC1" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(-0.0, 0.10843, 0.9941, 0.0, 0.9941, -0.10843, -1.0, -0.0, -0.0, 207.5, 34.95, 107.75)
+metadata/coliziune = "none"
+
+[node name="D_TeavaC2" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(-0.0, 0.10843, 0.9941, 0.0, 0.9941, -0.10843, -1.0, -0.0, -0.0, 201.5, 35.6, 107.75)
+metadata/coliziune = "none"
+
+[node name="D_TeavaC3" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(-0.0, 0.10843, 0.9941, 0.0, 0.9941, -0.10843, -1.0, -0.0, -0.0, 195.5, 36.25, 107.75)
+metadata/coliziune = "none"
+
+[node name="D_TeavaC4" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(-0.0, 0.10843, 0.9941, 0.0, 0.9941, -0.10843, -1.0, -0.0, -0.0, 189.5, 36.91, 107.75)
+metadata/coliziune = "none"
+
+[node name="D_TeavaC5" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(-0.0, 0.10843, 0.9941, 0.0, 0.9941, -0.10843, -1.0, -0.0, -0.0, 183.5, 37.56, 107.75)
+metadata/coliziune = "none"
+
+[node name="D_TeavaC6" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
+transform = Transform3D(-0.0, 0.10843, 0.9941, 0.0, 0.9941, -0.10843, -1.0, -0.0, -0.0, 177.5, 38.22, 107.75)
+metadata/coliziune = "none"
+
 [node name="ZonaF" type="Node3D" parent="DecorManual"]
 
 [node name="F_BermaE_D" parent="DecorManual/ZonaF" instance=ExtResource("k_safety_berm")]
@@ -2155,3 +2285,56 @@ transform = Transform3D(-0.25882, -0.03033, 0.96545, 0.0, 0.99951, 0.0314, -0.96
 
 [node name="F_BermaV_S" parent="DecorManual/ZonaF" instance=ExtResource("k_safety_berm")]
 transform = Transform3D(-0.25882, -0.03033, -0.96545, 0.0, 0.99951, -0.0314, 0.96593, -0.00813, -0.25869, -173.14, 41.89, 120.2)
+
+[node name="ZonaH" type="Node3D" parent="DecorManual"]
+
+[node name="H_MolozAripaS1" parent="DecorManual/ZonaH" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(-0.54723, 0.0, -1.50351, 0.0, 1.6, 0.0, 1.50351, 0.0, -0.54723, -251.7, 26.62, -113.2)
+metadata/coliziune = "none"
+
+[node name="H_MolozAripaS2" parent="DecorManual/ZonaH" instance=ExtResource("k_rubble_pile_b")]
+transform = Transform3D(0.8999, 0.0, -1.07246, 0.0, 1.4, 0.0, 1.07246, 0.0, 0.8999, -256.6, 26.89, -113.33)
+metadata/coliziune = "none"
+
+[node name="H_MolozAripaS3" parent="DecorManual/ZonaH" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(-1.06252, 0.0, -0.2847, 0.0, 1.1, 0.0, 0.2847, 0.0, -1.06252, -261.5, 27.32, -114.65)
+metadata/coliziune = "none"
+
+[node name="H_MolozAripaD1" parent="DecorManual/ZonaH" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(0.54723, 0.0, -1.50351, 0.0, 1.6, 0.0, 1.50351, 0.0, 0.54723, -251.7, 26.62, -96.8)
+metadata/coliziune = "none"
+
+[node name="H_MolozAripaD2" parent="DecorManual/ZonaH" instance=ExtResource("k_rubble_pile_b")]
+transform = Transform3D(-0.8999, 0.0, -1.07246, 0.0, 1.4, 0.0, 1.07246, 0.0, -0.8999, -256.6, 26.81, -96.67)
+metadata/coliziune = "none"
+
+[node name="H_MolozAripaD3" parent="DecorManual/ZonaH" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(1.06252, 0.0, -0.2847, 0.0, 1.1, 0.0, 0.2847, 0.0, 1.06252, -261.5, 26.98, -95.35)
+metadata/coliziune = "none"
+
+[node name="H_CastanS" parent="DecorManual/ZonaH" instance=ExtResource("k_chestnut_tree_a")]
+transform = Transform3D(0.5, 0.0, -0.86603, 0.0, 1.0, 0.0, 0.86603, 0.0, 0.5, -244.0, 26.97, -116.0)
+metadata/coliziune = "none"
+
+[node name="H_CastanD" parent="DecorManual/ZonaH" instance=ExtResource("k_chestnut_tree_b")]
+transform = Transform3D(-0.86603, 0.0, -0.5, 0.0, 1.0, 0.0, 0.5, 0.0, -0.86603, -241.0, 29.71, -92.5)
+metadata/coliziune = "none"
+
+[node name="H_GinestraS" parent="DecorManual/ZonaH" instance=ExtResource("k_ginestra_fiorita")]
+transform = Transform3D(-0.0, 0.0, -1.3, 0.0, 1.3, 0.0, 1.3, 0.0, -0.0, -248.0, 30.38, -119.5)
+metadata/coliziune = "none"
+
+[node name="H_GinestraD" parent="DecorManual/ZonaH" instance=ExtResource("k_ginestra_fiorita")]
+transform = Transform3D(1.3, 0.0, -0.0, 0.0, 1.3, 0.0, 0.0, 0.0, 1.3, -247.0, 29.17, -90.0)
+metadata/coliziune = "none"
+
+[node name="H_Stiva" parent="DecorManual/ZonaH" instance=ExtResource("k_block_stack_a")]
+transform = Transform3D(0.10453, 0.0, -0.99452, 0.0, 1.0, 0.0, 0.99452, 0.0, 0.10453, -261.0, 27.01, -93.8)
+metadata/coliziune = "none"
+
+[node name="H_Bloc" parent="DecorManual/ZonaH" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(-0.20791, 0.0, -0.97815, 0.0, 1.0, 0.0, 0.97815, 0.0, -0.20791, -265.5, 27.22, -92.0)
+metadata/coliziune = "none"
+
+[node name="H_Excavator" parent="DecorManual/ZonaH" instance=ExtResource("k_quarry_excavator")]
+transform = Transform3D(-0.5, 0.0, 0.86603, 0.0, 1.0, 0.0, -0.86603, 0.0, -0.5, -256.5, 27.1, -90.5)

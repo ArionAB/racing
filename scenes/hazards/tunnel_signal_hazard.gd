@@ -414,6 +414,22 @@ func _build_bus() -> void:
 ## opusul brief-ului. Citita de `Track._collect_tunnels`.
 @export var tube_class: String = "wet_gneiss"
 
+## Clasa triplanara a RAMEI si a ARIPILOR portalului (`Track._tun_frame`). Gol (implicit) = betonul
+## de pana acum (slotul CONCRETE, tenta 0,72): Fiordland / Transfagarasan bit-identice (ProbeTunelHash).
+## Carrara pune `carrara_marble`: portalurile sunt GLB-uri de piatra (galeria, Marmifera), iar aripile
+## de beton bej-gri de 14 m ieseau in fata lor ca doua pane de gard (capturile POI D 0,395 si H 0,945).
+## Geometria si coliziunea raman EXACT aceleasi (aripile tin masinile departe de inelul ramei,
+## vezi `Track.TUNNEL_WING_LEN_M`); se schimba doar materialul. Citita de `Track._collect_tunnels`.
+@export var frame_class: String = ""
+
+## Inaltimea aripilor portalului la CAPATUL departat (m peste asfalt). Negativ (implicit) = aceeasi
+## ca la radacina (`Track.TUNNEL_WING_HEIGHT_M`, 2,5 m), deci Fiordland / Transfagarasan bit-identice.
+## Carrara o coboara: o aripa de inaltime constanta citea scandura de gard infipta in fata portalului;
+## cu muchia de sus in panta e zidul-aripa al unui tunel real, care se pierde in molozul din spate.
+## Fata dinspre drum ramane aceeasi (lungime, deschidere), deci rolul ei — sa intoarca lovitura
+## frontala in razanta — se pastreaza cata vreme capatul ramane peste bara masinii (~1 m).
+@export_range(-1.0, 8.0, 0.1) var wing_end_height_m: float = -1.0
+
 ## Pe ce banda a tunelului merge autocarul, fata de AXA drumului (m, semn
 ## local X — acelasi semn ca `TrackRoute.side_at` / `lateral_distance`:
 ## POZITIV = dreapta SENSULUI de mers al masinilor, NEGATIV = stanga).

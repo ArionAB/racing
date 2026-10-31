@@ -377,7 +377,12 @@ const PROP_COLLISION := {
 	"tsutenkyo_roof_module": "none", "togetsukyo_module": "none",
 	"torii_senbon": "none", "torii_large": "none",
 	"votive_torii_cluster": "none",  # sir de 7 porti peste poteca: se trece pe sub ele
-	"shiba_fence": "none",  # nuiele de 1,1 m, panou subtire: capcana de colt, nu obstacol
+	# Gard de nuiele (0,19 x 1,1 x 3 m): hull = o placa subtire exact pe panou, nu
+	# un bloc umflat. Fusese "none" ("capcana de colt") si dezvoltatorul a
+	# prins la volan ca se trece prin el (issue #606): gardul sta la >= 1,7 m
+	# de bordura, deci nu ajunge pe carosabil. Piesele din MultiMesh (POI G) au
+	# corp separat, emis de `tools/gen_decor_kyoto_g.gd` (`GardG_col`).
+	"shiba_fence": "hull",
 	"daruma_otoshi": "none",  # corpul il face DarumaOtoshiHazard
 	# Restul kitului ramane hull implicit, corect: pagodele, hondo, kinkakuji,
 	# altarul, clopotnita, bazinul, ema, ceainaria, zidul de templu si cel
@@ -2229,6 +2234,8 @@ const _TF_JNEAPAN_BUSH := {"Jneapan_Needles": _TF_JNEAPAN}
 ## iar conurile de moloz stau pe marmura la baza peretilor; marmura pistei in sine nu trece pe
 ## aici (fetele pistei sunt cod, nu GLB-uri).
 const _CRR_MARBLE: String = Palette.TRI_PREFIX + "carrara_marble"
+const _CRR_RUST: String = Palette.TRI_PREFIX + "rust_metal"
+const _CRR_HOUSE := {"House_Stone": _TF_STONE, "House_Roof": _OK_ROOF}
 const CLASSES_CARRARA := {
 	"beech_tree_a": {"Beech_Leaves": _TF_BEECH},
 	"beech_tree_b": {"Beech_Leaves": _TF_BEECH},
@@ -2253,6 +2260,42 @@ const CLASSES_CARRARA := {
 	"ponti_di_vara": {"Viaduct_Marble": _CRR_MARBLE,
 		"Viaduct_Brick": Palette.TRI_PREFIX + "ok_roof"},
 	"marmifera_portal": {"Portal_Stone": _TF_STONE},
+	# Valul 2 al kitului (carrara_inventory_crr-d/e.md). Satul Colonnata: zidaria pe `tf_stone`,
+	# tigla pe `ok_roof`, ca la viaduct (`roof_tiles` iese aproape alb pe tema asta, iar `ok_roof`
+	# e deja pe Track23, deci satul nu adauga material). `House_Stone`/`House_Roof` sunt si chei
+	# GLOBALE (`village_house` din `Track._LANDMARKS`); intrarea pe fisier de aici le suprascrie.
+	"colonnata_church": {"Church_Stone": _TF_STONE, "Church_Roof": _OK_ROOF},
+	"colonnata_house_a": _CRR_HOUSE,
+	"colonnata_house_b": _CRR_HOUSE,
+	"colonnata_house_c": _CRR_HOUSE,
+	"quarry_sign_block": {"Sign_Marble": _CRR_MARBLE},
+	"museum_set_cart": {"Cart_Marble": _CRR_MARBLE},
+	# Rugina utilajelor de decor pe triplanar, doar pe nodurile cu UN slot. `Blades` (volantul care
+	# se roteste) ramane pe clasa globala pe UV, iar `*_Paint`/`*_Wood`/`Crawler_Blade` au doua
+	# sloturi pe acelasi nod, pe care o clasa l-ar sterge pe al doilea.
+	"wire_saw": {"Saw_Rust": _CRR_RUST},
+	"chain_saw_crawler": {"Crawler_Rust": _CRR_RUST},
+	"drill_rig": {"Drill_Rust": _CRR_RUST},
+	"museum_set_wheel": {"Pulley_Rust": _CRR_RUST},
+}
+## Clasele kitului Ha Long (Track22): piatra de carst, pe FISIER si pe numele
+## nodului. Pana la #598 pista n-avea NICIO intrare aici, deci turnurile,
+## stivele, bolovanii si grota ramaneau pe atlasul gol. Numele de noduri
+## (`Tower_Rock`, `Boulder_Rock`...) nu se mapeaza global (vezi nota de la
+## CLASSES_OKINAWA): cheia e stem-ul GLB-ului, scopata pe tema. Ce ramane pe
+## atlas: `Tower_Scrub` (tufisul de pe varf), `Portal_Dark` (gura grotei),
+## `Grotto_Drips`/`Grotto_Scrub`, siluetele de orizont (in ceata, `horizon_class`
+## gol deliberat).
+const _HL_KARST: String = Palette.TRI_PREFIX + "karst_limestone"
+const CLASSES_HALONG := {
+	"karst_tower_a": {"Tower_Rock": _HL_KARST},
+	"karst_tower_b": {"Tower_Rock": _HL_KARST},
+	"karst_tower_c": {"Tower_Rock": _HL_KARST},
+	"karst_stack_a": {"Tower_Rock": _HL_KARST},
+	"karst_stack_b": {"Tower_Rock": _HL_KARST},
+	"shore_boulder": {"Boulder_Rock": _HL_KARST},
+	"grotto_massif": {"Grotto_Rock": _HL_KARST},
+	"grotto_portal": {"Portal_Rock": _HL_KARST},
 }
 const CLASSES_TRANSFAGARASAN := {
 	"schist_outcrop_a": _TF_OUTCROP, "schist_outcrop_b": _TF_OUTCROP,
@@ -2386,6 +2429,8 @@ const CLASSES_BY_THEME := {
 	"transfagarasan": CLASSES_TRANSFAGARASAN,
 	# Carrara (Track23, brief carrara.md): castanul din fag, conul de moloz pe marmura.
 	"carrara": CLASSES_CARRARA,
+	# Ha Long (Track22, #598): vezi `CLASSES_HALONG`.
+	"halong": CLASSES_HALONG,
 }
 
 ## Modelele care NU arunca umbra: siluetele de orizont, scalate/asezate la
@@ -3762,6 +3807,8 @@ func _glow_spec(model: Node3D) -> String:
 ## respingea hull-ul la unele rotatii (`zid82_col`, 30 sep 2026). Vezi
 ## `TrackDecor.add_hull_collision`.
 const HULL_SKIP_PARTS := {
+	# Carrara: firul masinii de fir urca la 2,1 m si sinele de 6 m ar face din hull o pana invizibila.
+	"wire_saw": ["Saw_Water", "Saw_Rail"],
 	"fort_wall_segment": ["Wall_Glow"],
 	"fort_wall_turret": ["Turret_Glow"],
 	# Monument Valley: la monolitii mari fusta de grohotis si calota nu au corp
@@ -3814,6 +3861,42 @@ const HULL_SKIP_PARTS := {
 }
 
 
+## Parti de model care se imprastie la contact, per stem .glb (#602): prefixele
+## numelor de noduri. Restul modelului ramane hull static.
+const BUMP_PARTS := {"road_works": ["Works_Cone_"]}
+
+
+## Muta fiecare nod-parte sub un BumpProp si intoarce numele mesh-urilor mutate
+## (hull-ul modelului le sare). Piesa pe care BumpProp refuza sa o ia (prea mare,
+## plafon) ramane in hull.
+func _wrap_bump_parts(model: Node3D, prefixes: Array) -> Array:
+	var parts: Array[Node3D] = []
+	_find_parts(model, prefixes, parts)
+	var names: Array = []
+	for part in parts:
+		var mesh_names: Array = []
+		for mi in TrackDecor.visible_meshes(part, Transform3D.IDENTITY):
+			mesh_names.append(String((mi[0] as MeshInstance3D).name))
+		if BumpProp.wrap(part) != null:
+			names.append_array(mesh_names)
+	return names
+
+
+func _find_parts(node: Node, prefixes: Array, out: Array[Node3D]) -> void:
+	for c in node.get_children():
+		var n3 := c as Node3D
+		if n3 == null:
+			continue
+		var hit := false
+		for pre in prefixes:
+			if String(n3.name).begins_with(String(pre)):
+				hit = true
+		if hit:
+			out.append(n3)
+		else:
+			_find_parts(n3, prefixes, out)
+
+
 func _build_collision() -> void:
 	var models: Array[Node3D] = []
 	_collect_models(self, models)
@@ -3821,6 +3904,12 @@ func _build_collision() -> void:
 		var mode := _collision_mode(model)
 		if mode == "none":
 			continue
+		# Parti mici ale unui model montat (conurile din road_works, #602):
+		# devin BumpProp INDIVIDUAL, iar hull-ul modelului le sare.
+		var bumped_meshes: Array = []
+		var stem_bp := model.scene_file_path.get_file().get_basename()
+		if mode == "hull" and BUMP_PARTS.has(stem_bp):
+			bumped_meshes = _wrap_bump_parts(model, BUMP_PARTS[stem_bp])
 		if mode == "bump":
 			if BumpProp.wrap(model) != null:
 				continue
@@ -3835,8 +3924,9 @@ func _build_collision() -> void:
 				added = _add_trimesh(body, model)
 			_:
 				added = TrackDecor.add_hull_collision(body, model, true,
-					HULL_SKIP_PARTS.get(
-						model.scene_file_path.get_file().get_basename(), []))
+					(HULL_SKIP_PARTS.get(
+						model.scene_file_path.get_file().get_basename(), []) as Array)
+						+ bumped_meshes)
 		if not added:
 			body.free()
 			continue

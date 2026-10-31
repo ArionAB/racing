@@ -198,6 +198,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 207.014, 1.600, 319.802)
 gizmo_extents = 3.0
 script = ExtResource("6_hzm")
 kind = 9
+wave_travel = -1
 
 [node name="DecorManual" type="Node3D" parent="."]
 script = ExtResource("9_prop")

@@ -152,6 +152,12 @@ enum Kind {
 ## drum de 9 m. Doar pentru SLIDING.
 @export_range(0.0, 30.0, 0.1) var sweep_speed: float = 0.0
 
+## AI-ul cedeaza trecerea animalului care traverseaza (franeaza si asteapta cat e
+## pe asfalt). Doar TRAVERSARE. Ursul de pe Transfagarasan (#603): fara asta
+## plutonul il loveste la 40 m/s. Cheia ajunge in spec doar cand e bifata, deci
+## vacile si caii de pe celelalte piste raman neatinsi.
+@export var ai_yields: bool = false
+
 ## Perioada ciclului (s). 0 = implicitul clasei. Doar pentru AVALANCHE — pana
 ## la runda 2 (Fiordland) `_build_avalanche` nu citea NIMIC de la marker in
 ## afara de pozitie/latime, deci orice avalansa plantata mostenea implicitul
@@ -300,6 +306,8 @@ func model_spec() -> Dictionary:
 		spec["motion"] = motion
 	if sweep_speed > 0.0:
 		spec["sweep_speed"] = sweep_speed
+	if ai_yields:
+		spec["ai_yields"] = true
 	if avalanche_period > 0.0:
 		spec["avalanche_period"] = avalanche_period
 	if avalanche_from_left:

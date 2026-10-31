@@ -14,6 +14,8 @@ extends Node
 ##   --track=0 --frac=0.2 --gamecam
 ##   --fog-aerial=0.35         forteaza `fog_aerial_perspective` pe toate
 ##                             WorldEnvironment-urile (A/B fara editarea temei)
+##   --fog-corridor=0.8        forteaza CuloarCeata (FogCorridorHazard) la 0..1, fara masina
+##                             (vezi --gamecam la fractia culoarului; Chongqing 0.515)
 ##   --vignette                adauga vigneta din joc (Vignette) peste captura
 ##   --track=3 --eye=250,6,-118 --look=232,8,-165
 ##                             CAMERA LIBERA: ochi si punct privit, in metri
@@ -445,6 +447,7 @@ func _ready() -> void:
 	var balloon_at := -1.0
 	var lava_stage := -1
 	var route_idx := 0
+	var fog_corridor := -1.0 # --fog-corridor=A: forteaza FogCorridorHazard la A (0..1)
 	var hide_node := ""
 	# --car: masina jucatorului (Muscle) INGHETATA pe punctul de focus, ca in
 	# cadrul de joc — referintele de diorama au masina in prim-plan, iar o
@@ -627,6 +630,8 @@ func _ready() -> void:
 			game_cam = true
 		elif arg.begins_with("--fog-aerial="):
 			fog_aerial = float(arg.trim_prefix("--fog-aerial="))
+		elif arg.begins_with("--fog-corridor="):
+			fog_corridor = float(arg.trim_prefix("--fog-corridor="))
 		elif arg == "--vignette":
 			vignette = true
 		elif arg == "--no-fog":
@@ -698,6 +703,16 @@ func _ready() -> void:
 	# masuratorile de culoare pe margini sa nu se schimbe pe nesimtite).
 	if vignette:
 		add_child(Vignette.new())
+	if fog_corridor >= 0.0:
+		# Culoarul de ceata (FogCorridorHazard) fortat la `amount` (0..1), fara masina:
+		# hazardul isi ia valorile de baza, i se opreste ceasul si i se aplica ceata.
+		for fc in track.find_children("*", "FogCorridorHazard", true, false):
+			var h := fc as FogCorridorHazard
+			h.set_physics_process(false)
+			h._env = h._find_env()
+			h._take_base()
+			h._apply(fog_corridor)
+		print("--fog-corridor=%.2f" % fog_corridor)
 	if no_fog:
 		var envs := track.find_children("*", "WorldEnvironment", true, false)
 		for e in envs:

@@ -25,7 +25,7 @@ const SPEED: float = 28.0
 const HerdScript := preload("res://scenes/hazards/herd_hazard.gd")
 const PROPS := ["corridor_m", "animal_mass", "speed", "spacing", "zebra_ratio", "no_body_radius",
 	"body_reach", "pulse_on", "pulse_off", "strips", "files_per_strip", "kick_speed",
-	"forward_loss", "hit_cooldown", "tumble_time", "min_mass_ratio", "jolt_speed",
+	"forward_loss", "hit_cooldown", "tumble_time", "mass_ratio_floor", "jolt_speed",
 	"hit_feedback", "animal_model", "alt_model"]
 
 var _failed: bool = false
@@ -110,7 +110,7 @@ func _go() -> void:
 	await get_tree().physics_frame
 	print("  animale %d, perioada %.1f s, masa animal %.0f, loss %.2f, kick %.1f, jolt %.2f, min_ratio %.2f" % [
 		herd.count(), herd.period(), herd.animal_mass, herd.forward_loss, herd.kick_speed,
-		herd.jolt_speed, herd.min_mass_ratio])
+		herd.jolt_speed, herd.mass_ratio_floor])
 
 	await _wait(herd.seconds_to_window())
 	var free := await _cross(herd, 0.9)

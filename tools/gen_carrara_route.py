@@ -811,7 +811,7 @@ size = Vector3({r2(x1 - x0)}, {r2(y_hi - y_lo)}, {r2(y1 - y0)})
     patch("T2", -86.0, 8.0, LIP2, LIP1, l2, 22.0, 22.0, 0.0, 0.0)
     # T2W: bancul lui T2 dus spre V pana la W2a, doar la N de bratul acului 2 (marginea lui la y 71,5; pe
     # arc soseaua coboara sub l2, deci platoul nu are voie peste ea). Fara el ramanea o panta intre T2 si W2a.
-    patch("T2W", -114.0, -86.0, 72.0, LIP1, l2, 0.0, 0.0, 0.0, 4.0)
+    patch("T2W", -114.0, -86.0, 72.0, LIP1, l2, 4.0, 4.0, 0.0, 4.0)
     # T2N: polita de sub F1 (+20,5), de la W2b (aceeasi cota) pana la capatul de E al lui T2.
     patch("T2N", -150.0, 8.0, LIP1B, LIP1, const_level(W_MID), 0.0, 22.0, 0.0, 0.0)
     # T1 pana la WP (x -182): F1 continua peste W2a/W2b, la V de acul 2 (vezi TREPTELE DE DINCOLO DE ACE).
@@ -824,9 +824,11 @@ size = Vector3({r2(x1 - x0)}, {r2(y_hi - y_lo)}, {r2(y1 - y0)})
     l3e = level_profile(15.0, 34.0, 20.0, 110.0)
     # Capetele de E raman MOI (10 m): o fata spre E nu se vede din B, iar o margine dura ar fi subimpartit
     # coloana grilei pe toata harta (`Track._terrain_fine_mark`), deci si sub decorul lui C de la x ~96.
-    patch("T2E", 8.0, 96.0, LIP2, 72.0, l2e, 0.0, 10.0, 8.0, 0.0)
+    # Tot moi (4 m) sunt si racordurile intre platouri la ACEEASI cota (T2W/W2a/T2, T2E/T2, T3E/T3): o margine
+    # dura fara treapta doar adauga o coloana fina (~2 000 de triunghiuri) si muta cotele de sub decor.
+    patch("T2E", 8.0, 96.0, LIP2, 72.0, l2e, 4.0, 10.0, 8.0, 0.0)
     patch("M", -60.0, 96.0, LIP2B, LIP2, const_level(12.5), 0.0, 10.0, 0.0, 0.0)
-    patch("T3E", 28.0, 96.0, 30.0, LIP2B, l3e, 0.0, 10.0, 0.0, 6.0)
+    patch("T3E", 28.0, 96.0, 30.0, LIP2B, l3e, 4.0, 10.0, 0.0, 6.0)
     # Coama ravaneto-ului (POI G): interiorul coltului SV, la cota buzei debleului (RAV_LIP). Fara ea, debleul
     # (perete + platou de RAV_REACH m, apoi stins) iesea un DIG in L cu spatele cazut la loc in camp — un tumul
     # de 15 m vazut de pe pod (captura v1_f0.70). Cu ea, peretele de pe dreapta e marginea unui platou care

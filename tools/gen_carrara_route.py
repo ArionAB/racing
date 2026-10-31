@@ -742,6 +742,27 @@ size = Vector3({r2(abs(lat1 - lat0))}, {r2(y_hi - y_lo)}, {r2(length)})
     # E curge spre V pe y = -112: golul e la N (y mare). Muchiile treptelor, de la S la N.
     E_LIPS = [-112.0 + HALF_WIDTH + BENCH_W_E + E_TREAD * k for k in range(E_STEPS)]
 
+    # ---- TREPTELE DE DINCOLO DE ACE (POI B, runda "trepte verticale", 31 oct 2026). Fetele F1/F2/F3 erau
+    # deja verticale (ProbeCarraraBenches --mode=prof: 83 de grade, 9 m), dar se opreau la capetele
+    # platourilor T1/T2/T3 si se stingeau pe 22-28 m (`soft`) in campul care urmareste soseaua: in cadrul de
+    # joc, exact INAINTEA masinii (0.16 spre V, 0.25 spre E), peretele vizibil se topea intr-o duna, iar
+    # dincolo de ace relieful era o panta lina de 13 m (V: 12 -> 25 spre platoul lui A; E: 20 -> 3 spre C).
+    # Criticul orb (B r3): "relieful e o panta neteda". Fetele care COBOARA de langa drum nu se vad din
+    # camera de joc oricum (stau cu spatele la ea), deci treptele noi sunt cele care URCA in fata camerei:
+    #   V (inaintea acului 2, privit de pe T2): F1 continua pana la x -182; sub ea un banc lat la cota
+    #     capatului lui T2 (W2a +13,5, T2W intre W2a si T2, la N de bratul acului), apoi doua fete spre V
+    #     (x -150 si -182) care urca in trepte de ~6 m la platoul lui A (W2b +19,25, WP = cota lui T1);
+    #   E (inaintea lui C, privit de pe T3): F2 continua pana la x 96 (T2E, cota bratului de S al acului 1),
+    #     cu o treapta intermediara (M, +12,5; fata F2b la y 41,5) si capatul de V taiat drept (x 28).
+    # Exteriorul acului 2 (varful la +12,4..12,8) urca lin la W2a pe cei 7 m moi: ~1 m, fara prag.
+    # Toate se pun INAINTEA platourilor existente (PitA le taie fundul carierei), iar marginile dinspre
+    # sosea raman moi si la cota ei: niciun prag nou la asfalt (ProbeCarraraBenches --mode=edge).
+    LIP2B = LIP2 - 13.0
+    W_LO, W_MID = 13.5, 19.25
+    patch("WP", -215.0, -182.0, LIP3, LIP1, level_profile(Y1 - 5, Y1 + 5, -215.0, -100.0), 15.0, 0.0, 0.0, 8.0)
+    patch("W2a", -182.0, -114.0, LIP3, LIP1, const_level(W_LO), 0.0, 7.0, 0.0, 0.0)
+    patch("W2b", -182.0, -150.0, 35.0, LIP1, const_level(W_MID), 0.0, 0.0, 0.0, 0.0)
+
     # fundul carierei. Partea A (sub bancul lui T3): muchia de N DURA la LIP3 (fata T3 -> fund, sau, unde
     # T3 n-are platou, un gradon in cota drumului de acolo); capatul de E se stinge (45 -> 65) in partea B,
     # care urmeaza drumul C pe la S la >= 12 m de marginea lui (nu-l sapa).
@@ -760,10 +781,25 @@ size = Vector3({r2(abs(lat1 - lat0))}, {r2(y_hi - y_lo)}, {r2(length)})
     # T3 / T2 / T1: banc langa drum, fata la LIP*, platoul de sub ea pana la urmatoarea fata
     l3 = level_profile(Y_T3 - 5, Y_T3 + 5, -100.0, 40.0)
     l2 = level_profile(Y_T2 - 5, Y_T2 + 5, -100.0, 38.0)
-    l1 = level_profile(Y_T1 - 5, Y_T1 + 5, -150.0, 45.0)
+    l1 = level_profile(Y_T1 - 5, Y_T1 + 5, -215.0, 45.0)
     patch("T3", -60.0, 28.0, LIP3, LIP2, l3, 25.0, 25.0, 0.0, 0.0)
     patch("T2", -86.0, 8.0, LIP2, LIP1, l2, 22.0, 22.0, 0.0, 0.0)
-    patch("T1", -150.0, 12.0, LIP1, Y_T1 + 8.0, l1, 25.0, 28.0, 12.0, 0.0)
+    # T2W: bancul lui T2 dus spre V pana la W2a, doar la N de bratul acului 2 (marginea lui la y 71,5; pe
+    # arc soseaua coboara sub l2, deci platoul nu are voie peste ea). Fara el ramanea o panta intre T2 si W2a.
+    patch("T2W", -114.0, -86.0, 72.0, LIP1, l2, 0.0, 0.0, 0.0, 4.0)
+    # T1 pana la WP (x -182): F1 continua peste W2a/W2b, la V de acul 2 (vezi TREPTELE DE DINCOLO DE ACE).
+    patch("T1", -182.0, 12.0, LIP1, Y_T1 + 8.0, l1, 15.0, 28.0, 12.0, 0.0)
+    # E: T2E = bancul de SUB bratul de S al acului 1 (cota soselei pana la x 36, apoi cota de pe arc, ca
+    # exteriorul acului sa nu aiba prag), cu F2 dura la LIP2 pana la x 96. M = treapta intermediara (+12,5)
+    # intre F2 si F2b (LIP2B), cu capatul de V TAIAT (x 28: fata de 5,5 m spre T3, in fata camerei). T3E =
+    # bancul de jos, la cota drumului C (coboara 7 -> 2,4), moale spre sosea.
+    l2e = [p_ for p_ in level_profile(Y_T2 - 5, Y_T2 + 5, -20.0, 38.0) if p_[0] <= 36.0] + [(47.0, 19.85), (58.0, 20.6)]
+    l3e = level_profile(15.0, 34.0, 20.0, 110.0)
+    # Capetele de E raman MOI (10 m): o fata spre E nu se vede din B, iar o margine dura ar fi subimpartit
+    # coloana grilei pe toata harta (`Track._terrain_fine_mark`), deci si sub decorul lui C de la x ~96.
+    patch("T2E", 8.0, 96.0, LIP2, 72.0, l2e, 0.0, 10.0, 8.0, 0.0)
+    patch("M", 28.0, 96.0, LIP2B, LIP2, const_level(12.5), 0.0, 10.0, 0.0, 0.0)
+    patch("T3E", 28.0, 96.0, 30.0, LIP2B, l3e, 0.0, 10.0, 0.0, 6.0)
     # Coama ravaneto-ului (POI G): interiorul coltului SV, la cota buzei debleului (RAV_LIP). Fara ea, debleul
     # (perete + platou de RAV_REACH m, apoi stins) iesea un DIG in L cu spatele cazut la loc in camp — un tumul
     # de 15 m vazut de pe pod (captura v1_f0.70). Cu ea, peretele de pe dreapta e marginea unui platou care

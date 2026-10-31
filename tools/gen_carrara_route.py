@@ -513,6 +513,50 @@ if OUT_PATH:
     floors = [(0, 17.0), (1, 2.0)]
     widths = [(0, 60.0), (1, 70.0)]
 
+    # ---- BALTILE DE MARMETTOLA (POI C, brief par.2 randul C si par.4 "Apa"). Apa rapei 1
+    # (`custom_ravine_water`) la O SINGURA cota absoluta, BALTI_Y, plus scobituri locale (TerrainHollow) care
+    # coboara podeaua sub ea doar acolo unde trebuie sa fie balta. De ce asa:
+    #   - podeaua nu e plata la o singura cota: PitB (fundul de sub T3, x 45-115) e la +0.50, iar podeaua rapei 1
+    #     (tot ce e la E de x ~145) la +1.70; intre ele, racordul de 30 m al lui PitB (masurat cu
+    #     ProbeCarraraHmap --sample). Apa umple TOATE celulele de sub cota ei care tin de rapa (si vecinii lor
+    #     de sub cota), deci orice cota peste +0.50 ar fi inundat tot PitB-ul: un lac de 70 x 70 m, nu balti;
+    #   - cu BALTI_Y sub +0.50 nicio celula a podelei nu e sub apa, iar baltile ies exact din scobituri. Pe PitB
+    #     oglinda sta la 15 cm sub podea (balta la nivel, cu mal); pe podeaua de +1.70 scobitura are un perete
+    #     lat (`wall`), adica o farfurie cu malul in panta de ~12 grade, nu o groapa;
+    #   - un singur `custom_ravine_water` pe rapa 1 = un singur stil, deci un singur material in plus.
+    # Fundul scobiturii e la -2.0: o masina intra in cutia de repunere de sub apa (plafonul ei e la BALTI_Y - 0.6)
+    # doar daca fundul de sub ea e sub ~-1.1 (sonda temporara: masina lasata in balta, fund -1.07 -> nerepusa,
+    # -1.12 -> repusa). Cu -1.2 jumatate din P1 ramanea vad fara repunere; cu -2.0 doar banda de ~2 m de la mal.
+    # Toate baltile stau departe de linia de cursa (marginea farfuriei la >= 9 m de marginea asfaltului;
+    # scurtatura prin balta, TrackBranch la 0.33, nu exista inca).
+    # (nume, x, z Godot, raza plina m, perete m, fundul y). Raza + perete = unde incepe farfuria.
+    BALTI_Y = 0.35
+    BALTI = [
+        # P1 pe PitB, la dreapta intrarii pe podea (0.29-0.30); se vede de pe E si de pe terasele lui B.
+        ("BaltaPitV", 84.0, 26.0, 6.0, 6.0, -2.0),
+        ("BaltaPitE", 98.0, 33.0, 6.0, 6.0, -2.0),
+        # P2: sub derrick, pe racordul PitB -> podea (la 60 m de turn). Farfuria incepe la lat +31 de dreapta
+        # E-V: la 18.0 / 8 m (lat +23) o masina iesita din interiorul cotului 1 (ProbeRace s13, la x 143, lat 17,
+        # 28 m/s) ar fi ajuns in ea.
+        ("BaltaDerrick", 152.0, 26.0, 7.0, 8.0, -2.0),
+        # P3: interiorul cotului 1 (0.33), la 28 m de axa diagonalei; de aici trece candva scurtatura.
+        ("BaltaCot1", 172.0, 39.0, 8.0, 8.0, -2.0),
+        # P5: intre cotul 1 si cotul 2 (0.365, lat +25), in prim-planul din dreapta al capturii de la 0.36.
+        ("BaltaCot2", 205.0, 48.0, 6.0, 6.5, -2.0),
+        # P4: in fata cotului 2, pe dreapta dreptei spre portal (lat +27), langa ferastraul-lant. Pe EXTERIORUL
+        # cotului 2 (iesirea 0.375 a dat o ejectare la 30 m/s): farfuria incepe la lat +15, peste pragul de 12.5.
+        ("BaltaPortal", 246.0, 63.0, 5.0, 7.0, -2.0),
+    ]
+    # Turcoaz OPAC (shaderul de apa e opac prin constructie): REEF_SHALLOW 17 tras 25% spre CORAL_SAND 19 pe
+    # apa mica, 17 curat pe adanc, malul pe 19 (calcitul de la marginea baltii — rampa shore -> shallow ->
+    # deep a shaderului). Mata: fara spuma, creste, trepte, hula si aproape fara sclipire.
+    balti_style = ('{\n"ravines": Array[int]([1]),\n'
+                   '"water_shallow_rgb": Color(0.475, 0.776, 0.729, 1),\n'
+                   '"water_deep_slot": 17,\n"water_deep_gain": 0.92,\n'
+                   '"water_shore_slot": 19,\n'
+                   '"water_dim": 0.95,\n"water_foam": 0.0,\n"water_crest": 0.0,\n"water_band": 0.0,\n'
+                   '"water_wave_amp_k": 0.0,\n"water_glint": 0.08\n}')
+
     # ---- RAVANETO-UL (POI G, brief par.2 randul G): panta de moloz care urca pe DREAPTA sensului, din
     # interiorul buclei. Mecanismul e DEBLEUL (`custom_cuttings`, TrackSideSampler._lift_cuttings): un umar plat
     # dincolo de asfalt, apoi un perete PLAN cu panta data pana la o buza la cota absoluta, numai pe latura
@@ -586,6 +630,15 @@ radius_m = {r}
 """
     peaks_txt = peak("MasivGalerie", 262.0, -62.0, 85.0, 175.0) \
         + peak("MasivMarmifera", -228.0, 128.0, 75.0, 95.0)
+    # scobiturile baltilor (coordonate Godot direct)
+    balti_txt = '\n[node name="Balti" type="Node3D" parent="."]\n' + "".join(f"""
+[node name="{n_}" type="Marker3D" parent="Balti"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {x_}, {f_}, {z_})
+gizmo_extents = {r_ + w_}
+script = ExtResource("4_hollow")
+radius_m = {r_}
+wall_m = {w_}
+""" for n_, x_, z_, r_, w_, f_ in BALTI)
 
     # ---- tunelurile: noduri doar-tub la linia de oprire (originea = capatul dinspre start)
     def tunnel_node(name, tag, tag_end, hw, ceil_h, tail):
@@ -1433,6 +1486,7 @@ transform = {xf_txt}
 [ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
 [ext_resource type="Script" path="res://scenes/tracks/terrain_bluff.gd" id="3_bluff"]
+[ext_resource type="Script" path="res://scenes/tracks/terrain_hollow.gd" id="4_hollow"]
 [ext_resource type="Script" path="res://scenes/hazards/tunnel_signal_hazard.gd" id="5_signal"]
 [ext_resource type="Script" path="res://scenes/hazards/respawn_zone.gd" id="6_respawn"]
 {hz_ext}
@@ -1464,6 +1518,8 @@ custom_viaduct_ravines = Array[int]([{", ".join(str(i) for i in viaduct)}])
 custom_viaduct_net_margin = 12.0
 custom_ravine_floors = Array[Vector2]([{fl_txt}])
 custom_ravine_widths = Array[Vector2]([{rw_txt}])
+custom_ravine_water = Array[Vector3]([Vector3(1, {BALTI_Y}, 20.0)])
+custom_water_styles = Array[Dictionary]([{balti_style}])
 custom_cuttings = Array[Vector4]([{cut_txt}])
 custom_cutting_shape = Vector3({RAV_SHOULDER}, {RAV_SLOPE}, {RAV_REACH})
 custom_bench_patches = Array[Dictionary]([{patch_txt}])
@@ -1476,7 +1532,7 @@ terrain_pad_m = 160.0
 curve = SubResource("Curve3D_carrara")
 
 [node name="Peaks" type="Node3D" parent="."]
-{peaks_txt}{lizza_node}
+{peaks_txt}{lizza_node}{balti_txt}
 [node name="Hazarduri" type="Node3D" parent="."]
 {tunnels_txt}{"".join(nets)}{hz_nodes}"""
     with open(OUT_PATH, "w", encoding="utf-8", newline="\n") as f:

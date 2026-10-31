@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
 [ext_resource type="Script" path="res://scenes/tracks/terrain_bluff.gd" id="3_bluff"]
+[ext_resource type="Script" path="res://scenes/tracks/terrain_hollow.gd" id="4_hollow"]
 [ext_resource type="Script" path="res://scenes/hazards/tunnel_signal_hazard.gd" id="5_signal"]
 [ext_resource type="Script" path="res://scenes/hazards/respawn_zone.gd" id="6_respawn"]
 [ext_resource type="Script" path="res://scenes/hazards/bus_hazard.gd" id="7_bus"]
@@ -43,6 +44,8 @@
 [ext_resource type="PackedScene" path="res://assets/models/carrara/vehicles/wire_saw.glb" id="k_wire_saw"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/structures/safety_berm.glb" id="k_safety_berm"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/props/pipe_run.glb" id="k_pipe_run"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/vehicles/chain_saw_crawler.glb" id="k_chain_saw_crawler"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/rocks/scree_cone.glb" id="k_scree_cone"]
 
 
 [sub_resource type="BoxShape3D" id="Box_PlasaA"]
@@ -108,6 +111,20 @@ custom_viaduct_ravines = Array[int]([0])
 custom_viaduct_net_margin = 12.0
 custom_ravine_floors = Array[Vector2]([Vector2(0, 17.0), Vector2(1, 2.0)])
 custom_ravine_widths = Array[Vector2]([Vector2(0, 60.0), Vector2(1, 70.0)])
+custom_ravine_water = Array[Vector3]([Vector3(1, 0.35, 20.0)])
+custom_water_styles = Array[Dictionary]([{
+"ravines": Array[int]([1]),
+"water_shallow_rgb": Color(0.475, 0.776, 0.729, 1),
+"water_deep_slot": 17,
+"water_deep_gain": 0.92,
+"water_shore_slot": 19,
+"water_dim": 0.95,
+"water_foam": 0.0,
+"water_crest": 0.0,
+"water_band": 0.0,
+"water_wave_amp_k": 0.0,
+"water_glint": 0.08
+}])
 custom_cuttings = Array[Vector4]([Vector4(0.735, 0.837, 55.0, 1)])
 custom_cutting_shape = Vector3(5.0, 0.86, 40.0)
 custom_bench_patches = Array[Dictionary]([{ "lvl": PackedVector2Array(-1000.0, 0.8, 1000.0, 0.8), "soft": Vector4(0.0, 20.0, 0.0, 0.0), "x0": -190.0, "x1": 45.0, "z0": -16.5, "z1": 68.0 }, { "lvl": PackedVector2Array(-1000.0, 0.8, 1000.0, 0.8), "soft": Vector4(0.0, 30.0, 8.0, 0.0), "x0": 45.0, "x1": 115.0, "z0": -3.5, "z1": 68.0 }, { "lvl": PackedVector2Array(-1000.0, 45.0, 1000.0, 45.0), "soft": Vector4(20.0, 15.0, 0.0, 12.0), "x0": -112.0, "x1": 104.0, "z0": 100.0, "z1": 124.0 }, { "lvl": PackedVector2Array(-1000.0, 36.16, 1000.0, 36.16), "soft": Vector4(0.0, 15.0, 0.0, 0.0), "x0": -190.0, "x1": 104.0, "z0": 92.0, "z1": 100.0 }, { "lvl": PackedVector2Array(-1000.0, 27.32, 1000.0, 27.32), "soft": Vector4(0.0, 15.0, 0.0, 0.0), "x0": -190.0, "x1": 104.0, "z0": 84.0, "z1": 92.0 }, { "lvl": PackedVector2Array(-1000.0, 18.48, 1000.0, 18.48), "soft": Vector4(0.0, 15.0, 0.0, 0.0), "x0": -190.0, "x1": 104.0, "z0": 76.0, "z1": 84.0 }, { "lvl": PackedVector2Array(-1000.0, 9.64, 1000.0, 9.64), "soft": Vector4(0.0, 15.0, 0.0, 0.0), "x0": -190.0, "x1": 104.0, "z0": 68.0, "z1": 76.0 }, { "lvl": PackedVector2Array(-94.433, 11.021, -82.954, 10.207, -70.954, 9.405, -58.954, 8.602, -46.954, 7.8, -34.954, 7.117, -22.954, 7.0, -10.954, 7.0, 1.046, 7.0, 13.046, 7.0, 25.043, 6.937, 37.012, 6.499), "soft": Vector4(25.0, 25.0, 0.0, 0.0), "x0": -60.0, "x1": 28.0, "z0": -54.5, "z1": -16.5 }, { "lvl": PackedVector2Array(-96.484, 13.477, -85.449, 14.294, -73.495, 15.097, -61.495, 15.9, -49.495, 15.997, -37.495, 16.0, -25.495, 16.0, -13.495, 16.0, -1.495, 16.583, 10.505, 17.371, 22.505, 18.174, 34.505, 18.977), "soft": Vector4(22.0, 22.0, 0.0, 0.0), "x0": -86.0, "x1": 8.0, "z0": -92.5, "z1": -54.5 }, { "lvl": PackedVector2Array(-148.0, 25.0, -136.0, 25.0, -124.0, 25.0, -112.0, 25.0, -100.0, 25.0, -88.0, 25.0, -76.0, 25.0, -64.0, 25.0, -52.0, 25.0, -40.0, 25.0, -28.0, 25.0, -16.0, 25.0, -4.0, 25.0, 8.0, 25.0, 20.0, 24.666, 32.0, 23.863, 43.989, 23.059), "soft": Vector4(25.0, 28.0, 12.0, 0.0), "x0": -150.0, "x1": 12.0, "z0": -113.0, "z1": -92.5 }, { "lvl": PackedVector2Array(-1000.0, 55.3, 1000.0, 55.3), "soft": Vector4(10.0, 20.0, 30.0, 20.0), "x0": -290.0, "x1": -215.0, "z0": 55.0, "z1": 80.0 }])
@@ -149,6 +166,50 @@ terrace_rise_m = 0.15
 length_m = 58.843
 end_fade_m = 4.0
 road_clear_m = -3.0
+
+[node name="Balti" type="Node3D" parent="."]
+
+[node name="BaltaPitV" type="Marker3D" parent="Balti"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 84.0, -2.0, 26.0)
+gizmo_extents = 12.0
+script = ExtResource("4_hollow")
+radius_m = 6.0
+wall_m = 6.0
+
+[node name="BaltaPitE" type="Marker3D" parent="Balti"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 98.0, -2.0, 33.0)
+gizmo_extents = 12.0
+script = ExtResource("4_hollow")
+radius_m = 6.0
+wall_m = 6.0
+
+[node name="BaltaDerrick" type="Marker3D" parent="Balti"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 152.0, -2.0, 26.0)
+gizmo_extents = 15.0
+script = ExtResource("4_hollow")
+radius_m = 7.0
+wall_m = 8.0
+
+[node name="BaltaCot1" type="Marker3D" parent="Balti"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 172.0, -2.0, 39.0)
+gizmo_extents = 16.0
+script = ExtResource("4_hollow")
+radius_m = 8.0
+wall_m = 8.0
+
+[node name="BaltaCot2" type="Marker3D" parent="Balti"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 205.0, -2.0, 48.0)
+gizmo_extents = 12.5
+script = ExtResource("4_hollow")
+radius_m = 6.0
+wall_m = 6.5
+
+[node name="BaltaPortal" type="Marker3D" parent="Balti"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 246.0, -2.0, 63.0)
+gizmo_extents = 12.0
+script = ExtResource("4_hollow")
+radius_m = 5.0
+wall_m = 7.0
 
 [node name="Hazarduri" type="Node3D" parent="."]
 
@@ -1475,13 +1536,335 @@ transform = Transform3D(0.2683, 0.0, -0.96333, 0.0, 1.0, 0.0, 0.96333, 0.0, 0.26
 transform = Transform3D(-0.91913, 0.0, -0.39395, 0.0, 1.0, 0.0, 0.39395, 0.0, -0.91913, 171.94, 1.63, -0.484)
 
 [node name="C_Informe3" parent="DecorManual/ZonaC" instance=ExtResource("k_block_informe_a")]
-transform = Transform3D(0.68514, 0.0, -0.72841, 0.0, 1.0, 0.0, 0.72841, 0.0, 0.68514, 238.826, 1.66, 47.957)
+transform = Transform3D(0.68514, 0.0, -0.72841, 0.0, 1.0, 0.0, 0.72841, 0.0, 0.68514, 238.826, 1.39, 47.957)
 
 [node name="C_Informe4" parent="DecorManual/ZonaC" instance=ExtResource("k_block_informe_b")]
 transform = Transform3D(-0.16992, 0.0, -0.98546, 0.0, 1.0, 0.0, 0.98546, 0.0, -0.16992, 233.183, 1.66, 24.801)
 
 [node name="C_Informe5" parent="DecorManual/ZonaC" instance=ExtResource("k_block_informe_b")]
 transform = Transform3D(0.07824, 0.0, -0.99693, 0.0, 1.0, 0.0, 0.99693, 0.0, 0.07824, 192.546, 1.59, 18.201)
+
+[node name="C_FerastrauLant" parent="DecorManual/ZonaC" instance=ExtResource("k_chain_saw_crawler")]
+transform = Transform3D(-0.00072, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.00072, 260.475, 1.51, 56.013)
+
+[node name="C_MolozTaietura" parent="DecorManual/ZonaC" instance=ExtResource("k_rubble_pile_b")]
+transform = Transform3D(0.50103, 0.0, -0.86543, 0.0, 1.0, 0.0, 0.86543, 0.0, 0.50103, 265.832, 1.73, 50.001)
+
+[node name="C_LampaGalerieD" parent="DecorManual/ZonaC" instance=ExtResource("k_work_lamp")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, 286.97, 3.4, 47.5)
+
+[node name="C_LampaGalerieS" parent="DecorManual/ZonaC" instance=ExtResource("k_work_lamp")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, 286.97, 4.22, 24.5)
+
+[node name="C_MarginePodea1" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(0.07825, 0.0, -0.99693, 0.0, 1.0, 0.0, 0.99693, 0.0, 0.07825, 112.401, 0.9, -6.44)
+
+[node name="C_BlocPodea1" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_b")]
+transform = Transform3D(0.20791, 0.0, -0.97815, 0.0, 1.0, 0.0, 0.97815, 0.0, 0.20791, 120.105, 0.58, 4.0)
+
+[node name="C_BlocPodea2" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(-0.74937, 0.0, -0.66215, 0.0, 1.0, 0.0, 0.66215, 0.0, -0.74937, 221.155, 1.67, 65.717)
+
+[node name="C_BlocPodea3" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(0.29655, 0.0, -0.95502, 0.0, 1.0, 0.0, 0.95502, 0.0, 0.29655, 217.047, 1.67, 60.485)
+
+[node name="C_MolozPereteS1" parent="DecorManual/ZonaC" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(0.02618, 0.0, -0.99966, 0.0, 1.0, 0.0, 0.99966, 0.0, 0.02618, 251.976, 2.5, 25.044)
+
+[node name="C_MolozPereteS2" parent="DecorManual/ZonaC" instance=ExtResource("k_rubble_pile_b")]
+transform = Transform3D(0.86662, 0.0, -0.49897, 0.0, 1.0, 0.0, 0.49897, 0.0, 0.86662, 265.803, 2.54, 25.501)
+
+[node name="C_GramadaP1_00" parent="DecorManual/ZonaC" instance=ExtResource("k_block_stack_a")]
+transform = Transform3D(0.26946, 0.0, -0.78504, 0.0, 0.83, 0.0, 0.78504, 0.0, 0.26946, 88.499, 0.35, 9.0)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP1_01" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(0.95653, 0.0, -0.45678, 0.0, 1.06, 0.0, 0.45678, 0.0, 0.95653, 90.604, 0.4, 10.405)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP1_02" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(0.98751, 0.0, -0.21194, 0.0, 1.01, 0.0, 0.21194, 0.0, 0.98751, 85.795, 0.34, 9.103)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP1_03" parent="DecorManual/ZonaC" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(0.20744, 0.0, -0.80366, 0.0, 0.83, 0.0, 0.80366, 0.0, 0.20744, 92.196, 0.45, 11.503)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP1_04" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(-1.08752, 0.0, -0.22224, 0.0, 1.11, 0.0, 0.22224, 0.0, -1.08752, 97.997, 0.44, 14.595)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP1_05" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(0.95993, 0.0, 0.73664, 0.0, 1.21, 0.0, -0.73664, 0.0, 0.95993, 100.398, 0.38, 15.401)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP1_06" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(0.84956, 0.0, -0.69875, 0.0, 1.1, 0.0, 0.69875, 0.0, 0.84956, 95.399, 0.14, 15.302)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP1_07" parent="DecorManual/ZonaC" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(-0.77327, 0.0, 0.27287, 0.0, 0.82, 0.0, -0.27287, 0.0, -0.77327, 93.803, 0.05, 16.101)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP2_08" parent="DecorManual/ZonaC" instance=ExtResource("k_block_stack_b")]
+transform = Transform3D(0.53379, 0.0, 0.60923, 0.0, 0.81, 0.0, -0.60923, 0.0, 0.53379, 155.999, 0.49, 11.104)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP2_09" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(0.957, 0.0, 0.50055, 0.0, 1.08, 0.0, -0.50055, 0.0, 0.957, 158.099, 0.36, 12.602)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP2_10" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(-0.32266, 0.0, -0.92536, 0.0, 0.98, 0.0, 0.92536, 0.0, -0.32266, 153.298, 0.37, 11.205)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP2_11" parent="DecorManual/ZonaC" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(0.15668, 0.0, -0.7947, 0.0, 0.81, 0.0, 0.7947, 0.0, 0.15668, 159.705, 0.6, 13.597)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP2_12" parent="DecorManual/ZonaC" instance=ExtResource("k_block_stack_a")]
+transform = Transform3D(-0.27961, 0.0, 0.78149, 0.0, 0.83, 0.0, -0.78149, 0.0, -0.27961, 166.903, 0.53, 19.804)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP2_13" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(-0.92825, 0.0, -0.39807, 0.0, 1.01, 0.0, 0.39807, 0.0, -0.92825, 166.899, 0.54, 22.393)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP2_14" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(1.06691, 0.0, 0.08131, 0.0, 1.07, 0.0, -0.08131, 0.0, 1.06691, 165.104, 0.78, 17.699)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP2_15" parent="DecorManual/ZonaC" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(-0.68289, 0.0, 0.48914, 0.0, 0.84, 0.0, -0.48914, 0.0, -0.68289, 163.9, 0.85, 16.496)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP2_16" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(0.78567, 0.0, 0.81217, 0.0, 1.13, 0.0, -0.81217, 0.0, 0.78567, 145.303, 0.19, 14.498)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP2_17" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(0.4533, 0.0, 1.10028, 0.0, 1.19, 0.0, -1.10028, 0.0, 0.4533, 147.899, 0.31, 13.997)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP2_18" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(-0.44538, 0.0, 0.8617, 0.0, 0.97, 0.0, -0.8617, 0.0, -0.44538, 143.502, 0.36, 16.497)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP2_19" parent="DecorManual/ZonaC" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(-0.81056, 0.0, -0.41364, 0.0, 0.91, 0.0, 0.41364, 0.0, -0.81056, 149.696, 0.02, 13.698)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP3_20" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(1.05998, 0.0, -0.00624, 0.0, 1.06, 0.0, 0.00624, 0.0, 1.05998, 182.396, 0.52, 25.399)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP3_21" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(0.34773, 0.0, -1.3458, 0.0, 1.39, 0.0, 1.3458, 0.0, 0.34773, 183.8, 0.41, 27.606)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP3_22" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(0.52783, 0.0, 0.91924, 0.0, 1.06, 0.0, -0.91924, 0.0, 0.52783, 179.895, 0.66, 24.399)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP3_23" parent="DecorManual/ZonaC" instance=ExtResource("k_block_stack_a")]
+transform = Transform3D(0.78953, 0.0, -0.22145, 0.0, 0.82, 0.0, 0.22145, 0.0, 0.78953, 184.898, 0.57, 35.497)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP3_24" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(-0.16752, 0.0, 0.99601, 0.0, 1.01, 0.0, -0.99601, 0.0, -0.16752, 184.701, 0.34, 38.095)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP3_25" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(0.26624, 0.0, -1.00534, 0.0, 1.04, 0.0, 1.00534, 0.0, 0.26624, 183.502, 0.08, 33.196)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP3_26" parent="DecorManual/ZonaC" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(0.66279, 0.0, 0.65239, 0.0, 0.93, 0.0, -0.65239, 0.0, 0.66279, 184.601, 0.02, 40.003)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP3_27" parent="DecorManual/ZonaC" instance=ExtResource("k_block_stack_b")]
+transform = Transform3D(0.88907, 0.0, -0.13983, 0.0, 0.9, 0.0, 0.13983, 0.0, 0.88907, 184.299, 0.55, 46.102)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP3_28" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(1.03725, 0.0, -0.16313, 0.0, 1.05, 0.0, 0.16313, 0.0, 1.03725, 182.299, 0.02, 47.702)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP3_29" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(-0.87015, 0.0, 0.60534, 0.0, 1.06, 0.0, -0.60534, 0.0, -0.87015, 184.896, 0.27, 43.4)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP5_30" parent="DecorManual/ZonaC" instance=ExtResource("k_block_stack_b")]
+transform = Transform3D(0.55023, 0.0, -0.62141, 0.0, 0.83, 0.0, 0.62141, 0.0, 0.55023, 214.706, 0.36, 40.499)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP5_31" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(0.77216, 0.0, -0.79741, 0.0, 1.11, 0.0, 0.79741, 0.0, 0.77216, 215.502, 0.35, 42.9)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP5_32" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(1.08963, 0.0, -0.02823, 0.0, 1.09, 0.0, 0.02823, 0.0, 1.08963, 212.498, 0.42, 38.898)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP5_33" parent="DecorManual/ZonaC" instance=ExtResource("k_block_stack_b")]
+transform = Transform3D(-0.81968, 0.0, -0.02283, 0.0, 0.82, 0.0, 0.02283, 0.0, -0.81968, 205.0, 0.45, 35.998)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP5_34" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(-1.19929, 0.0, -0.31511, 0.0, 1.24, 0.0, 0.31511, 0.0, -1.19929, 207.4, 0.37, 36.893)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP5_35" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(-0.16575, 0.0, 0.94558, 0.0, 0.96, 0.0, -0.94558, 0.0, -0.16575, 202.4, 0.16, 36.804)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP5_36" parent="DecorManual/ZonaC" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(-0.99611, 0.0, 0.08816, 0.0, 1.0, 0.0, -0.08816, 0.0, -0.99611, 200.801, -0.01, 37.495)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP5_37" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(-1.04559, 0.0, -0.34168, 0.0, 1.1, 0.0, 0.34168, 0.0, -1.04559, 214.801, 0.26, 52.003)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP5_38" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(-0.28671, 0.0, -1.36011, 0.0, 1.39, 0.0, 1.36011, 0.0, -0.28671, 213.099, -0.03, 53.898)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP5_39" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(-0.94861, 0.0, -0.05131, 0.0, 0.95, 0.0, 0.05131, 0.0, -0.94861, 215.098, 0.23, 49.294)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP5_40" parent="DecorManual/ZonaC" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(-0.38031, 0.0, -0.78247, 0.0, 0.87, 0.0, 0.78247, 0.0, -0.38031, 214.996, 0.04, 47.598)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP5_41" parent="DecorManual/ZonaC" instance=ExtResource("k_block_stack_a")]
+transform = Transform3D(-0.28099, 0.0, -0.84448, 0.0, 0.89, 0.0, 0.84448, 0.0, -0.28099, 196.497, 0.53, 43.097)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP5_42" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(-0.24341, 0.0, -1.0214, 0.0, 1.05, 0.0, 1.0214, 0.0, -0.24341, 198.504, 0.17, 41.499)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP5_43" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(1.07809, 0.0, -0.06413, 0.0, 1.08, 0.0, 0.06413, 0.0, 1.07809, 195.905, -0.03, 45.702)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP5_44" parent="DecorManual/ZonaC" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(0.52852, 0.0, 0.80141, 0.0, 0.96, 0.0, -0.80141, 0.0, 0.52852, 199.897, 0.0, 40.201)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP4_45" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(-0.6258, 0.0, -0.91678, 0.0, 1.11, 0.0, 0.91678, 0.0, -0.6258, 250.904, 0.32, 51.203)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP4_46" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(-0.75324, 0.0, -0.94696, 0.0, 1.21, 0.0, 0.94696, 0.0, -0.75324, 252.696, 0.42, 52.904)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP4_47" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(-0.43426, 0.0, -0.87853, 0.0, 0.98, 0.0, 0.87853, 0.0, -0.43426, 248.198, 0.44, 50.905)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP4_48" parent="DecorManual/ZonaC" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(-0.75703, 0.0, -0.36402, 0.0, 0.84, 0.0, 0.36402, 0.0, -0.75703, 254.2, 0.4, 54.204)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP4_49" parent="DecorManual/ZonaC" instance=ExtResource("k_block_stack_b")]
+transform = Transform3D(0.80609, 0.0, -0.15039, 0.0, 0.82, 0.0, 0.15039, 0.0, 0.80609, 240.697, 0.5, 53.902)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP4_50" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(-0.64303, 0.0, -0.95342, 0.0, 1.15, 0.0, 0.95342, 0.0, -0.64303, 243.305, 0.33, 53.496)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP4_51" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(0.97394, 0.0, 0.41837, 0.0, 1.06, 0.0, -0.41837, 0.0, 0.97394, 238.902, 0.11, 55.901)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP4_52" parent="DecorManual/ZonaC" instance=ExtResource("k_block_stack_b")]
+transform = Transform3D(0.81144, 0.0, 0.21718, 0.0, 0.84, 0.0, -0.21718, 0.0, 0.81144, 255.903, 0.6, 61.7)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP4_53" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(0.98517, 0.0, -0.26427, 0.0, 1.02, 0.0, 0.26427, 0.0, 0.98517, 255.402, 0.45, 64.2)
+metadata/coliziune = "none"
+
+[node name="C_GramadaP4_54" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(0.79627, 0.0, 0.68444, 0.0, 1.05, 0.0, -0.68444, 0.0, 0.79627, 254.8, -0.06, 59.197)
+metadata/coliziune = "none"
+
+[node name="C_Sir1" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(-0.78501, 0.0, -0.90761, 0.0, 1.2, 0.0, 0.90761, 0.0, -0.78501, 183.916, 1.59, 10.382)
+metadata/coliziune = "none"
+
+[node name="C_Sir2" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(0.49105, 0.0, -0.49887, 0.0, 0.7, 0.0, 0.49887, 0.0, 0.49105, 198.768, 1.6, 25.23)
+metadata/coliziune = "none"
+
+[node name="C_Sir3" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(-0.82349, 0.0, -0.72929, 0.0, 1.1, 0.0, 0.72929, 0.0, -0.82349, 204.511, 1.54, 30.85)
+metadata/coliziune = "none"
+
+[node name="C_Sir4" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(-0.43364, 0.0, -0.54951, 0.0, 0.7, 0.0, 0.54951, 0.0, -0.43364, 210.169, 0.59, 36.239)
+metadata/coliziune = "none"
+
+[node name="C_Sir5" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(1.02492, 0.0, -0.71557, 0.0, 1.25, 0.0, 0.71557, 0.0, 1.02492, 217.36, 1.17, 41.297)
+metadata/coliziune = "none"
+
+[node name="C_Sir6" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(-0.1904, 0.0, -0.67361, 0.0, 0.7, 0.0, 0.67361, 0.0, -0.1904, 225.805, 1.64, 45.315)
+metadata/coliziune = "none"
+
+[node name="C_ConPortal" parent="DecorManual/ZonaC" instance=ExtResource("k_scree_cone")]
+transform = Transform3D(0.6, 0.0, -0.0, 0.0, 0.6, 0.0, 0.0, 0.0, 0.6, 276.0, 2.41, 46.0)
+metadata/coliziune = "none"
+
+[node name="C_ConTaietura" parent="DecorManual/ZonaC" instance=ExtResource("k_scree_cone")]
+transform = Transform3D(0.00014, 0.0, 0.6, 0.0, 0.6, 0.0, -0.6, 0.0, 0.00014, 262.998, 1.57, 61.499)
+metadata/coliziune = "none"
+
+[node name="C_ConFund" parent="DecorManual/ZonaC" instance=ExtResource("k_scree_cone")]
+transform = Transform3D(0.75, 0.0, -0.00052, 0.0, 0.75, 0.0, 0.00052, 0.0, 0.75, 222.003, 1.67, 67.503)
+metadata/coliziune = "none"
+
+[node name="C_ConCot1" parent="DecorManual/ZonaC" instance=ExtResource("k_scree_cone")]
+transform = Transform3D(0.00013, 0.0, 0.6, 0.0, 0.6, 0.0, -0.6, 0.0, 0.00013, 207.501, 1.86, 2.502)
+metadata/coliziune = "none"
+
+[node name="C_BlocTaiat1" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(0.03418, 0.0, -0.99942, 0.0, 1.0, 0.0, 0.99942, 0.0, 0.03418, 259.501, 1.48, 60.802)
+metadata/coliziune = "none"
+
+[node name="C_BlocTaiat2" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_b")]
+transform = Transform3D(-0.14271, 0.0, -0.98976, 0.0, 1.0, 0.0, 0.98976, 0.0, -0.14271, 257.502, 1.3, 64.498)
+metadata/coliziune = "none"
+
+[node name="C_StivaTaietura" parent="DecorManual/ZonaC" instance=ExtResource("k_block_stack_a")]
+transform = Transform3D(0.08954, 0.0, -0.99598, 0.0, 1.0, 0.0, 0.99598, 0.0, 0.08954, 263.999, 1.7, 52.505)
+metadata/coliziune = "none"
+
+[node name="C_StivaFund1" parent="DecorManual/ZonaC" instance=ExtResource("k_block_stack_b")]
+transform = Transform3D(-0.49854, 0.0, -0.86687, 0.0, 1.0, 0.0, 0.86687, 0.0, -0.49854, 210.998, 1.67, 66.502)
+metadata/coliziune = "none"
+
+[node name="C_StivaFund2" parent="DecorManual/ZonaC" instance=ExtResource("k_block_stack_a")]
+transform = Transform3D(-0.10081, 0.0, -0.99491, 0.0, 1.0, 0.0, 0.99491, 0.0, -0.10081, 232.5, 1.58, 66.998)
+metadata/coliziune = "none"
+
+[node name="C_BlocPerete1" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_b")]
+transform = Transform3D(0.11165, 0.0, -0.99375, 0.0, 1.0, 0.0, 0.99375, 0.0, 0.11165, 229.002, 1.67, 68.504)
+metadata/coliziune = "none"
+
+[node name="C_BlocPerete2" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
+transform = Transform3D(-0.61221, 0.0, -0.7907, 0.0, 1.0, 0.0, 0.7907, 0.0, -0.61221, 215.505, 1.67, 65.998)
+metadata/coliziune = "none"
+
+[node name="C_BlocPerete3" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
+transform = Transform3D(-0.0, 0.0, -0.8, 0.0, 0.8, 0.0, 0.8, 0.0, -0.0, 283.0, 2.95, 45.8)
+metadata/coliziune = "none"
 
 [node name="ZonaF" type="Node3D" parent="DecorManual"]
 

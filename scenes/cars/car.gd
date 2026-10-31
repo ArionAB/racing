@@ -352,6 +352,8 @@ const OFFROAD_SPEED_DEFAULT: float = 0.45
 ## Plafonul de viteza (fractie) cat tine strivirea unei lovituri MOI (meta
 ## `soft_hit_crush` pe corpul lovit: camionul Carrara, bratul excavatorului).
 const SOFT_CRUSH_FACTOR: float = 0.6
+## Meta pe corpurile animalelor de turma; ejectarea le ignora (`ignore_animal_eject`).
+const HERD_ANIMAL_META := &"herd_animal"
 ## Viteza de cadere (m/s) la aterizare peste care soferul zboara.
 ## Masurat cu ProbeRace pe Alpii (garaj deschis, 150 s): SARITURA PROIECTATA
 ## peste gol (frac 0.71) ateriza la 24-30 m/s, si la pragul de 24 fiecare
@@ -360,6 +362,19 @@ const SOFT_CRUSH_FACTOR: float = 0.6
 ## jocului e 28, deci o cadere de la ~20 m) ramane doar prabusirea: de pe
 ## cornisa, in rapa, de pe un pasaj — nu de pe o rampa.
 @export var eject_land_speed: float = 34.0
+## Animalele turmei (corpurile `HerdHazard`, marcate cu meta [constant HERD_ANIMAL_META])
+## NU arunca soferul, oricat de tare le-ai lovi (#614): turma incetineste
+## masina (cat de mult depinde de masa, vezi `HerdHazard._hit`), nu o repune.
+## Cat tine [constant ANIMAL_EJECT_GRACE] dupa o lovitura de animal, NICIO
+## ejectare (perete sau aterizare) nu se declanseaza; pragurile `eject_wall_dv`
+## si `eject_land_speed` raman neatinse. `false` = comportamentul vechi (sonda
+## de sabotaj: `ProbeHerdEject --sabotage`).
+@export var ignore_animal_eject: bool = true
+## Cat dupa o ciocnire cu un animal de turma ejectarea ramane suprimata (s).
+## Corpul animalului da si el schimbari de viteza uriase (am masurat dv de
+## 60-260 m/s cand solverul scoate masina dintr-o ingramadeala), iar ele apar
+## in tick-uri vecine, nu neaparat in cel al contactului.
+const ANIMAL_EJECT_GRACE: float = 0.6
 ## Cat sta masina fara sofer (comenzi taiate, camera pe figurina) pana la
 ## repunere. Referinta Ignition: ~1,5-2 s de ecran fara masina.
 @export var eject_hold: float = 1.1
@@ -839,6 +854,7 @@ func _ready() -> void:
 	# Grupul e pentru cine trebuie sa stie TOATE masinile fara sa treaca prin
 	# Race (ragdoll-ul isi exclude coliziunea cu ele).
 	add_to_group(&"cars")
+	impact.connect(_on_own_impact)
 	mass = 100.0 * mass_factor
 	# Gravitatia proiectului e cea implicita (9.8); jocul cade cu `gravity`.
 	var project_g: float = ProjectSettings.get_setting(
@@ -1516,6 +1532,7 @@ func _draft_target() -> float:
 func _process_contacts(delta: float) -> void:
 	_scan_contact_state()
 	_impact_wall_cooldown = maxf(_impact_wall_cooldown - delta, 0.0)
+	_animal_grace = maxf(_animal_grace - delta, 0.0)
 	var cars_hit: Array[Car] = []
 	var static_hit := false
 	var hard_static := false
@@ -1536,6 +1553,8 @@ func _process_contacts(delta: float) -> void:
 				+ Vector3.UP * 1.5)
 		elif body is StaticBody3D:
 			static_hit = true
+			if body.has_meta(HERD_ANIMAL_META):
+				_animal_grace = ANIMAL_EJECT_GRACE
 			# Contact MOALE (camion, brat de excavator): corp greu, nu zid de
 			# beton. Meta `soft_hit_crush` (secunde de strivire) o pune hazardul,
 			# in spatele unui flag implicit stins. Fara meta, nimic nu se schimba.
@@ -1643,7 +1662,7 @@ func _process_contacts(delta: float) -> void:
 			# sustinut sa nu reinnoiasca strivirea in fiecare tick.
 			if crush_time <= 0.0:
 				crush(soft_crush, SOFT_CRUSH_FACTOR, Vector3(1.25, 0.65, 1.1), 1.0)
-		elif dv_h >= eject_wall_dv:
+		elif dv_h >= eject_wall_dv and not _eject_blocked_by_animal():
 			# 0.6 din viteza inainte + 7.5 m/s in sus: peste o bariera de 1,2 m
 			# trece; intr-o faleza se izbeste si cade — amandoua sunt corecte.
 			var fling := Vector3(_prev_velocity.x, 0.0, _prev_velocity.z) * 0.6
@@ -2203,13 +2222,30 @@ func _detect_landing() -> void:
 			# pe semnalul `landed` de mai sus.
 			# Aterizare de la inaltime: soferul sare din scaun, drept in sus si
 			# putin inainte (masina se opreste brusc pe verticala, el nu).
-			if -_prev_velocity.y >= eject_land_speed:
+			if -_prev_velocity.y >= eject_land_speed and not _eject_blocked_by_animal():
 				var fwd_v := Vector3(_prev_velocity.x, 0.0, _prev_velocity.z) * 0.5
 				_eject(fwd_v + Vector3.UP * minf(-_prev_velocity.y * 0.35, 12.0),
 					"aterizare", -_prev_velocity.y)
 	_was_on_floor = is_on_floor()
 
 # ------------------------------------------------------------------ ejectare
+
+## Timp ramas din fereastra „tocmai am lovit o turma" (`ANIMAL_EJECT_GRACE`).
+var _animal_grace: float = 0.0
+
+
+## Turma incetineste, nu arunca soferul (#614). Adevarat cat tine fereastra de
+## dupa o lovitura de animal (contact cu corpul lui, sau `impact` de tip
+## `animal` emis de hazard) — doar daca `ignore_animal_eject` e pornit.
+func _eject_blocked_by_animal() -> bool:
+	return ignore_animal_eject and _animal_grace > 0.0
+
+
+func _on_own_impact(_car: Car, kind: StringName, _strength: float, _normal: Vector3,
+		_point: Vector3, _other: Node) -> void:
+	if kind == &"animal":
+		_animal_grace = ANIMAL_EJECT_GRACE
+
 
 ## Soferul zboara din masina. `fling` = viteza initiala a figurinei (lume).
 ##

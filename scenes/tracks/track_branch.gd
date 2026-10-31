@@ -121,7 +121,10 @@ extends Path3D
 ##              iarba pe margini si pe brazda
 ##   GRAVEL     pietris batatorit: aceleasi margini zdrentuite, fara fagase
 ##              si fara iarba pe mijloc
-enum Surface { THEME, SAND, DIRT_ROAD, GRAVEL }
+##   DECK       banda asfaltata cu ax discontinuu si linii albe pe umeri (reteta
+##              Chongqing). Pe uscat se comporta ca SAND pentru teren (nu se
+##              sapa); alege-o cand banda trebuie CITITA ca drum (Ha Long, #594)
+enum Surface { THEME, SAND, DIRT_ROAD, GRAVEL, DECK }
 @export var surface: Surface = Surface.THEME
 
 ## Culoarea pamantului benzii. Alfa 0 = culoarea din tema (`branch_tint`).
@@ -160,6 +163,7 @@ func surface_name() -> String:
 		Surface.SAND: return "sand"
 		Surface.DIRT_ROAD: return "dirt_road"
 		Surface.GRAVEL: return "gravel"
+		Surface.DECK: return "deck"
 	return ""
 
 

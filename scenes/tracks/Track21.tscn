@@ -301,6 +301,20 @@ face_travel = true
 follow_ground = true
 motion = 1
 sweep_speed = 1.2
+ai_yields = true
+
+[node name="UrsDupaCascada" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -145.70, 8.21, -291.12)
+gizmo_extents = 3.0
+script = ExtResource("4_hzm")
+kind = 0
+model = ExtResource("m_bear")
+model_scale = 1.0
+face_travel = true
+follow_ground = true
+motion = 1
+sweep_speed = 1.2
+ai_yields = true
 
 [node name="SemaforTunel" type="Node3D" parent="Hazarduri" node_paths=PackedStringArray("lamp")]
 transform = Transform3D(0.98387, 0, 0.17889, 0, 1.0, 0, -0.17889, 0, 0.98387, 220.624, 42.185, -96.551)
@@ -359,6 +373,11 @@ spacing = 1.4
 zebra_ratio = 0.1
 no_body_radius = 9.0
 body_reach = 18.0
+forward_loss = 0.4
+kick_speed = 7.0
+mass_ratio_floor = 0.55
+feel_on_hit = true
+feel_scale = 1.3
 
 [node name="Tren" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(-0.80327, 0, 0.59562, 0, 1.0, 0, -0.59562, 0, -0.80327, -199.674, 5.033, -131.918)
@@ -781,6 +800,9 @@ metadata/camera_blocker = true
 
 [node name="Semn_urs" parent="DecorManual/ZonaRepere" instance=ExtResource("m_bear_sign")]
 transform = Transform3D(-0.966254, 0, 0.25759122, 0, 1, 0, -0.25759122, 0, -0.966254, 218.9876, 14.907672, 150.7509)
+
+[node name="Semn_urs_cascada" parent="DecorManual/ZonaRepere" instance=ExtResource("m_bear_sign")]
+transform = Transform3D(0.42, 0, -0.907, 0, 1, 0, 0.907, 0, 0.42, -118.83, 8.86, -326.18)
 
 [node name="Poenari" parent="DecorManual/ZonaRepere" instance=ExtResource("m_poenari")]
 transform = Transform3D(0.87777764, 0, 0.47906825, 0, 1, 0, -0.47906825, 0, 0.87777764, -125, -1.3326111, 215)

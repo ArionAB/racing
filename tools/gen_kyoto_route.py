@@ -951,6 +951,8 @@ zones = Array[ExtResource("mf_zone")]([{zones_txt}])
     import glob as _glob
     import os as _os
     decor_ext = ""
+    decor_sub = ""   # sub_resource-urile unui .part (cutia gardului G) merg dupa toate ext_resource
+    _in_sub = False
     decor_nodes = ""
     _parts = sorted(_glob.glob(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),
                                              "kyoto_decor", "poi_*.part")))
@@ -963,8 +965,13 @@ zones = Array[ExtResource("mf_zone")]([{zones_txt}])
             if _ln.strip() == ";;NODES":
                 _sec = "nodes"
                 continue
+            if _sec == "ext" and _ln.startswith("["):
+                _in_sub = _ln.startswith("[sub_resource")
             if _sec == "ext" and _ln.strip():
-                decor_ext += _ln + "\n"
+                if _in_sub:
+                    decor_sub += _ln + "\n"
+                else:
+                    decor_ext += _ln + "\n"
             elif _sec == "nodes":
                 decor_nodes += _ln + "\n"
     if _parts:
@@ -1006,6 +1013,8 @@ zones = Array[ExtResource("mf_zone")]([{zones_txt}])
 size = Vector3({sz[0]:.2f}, {sz[1]:.2f}, {sz[2]:.2f})
 """
     tscn += forest_sub   # GRUPA PADUREA IN MASA
+    if decor_sub:
+        tscn += "\n" + decor_sub
     tscn += f"""
 [sub_resource type="Curve3D" id="Curve3D_kyoto"]
 closed = true

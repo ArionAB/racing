@@ -202,6 +202,11 @@ func _handle_wall_hit(e: Dictionary) -> void:
 	var car := e["car"] as Car
 	if car == null or not car.is_player:
 		return
+	# Animalele (HerdHazard.hit_feedback) isi cant singure „tacul" lor: un macac
+	# nu e un perete, iar thud-ul de perete peste o lovitura de 4 m/s ar suna a
+	# accident.
+	if e["kind"] == &"animal":
+		return
 	last_plan = AudioManager.play_impact(&"wall", float(e["strength"]))
 	played_count += 1
 

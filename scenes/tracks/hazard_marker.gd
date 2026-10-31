@@ -75,6 +75,12 @@ enum Kind {
 ## intoarce panta fara ca nimeni sa fi cerut asta.
 @export_enum("Dreapta:1", "Stanga:-1") var deflector_side: int = 1
 
+## Pentru WAVE: incotro MERGE creasta, vazut din masina in sensul cursei.
+## `1` = spre dreapta (vine din stanga, ca pana la #609), `-1` = spre stanga
+## (vine din dreapta). Ignorat de restul. Sensul e al intregului val: miscarea,
+## spuma, stropii si imbrancitura se iau toate din `WaveSurge.travel_dir`.
+@export_enum("Spre dreapta:1", "Spre stanga:-1") var wave_travel: int = 1
+
 @export_group("Model")
 
 ## Ce OBIECT traverseaza soseaua aici. Gol = ce alege tema (vezi
@@ -119,6 +125,13 @@ enum Kind {
 ## Stins implicit: pe apa (jonca de pe Ha Long) „solul" e fundul marii.
 @export var follow_ground: bool = false
 
+## Pluteste pe APA: cota hazardului e oglinda marii (`sea_y` din Track), nu cea
+## a asfaltului. Pentru o barca care traverseaza un canal sub un pod/dig: coca
+## sta pe apa si taie soseaua jos, iar catargul si vela matura carosabilul —
+## in loc de o barca pe asfalt, la cota lui (Ha Long, #596). Capetele cursei
+## cad in apa, nu in aer. Doar pentru SLIDING.
+@export var on_water: bool = false
+
 ## Se rostogoleste in timp ce traverseaza (raza reala o ia din model).
 ##
 ## Doar bolovanii. Un car cu fan care se da peste cap traversand ulita e exact
@@ -144,6 +157,12 @@ enum Kind {
 ## SlidingHazard._readable_period), deci ciclul iese de la sine ~35-40 s pe un
 ## drum de 9 m. Doar pentru SLIDING.
 @export_range(0.0, 30.0, 0.1) var sweep_speed: float = 0.0
+
+## AI-ul cedeaza trecerea animalului care traverseaza (franeaza si asteapta cat e
+## pe asfalt). Doar TRAVERSARE. Ursul de pe Transfagarasan (#603): fara asta
+## plutonul il loveste la 40 m/s. Cheia ajunge in spec doar cand e bifata, deci
+## vacile si caii de pe celelalte piste raman neatinsi.
+@export var ai_yields: bool = false
 
 ## Perioada ciclului (s). 0 = implicitul clasei. Doar pentru AVALANCHE — pana
 ## la runda 2 (Fiordland) `_build_avalanche` nu citea NIMIC de la marker in
@@ -274,6 +293,8 @@ func model_spec() -> Dictionary:
 		spec["face_travel"] = face_travel
 		if follow_ground:
 			spec["follow_ground"] = true
+		if on_water:
+			spec["on_water"] = true
 		if not model_node.is_empty():
 			spec["model_node"] = model_node
 	if not tri_class.is_empty():
@@ -291,6 +312,8 @@ func model_spec() -> Dictionary:
 		spec["motion"] = motion
 	if sweep_speed > 0.0:
 		spec["sweep_speed"] = sweep_speed
+	if ai_yields:
+		spec["ai_yields"] = true
 	if avalanche_period > 0.0:
 		spec["avalanche_period"] = avalanche_period
 	if avalanche_from_left:

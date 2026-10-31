@@ -2707,6 +2707,10 @@ static func themes() -> Dictionary:
 			"horizon_rings": [],
 			"walls": false,
 			"deck_rails": true,
+			# Parapetul tablierului (WallDeck + parapetul scurtaturii): beton de
+			# noapte, nu CONCRETE crud — la lumina de luna 0.35 iesea ca o dunga
+			# gri deschis de-a lungul scurtaturii (#504).
+			"deck_color": Palette.color(Palette.CONCRETE).darkened(0.55),
 			"kerbs": false,
 			"cliffs": false,
 			# Fara decor procedural: orasul se aseaza de mana (DecorManual), nu
@@ -3962,6 +3966,12 @@ static func themes() -> Dictionary:
 		# stinge, deci solul ramane `ground_tint` CORAL_SAND pe toata pista.
 		"kerbs": false,
 		"wall_visible": false,
+		# Issue #608 (30 oct 2026, de la volan): „nu pot iesi de pe drum". Cauza,
+		# masurata cu `tools/ProbeEdgeCross.tscn`: soseaua sta la +1,6..2,0 m, deci
+		# regula „exterior SAU inaltat > 1 m" punea gardul invizibil pe AMBELE
+		# parti, pe tot turul — si pe uscat, unde nu era nicio apa de oprit.
+		# Acum ramane doar langa apa (dig, pod, mal), ca pe Ha Long.
+		"walls_water_only": true,
 		"inland_tint": null,
 		# Soare de dupa-amiaza tarzie din VSV, ~25 grade. Aceeasi cifra ca
 		# `custom_sun_rotation_deg` din Track20.tscn (conventia busolei din
@@ -4373,7 +4383,29 @@ static func themes() -> Dictionary:
 		"scarp_fade_deg": 10.0,
 		"dust_color": null, # null = derivat din ground_tint (umerii soselei, praful din roti)
 		"loose_grip": 7.0,
-		"horizon_model": "",
+		# FUNDALUL (kit carrara_kit.md §1.6, brief §5.4): crestele Apuanilor din
+		# `carrara_horizon.glb` (3 noduri, copii directi ai radacinii), PROVIZORIU pana la
+		# testul de anotimp (brief §6). Calcar crem-gri cu dare de moloz deschise si padure
+		# la baza, FARA calota (calota = Alpi). Clasa goala = atlasul modelului: sloturile
+		# pictate (29/19/21/13) raman; o clasa de roca le-ar sterge.
+		#
+		# Un inel per creasta, cu azimut FIX (conventia `_build_horizon`: cos pe X, sin pe Z
+		# fata de centroid; E = 0, S = +90, N = -90) si lungimea TANGENTA la cerc
+		# (`yaw_deg` = 90 - unghi), alese cu tools/ProbeCarraraHorizon.tscn ca fiecare din
+		# fractiile de contract (A 0.02, E 0.62, F 0.70, G 0.80, G 0.88) sa aiba o creasta
+		# in cadrul camerei de joc, neacoperita de teren. Cotele legate (memoria
+		# efecte-de-fundal-cote-legate): fog_end 300 < FAR_PLANE 380; `_build_horizon`
+		# stinge aruncarea de umbra (memoria caster-departat-fura-umbra).
+		"horizon_model": "res://assets/models/carrara/effects/carrara_horizon.glb",
+		"horizon_class": "",
+		"horizon_rings": [
+			{"near": 200.0, "far": 300.0, "count": 1, "scale": 0.9, "clear": 130.0,
+				"picks": ["ApuanRidge_C"], "angle_deg": -60.0, "yaw_deg": 0.0},
+			{"near": 230.0, "far": 330.0, "count": 1, "scale": 0.9, "clear": 140.0,
+				"picks": ["ApuanRidge_A"], "angle_deg": 128.0, "yaw_deg": 0.0},
+			{"near": 300.0, "far": 480.0, "count": 1, "scale": 0.85, "clear": 170.0,
+				"picks": ["ApuanRidge_B"], "angle_deg": 185.0, "yaw_deg": 90.0},
+		],
 		"walls": false,
 		"kerbs": false,
 		"cliffs": false,
@@ -5479,6 +5511,7 @@ func _collect_hazards(node: Node, out: Array[Dictionary]) -> void:
 				"kind": hz.kind,
 				"frac": frac_at(_closest_baked_index(p)),
 				"side": hz.deflector_side,
+				"wave_travel": hz.wave_travel,
 				# Infatisarea declarata pe nod, in acelasi vocabular ca o intrare
 				# din `_hazard_kinds()` — vezi HazardMarker.model_spec(). Gol cand
 				# nodul n-a cerut nimic, si atunci decide tema, ca pana acum.
@@ -10488,7 +10521,9 @@ func _branch_corridor_points() -> PackedVector3Array:
 func _branch_carve_points() -> PackedVector3Array:
 	var out := PackedVector3Array()
 	for i in range(1, routes.size()):
-		if routes[i].surface != "sand" and not routes[i].elevated:
+		# "deck" pe uscat (Ha Long, #594) pastreaza comportamentul lui "sand":
+		# se schimba doar ce se VEDE, nu terenul din jur.
+		if routes[i].surface != "sand" and routes[i].surface != "deck" 				and not routes[i].elevated:
 			out.append_array(routes[i].baked)
 	return out
 
@@ -10593,7 +10628,10 @@ func _build_branch_rails(r: TrackRoute) -> void:
 	if not emitted:
 		return
 	st.generate_normals()
-	_add_mesh_with_collision(st.commit(), Palette.color(Palette.CONCRETE),
+	# `_deck_color()`, nu CONCRETE direct: e acelasi parapet ca `WallDeck`, deci
+	# aceeasi culoare si acelasi material din cache (#504: pe Chongqing, noaptea,
+	# betonul crud iesea ca o dunga gri deschis peste tot tablierul).
+	_add_mesh_with_collision(st.commit(), _deck_color(),
 		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
 		null, null, true, null, "TunnelShell")
 
@@ -10688,6 +10726,18 @@ func _build_branch_deck(r: TrackRoute) -> void:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var u_half := hw / tile
+	# TRECEREA DE LA CAPETE (#504): tablierul e deliberat mai DESCHIS decat
+	# soseaua (vezi `branch_tint` din tema), dar primii metri — fara marcaje — cad
+	# PESTE asfaltul buclei, si din banda de rulare se vedea o placa gri taiata
+	# drept chiar inainte de urcare. Culoarea de vertex doar INTUNECA, deci
+	# capetele pornesc de la nuanta soselei (raport <= 1 fata de nuanta
+	# tablierului) si urca la alb pe DECK_BLEND_M metri.
+	var deck_base: Color = _branch_dirt_color(r)
+	var road_ratio := Color(
+		minf(asphalt_color().r / maxf(deck_base.r, 0.001), 1.0),
+		minf(asphalt_color().g / maxf(deck_base.g, 0.001), 1.0),
+		minf(asphalt_color().b / maxf(deck_base.b, 0.001), 1.0))
+	var total_len: float = r.dists[n - 1]
 	for i in n - 1:
 		var j := i + 1
 		var l0 := r.baked[i] - r.side_at(i) * hw
@@ -10696,17 +10746,19 @@ func _build_branch_deck(r: TrackRoute) -> void:
 		var r1 := r.baked[j] + r.side_at(j) * hw
 		var v0 := r.dists[i] / tile
 		var v1 := r.dists[j] / tile
-		st.set_uv(Vector2(-u_half, v0)); st.set_uv2(Vector2(-u_half, v0) * 0.078)
+		var c0 := _deck_end_blend(r.dists[i], total_len, road_ratio)
+		var c1 := _deck_end_blend(r.dists[j], total_len, road_ratio)
+		st.set_uv(Vector2(-u_half, v0)); st.set_uv2(Vector2(-u_half, v0) * 0.078); st.set_color(c0)
 		st.add_vertex(l0)
-		st.set_uv(Vector2(u_half, v0)); st.set_uv2(Vector2(u_half, v0) * 0.078)
+		st.set_uv(Vector2(u_half, v0)); st.set_uv2(Vector2(u_half, v0) * 0.078); st.set_color(c0)
 		st.add_vertex(r0)
-		st.set_uv(Vector2(-u_half, v1)); st.set_uv2(Vector2(-u_half, v1) * 0.078)
+		st.set_uv(Vector2(-u_half, v1)); st.set_uv2(Vector2(-u_half, v1) * 0.078); st.set_color(c1)
 		st.add_vertex(l1)
-		st.set_uv(Vector2(u_half, v0)); st.set_uv2(Vector2(u_half, v0) * 0.078)
+		st.set_uv(Vector2(u_half, v0)); st.set_uv2(Vector2(u_half, v0) * 0.078); st.set_color(c0)
 		st.add_vertex(r0)
-		st.set_uv(Vector2(u_half, v1)); st.set_uv2(Vector2(u_half, v1) * 0.078)
+		st.set_uv(Vector2(u_half, v1)); st.set_uv2(Vector2(u_half, v1) * 0.078); st.set_color(c1)
 		st.add_vertex(r1)
-		st.set_uv(Vector2(-u_half, v1)); st.set_uv2(Vector2(-u_half, v1) * 0.078)
+		st.set_uv(Vector2(-u_half, v1)); st.set_uv2(Vector2(-u_half, v1) * 0.078); st.set_color(c1)
 		st.add_vertex(l1)
 	st.index()
 	st.generate_normals()
@@ -10726,6 +10778,20 @@ func _build_branch_deck(r: TrackRoute) -> void:
 		_tex("res://assets/textures/surface_asphalt_macro.png"),
 		true, null, "BranchDeck")
 	_build_branch_markings(r)
+
+
+## Cat dureaza trecerea de la nuanta soselei la nuanta tablierului, la fiecare
+## capat al unei benzi `deck` (m). Ceva mai lunga decat gura fara marcaje (6 m).
+const DECK_BLEND_M: float = 16.0
+
+
+## Culoarea de vertex a tablierului la distanta `d` pe banda: nuanta soselei la
+## capete, alb (= nuanta tablierului) dupa DECK_BLEND_M.
+func _deck_end_blend(d: float, total: float, road_ratio: Color) -> Color:
+	var from_end := minf(d, total - d)
+	var t := smoothstep(0.0, DECK_BLEND_M, from_end)
+	return road_ratio.lerp(Color.WHITE, t)
+
 
 
 ## Latimea unei linii discontinue de ax pe banda (jumatate, in metri).
@@ -12863,6 +12929,7 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 		# Cota din sol, nu din linia asfaltului (vacile de pe coama Serengeti,
 		# #503). Doar la cerere — vezi SlidingHazard.follow_ground.
 		ball.follow_ground = bool(kind.get("follow_ground", false))
+		ball.ai_yields = bool(kind.get("ai_yields", false))
 		# Cu ce se uita obiectul spre directia in care matura. Fara steag ramane
 		# pe axele LUMII, ceea ce e o nepasare acceptabila la o barca targ ita
 		# (n-are un "inainte" al ei) si vizibil gresit la un animal: o testoasa
@@ -12897,9 +12964,14 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 			if door:
 				ball.rotation.y += PI * 0.5
 		add_child(ball)
-		ball.center = p
+		# Pe apa (HazardMarker.on_water, Ha Long #596): cota hazardului e oglinda
+		# marii, nu asfaltul — coca sta pe canal, vela matura soseaua.
+		var boat_p := p
+		if bool(kind.get("on_water", false)):
+			boat_p.y = _sampler.mean_road_y() + sea_level_offset
+		ball.center = boat_p
 		ball.travel = side * hw * 0.9
-		ball.global_position = p
+		ball.global_position = boat_p
 	elif ResourceLoader.exists("res://assets/models/vehicles/rusted_digger.glb"):
 		_build_excavator(frac)
 	else:
@@ -13383,7 +13455,7 @@ func _build_node_hazard(hz: Dictionary) -> void:
 			_build_avalanche(frac, spec)
 		HazardMarker.Kind.WAVE:
 			# Se sare singur, cu avertisment, daca tema n-are mare.
-			_build_wave_surge(frac)
+			_build_wave_surge(frac, signf(float(hz.get("wave_travel", 1))))
 		HazardMarker.Kind.ICE_SLAB:
 			_build_ice_field_at(frac)
 		HazardMarker.Kind.TRAIN_ALONG:
@@ -16386,7 +16458,7 @@ func _build_hose(frac: float) -> void:
 ## Valul care spala soseaua (#106). E acelasi hazard de apa ca furtunul — banda
 ## uda si taierea de grip vin amandoua din `WaterHazard` — doar ca sursa se misca
 ## si uda doar cat trece.
-func _build_wave_surge(frac: float) -> void:
+func _build_wave_surge(frac: float, travel_sign: float = 1.0) -> void:
 	var n := baked.size()
 	if n == 0:
 		return
@@ -16408,7 +16480,12 @@ func _build_wave_surge(frac: float) -> void:
 	# Directia de mers: perpendicular pe sosea, dinspre larg spre uscat. Nu se
 	# alege la zar — pe un dig marea vine de pe o parte anume, iar un val care
 	# porneste din interiorul insulei ar fi absurd.
-	wave.travel_dir = _side_at(idx)
+	#
+	# `travel_sign` (-1 = spre stanga, vezi HazardMarker.wave_travel): decizia
+	# dezvoltatorului, #609. `_side_at` e DREAPTA drumului, deci +1 = creasta
+	# merge spre dreapta. Tot restul valului (spuma, stropi, imbrancitura) se
+	# ia din `travel_dir`, deci un singur semn le intoarce pe toate.
+	wave.travel_dir = _side_at(idx) * (-1.0 if travel_sign < 0.0 else 1.0)
 	wave.sweep = width_at(frac) * 3.2
 	wave.road_width = width_at(frac) * 2.0
 	# Creasta cat DOUA latimi de drum. Nu e o cifra de gust: la o latime de drum

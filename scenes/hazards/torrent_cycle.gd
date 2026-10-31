@@ -190,6 +190,15 @@ const AI_GROUP: StringName = &"torrents"
 @export_range(0.0, 6.0, 0.5) var douse_seconds: float = 4.0
 @export var impact_sfx: StringName = &"splash"
 
+@export_group("Efect in CALM/TELEGRAPH (issue #493)")
+## Efect mic, simtit, in afara pulsului (SURGE ramane neatins). Vezi
+## `WaterfallHazard.calm_*`. Franare 1/s (masurat cu gaz plin: ~14% la 25 m/s pe 20 m).
+@export_range(0.0, 1.0, 0.01) var calm_drag: float = 0.35
+## Impingere laterala la intrare (m/s) pe `push_dir`.
+@export_range(0.0, 6.0, 0.1) var calm_push_speed: float = 2.5
+@export_range(0.0, 1.0, 0.05) var calm_splash_trauma: float = 0.25
+@export_range(0.0, 6.0, 0.5) var calm_douse_seconds: float = 1.5
+
 @export_group("Vizual")
 ## Intensitatea vizuala (`WaterfallVisual.set_intensity`, prin
 ## `WaterfallHazard.modulate.a`) in CALM — fir subtire, teatru, brief: „fir
@@ -309,6 +318,10 @@ func _build_hazard(eff_thickness: float) -> void:
 	_hazard.splash_trauma = splash_trauma
 	_hazard.douse_seconds = douse_seconds
 	_hazard.impact_sfx = impact_sfx
+	_hazard.calm_drag = calm_drag
+	_hazard.calm_push_speed = calm_push_speed
+	_hazard.calm_splash_trauma = calm_splash_trauma
+	_hazard.calm_douse_seconds = calm_douse_seconds
 	add_child(_hazard)
 	# Perdeaua NU e in "rain_falls" (RainCycle ar stinge-o pe uscat — vezi
 	# antetul WaterfallHazard §"Fade-ul de ploaie") — torentul e vizibil in

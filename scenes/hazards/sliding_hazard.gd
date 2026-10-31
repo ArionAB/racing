@@ -87,6 +87,11 @@ const DOOR_ROLL_SPEED: float = 1.8
 ## RotatingSpanHazard.AI_GROUP): pilotul intreaba `door_blocks_in()` si alege
 ## ocolul cand poarta va fi inchisa la sosire.
 const DOOR_GROUP: StringName = &"door_hazards"
+## Grupul din care AI-ul citeste traversarile cu sens care CER cedare de trecere
+## (`ai_yields`): ursul de pe Transfagarasan (#603). Fara el, plutonul intra in
+## animal la 40 m/s (masurat: 3 ejectari din 3 curse la ursul de la 0.199) — un
+## AI care nu vede ce vede jucatorul nu e „AI onest".
+const CROSSING_GROUP: StringName = &"crossing_hazards"
 ## Banda lasata libera langa perete. 0 = fara limitare (cursa exact cat cere
 ## pista). Exista pentru piste inguste, unde maturarea pana in perete ar lasa
 ## banda plina fara iesire.
@@ -202,10 +207,18 @@ var model_classes: Dictionary = {}
 ## pozitional, la masina lovita. Gol = hazard mut (o pista poate sa-l stinga).
 var contact_sfx: StringName = &"hazard_barrier_hit"
 
+## Doar TRAVERSARE: AI-ul franeaza si asteapta cat animalul e pe asfalt (sau va fi
+## la sosire). Stins implicit: vacile si caii de pe celelalte piste raman ca pana
+## acum (bit-identic).
+var ai_yields: bool = false
+
 var _time: float = 0.0
 var _pivot: Node3D
 ## AnimationPlayer-ul modelului, daca GLB-ul are schelet. Vezi ANIM_* sus.
 var _anim: AnimationPlayer
+## Pasul legat de distanta (elefantul: picioarele nu patineaza, #613). Null la
+## modelele fara oasele de picior numite (vaca, camila: pasul vine din clip).
+var _stride: StrideDriver
 var _anim_rest: StringName = &""
 var _stand_started: bool = false
 var _walk_cycle_speed: float = WALK_CYCLE_SPEED
@@ -244,6 +257,8 @@ func _configure() -> void:
 		period = _readable_period()
 	if motion == Motion.USA and not is_in_group(DOOR_GROUP):
 		add_to_group(DOOR_GROUP)
+	if motion == Motion.TRAVERSARE and ai_yields and not is_in_group(CROSSING_GROUP):
+		add_to_group(CROSSING_GROUP)
 	# Pozitia de start a defazajului, nu centrul: altfel primul cadru "vede" o
 	# deplasare de toata amplitudinea si roteste mingea brusc.
 	_last_pos = _pos_at(_offset_now())
@@ -454,6 +469,12 @@ func _hook_animation(model: Node3D) -> void:
 	for anim_name: StringName in [ANIM_WALK, ANIM_RUN, _anim_rest]:
 		if anim_name != &"" and _anim.has_animation(anim_name):
 			_anim.get_animation(anim_name).loop_mode = Animation.LOOP_LINEAR
+	var driver := StrideDriver.new()
+	if driver.attach(model, _anim.get_animation(ANIM_WALK)):
+		_stride = driver
+		add_child(driver)
+	else:
+		driver.free()
 
 ## Pasul urmeaza nodul: ce animatie si in ce ritm, din viteza reala (m/s).
 func _animate(speed: float) -> void:
@@ -541,6 +562,8 @@ func _physics_process(delta: float) -> void:
 			_pivot.global_rotate(axis, -flat.length() / roll_radius)
 	if _anim != null and delta > 0.0:
 		_animate(moved.length() / delta)
+	if _stride != null:
+		_stride.advance(moved.length(), delta)
 	# `next_pos`, NU `global_position`: cu sync_to_physics getterul intoarce
 	# transformul de acum UN PAS (scrierea de mai sus ajunge in nod abia la
 	# sincronizarea fizicii), deci `moved` de la pasul urmator ar fi acoperit
@@ -733,6 +756,19 @@ func door_blocks_in(seconds: float) -> bool:
 	var edge := _door_offset(_time + seconds) * amp + _half_extent
 	var hw := road_half_width if road_half_width > 0.0 else amp * 0.5
 	return edge > -hw
+
+## Peste `seconds` secunde, animalul care traverseaza va fi (macar cu o parte din
+## corp) PE asfalt? Pentru AI, ca `door_blocks_in`: pilotul isi estimeaza sosirea
+## din ce vede si un om (animalul se misca vizibil, cu telegraf) si franeaza daca
+## raspunsul e da. Parcat pe acostament = nu blocheaza. Doar TRAVERSARE.
+func crossing_blocks_in(seconds: float) -> bool:
+	if motion != Motion.TRAVERSARE:
+		return false
+	if not _configured:
+		_configure()
+	var amp := travel.length()
+	var hw := road_half_width if road_half_width > 0.0 else amp * 0.5
+	return absf(_offset_at(_time + seconds)) * amp - _half_extent < hw + 0.5
 
 ## Usa e pe banda ACUM (pentru sonde si pentru snapshot).
 func door_closed_now() -> bool:

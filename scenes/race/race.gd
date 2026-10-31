@@ -83,6 +83,7 @@ signal lap_completed(laps: int, lap_ms: int)
 signal race_finished(position: int, race_ms: int)
 var _race_record_new: bool = false
 var _best_lap_ms: int = -1
+var _positions_frozen: bool = false
 var _final_order: Array = [] # sloturi in ordinea sosirii
 var _champion_shown: bool = false
 ## Cat sta fiecare masina impotmolita in afara soselei (secunde).
@@ -340,6 +341,7 @@ func _spawn_cars() -> void:
 			"frac": frac,
 			"total": frac - 1.0 if frac > 0.5 else frac,
 			"laps": 0,
+			"finish_t": -1.0,
 		})
 
 ## Tuk-tuk-urile (Jodhpur, brief §3): `Track.traffic_count` corpuri `Car`
@@ -484,10 +486,18 @@ func _tick_race(delta: float) -> void:
 		var laps := int(floor(float(st.total)))
 		if laps > int(st.laps):
 			st.laps = laps
-			if car == player:
-				_on_player_lap(laps)
+			# Sosirea INAINTE de `_on_player_lap`: acela cheama `_finish_race`,
+			# care are nevoie de `finish_t` al jucatorului deja pus.
 			if laps >= GameState.total_laps and not car.finished:
 				car.finished = true
+				# Momentul trecerii liniei, interpolat in interiorul tick-ului
+				# (total a trecut de `laps` cu o fractie din `d`). Ordinea de
+				# sosire se cheama dupa el, nu dupa `total` (#611).
+				var over := clampf((float(st.total) - float(GameState.total_laps))
+					/ absf(d), 0.0, 1.0) if d > 0.0 else 0.0
+				st.finish_t = _race_clock - delta * over
+			if car == player:
+				_on_player_lap(laps)
 	_update_positions()
 
 ## Ceasul de offroad al jucatorului (#497): iesit de pe carosabil, ai atatea
@@ -798,6 +808,7 @@ func _finish_race() -> void:
 	_race_record_new = not Career.is_time_trial() \
 		and GameState.try_race_record(GameState.selected_track, _player_race_ms)
 	_update_positions()
+	_positions_frozen = true # locul jucatorului nu se mai misca dupa sosire
 	# Ordinea finala = pozitiile din clipa sosirii jucatorului (AI-ul din
 	# spate isi pastreaza locul relativ; cursa e a jucatorului).
 	var order := range(cars.size())
@@ -965,9 +976,22 @@ func _show_champion() -> void:
 
 # -------------------------------------------------------------------- HUD
 
+## Clasamentul: cine a trecut linia la ultimul tur sta in fata, in ordinea
+## trecerii; dupa ei, cei care inca aleaga, dupa progres. `total` singur nu
+## ajunge: `_tick_race` il ingheata la sosire (depasirea de cateva cm din
+## ultimul tick), deci intre doi sositi ordinea ar fi fost intamplatoare —
+## jucatorul pe locul 3 aparea pe 1 (#611).
 func _update_positions() -> void:
+	if _positions_frozen:
+		return
 	var order := range(cars.size())
 	order.sort_custom(func(a: int, b: int) -> bool:
+		var fa := float(_progress[a].finish_t)
+		var fb := float(_progress[b].finish_t)
+		if fa >= 0.0 and fb >= 0.0:
+			return fa < fb
+		if fa >= 0.0 or fb >= 0.0:
+			return fa >= 0.0
 		return float(_progress[a].total) > float(_progress[b].total))
 	for rank in cars.size():
 		cars[order[rank]].race_position = rank + 1

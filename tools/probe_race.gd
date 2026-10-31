@@ -234,6 +234,8 @@ var _train_cam: bool = false
 var _train_meter: Node = null
 ## `--no-tub`: scoate `ShishiOdoshiHazard` din scena (A/B-ul tubului, Kyoto).
 var _no_tub: bool = false
+## `--no-calm`: zero pe `TorrentCycle.calm_*` (A/B-ul efectului din CALM, #493).
+var _no_calm: bool = false
 ## `--no-haboob`: scoate `HaboobHazard` din scena INAINTE de prima fizica (A/B-ul
 ## zidului de praf, Monument Valley). `--haboob-at=<t>`: ceasul lui INGHETAT la t
 ## secunde din ciclu (>= 0); fara el ruleaza de la `start_clock` (liniste la start,
@@ -434,6 +436,8 @@ func _ready() -> void:
 			_traffic = int(arg.trim_prefix("--traffic="))
 		elif arg.begins_with("--dusk="):
 			_force_dusk = float(arg.trim_prefix("--dusk="))
+		elif arg == "--no-calm":
+			_no_calm = true
 		elif arg == "--no-tub":
 			_no_tub = true
 		elif arg == "--no-rim":
@@ -575,7 +579,7 @@ func _start_race() -> void:
 			"speed_sum": 0.0, "samples": 0,
 			"stuck_t": 0.0, "stuck_reports": 0,
 			"branch_laps": 0, "branch_s": 0.0, "last_route": 0,
-			"lap_t": [], "last_total": 0.0,
+			"lap_t": [], "last_total": 0.0, "last_laps": 0,
 			"jump_armed": false, "jump_ok": 0, "jump_fail": 0, "tub_hits": 0, "daruma_hits": 0, "gion_hits": 0,
 			"jump_v": [], "jump_v_taken": false,
 		})
@@ -676,6 +680,15 @@ func _setup_kyoto() -> void:
 		if tt != null:
 			tt.get_parent().remove_child(tt)
 			tt.free()
+	if _no_calm:
+		for n in get_tree().get_nodes_in_group(TorrentCycle.AI_GROUP):
+			var tc := n as TorrentCycle
+			if tc != null:
+				tc.calm_drag = 0.0
+				tc.calm_push_speed = 0.0
+				tc.calm_splash_trauma = 0.0
+				tc.calm_douse_seconds = 0.0
+				print("--no-calm: calm_* pe zero (torent)")
 	for n in get_tree().get_nodes_in_group(ShishiOdoshiHazard.AI_GROUP):
 		var hz := n as ShishiOdoshiHazard
 		if hz == null:
@@ -761,10 +774,15 @@ func _watch_laps_and_jump(car: Car, st: Dictionary, idx: int) -> void:
 		return
 	if _run_t0 < 0.0:
 		_run_t0 = _elapsed
+	# Turul numarat de CURSA (`_progress.laps`, monoton), nu "floor(total) a
+	# crescut": `total` scade la o repunere in spatele liniei, iar trecerea
+	# urmatoare ar fi aparut aici ca tur nou de 0.85 s, desi cursa nu-l
+	# numara (#580; vezi ProbeFinishOrder).
 	var total := float(_race._progress[idx].total)
-	var last := float(st.last_total)
-	if int(floor(total)) > int(floor(last)) and total > 0.0:
+	var laps_now := int(_race._progress[idx].laps)
+	if laps_now > int(st.last_laps):
 		(st.lap_t as Array).append(_elapsed - _run_t0)
+	st.last_laps = laps_now
 	st.last_total = total
 	if _jump_near < 0.0:
 		return

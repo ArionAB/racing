@@ -109,6 +109,10 @@ run_step "Garda de draw call-uri (materiale per pista)" probe_decor.log 'VERDICT
 	--headless --path . --script res://tools/probe_decor.gd
 run_step "Anti-blocaj in peretii de canion" cliff.log 'VERDICT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeRace.tscn -- --mode=cliff --track=0
+run_step "Taieturi (cut_wall) cu corp solid: Cappadocia" cut_wall_13.log 'VERDICT' -- --headless --fixed-fps 60 --path . res://tools/ProbeCutWall.tscn -- --track=13
+run_step "Taieturi (cut_wall) cu corp solid: Serengeti" cut_wall_14.log 'VERDICT' -- --headless --fixed-fps 60 --path . res://tools/ProbeCutWall.tscn -- --track=14
+run_step "Taieturi (cut_wall) cu corp solid: Machu Picchu" cut_wall_15.log 'VERDICT' -- --headless --fixed-fps 60 --path . res://tools/ProbeCutWall.tscn -- --track=15
+run_step "Taieturi (cut_wall) cu corp solid: Fiordland" cut_wall_16.log 'VERDICT' -- --headless --fixed-fps 60 --path . res://tools/ProbeCutWall.tscn -- --track=16
 run_step "Coliziunea stancilor urmareste silueta" rockfit.log 'VERDICT:' -- \
 	--headless --fixed-fps 60 --path . --script res://tools/probe_rock_fit.gd -- --no-batch
 run_step "Decorul nu intra peste asfalt" overlap.log 'VERDICT:' -- \
@@ -147,6 +151,7 @@ run_step "Tufe: frunze si franare usoara" soft_veg.log 'VERDICT:' -- --headless 
 run_step "Jucaria: antena cu arc, cheia de intors si zdranganeala pe teren aspru, fara intrari in caroserie" toy_animation.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeToyAnimation.tscn
 run_step "Camera la izbituri: kick, hit-stop, atacator" impact_camera.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeImpactCamera.tscn
 run_step "Race: ImpactFeel cablat (kick, hit-stop, final)" impact_wiring.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeImpactWiring.tscn
+run_step "Tururi si ordine de sosire: repunere langa linie, locul final real" finish_order.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeFinishOrder.tscn
 run_step "Popup de pozitie: debounce, numaratoare, final" position_popup.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbePositionPopup.tscn
 run_step "AI care reactioneaza: clatinare, ranchiuna, cinstit" ai_react.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeAiReact.tscn
 run_step "Vibratie: marime, ritm, setare, cablaj" haptics.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeHaptics.tscn
@@ -204,6 +209,14 @@ run_step "Serengeti: niciun decor ingropat sub teren" decor_buried.log 'VERDICT:
 # jucatorului (cu contra-probe pe alte masini), datele sabotate dau cate o
 # problema, foaia pistei se activeaza, pistele reale au sursa semnalului.
 run_step "Provocari: tracker-ul numara doar ce trebuie" challenge.log 'VERDICT:' -- 	--headless --path . res://tools/ProbeChallenge.tscn
+# Torentul Fiordland (#493): fizica doar in puls + efect mic in CALM (sabotaj: --calm-zero pica).
+run_step "Torent Fiordland: CALM simtit, SURGE mai dur" torrent_b.log 'REZULTAT FINAL' -- --headless --fixed-fps 60 --path . res://tools/ProbeFiordTorent.tscn -- --only=b
+
+# Transfagarasan: oile se simt (timp pierdut fata de control, semnal `impact`, nu zid)
+# si exista un urs dupa saritura peste parau, care nu arunca masina in aer (#603/#604).
+run_step "Transfagarasan: oi si urs (hazarde animale)" tf_hazards.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeTfHazards.tscn
+# Conurile din tunel (road_works) se imprastie, nu sunt zid (#602).
+run_step "Transfagarasan: conurile din tunel se imprastie" tf_cones.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeBumpProps.tscn -- --track=21
 
 echo
 if [ ${#FAILED[@]} -eq 0 ]; then

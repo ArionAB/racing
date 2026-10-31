@@ -514,6 +514,34 @@ var _grid_span: float = 4.0
 ## pastreaza comportamentul dinainte (fata continua).
 @export var cut_tread_m: float = 0.0
 
+## ############################################################################
+## VOLUMUL TAIETURII: grosime si coliziune (#599, #612, #615).
+## ############################################################################
+##
+## Pana aici taietura era O SINGURA PANZA, fara corp. Trei lucruri care s-au
+## vazut de la volan pe trei piste (Machu Picchu, Serengeti, Cappadocia — pe
+## toate `cut_wall`, deci acelasi cod):
+##   1. masina TRECEA prin ea: panza nu avea coliziune, iar in spatele ei
+##      terenul e un camp de inaltime fara corp (fizica de sol e o cutie plata);
+##   2. de oriunde in afara drumului (bratul opus al serpentinei, balonul care
+##      trece pe langa) se vedea o foaie de grosime zero, gri, fara fata de sus
+##      si fara spate — „peretele subtire";
+##   3. capetele ei, stinse in teren, ramaneau deschise: vedeai prin ele.
+## Panza pintenului (`far_wall`) avea deja trimesh din 4 sep 2026; taietura
+## fusese uitata fiindca „faleza n-are nevoie de coliziune" (comentariul de la
+## `_build`, scris pentru buza, unde peste muchie se cade in gol).
+##
+## Acum taietura e un PRISMA INCHISA: fata (cea de dinainte, neatinsa), o
+## coama care se retrage `cut_thick_m` spre interiorul masivului, spatele si
+## capacele de capat. Aceleasi sloturi de paleta si acelasi material ca fata:
+## zero materiale in plus. Corpul fizic e exact aceasta prisma (trimesh, cu
+## `backface_collision`, ca sa nu se poata trece nici dintr-o parte, nici din
+## cealalta), FARA poala de moloz — molozul ramane decor, ca roata sa nu
+## urce pe el.
+##
+## Zero pastreaza comportamentul dinainte (panza goala, fara corp).
+@export var cut_thick_m: float = 5.0
+
 
 ## Retragerea laterala si saltul de coama ale blocului din care face parte
 ## coloana `si`. Determinist: acelasi bloc da acelasi rezultat la fiecare
@@ -715,9 +743,11 @@ func _build_cut(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 	var span := (frac_end - frac_start) * total
 	var steps := maxi(int(round(span / maxf(cut_step_m, 0.5))), 2)
 	var cols: Array = []
+	var dirs: Array[Vector3] = []
 	for si in steps + 1:
 		var f := frac_start + (frac_end - frac_start) * (float(si) / float(steps))
 		cols.append(_cut_column(sampler, f, surface_y, si))
+		dirs.append(_cut_dir(sampler, f))
 	var built := 0
 	for si in steps:
 		var a: Array = cols[si]
@@ -744,16 +774,103 @@ func _build_cut(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 			_quad(st, b[r], a[r], a[r + 1], b[r + 1], uvv, c0, c0, c1, c1, true)
 	if built == 0:
 		return null
+	var solid_tris := PackedVector3Array()
+	if cut_thick_m > 0.0:
+		solid_tris = _cut_solid(st, cols, dirs)
 	st.generate_normals()
 	var mi := MeshInstance3D.new()
 	mi.name = "Taietura " + name
 	mi.mesh = st.commit()
 	mi.material_override = _face_material()
+	if not solid_tris.is_empty():
+		var body := StaticBody3D.new()
+		body.name = "TaieturaCorp"
+		var shape := ConcavePolygonShape3D.new()
+		shape.set_faces(solid_tris)
+		# Prisma e inchisa, dar o roata care intra dintr-un pas mare nu trebuie
+		# sa iasa pe partea cealalta: coliziunea se face si pe fetele din spate.
+		shape.backface_collision = true
+		var cs := CollisionShape3D.new()
+		cs.shape = shape
+		body.add_child(cs)
+		mi.add_child(body)
 	# Peretele sta LANGA banda si la est de ea pe portiunea cornisei: la soare de
 	# zori umbra lui cade chiar pe carosabil, si e cel mai ieftin semn ca drumul
 	# e sapat in ceva solid.
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	return mi
+
+
+## Directia ORIZONTALA dinspre banda spre interiorul masivului, la fractia `f`
+## (aceeasi formula ca in `_cut_column`: latura opusa golului).
+func _cut_dir(sampler: TrackSideSampler, f: float) -> Vector3:
+	var n := sampler.point_count()
+	var i := clampi(int(round(f * float(n))) % n, 0, n - 1)
+	return sampler.side_at(i) * -signf(side)
+
+
+## Cate puncte dintr-o coloana sunt PERETE (restul sunt poala de moloz).
+func _cut_wall_rows(col: Array) -> int:
+	if talus_m > 0.0 and talus_rows >= 1:
+		return maxi(col.size() - talus_rows, 0)
+	return col.size()
+
+
+## Prisma taieturii: coama, spatele si capacele de capat, adaugate in `st`
+## (vizual), si TOATE fetele solidului (inclusiv fata) intoarse ca lista de
+## triunghiuri pentru corpul fizic. Fata in sine e deja in `st`.
+func _cut_solid(st: SurfaceTool, cols: Array, dirs: Array[Vector3]) -> PackedVector3Array:
+	var tris := PackedVector3Array()
+	var uv_top := Palette.uv(cut_slots[0])
+	var c_top := _shade(0.0) * cut_shade
+	var c_back := _shade(0.6) * cut_shade
+	for si in cols.size():
+		var a: Array = cols[si]
+		var na := _cut_wall_rows(a)
+		if na < 2:
+			continue
+		var da: Vector3 = dirs[si] * cut_thick_m
+		# Capac de capat: la prima/ultima coloana a unei portiuni continue.
+		var starts := si == 0 or (cols[si - 1] as Array).is_empty()
+		var ends := si == cols.size() - 1 or (cols[si + 1] as Array).is_empty()
+		if starts or ends:
+			for r in na - 1:
+				var f0: Vector3 = a[r]
+				var f1: Vector3 = a[r + 1]
+				_solid_quad(st, tris, f0, f1, f1 + da, f0 + da,
+						Palette.uv(_cut_row_slot(a, r)), c_back, false)
+		if si == cols.size() - 1:
+			continue
+		var b: Array = cols[si + 1]
+		var nb := _cut_wall_rows(b)
+		if b.is_empty() or nb < 2:
+			continue
+		var db: Vector3 = dirs[si + 1] * cut_thick_m
+		# Coama: de la muchia fetei spre spate, pe cota coamei fiecarei coloane.
+		_solid_quad(st, tris, a[0], b[0], (b[0] as Vector3) + db, (a[0] as Vector3) + da,
+				uv_top, c_top, true)
+		# Spatele: aceeasi grila ca fata, impinsa in masiv, cu normala spre interior.
+		var rows := mini(na, nb)
+		for r in rows - 1:
+			_solid_quad(st, tris, (a[r] as Vector3) + da, (b[r] as Vector3) + db,
+					(b[r + 1] as Vector3) + db, (a[r + 1] as Vector3) + da,
+					Palette.uv(_cut_row_slot(a, r)), c_back, false)
+		# Fata pentru fizica (identica cu cea vizuala).
+		for r in rows - 1:
+			_tri_quad(tris, b[r], a[r], a[r + 1], b[r + 1])
+	return tris
+
+
+## Un quad vizual (doua fete) + aceleasi triunghiuri in lista fizica.
+func _solid_quad(st: SurfaceTool, tris: PackedVector3Array, a: Vector3, b: Vector3,
+		c: Vector3, d: Vector3, uvv: Vector2, col: Color, _top: bool) -> void:
+	st.set_smooth_group(0xFFFFFFFF)
+	_quad(st, a, b, c, d, uvv, col, col, col, col, true)
+	_tri_quad(tris, a, b, c, d)
+
+
+func _tri_quad(tris: PackedVector3Array, a: Vector3, b: Vector3, c: Vector3, d: Vector3) -> void:
+	tris.append_array(PackedVector3Array([a, c, b, a, d, c]))
 
 
 ## O coloana din taietura: de la coama in jos pana in talpa, infipta in umar.

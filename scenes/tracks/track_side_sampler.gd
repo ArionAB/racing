@@ -1209,6 +1209,62 @@ const BRANCH_BLEND_LEN: float = 16.0
 const BRANCH_LIFT_CLEAR: float = 12.0
 
 
+## Cota benzii in loc de cota celui mai apropiat punct COPT (opt-in, pe pista:
+## `Track.branch_smooth_level`).
+##
+## `_lift_branches`/`_carve_branches` luau `y` al celui mai apropiat punct din
+## lista (la fiecare GROUND_STRIDE-ul al treilea punct, adica ~4 m). Pe o banda
+## in panta aia e o SCARA: terenul de langa banda sta pe trepte de
+## `panta * 4 m`, iar peste planul real al benzii iese cand 0,4-0,9 m sub el,
+## cand 0,5 m deasupra. Pe scurtatura Stromboli (17%) asta era un prag de pana
+## la 0,9 m la marginea drumului: de pe teren nu mai puteai urca inapoi pe
+## banda (#616). Cu flagul pornit, cota se interpoleaza liniar pe segmentul cel
+## mai apropiat, deci terenul urmareste panta benzii. Oprit = bit-identic.
+var smooth_branch_level: bool = false
+
+
+## Cel mai apropiat punct al listei `pts` (strans la GROUND_STRIDE) fata de
+## (wx, wz): (distanta^2, cota). Cu `smooth_branch_level`, punctul se proiecteaza
+## pe segmentele vecine si cota se interpoleaza.
+func _nearest_level(pts: PackedVector3Array, wx: float, wz: float) -> Vector2:
+	var m := pts.size()
+	var near_sq := INF
+	var level := 0.0
+	var best_k := 0
+	var k := 0
+	while k < m:
+		var q := pts[k]
+		var dx := q.x - wx
+		var dz := q.z - wz
+		var d_sq := dx * dx + dz * dz
+		if d_sq < near_sq:
+			near_sq = d_sq
+			level = q.y
+			best_k = k
+		k += GROUND_STRIDE
+	if not smooth_branch_level or near_sq == INF:
+		return Vector2(near_sq, level)
+	for nb in [best_k - GROUND_STRIDE, best_k + GROUND_STRIDE]:
+		if nb < 0 or nb >= m:
+			continue
+		var a := pts[best_k]
+		var b := pts[nb]
+		var sx := b.x - a.x
+		var sz := b.z - a.z
+		var seg_sq := sx * sx + sz * sz
+		# Segmentul dintre doua benzi diferite (lista e concatenata) nu exista.
+		if seg_sq < 0.0001 or seg_sq > 36.0:
+			continue
+		var t := clampf(((wx - a.x) * sx + (wz - a.z) * sz) / seg_sq, 0.0, 1.0)
+		var px := a.x + sx * t - wx
+		var pz := a.z + sz * t - wz
+		var d2 := px * px + pz * pz
+		if d2 < near_sq:
+			near_sq = d2
+			level = lerpf(a.y, b.y, t)
+	return Vector2(near_sq, level)
+
+
 ## Ridica terenul la cota benzilor secundare, dar doar chiar langa ele.
 func _lift_branches(y: float, wx: float, wz: float,
 		road_level: float, road_dist: float, near_i: int) -> float:
@@ -1217,18 +1273,9 @@ func _lift_branches(y: float, wx: float, wz: float,
 		return y
 	var reach := BRANCH_FLAT_RADIUS + BRANCH_BLEND_LEN
 	var reach_sq := reach * reach
-	var near_sq := INF
-	var level := 0.0
-	var k := 0
-	while k < m:
-		var q := _extra[k]
-		var dx := q.x - wx
-		var dz := q.z - wz
-		var d_sq := dx * dx + dz * dz
-		if d_sq < near_sq:
-			near_sq = d_sq
-			level = q.y
-		k += GROUND_STRIDE
+	var nl := _nearest_level(_extra, wx, wz)
+	var near_sq := nl.x
+	var level := nl.y
 	if near_sq > reach_sq:
 		return y
 	var d := sqrt(near_sq)
@@ -1273,18 +1320,9 @@ func _carve_branches(y: float, wx: float, wz: float, road_dist: float,
 		return y
 	var reach := BRANCH_FLAT_RADIUS + BRANCH_BLEND_LEN
 	var reach_sq := reach * reach
-	var near_sq := INF
-	var level := 0.0
-	var k := 0
-	while k < m:
-		var q := _carve[k]
-		var dx := q.x - wx
-		var dz := q.z - wz
-		var d_sq := dx * dx + dz * dz
-		if d_sq < near_sq:
-			near_sq = d_sq
-			level = q.y
-		k += GROUND_STRIDE
+	var nl := _nearest_level(_carve, wx, wz)
+	var near_sq := nl.x
+	var level := nl.y
 	# Terenul sta putin SUB banda (BRANCH_DROP), ca sub sosea (GROUND_DROP):
 	# grila de teren e la ~8 m si intre noduri planul ei se abate de la curba
 	# benzii — fara marja, colturi de pajiste rasareau prin drum (vazut pe
@@ -1510,19 +1548,9 @@ func _branch_floor_at(wx: float, wz: float) -> Vector2:
 	if _carve.is_empty():
 		return Vector2(-INF, 1.0)
 	var reach := BRANCH_FLAT_RADIUS + BRANCH_BLEND_LEN
-	var near_sq := INF
-	var level := 0.0
-	var k := 0
-	var m := _carve.size()
-	while k < m:
-		var q := _carve[k]
-		var dx := q.x - wx
-		var dz := q.z - wz
-		var d_sq := dx * dx + dz * dz
-		if d_sq < near_sq:
-			near_sq = d_sq
-			level = q.y
-		k += GROUND_STRIDE
+	var nl := _nearest_level(_carve, wx, wz)
+	var near_sq := nl.x
+	var level := nl.y
 	if near_sq > reach * reach:
 		return Vector2(-INF, 1.0)
 	var t := smoothstep(0.0, 1.0,
@@ -1570,19 +1598,9 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 	if not _carve.is_empty():
 		var reach := BRANCH_FLAT_RADIUS + BRANCH_BLEND_LEN
 		var reach_sq := reach * reach
-		var near_sq := INF
-		var level := 0.0
-		var k := 0
-		var m := _carve.size()
-		while k < m:
-			var q := _carve[k]
-			var dx := q.x - wx
-			var dz := q.z - wz
-			var d_sq := dx * dx + dz * dz
-			if d_sq < near_sq:
-				near_sq = d_sq
-				level = q.y
-			k += GROUND_STRIDE
+		var nl := _nearest_level(_carve, wx, wz)
+		var near_sq := nl.x
+		var level := nl.y
 		if near_sq <= reach_sq:
 			var d := sqrt(near_sq)
 			var t := smoothstep(0.0, 1.0,

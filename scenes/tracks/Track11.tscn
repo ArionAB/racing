@@ -60,7 +60,7 @@ _data = {
 point_count = 5
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_craterfall"]
-size = Vector3(30, 12.5, 30)
+size = Vector3(30, 15.4, 30)
 
 [sub_resource type="Curve3D" id="Curve3D_bomba1"]
 _data = {
@@ -124,6 +124,7 @@ custom_name = "Stromboli"
 custom_theme = "stromboli"
 custom_road_surface = "dirt"
 custom_sea_level_offset = -22.95
+branch_smooth_level = true
 custom_loose_ranges = Array[Vector2]([Vector2(0.05, 0.13), Vector2(0.44, 0.66)])
 custom_ravines = Array[Vector4]([Vector4(0.045, 0.125, 16, 1), Vector4(0.7, 0.86, 14, 1)])
 custom_cornice_ravines = Array[int]([0, 1])
@@ -202,10 +203,12 @@ depth = 22.0
 water_y_drop = -1.0
 reach = 40.0
 pit = true
+respawn_past_gap = true
+respawn_runup_m = 60.0
 label = "Gaura craterului"
 
 [node name="CraterFall" type="Area3D" parent="." unique_id=944992767]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -149.6, 50.05, 255.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -149.6, 51.5, 255.8)
 script = ExtResource("34_resp")
 backoff_m = 70.0
 

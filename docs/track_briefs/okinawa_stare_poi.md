@@ -121,3 +121,10 @@ Pe `okinawa/poi-integrare` după toate merge-urile, cu `--import` înainte:
 **Ce costă cel mai mult:** `cycad` (~2 700 triunghiuri pe piesă, ~3,4 M în total). Dacă
 testul pe telefon nu ține 60 fps, primul loc de tăiat (după umbrele dinamice, cum spune
 CLAUDE.md).
+
+## Iesirea/intrarea de pe drum si sensul valului (#607, #608, #609 — 31 oct 2026)
+
+- **#608/#607, cauza:** soseaua sta la +1,6..2,0 m, deci regula de zid „exterior SAU inaltat > 1 m" punea gardul invizibil (`wall_visible` false) pe ambele parti, pe tot turul, si pe uscat. Il tinea si pe cel care ramasese afara. Fix: `walls_water_only` pe tema `okinawa` (gardul doar unde la 3/8/15 m in afara fundul e sub mare, ca pe Ha Long). Garda: `tools/ProbeEdgeCross.tscn --track=20` (masina reala, 66 puncte x 2 parti x iesire/intrare, verdict PICAT pe zid invizibil pe uscat; cu flagul oprit: 17 cazuri).
+- **Inventar (132 iesiri, 103 intrari testate, 29 fara teren = mare):** iesiri blocate 114 -> 66, intrari blocate 83 -> 44. Ce a ramas e INTENTIONAT si vizibil: satul/aleea (A-C: `aZid`, `bZid`, `Fukugi`, `Gard`, case), castelul (D), rapele cu parapet de pod (0.54-0.59, 0.67-0.70, 0.84-0.93), tetrapozii digului (H), rampa podului ridicator. Decizie de design deschisa: ziduri/garduri de sat fara nicio poarta (0.015-0.27).
+- **#609:** `HazardMarker.wave_travel = -1` pe markerul „Val": creasta merge din dreapta spre stanga. Pe dig marea e pe ambele parti (cota +0,5 m la 3-8 m, -0,2 la 15 m, -4,6 la 25 m); stanga e marea larga (tetrapozi), dreapta golful. Brieful (§3) cerea valul dinspre larg = din stanga; sensul cerut de dezvoltator il aduce dinspre golf. Reversibil: `wave_travel = 1`. Garda: `tools/ProbeWaveDir.tscn --track=20 --expect=left`.
+- **ProbeRace, 4 seed-uri, 200 s:** dupa 2 repuneri (ambele pe 0.635-0.666, podul), inainte 7 (aceeasi zona); zero la val (0.881).

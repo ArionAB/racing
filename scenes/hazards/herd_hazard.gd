@@ -99,6 +99,17 @@ const ZEBRA_GLB := "res://assets/models/serengeti/animals/zebra.glb"
 ## Doua lovituri pe aceeasi masina nu vin mai des de atat (s).
 @export_range(0.05, 1.0, 0.05) var hit_cooldown: float = 0.3
 @export_range(0.5, 5.0, 0.1) var tumble_time: float = 1.5
+## Podeaua raportului de masa (animal / masina). Implicit 0.4: un animal usor
+## tot loveste cat un 0.4 dintr-unul egal. Pe Transfagarasan (#604) oile (45) cad
+## sub el, iar ghiontul scaleaza cu PATRATUL raportului — 0,16 din 4 m/s = 0,64
+## m/s lateral, adica nimic. Ridicata, oaia ramane usoara (nu zid), dar se simte.
+@export_range(0.1, 1.0, 0.05) var mass_ratio_floor: float = 0.4
+## Lovitura se aude si se vede (kick de camera, tunet de impact) la jucator, nu
+## doar se aplica pe viteza. Stins implicit: Serengeti ramane bit-identic. Fara
+## el, oile loveau „pe tacute" — viteza scadea cu cativa m/s si nimic nu spunea de ce.
+@export var feel_on_hit: bool = false
+## Cat din schimbarea de viteza (m/s) intra in kick-ul de camera / sunet.
+@export_range(0.5, 3.0, 0.1) var feel_scale: float = 1.0
 
 @export_group("Bazin de corpuri")
 @export_range(4, 40) var body_pool: int = 16
@@ -821,7 +832,7 @@ func _contacts() -> void:
 
 
 func _hit(a: int, car: Car) -> void:
-	var ratio := clampf(animal_mass / maxf(car.mass, 1.0), 0.4, 1.6)
+	var ratio := clampf(animal_mass / maxf(car.mass, 1.0), mass_ratio_floor, 1.6)
 	var fwd := -car.global_transform.basis.z
 	fwd.y = 0.0
 	fwd = fwd.normalized()
@@ -829,6 +840,13 @@ func _hit(a: int, car: Car) -> void:
 	var loss := fwd * fwd_speed * forward_loss * minf(ratio, 1.0)
 	var push := flow_dir * kick_speed * ratio * ratio + Vector3.UP * 0.3
 	car.apply_sweep(push - loss)
+	if feel_on_hit:
+		var away := car.global_position - _pos[a]
+		away.y = 0.0
+		var dv := (push - loss).length() * feel_scale
+		car.impact.emit(car, &"wall", dv,
+			away.normalized() if away.length_squared() > 1e-4 else flow_dir,
+			_pos[a] + Vector3.UP * 0.4, self)
 	# Animalul cade si isi pierde corpul: nu te tine prins intre el si vecin.
 	_state[a] = State.TUMBLE
 	_tumble_left[a] = tumble_time

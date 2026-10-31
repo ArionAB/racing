@@ -3835,6 +3835,42 @@ const HULL_SKIP_PARTS := {
 }
 
 
+## Parti de model care se imprastie la contact, per stem .glb (#602): prefixele
+## numelor de noduri. Restul modelului ramane hull static.
+const BUMP_PARTS := {"road_works": ["Works_Cone_"]}
+
+
+## Muta fiecare nod-parte sub un BumpProp si intoarce numele mesh-urilor mutate
+## (hull-ul modelului le sare). Piesa pe care BumpProp refuza sa o ia (prea mare,
+## plafon) ramane in hull.
+func _wrap_bump_parts(model: Node3D, prefixes: Array) -> Array:
+	var parts: Array[Node3D] = []
+	_find_parts(model, prefixes, parts)
+	var names: Array = []
+	for part in parts:
+		var mesh_names: Array = []
+		for mi in TrackDecor.visible_meshes(part, Transform3D.IDENTITY):
+			mesh_names.append(String((mi[0] as MeshInstance3D).name))
+		if BumpProp.wrap(part) != null:
+			names.append_array(mesh_names)
+	return names
+
+
+func _find_parts(node: Node, prefixes: Array, out: Array[Node3D]) -> void:
+	for c in node.get_children():
+		var n3 := c as Node3D
+		if n3 == null:
+			continue
+		var hit := false
+		for pre in prefixes:
+			if String(n3.name).begins_with(String(pre)):
+				hit = true
+		if hit:
+			out.append(n3)
+		else:
+			_find_parts(n3, prefixes, out)
+
+
 func _build_collision() -> void:
 	var models: Array[Node3D] = []
 	_collect_models(self, models)
@@ -3842,6 +3878,12 @@ func _build_collision() -> void:
 		var mode := _collision_mode(model)
 		if mode == "none":
 			continue
+		# Parti mici ale unui model montat (conurile din road_works, #602):
+		# devin BumpProp INDIVIDUAL, iar hull-ul modelului le sare.
+		var bumped_meshes: Array = []
+		var stem_bp := model.scene_file_path.get_file().get_basename()
+		if mode == "hull" and BUMP_PARTS.has(stem_bp):
+			bumped_meshes = _wrap_bump_parts(model, BUMP_PARTS[stem_bp])
 		if mode == "bump":
 			if BumpProp.wrap(model) != null:
 				continue
@@ -3856,8 +3898,9 @@ func _build_collision() -> void:
 				added = _add_trimesh(body, model)
 			_:
 				added = TrackDecor.add_hull_collision(body, model, true,
-					HULL_SKIP_PARTS.get(
-						model.scene_file_path.get_file().get_basename(), []))
+					(HULL_SKIP_PARTS.get(
+						model.scene_file_path.get_file().get_basename(), []) as Array)
+						+ bumped_meshes)
 		if not added:
 			body.free()
 			continue

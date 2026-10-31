@@ -1839,8 +1839,10 @@ func _seat_car_on_rope_bridge(root: Node, car: Car) -> void:
 func _vitrina_path(stem: String) -> String:
 	if _VITRINA_MODEL_PATHS.has(stem):
 		return String(_VITRINA_MODEL_PATHS[stem])
-	# Kitul Kyoto, Okinawa si Transfagarasan (assets/models/<kit>/<categorie>/<stem>.glb).
-	for kit: String in ["kyoto", "okinawa", "transfagarasan"]:
+	# Kitul Kyoto, Okinawa, Transfagarasan, Carrara si Stromboli
+	# (assets/models/<kit>/<categorie>/<stem>.glb). Carrara reuse-uieste ginestra
+	# Stromboli, deci si kitul ala trebuie sa se gaseasca pe stem.
+	for kit: String in ["kyoto", "okinawa", "transfagarasan", "carrara", "stromboli"]:
 		var root: String = "res://assets/models/" + kit
 		var d := DirAccess.open(root)
 		if d == null:

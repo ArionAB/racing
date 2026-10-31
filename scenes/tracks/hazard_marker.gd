@@ -224,7 +224,7 @@ enum Kind {
 @export_range(1.0, 30.0, 0.5) var rock_speed: float = 9.0
 
 ## Cat sta ascuns intre doua treceri (secunde).
-@export_range(0.0, 20.0, 0.5) var rock_pause: float = 3.0
+@export_range(0.0, 20.0, 0.5, "or_greater") var rock_pause: float = 3.0 # sania Carrara: 33,57
 
 ## Cota din TEREN, nu din curba: desenezi traseul din vederea de sus si
 ## bolovanul isi ia inaltimea cu un raycast, urca dealul, coboara pe versant
@@ -238,6 +238,18 @@ enum Kind {
 ## lizzatura (Carrara, POI G). Vezi `RockfallHazard.roll_model`. Cheia ajunge
 ## in spec doar cand e stinsa, deci orice nod de azi ramane bit-identic.
 @export var rock_roll_model: bool = true
+
+## Clopotul de avertizare, cu atatea secunde INAINTE de fiecare plecare de pe
+## traseu, pozitional din capatul de sus (sania Carrara: 2 s, brief carrara.md
+## §5.5). 0 = fara clopot. Vezi `RockfallHazard.warn_bell_s`. Cheia ajunge in
+## spec doar cand e > 0, ca orice nod de azi sa ramana bit-identic.
+@export_range(0.0, 10.0, 0.1) var rock_warn_bell_s: float = 0.0
+
+## Faza ciclului (0..1). Negativ = din fractie (`frac * 3.7`, ca azi). Pe Carrara
+## faza din fractie cadea fix pe plutonul din turul 1 dupa mutarea trecerii
+## saniei de la 0.815 la 0.769 (31 de lovituri pe 16 curse fata de 8).
+## Cheia ajunge in spec doar cand e >= 0, deci orice nod de azi ramane bit-identic.
+@export_range(-1.0, 1.0, 0.01) var rock_phase: float = -1.0
 
 
 ## Ce a declarat nodul despre INFATISAREA obstacolului, in forma pe care o
@@ -291,6 +303,10 @@ func model_spec() -> Dictionary:
 		spec["rock_stick_to_ground"] = rock_stick_to_ground
 		if not rock_roll_model:
 			spec["rock_roll_model"] = false
+		if rock_warn_bell_s > 0.0:
+			spec["rock_warn_bell_s"] = rock_warn_bell_s
+		if rock_phase >= 0.0:
+			spec["rock_phase"] = rock_phase
 	return spec
 
 

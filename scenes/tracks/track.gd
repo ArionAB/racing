@@ -4373,7 +4373,29 @@ static func themes() -> Dictionary:
 		"scarp_fade_deg": 10.0,
 		"dust_color": null, # null = derivat din ground_tint (umerii soselei, praful din roti)
 		"loose_grip": 7.0,
-		"horizon_model": "",
+		# FUNDALUL (kit carrara_kit.md §1.6, brief §5.4): crestele Apuanilor din
+		# `carrara_horizon.glb` (3 noduri, copii directi ai radacinii), PROVIZORIU pana la
+		# testul de anotimp (brief §6). Calcar crem-gri cu dare de moloz deschise si padure
+		# la baza, FARA calota (calota = Alpi). Clasa goala = atlasul modelului: sloturile
+		# pictate (29/19/21/13) raman; o clasa de roca le-ar sterge.
+		#
+		# Un inel per creasta, cu azimut FIX (conventia `_build_horizon`: cos pe X, sin pe Z
+		# fata de centroid; E = 0, S = +90, N = -90) si lungimea TANGENTA la cerc
+		# (`yaw_deg` = 90 - unghi), alese cu tools/ProbeCarraraHorizon.tscn ca fiecare din
+		# fractiile de contract (A 0.02, E 0.62, F 0.70, G 0.80, G 0.88) sa aiba o creasta
+		# in cadrul camerei de joc, neacoperita de teren. Cotele legate (memoria
+		# efecte-de-fundal-cote-legate): fog_end 300 < FAR_PLANE 380; `_build_horizon`
+		# stinge aruncarea de umbra (memoria caster-departat-fura-umbra).
+		"horizon_model": "res://assets/models/carrara/effects/carrara_horizon.glb",
+		"horizon_class": "",
+		"horizon_rings": [
+			{"near": 200.0, "far": 300.0, "count": 1, "scale": 0.9, "clear": 130.0,
+				"picks": ["ApuanRidge_C"], "angle_deg": -60.0, "yaw_deg": 0.0},
+			{"near": 230.0, "far": 330.0, "count": 1, "scale": 0.9, "clear": 140.0,
+				"picks": ["ApuanRidge_A"], "angle_deg": 128.0, "yaw_deg": 0.0},
+			{"near": 300.0, "far": 480.0, "count": 1, "scale": 0.85, "clear": 170.0,
+				"picks": ["ApuanRidge_B"], "angle_deg": 185.0, "yaw_deg": 90.0},
+		],
 		"walls": false,
 		"kerbs": false,
 		"cliffs": false,
@@ -13467,7 +13489,8 @@ func _build_rockfall(frac: float, spec: Dictionary = {}) -> void:
 	var side := _side_at(idx) * signf(sin(frac * 17.0))
 	var rock := RockfallHazard.new()
 	# Defazare din fractie, ca la SlidingHazard: doua bolovanuri nu cad la unison.
-	rock.phase = fposmod(frac * 3.7, 1.0)
+	# Un nod poate cere faza explicit (`rock_phase` pe HazardMarker).
+	rock.phase = float(spec.get("rock_phase", fposmod(frac * 3.7, 1.0)))
 	# Clasa de material: ce cere nodul, altfel steagul dedicat al temei, altfel
 	# ROCA LUMII (`rock_class` — sisturile alpine, gresia canionului). Ultima
 	# treapta e cea care conteaza: bolovanul care se desprinde dintr-o faleza e
@@ -13497,6 +13520,7 @@ func _build_rockfall(frac: float, spec: Dictionary = {}) -> void:
 		RockfallHazard.DEFAULT_ROUTE_PAUSE))
 	rock.stick_to_ground = bool(spec.get("rock_stick_to_ground", true))
 	rock.roll_model = bool(spec.get("rock_roll_model", true))
+	rock.warn_bell_s = float(spec.get("rock_warn_bell_s", 0.0))
 	for g in spec.get("groups", []):
 		rock.add_to_group(g)
 	# Cu TRASEU desenat in editor: bolovanul urmeaza curba de la primul punct
@@ -15783,8 +15807,14 @@ func _bake_decor(cliffs: Node3D, decor: Node3D, scen: Node3D) -> void:
 	TrackDecorBatch.bake(scen)
 
 func _build_excavator(frac: float, spec: Dictionary = {}) -> void:
-	const PATH := "res://assets/models/vehicles/rusted_digger.glb"
-	if not ResourceLoader.exists(PATH):
+	# Modelul vine din spec (`model` pe HazardMarker); fara el e excavatorul de
+	# azi, rusted_digger integral pe rust_metal. Un model declarat fara
+	# `tri_class` trece pe clasele pe PARTI, ca bolovanul cu model
+	# (`_build_rockfall`). Rigul altui model trebuie sa stea in ±0.1 m fata de
+	# rusted_digger: cutia bratului e potrivita de mana (excavator_hazard.gd).
+	const RIG := "res://assets/models/vehicles/rusted_digger.glb"
+	var path := String(spec.get("model", RIG))
+	if not ResourceLoader.exists(path):
 		return
 	var n := baked.size()
 	var idx := int(frac * float(n)) % n
@@ -15795,8 +15825,13 @@ func _build_excavator(frac: float, spec: Dictionary = {}) -> void:
 	# Era un excavator de PLASTIC din tema "lada de nisip". Cel nou e construit
 	# la scara lumii — corpul lui de 3.73 m e practic cat cel vechi inmultit cu
 	# 0.75, deci scara devine 1.0 si colizoarele se recalibreaza in hazard.
-	excavator.model_scene = load(PATH)
+	excavator.model_scene = load(path)
+	# Colizoarele raman ale rigului de referinta (vezi `collider_scene`).
+	if path != RIG and ResourceLoader.exists(RIG):
+		excavator.collider_scene = load(RIG)
 	excavator.model_scale = 1.0
+	excavator.model_class = String(spec.get("tri_class",
+		"" if spec.has("model") else "rust_metal"))
 	excavator.ai_dice = bool(spec.get("excavator_ai_dice", false))
 	excavator.soft_contact = bool(spec.get("excavator_soft_contact", false))
 	add_child(excavator)

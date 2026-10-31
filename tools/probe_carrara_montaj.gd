@@ -390,7 +390,15 @@ func _sled() -> void:
 			hz.route_pause, hz.route_speed, hz.cross_time(), hz._radius])
 		_verdict(not hz.roll_model, "roll_model stins (sania aluneca)")
 		_verdict(absf(hz.period - 41.0) < 1.5, "ciclul ~41 s (%.2f)" % hz.period)
-		var route := hz._route_local
+		# Abaterea se masoara IN PLAN: de cand punctele jgheabului au cota terenului (ravaneto-ul, POI G),
+		# cel mai apropiat punct 3D al curbei de centrul saniei (o raza deasupra rampei de 30 de grade) cade
+		# mai sus pe jgheab, deci distanta in plan iesea ~1 m pe o sanie care merge exact pe traseu. Copia
+		# turtita la y = 0 da punctul corect.
+		var route := Curve3D.new()
+		route.bake_interval = hz._route_local.bake_interval
+		for i in hz._route_local.point_count:
+			var rp := hz._route_local.get_point_position(i)
+			route.add_point(Vector3(rp.x, 0.0, rp.z))
 		var frames := int(hz.period * 60.0) + 60
 		var dev_max := 0.0
 		var gap_max := -INF
@@ -417,7 +425,7 @@ func _sled() -> void:
 			var gp := body.global_position
 			# Abaterea de la jgheab, in plan.
 			var lp := hz.to_local(gp)
-			var cp := route.get_closest_point(lp)
+			var cp := route.get_closest_point(Vector3(lp.x, 0.0, lp.z))
 			dev_max = maxf(dev_max, Vector2(lp.x - cp.x, lp.z - cp.z).length())
 			# Golul sub talpi.
 			var mx := hz._model.global_transform

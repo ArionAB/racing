@@ -56,6 +56,8 @@ func _ready() -> void:
 		_edge(track)
 	elif mode == "info":
 		_info(track)
+	elif mode == "view":
+		_view(track)
 	elif mode == "ray":
 		for pair in _arg("pts", "").split(";"):
 			var xy := pair.split(",")
@@ -219,6 +221,70 @@ func _reveal(track: Track) -> void:
 		sum += float(s)
 	print("REVEAL: fundul vazut (>= 1 %% din cadru) la %d / %d puncte (%.0f %%); cadru mediu %.1f %%" % [
 		seen_ok, count, 100.0 * float(seen_ok) / float(count), sum / float(count)])
+
+
+## `--mode=view` — ce vede camera REALA de joc din TEREN, pe clase de panta (normala lovita, doar
+## `TerrainBody`): plat (< 12 grade), PANTA (12-65 grade: dunele netede pe care criticul le citeste
+## „relief neted") si FATA (>= 65 grade: gradonul taiat). `--fracs=0.07,0.16` (implicit capturile lui B).
+## Procentele sunt din tot cadrul (cerul si decorul raman in rest).
+func _view(track: Track) -> void:
+	var route := track.routes[0]
+	var pts: PackedVector3Array = route.baked
+	var n := pts.size()
+	var th := tan(deg_to_rad(ChaseCamera.BASE_FOV) * 0.5)
+	var aspect := 16.0 / 9.0
+	var W := 160
+	var H := 90
+	for fs in _arg("fracs", "0.07,0.105,0.16,0.25").split(","):
+		var f := float(fs)
+		var idx := int(f * float(n)) % n
+		var focus: Vector3 = pts[idx]
+		var ahead: Vector3 = pts[route.wrap_index(idx + 12)]
+		var dir := (ahead - focus).normalized()
+		var cam_pos := focus - dir * ChaseCamera.DEFAULT_DISTANCE + Vector3.UP * ChaseCamera.DEFAULT_HEIGHT
+		var tgt := focus + dir * ChaseCamera.LOOK_AHEAD + Vector3.UP * ChaseCamera.LOOK_HEIGHT
+		var basis := Basis.looking_at(tgt - cam_pos, Vector3.UP)
+		var cnt := {"plat": 0, "panta": 0, "fata": 0, "alt": 0, "cer": 0}
+		# panta pe jumatatea de SUS a cadrului (fundalul, unde stau dunele din capturi)
+		var slope_top := 0
+		var img := Image.create(W, H, false, Image.FORMAT_RGB8)
+		for j in H:
+			for i in W:
+				var u := (2.0 * (float(i) + 0.5) / float(W) - 1.0) * th * aspect
+				var v := (1.0 - 2.0 * (float(j) + 0.5) / float(H)) * th
+				var d := (basis * Vector3(u, v, -1.0)).normalized()
+				var q := PhysicsRayQueryParameters3D.create(cam_pos, cam_pos + d * 400.0)
+				q.collide_with_areas = false
+				var h := _space.intersect_ray(q)
+				if h.is_empty():
+					cnt["cer"] += 1
+					img.set_pixel(i, j, Color(0.6, 0.8, 1.0))
+					continue
+				var col: Object = h["collider"]
+				if not (col is Node and (col as Node).name == "TerrainBody"):
+					cnt["alt"] += 1
+					img.set_pixel(i, j, Color(0.3, 0.3, 0.3))
+					continue
+				var deg := rad_to_deg(acos(clampf((h["normal"] as Vector3).y, -1.0, 1.0)))
+				if deg < 12.0:
+					cnt["plat"] += 1
+					img.set_pixel(i, j, Color(0.9, 0.85, 0.7))
+				elif deg < 65.0:
+					cnt["panta"] += 1
+					img.set_pixel(i, j, Color(0.9, 0.2, 0.1))
+					if j < H / 2:
+						slope_top += 1
+				else:
+					cnt["fata"] += 1
+					img.set_pixel(i, j, Color(0.1, 0.4, 0.9))
+		var tot := float(W * H)
+		var out_dir := _arg("img", "")
+		if out_dir != "":
+			img.resize(W * 4, H * 4, Image.INTERPOLATE_NEAREST)
+			img.save_png("%s/view_%s.png" % [out_dir, fs])
+		print("VIEW frac %.3f (x %.0f, y %.0f, cota %.1f): plat %5.1f %%  PANTA %5.1f %% (sus %4.1f %%)  FATA %5.1f %%  decor/drum %5.1f %%  cer %4.1f %%" % [
+			f, focus.x, -focus.z, focus.y, 100.0 * cnt["plat"] / tot, 100.0 * cnt["panta"] / tot,
+			100.0 * slope_top / tot, 100.0 * cnt["fata"] / tot, 100.0 * cnt["alt"] / tot, 100.0 * cnt["cer"] / tot])
 
 
 ## `--mode=edge`: treapta (m) dintre carosabil si teren LA MARGINEA soselei, pe ambele laturi. Terenul sta la

@@ -7065,9 +7065,12 @@ func _terrain_mesh_y(x: float, z: float) -> float:
 
 
 ## Cate sub-intervale are un rand / o coloana FINA a grilei de teren (vezi
-## [member custom_bench_patches]). 8 => 0.99 m: o fata de 9 m pe un singur sub-interval
-## iese la ~84 de grade, deci "aproape verticala" e masurabila.
-const BENCH_FINE_DIV: int = 8
+## [member custom_bench_patches]). 16 => 0.495 m: fata cade pe UN sub-interval, deci rulajul
+## ei e fix si unghiul depinde doar de inaltime. La 8 (0.99 m) o fata de 9 m iesea la 84 de
+## grade, dar treptele de 3.5-4.5 m ale gradonilor Carrara (doua trepte pe banc, POI B) doar la
+## 74-77 — criticul orb le citea "taluz culcat pe spate". La 16: 82-86 de grade. Costul e doar
+## pe randurile/coloanele fine (Carrara: teren 59 670 -> ~90 000 de triunghiuri).
+const BENCH_FINE_DIV: int = 16
 ## De la ce inclinare (grade) un triunghi fin primeste normala lui proprie (fata plana,
 ## neneteda cu vecinii) si tenta de panta calculata pe triunghi.
 const BENCH_FLAT_SHADE_DEG: float = 55.0

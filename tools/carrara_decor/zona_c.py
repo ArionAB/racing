@@ -45,8 +45,8 @@ ITEMS = [
     # scobituri TerrainHollow din generator, `BALTI`). Toate pe dreapta, la >= 15 m de axa.
     ("C_MalP1Bloc", "rocks/marble_block_b.glb", 0.2959, 37.0, 15.0),
     ("C_MalP1Moloz", "rocks/rubble_pile_a.glb", 0.3017, 42.0, -20.0),
-    ("C_MalP2Moloz", "rocks/rubble_pile_b.glb", 0.3221, 23.8, 10.0),
-    ("C_MalP2Bloc", "rocks/marble_block_a.glb", 0.3298, 23.9, 25.0),
+    ("C_MalP2Moloz", "rocks/rubble_pile_b.glb", 0.3211, 32.9, 10.0),
+    ("C_MalP2Bloc", "rocks/marble_block_a.glb", 0.3337, 31.0, 25.0),
     ("C_MalP3Bloc", "rocks/marble_block_c.glb", 0.3443, 38.0, -10.0),
     ("C_MalP3Moloz", "rocks/rubble_pile_a.glb", 0.3511, 26.9, 40.0),
     ("C_MalP4Moloz", "rocks/rubble_pile_b.glb", 0.3752, 15.6, -15.0),
@@ -58,7 +58,8 @@ ITEMS = [
     # Sirul de blocuri pe marginea dinspre balti a dreptei de sub derrick (diorama: cuburile de langa drum),
     # la lat +13.5 / +14 (pragul de 12.5 al lui C) si la > 15 m de turnul derrick-ului (generatorul verifica).
     ("C_MarginePodea1", "rocks/marble_block_c.glb", 0.3046, 13.5, 4.0),
-    ("C_MarginePodea2", "rocks/marble_block_b.glb", 0.3211, 14.0, -6.0),
+    # (al doilea bloc, la 0.321 / lat +14, a scos o ejectare la 28 m/s pe ProbeRace s13: e interiorul de
+    # dinaintea cotului 1, unde masinile taie peste podea. Scos.)
     ("C_BlocPodea1", "rocks/marble_block_b.glb", 0.3085, 24.0, 12.0),
     ("C_BlocPodea2", "rocks/marble_block_c.glb", 0.3714, 33.8, -30.0),
     ("C_BlocPodea3", "rocks/marble_block_a.glb", 0.3694, 30.3, 40.0),
@@ -68,12 +69,12 @@ ITEMS = [
 ]
 
 KIT_Y = {
-    "C_Informe1": 1.05, "C_Informe2": 1.63, "C_Informe3": 1.45, "C_Informe4": 1.66,
-    "C_Informe5": 1.59, "C_FerastrauLant": 1.52, "C_MolozTaietura": 1.73, "C_MalP1Bloc": 0.18,
-    "C_MalP1Moloz": 0.1, "C_MalP2Moloz": 0.65, "C_MalP2Bloc": 0.74, "C_MalP3Bloc": 0.95,
-    "C_MalP3Moloz": 0.14, "C_MalP4Moloz": 1.16, "C_MalP4Bloc": 0.8, "C_MalP5Moloz": 0.38,
-    "C_MalP5Bloc": 0.13, "C_MarginePodea1": 0.9, "C_MarginePodea2": 1.58, "C_BlocPodea1": 0.58,
-    "C_BlocPodea2": 1.67, "C_BlocPodea3": 1.67, "C_MolozPereteS1": 2.5, "C_MolozPereteS2": 2.54,
+    "C_Informe1": 1.05, "C_Informe2": 1.63, "C_Informe3": 1.39, "C_Informe4": 1.66,
+    "C_Informe5": 1.59, "C_FerastrauLant": 1.51, "C_MolozTaietura": 1.73, "C_MalP1Bloc": 0.04,
+    "C_MalP1Moloz": -0.07, "C_MalP2Moloz": 0.74, "C_MalP2Bloc": 0.93, "C_MalP3Bloc": -0.61,
+    "C_MalP3Moloz": -0.28, "C_MalP4Moloz": 1.01, "C_MalP4Bloc": 0.56, "C_MalP5Moloz": 0.03,
+    "C_MalP5Bloc": -0.3, "C_MarginePodea1": 0.9, "C_BlocPodea1": 0.58, "C_BlocPodea2": 1.67,
+    "C_BlocPodea3": 1.67, "C_MolozPereteS1": 2.5, "C_MolozPereteS2": 2.54,
     # lampile nu ies in `--decor` (AABB nul dupa coacerea DecorManual, ca A_Lampa): terenul minim din
     # ProbeCarraraHmap --sample pe 3x3 puncte ale amprentei (1.6 x 1.5 m), minus 3 cm.
     "C_LampaGalerieD": 3.11, "C_LampaGalerieS": 3.57,

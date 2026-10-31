@@ -156,42 +156,42 @@ road_clear_m = -3.0
 [node name="Balti" type="Node3D" parent="."]
 
 [node name="BaltaPitV" type="Marker3D" parent="Balti"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 84.0, -1.2, 26.0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 84.0, -2.0, 26.0)
 gizmo_extents = 12.0
 script = ExtResource("4_hollow")
 radius_m = 6.0
 wall_m = 6.0
 
 [node name="BaltaPitE" type="Marker3D" parent="Balti"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 98.0, -1.2, 33.0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 98.0, -2.0, 33.0)
 gizmo_extents = 12.0
 script = ExtResource("4_hollow")
 radius_m = 6.0
 wall_m = 6.0
 
 [node name="BaltaDerrick" type="Marker3D" parent="Balti"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 150.0, -1.2, 18.0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 152.0, -2.0, 26.0)
 gizmo_extents = 15.0
 script = ExtResource("4_hollow")
 radius_m = 7.0
 wall_m = 8.0
 
 [node name="BaltaCot1" type="Marker3D" parent="Balti"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 172.0, -1.2, 39.0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 172.0, -2.0, 39.0)
 gizmo_extents = 16.0
 script = ExtResource("4_hollow")
 radius_m = 8.0
 wall_m = 8.0
 
 [node name="BaltaCot2" type="Marker3D" parent="Balti"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 205.0, -1.2, 48.0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 205.0, -2.0, 48.0)
 gizmo_extents = 12.5
 script = ExtResource("4_hollow")
 radius_m = 6.0
 wall_m = 6.5
 
 [node name="BaltaPortal" type="Marker3D" parent="Balti"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 246.0, -1.2, 63.0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 246.0, -2.0, 63.0)
 gizmo_extents = 12.0
 script = ExtResource("4_hollow")
 radius_m = 5.0
@@ -420,7 +420,7 @@ transform = Transform3D(0.2683, 0.0, -0.96333, 0.0, 1.0, 0.0, 0.96333, 0.0, 0.26
 transform = Transform3D(-0.91913, 0.0, -0.39395, 0.0, 1.0, 0.0, 0.39395, 0.0, -0.91913, 171.94, 1.63, -0.484)
 
 [node name="C_Informe3" parent="DecorManual/ZonaC" instance=ExtResource("k_block_informe_a")]
-transform = Transform3D(0.68514, 0.0, -0.72841, 0.0, 1.0, 0.0, 0.72841, 0.0, 0.68514, 238.826, 1.45, 47.957)
+transform = Transform3D(0.68514, 0.0, -0.72841, 0.0, 1.0, 0.0, 0.72841, 0.0, 0.68514, 238.826, 1.39, 47.957)
 
 [node name="C_Informe4" parent="DecorManual/ZonaC" instance=ExtResource("k_block_informe_b")]
 transform = Transform3D(-0.16992, 0.0, -0.98546, 0.0, 1.0, 0.0, 0.98546, 0.0, -0.16992, 233.183, 1.66, 24.801)
@@ -429,7 +429,7 @@ transform = Transform3D(-0.16992, 0.0, -0.98546, 0.0, 1.0, 0.0, 0.98546, 0.0, -0
 transform = Transform3D(0.07824, 0.0, -0.99693, 0.0, 1.0, 0.0, 0.99693, 0.0, 0.07824, 192.546, 1.59, 18.201)
 
 [node name="C_FerastrauLant" parent="DecorManual/ZonaC" instance=ExtResource("k_chain_saw_crawler")]
-transform = Transform3D(-0.00072, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.00072, 258.975, 1.52, 56.012)
+transform = Transform3D(-0.00072, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.00072, 258.975, 1.51, 56.012)
 
 [node name="C_MolozTaietura" parent="DecorManual/ZonaC" instance=ExtResource("k_rubble_pile_b")]
 transform = Transform3D(0.50103, 0.0, -0.86543, 0.0, 1.0, 0.0, 0.86543, 0.0, 0.50103, 265.832, 1.73, 50.001)
@@ -441,40 +441,37 @@ transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, 285.63, 3.
 transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, 285.63, 3.57, 27.0)
 
 [node name="C_MalP1Bloc" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_b")]
-transform = Transform3D(0.16459, 0.0, -0.98636, 0.0, 1.0, 0.0, 0.98636, 0.0, 0.16459, 90.777, 0.18, 16.098)
+transform = Transform3D(0.16459, 0.0, -0.98636, 0.0, 1.0, 0.0, 0.98636, 0.0, 0.16459, 90.777, 0.04, 16.098)
 
 [node name="C_MalP1Moloz" parent="DecorManual/ZonaC" instance=ExtResource("k_rubble_pile_a")]
-transform = Transform3D(-0.36859, 0.0, -0.92959, 0.0, 1.0, 0.0, 0.92959, 0.0, -0.36859, 105.096, 0.1, 21.983)
+transform = Transform3D(-0.36859, 0.0, -0.92959, 0.0, 1.0, 0.0, 0.92959, 0.0, -0.36859, 105.096, -0.07, 21.983)
 
 [node name="C_MalP2Moloz" parent="DecorManual/ZonaC" instance=ExtResource("k_rubble_pile_b")]
-transform = Transform3D(0.10366, 0.0, -0.99461, 0.0, 1.0, 0.0, 0.99461, 0.0, 0.10366, 146.607, 0.65, 4.004)
+transform = Transform3D(0.12763, 0.0, -0.99182, 0.0, 1.0, 0.0, 0.99182, 0.0, 0.12763, 144.116, 0.74, 12.991)
 
 [node name="C_MalP2Bloc" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
-transform = Transform3D(0.15258, 0.0, -0.98829, 0.0, 1.0, 0.0, 0.98829, 0.0, 0.15258, 157.488, 0.74, 5.809)
+transform = Transform3D(0.05388, 0.0, -0.99855, 0.0, 1.0, 0.0, 0.99855, 0.0, 0.05388, 160.042, 0.93, 14.039)
 
 [node name="C_MalP3Bloc" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
-transform = Transform3D(-0.78573, 0.0, -0.61857, 0.0, 1.0, 0.0, 0.61857, 0.0, -0.78573, 163.744, 0.95, 25.743)
+transform = Transform3D(-0.78573, 0.0, -0.61857, 0.0, 1.0, 0.0, 0.61857, 0.0, -0.78573, 163.744, -0.61, 25.743)
 
 [node name="C_MalP3Moloz" parent="DecorManual/ZonaC" instance=ExtResource("k_rubble_pile_a")]
-transform = Transform3D(-0.09302, 0.0, -0.99566, 0.0, 1.0, 0.0, 0.99566, 0.0, -0.09302, 180.48, 0.14, 26.463)
+transform = Transform3D(-0.09302, 0.0, -0.99566, 0.0, 1.0, 0.0, 0.99566, 0.0, -0.09302, 180.48, -0.28, 26.463)
 
 [node name="C_MalP4Moloz" parent="DecorManual/ZonaC" instance=ExtResource("k_rubble_pile_b")]
-transform = Transform3D(-0.37062, 0.0, -0.92879, 0.0, 1.0, 0.0, 0.92879, 0.0, -0.37062, 238.461, 1.16, 51.036)
+transform = Transform3D(-0.37062, 0.0, -0.92879, 0.0, 1.0, 0.0, 0.92879, 0.0, -0.37062, 238.461, 1.01, 51.036)
 
 [node name="C_MalP4Bloc" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_a")]
-transform = Transform3D(0.36651, 0.0, -0.93042, 0.0, 1.0, 0.0, 0.93042, 0.0, 0.36651, 252.657, 0.8, 51.035)
+transform = Transform3D(0.36651, 0.0, -0.93042, 0.0, 1.0, 0.0, 0.93042, 0.0, 0.36651, 252.657, 0.56, 51.035)
 
 [node name="C_MalP5Moloz" parent="DecorManual/ZonaC" instance=ExtResource("k_rubble_pile_a")]
-transform = Transform3D(-0.50087, 0.0, -0.86552, 0.0, 1.0, 0.0, 0.86552, 0.0, -0.50087, 197.66, 0.38, 39.698)
+transform = Transform3D(-0.50087, 0.0, -0.86552, 0.0, 1.0, 0.0, 0.86552, 0.0, -0.50087, 197.66, 0.03, 39.698)
 
 [node name="C_MalP5Bloc" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_b")]
-transform = Transform3D(-0.8631, 0.0, -0.50503, 0.0, 1.0, 0.0, 0.50503, 0.0, -0.8631, 212.32, 0.13, 41.213)
+transform = Transform3D(-0.8631, 0.0, -0.50503, 0.0, 1.0, 0.0, 0.50503, 0.0, -0.8631, 212.32, -0.3, 41.213)
 
 [node name="C_MarginePodea1" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_c")]
 transform = Transform3D(0.07825, 0.0, -0.99693, 0.0, 1.0, 0.0, 0.99693, 0.0, 0.07825, 112.401, 0.9, -6.44)
-
-[node name="C_MarginePodea2" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_b")]
-transform = Transform3D(-0.15069, 0.0, -0.98858, 0.0, 1.0, 0.0, 0.98858, 0.0, -0.15069, 144.996, 1.58, -5.888)
 
 [node name="C_BlocPodea1" parent="DecorManual/ZonaC" instance=ExtResource("k_marble_block_b")]
 transform = Transform3D(0.20791, 0.0, -0.97815, 0.0, 1.0, 0.0, 0.97815, 0.0, 0.20791, 120.105, 0.58, 4.0)

@@ -524,24 +524,28 @@ if OUT_PATH:
     #     oglinda sta la 15 cm sub podea (balta la nivel, cu mal); pe podeaua de +1.70 scobitura are un perete
     #     lat (`wall`), adica o farfurie cu malul in panta de ~12 grade, nu o groapa;
     #   - un singur `custom_ravine_water` pe rapa 1 = un singur stil, deci un singur material in plus.
-    # Fundul scobiturii (-1.2) e destul de adanc incat o masina ajunsa in balta intra in cutia de repunere de
-    # sub apa (plafonul ei e la BALTI_Y - 0.6); toate baltile stau departe de linia de cursa (marginea
-    # farfuriei la >= 9 m de marginea asfaltului; scurtatura prin balta, TrackBranch la 0.33, nu exista inca).
+    # Fundul scobiturii e la -2.0: o masina intra in cutia de repunere de sub apa (plafonul ei e la BALTI_Y - 0.6)
+    # doar daca fundul de sub ea e sub ~-1.1 (sonda temporara: masina lasata in balta, fund -1.07 -> nerepusa,
+    # -1.12 -> repusa). Cu -1.2 jumatate din P1 ramanea vad fara repunere; cu -2.0 doar banda de ~2 m de la mal.
+    # Toate baltile stau departe de linia de cursa (marginea farfuriei la >= 9 m de marginea asfaltului;
+    # scurtatura prin balta, TrackBranch la 0.33, nu exista inca).
     # (nume, x, z Godot, raza plina m, perete m, fundul y). Raza + perete = unde incepe farfuria.
     BALTI_Y = 0.35
     BALTI = [
         # P1 pe PitB, la dreapta intrarii pe podea (0.29-0.30); se vede de pe E si de pe terasele lui B.
-        ("BaltaPitV", 84.0, 26.0, 6.0, 6.0, -1.2),
-        ("BaltaPitE", 98.0, 33.0, 6.0, 6.0, -1.2),
-        # P2: sub derrick, pe racordul PitB -> podea (la 53 m de turn, 32 m de axa drumului).
-        ("BaltaDerrick", 150.0, 18.0, 7.0, 8.0, -1.2),
+        ("BaltaPitV", 84.0, 26.0, 6.0, 6.0, -2.0),
+        ("BaltaPitE", 98.0, 33.0, 6.0, 6.0, -2.0),
+        # P2: sub derrick, pe racordul PitB -> podea (la 60 m de turn). Farfuria incepe la lat +31 de dreapta
+        # E-V: la 18.0 / 8 m (lat +23) o masina iesita din interiorul cotului 1 (ProbeRace s13, la x 143, lat 17,
+        # 28 m/s) ar fi ajuns in ea.
+        ("BaltaDerrick", 152.0, 26.0, 7.0, 8.0, -2.0),
         # P3: interiorul cotului 1 (0.33), la 28 m de axa diagonalei; de aici trece candva scurtatura.
-        ("BaltaCot1", 172.0, 39.0, 8.0, 8.0, -1.2),
+        ("BaltaCot1", 172.0, 39.0, 8.0, 8.0, -2.0),
         # P5: intre cotul 1 si cotul 2 (0.365, lat +25), in prim-planul din dreapta al capturii de la 0.36.
-        ("BaltaCot2", 205.0, 48.0, 6.0, 6.5, -1.2),
+        ("BaltaCot2", 205.0, 48.0, 6.0, 6.5, -2.0),
         # P4: in fata cotului 2, pe dreapta dreptei spre portal (lat +27), langa ferastraul-lant. Pe EXTERIORUL
         # cotului 2 (iesirea 0.375 a dat o ejectare la 30 m/s): farfuria incepe la lat +15, peste pragul de 12.5.
-        ("BaltaPortal", 246.0, 63.0, 5.0, 7.0, -1.2),
+        ("BaltaPortal", 246.0, 63.0, 5.0, 7.0, -2.0),
     ]
     # Turcoaz OPAC (shaderul de apa e opac prin constructie): REEF_SHALLOW 17 tras 25% spre CORAL_SAND 19 pe
     # apa mica, 17 curat pe adanc, malul pe 19 (calcitul de la marginea baltii — rampa shore -> shallow ->

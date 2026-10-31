@@ -32,7 +32,10 @@ ITEMS = [
     # lamei la x 266.3, unde peretele e deja la +6 (lama sta la +1.7 .. +3.3) -> ~1.3 m de lama in marmura.
     # Lat +20: departe de linia de cursa si de iesirea cotului 2. Cota: talpa senilelor e la +0.10 peste
     # origine (AABB masurat), deci KIT_Y = terenul minim - 0.03 - 0.10.
-    ("C_FerastrauLant", "vehicles/chain_saw_crawler.glb", 0.3849, 20.0, 0.0),
+    # "along" 1.5: originea iese la x 259.0 pe indexul lui 0.3849 (nu 260), iar fara el doar ultimii 0.3 m ai
+    # lamei atingeau piciorul peretelui (teren 2.6 la x 265, ProbeCarraraHmap --sample); cu 1.5 varful e la
+    # x 266.7, unde peretele e la +7.6 -> ~1.5 m de lama in marmura.
+    ("C_FerastrauLant", "vehicles/chain_saw_crawler.glb", 0.3849, 20.0, 0.0, {"along": 1.5}),
     # Moloz la piciorul taieturii, intre ferastrau si peretele de S (lat +14, peste pragul de 12.5).
     ("C_MolozTaietura", "rocks/rubble_pile_b.glb", 0.3878, 14.0, 30.0),
 

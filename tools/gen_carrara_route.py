@@ -1564,7 +1564,11 @@ scale_max = {float(d_.get('scale_max', 1.2))}
 seed_value = {int(d_.get('seed', 1))}
 """
                 if d_.get("kind") == "disc":
-                    cx_, cz_ = d_["center"]
+                    if "at" in d_:   # (frac pe INDEX, lateral + dreapta): centrul fata de drum, ca piesele din ITEMS
+                        p_c, _d, _i = road_pt(d_["at"][0], d_["at"][1])
+                        cx_, cz_ = p_c[0], p_c[2]
+                    else:
+                        cx_, cz_ = d_["center"]
                     kit_sub += f"center = Vector3({cx_:.2f}, 0, {cz_:.2f})\nradius = {float(d_['radius'])}\n"
                 else:
                     kit_sub += (f"frac_from = {d_['frac_from']:.4f}\nfrac_to = {d_['frac_to']:.4f}\n"

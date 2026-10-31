@@ -388,6 +388,28 @@ atât se pierde avantajul de VRAM fără câștig vizibil la viteza de joc.
 
 ---
 
+### Rampe de săritură (issue #610)
+
+O rampă nu e o pană galbenă: e **un obiect al lumii ei**, un volum închis făcut din
+clasele de material pe care pista le are deja. Cheia `ramp_style` din `themes()`
+(`body` = clasa corpului, `lip` = clasa benzii de buză, `planks` = rosturi de
+scânduri) alege ce e: la Dunele piatră de canion cu buză de tablă ruginită, la
+Okinawa calcar de recif cu buză de scânduri, la Transfăgărășan piatră de drum de
+munte cu buză de beton, la Serengeti lespede de granit de kopje, la Fiordland
+debarcader de lemn ud, la Jodhpur gresie de fort. Reguli:
+
+- **Fizica nu se atinge.** Coliziunea e prisma veche, triunghi cu triunghi; tot ce
+  e nou e vizual (`scenes/tracks/ramp_visual.gd`). `tools/probe_ramps.gd` listează
+  rampele cu semnătura de coliziune (AABB + arie) și măsoară airtime-ul.
+- **Fără găuri.** Laterale, spate și buză coboară sub cota drumului (`SKIRT`);
+  trambulina de peste un canal are culee până la apă, nu o placă care plutește.
+- **Lizibilitate în paleta lumii.** Banda de buză alternează clasa de buză cu
+  varianta ei întunecată (culoarea de vertex doar întunecă). Nu se aduce culoare
+  nouă și nici textură nouă: clasele trebuie să fie deja pe pistă (garda de
+  materiale), iar o temă fără `ramp_style` cade pe `rock_class`.
+
+---
+
 ## 5. Lumină
 
 | parametru | valoare |

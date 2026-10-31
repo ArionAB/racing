@@ -155,10 +155,10 @@ _HALF = {"wire_saw": (3.2, 2.5), "drill_rig": (1.9, 3.1), "cable_reel": (1.0, 1.
          "safety_berm": (3.1, 0.8), "pipe_run": (3.1, 0.5), "block_informe_a": (1.6, 1.6)}
 
 # Paleta cordonului: (glb, scala min, scala max, pondere). Bolovani si blocuri mici, NU stive.
-_CORDON = [("rocks/marble_block_a.glb", 0.60, 0.95, 3), ("rocks/marble_block_b.glb", 0.50, 0.80, 3),
-           ("rocks/marble_block_c.glb", 0.45, 0.65, 2), ("rocks/block_informe_b.glb", 0.60, 0.90, 3),
-           ("rocks/block_informe_a.glb", 0.40, 0.55, 1), ("rocks/rubble_pile_b.glb", 0.70, 1.00, 4),
-           ("rocks/rubble_pile_a.glb", 0.55, 0.80, 3)]
+_CORDON = [("rocks/marble_block_a.glb", 0.70, 1.00, 2), ("rocks/marble_block_b.glb", 0.60, 0.85, 2),
+           ("rocks/marble_block_c.glb", 0.50, 0.70, 1), ("rocks/block_informe_b.glb", 0.70, 1.00, 2),
+           ("rocks/block_informe_a.glb", 0.45, 0.60, 1), ("rocks/rubble_pile_b.glb", 0.90, 1.25, 4),
+           ("rocks/rubble_pile_a.glb", 0.70, 1.00, 4)]
 # (r2b: la 0.4-0.7 cordonul se citea din camera de joc ca o linie punctata de cuburi mici; bolovanii lati si
 # jos, rubble_pile, umplu golurile fara sa creasca numarul de piese.)
 # Pe buza bancurilor doar piese mici: una care trece de buza ar lua cota platoului de dedesubt.
@@ -172,20 +172,20 @@ _MOLOZ = [("rocks/rubble_pile_a.glb", 0.70, 1.00, 3), ("rocks/rubble_pile_b.glb"
 # Marginile drumului: dincolo de berma din cod (+-6), la 7.8; pe partea camionului la 8.8 (generatorul cere > 6 m
 # de banda lui, chiar daca piesele sunt fantome). Interiorul acelor ramane gol (linia de cursa si scaparea AI-ului, contractul B).
 _LINII = [
-    ("B_CT1D", 0.0585, 0.0860, 7.8, 0.35, 2.8, 4.0, _CORDON),   # T1, marginea dreapta (dupa berma)
-    ("B_CT1E", 0.0862, 0.0935, 8.8, 0.25, 2.8, 4.0, _CORDON),   # T1, capatul: camionul trece pe banda dreapta
+    ("B_CT1D", 0.0585, 0.0860, 7.8, 0.35, 2.4, 3.6, _CORDON),   # T1, marginea dreapta (dupa berma)
+    ("B_CT1E", 0.0862, 0.0935, 8.8, 0.25, 2.4, 3.6, _CORDON),   # T1, capatul: camionul trece pe banda dreapta
     ("B_CT1M", 0.0585, 0.0935, 11.0, 0.25, 2.8, 4.2, _MIC),     # T1, buza bancului (sus pe F1)
-    ("B_CT1S", 0.0610, 0.0935, -8.8, 0.35, 3.2, 4.8, _CORDON),  # T1, marginea stanga (camp plat)
+    ("B_CT1S", 0.0610, 0.0935, -8.8, 0.35, 2.8, 4.2, _CORDON),  # T1, marginea stanga (camp plat)
     ("B_CA1", 0.0945, 0.1180, -7.9, 0.30, 3.3, 4.4, _CORDON),   # ac1, exteriorul
     ("B_CR1M", 0.1185, 0.1450, -10.1, 0.25, 2.8, 4.0, _MIC),    # rampa ac1, muchia din stanga (printre hull)
-    ("B_CT2S", 0.1455, 0.1770, -8.8, 0.30, 2.8, 4.0, _CORDON),  # T2, marginea stanga (dupa berma)
+    ("B_CT2S", 0.1455, 0.1770, -8.8, 0.30, 2.4, 3.6, _CORDON),  # T2, marginea stanga (dupa berma)
     ("B_CT2M", 0.1455, 0.1770, -10.6, 0.20, 3.0, 4.4, _MIC),    # T2, buza bancului
-    ("B_CT2D", 0.1455, 0.1770, 8.8, 0.35, 3.2, 4.8, _CORDON),   # T2, marginea dreapta (platou)
+    ("B_CT2D", 0.1455, 0.1770, 8.8, 0.35, 2.8, 4.2, _CORDON),   # T2, marginea dreapta (platou)
     ("B_CA2", 0.1780, 0.2080, 7.9, 0.30, 3.3, 4.4, _CORDON),    # ac2, exteriorul
     ("B_CR2M", 0.2085, 0.2320, 10.9, 0.20, 2.8, 4.0, _MIC),     # rampa ac2, muchia din dreapta (printre hull)
-    ("B_CT3D", 0.2325, 0.2660, 7.8, 0.35, 2.8, 4.0, _CORDON),   # T3, marginea dreapta (dupa berma)
+    ("B_CT3D", 0.2325, 0.2660, 7.8, 0.35, 2.4, 3.6, _CORDON),   # T3, marginea dreapta (dupa berma)
     ("B_CT3M", 0.2325, 0.2660, 11.1, 0.20, 3.0, 4.4, _MIC),     # T3, buza bancului
-    ("B_CT3S", 0.2325, 0.2660, -8.8, 0.35, 3.2, 4.8, _CORDON),  # T3, marginea stanga (platou)
+    ("B_CT3S", 0.2325, 0.2660, -8.8, 0.35, 2.8, 4.2, _CORDON),  # T3, marginea stanga (platou)
     ("B_MF1", 0.1470, 0.1760, 20.8, 0.6, 5.5, 8.0, _MOLOZ),     # piciorul lui F1 (in PlasaA)
 ]
 
@@ -236,42 +236,45 @@ KIT_Y = {
     "B_T3_Sarma": 6.67, "B_T3_Taiat": 6.67, "B_T3_R2": 6.67, "B_T3_R3": 6.67, "B_T3_R4": 6.6,
     "B_T3_R5": 6.45, "B_T3_R6": 6.71, "B_T3_R7": 6.67, "B_T3_R8": 6.67, "B_T3_R10": 6.55,
     "B_CT1D1": 24.67, "B_CT1D2": 24.67, "B_CT1D3": 24.67, "B_CT1D4": 24.67, "B_CT1D5": 24.67,
-    "B_CT1D6": 24.67, "B_CT1D7": 24.67, "B_CT1D8": 24.61, "B_CT1D9": 24.57, "B_CT1D10": 24.48,
-    "B_CT1D11": 24.31, "B_CT1D12": 24.14, "B_CT1D13": 23.85, "B_CT1D14": 23.62, "B_CT1E1": 23.33,
-    "B_CT1E2": 23.11, "B_CT1E3": 22.92, "B_CT1E4": 22.65, "B_CT1E5": 22.38, "B_CT1M1": 24.67,
-    "B_CT1M2": 24.67, "B_CT1M3": 24.67, "B_CT1M4": 24.67, "B_CT1M5": 24.67, "B_CT1M6": 23.68,
-    "B_CT1M7": 23.39, "B_CT1M8": 22.65, "B_CT1M9": 22.5, "B_CT1M10": 22.37, "B_CT1S1": 24.63,
-    "B_CT1S2": 24.62, "B_CT1S3": 24.62, "B_CT1S4": 24.61, "B_CT1S5": 24.62, "B_CT1S6": 24.61,
-    "B_CT1S7": 24.62, "B_CT1S8": 24.56, "B_CT1S9": 24.49, "B_CT1S10": 24.39, "B_CT1S11": 24.18,
-    "B_CT1S12": 23.98, "B_CT1S13": 23.63, "B_CT1S14": 23.44, "B_CT1S15": 23.21, "B_CT1S16": 22.94,
-    "B_CT1S17": 22.66, "B_CA11": 22.47, "B_CA12": 22.21, "B_CA13": 21.94, "B_CA14": 21.74,
-    "B_CA15": 21.43, "B_CA16": 21.13, "B_CA17": 20.85, "B_CA18": 20.63, "B_CA19": 20.24,
-    "B_CA110": 19.99, "B_CA111": 19.68, "B_CA112": 19.36, "B_CA113": 18.79, "B_CR1M1": 18.03,
-    "B_CR1M2": 17.99, "B_CR1M3": 17.78, "B_CR1M4": 17.37, "B_CR1M5": 17.31, "B_CR1M6": 17.16,
-    "B_CR1M7": 16.74, "B_CR1M8": 16.3, "B_CR1M9": 15.96, "B_CR1M10": 15.79, "B_CT2S1": 15.74,
-    "B_CT2S2": 15.71, "B_CT2S3": 15.67, "B_CT2S4": 15.67, "B_CT2S5": 15.67, "B_CT2S6": 15.66,
-    "B_CT2S7": 15.61, "B_CT2S8": 15.19, "B_CT2S9": 14.92, "B_CT2S10": 14.74, "B_CT2S11": 14.49,
-    "B_CT2M1": 15.7, "B_CT2M2": 15.67, "B_CT2M3": 15.67, "B_CT2M4": 15.67, "B_CT2M5": 15.62,
-    "B_CT2M6": 15.42, "B_CT2M7": 14.89, "B_CT2M8": 14.72, "B_CT2M9": 14.47, "B_CT2D1": 15.74,
-    "B_CT2D2": 15.7, "B_CT2D3": 15.67, "B_CT2D4": 15.67, "B_CT2D5": 15.67, "B_CT2D6": 15.67,
-    "B_CT2D7": 15.67, "B_CT2D8": 15.67, "B_CT2D9": 15.66, "B_CT2D10": 15.49, "B_CT2D11": 15.33,
-    "B_CT2D12": 15.11, "B_CT2D13": 14.87, "B_CT2D14": 14.57, "B_CA21": 14.19, "B_CA22": 13.84,
-    "B_CA23": 13.63, "B_CA24": 13.38, "B_CA25": 13.16, "B_CA26": 12.88, "B_CA27": 12.71,
-    "B_CA28": 12.52, "B_CA29": 12.24, "B_CA210": 12.01, "B_CA211": 11.72, "B_CA212": 11.41,
-    "B_CA213": 11.11, "B_CA214": 10.84, "B_CA215": 10.49, "B_CA216": 10.2, "B_CR2M1": 10.03,
-    "B_CR2M2": 9.75, "B_CR2M3": 9.31, "B_CR2M4": 8.88, "B_CR2M5": 8.66, "B_CR2M6": 8.17,
-    "B_CR2M7": 7.67, "B_CR2M8": 7.25, "B_CT3D1": 6.84, "B_CT3D2": 6.78, "B_CT3D3": 6.73,
-    "B_CT3D4": 6.7, "B_CT3D5": 6.67, "B_CT3D6": 6.67, "B_CT3D7": 6.67, "B_CT3D8": 6.67,
-    "B_CT3D9": 6.67, "B_CT3D10": 6.67, "B_CT3D11": 6.67, "B_CT3D12": 6.67, "B_CT3D13": 6.66,
-    "B_CT3D14": 6.65, "B_CT3D15": 6.63, "B_CT3D16": 6.57, "B_CT3D17": 6.52, "B_CT3D18": 6.41,
-    "B_CT3D19": 6.34, "B_CT3M1": 6.88, "B_CT3M2": 6.73, "B_CT3M3": 6.67, "B_CT3M4": 6.67,
-    "B_CT3M5": 6.67, "B_CT3M6": 6.66, "B_CT3M7": 6.64, "B_CT3M8": 6.37, "B_CT3S1": 6.88,
-    "B_CT3S2": 6.78, "B_CT3S3": 6.72, "B_CT3S4": 6.7, "B_CT3S5": 6.67, "B_CT3S6": 6.67,
-    "B_CT3S7": 6.67, "B_CT3S8": 6.67, "B_CT3S9": 6.67, "B_CT3S10": 6.67, "B_CT3S11": 6.67,
-    "B_CT3S12": 6.67, "B_CT3S13": 6.66, "B_CT3S14": 6.65, "B_CT3S15": 6.61, "B_CT3S16": 6.55,
-    "B_CT3S17": 6.5, "B_CT3S18": 6.44, "B_MF11": 15.71, "B_MF12": 15.67, "B_MF13": 15.67,
-    "B_MF14": 15.67, "B_MF15": 15.67, "B_MF16": 15.66, "B_MF17": 15.6, "B_MF18": 15.39,
-    "B_MF19": 15.0, "B_MF110": 14.59,
+    "B_CT1D6": 24.67, "B_CT1D7": 24.67, "B_CT1D8": 24.67, "B_CT1D9": 24.63, "B_CT1D10": 24.59,
+    "B_CT1D11": 24.48, "B_CT1D12": 24.4, "B_CT1D13": 24.28, "B_CT1D14": 24.11, "B_CT1D15": 23.71,
+    "B_CT1D16": 23.55, "B_CT1E1": 23.42, "B_CT1E2": 23.06, "B_CT1E3": 22.77, "B_CT1E4": 22.54,
+    "B_CT1E5": 22.39, "B_CT1E6": 22.23, "B_CT1M1": 24.67, "B_CT1M2": 24.67, "B_CT1M3": 24.67,
+    "B_CT1M4": 24.67, "B_CT1M5": 24.56, "B_CT1M6": 23.54, "B_CT1M7": 22.74, "B_CT1M8": 22.36,
+    "B_CT1S1": 24.61, "B_CT1S2": 24.62, "B_CT1S3": 24.62, "B_CT1S4": 24.62, "B_CT1S5": 24.61,
+    "B_CT1S6": 24.6, "B_CT1S7": 24.61, "B_CT1S8": 24.58, "B_CT1S9": 24.55, "B_CT1S10": 24.45,
+    "B_CT1S11": 24.35, "B_CT1S12": 24.29, "B_CT1S13": 24.11, "B_CT1S14": 23.86, "B_CT1S15": 23.64,
+    "B_CT1S16": 23.44, "B_CT1S17": 23.27, "B_CT1S18": 23.13, "B_CT1S19": 22.89, "B_CT1S20": 22.54,
+    "B_CA11": 22.4, "B_CA12": 22.23, "B_CA13": 21.9, "B_CA14": 21.67, "B_CA15": 21.36,
+    "B_CA16": 21.21, "B_CA17": 20.93, "B_CA18": 20.48, "B_CA19": 20.31, "B_CA110": 19.89,
+    "B_CA111": 19.41, "B_CA112": 19.0, "B_CA113": 18.62, "B_CR1M1": 18.09, "B_CR1M2": 17.95,
+    "B_CR1M3": 17.8, "B_CR1M4": 17.44, "B_CR1M5": 17.25, "B_CR1M6": 17.15, "B_CR1M7": 16.77,
+    "B_CR1M8": 16.57, "B_CR1M9": 16.0, "B_CR1M10": 15.85, "B_CT2S1": 15.73, "B_CT2S2": 15.7,
+    "B_CT2S3": 15.67, "B_CT2S4": 15.67, "B_CT2S5": 15.67, "B_CT2S6": 15.67, "B_CT2S7": 15.66,
+    "B_CT2S8": 15.61, "B_CT2S9": 15.59, "B_CT2S10": 15.4, "B_CT2S11": 15.14, "B_CT2S12": 14.85,
+    "B_CT2S13": 14.76, "B_CT2S14": 14.54, "B_CT2M1": 15.7, "B_CT2M2": 15.67, "B_CT2M3": 15.67,
+    "B_CT2M4": 15.67, "B_CT2M5": 15.63, "B_CT2M6": 15.48, "B_CT2M7": 15.07, "B_CT2M8": 14.83,
+    "B_CT2M9": 14.54, "B_CT2D1": 15.74, "B_CT2D2": 15.7, "B_CT2D3": 15.67, "B_CT2D4": 15.67,
+    "B_CT2D5": 15.67, "B_CT2D6": 15.67, "B_CT2D7": 15.67, "B_CT2D8": 15.67, "B_CT2D9": 15.67,
+    "B_CT2D10": 15.67, "B_CT2D11": 15.66, "B_CT2D12": 15.65, "B_CT2D13": 15.39, "B_CT2D14": 15.29,
+    "B_CT2D15": 15.12, "B_CT2D16": 14.84, "B_CT2D17": 14.73, "B_CT2D18": 14.48, "B_CA21": 14.16,
+    "B_CA22": 13.76, "B_CA23": 13.59, "B_CA24": 13.34, "B_CA25": 13.1, "B_CA26": 12.88,
+    "B_CA27": 12.56, "B_CA28": 12.37, "B_CA29": 12.0, "B_CA210": 11.83, "B_CA211": 11.55,
+    "B_CA212": 11.31, "B_CA213": 11.02, "B_CA214": 10.68, "B_CA215": 10.48, "B_CA216": 10.11,
+    "B_CR2M1": 10.02, "B_CR2M2": 9.74, "B_CR2M3": 9.3, "B_CR2M4": 8.8, "B_CR2M5": 8.34,
+    "B_CR2M6": 8.15, "B_CR2M7": 7.62, "B_CR2M8": 7.28, "B_CR2M9": 6.96, "B_CT3D1": 6.82,
+    "B_CT3D2": 6.78, "B_CT3D3": 6.75, "B_CT3D4": 6.71, "B_CT3D5": 6.7, "B_CT3D6": 6.67,
+    "B_CT3D7": 6.67, "B_CT3D8": 6.67, "B_CT3D9": 6.67, "B_CT3D10": 6.67, "B_CT3D11": 6.67,
+    "B_CT3D12": 6.67, "B_CT3D13": 6.67, "B_CT3D14": 6.67, "B_CT3D15": 6.66, "B_CT3D16": 6.65,
+    "B_CT3D17": 6.63, "B_CT3D18": 6.58, "B_CT3D19": 6.52, "B_CT3D20": 6.5, "B_CT3D21": 6.39,
+    "B_CT3M1": 6.89, "B_CT3M2": 6.75, "B_CT3M3": 6.69, "B_CT3M4": 6.67, "B_CT3M5": 6.67,
+    "B_CT3M6": 6.67, "B_CT3M7": 6.65, "B_CT3S1": 6.86, "B_CT3S2": 6.78, "B_CT3S3": 6.74,
+    "B_CT3S4": 6.71, "B_CT3S5": 6.69, "B_CT3S6": 6.67, "B_CT3S7": 6.67, "B_CT3S8": 6.67,
+    "B_CT3S9": 6.67, "B_CT3S10": 6.67, "B_CT3S11": 6.67, "B_CT3S12": 6.67, "B_CT3S13": 6.67,
+    "B_CT3S14": 6.67, "B_CT3S15": 6.67, "B_CT3S16": 6.65, "B_CT3S17": 6.63, "B_CT3S18": 6.58,
+    "B_CT3S19": 6.51, "B_CT3S20": 6.47, "B_CT3S21": 6.4, "B_MF11": 15.7, "B_MF12": 15.67,
+    "B_MF13": 15.67, "B_MF14": 15.67, "B_MF15": 15.67, "B_MF16": 15.66, "B_MF17": 15.63,
+    "B_MF18": 15.42, "B_MF19": 15.05, "B_MF110": 14.66,
     # mosoarele nu apar in --decor (mesh-ul lor intra in coacerea DecorManual): cota din --scan, teren plat
     "B_T1_Mosor": 24.67, "B_T2_Mosor": 15.67, "B_T1_Mosor2": 24.37, "B_Ac2_Mosor": 11.07, "B_T3_Mosor": 6.67,
 }

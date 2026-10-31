@@ -30,6 +30,11 @@
 # 1,6, 25 m adancime, +-12 m dincolo de tablier) sau in plasa apei; o piesa solida doar ar intarzia repunerea.
 
 _FC = 0.7137
+# probe_manual judeca pe sampler (`ground_y`), care nu modeleaza peretii cheiului (da fundul sau buza): cu
+# metadata asta, cand sampler-ul si terenul randat difera cu > 1,5 m, se judeca pe raycast (ca ZonaB pe
+# Transfagarasan). Stancile din perete sunt in plus `scufundat` (spatele in perete prin proiect; sonda
+# cere ca varful sa iasa din teren).
+ZONE_META = {"ref_teren_raycast": True}
 
 # Profilul peretelui din AVAL al cheiului (cel care sta cu fata spre camera cand intri pe pod), masurat cu
 # `--scan=0.703,0.724,0.001,-52,12,4 --under` (31 oct 2026): (along fata de centrul viaductului, cota).
@@ -54,7 +59,7 @@ def _vegetatie_perete():
     Runda 1 a criticului orb pe F: "peretii sunt planuri gri netede, un sant de beton; in bara versantii
     sunt plini de ginestra si castani printre stanci, pana la apa". Runda 2, dupa o prima acoperire cu
     piese mici: "cateva tufe si pietre plutesc pe perete departe una de alta, ca niste abtibilduri". Deci
-    acum: trei randuri de AFLORIMENTE mari (blocuri informi la 3-4x, 9-12 m, cu spatele in perete),
+    acum: trei randuri de AFLORIMENTE (blocuri informi la 2,2-3x, 5-9 m, cu spatele in perete),
     decalate de la un rand la altul ca sa se suprapuna, si in "crapaturile" dintre ele tufe de ginestra
     lipite cate doua-trei si castani mici; jos, bolovani care intra in apa. Fantome, ca tot ce e in chei.
     """
@@ -72,11 +77,15 @@ def _vegetatie_perete():
                 # doar stancile din doua in doua, iar in locul celorlalte, ginestra pana la apa (mai jos).
                 continue
             glb = "rocks/block_informe_a.glb" if (li + ri) % 2 else "rocks/block_informe_b.glb"
-            sc = [3.4, 3.9, 3.0, 3.6, 4.1, 3.2][(li + 2 * ri) % 6] * (0.7 if ri == 0 else 1.0)
+            sc = [2.4, 2.8, 2.2, 2.6, 3.0, 2.3][(li + 2 * ri) % 6] * (0.8 if ri == 0 else 1.0)
             a_ = a + (0.5 if li % 2 else -0.4)
-            y = _y_perete(a_ - 0.9 * sc) - 0.4
+            # originea cu o treime din inaltimea stancii SUB peretele de la origine: spatele intra in perete,
+            # varful iese cu ~2/3 din ea (probe_manual: `scufundat`, varful trebuie sa iasa cu >= 0,8 m).
+            # Prima varianta (cota muchiei din aval, la 3-4x) ingropa tot randul de sus: varf -2 .. -16 m.
+            h_ = (3.0 if glb.endswith("_a.glb") else 1.6) * sc
+            y = _y_perete(a_) - 0.3 * h_
             out.append((f"F_Stanca{k:02d}", glb, _FC, lat, (li * 53 + ri * 97) % 360,
-                        {"along": a_, "scale": sc, "coliziune": "none", "y": round(y, 2)}))
+                        {"along": a_, "scale": sc, "coliziune": "none", "y": round(y, 2), "scufundat": True}))
             k += 1
     # tufele din crapaturi: intre stancile fiecarui rand si pe muchia de sus a randului de dedesubt
     k = 0
@@ -89,13 +98,13 @@ def _vegetatie_perete():
             if (li + ri) % 3 == 2:
                 glb, sc = ("plants/chestnut_tree_a.glb" if li % 2 else "plants/chestnut_tree_b.glb"), 0.65
                 out.append((f"F_PereteCastan{k:02d}", glb, _FC, lat, (li * 71) % 360,
-                            {"along": a_, "scale": sc, "coliziune": "none", "y": round(_y_perete(a_ - 0.5) + 0.8, 2)}))
+                            {"along": a_, "scale": sc, "coliziune": "none", "y": round(_y_perete(a_) - 0.4, 2)}))
             else:
                 for di, dl in enumerate((-1.1, 1.0)):
                     out.append((f"F_PereteGinestra{k:02d}{di}", "plants/ginestra_fiorita.glb", _FC, lat + dl,
                                 (li * 37 + di * 120) % 360,
                                 {"along": a_ + 0.3 * di, "scale": 2.3 + 0.2 * di, "coliziune": "none",
-                                 "y": round(_y_perete(a_ - 0.8) + 1.2, 2)}))
+                                 "y": round(_y_perete(a_ + 0.3 * di) - 0.4, 2)}))
             k += 1
     # ginestra si castani mici pe malul apei, in golurile randului de jos (vegetatia pana la apa)
     for i, lat in enumerate([-11.0, -27.0, -43.0]):

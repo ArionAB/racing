@@ -89,8 +89,9 @@ def _sir_dreapta():
                      "coliziune": "none", "y": 44.45}))
         if k % 3 == 1:
             # si varsat peste buza, dincolo de blocuri
-            out.append((f"E_SirBuza{k:02d}", "rocks/rubble_pile_a.glb", _F0, 12.3, jit[(k + 5) % len(jit)] * 25.0,
-                        {"along": a_c, "scale": 1.1, "coliziune": "none", "y": 44.0}))
+            # (lat 11,3: centrul pe banca, marginea peste buza; la 12,3 jumatate atarna peste treapta E1)
+            out.append((f"E_SirBuza{k:02d}", "rocks/rubble_pile_a.glb", _F0, 11.3, jit[(k + 5) % len(jit)] * 25.0,
+                        {"along": a_c, "scale": 1.1, "coliziune": "none", "y": 44.1}))
         if k % 2 == 0:
             out.append((f"E_SirAschie{k:02d}", "rocks/block_informe_b.glb", _F0, 8.4 + lat_j[k % len(lat_j)],
                         jit[(k + 3) % len(jit)] * 30.0, {"along": a_c + half + 0.2,

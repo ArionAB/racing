@@ -1083,9 +1083,14 @@ excavator_soft_contact = true
         import importlib
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         decor_zones = []
+        zone_meta = {}
         for zl in "abcdefgh":
             zm = importlib.import_module(f"carrara_decor.zona_{zl}")
             decor_zones.append((f"Zona{zl.upper()}", list(zm.ITEMS)))
+            # ZONE_META (optional, din fisierul zonei): metadata pe nodul ZonaX (ex. `ref_teren_raycast` pentru
+            # probe_manual, cand decorul sta pe peretii unei rape pe care sampler-ul nu-i modeleaza). Zonele fara
+            # ea ies identic.
+            zone_meta[f"Zona{zl.upper()}"] = dict(getattr(zm, "ZONE_META", {}))
             for k_, v_ in zm.KIT_Y.items():
                 assert k_ not in KIT_Y, f"cota dublata: {k_}"
                 KIT_Y[k_] = v_
@@ -1511,6 +1516,8 @@ visible = false
             kit_nodes += f"""
 [node name="{zname}" type="Node3D" parent="DecorManual"]
 """
+            for mk_, mv_ in zone_meta.get(zname, {}).items():
+                kit_nodes += f"metadata/{mk_} = {'true' if mv_ is True else mv_}\n"
             for it_ in items:
                 nm, path, fr_, lat, yaw = it_[:5]
                 opt = it_[5] if len(it_) > 5 else {}
@@ -1543,6 +1550,10 @@ transform = {xf_txt}
                         kit_nodes += f'phase_offset_deg = {float(sp_["phase"])}\n'
                 if "coliziune" in opt:
                     kit_nodes += f'metadata/coliziune = "{opt["coliziune"]}"\n'
+                # "scufundat": piesa infipta PRIN PROIECT (stanca cu spatele intr-un perete de rapa); probe_manual
+                # o iarta doar daca varful ei iese din teren cu SUNK_MIN_VISIBLE.
+                if opt.get("scufundat", False):
+                    kit_nodes += "metadata/scufundat = true\n"
                 dt = min(math.hypot(p_[0] - a, p_[2] - c) for a, c in truck_pts)
                 dd = math.hypot(p_[0] - od[0] - (-fzd) * -7.0, p_[2] - od[2] - fxd * -7.0)
                 flag = "" if dt > 6.0 and dd > 15.0 else "  <-- PREA APROAPE"

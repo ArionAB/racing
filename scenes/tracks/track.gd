@@ -4956,6 +4956,12 @@ func _code_points() -> Array[Vector3]:
 ## iar in canal — bucla masurata pe Track17 seed 2 (6 repuneri, 1 ejectare).
 @export var ai_progress_reset_on_respawn: bool = false
 
+## Terenul de langa o banda secundara urmareste PANTA ei, nu treptele punctelor
+## coapte (vezi `TrackSideSampler.smooth_branch_level`). Fals = bit-identic pe
+## pistele existente. Pornit pe Stromboli (#616): scurtatura de 17% avea un prag
+## de pana la 0,9 m la marginea drumului si nu se putea urca inapoi pe ea.
+@export var branch_smooth_level: bool = false
+
 ## Muchii FARA PARAPET pe care AI-ul le trateaza ca pe o prapastie, nu ca pe
 ## o margine de asfalt: fiecare e (frac_start, frac_end, latura, margine_m),
 ## fractii pe LUNGIME (ca in ProbeRace), latura -1 = stanga sensului de mers,
@@ -5742,6 +5748,7 @@ func rebuild() -> void:
 	# lista de argumente, si date DUPA constructie — samplerul le ridica dupa
 	# rape. Goala pe orice pista fara noduri cu flagul.
 	_sampler.late_peaks = _island_peaks
+	_sampler.smooth_branch_level = branch_smooth_level
 	# Debleele, tot dupa constructie: lista goala pe orice pista fara ele.
 	_sampler.cuttings = _cuttings()
 	_sampler.ravine_capes = _ravine_capes()
@@ -17682,7 +17689,39 @@ func recovery_transform(index: int, backoff_m: float,
 		var clamped := _clamp_respawn_past_gap(index, backoff_m)
 		if clamped >= 0:
 			return r.recovery_transform(clamped, 0.0)
+		backoff_m = _runup_backoff(index, backoff_m)
 	return r.recovery_transform(index, backoff_m)
+
+
+## Retragerea de repunere ridicata astfel incat masina sa porneasca la cel putin
+## `respawn_runup_m` metri inaintea buzei unei sarituri (canal cu elan declarat),
+## daca n-a trecut inca golul. Intoarce `backoff_m` neschimbat cand regula nu se
+## aplica: niciun canal cu `respawn_runup_m`, masina e deja dincolo de buza de
+## aterizare, sau retragerea ei ajunge deja destul de departe. Cresterea e
+## relativa la `backoff_m`, deci reincercarile `_clear_recovery_transform` (care
+## mai retrag cu 4 m) merg mai departe decat punctul minim, nu pe loc.
+func _runup_backoff(index: int, backoff_m: float) -> float:
+	if _channels.is_empty():
+		return backoff_m
+	var n := baked.size()
+	if n < 2 or _dists.size() <= n or _dists[n] <= 0.0:
+		return backoff_m
+	var spacing := _dists[n] / float(n)
+	for ch: Dictionary in _channels:
+		var runup := float(ch.get("respawn_runup_m", 0.0))
+		if runup <= 0.0 or not bool(ch.get("jump", false)) or bool(ch.get("ford", false)):
+			continue
+		var near: int = ch["near"]
+		var far: int = ch["far"]
+		# Pozitia masinii fata de buza de plecare, in indici, cu semn (pe bucla).
+		var rel := posmod(index - near + n / 2, n) - n / 2
+		if rel > posmod(far - near, n):
+			continue # a trecut golul: regula lui respawn_past_gap, nu a elanului
+		# +1 pas: recovery_transform rotunjeste retragerea in jos la un numar intreg de puncte.
+		var need := (float(rel) * spacing) + runup + spacing
+		if need > backoff_m:
+			backoff_m = need
+	return backoff_m
 
 
 ## Cat de departe DUPA buza de aterizare se opreste o repunere care ar fi cazut

@@ -61,10 +61,12 @@ ITEMS = [
     ('A_R1c', 'rocks/marble_block_c.glb', 0.03, 9.9, 90.0, {'along': -3.7, 'scale': 1.2}),
     ('A_R1d', 'rocks/marble_block_a.glb', 0.03, 10.9, 20.0, {'along': 1.4, 'scale': 1.1}),
     ('A_R1e', 'rocks/block_informe_b.glb', 0.03, 9.6, 35.0, {'along': 5.8, 'scale': 0.9}),
-    ('A_R2a', 'rocks/block_stack_a.glb', 0.0415, 10.0, 6.0, {'along': 0.0, 'scale': 1.4}),
-    ('A_R2b', 'rocks/block_stack_b.glb', 0.0415, 9.9, -4.0, {'along': -3.3, 'scale': 1.2}),
-    ('A_R2c', 'rocks/marble_block_b.glb', 0.0415, 10.6, 15.0, {'along': 3.0, 'scale': 1.1}),
-    ('A_R2d', 'rocks/block_informe_b.glb', 0.0415, 9.7, -30.0, {'along': -6.3}),
+    # R2 sta in coada excavatorului (0.04): pe ProbeRace integrat (s14/32) o masina s-a intepenit intre
+    # berma si A_R2a (lat 6.3). Dincolo de berma fizica piesele raman doar vizuale (fantome).
+    ('A_R2a', 'rocks/block_stack_a.glb', 0.0415, 10.0, 6.0, {'coliziune': 'none', 'along': 0.0, 'scale': 1.4}),
+    ('A_R2b', 'rocks/block_stack_b.glb', 0.0415, 9.9, -4.0, {'coliziune': 'none', 'along': -3.3, 'scale': 1.2}),
+    ('A_R2c', 'rocks/marble_block_b.glb', 0.0415, 10.6, 15.0, {'coliziune': 'none', 'along': 3.0, 'scale': 1.1}),
+    ('A_R2d', 'rocks/block_informe_b.glb', 0.0415, 9.7, -30.0, {'coliziune': 'none', 'along': -6.3}),
     # Liziera verde-galbena sub platou (dreapta): castanii SUB fata de 10 m, doar coroana trece de buza;
     # ginestra pe panta lina de la start (joasa: nu acopera vederea spre balti).
     ('A_Castan1', 'res://assets/models/transfagarasan/plants/beech_tree_a.glb', 0.028, 21.0, 30.0, {'coliziune': 'trunk'}),

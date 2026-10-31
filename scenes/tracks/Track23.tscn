@@ -484,15 +484,19 @@ transform = Transform3D(0.51622, 0.0, -0.73724, 0.0, 0.9, 0.0, 0.73724, 0.0, 0.5
 
 [node name="A_R2a" parent="DecorManual/ZonaA" instance=ExtResource("k_block_stack_a")]
 transform = Transform3D(0.14634, 0.0, -1.39233, 0.0, 1.4, 0.0, 1.39233, 0.0, 0.14634, -62.185, 24.67, -95.0)
+metadata/coliziune = "none"
 
 [node name="A_R2b" parent="DecorManual/ZonaA" instance=ExtResource("k_block_stack_b")]
 transform = Transform3D(-0.08371, 0.0, -1.19708, 0.0, 1.2, 0.0, 1.19708, 0.0, -0.08371, -65.485, 24.67, -95.1)
+metadata/coliziune = "none"
 
 [node name="A_R2c" parent="DecorManual/ZonaA" instance=ExtResource("k_marble_block_b")]
 transform = Transform3D(0.2847, 0.0, -1.06252, 0.0, 1.1, 0.0, 1.06252, 0.0, 0.2847, -59.185, 24.67, -94.4)
+metadata/coliziune = "none"
 
 [node name="A_R2d" parent="DecorManual/ZonaA" instance=ExtResource("k_block_informe_b")]
 transform = Transform3D(-0.5, 0.0, -0.86603, 0.0, 1.0, 0.0, 0.86603, 0.0, -0.5, -68.485, 24.67, -95.3)
+metadata/coliziune = "none"
 
 [node name="A_Castan1" parent="DecorManual/ZonaA" instance=ExtResource("k_beech_tree_a")]
 transform = Transform3D(0.5, 0.0, -0.86603, 0.0, 1.0, 0.0, 0.86603, 0.0, 0.5, -89.815, 14.12, -84.0)

@@ -31,7 +31,6 @@
 # (x -199) pana la iesirea coridorului (x -27), deci un `along` negativ cade pe grila, nu pe alt tronson.
 
 _F0 = 0.0  # linia de start
-_BL = 'res://assets/models/transfagarasan/plants/'
 
 ITEMS = [
     # ---- 1. langa grila, la piciorul falezei portalului Marmifera: cisternele albastre (bara: langa portal)
@@ -54,8 +53,9 @@ ITEMS = [
     # 0.01). Inlocuitor: stiva de trei blocuri la 2,2x (5,1 x 7,9 x 4,7 m), piatra crem pe paleta.
     # `colonnata_house_b` a fost incercata intai: acoperisul rosu si zidaria gri-albastra (casa nu are
     # inca maparea de clase pe Carrara) ieseau din paleta barei.
-    # inlocuit la integrare cu stone_tower.glb
-    ('A_Turn', 'rocks/block_stack_b.glb', _F0, -21.5, 2.0, {'along': 33.0, 'scale': 2.2}),
+    # Integrare: turnul de piatra din kit (stone_tower.glb, corp 3,6 x 3,6 m, 8,1 m pana la parapet; grinda
+    # scripetelui pe +X, spre drum la yaw 0 -> 90 o intoarce in lung).
+    ('A_Turn', 'buildings/stone_tower.glb', _F0, -21.5, 2.0, {'along': 33.0}),
     # Mijlocul curtii (13-25 m) intre utilaje: moloz si blocuri informe, ca bara sa nu aiba pete goale.
     ('A_Moloz1', 'rocks/rubble_pile_a.glb', _F0, -21.0, 30.0, {'along': 47.0}),
     ('A_Informe1', 'rocks/block_informe_a.glb', _F0, -21.5, 40.0, {'along': 24.0, 'scale': 1.3}),
@@ -75,21 +75,21 @@ ITEMS = [
     # niveluri la fel (prea multe containere), iar IN FATA gramezii P1 sta magazia cu acoperis de tabla si
     # cisternele albastre, cu turnul deasupra lor, in cadrul de la 0.01. Muzeul s-a mutat pe dreapta (ca in bara).
     # Magazia: doua containere lipite pe lung (6 x 5,2 m).
-    # inlocuit la integrare cu tin_shed.glb (ambele piese devin una)
-    ('A_SopronA', 'buildings/office_container.glb', _F0, -13.6, 90.0, {'along': 29.0}),
-    ('A_SopronB', 'buildings/office_container.glb', _F0, -16.2, 90.0, {'along': 29.0}),
+    # Integrare: magazia din kit (tin_shed.glb, corp 6,0 x 4,4 m, coama 3,64 m, sopronul lipit pe +X).
+    ('A_Sopron', 'buildings/tin_shed.glb', _F0, -15.6, 90.0, {'along': 28.0}),
     ('A_CisternaC', 'props/water_tank.glb', _F0, -12.6, 0.0, {'along': 35.4}),
     ('A_CisternaD', 'props/water_tank.glb', _F0, -15.5, 0.0, {'along': 36.2}),
     # Verdele curtii: castani intre turn si birou si dupa magazie, ginestra la piciorul turnului.
-    # inlocuit la integrare cu chestnut_tree.glb / ginestra cu flori (numele raman)
-    ('A_Castan4', _BL + 'beech_tree_b.glb', _F0, -27.5, 50.0, {'along': 40.5, 'coliziune': 'trunk'}),
-    ('A_Castan5', _BL + 'beech_tree_a.glb', _F0, -20.0, 160.0, {'along': 72.0, 'coliziune': 'trunk'}),
-    ('A_Castan6', _BL + 'beech_tree_a.glb', _F0, -22.0, -70.0, {'along': 1.0, 'coliziune': 'trunk'}),
-    ('A_Ginestra6', 'res://assets/models/stromboli/plants/ginestra_bush.glb', _F0, -19.0, 20.0, {'along': 38.0, 'scale': 1.3}),
-    ('A_Ginestra7', 'res://assets/models/stromboli/plants/ginestra_bush.glb', _F0, -25.6, 120.0, {'along': 36.5, 'scale': 1.3}),
-    # Dreapta: doi castani pe banca, dincolo de berma (fantome).
-    ('A_Castan7', _BL + 'beech_tree_b.glb', _F0, 14.0, 10.0, {'along': 19.0, 'coliziune': 'none'}),
-    ('A_Castan8', _BL + 'beech_tree_a.glb', _F0, 12.0, 200.0, {'along': 37.0, 'coliziune': 'none'}),
+    # Integrare: castanul (chestnut_tree_a/b.glb) si ginestra infloritoare (ginestra_fiorita.glb) din kit.
+    ('A_Castan4', 'plants/chestnut_tree_b.glb', _F0, -27.5, 50.0, {'along': 40.5, 'coliziune': 'trunk'}),
+    ('A_Castan5', 'plants/chestnut_tree_a.glb', _F0, -20.0, 160.0, {'along': 72.0, 'coliziune': 'trunk'}),
+    ('A_Castan6', 'plants/chestnut_tree_a.glb', _F0, -22.0, -70.0, {'along': 1.0, 'coliziune': 'trunk'}),
+    ('A_Ginestra6', 'plants/ginestra_fiorita.glb', _F0, -19.0, 20.0, {'along': 38.0, 'scale': 1.3}),
+    ('A_Ginestra7', 'plants/ginestra_fiorita.glb', _F0, -25.6, 120.0, {'along': 36.5, 'scale': 1.3}),
+    # Dreapta: doi castani pe POLITA de sub buza (+20,2, treptele lui B; buza e la lat +12,5): doar coroana
+    # trece de buza, ca A_Castan1-3. Fantome.
+    ('A_Castan7', 'plants/chestnut_tree_b.glb', _F0, 14.5, 10.0, {'along': 19.0, 'coliziune': 'none'}),
+    ('A_Castan8', 'plants/chestnut_tree_a.glb', _F0, 15.5, 200.0, {'along': 37.0, 'coliziune': 'none'}),
     # ---- 3. depozitul de blocuri mari (28-34 m): inchide orizontul gol din stanga, ca peretele din bara.
     ('A_D1', 'rocks/block_stack_b.glb', _F0, -30.0, 5.0, {'along': -10.0, 'scale': 2.0}),
     ('A_D2', 'rocks/marble_block_c.glb', _F0, -31.5, 86.0, {'along': -3.0, 'scale': 2.0}),
@@ -147,24 +147,24 @@ ITEMS = [
     ('A_CiobM2', 'rocks/block_informe_b.glb', _F0, -27.0, -20.0, {'coliziune': 'none', 'along': 18.0, 'scale': 0.8}),
     ('A_CiobR1', 'rocks/marble_block_a.glb', _F0, 8.6, -15.0, {'coliziune': 'none', 'along': 12.0, 'scale': 0.5}),
     ('A_CiobR2', 'rocks/rubble_pile_b.glb', _F0, 9.5, 40.0, {'coliziune': 'none', 'along': 19.5, 'scale': 0.5}),
-    ('A_CiobR3', 'rocks/block_informe_b.glb', _F0, 12.6, 80.0, {'coliziune': 'none', 'along': 22.5, 'scale': 0.5}),
+    ('A_CiobR3', 'rocks/block_informe_b.glb', _F0, 11.0, 80.0, {'coliziune': 'none', 'along': 22.5, 'scale': 0.5}),
     ('A_CiobR4', 'rocks/marble_block_b.glb', _F0, 9.0, 25.0, {'coliziune': 'none', 'along': 34.5, 'scale': 0.4}),
-    ('A_CiobR5', 'rocks/rubble_pile_a.glb', _F0, 12.0, -30.0, {'coliziune': 'none', 'along': 37.0, 'scale': 0.5}),
+    ('A_CiobR5', 'rocks/rubble_pile_a.glb', _F0, 11.0, -30.0, {'coliziune': 'none', 'along': 37.0, 'scale': 0.5}),
     # ---- dreapta: cordonul de blocuri pe banca dintre berma si buza (FANTOME, dincolo de berma).
     ('A_RGa', 'rocks/block_stack_a.glb', _F0, 10.0, 4.0, {'coliziune': 'none', 'along': -17.0, 'scale': 1.2}),
     ('A_RGb', 'rocks/marble_block_c.glb', _F0, 10.4, 88.0, {'coliziune': 'none', 'along': -13.2}),
-    ('A_RGc', 'rocks/marble_block_a.glb', _F0, 12.0, 25.0, {'coliziune': 'none', 'along': -10.8}),
+    ('A_RGc', 'rocks/marble_block_a.glb', _F0, 10.8, 25.0, {'coliziune': 'none', 'along': -10.8}),
     ('A_RMa', 'rocks/block_stack_b.glb', _F0, 10.0, -3.0, {'coliziune': 'none', 'along': 2.0, 'scale': 1.3}),
     ('A_RMb', 'rocks/marble_block_b.glb', _F0, 10.5, 10.0, {'coliziune': 'none', 'along': 5.6}),
     ('A_RLampa', 'props/work_lamp.glb', _F0, 9.2, 200.0, {'coliziune': 'none', 'along': 9.0}),
     ('A_RSanie', 'props/museum_set_sled.glb', _F0, 10.8, 80.0, {'coliziune': 'none', 'along': 15.0, 'scale': 1.4}),
     # Muzeul la scara mare pe banca din dreapta (in bara: roata si vagonetul la dreapta magaziei): roata de
     # fir 3,2 m si vagonetul cu bloc.
-    ('A_MuzeuRoata', 'props/museum_set_wheel.glb', _F0, 11.6, -70.0, {'coliziune': 'none', 'along': 25.5, 'scale': 1.6}),
+    ('A_MuzeuRoata', 'props/museum_set_wheel.glb', _F0, 10.4, -70.0, {'coliziune': 'none', 'along': 25.5, 'scale': 1.6}),
     ('A_MuzeuVagonet', 'props/museum_set_cart.glb', _F0, 10.6, 4.0, {'coliziune': 'none', 'along': 30.5, 'scale': 1.6}),
     ('A_RSa', 'rocks/block_stack_a.glb', _F0, 10.0, 6.0, {'coliziune': 'none', 'along': 41.0, 'scale': 1.3}),
     ('A_RSb', 'rocks/marble_block_c.glb', _F0, 10.6, 82.0, {'coliziune': 'none', 'along': 44.5}),
-    ('A_RSc', 'rocks/block_informe_a.glb', _F0, 11.2, 30.0, {'coliziune': 'none', 'along': 47.5}),
+    ('A_RSc', 'rocks/block_informe_a.glb', _F0, 10.6, 30.0, {'coliziune': 'none', 'along': 47.5}),
     ('A_RTa', 'rocks/block_stack_b.glb', _F0, 10.0, -5.0, {'coliziune': 'none', 'along': 52.0, 'scale': 1.3}),
     ('A_RTb', 'rocks/marble_block_a.glb', _F0, 10.8, 15.0, {'coliziune': 'none', 'along': 55.5}),
     # Lampa de lucru inaintea excavatorului-hazard (valul 1).
@@ -181,14 +181,14 @@ ITEMS = [
     ('A_R2d', 'rocks/block_informe_b.glb', 0.0415, 9.7, -30.0, {'coliziune': 'none', 'along': -6.3}),
     # Liziera verde-galbena sub platou (dreapta): castanii SUB fata de 10 m, doar coroana trece de buza;
     # ginestra pe panta lina de la start.
-    ('A_Castan1', _BL + 'beech_tree_a.glb', 0.028, 21.0, 30.0, {'coliziune': 'trunk'}),
-    ('A_Castan2', _BL + 'beech_tree_b.glb', 0.036, 23.0, -40.0, {'coliziune': 'trunk'}),
-    ('A_Castan3', _BL + 'beech_tree_a.glb', 0.055, 22.0, 110.0, {'coliziune': 'trunk'}),
-    ('A_Ginestra1', 'res://assets/models/stromboli/plants/ginestra_bush.glb', 0.004, 17.0, 0.0, {'scale': 1.3}),
-    ('A_Ginestra2', 'res://assets/models/stromboli/plants/ginestra_bush.glb', 0.009, 19.0, 70.0, {'scale': 1.3}),
-    ('A_Ginestra3', 'res://assets/models/stromboli/plants/ginestra_bush.glb', 0.0135, 17.5, 140.0, {'scale': 1.3}),
-    ('A_Ginestra4', 'res://assets/models/stromboli/plants/ginestra_bush.glb', 0.0185, 18.0, 210.0, {'scale': 1.3}),
-    ('A_Ginestra5', 'res://assets/models/stromboli/plants/ginestra_bush.glb', 0.0055, 21.0, 280.0, {'scale': 1.3}),
+    ('A_Castan1', 'plants/chestnut_tree_a.glb', 0.028, 21.0, 30.0, {'coliziune': 'trunk'}),
+    ('A_Castan2', 'plants/chestnut_tree_b.glb', 0.036, 23.0, -40.0, {'coliziune': 'trunk'}),
+    ('A_Castan3', 'plants/chestnut_tree_a.glb', 0.055, 22.0, 110.0, {'coliziune': 'trunk'}),
+    ('A_Ginestra1', 'plants/ginestra_fiorita.glb', 0.004, 17.0, 0.0, {'scale': 1.3}),
+    ('A_Ginestra2', 'plants/ginestra_fiorita.glb', 0.009, 19.0, 70.0, {'scale': 1.3}),
+    ('A_Ginestra3', 'plants/ginestra_fiorita.glb', 0.0135, 17.5, 140.0, {'scale': 1.3}),
+    ('A_Ginestra4', 'plants/ginestra_fiorita.glb', 0.0185, 18.0, 210.0, {'scale': 1.3}),
+    ('A_Ginestra5', 'plants/ginestra_fiorita.glb', 0.0055, 21.0, 280.0, {'scale': 1.3}),
 ]
 
 # Cotele: terenul minim de sub amprenta - 3 cm, din `ProbeCarraraMontaj -- --decor` (piesele cu mai multe
@@ -207,7 +207,7 @@ KIT_Y = {
     "A_RGa": 24.72, "A_RGb": 24.62, "A_RGc": 24.62, "A_RMa": 24.62, "A_RMb": 24.62, "A_RLampa": 24.62,
     "A_RSanie": 24.60, "A_RSa": 24.62, "A_RSb": 24.62, "A_RSc": 24.62, "A_RTa": 24.62, "A_RTb": 24.62,
     # Runda 2, acelasi scan.
-    "A_SopronA": 24.52, "A_SopronB": 24.52, "A_CisternaC": 24.52, "A_CisternaD": 24.52, "A_Castan4": 24.42, "A_Castan5": 24.32, "A_Castan6": 24.62, "A_Ginestra6": 24.52, "A_Ginestra7": 24.42, "A_Castan7": 24.22, "A_Castan8": 24.62,
+    "A_Sopron": 24.52, "A_CisternaC": 24.52, "A_CisternaD": 24.52, "A_Castan4": 24.42, "A_Castan5": 24.32, "A_Castan6": 24.62, "A_Ginestra6": 24.52, "A_Ginestra7": 24.42, "A_Castan7": 20.17, "A_Castan8": 20.17,
     "A_Rezervor": 24.39, "A_Foreza": 24.37,
     # Runda 3, peretele: din scanul lateral -60..-30 (teren 24,3-24,9; capetele spre faleza portalului urca).
     "A_Perete1_0": 24.75, "A_Perete1_1": 24.30, "A_Perete1_2": 24.30, "A_Perete1_3": 24.30, "A_Perete1_4": 24.30, "A_Perete1_5": 24.30, "A_Perete1_6": 24.30, "A_Perete1_7": 24.30, "A_Perete1_8": 24.30, "A_Perete2_0": 24.75, "A_Perete2_1": 24.30, "A_Perete2_2": 24.30, "A_Perete2_3": 24.30, "A_Perete2_4": 24.30, "A_Perete2_5": 24.30, "A_Perete2_6": 24.30,

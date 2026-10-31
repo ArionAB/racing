@@ -501,7 +501,13 @@ if OUT_PATH:
     # adevarate sunt `custom_bench_patches` (fata verticala, bancul plat de BENCH_W m inaintea ei).
     ravines = [
         # 0: cheiul Ponti di Vara: viaduct pe ambele parti, 30 m de gol, podea la +17.
-        (LEN("F pod", -15.0), LEN("F pod", 15.0), 40, 0),
+        # ADANCIMEA 400, nu 40 (POI F, gauntlet 31 oct 2026): sapatura in lung e `_ring_window` cu
+        # RAVINE_FADE_FRAC 0,02 (~42 m de rampa), iar o rapa de 30 m ajunge doar la 0,36 din ea. Cu 40
+        # declarati cheiul iesea un BOL de 14 m (fundul la +28,4, scan --under), deci arcele de margine ale
+        # viaductului (nasterea la +37,5) stateau ingropate si pilele de 26 m in pamant pana la jumatate.
+        # Cu 400 podeaua (+17) e atinsa la ~2,7 m de capat: peretii cad aproape drept la culei (+-13,2 m) si
+        # toate trei arcele raman libere. Intervalul +-16 (nu 15): peretele de 2,7 m sta in culee, nu in arc.
+        (LEN("F pod", -16.0), LEN("F pod", 16.0), 400, 0),
         # 1: fundul carierei C, pe DREAPTA (S): baltile stau pe podea, nu pe un platou de +20.
         (LEN("C intrare podea", -20.0), LEN("D rampa jos"), 40, 1),
     ]
@@ -557,6 +563,21 @@ if OUT_PATH:
                    '"water_dim": 0.95,\n"water_foam": 0.0,\n"water_crest": 0.0,\n"water_band": 0.0,\n'
                    '"water_wave_amp_k": 0.0,\n"water_glint": 0.08\n}')
 
+    # ---- TORENTUL DE SUB PONTI DI VARA (POI F, gauntlet 31 oct 2026; brief par.2 randul F: "parau alb-gri jos",
+    # bara_poi_F: torent turcoaz printre bolovani). Apa rapei 0 (cheiul) la TORENT_Y, cu 35 cm peste podeaua de
+    # +16,7 si cu 13 cm peste talpa pilelor viaductului (+16,92): pilele stau IN apa, nu deasupra ei. Podeaua e
+    # plata pe toata latimea, deci apa o acopera toata (celulele de grila au 7,9 m; un parau mai ingust decat
+    # podeaua de ~15 m nu se poate desena cu ele). Stil PROPRIU, nu cel al baltilor, numai pentru `fill_circle`:
+    # semintele apei sunt celulele sub cota a caror sosea cea mai apropiata e in intervalul rapei, iar treptele
+    # E3-E5 ale amfiteatrului (+18 .. +9, la dreapta podului, lat 30-45) ar fi intrat si ele, cu o panza de apa
+    # plutind la +17 peste cariera. Cercul (centrul pe podea, raza 31 m) tine apa intre peretii cheiului.
+    # Costul: +1 material (al doilea stil de apa). Aceiasi parametri ca baltile (turcoaz opac, mat).
+    TORENT_Y = 17.05
+    torent_circle = (-153.0, 134.0, 31.0)     # Godot x, z, raza: podeaua cheiului, lat -52 .. +9
+    torent_style = balti_style.replace('"ravines": Array[int]([1]),',
+                                       '"ravines": Array[int]([0]),\n"fill_circle": Vector3(%s, %s, %s),' % torent_circle)
+    assert torent_style != balti_style
+
     # ---- RAVANETO-UL (POI G, brief par.2 randul G): panta de moloz care urca pe DREAPTA sensului, din
     # interiorul buclei. Mecanismul e DEBLEUL (`custom_cuttings`, TrackSideSampler._lift_cuttings): un umar plat
     # dincolo de asfalt, apoi un perete PLAN cu panta data pana la o buza la cota absoluta, numai pe latura
@@ -601,10 +622,15 @@ if OUT_PATH:
         (LEN("F pod", -55.0), LEN("F pod", 55.0), 0, 2),
     ]
 
-    # ---- sol: drum de praf peste tot, mai putin podul si Marmifera; umed pe C
+    # ---- sol: drum de praf pe TOATA bucla; umed pe C.
+    # Valul 2 (31 oct 2026) a scos ultimele doua bucati de asfalt implicit, fiecare constructor pe a lui:
+    # podul F (+-62 m: banda albastru-inchis cu linia de mijloc alba `_build_center_line` pe un viaduct
+    # de caramida din 1876) si tunelul Marmifera H (citea sosea de oras in muntele de marmura, nu fosta
+    # linie ferata de cariera). Doua intervale, nu `custom_road_surface = "dirt"`: tema ramane pe calea
+    # testata de ambii constructori (DirtRoad existent, grip din `loose_grip`, zero materiale noi).
     dirt = [
-        (IDX("F pod", 62.0), IDX("H portal intrare", -2.0)),
-        (IDX("H portal iesire", 2.0), IDX("F pod", -62.0)),
+        (IDX("F pod", 62.0), IDX("F pod", -62.0)),
+        (IDX("F pod", -62.0), IDX("F pod", 62.0)),
     ]
     # Ud doar pana cu 40 m inainte de portal: masinile care alunecau in cotul ud iesisera cu botul
     # pe diagonala in cadrul portalului (ejectare 31 m/s, runda 0).
@@ -641,7 +667,11 @@ wall_m = {w_}
 """ for n_, x_, z_, r_, w_, f_ in BALTI)
 
     # ---- tunelurile: noduri doar-tub la linia de oprire (originea = capatul dinspre start)
-    def tunnel_node(name, tag, tag_end, hw, ceil_h, tail):
+    # Rama si aripile portalului (`frame_class`, `wing_end_height_m`, POI D/H 31 oct 2026): pe clasa
+    # portalului GLB, nu pe beton, iar aripile coboara spre capat (zid-aripa care tine molozul din spate,
+    # zona_d/zona_h). Ambele portaluri GLB sunt pe marmura (`gallery_portal`; `marmifera_portal` din POI H
+    # runda 3, CLASSES_CARRARA), deci rama si aripile la fel. Zero materiale noi.
+    def tunnel_node(name, tag, tag_end, hw, ceil_h, tail, frame_cls="carrara_marble"):
         x, y = pos_at(tag_s[tag])
         x2, y2 = pos_at(tag_s[tag] + 3.0)
         dx, dz = (x2 - x), -(y2 - y)   # directia de mers in lume (gx, gz)
@@ -663,6 +693,8 @@ tunnel_ceiling = {ceil_h}
 camera_tail_m = {tail}
 tube_only = true
 tube_class = "carrara_marble"
+frame_class = "{frame_cls}"
+wing_end_height_m = 1.1
 """
     tunnels_txt = tunnel_node("TunelGalerie", "D portal jos", "D portal sus (E inceput)", 4.0, 9.0, 14.0) \
         + tunnel_node("TunelMarmifera", "H portal intrare", "H portal iesire", 4.0, 7.0, 12.0)
@@ -1059,9 +1091,18 @@ excavator_soft_contact = true
         import importlib
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         decor_zones = []
+        zone_meta = {}
+        forest_zones = []   # G: padurea in masa (MeshForest), vezi blocul "G: PADUREA IN MASA" mai jos
+        forest_glbs = {}
         for zl in "abcdefgh":
             zm = importlib.import_module(f"carrara_decor.zona_{zl}")
             decor_zones.append((f"Zona{zl.upper()}", list(zm.ITEMS)))
+            # ZONE_META (optional, din fisierul zonei): metadata pe nodul ZonaX (ex. `ref_teren_raycast` pentru
+            # probe_manual, cand decorul sta pe peretii unei rape pe care sampler-ul nu-i modeleaza). Zonele fara
+            # ea ies identic.
+            zone_meta[f"Zona{zl.upper()}"] = dict(getattr(zm, "ZONE_META", {}))
+            forest_zones += list(getattr(zm, "FOREST", []))
+            forest_glbs.update(getattr(zm, "FOREST_GLBS", {}))
             for k_, v_ in zm.KIT_Y.items():
                 assert k_ not in KIT_Y, f"cota dublata: {k_}"
                 KIT_Y[k_] = v_
@@ -1466,9 +1507,13 @@ metadata/camera_blocker = true
 """
                 if keep:
                     # Sinele ies 5 m in fata portalului, PE drum (7 cm), in afara tubului: se taie (decizia 6).
+                    # Muschiul (pete verzi saturate pe arc) citea „plastic vopsit" (criticul orb, POI H r1-r2): stins.
                     kit_nodes += f"""metadata/keep_variants = PackedStringArray({", ".join('"%s"' % k for k in keep)})
 
 [node name="Portal_Rail" parent="DecorManual/Portaluri/{nm}"]
+visible = false
+
+[node name="Portal_Moss" parent="DecorManual/Portaluri/{nm}"]
 visible = false
 """
                 print(f"  portal {nm}: fata la ({face[0]:.2f}, {face[1]:.2f}, {face[2]:.2f}), spre exterior ({ox_:+.3f}, {oz_:+.3f}), frac {fr_:.4f}")
@@ -1487,6 +1532,8 @@ visible = false
             kit_nodes += f"""
 [node name="{zname}" type="Node3D" parent="DecorManual"]
 """
+            for mk_, mv_ in zone_meta.get(zname, {}).items():
+                kit_nodes += f"metadata/{mk_} = {'true' if mv_ is True else mv_}\n"
             for it_ in items:
                 nm, path, fr_, lat, yaw = it_[:5]
                 opt = it_[5] if len(it_) > 5 else {}
@@ -1519,10 +1566,75 @@ transform = {xf_txt}
                         kit_nodes += f'phase_offset_deg = {float(sp_["phase"])}\n'
                 if "coliziune" in opt:
                     kit_nodes += f'metadata/coliziune = "{opt["coliziune"]}"\n'
+                # "scufundat": piesa infipta PRIN PROIECT (stanca cu spatele intr-un perete de rapa); probe_manual
+                # o iarta doar daca varful ei iese din teren cu SUNK_MIN_VISIBLE.
+                if opt.get("scufundat", False):
+                    kit_nodes += "metadata/scufundat = true\n"
                 dt = min(math.hypot(p_[0] - a, p_[2] - c) for a, c in truck_pts)
                 dd = math.hypot(p_[0] - od[0] - (-fzd) * -7.0, p_[2] - od[2] - fxd * -7.0)
                 flag = "" if dt > 6.0 and dd > 15.0 else "  <-- PREA APROAPE"
                 print(f"  {zname}/{nm:12s} frac {brow[i_][4]:.4f} lat {lat:+5.1f} y {y_:6.2f}  camion {dt:5.1f} m  turn derrick {dd:5.1f} m{flag}")
+
+        # === G: PADUREA IN MASA (MeshForest, scenes/props/mesh_forest.gd) ====================================
+        # Castanii si ginestra versantilor lui G (brief par.2 randul G: „aici se decide daca pista citeste vara")
+        # sunt sute de arbori: noduri de scena peste ~1000 de piese blocheaza incarcarea (memoria
+        # `decor-in-masa-cere-multimesh`), deci merg in MultiMesh feliat, ca valea de artari de pe Kyoto
+        # (gen_kyoto_route.py, GRUPA PADUREA IN MASA). Zonele sunt DATE, in fisierul zonei (`FOREST`, cu
+        # `FOREST_GLBS` = stem -> GLB); plasarea pe teren real, distanta fata de asfalt si zidul lumii se rezolva
+        # la rulare. Toti arborii de aici sunt FANTOME (MeshForest n-are corpuri): primul rand de langa drum ramane
+        # in ITEMS, cu trunchi. Fara nicio zona `FOREST`, Track23 iese identic la bit.
+        # Treapta grosiera a castanului: cel mai grosier nivel generat (188 de triunghiuri din 4244) topea
+        # coroana in cioburi (vezi `MeshForest.far_lod_min_ratio`); ramane la nivelul care pastreaza macar atat.
+        FOREST_FAR_MIN = 0.12
+        if forest_zones:
+            kit_ext += ('[ext_resource type="Script" path="res://scenes/props/mesh_forest.gd" id="mf_script"]\n'
+                        '[ext_resource type="Script" path="res://scenes/props/mesh_forest_zone.gd" id="mf_zone"]\n')
+            for stem_, path_ in forest_glbs.items():
+                if not path_.startswith("res://"):
+                    path_ = R + path_
+                kit_ext += f'[ext_resource type="PackedScene" path="{path_}" id="mf_{stem_}"]\n'
+            for k_, d_ in enumerate(forest_zones):
+                sp_txt = ", ".join('"%s"' % s_ for s_ in d_.get("species", ()))
+                zw_txt = ", ".join(str(float(w_)) for w_ in d_.get("weights", ()))
+                kit_sub += f"""
+[sub_resource type="Resource" id="MFZ_{k_}"]
+script = ExtResource("mf_zone")
+label = "{d_['label']}"
+kind = {1 if d_.get('kind') == 'disc' else 0}
+species = PackedStringArray({sp_txt})
+weights = PackedFloat32Array({zw_txt})
+spacing = {float(d_.get('spacing', 8.0))}
+edge_clear_m = {float(d_.get('edge_clear_m', 14.0))}
+shadow_m = {float(d_.get('shadow_m', 25.0))}
+view_m = {float(d_.get('view_m', 330.0))}
+max_below_road_m = {float(d_.get('max_below_road_m', 200.0))}
+claim = {"true" if d_.get('claim') else "false"}
+scale_min = {float(d_.get('scale_min', 0.85))}
+scale_max = {float(d_.get('scale_max', 1.2))}
+seed_value = {int(d_.get('seed', 1))}
+"""
+                if d_.get("kind") == "disc":
+                    if "at" in d_:   # (frac pe INDEX, lateral + dreapta): centrul fata de drum, ca piesele din ITEMS
+                        p_c, _d, _i = road_pt(d_["at"][0], d_["at"][1])
+                        cx_, cz_ = p_c[0], p_c[2]
+                    else:
+                        cx_, cz_ = d_["center"]
+                    kit_sub += f"center = Vector3({cx_:.2f}, 0, {cz_:.2f})\nradius = {float(d_['radius'])}\n"
+                else:
+                    kit_sub += (f"frac_from = {d_['frac_from']:.4f}\nfrac_to = {d_['frac_to']:.4f}\n"
+                                f"side = {int(d_.get('side', 0))}\n"
+                                f"lat_min = {float(d_['lat_min'])}\nlat_max = {float(d_['lat_max'])}\n")
+            scenes_txt = ", ".join(f'ExtResource("mf_{s_}")' for s_ in forest_glbs)
+            zones_txt = ", ".join(f'SubResource("MFZ_{k_}")' for k_ in range(len(forest_zones)))
+            kit_nodes += f"""
+[node name="PadureMasa" type="Node3D" parent="."]
+script = ExtResource("mf_script")
+scenes = Array[PackedScene]([{scenes_txt}])
+zones = Array[ExtResource("mf_zone")]([{zones_txt}])
+far_lod_min_ratio = {FOREST_FAR_MIN}
+"""
+            print(f"  padurea in masa: {len(forest_zones)} zone, specii {list(forest_glbs)}")
+        # === sfarsit G: PADUREA IN MASA =====================================================================
 
         kit_ext += "".join(f'[ext_resource type="PackedScene" path="{p}" id="k_{s}"]\n' for s, p in kit_glb.items())
         hz_ext += kit_ext
@@ -1583,8 +1695,8 @@ custom_viaduct_ravines = Array[int]([{", ".join(str(i) for i in viaduct)}])
 custom_viaduct_net_margin = 12.0
 custom_ravine_floors = Array[Vector2]([{fl_txt}])
 custom_ravine_widths = Array[Vector2]([{rw_txt}])
-custom_ravine_water = Array[Vector3]([Vector3(1, {BALTI_Y}, 20.0)])
-custom_water_styles = Array[Dictionary]([{balti_style}])
+custom_ravine_water = Array[Vector3]([Vector3(1, {BALTI_Y}, 20.0), Vector3(0, {TORENT_Y}, 16.0)])
+custom_water_styles = Array[Dictionary]([{balti_style}, {torent_style}])
 custom_cuttings = Array[Vector4]([{cut_txt}])
 custom_cutting_shape = Vector3({RAV_SHOULDER}, {RAV_SLOPE}, {RAV_REACH})
 custom_bench_patches = Array[Dictionary]([{patch_txt}])

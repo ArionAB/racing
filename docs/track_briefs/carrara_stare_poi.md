@@ -1,4 +1,4 @@
-# Carrara — starea POI-urilor după gauntlet, valul 1: A, B, C (31 oct 2026)
+# Carrara — starea POI-urilor după gauntlet (valul 1: A, B, C; valul 2: D–H) (31 oct 2026)
 
 Nota de predare a primului val de decor pe Track23 (temă `carrara`, index 15,
 scena 23). Contractul e `docs/track_briefs/carrara_poi_gauntlet.md`; aici e ce
@@ -127,3 +127,49 @@ A_CiobR3/R5 se muta sub buza (masurat pe toate piesele, inclusiv cele coapte).
 13 / 4 / 24 (repuneri / ejectari / blocaje) — 21 din 24 de blocaje la excavator (0,046-0,052, hazardul
 lui A, ca pe main), zero atingeri de decor, zero incidente la buza T1 (0,078) si la portalul galeriei (0,398).
 Capturi: `img/carrara_poi/a_int2_f001.jpg`, `b_int2_f016.jpg`.
+
+## Valul 2 (31 oct 2026): D, E, F, G, H
+
+Trei constructori Opus pe baza `carrara/poi-abc-v2` (#637), integrați pe `carrara/poi-val2`. Niciun POI n-a
+câștigat orb (0/5, ca toate celelalte); acceptarea e la volan.
+
+| ramura | POI | ieșire orb | ce s-a făcut | cauza sub decor |
+|---|---|---|---|---|
+| `carrara/poi-dh` | D galeria | (b), r1 | aripile portalurilor (cod, `Track._tun_frame`, 14 m beton) pe marmură și în pantă 2,5 → 1,1 m prin două exporturi noi pe `TunnelSignalHazard` (`frame_class`, `wing_end_height_m`; amprentele Track16/Track21 neschimbate); moloz în spatele aripilor; conducta de serviciu în tub (fără coliziune) | „gri-albăstrui, fără planuri tăiate” = culoarea marmurei + relieful |
+| `carrara/poi-dh` | H Marmifera | plafonul de 4 runde | tunelul pe praf (nu mai e asfalt cu linie albă); portalul pe `carrara_marble`, fără mușchi; stânci pe capac și pe umerii movilei; castani, ginestra, excavator parcat | portalul oscilează `tf_stone` (albastru) ↔ marmură (se pierde în tot); tunelurile sunt luminate |
+| `carrara/poi-ef` | E platoul de sus | plafonul de 4 runde | 280 de piese: cordon de blocuri pe buza din dreapta (fantome), perete tăiat în două trepte pe stânga cu gol pentru camionul 2 | grohotișul des din bară e textură pictată |
+| `carrara/poi-ef` | F podul | (c), r3 | podul pe praf; râpa 0 adâncită (+16,7, arcele libere); torentul turcoaz (+1 material); stânci în peretele cheiului, bolovani în apă | peretele de teren de 26 m cu triplanarul întins |
+| `carrara/poi-g-ravaneto` | G ravaneto + Colonnata | (c), r3 | 58 de piese (Colonnata în S2, turnuri, colțul SV) + pădure în masă `PadureMasa` (MeshForest, ~1.890 de instanțe); satul pe marmură + țiglă pe atlas | ravaneto-ul gol cerut de brief, solul rece, lipsește un arbust verde jos |
+
+**Integrarea:** praful a fost unit pe toată bucla (fiecare constructor scosese asfaltul doar de pe zona lui:
+podul F, tunelul H) — două intervale în generator, nu `custom_road_surface = "dirt"`. `world_prop` și generatorul
+au avut conflicte aditive (portalul Marmiferei + satul; `ZONE_META` + `FOREST`). Track23 regenerat. Capturi pe
+cusături (0,70 / 0,725 / 0,83 / 0,935): `img/carrara_poi/val2_cusaturi.jpg` — fără pădure pe pod sau în gura H.
+
+**Respinsă:** propunerea de a termina camionul 2 la capul podului (`b_near(-118, 112)`). Ieșirea lui din drum
+(ultimii ~20 m, până la lat −30) ar cădea pe tablier, deasupra cheiului de 26 m.
+
+**Gărzi pe `carrara/poi-val2`:** verify_local OK (66 de pași); probe_decor **23 de materiale**, 1.571 de desene
+statice (toate feliile LOD ale pădurii; pe cadru: medie 139 / vârf 289, ProbePerf al constructorului G);
+probe_manual 5; ProbeLaneClear 9; ProbeBuried / ProbeLayout / ProbeCarraraMontaj OK.
+
+ProbeRace 32 de seed-uri: **23 / 6 / 23** (repuneri / ejectări / blocaje), față de 13 / 4 / 24 pe #637:
+- excavatorul (0,034–0,052, A, neatins în valul 2): 14 repuneri, 5 ejectări, 20 de blocaje;
+- E/F (0,679–0,699): 8 repuneri, toate la întâlnirea cu camionul 2 la t ≈ 57–61 s — mașini împinse în afara
+  drumului care acum cad în cheiul adâncit; constructorul E/F măsurase aceeași rată (3 / 16);
+- D 0,432: o ejectare în peretele tubului, departe de portaluri (aceeași clasă ca 0,479 din logurile vechi);
+- zero atingeri de decor din valul 2, zero incidente în G.
+
+### Decizii noi pentru dezvoltator
+
+1. **Tunelurile par luminate ziua** (D, H): tema lasă ~35 % din soare în tuburi (`shadow_opacity` 0,65), iar
+   `CameraZone` stinge doar ambientul.
+2. **Sala din galeria D** (stâlpi de marmură, bloc răsturnat, puț de lumină): tubul are o singură lățime (8 m,
+   exact drumul). Planul constructorului: 3 noduri de tunel sau profil variabil, piesa de stâlp, ROCKFALL la 0,48.
+3. **Camionul 2** pe E/F: întâlnirea frontală la t ≈ 60 s e acum principala sursă de repuneri în afara lui A.
+4. **Arbust verde jos** pentru subarboret (G): lipsește din kit.
+5. **Vârful de triunghiuri** cu pădurea: 1,44 M la 0,70 (G văzut de pe pod). Cu `FOREST_FAR_MIN = 0`: 1,10 M,
+   dar coroanele de departe se rup.
+6. **Galbenul excavatorului** e saturat (atlas `Body_Paint`); **o gaură de teren** lângă capacul H, nevăzută
+   din cameră; **treptele amfiteatrului** din dreapta podului (lat +29) — o mașină blocată o dată, în afara
+   plaselor.

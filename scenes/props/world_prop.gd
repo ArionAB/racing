@@ -2277,6 +2277,13 @@ const CLASSES_CARRARA := {
 	"chain_saw_crawler": {"Crawler_Rust": _CRR_RUST},
 	"drill_rig": {"Drill_Rust": _CRR_RUST},
 	"museum_set_wheel": {"Pulley_Rust": _CRR_RUST},
+	# Rezervorul de motorina de la start (POI A): slotul lui portocaliu-saturat citea jucarie in prim-plan
+	# (criticul orb, runda 2 a gauntlet-ului); pe rugina mata, ca utilajele. Un singur nod.
+	"fuel_tank": {"FuelTank_Body": _CRR_RUST},
+	# Biroul de santier (POI A, runda 3): pe `world_material()` stratul triplanar de fibra peste tabla
+	# vopsita (CONCRETE 8 + rama ASPHALT_EDGE) citea scandura maro, „lazi de lemn". `plain` pastreaza
+	# sloturile si opreste doar stratul de detaliu (ca la cruise_boat, Fiordland).
+	"office_container": {"Office_Body": Palette.PLAIN_PREFIX},
 }
 ## Clasele kitului Ha Long (Track22): piatra de carst, pe FISIER si pe numele
 ## nodului. Pana la #598 pista n-avea NICIO intrare aici, deci turnurile,

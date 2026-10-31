@@ -619,6 +619,12 @@ const CLASS_TEXTURES := {
 	# verticale de lemn/sist, iar zidurile gusuku de 8 m ar fi iesit cu scoarta pe
 	# ele. Clasa e NOUA, `coral_rock` ramane neatinsa (stancile Track08).
 	"ok_limestone": "res://assets/textures/classes/coral_rock.png",
+	# CALCARUL DE CARST (Ha Long, #598). Aceeasi roca ca Okinawa, deci aceeasi
+	# dala (`coral_rock`, ridicata o singura data: CLASS_LIFT_SHARED), cu tenta
+	# proprie. Brief halong.md §4 o cerea din prima zi ("karst_limestone") si
+	# nu fusese creata: turnurile, stivele, bolovanii si grota stateau pe atlasul
+	# gol, fara textura de clasa.
+	"karst_limestone": "res://assets/textures/classes/coral_rock.png",
 	# OLANELE RYUKYU (#B8452E, rosu-caramiziu). Dala lui `roof_tiles` ridicata si
 	# tentata: slotul 23 (TILE_TERRACOTTA) iese portocaliu-pal, iar `roof_tiles`
 	# plin e brun-portocaliu (154,113,82), deci nici una nu da rosul din brief.
@@ -1056,6 +1062,11 @@ const CLASS_TINT := {
 	# (0.624, 0.565, 0.434) => multiplicator liniar (0.92, 0.87, 0.65) = in sRGB
 	# (0.965, 0.94, 0.825). INCEPUT DE CALIBRARE, de masurat pe captura de joc.
 	"ok_limestone": Color(0.988, 0.988, 0.945),
+	# Calcarul de carst: gri-crem MAI RECE decat Okinawa, #C4BEAE (196,190,174).
+	# Aceeasi dala ridicata ca `ok_limestone` (media liniara 0.676, 0.651, 0.670);
+	# tinta liniara (0.552, 0.515, 0.423) => multiplicator liniar (0.817, 0.791,
+	# 0.631) = in sRGB (0.92, 0.905, 0.82). INCEPUT DE CALIBRARE, de masurat in joc.
+	"karst_limestone": Color(0.920, 0.905, 0.820),
 	# Olanele (#B8452E = 184,69,46). Dala `roof_tiles` ridicata la 0.60 are media
 	# liniara (0.599, 0.303, 0.153); tinta liniara (0.479, 0.060, 0.027) =>
 	# multiplicator liniar (0.80, 0.20, 0.18) = in sRGB (0.906, 0.48, 0.46).
@@ -1311,6 +1322,8 @@ const CLASS_LIFT := {
 	# Calcarul Ryukyu: dala `coral_rock` are luminanta 0.35 si trebuie sa ajunga
 	# pe un crem deschis (#CFC6B0, 0.78). Vezi CLASS_TINT.
 	"ok_limestone": 0.850,
+	# Calcarul de carst: aceeasi ridicare ca Okinawa (dala imprumutata).
+	"karst_limestone": 0.850,
 	# Olanele Ryukyu: R tinta (0.479 liniar) e peste media dalei `roof_tiles`
 	# (0.357), deci tenta singura nu ajunge. Vezi CLASS_TINT.
 	"ok_roof": 0.600,
@@ -1462,6 +1475,9 @@ const CLASS_TRIPLANAR_SCALE := {
 	# 8 m: la 0.85 o fata prinde 7 repetitii pe inaltime si se citeste tapet.
 	# Mai rar (o repetitie la 1.7 m) cratere mai late, tot la scara de bolovan.
 	"ok_limestone": 0.6,
+	# Calcarul de carst: turnuri de 25-60 m, deci o repetitie la ~3.3 m (nu la
+	# 1.7 m ca pe zidurile gusuku): la 0.6 o fata de turn ar fi iesit tapet.
+	"karst_limestone": 0.3,
 	# Olanele: ~26 coloane de tigla pe repetitie. La 0.2 (5 m) coloana are ~0.19 m,
 	# aproape de nervurile de 0.2 m modelate in geometrie (`Gate_Roof`).
 	"ok_roof": 0.2,
@@ -1835,6 +1851,8 @@ const CLASS_LIFT_SHARED := {
 	"shu_red": "shu_vermilion",
 	# Calota imparte dala ridicata a gresiei (aceeasi imagine, alta tenta): zero VRAM.
 	"mv_cap": "mv_sandstone",
+	# Calcarul de carst imparte dala ridicata a calcarului Ryukyu: zero VRAM.
+	"karst_limestone": "ok_limestone",
 }
 
 static func _class_texture(cls: String) -> Texture2D:

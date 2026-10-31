@@ -40,7 +40,10 @@ func _ready() -> void:
 		# spatele la drum.
 		lines.append('transform = Transform3D(%.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f)' % [
 			b.x.x, b.y.x, b.z.x, b.x.y, b.y.y, b.z.y, b.x.z, b.y.z, b.z.z, pos.x, pos.y, pos.z])
-		lines.append('metadata/coliziune = "none"')
+		# Casele de pe mal stau la 12,5 m de axa, la cota drumului: au corp (hull
+		# implicit). "none" ramane doar pe felinare si neoane (#506).
+		if nm != "casaFmal":
+			lines.append('metadata/coliziune = "none"')
 		lines.append("")
 		counter[0] += 1
 

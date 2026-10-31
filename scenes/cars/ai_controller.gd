@@ -103,6 +103,19 @@ const DOOR_REACH_M: float = 120.0
 ## tarziu decat `along / speed`; se intreaba si „dar peste inca o secunda?".
 const DOOR_ETA_SLACK: float = 1.0
 
+## Animal care traverseaza si cere cedare de trecere (`SlidingHazard.ai_yields`,
+## ursul de pe Transfagarasan). Pilotul face ce face un om: de la 55 m, daca ursul
+## e (sau va fi, la sosire) pe asfalt, ridica piciorul la CROSSING_CAP_MS si isi
+## muta linia pe partea libera. NU se opreste: prima varianta (oprire in fata,
+## ca la usa de piatra) a pus 6 masini coada in fata ursului, 3-5 repuneri pe
+## cursa si viteza medie de la 30 la 24 m/s (ProbeRace Transfagarasan, 3 seed-uri)
+## — asfaltul are 14 m, ursul ocupa ~2 m, deci exista mereu un loc pe langa el.
+const CROSSING_BRAKE_M: float = 55.0
+const CROSSING_CAP_MS: float = 14.0
+## Cat de departe de centrul ursului trebuie sa treaca linia: jumatate de urs,
+## jumatate de masina si o palma de aer.
+const CROSSING_CLEAR_M: float = 3.4
+
 ## Torentul in pulsuri (Fiordland, `torrent_cycle.gd`, scurtatura Chasm): cat
 ## de departe (m, pe BUCLA PRINCIPALA) se citeste torentul inainte de furca —
 ## brief: „decizia se ia la furca, la ~80 m de perdea". 120 m la viteza
@@ -303,6 +316,10 @@ var _door_block_m: float = INF
 ## Indexul de traseu al fiecarei usi, pe ruta 0 — scanare completa o data,
 ## nu per cadru (cheie: instance id).
 var _door_index: Dictionary = {}
+var _crossing_block_m: float = INF
+var _crossing_index: Dictionary = {}
+var _crossing_node: SlidingHazard = null
+var _crossing_side: float = 0.0
 ## Indexul pe BUCLA PRINCIPALA al furcii fiecarui torent (cheie: instance
 ## id) — scanare completa o data, ca la usi/semafoare.
 var _torrent_index: Dictionary = {}
@@ -546,6 +563,7 @@ func update(delta: float) -> void:
 	line = _span_line(speed, line)
 	# Cineva mai lent pe culoarul nostru? Linia se muta pe langa el.
 	line = _avoid_line(idx, speed, line, keep_off)
+	line = _crossing_line(idx, line)
 	# Banda de autocar (Fiordland, brief §3 „optiunea 0"): pe rosu, in zona
 	# tunelului, banda dreapta e IMPUSA — vine dupa ocolirea de trafic
 	# (`_avoid_line`) fiindca e regula de siguranta cu veto, nu o preferinta
@@ -595,6 +613,7 @@ func update(delta: float) -> void:
 	# fara asta, un AI care a decis la turul 1 "o iau pe scurta" intra in zid
 	# la turul 3.
 	_door_block_m = _door_closed_ahead(speed)
+	_crossing_block_m = _crossing_ahead(speed)
 	# Semaforul tunelului: se citeste INDEPENDENT de usa de piatra (nu e o
 	# ramura a aceleiasi decizii — sunt doua mecanisme, brief-uri diferite),
 	# dar cu ACELASI tipar: distanta pana la linie, sau INF daca drumul e
@@ -676,6 +695,8 @@ func update(delta: float) -> void:
 		target = minf(target, stop_m * 1.2)
 	if door_wait:
 		target = minf(target, maxf(_door_block_m - DOOR_STOP_M, 0.0) * 1.2)
+	if _crossing_block_m < CROSSING_BRAKE_M:
+		target = minf(target, CROSSING_CAP_MS)
 	# Daruma-otoshi (Kyoto): discul traverseaza TOATA soseaua, deci nu exista banda
 	# libera — se scapa prin timing. Ridic piciorul ca sa trec DUPA disc (niciodata
 	# pana la oprire: plafonul are podea), sau trec inainte de lovitura.
@@ -1730,6 +1751,64 @@ func _door_closed_ahead(speed: float) -> float:
 		if door.door_blocks_in(eta) or door.door_blocks_in(eta + DOOR_ETA_SLACK):
 			best = along
 	return best
+
+## Metri pana la primul animal care traverseaza (cu `ai_yields`) si care va fi pe
+## asfalt cand ajungem la el; INF daca nu e niciunul sau va fi parcat. Doar ruta 0.
+func _crossing_ahead(speed: float) -> float:
+	if car.route != 0:
+		return INF
+	var list := get_tree().get_nodes_in_group(SlidingHazard.CROSSING_GROUP)
+	if list.is_empty():
+		return INF
+	var n_pts: int = track.route_at(0).count()
+	var bake: float = track.curve.bake_interval
+	var best := INF
+	_crossing_node = null
+	for node in list:
+		var hz := node as SlidingHazard
+		if hz == null:
+			continue
+		var key := hz.get_instance_id()
+		if not _crossing_index.has(key):
+			_crossing_index[key] = track.closest_index_global(hz.ai_decision_point(), 0)
+		var d_idx: int = int(_crossing_index[key]) - car.road_index
+		if d_idx < -n_pts / 2:
+			d_idx += n_pts
+		elif d_idx > n_pts / 2:
+			d_idx -= n_pts
+		var along := float(d_idx) * bake
+		if along < 0.0 or along > DOOR_REACH_M or along >= best:
+			continue
+		var eta := along / maxf(speed, 6.0)
+		if hz.crossing_blocks_in(eta) or hz.crossing_blocks_in(eta + DOOR_ETA_SLACK):
+			best = along
+			_crossing_node = hz
+	return best
+
+
+## Linia pe partea libera a animalului care traverseaza: aceeasi idee ca
+## `_avoid_line`, dar obstacolul e un `SlidingHazard`, nu o masina. Pozitia lui se
+## citeste LIVE (se vede cum merge), iar partea aleasa ramane aceeasi cat tine
+## trecerea: se prefera cea pe care suntem deja, daca incape pe asfalt.
+func _crossing_line(idx: int, line: float) -> float:
+	if _crossing_node == null or _crossing_block_m >= CROSSING_BRAKE_M:
+		_crossing_side = 0.0
+		return line
+	var r := track.route_at(car.route)
+	var bidx: int = int(_crossing_index.get(_crossing_node.get_instance_id(), idx))
+	var hw := maxf(track.width_at_index(bidx), 0.001)
+	var bear_lat := r.side_at(bidx).dot(
+		_crossing_node.global_position - r.baked[r.wrap_index(bidx)]) / hw
+	var gap := CROSSING_CLEAR_M / hw
+	if absf(bear_lat - line) >= gap and _crossing_side == 0.0:
+		return line
+	if _crossing_side == 0.0:
+		_crossing_side = 1.0 if line >= bear_lat else -1.0
+		# partea aleasa nu incape pe asfalt -> cealalta
+		var t := bear_lat + _crossing_side * gap
+		if t > _line_hi or t < _line_lo:
+			_crossing_side = -_crossing_side
+	return clampf(bear_lat + _crossing_side * gap, _line_lo, _line_hi)
 
 ## Torentul in pulsuri (Fiordland, brief „Torentul in pulsuri"): scurtatura
 ## Chasm e blocata cand ajungem la perdea in mijlocul unui PULS. Diferit de

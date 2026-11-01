@@ -5846,6 +5846,10 @@ func rebuild() -> void:
 	_lane_lane.clear()
 	for seg in _lane_corridors():
 		_lane_lane.append(seg)
+	_lane_floor.clear()
+	for seg in _lane_bias_sectors():
+		_lane_bias.append(seg)
+		_lane_floor.append(seg)
 	for frac in _avalanche_fracs():
 		_build_avalanche(frac)
 	for rg in _ice_field_ranges():
@@ -13241,6 +13245,18 @@ var _tunnel_camera_tail: Dictionary = {}
 ## pentru tunelurile care cer alta clasa (`TunnelSignalHazard.tube_class`, Carrara: marmura).
 var _tunnel_tube_class: Dictionary = {}
 
+## Clasa triplanara a ramei si a aripilor, per tunel (aceeasi cheie). Goala = beton pe toate
+## (bit-identic). Plina doar pentru `TunnelSignalHazard.frame_class` nevid (Carrara: marmura).
+var _tunnel_frame_class: Dictionary = {}
+
+## Inaltimea capatului departat al aripilor, per tunel (aceeasi cheie). Goala = TUNNEL_WING_HEIGHT_M
+## pe toata lungimea (bit-identic). Plina doar pentru `TunnelSignalHazard.wing_end_height_m` >= 0.
+var _tunnel_wing_end_h: Dictionary = {}
+
+## Sala din tub, per tunel (aceeasi cheie): Vector3(de_la_m, pana_la_m, tavan). Goala = profil
+## constant pe tot tubul (bit-identic). Plina doar pentru `TunnelSignalHazard.hall_ceiling` > 0.
+var _tunnel_hall: Dictionary = {}
+
 
 ## Tunelurile declarate ca noduri [TunnelSignalHazard], in aceleasi patru
 ## numere. Cautare recursiva si manuala, ca la varfuri.
@@ -13264,6 +13280,13 @@ func _collect_tunnels(node: Node, out: Array[Vector4]) -> void:
 				_tunnel_camera_tail[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = sig.camera_tail_m # cheia trece prin float32, ca spec.x
 			if sig.tube_class != "wet_gneiss":
 				_tunnel_tube_class[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = sig.tube_class
+			if sig.frame_class != "":
+				_tunnel_frame_class[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = sig.frame_class
+			if sig.wing_end_height_m >= 0.0:
+				_tunnel_wing_end_h[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = sig.wing_end_height_m
+			if sig.hall_ceiling > 0.0 and sig.hall_to_m > sig.hall_from_m:
+				_tunnel_hall[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = Vector3(
+					sig.hall_from_m, sig.hall_to_m, sig.hall_ceiling)
 		_collect_tunnels(child, out)
 
 
@@ -13296,18 +13319,8 @@ func _build_tunnel(spec: Vector4) -> void:
 
 	# Profilele, in coordonate de sectiune (lateral, inaltime). Tavanul e rupt
 	# asimetric si creasta e asimetrica — vezi TUNNEL_MOUND_CREST.
-	var inner: Array[Vector2] = [
-		Vector2(-hw, -TUNNEL_FOOT_DROP_M), Vector2(-hw, ceil_h),
-		Vector2(hw * TUNNEL_CEILING_SPLIT, ceil_h),
-		Vector2(hw, ceil_h), Vector2(hw, -TUNNEL_FOOT_DROP_M)]
-	var mound: Array[Vector2] = []
-	for q in TUNNEL_MOUND_PROFILE:
-		mound.append(Vector2(-(hw + q.x), ceil_h + q.y))
-	for q in TUNNEL_MOUND_CREST:
-		mound.append(Vector2(q.x, ceil_h + q.y))
-	for k in range(TUNNEL_MOUND_PROFILE.size() - 1, -1, -1):
-		var q := TUNNEL_MOUND_PROFILE[k]
-		mound.append(Vector2(hw + q.x, ceil_h + q.y))
+	var inner := _tun_inner_profile(hw, ceil_h)
+	var mound := _tun_mound_profile(hw, ceil_h, ceil_h)
 
 	# Cadrele sectiunilor: capacul de est (impins cu TUNNEL_CAP_PUSH_M in
 	# afara primului punct copt), apoi cate o sectiune la MIJLOCUL fiecarui
@@ -13315,20 +13328,57 @@ func _build_tunnel(spec: Vector4) -> void:
 	# insesi), apoi capacul de vest.
 	var centers: Array[Vector3] = []
 	var sides: Array[Vector3] = []
+	# Semilatimea soselei sub fiecare sectiune (doar pentru sala): mijlocul segmentului copt are
+	# latimea capetelor lui, iar capacele pe a punctului de capat.
+	var sec_w: Array[float] = []
+	var sec_m: Array[float] = []
+	var hall: Vector3 = _tunnel_hall.get(spec.x, Vector3.ZERO)
+	var walk := 0.0
 	var i_east := r.wrap_index(line_idx)
 	var i_west := r.wrap_index(idx_west)
 	var t_east := (r.baked[r.wrap_index(line_idx + 1)] - r.baked[i_east]).normalized()
 	var t_west := (r.baked[i_west] - r.baked[r.wrap_index(idx_west - 1)]).normalized()
 	centers.append(r.baked[i_east] - t_east * TUNNEL_CAP_PUSH_M)
 	sides.append(r.side_at(i_east))
+	sec_w.append(width_at_index(i_east) if hall.z > 0.0 else hw)
+	sec_m.append(0.0)
 	for k in count - 1:
 		var i := r.wrap_index(line_idx + k)
 		var j := r.wrap_index(line_idx + k + 1)
 		centers.append((r.baked[i] + r.baked[j]) * 0.5)
 		sides.append(r.side_at(i))
+		var seg := r.baked[i].distance_to(r.baked[j])
+		sec_m.append(walk + seg * 0.5)
+		walk += seg
+		sec_w.append((width_at_index(i) + width_at_index(j)) * 0.5 if hall.z > 0.0 else hw)
 	centers.append(r.baked[i_west] + t_west * TUNNEL_CAP_PUSH_M)
 	sides.append(r.side_at(r.wrap_index(idx_west - 1)))
+	sec_w.append(width_at_index(i_west) if hall.z > 0.0 else hw)
+	sec_m.append(walk)
 	count = centers.size()
+
+	# Profilul fiecarei sectiuni. Fara sala: acelasi pe tot tubul (bit-identic). Cu sala: pe
+	# [hall.x, hall.y] peretii merg pe marginea soselei cand e mai lata decat `hw`, iar tavanul urca
+	# proportional cu lărgirea (0 la `hw`, `hall.z` la cea mai lata sectiune). Profilele au acelasi
+	# numar de vertecsi oricare ar fi latimea, deci fasiile dintre sectiuni raman patrulatere.
+	var sec_hw: Array[float] = []
+	var hall_max := hw
+	for k in count:
+		var w := hw
+		if hall.z > 0.0 and sec_m[k] >= hall.x and sec_m[k] <= hall.y:
+			w = maxf(hw, sec_w[k])
+		sec_hw.append(w)
+		hall_max = maxf(hall_max, w)
+	var sec_ceil: Array[float] = []
+	var inners: Array = []
+	var mounds: Array = []
+	for k in count:
+		var c := ceil_h
+		if hall_max > hw + 0.01:
+			c = lerpf(ceil_h, maxf(ceil_h, hall.z), clampf((sec_hw[k] - hw) / (hall_max - hw), 0.0, 1.0))
+		sec_ceil.append(c)
+		inners.append(_tun_inner_profile(sec_hw[k], c))
+		mounds.append(_tun_mound_profile(sec_hw[k], c, ceil_h))
 
 	var rock := SurfaceTool.new()
 	rock.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -13337,22 +13387,28 @@ func _build_tunnel(spec: Vector4) -> void:
 
 	var cm := Color(TUNNEL_TINT_MOUND, TUNNEL_TINT_MOUND, TUNNEL_TINT_MOUND)
 	for k in count - 1:
+		var in_a: Array[Vector2] = inners[k]
+		var in_b: Array[Vector2] = inners[k + 1]
+		var mo_a: Array[Vector2] = mounds[k]
+		var mo_b: Array[Vector2] = mounds[k + 1]
 		# Interiorul: fasii intre profilele consecutive, normale spre axa.
 		for e in inner.size() - 1:
-			var a0 := _tun_pt(centers[k], sides[k], inner[e])
-			var a1 := _tun_pt(centers[k], sides[k], inner[e + 1])
-			var b0 := _tun_pt(centers[k + 1], sides[k + 1], inner[e])
-			var b1 := _tun_pt(centers[k + 1], sides[k + 1], inner[e + 1])
-			var axis_a := centers[k] + Vector3.UP * ceil_h * 0.5
-			var ca := _tun_tint(inner[e], ceil_h)
-			var cb := _tun_tint(inner[e + 1], ceil_h)
-			_tun_quad(rock, a0, a1, b1, b0, axis_a - (a0 + a1) * 0.5, ca, cb, cb, ca)
+			var a0 := _tun_pt(centers[k], sides[k], in_a[e])
+			var a1 := _tun_pt(centers[k], sides[k], in_a[e + 1])
+			var b0 := _tun_pt(centers[k + 1], sides[k + 1], in_b[e])
+			var b1 := _tun_pt(centers[k + 1], sides[k + 1], in_b[e + 1])
+			var axis_a := centers[k] + Vector3.UP * sec_ceil[k] * 0.5
+			var ca := _tun_tint(in_a[e], sec_ceil[k])
+			var cb := _tun_tint(in_a[e + 1], sec_ceil[k])
+			var da := _tun_tint(in_b[e], sec_ceil[k + 1])
+			var db := _tun_tint(in_b[e + 1], sec_ceil[k + 1])
+			_tun_quad(rock, a0, a1, b1, b0, axis_a - (a0 + a1) * 0.5, ca, cb, db, da)
 		# Movila: normale in sus / spre exterior.
 		for e in mound.size() - 1:
-			var a0 := _tun_pt(centers[k], sides[k], mound[e])
-			var a1 := _tun_pt(centers[k], sides[k], mound[e + 1])
-			var b0 := _tun_pt(centers[k + 1], sides[k + 1], mound[e])
-			var b1 := _tun_pt(centers[k + 1], sides[k + 1], mound[e + 1])
+			var a0 := _tun_pt(centers[k], sides[k], mo_a[e])
+			var a1 := _tun_pt(centers[k], sides[k], mo_a[e + 1])
+			var b0 := _tun_pt(centers[k + 1], sides[k + 1], mo_b[e])
+			var b1 := _tun_pt(centers[k + 1], sides[k + 1], mo_b[e + 1])
 			var out_dir := (a0 - centers[k]) + (a1 - centers[k]) + Vector3.UP * 4.0
 			_tun_quad(rock, a0, a1, b1, b0, out_dir, cm, cm, cm, cm)
 
@@ -13362,8 +13418,9 @@ func _build_tunnel(spec: Vector4) -> void:
 		var k := 0 if end == 0 else count - 1
 		var kn := 1 if end == 0 else count - 2
 		var outward := (centers[k] - centers[kn]).normalized()
-		_tun_cap(rock, centers[k], sides[k], inner, mound, outward)
-		_tun_frame(concrete, centers[k], sides[k], hw, ceil_h, outward)
+		_tun_cap(rock, centers[k], sides[k], inners[k], mounds[k], outward)
+		_tun_frame(concrete, centers[k], sides[k], hw, ceil_h, outward,
+			float(_tunnel_wing_end_h.get(spec.x, TUNNEL_WING_HEIGHT_M)))
 
 	rock.generate_normals()
 	_add_mesh_with_collision(rock.commit(), Color.WHITE, null, 0.9, 0.5,
@@ -13371,9 +13428,14 @@ func _build_tunnel(spec: Vector4) -> void:
 		Palette.triplanar_class_material(String(_tunnel_tube_class.get(spec.x, "wet_gneiss"))),
 		"TunnelBore")
 	concrete.generate_normals()
+	# Rama + aripile: beton (implicit) sau clasa declarata pe nod (`frame_class`, Carrara). Acelasi
+	# mesh, aceeasi coliziune, acelasi nume de corp: se schimba doar materialul.
+	var frame_cls := String(_tunnel_frame_class.get(spec.x, ""))
 	_add_mesh_with_collision(concrete.commit(), Palette.color(Palette.CONCRETE),
 		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
-		null, null, true, null, "TunnelPortal")
+		null, null, true,
+		Palette.triplanar_class_material(frame_cls) if frame_cls != "" else null,
+		"TunnelPortal")
 
 	# Zona de camera pe EXACT intervalul tubului (brief §2.0: „tunelul e
 	# intuneric, deci camera coboara"; memoria `camera-zone-tavan-per-sala`:
@@ -13396,6 +13458,30 @@ func _build_tunnel(spec: Vector4) -> void:
 	cz.cave_fog_end = maxf(length + 60.0, 120.0)
 	add_child(cz)
 	cz.position = centers[count / 2]
+
+
+## Profilul interior al tubului (lateral, inaltime): peretii si tavanul rupt asimetric.
+func _tun_inner_profile(hw: float, ceil_h: float) -> Array[Vector2]:
+	return [
+		Vector2(-hw, -TUNNEL_FOOT_DROP_M), Vector2(-hw, ceil_h),
+		Vector2(hw * TUNNEL_CEILING_SPLIT, ceil_h),
+		Vector2(hw, ceil_h), Vector2(hw, -TUNNEL_FOOT_DROP_M)]
+
+
+## Profilul movilei (vezi TUNNEL_MOUND_PROFILE). Baza (primul punct al profilului, pe ambele
+## parti) sta pe `base_ceil`, nu pe tavanul sectiunii: in sala tavanul urca, dar piciorul movilei
+## trebuie sa ramana infipt in transee, nu sa se ridice cu el si sa lase o fanta sub movila.
+func _tun_mound_profile(hw: float, ceil_h: float, base_ceil: float) -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	for k in TUNNEL_MOUND_PROFILE.size():
+		var q := TUNNEL_MOUND_PROFILE[k]
+		out.append(Vector2(-(hw + q.x), (base_ceil if k == 0 else ceil_h) + q.y))
+	for q in TUNNEL_MOUND_CREST:
+		out.append(Vector2(q.x, ceil_h + q.y))
+	for k in range(TUNNEL_MOUND_PROFILE.size() - 1, -1, -1):
+		var q := TUNNEL_MOUND_PROFILE[k]
+		out.append(Vector2(hw + q.x, (base_ceil if k == 0 else ceil_h) + q.y))
+	return out
 
 
 func _tun_pt(c: Vector3, s: Vector3, q: Vector2) -> Vector3:
@@ -13492,7 +13578,8 @@ func _tun_cap(st: SurfaceTool, c: Vector3, s: Vector3, inner: Array[Vector2],
 ## `TUNNEL_FRAME_DEPTH_M` in afara capacului, cu peretii grosi de
 ## `TUNNEL_FRAME_THICK_M` IN AFARA golului (gura ramane cea din contract).
 func _tun_frame(st: SurfaceTool, c: Vector3, s: Vector3, hw: float,
-		ceil_h: float, outward: Vector3) -> void:
+		ceil_h: float, outward: Vector3,
+		wing_end_h: float = TUNNEL_WING_HEIGHT_M) -> void:
 	var th := TUNNEL_FRAME_THICK_M
 	var foot := -TUNNEL_FOOT_DROP_M
 	var inner_p: Array[Vector2] = [Vector2(-hw, foot), Vector2(-hw, ceil_h),
@@ -13525,7 +13612,9 @@ func _tun_frame(st: SurfaceTool, c: Vector3, s: Vector3, hw: float,
 		var a_hi := _tun_pt(c2, s, Vector2(sgn * hw, top))
 		var far := c2 + outward * TUNNEL_WING_LEN_M
 		var b_lo := _tun_pt(far, s, Vector2(sgn * (hw + TUNNEL_WING_SPREAD_M), foot))
-		var b_hi := _tun_pt(far, s, Vector2(sgn * (hw + TUNNEL_WING_SPREAD_M), top))
+		# Capatul departat al aripii: implicit la fel de inalt ca radacina (bit-identic); cu
+		# `wing_end_h` mai mic muchia de sus coboara spre capat, ca un zid-aripa de tunel real.
+		var b_hi := _tun_pt(far, s, Vector2(sgn * (hw + TUNNEL_WING_SPREAD_M), wing_end_h))
 		# Fata dinspre drum (cea care conduce masina), normala spre axa.
 		_tun_quad(st, a_lo, a_hi, b_hi, b_lo, -s * sgn, col, col, col, col)
 		# Fata din spate, grosime 0.5 m, normala in afara.
@@ -14086,6 +14175,32 @@ func ai_drop_edge_at(index: int) -> Vector2:
 			return Vector2(signf(seg.z), seg.w)
 	return Vector2.ZERO
 
+## Sectoarele de margine declarate de PISTA (`_lane_bias_sectors`), tinute separat: acolo marginea
+## e un PODEA tare, nu doar punctul de plecare al liniei. Vezi `lane_floor_at`.
+var _lane_floor: Array[Vector3] = []
+
+
+## |linie| minima TARE la indexul dat, sau 0.0. Diferit de `lane_bias_at` (care e aceeasi cifra, dar
+## citita INAINTE de ocolirea de trafic): aici e un obstacol static pe axa (stalpii din sala galeriei
+## Carrara), deci nici depasirea, nici ranchiuna nu au voie sa traga linia spre axa. Masurat pe
+## ProbeRace fara podea: AI-ul lovea stalpul 2 cu 30-42 m/s la lat +2..+3 m (linia dusa spre axa de
+## ocolire), in 7 din primele 8 seed-uri. Gol pe orice pista fara `custom_lane_bias`.
+func lane_floor_at(index: int) -> float:
+	if _lane_floor.is_empty():
+		return 0.0
+	var f := frac_at(index)
+	var out := 0.0
+	for seg in _lane_floor:
+		var inside: bool
+		if seg.x <= seg.y:
+			inside = f >= seg.x and f <= seg.y
+		else:
+			inside = f >= seg.x or f <= seg.y
+		if inside:
+			out = maxf(out, seg.z)
+	return out
+
+
 func lane_bias_at(index: int) -> float:
 	if _lane_bias.is_empty():
 		return 0.0
@@ -14109,6 +14224,12 @@ func _train_along_fracs() -> Array[float]:
 ## Culoarele cu o singura trecere: (frac_start, frac_end, linie cu semn).
 ## Vezi `lane_forced_at` si `custom_lane_corridors`.
 func _lane_corridors() -> Array[Vector3]:
+	return []
+
+
+## Sectoarele de margine declarate de pista (nu de un hazard): (frac_start, frac_end, |linie|
+## minima). Se adauga la `_lane_bias`. Vezi `lane_bias_at` si `custom_lane_bias`.
+func _lane_bias_sectors() -> Array[Vector3]:
 	return []
 
 

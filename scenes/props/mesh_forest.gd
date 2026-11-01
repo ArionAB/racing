@@ -116,6 +116,12 @@ extends Node3D
 @export_range(0.0, 20.0, 0.5, "suffix:m") var branch_extra_clear_m: float = 4.0
 ## Cat de aproape de marginea panzei de teren si a zidului lumii (m).
 @export_range(0.0, 60.0, 0.5, "suffix:m") var world_margin_m: float = 12.0
+## Treapta GROSIERA nu coboara sub atata din indicii mesh-ului intreg: se ia cel mai grosier
+## nivel generat care pastreaza cel putin fractia asta (0 = cel mai grosier, comportamentul
+## dintotdeauna). Pe castanul Carrara (Track23, POI G, 31 oct 2026) nivelul cel mai grosier
+## (188 de triunghiuri din 4244) topea coroana in cioburi: dincolo de 65 m padurea citea crengi
+## goale cu frunze plutind (A/B pe captura cu `--forest-far=400`).
+@export_range(0.0, 0.5, 0.01) var far_lod_min_ratio: float = 0.0
 ## Stinge tot (sabotaj pentru sonde: A/B cu si fara padure).
 @export var enabled: bool = true
 ## Afiseaza raportul constructiei in log.
@@ -427,7 +433,8 @@ const LOD_AABB_GROW_M: float = 0.5
 ##     simplificarea le topeste in cioburi; de la distanta coroana citeste la
 ##     fel cu o parte din carduri, deci se RARESC: mediu 1 din 2, departe 1 din 3.
 ## Coroanele de artar/ginkgo (9 componente de 280-320) raman pe generator.
-static func _lod_variants(src: Mesh, mid_ratio: float = MID_LOD_RATIO_DEFAULT) -> Dictionary:
+static func _lod_variants(src: Mesh, mid_ratio: float = MID_LOD_RATIO_DEFAULT,
+		far_min_ratio: float = 0.0) -> Dictionary:
 	var im := ImporterMesh.new()
 	for si in src.get_surface_count():
 		im.add_surface(Mesh.PRIMITIVE_TRIANGLES, src.surface_get_arrays(si), [], {}, src.surface_get_material(si))
@@ -446,6 +453,13 @@ static func _lod_variants(src: Mesh, mid_ratio: float = MID_LOD_RATIO_DEFAULT) -
 		var nl := im.get_surface_lod_count(si)
 		if nl > 0:
 			far_idx = im.get_surface_lod_indices(si, nl - 1)
+			# `far_lod_min_ratio`: cel mai grosier nivel care pastreaza macar fractia ceruta.
+			if far_min_ratio > 0.0:
+				for li in range(nl - 1, -1, -1):
+					var li_idx := im.get_surface_lod_indices(si, li)
+					if float(li_idx.size()) / maxf(float(full_n), 1.0) >= far_min_ratio:
+						far_idx = li_idx
+						break
 			# Nivelul mediu: dintre cele NEgrosiere, cel cu numarul de indici
 			# cel mai apropiat de tinta.
 			var best := -1
@@ -927,7 +941,7 @@ func _species_meshes(ps: PackedScene, stem: String, theme: String) -> Dictionary
 			src = WorldProp._mesh_with_slots_moved(src, remap)
 		var levels := {"full": src, "mid": src, "far": src}
 		if lod_m > 0.0:
-			var lv := _lod_variants(src, mid_lod_ratio)
+			var lv := _lod_variants(src, mid_lod_ratio, far_lod_min_ratio)
 			levels["mid"] = lv.get("mid", src)
 			levels["far"] = lv.get("far", src)
 			any_lod = any_lod or levels["mid"] != src or levels["far"] != src

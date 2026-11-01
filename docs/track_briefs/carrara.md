@@ -1110,4 +1110,4 @@ camioanelor, nu 3,6), derrick-ul se modelează la **22,05 m** și intră în joc
 cu `model_scale` 0,7256 (constanta `JIB_HEIGHT`), portalul galeriei are
 golul **≥ 10 × 10,5 m** (rama de beton a tubului din cod are 9,6 × 9,8),
 iar viaductul are **36 m** pe un gol măsurat de 31 m și pile de 26 m.
-`gallery_pillar` e amânat: sala de 16 m nu s-a construit.
+`gallery_pillar` a fost amânat până la sala de 16 m; ambele s-au făcut pe 31 oct 2026 (`carrara_stare_poi.md`, „Sala galeriei D”).

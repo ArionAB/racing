@@ -12,6 +12,7 @@
   carrara/buildings/office_container.glb     container de santier
   carrara/props/quarry_sign_a.glb, _b        semne cu pictograma (fara text)
   carrara/props/pipe_run.glb                 modul de conducte 6 m, inlantuibil
+  carrara/structures/gallery_pillar.glb      stalp de marmura 3 x 3 x 18 m (sala galeriei D)
 
 Rulare:
     D:/Blender/blender.exe --background --factory-startup \\
@@ -857,6 +858,52 @@ def build_pipe_run():
 
 
 # ---------------------------------------------------------------------------
+# gallery_pillar
+# ---------------------------------------------------------------------------
+
+def build_gallery_pillar():
+    """LISTA DE ELEMENTE (kit §1.3, randul `gallery_pillar`; sala galeriei D, brief §2 POI D):
+
+     1. Stalp de marmura LASAT IN PICIOARE de taietura: 3 x 3 m in plan, 18 m inalt (talpa la 0;
+        tavanul salii e la 16 m, varful intra in movila).
+     2. Sase TRONSOANE vizibile (inaltimi 2,6-3,4 m), fiecare un bloc taiat drept, cu amprenta
+        usor diferita (2,86-3,0 m) si decalaj de cativa cm: rostul dintre ele e treapta de
+        taietura, nu un ornament. Intre tronsoane, un rost adancit de 12 cm pe 10 cm inaltime.
+     3. Amprenta MAXIMA e fix 3,0 x 3,0 (tronsonul de jos): coliziunea `hull` din world_prop
+        ia exact gabaritul din brief, fara burta.
+     4. Doua tonuri ca noduri separate (regula 8): tronsonul de jos pe MARBLE_GREY
+        (`Pillar_MarbleBase`, patina de la sol), restul pe CORAL_SAND (`Pillar_Marble`).
+     5. Dungile de fir si venele NU sunt geometrie (regula 7): le da clasa `carrara_marble`.
+    """
+    marble, base = Builder(), Builder()
+    rnd = random.Random(23)
+    heights = (2.6, 3.2, 3.0, 3.4, 2.9, 2.9)
+    seam_h, seam_in = 0.10, 0.12
+    z = 0.0
+    for k, h in enumerate(heights):
+        if k == 0:
+            lx = ly = 3.0
+            ox = oy = 0.0
+        else:
+            lx = rnd.uniform(2.86, 2.98)
+            ly = rnd.uniform(2.86, 2.98)
+            ox = rnd.uniform(-0.04, 0.04)
+            oy = rnd.uniform(-0.04, 0.04)
+        b = base if k == 0 else marble
+        slot = CRR_MARBLE_BASE if k == 0 else CRR_MARBLE
+        body = h - (seam_h if k < len(heights) - 1 else 0.0)
+        yaw = rnd.uniform(-0.8, 0.8)
+        open_box(b, (ox, oy, z + body * 0.5), (lx, ly, body), slot,
+                 yaw_deg=0.0 if k == 0 else yaw)
+        if k < len(heights) - 1:
+            open_box(marble, (ox, oy, z + body + seam_h * 0.5),
+                     (lx - 2.0 * seam_in, ly - 2.0 * seam_in, seam_h), CRR_MARBLE,
+                     drop=("top", "bottom"))
+        z += h
+    return [marble.to_object("Pillar_Marble"), base.to_object("Pillar_MarbleBase")]
+
+
+# ---------------------------------------------------------------------------
 
 clear_built()
 if _want("marble_block_a"):
@@ -924,5 +971,9 @@ if _want("quarry_sign_b"):
     clear_built()
 if _want("pipe_run"):
     emit_kit(build_pipe_run(), "props/pipe_run.glb", AO_PROP, bevel=0.0)
+    clear_built()
+if _want("gallery_pillar"):
+    emit_kit(build_gallery_pillar(), "structures/gallery_pillar.glb", AO_BLOCK,
+             bevels=BLOCK_BEVELS)
     clear_built()
 report_crr()

@@ -13257,6 +13257,10 @@ var _tunnel_wing_end_h: Dictionary = {}
 ## constant pe tot tubul (bit-identic). Plina doar pentru `TunnelSignalHazard.hall_ceiling` > 0.
 var _tunnel_hall: Dictionary = {}
 
+## Putul de lumina din sala, per tunel (aceeasi cheie): Vector4(de_la_m, pana_la_m, lateral_min,
+## lateral_max). Gol = tavan intreg (bit-identic). Plin doar pentru `TunnelSignalHazard.shaft_*`.
+var _tunnel_shaft: Dictionary = {}
+
 
 ## Tunelurile declarate ca noduri [TunnelSignalHazard], in aceleasi patru
 ## numere. Cautare recursiva si manuala, ca la varfuri.
@@ -13287,6 +13291,9 @@ func _collect_tunnels(node: Node, out: Array[Vector4]) -> void:
 			if sig.hall_ceiling > 0.0 and sig.hall_to_m > sig.hall_from_m:
 				_tunnel_hall[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = Vector3(
 					sig.hall_from_m, sig.hall_to_m, sig.hall_ceiling)
+				if sig.shaft_to_m > sig.shaft_from_m and sig.shaft_lateral.y > sig.shaft_lateral.x:
+					_tunnel_shaft[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = Vector4(sig.shaft_from_m,
+						sig.shaft_to_m, sig.shaft_lateral.x, sig.shaft_lateral.y)
 		_collect_tunnels(child, out)
 
 
@@ -13317,10 +13324,8 @@ func _build_tunnel(spec: Vector4) -> void:
 	if count < 2:
 		return
 
-	# Profilele, in coordonate de sectiune (lateral, inaltime). Tavanul e rupt
-	# asimetric si creasta e asimetrica — vezi TUNNEL_MOUND_CREST.
-	var inner := _tun_inner_profile(hw, ceil_h)
-	var mound := _tun_mound_profile(hw, ceil_h, ceil_h)
+	# Profilele (`inners`, `mounds`, mai jos) sunt in coordonate de sectiune (lateral, inaltime).
+	# Tavanul e rupt asimetric si creasta e asimetrica — vezi TUNNEL_MOUND_CREST.
 
 	# Cadrele sectiunilor: capacul de est (impins cu TUNNEL_CAP_PUSH_M in
 	# afara primului punct copt), apoi cate o sectiune la MIJLOCUL fiecarui
@@ -13369,6 +13374,10 @@ func _build_tunnel(spec: Vector4) -> void:
 			w = maxf(hw, sec_w[k])
 		sec_hw.append(w)
 		hall_max = maxf(hall_max, w)
+	# Putul de lumina: doar intr-o sala (gaura se taie pe sectiunile late). Fara put, profilele raman
+	# cele de dinainte (bit-identic, ProbeTunelHash).
+	var shaft: Vector4 = _tunnel_shaft.get(spec.x, Vector4.ZERO) if hall_max > hw + 0.01 else Vector4.ZERO
+	var has_shaft := shaft.y > shaft.x
 	var sec_ceil: Array[float] = []
 	var inners: Array = []
 	var mounds: Array = []
@@ -13377,8 +13386,16 @@ func _build_tunnel(spec: Vector4) -> void:
 		if hall_max > hw + 0.01:
 			c = lerpf(ceil_h, maxf(ceil_h, hall.z), clampf((sec_hw[k] - hw) / (hall_max - hw), 0.0, 1.0))
 		sec_ceil.append(c)
-		inners.append(_tun_inner_profile(sec_hw[k], c))
-		mounds.append(_tun_mound_profile(sec_hw[k], c, ceil_h))
+		if has_shaft:
+			# Marginile putului se scaleaza cu latimea sectiunii, ca ordinea vertecsilor sa ramana
+			# aceeasi pe toata lungimea (fasiile raman patrulatere); pe sectiunile cele mai late, unde
+			# se taie gaura, sunt exact `shaft_lateral`.
+			var f := sec_hw[k] / hall_max
+			inners.append(_tun_inner_profile_shaft(sec_hw[k], c, shaft.z * f, shaft.w * f))
+			mounds.append(_tun_mound_profile_shaft(sec_hw[k], c, ceil_h, shaft.z * f, shaft.w * f))
+		else:
+			inners.append(_tun_inner_profile(sec_hw[k], c))
+			mounds.append(_tun_mound_profile(sec_hw[k], c, ceil_h))
 
 	var rock := SurfaceTool.new()
 	rock.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -13386,13 +13403,24 @@ func _build_tunnel(spec: Vector4) -> void:
 	concrete.begin(Mesh.PRIMITIVE_TRIANGLES)
 
 	var cm := Color(TUNNEL_TINT_MOUND, TUNNEL_TINT_MOUND, TUNNEL_TINT_MOUND)
+	var shaft_k0 := -1
+	var shaft_k1 := -1
 	for k in count - 1:
 		var in_a: Array[Vector2] = inners[k]
 		var in_b: Array[Vector2] = inners[k + 1]
 		var mo_a: Array[Vector2] = mounds[k]
 		var mo_b: Array[Vector2] = mounds[k + 1]
+		var mid_m := (sec_m[k] + sec_m[k + 1]) * 0.5
+		var hole := has_shaft and mid_m >= shaft.x and mid_m <= shaft.y
+		if hole:
+			if shaft_k0 < 0:
+				shaft_k0 = k
+			shaft_k1 = k
+			_tun_shaft_walls(rock, centers, sides, k, in_a, in_b, mo_a, mo_b)
 		# Interiorul: fasii intre profilele consecutive, normale spre axa.
-		for e in inner.size() - 1:
+		for e in in_a.size() - 1:
+			if hole and e == SHAFT_INNER_EDGE:
+				continue
 			var a0 := _tun_pt(centers[k], sides[k], in_a[e])
 			var a1 := _tun_pt(centers[k], sides[k], in_a[e + 1])
 			var b0 := _tun_pt(centers[k + 1], sides[k + 1], in_b[e])
@@ -13404,13 +13432,22 @@ func _build_tunnel(spec: Vector4) -> void:
 			var db := _tun_tint(in_b[e + 1], sec_ceil[k + 1])
 			_tun_quad(rock, a0, a1, b1, b0, axis_a - (a0 + a1) * 0.5, ca, cb, db, da)
 		# Movila: normale in sus / spre exterior.
-		for e in mound.size() - 1:
+		for e in mo_a.size() - 1:
+			if hole and e == SHAFT_MOUND_EDGE:
+				continue
 			var a0 := _tun_pt(centers[k], sides[k], mo_a[e])
 			var a1 := _tun_pt(centers[k], sides[k], mo_a[e + 1])
 			var b0 := _tun_pt(centers[k + 1], sides[k + 1], mo_b[e])
 			var b1 := _tun_pt(centers[k + 1], sides[k + 1], mo_b[e + 1])
 			var out_dir := (a0 - centers[k]) + (a1 - centers[k]) + Vector3.UP * 4.0
 			_tun_quad(rock, a0, a1, b1, b0, out_dir, cm, cm, cm, cm)
+
+	if shaft_k0 >= 0:
+		var k_end := shaft_k1 + 1
+		_tun_shaft_end(rock, centers[shaft_k0], sides[shaft_k0], inners[shaft_k0], mounds[shaft_k0],
+			centers[shaft_k0 + 1] - centers[shaft_k0])
+		_tun_shaft_end(rock, centers[k_end], sides[k_end], inners[k_end], mounds[k_end],
+			centers[k_end - 1] - centers[k_end])
 
 	# Capacele: inelul dintre movila si gol, la fiecare capat, normala spre
 	# exterior (inapoi la est, inainte la vest). Rama de beton pe acelasi plan.
@@ -13436,6 +13473,8 @@ func _build_tunnel(spec: Vector4) -> void:
 		null, null, true,
 		Palette.triplanar_class_material(frame_cls) if frame_cls != "" else null,
 		"TunnelPortal")
+	if shaft_k0 >= 0:
+		_tun_shaft_light(centers, sides, shaft_k0, shaft_k1 + 1, shaft, sec_ceil)
 
 	# Zona de camera pe EXACT intervalul tubului (brief §2.0: „tunelul e
 	# intuneric, deci camera coboara"; memoria `camera-zone-tavan-per-sala`:
@@ -13482,6 +13521,99 @@ func _tun_mound_profile(hw: float, ceil_h: float, base_ceil: float) -> Array[Vec
 		var q := TUNNEL_MOUND_PROFILE[k]
 		out.append(Vector2(hw + q.x, (base_ceil if k == 0 else ceil_h) + q.y))
 	return out
+
+
+## Indicii fasiilor taiate de put: in profilul interior cu put, fasia dintre marginile putului
+## (`_tun_inner_profile_shaft`, al treilea segment); in movila, fasia de creasta.
+const SHAFT_INNER_EDGE: int = 2
+const SHAFT_MOUND_EDGE: int = 3
+## Raza putului: tenta (soarele temei, palid — „lumina se citeste din valoare, nu din croma",
+## `LightShaft.tint`) si intensitatea. Mai mare decat in caverna Cappadociei (0,085): aici peretii
+## din spate sunt marmura in plina lumina, iar aditivul trebuie sa se ridice peste ei.
+const SHAFT_TINT: Color = Color(1.0, 0.88, 0.70)
+## Raza se vede de departe si se topeste doar cand camera trece prin ea (`LightShaft.fade_m`).
+const SHAFT_FADE_M: Vector2 = Vector2(1.5, 5.0)
+const SHAFT_STRENGTH: float = 0.22
+
+
+## Ca `_tun_inner_profile`, dar tavanul are cele doua margini ale putului (`a` < `b`) in locul
+## rupturii asimetrice. Acelasi numar de vertecsi pe toata lungimea tubului.
+func _tun_inner_profile_shaft(hw: float, ceil_h: float, a: float, b: float) -> Array[Vector2]:
+	return [
+		Vector2(-hw, -TUNNEL_FOOT_DROP_M), Vector2(-hw, ceil_h),
+		Vector2(a, ceil_h), Vector2(b, ceil_h),
+		Vector2(hw, ceil_h), Vector2(hw, -TUNNEL_FOOT_DROP_M)]
+
+
+## Ca `_tun_mound_profile`, dar creasta are marginile putului (`a`, `b`), la inaltimea crestei, in
+## locul celor doua puncte din TUNNEL_MOUND_CREST: fasia dintre ele e cea care se taie.
+func _tun_mound_profile_shaft(hw: float, ceil_h: float, base_ceil: float, a: float,
+		b: float) -> Array[Vector2]:
+	var crest_y := ceil_h + TUNNEL_MOUND_CREST[0].y
+	var out: Array[Vector2] = []
+	for k in TUNNEL_MOUND_PROFILE.size():
+		var q := TUNNEL_MOUND_PROFILE[k]
+		out.append(Vector2(-(hw + q.x), (base_ceil if k == 0 else ceil_h) + q.y))
+	out.append(Vector2(a, crest_y))
+	out.append(Vector2(b, crest_y))
+	for k in range(TUNNEL_MOUND_PROFILE.size() - 1, -1, -1):
+		var q := TUNNEL_MOUND_PROFILE[k]
+		out.append(Vector2(hw + q.x, (base_ceil if k == 0 else ceil_h) + q.y))
+	return out
+
+
+## Peretii putului pe fasia `k` (intre sectiunile k si k+1): cele doua laturi, de la marginea
+## tavanului pana la marginea crestei, cu fata spre gaura. Peretii de capat, pe prima si pe
+## ultima sectiune taiata (`_tun_shaft_end`), inchid golul dintre tavan si movila, ca prin put sa
+## se vada cer, nu interiorul movilei.
+func _tun_shaft_walls(st: SurfaceTool, centers: Array[Vector3], sides: Array[Vector3], k: int,
+		in_a: Array[Vector2], in_b: Array[Vector2], mo_a: Array[Vector2],
+		mo_b: Array[Vector2]) -> void:
+	var col := Color(TUNNEL_TINT_CAP, TUNNEL_TINT_CAP, TUNNEL_TINT_CAP)
+	var ie := SHAFT_INNER_EDGE
+	var me := SHAFT_MOUND_EDGE
+	for side in 2:
+		var g0 := _tun_pt(centers[k], sides[k], in_a[ie + side])
+		var g1 := _tun_pt(centers[k + 1], sides[k + 1], in_b[ie + side])
+		var m0 := _tun_pt(centers[k], sides[k], mo_a[me + side])
+		var m1 := _tun_pt(centers[k + 1], sides[k + 1], mo_b[me + side])
+		var want := sides[k] * (1.0 if side == 0 else -1.0)
+		_tun_quad(st, g0, g1, m1, m0, want, col, col, col, col)
+
+
+## Peretele de capat al putului pe o sectiune: dreptunghiul dintre marginile tavanului si cele ale
+## crestei, cu fata spre `want` (spre interiorul putului).
+func _tun_shaft_end(st: SurfaceTool, c: Vector3, s: Vector3, inner: Array[Vector2],
+		mound: Array[Vector2], want: Vector3) -> void:
+	var col := Color(TUNNEL_TINT_CAP, TUNNEL_TINT_CAP, TUNNEL_TINT_CAP)
+	var g0 := _tun_pt(c, s, inner[SHAFT_INNER_EDGE])
+	var g1 := _tun_pt(c, s, inner[SHAFT_INNER_EDGE + 1])
+	var m0 := _tun_pt(c, s, mound[SHAFT_MOUND_EDGE])
+	var m1 := _tun_pt(c, s, mound[SHAFT_MOUND_EDGE + 1])
+	_tun_quad(st, g0, g1, m1, m0, want, col, col, col, col)
+
+
+## Raza care cade prin put ([LightShaft], acelasi material partajat ca in caverna Cappadociei):
+## gura in centrul gaurii, la cota tavanului, coloana pana pe asfalt.
+func _tun_shaft_light(centers: Array[Vector3], sides: Array[Vector3], k0: int, k1: int,
+		shaft: Vector4, sec_ceil: Array[float]) -> void:
+	var lat := (shaft.z + shaft.w) * 0.5
+	var c0 := centers[k0] + sides[k0] * lat
+	var c1 := centers[k1] + sides[k1] * lat
+	var top_y := (centers[k0].y + sec_ceil[k0] + centers[k1].y + sec_ceil[k1]) * 0.5
+	var half_len := c0.distance_to(c1) * 0.5
+	var half_lat := (shaft.w - shaft.z) * 0.5
+	var ls := LightShaft.new()
+	ls.name = "TunnelShaftLight"
+	ls.top_radius = minf(half_len, half_lat)
+	ls.bottom_radius = maxf(half_len, half_lat) * 1.3
+	ls.length = top_y - (c0.y + c1.y) * 0.5
+	ls.tint = SHAFT_TINT
+	ls.strength = SHAFT_STRENGTH
+	ls.fade_m = SHAFT_FADE_M
+	add_child(ls)
+	var mid := (c0 + c1) * 0.5
+	ls.position = Vector3(mid.x, top_y, mid.z)
 
 
 func _tun_pt(c: Vector3, s: Vector3, q: Vector2) -> Vector3:

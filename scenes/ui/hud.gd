@@ -31,6 +31,14 @@ var _message: Label
 ## sa nu se bata cu pozitia/turul (stanga) si cu pauza/minimapa (dreapta).
 var _perf: Label
 var _perf_clock: float = 0.0
+## Timpul cadrului si al fizicii, adunate pe fereastra de 0,25 s a contorului.
+## `cpu`/`gpu` de pe randul 1 sunt doar ai randarii; pe telefon gpu citeste 0,
+## deci fara acestia un cadru de 30 ms nu spune unde s-a dus timpul.
+## TIME_PROCESS NU se afiseaza: in Godot 4 include si randarea si asteptarea
+## de vsync (Kyoto pe desktop: ~16 ms si cu toata pista oprita).
+var _perf_frames: int = 0
+var _perf_phys_max_s: float = 0.0
+var _perf_phys_ticks0: int = 0
 ## Bara de turbo: jgheabul, umplutura si fulgerul din capatul stang.
 ## `Panel` in loc de `ColorRect` ca sa aiba colturi rotunjite — bara dreptunghiulara
 ## era singura forma cu colt ascutit ramasa pe ecran.
@@ -547,12 +555,29 @@ func _process(delta: float) -> void:
 		return
 	if not _perf.visible:
 		_perf.visible = true
+		_perf_clock = 0.0
+		_perf_frames = 0
+		_perf_phys_max_s = 0.0
+		_perf_phys_ticks0 = Engine.get_physics_frames()
 		RenderingServer.viewport_set_measure_render_time(
 			get_viewport().get_viewport_rid(), true)
 	_perf_clock += delta
+	_perf_frames += 1
+	_perf_phys_max_s = maxf(_perf_phys_max_s,
+		Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS))
 	if _perf_clock < 0.25:
 		return
+	var win_s := _perf_clock
 	_perf_clock = 0.0
+	# Fizica merge la tick fix (60 Hz): sub 60 fps face MAI MULTI pasi pe
+	# cadru, deci costul ei pe cadru = ms pe pas x pasi pe cadru.
+	var ticks := Engine.get_physics_frames() - _perf_phys_ticks0
+	_perf_phys_ticks0 = Engine.get_physics_frames()
+	var frame_ms := win_s * 1000.0 / float(_perf_frames)
+	var phys_ms := _perf_phys_max_s * 1000.0
+	var steps := float(ticks) / float(_perf_frames)
+	_perf_frames = 0
+	_perf_phys_max_s = 0.0
 	var vp := get_viewport().get_viewport_rid()
 	var t := RenderingServer.VIEWPORT_RENDER_INFO_TYPE_VISIBLE
 	var draws := RenderingServer.viewport_get_render_info(vp, t,
@@ -567,12 +592,15 @@ func _process(delta: float) -> void:
 		RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME)
 	var sh_prims := RenderingServer.viewport_get_render_info(vp, ts,
 		RenderingServer.VIEWPORT_RENDER_INFO_PRIMITIVES_IN_FRAME)
-	# A doua linie: optiunile grafice active, inclusiv inaltimea 3D efectiva.
-	_perf.text = "%d fps  |  %d+%d draws  |  %dk+%dk tri  |  cpu %.1f ms  gpu %.1f ms\n%s" % [
+	# A treia linie: optiunile grafice active, inclusiv inaltimea 3D efectiva.
+	# Randul 2: cat din cadru e fizica. Ce ramane din `frame` dupa
+	# fizica x pasi e logica, randarea si asteptarea GPU-ului.
+	_perf.text = "%d fps  |  %d+%d draws  |  %dk+%dk tri  |  cpu %.1f ms  gpu %.1f ms\nframe %.1f ms  |  phys max %.1f ms x %.1f steps\n%s" % [
 		Engine.get_frames_per_second(), draws, sh_draws, prims / 1000,
 		sh_prims / 1000,
 		RenderingServer.viewport_get_measured_render_time_cpu(vp),
 		RenderingServer.viewport_get_measured_render_time_gpu(vp),
+		frame_ms, phys_ms, steps,
 		_gfx_line()]
 
 

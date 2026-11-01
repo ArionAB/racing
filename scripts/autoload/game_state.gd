@@ -410,6 +410,19 @@ const DBG_SHADOW_SIZE_NAMES: Array[String] = ["Tier", "1024", "2048", "4096"]
 const DBG_SHADOW_SIZE_PX: Array[int] = [0, 1024, 2048, 4096]
 const DBG_LOD_NAMES: Array[String] = ["Tier", "1 px", "4 px", "8 px"]
 const DBG_LOD_PX: Array[float] = [0.0, 1.0, 4.0, 8.0]
+## Comutatoarele de CONTINUT (nov 2026): pe Kyoto, rezolutia 720p -> 540p si
+## MSAA off au mutat cadrul cu ~1 ms din ~23, deci costul nu e in pixeli ci in
+## cate lucruri se deseneaza. Astea ascund cate o familie de decor (casele din
+## CityFill, padurea din MeshForest, DecorManual cu bufferele lui coapte) si
+## scurteaza vederea camerei (FAR_PLANE e 380 m, ceata se inchide la 370), ca
+## telefonul sa spuna singur care familie costa cadrul.
+const DBG_HIDE_NAMES: Array[String] = ["Shown", "Hidden"]
+const DBG_FAR_NAMES: Array[String] = ["Tier", "120 m", "180 m", "250 m"]
+const DBG_FAR_M: Array[float] = [0.0, 120.0, 180.0, 250.0]
+var dbg_hide_houses: int = 0
+var dbg_hide_forest: int = 0
+var dbg_hide_decor: int = 0
+var dbg_far: int = 0
 var dbg_msaa: int = 0
 var dbg_scale: int = 0
 var dbg_shadows: int = 0
@@ -474,6 +487,18 @@ func apply_debug_gfx() -> void:
 			we.environment.glow_enabled = bool(we.get_meta(&"dbg_orig"))
 		else:
 			we.environment.glow_enabled = dbg_glow == 2
+	var root := get_tree().root
+	for n in root.find_children("*", "CityFill", true, false):
+		(n as Node3D).visible = dbg_hide_houses == 0
+	for n in root.find_children("*", "MeshForest", true, false):
+		(n as Node3D).visible = dbg_hide_forest == 0
+	# Bufferele coapte (TrackDecorBatch.bake_manual) stau SUB DecorManual, deci
+	# ascunderea nodului le ia si pe ele.
+	for n in root.find_children("DecorManual", "Node3D", true, false):
+		(n as Node3D).visible = dbg_hide_decor == 0
+	var cam := vp.get_camera_3d()
+	if cam != null:
+		cam.far = DBG_FAR_M[dbg_far] if dbg_far > 0 else ChaseCamera.FAR_PLANE
 
 
 ## Filtrul hartii de umbra directionale, global. Hard = un esantion per pixel

@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/carrara/structures/derrick.glb" id="11_derrick"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/props/marble_block_hooked.glb" id="12_hooked"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/props/lizza_sled.glb" id="13_sled"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/rocks/block_informe_a.glb" id="13_bloc"]
 [ext_resource type="Script" path="res://scenes/props/windmill.gd" id="16_windmill"]
 [ext_resource type="Script" path="res://scenes/props/mesh_forest.gd" id="mf_script"]
 [ext_resource type="Script" path="res://scenes/props/mesh_forest_zone.gd" id="mf_zone"]
@@ -54,6 +55,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/carrara/props/pipe_run.glb" id="k_pipe_run"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/vehicles/chain_saw_crawler.glb" id="k_chain_saw_crawler"]
 [ext_resource type="PackedScene" path="res://assets/models/transfagarasan/rocks/scree_cone.glb" id="k_scree_cone"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/structures/gallery_pillar.glb" id="k_gallery_pillar"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/props/quarry_sign_block.glb" id="k_quarry_sign_block"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/buildings/colonnata_church.glb" id="k_colonnata_church"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/buildings/colonnata_house_a.glb" id="k_colonnata_house_a"]
@@ -102,6 +104,13 @@ _data = {
 "tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0)
 }
 point_count = 7
+
+[sub_resource type="Curve3D" id="Curve3D_bloc"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0.0, 2.2, -6.4, 0, 0, 0, 0, 0, 0, 0.0, 0.0, -5.2, 0, 0, 0, 0, 0, 0, 0.0, 0.0, -0.5),
+"tilts": PackedFloat32Array(0, 0, 0)
+}
+point_count = 3
 
 [sub_resource type="Resource" id="MFZ_0"]
 script = ExtResource("mf_zone")
@@ -1588,9 +1597,10 @@ custom_water_styles = Array[Dictionary]([{
 custom_cuttings = Array[Vector4]([Vector4(0.735, 0.837, 55.0, 1)])
 custom_cutting_shape = Vector3(5.0, 0.86, 40.0)
 custom_bench_patches = Array[Dictionary]([{ "lvl": PackedVector2Array(-207.852, 25.638, -195.852, 25.42, -183.852, 25.314, -171.852, 25.209, -159.852, 25.104, -148.0, 25.0, -136.0, 25.0, -124.0, 25.0, -112.0, 25.0, -100.0, 25.0), "soft": Vector4(15.0, 0.0, 0.0, 8.0), "x0": -215.0, "x1": -182.0, "z0": -92.5, "z1": -16.5 }, { "lvl": PackedVector2Array(-1000.0, 13.5, 1000.0, 13.5), "soft": Vector4(0.0, 7.0, 0.0, 0.0), "x0": -182.0, "x1": -114.0, "z0": -92.5, "z1": -16.5 }, { "lvl": PackedVector2Array(-1000.0, 20.5, 1000.0, 20.5), "soft": Vector4(0.0, 0.0, 0.0, 0.0), "x0": -182.0, "x1": -150.0, "z0": -92.5, "z1": -35.0 }, { "lvl": PackedVector2Array(-1000.0, 0.8, 1000.0, 0.8), "soft": Vector4(0.0, 20.0, 0.0, 0.0), "x0": -190.0, "x1": 45.0, "z0": -16.5, "z1": 68.0 }, { "lvl": PackedVector2Array(-1000.0, 0.8, 1000.0, 0.8), "soft": Vector4(0.0, 30.0, 8.0, 0.0), "x0": 45.0, "x1": 115.0, "z0": -3.5, "z1": 68.0 }, { "lvl": PackedVector2Array(-1000.0, 45.0, 1000.0, 45.0), "soft": Vector4(20.0, 15.0, 0.0, 12.0), "x0": -112.0, "x1": 104.0, "z0": 100.0, "z1": 124.0 }, { "lvl": PackedVector2Array(-1000.0, 36.16, 1000.0, 36.16), "soft": Vector4(0.0, 15.0, 0.0, 0.0), "x0": -190.0, "x1": 104.0, "z0": 92.0, "z1": 100.0 }, { "lvl": PackedVector2Array(-1000.0, 27.32, 1000.0, 27.32), "soft": Vector4(0.0, 15.0, 0.0, 0.0), "x0": -190.0, "x1": 104.0, "z0": 84.0, "z1": 92.0 }, { "lvl": PackedVector2Array(-1000.0, 18.48, 1000.0, 18.48), "soft": Vector4(0.0, 15.0, 0.0, 0.0), "x0": -190.0, "x1": 104.0, "z0": 76.0, "z1": 84.0 }, { "lvl": PackedVector2Array(-1000.0, 9.64, 1000.0, 9.64), "soft": Vector4(0.0, 15.0, 0.0, 0.0), "x0": -190.0, "x1": 104.0, "z0": 68.0, "z1": 76.0 }, { "lvl": PackedVector2Array(-94.433, 11.021, -82.954, 10.207, -70.954, 9.405, -58.954, 8.602, -46.954, 7.8, -34.954, 7.117, -22.954, 7.0, -10.954, 7.0, 1.046, 7.0, 13.046, 7.0, 25.043, 6.937, 37.012, 6.499), "soft": Vector4(25.0, 25.0, 0.0, 0.0), "x0": -60.0, "x1": 28.0, "z0": -54.5, "z1": -16.5 }, { "lvl": PackedVector2Array(-96.484, 13.477, -85.449, 14.294, -73.495, 15.097, -61.495, 15.9, -49.495, 15.997, -37.495, 16.0, -25.495, 16.0, -13.495, 16.0, -1.495, 16.583, 10.505, 17.371, 22.505, 18.174, 34.505, 18.977), "soft": Vector4(22.0, 22.0, 0.0, 0.0), "x0": -86.0, "x1": 8.0, "z0": -92.5, "z1": -54.5 }, { "lvl": PackedVector2Array(-96.484, 13.477, -85.449, 14.294, -73.495, 15.097, -61.495, 15.9, -49.495, 15.997, -37.495, 16.0, -25.495, 16.0, -13.495, 16.0, -1.495, 16.583, 10.505, 17.371, 22.505, 18.174, 34.505, 18.977), "soft": Vector4(4.0, 4.0, 0.0, 4.0), "x0": -114.0, "x1": -86.0, "z0": -92.5, "z1": -72.0 }, { "lvl": PackedVector2Array(-1000.0, 20.5, 1000.0, 20.5), "soft": Vector4(0.0, 22.0, 0.0, 0.0), "x0": -150.0, "x1": 8.0, "z0": -92.5, "z1": -80.0 }, { "lvl": PackedVector2Array(-207.852, 25.638, -195.852, 25.42, -183.852, 25.314, -171.852, 25.209, -159.852, 25.104, -148.0, 25.0, -136.0, 25.0, -124.0, 25.0, -112.0, 25.0, -100.0, 25.0, -88.0, 25.0, -76.0, 25.0, -64.0, 25.0, -52.0, 25.0, -40.0, 25.0, -28.0, 25.0, -16.0, 25.0, -4.0, 25.0, 8.0, 25.0, 20.0, 24.666, 32.0, 23.863, 43.989, 23.059), "soft": Vector4(15.0, 28.0, 12.0, 0.0), "x0": -182.0, "x1": 12.0, "z0": -113.0, "z1": -92.5 }, { "lvl": PackedVector2Array(-13.495, 16.0, -1.495, 16.583, 10.505, 17.371, 22.505, 18.174, 34.505, 18.977, 47.0, 19.85, 58.0, 20.6), "soft": Vector4(4.0, 10.0, 8.0, 0.0), "x0": 8.0, "x1": 96.0, "z0": -72.0, "z1": -54.5 }, { "lvl": PackedVector2Array(-1000.0, 12.5, 1000.0, 12.5), "soft": Vector4(0.0, 10.0, 0.0, 0.0), "x0": -60.0, "x1": 96.0, "z0": -54.5, "z1": -41.5 }, { "lvl": PackedVector2Array(25.043, 6.937, 37.012, 6.499, 48.914, 5.649, 60.816, 4.799, 72.718, 3.949, 84.62, 3.099, 96.536, 2.33, 108.518, 2.0), "soft": Vector4(4.0, 10.0, 0.0, 6.0), "x0": 28.0, "x1": 96.0, "z0": -41.5, "z1": -30.0 }, { "lvl": PackedVector2Array(-1000.0, 55.3, 1000.0, 55.3), "soft": Vector4(10.0, 20.0, 30.0, 20.0), "x0": -290.0, "x1": -215.0, "z0": 55.0, "z1": 80.0 }])
-custom_width_segments = Array[Vector3]([Vector3(0.952, 0.975, 4.0), Vector3(0.4, 0.696, 4.0), Vector3(0.976, 0.058, 5.0)])
+custom_width_segments = Array[Vector3]([Vector3(0.952, 0.975, 4.0), Vector3(0.4, 0.4758, 4.0), Vector3(0.4758, 0.5716, 8.0), Vector3(0.5716, 0.696, 4.0), Vector3(0.976, 0.058, 5.0)])
 custom_parapets = Array[Vector4]([Vector4(0.987, 0.089, 1, 2), Vector4(0.145, 0.177, -1, 2), Vector4(0.232, 0.273, 1, 2), Vector4(0.602, 0.696, 1, 2), Vector4(0.688, 0.74, 0, 2)])
-width_flow_windows = Array[Vector2]([Vector2(0.965, 0.001)])
+width_flow_windows = Array[Vector2]([Vector2(0.965, 0.001), Vector2(0.4578, 0.5896)])
+custom_lane_bias = Array[Vector3]([Vector3(0.4932, 0.534, 0.7)])
 terrain_pad_m = 160.0
 metadata/zones = {"T1": Vector2(0.058, 0.081), "H1": Vector2(0.081, 0.145), "T2": Vector2(0.145, 0.168), "H2": Vector2(0.168, 0.232), "T3": Vector2(0.232, 0.267), "C": Vector2(0.267, 0.4), "D": Vector2(0.4, 0.592), "E": Vector2(0.592, 0.697), "F": Vector2(0.697, 0.73), "G": Vector2(0.73, 0.952), "H": Vector2(0.952, 0.975)}
 metadata/zone_default = "A"
@@ -1684,6 +1694,9 @@ tube_only = true
 tube_class = "carrara_marble"
 frame_class = "carrara_marble"
 wing_end_height_m = 1.1
+hall_ceiling = 16.0
+hall_from_m = 146.44
+hall_to_m = 364.16
 
 [node name="TunelMarmifera" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(-0.0, 0, 1.0, 0, 1, 0, -1.0, 0, -0.0, -248.8, 26.96, -105.0)
@@ -1817,6 +1830,20 @@ rock_phase = 0.72
 
 [node name="Jgheab" type="Path3D" parent="Hazarduri/Sanie"]
 curve = SubResource("Curve3D_jgheab")
+
+[node name="BlocSala" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 273.5, 27.77, 112.0)
+script = ExtResource("9_marker")
+kind = 1
+model = ExtResource("13_bloc")
+rock_speed = 7.0
+rock_pause = 27.1
+rock_stick_to_ground = false
+rock_warn_bell_s = 2.0
+rock_phase = 0.5
+
+[node name="Traseu" type="Path3D" parent="Hazarduri/BlocSala"]
+curve = SubResource("Curve3D_bloc")
 
 [node name="DecorManual" type="Node3D" parent="."]
 script = ExtResource("14_prop")
@@ -3674,59 +3701,61 @@ transform = Transform3D(-0.0, -0.11395, -0.99349, 0.0, 0.99349, -0.11395, 1.0, -
 metadata/coliziune = "none"
 
 [node name="D_TeavaB1" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
-transform = Transform3D(0.00024, 0.10809, 0.99414, -0.0, 0.99414, -0.10809, -1.0, 3e-05, 0.00024, 330.87, 21.47, 108.07)
+transform = Transform3D(-0.0, 0.10839, 0.99411, 0.0, 0.99411, -0.10839, -1.0, -0.0, -0.0, 258.86, 29.34, 104.1)
 metadata/coliziune = "none"
 
 [node name="D_TeavaB2" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
-transform = Transform3D(0.00024, 0.10809, 0.99414, -0.0, 0.99414, -0.10809, -1.0, 3e-05, 0.00024, 324.87, 22.12, 108.069)
+transform = Transform3D(-0.0, 0.10839, 0.99411, 0.0, 0.99411, -0.10839, -1.0, -0.0, -0.0, 252.86, 29.99, 104.1)
 metadata/coliziune = "none"
 
 [node name="D_TeavaB3" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
-transform = Transform3D(0.00024, 0.10809, 0.99414, -0.0, 0.99414, -0.10809, -1.0, 3e-05, 0.00024, 318.87, 22.77, 108.067)
+transform = Transform3D(-0.0, 0.10839, 0.99411, 0.0, 0.99411, -0.10839, -1.0, -0.0, -0.0, 246.86, 30.65, 104.1)
 metadata/coliziune = "none"
 
 [node name="D_TeavaB4" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
-transform = Transform3D(0.00024, 0.10809, 0.99414, -0.0, 0.99414, -0.10809, -1.0, 3e-05, 0.00024, 312.87, 23.43, 108.066)
-metadata/coliziune = "none"
-
-[node name="D_TeavaB5" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
-transform = Transform3D(0.00024, 0.10809, 0.99414, -0.0, 0.99414, -0.10809, -1.0, 3e-05, 0.00024, 306.87, 24.08, 108.064)
-metadata/coliziune = "none"
-
-[node name="D_TeavaB6" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
-transform = Transform3D(0.00024, 0.10809, 0.99414, -0.0, 0.99414, -0.10809, -1.0, 3e-05, 0.00024, 300.87, 24.73, 108.063)
-metadata/coliziune = "none"
-
-[node name="D_TeavaB7" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
-transform = Transform3D(0.00024, 0.10809, 0.99414, -0.0, 0.99414, -0.10809, -1.0, 3e-05, 0.00024, 294.87, 25.38, 108.061)
-metadata/coliziune = "none"
-
-[node name="D_TeavaB8" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
-transform = Transform3D(0.00024, 0.10809, 0.99414, -0.0, 0.99414, -0.10809, -1.0, 3e-05, 0.00024, 288.87, 26.03, 108.06)
+transform = Transform3D(-0.0, 0.10839, 0.99411, 0.0, 0.99411, -0.10839, -1.0, -0.0, -0.0, 240.86, 31.3, 104.1)
 metadata/coliziune = "none"
 
 [node name="D_TeavaC1" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
-transform = Transform3D(-0.0, 0.10843, 0.9941, 0.0, 0.9941, -0.10843, -1.0, -0.0, -0.0, 207.5, 34.95, 108.1)
+transform = Transform3D(-0.0, 0.10914, 0.99403, 0.0, 0.99403, -0.10914, -1.0, -0.0, -0.0, 141.5, 42.17, 108.1)
 metadata/coliziune = "none"
 
 [node name="D_TeavaC2" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
-transform = Transform3D(-0.0, 0.10843, 0.9941, 0.0, 0.9941, -0.10843, -1.0, -0.0, -0.0, 201.5, 35.6, 108.1)
+transform = Transform3D(-0.0, 0.10914, 0.99403, 0.0, 0.99403, -0.10914, -1.0, -0.0, -0.0, 135.5, 42.82, 108.1)
 metadata/coliziune = "none"
 
 [node name="D_TeavaC3" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
-transform = Transform3D(-0.0, 0.10843, 0.9941, 0.0, 0.9941, -0.10843, -1.0, -0.0, -0.0, 195.5, 36.25, 108.1)
+transform = Transform3D(-0.0, 0.10914, 0.99403, 0.0, 0.99403, -0.10914, -1.0, -0.0, -0.0, 129.5, 43.48, 108.1)
 metadata/coliziune = "none"
 
 [node name="D_TeavaC4" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
-transform = Transform3D(-0.0, 0.10843, 0.9941, 0.0, 0.9941, -0.10843, -1.0, -0.0, -0.0, 189.5, 36.91, 108.1)
+transform = Transform3D(-0.0, 0.10914, 0.99403, 0.0, 0.99403, -0.10914, -1.0, -0.0, -0.0, 123.5, 44.02, 108.1)
 metadata/coliziune = "none"
 
-[node name="D_TeavaC5" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
-transform = Transform3D(-0.0, 0.10843, 0.9941, 0.0, 0.9941, -0.10843, -1.0, -0.0, -0.0, 183.5, 37.56, 108.1)
+[node name="D_StalpSala1" parent="DecorManual/ZonaD" instance=ExtResource("k_gallery_pillar")]
+transform = Transform3D(-0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.0, 258.86, 29.07, 113.5)
+
+[node name="D_StalpSala2" parent="DecorManual/ZonaD" instance=ExtResource("k_gallery_pillar")]
+transform = Transform3D(-0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.0, 228.14, 32.43, 110.5)
+
+[node name="D_SalaPatMoloz" parent="DecorManual/ZonaD" instance=ExtResource("k_rubble_pile_a")]
+transform = Transform3D(-0.65, 0.0, 1.12583, 0.0, 1.3, 0.0, -1.12583, 0.0, -0.65, 273.5, 27.47, 104.8)
 metadata/coliziune = "none"
 
-[node name="D_TeavaC6" parent="DecorManual/ZonaD" instance=ExtResource("k_pipe_run")]
-transform = Transform3D(-0.0, 0.10843, 0.9941, 0.0, 0.9941, -0.10843, -1.0, -0.0, -0.0, 177.5, 38.22, 108.1)
+[node name="D_SalaInforme" parent="DecorManual/ZonaD" instance=ExtResource("k_block_informe_b")]
+transform = Transform3D(0.34202, 0.0, 0.93969, 0.0, 1.0, 0.0, -0.93969, 0.0, 0.34202, 279.5, 27.17, 105.0)
+metadata/coliziune = "none"
+
+[node name="D_SalaLampa1" parent="DecorManual/ZonaD" instance=ExtResource("k_work_lamp")]
+transform = Transform3D(-0.86603, 0.0, 0.5, 0.0, 1.0, 0.0, -0.5, 0.0, -0.86603, 279.5, 26.81, 119.2)
+metadata/coliziune = "none"
+
+[node name="D_SalaLampa2" parent="DecorManual/ZonaD" instance=ExtResource("k_work_lamp")]
+transform = Transform3D(0.86603, 0.0, -0.5, 0.0, 1.0, 0.0, 0.5, 0.0, 0.86603, 243.5, 30.75, 104.8)
+metadata/coliziune = "none"
+
+[node name="D_SalaLampa3" parent="DecorManual/ZonaD" instance=ExtResource("k_work_lamp")]
+transform = Transform3D(-0.70711, 0.0, 0.70711, 0.0, 1.0, 0.0, -0.70711, 0.0, -0.70711, 210.86, 34.31, 119.2)
 metadata/coliziune = "none"
 
 [node name="ZonaE" type="Node3D" parent="DecorManual"]

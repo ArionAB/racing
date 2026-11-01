@@ -18,10 +18,11 @@
 #   - un singur tub (`TunelGalerie`, Track._build_tunnel) de la portalul de jos (0.400, +3) la cel de sus
 #     (0.592, +45): 8 m latime = EXACT latimea drumului (peretii sunt marginea asfaltului, fara umar),
 #     tavan 9 m, `CameraZone` pe tot intervalul (darkness 0.5, tavan 9);
-#   - NU exista sala de 16 m / 18 m de la 0.46-0.50, nici stalpii de pe carosabil, nici blocul basculat
-#     (RockfallHazard): brieful le cere (par.2 D, par.3), dar builderul tunelului n-are latime pe interval.
-#     Decizie de dezvoltator (vezi raportul POI D). Decorul nu inventeaza sala.
-# Deci in tub nu incape nimic pe sol: tot ce e inauntru e lipit de perete si FANTOMA (coliziune "none").
+#   - SALA (31 oct 2026, decizia dezvoltatorului dupa valul 2): pe dreapta de dupa ac soseaua se
+#     lateste la 16 m (`HALL` mai jos), iar tubul o urmeaza (`TunnelSignalHazard.hall_*`) cu tavanul
+#     urcand la 16 m. In sala: doi stalpi de marmura PE carosabil, blocul basculat (RockfallHazard),
+#     lampi de santier. In afara salii tubul ramane de 8 m, deci acolo tot ce e inauntru e lipit de
+#     perete si FANTOMA (coliziune "none").
 
 import csv as _csv
 import math as _math
@@ -107,7 +108,31 @@ ITEMS += [
 # de perete trece prin 50 cm de teava, nu se agata (memoria `obstacol-pe-drum-poate-fi-gimmick`).
 # Pe dreptele tubului, nu in ac: in ac un modul drept de 6 m ar iesi din peretele curb. Pas 6 m
 # (0.0029 din tur de 2070 m), inclinat cu panta (11%), cota = drumul - 3 cm.
-def _pipe_run(prefix, f0, n):
+# ---- 3. SALA (brief par.2 POI D: „16 m latime, tavan inalt, doi stalpi de marmura lasati in picioare PE
+# carosabil, decalati — alegi stanga sau dreapta fiecaruia”). Fractii pe INDEX (randurile din carrara_baked.csv,
+# ~2,07 m pe rand), pe dreapta de dupa ac (iesirea din arc la ~0.472, rampa spre portalul de sus la 0.580).
+#
+# Latimea se declara O DATA, ca sector de drum de semilatime `hw` pe [f0, f1] (gen_carrara_route.py, intre doua
+# sectoare de 4 m, intr-o fereastra de curgere): curgerea (panta 1/15) face trecerea 4 -> 8 m pe ~60 m de fiecare
+# parte, IN sector, deci latimea plina tine ~0.505-0.543 (~80 m). Tubul citeste latimea drumului
+# (`Track._build_tunnel`), nu o copiaza; tavanul urca proportional pana la `ceil`.
+#
+# Stalpii (3 x 3 m, `structures/gallery_pillar.glb`, coliziune hull) stau la -1.5 si +1.5 m de axa, 33 m unul
+# de altul: pe la mijloc se trece doar in slalom (dreapta lui 1, stanga lui 2); lipit de un perete se trece
+# drept (stanga: fanta de 5 m la 1, de 8 m la 2; dreapta: 8 m la 1, 5 m la 2). AI-ul nu vede decorul static
+# (memoria `obstacol-pe-drum-poate-fi-gimmick`): sectorul `bias` il tine pe MARGINE, pe malul lui de
+# personalitate (`custom_lane_bias`, Track.lane_bias_at, si podea TARE dupa ocolire: Track.lane_floor_at) —
+# 0.70 din semilatime = 5,6 m in sala: 1,6 m de aer intre caroserie si stalpul de pe partea lui, 1,4 m pana
+# la perete. Cu 0.62 (0,96 m de aer) ramaneau 3 ejectari in stalpul 2 pe 16 seed-uri (ProbeRace).
+#
+# Blocul basculat (RockfallHazard cu traseu, generatorul): se desprinde de pe patul de moloz de la peretele din
+# DREAPTA, la `block_f`, 13 m inaintea primului stalp, si se rostogoleste pe banda dreapta pana la `block_lat`.
+HALL = dict(f0=0.4758, f1=0.5716, hw=8.0, ceil=16.0, bias=(0.4932, 0.5340, 0.70),
+            block_f=0.5077, block_lat=0.5)
+PILLARS = (("D_StalpSala1", 0.5145, -1.5), ("D_StalpSala2", 0.5300, 1.5))
+
+
+def _pipe_run(prefix, f0, n, lat=3.9):
     """`n` module la rand de la fractia f0: aceeasi fractie, `along` = 6 m * k (fractia pe rand ar sari cu
     ~2 m, cat pasul axei coapte). Cota = drumul interpolat in lungul axei la pozitia modulului - 3 cm."""
     i0 = min(range(len(_ROWS)), key=lambda k: abs(_ROWS[k][4] - f0))
@@ -122,14 +147,36 @@ def _pipe_run(prefix, f0, n):
             i += 1
         t = d / _math.dist(_ROWS[i][:3], _ROWS[i + 1][:3])
         y = _ROWS[i][1] + (_ROWS[i + 1][1] - _ROWS[i][1]) * t
-        out.append((f"{prefix}{k + 1}", "props/pipe_run.glb", _ROWS[i0][4], 3.9, 0.0,
+        out.append((f"{prefix}{k + 1}", "props/pipe_run.glb", _ROWS[i0][4], lat, 0.0,
                     {"along": 6.0 * k, "tilt": True, "coliziune": "none", "y": round(y - 0.03, 2)}))
     return out
 
 
 ITEMS += _pipe_run("D_TeavaA", 0.4045, 6)     # dreapta de la portalul de jos spre ac
-ITEMS += _pipe_run("D_TeavaB", 0.4800, 8)     # rampa de dupa ac
-ITEMS += _pipe_run("D_TeavaC", 0.5400, 6)     # rampa spre portalul de sus
+# In sala conducta merge pe peretele din dreapta al latimii pline (8 m), de la primul stalp incolo: inainte de el
+# e patul de moloz al blocului. In trecerile de 60 m peretele se departeaza de axa (1/15), deci acolo nu se pune
+# un modul drept de 6 m.
+ITEMS += _pipe_run("D_TeavaB", 0.5145, 4, lat=HALL["hw"] - 0.1)
+ITEMS += _pipe_run("D_TeavaC", HALL["f1"], 4)  # dupa sala, spre portalul de sus
+
+# Stalpii: talpa la drum - 0.3 (panta de 10 % pe 3 m = +-0.15 m: nicio muchie nu pluteste); 18 m inalti, tavanul
+# salii e la 16 m peste drum, deci varful intra in grosimea movilei (creasta e la tavan + 3,5).
+ITEMS += [(nm, "structures/gallery_pillar.glb", f_, lat_, 0.0, {"y": round(_road_y(f_) - 0.3, 2)})
+          for nm, f_, lat_ in PILLARS]
+ITEMS += [
+    # patul de moloz de sub blocul basculat, lipit de peretele din dreapta (fantoma: blocul isi are traseul lui)
+    ("D_SalaPatMoloz", "rocks/rubble_pile_a.glb", HALL["block_f"], 7.2, 30.0,
+     {"scale": 1.3, "coliziune": "none", "y": round(_road_y(HALL["block_f"]) - 0.3, 2)}),
+    ("D_SalaInforme", "rocks/block_informe_b.glb", HALL["block_f"], 7.0, -20.0,
+     {"along": -6.0, "coliziune": "none", "y": round(_road_y(HALL["block_f"]) - 0.6, 2)}),
+    # lampile de santier, calde, la pereti: fantoma (stau pe asfalt, lipite de perete, ca teava)
+    ("D_SalaLampa1", "props/work_lamp.glb", 0.5048, -7.2, 60.0,
+     {"coliziune": "none", "y": round(_road_y(0.5048) - 0.3, 2)}),
+    ("D_SalaLampa2", "props/work_lamp.glb", 0.5222, 7.2, -120.0,
+     {"coliziune": "none", "y": round(_road_y(0.5222) - 0.3, 2)}),
+    ("D_SalaLampa3", "props/work_lamp.glb", 0.5380, -7.2, 45.0,
+     {"coliziune": "none", "y": round(_road_y(0.5380) - 0.3, 2)}),
+]
 
 KIT_Y = {
     # terenul minim de sub amprenta - 3 cm (`ProbeCarraraMontaj -- --decor --no-manual-batch`: piesele

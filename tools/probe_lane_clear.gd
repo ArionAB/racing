@@ -356,7 +356,12 @@ const BASELINE := {
 	# inaltimi) si 5 la frac 0.685 (`@AnimatableBody3D`, CAMIONUL 2 pe banda lui, la intrarea
 	# pe pod). Derrick-ul, sania, portalurile, viaductul si decorul din A/C/F nu apar.
 	# Baza = cifra masurata, FARA marja. Sabotaj (`--sabotaj`) verificat la armare.
-	"Carrara (Track23)": 9,
+	# 9 -> 13 (31 oct 2026, sala galeriei D): cele 4 noi sunt STALPII salii, gimmick-ul de linie din
+	# brief §2 POI D („doi stalpi lasati in picioare PE carosabil, alegi stanga sau dreapta"):
+	# `D_StalpSala1_col` la 0.515 (lat +0.0 si -2.7: stalpul sta la -1.5) si `D_StalpSala2_col` la
+	# 0.530 (lat +0.0 si +2.7: stalpul sta la +1.5). Sala are 16 m, deci sondele de +-1/3 cad la
+	# +-2.7 m; fanta pe langa fiecare stalp e de 5 m pe o parte si 8 m pe cealalta (zona_d.HALL).
+	"Carrara (Track23)": 13,
 }
 
 

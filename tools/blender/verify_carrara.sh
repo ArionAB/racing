@@ -198,6 +198,8 @@ crr_nodes "structures/ponti_di_vara.glb" "Viaduct_Brick,Viaduct_Marble,Viaduct_M
 check "structures/gallery_portal.glb" --origin=assembly
 crr_gap "structures/gallery_portal.glb" --rect=10.0,10.5
 crr_nodes "structures/gallery_portal.glb" "Portal_Glow,Portal_Marble,Portal_MarbleBase,Portal_Rust,Portal_Void"
+check "structures/gallery_pillar.glb" --origin=assembly
+crr_nodes "structures/gallery_pillar.glb" "Pillar_Marble,Pillar_MarbleBase"
 check "structures/marmifera_portal.glb" --origin=assembly
 crr_gap "structures/marmifera_portal.glb" --rect=10.0,6.0 --crown=8.5 --floor=0.1
 crr_nodes "structures/marmifera_portal.glb" "Portal_Glow,Portal_Moss,Portal_Rail,Portal_Stone,Portal_Void"

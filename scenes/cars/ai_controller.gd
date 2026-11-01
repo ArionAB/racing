@@ -598,6 +598,14 @@ func update(delta: float) -> void:
 		var hi := forced + FORCED_SLACK
 		line = clampf(line, minf(lo, hi), maxf(lo, hi))
 		line = clampf(line, -LINE_MAX, LINE_MAX)
+	# Obstacol STATIC pe axa cu trecere pe ambele parti (stalpii salii, Carrara POI D): marginea aleasa
+	# ramane podea tare dupa toate ajustarile (ocolire, ranchiuna, camion), nu doar punct de plecare —
+	# altfel depasirea muta linia spre axa, adica in stalp. Partea ramane cea pe care e linia acum.
+	var floor_off := track.lane_floor_at(idx)
+	if floor_off > 0.0:
+		var floor_side := signf(line) if absf(line) > 0.01 \
+			else (signf(line_offset) if absf(line_offset) > 0.02 else 1.0)
+		line = floor_side * clampf(absf(line), floor_off, LINE_MAX)
 	line = _alley_gate_line(idx, line)
 	# Muchia fara parapet are ultimul cuvant, dupa ocolire: nici depasirea nu
 	# trece pe buza, nici nu inchide usa celui de langa noi spre apa.

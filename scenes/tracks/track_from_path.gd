@@ -179,6 +179,10 @@ extends Track
 ## anume — pilotii sunt trimisi acolo, in loc sa aleaga malul dupa
 ## personalitate ca la `_lane_bias`. Vezi Track.lane_forced_at.
 @export var custom_lane_corridors: Array[Vector3] = []
+## Sector cu obstacol PE AXA si trecere pe AMBELE parti: (frac_start, frac_end, |linie| minima 0..1).
+## Pilotul se tine de margine, pe malul lui de personalitate — ca la trenul pe sens de pe Baikal,
+## dar declarat de pista (stalpii din sala galeriei Carrara, brief §2 POI D). Vezi Track.lane_bias_at.
+@export var custom_lane_bias: Array[Vector3] = []
 ## Landmark-uri hero: fiecare Vector3 = (fractie, parte ±1, id-model din
 ## _LANDMARKS). Desert: 0=turn apa, 1=benzinarie, 2=moara, 3=semn Route 66,
 ## 4=ecran drive-in, 5=stalp GAS, 12=baraca minerului.
@@ -402,6 +406,9 @@ func _flyoff_fracs() -> Array[float]:
 
 func _lane_corridors() -> Array[Vector3]:
 	return custom_lane_corridors
+
+func _lane_bias_sectors() -> Array[Vector3]:
+	return custom_lane_bias
 
 func _landmark_spots() -> Array[Vector3]:
 	return custom_landmarks

@@ -2265,6 +2265,8 @@ const CLASSES_CARRARA := {
 	"safety_berm": {"Berm_Marble": _CRR_MARBLE},
 	"pipe_run": {"Pipe_Marble": _CRR_MARBLE},
 	"gallery_portal": {"Portal_Marble": _CRR_MARBLE},
+	# stalpii salii galeriei D (31 oct 2026): `Pillar_Marble` + `Pillar_MarbleBase`, ca blocurile
+	"gallery_pillar": {"Pillar_Marble": _CRR_MARBLE},
 	# Caramida viaductului pe `ok_roof` (olanele Okinawa, tinta #B8452E): pe atlas iesea portocaliu-viu, iar pe `roof_tiles` (fara tenta pe tema) iesea aproape alba.
 	"ponti_di_vara": {"Viaduct_Marble": _CRR_MARBLE,
 		"Viaduct_Brick": Palette.TRI_PREFIX + "ok_roof"},
@@ -4683,6 +4685,8 @@ const CARRARA_MOVING_CLASSES := {
 	"Truck_Marble": Palette.TRI_PREFIX + "carrara_marble",
 	"Sled_Marble": Palette.TRI_PREFIX + "carrara_marble",
 	"Block_Marble": Palette.TRI_PREFIX + "carrara_marble",
+	# blocul basculat din sala galeriei D (RockfallHazard, block_informe_a): 31 oct 2026
+	"Informe_Marble": Palette.TRI_PREFIX + "carrara_marble",
 	"Truck_Rust": Palette.TRI_PREFIX + "rust_metal",
 	"Body_Rust": Palette.TRI_PREFIX + "rust_metal",
 	"Arm_Rust": Palette.TRI_PREFIX + "rust_metal",

@@ -430,6 +430,17 @@ func _build_bus() -> void:
 ## frontala in razanta — se pastreaza cata vreme capatul ramane peste bara masinii (~1 m).
 @export_range(-1.0, 8.0, 0.1) var wing_end_height_m: float = -1.0
 
+## SALA din tub (Carrara, galeria Ravaccione, brief §2 POI D: 16 m latime, tavan inalt, stalpi pe
+## carosabil). Pe [hall_from_m, hall_to_m] metri de la linia de oprire, peretii tubului urmeaza
+## latimea REALA a soselei (`Track.width_at_index`) cand e mai lata decat `tunnel_half_width`, iar
+## tavanul urca proportional cu lărgirea, pana la `hall_ceiling` acolo unde soseaua e cea mai lata.
+## Latimea se declara DOAR o data, ca sector de drum (`custom_width_segments` + fereastra de
+## curgere): tubul o citeste, nu o copiaza (memoria `hazard-dezaliniat-contamineaza-verdictul`).
+## 0 (implicit) = fara sala: Fiordland / Transfagarasan bit-identice (ProbeTunelHash).
+@export_range(0.0, 30.0, 0.5) var hall_ceiling: float = 0.0
+@export var hall_from_m: float = 0.0
+@export var hall_to_m: float = 0.0
+
 ## Pe ce banda a tunelului merge autocarul, fata de AXA drumului (m, semn
 ## local X — acelasi semn ca `TrackRoute.side_at` / `lateral_distance`:
 ## POZITIV = dreapta SENSULUI de mers al masinilor, NEGATIV = stanga).

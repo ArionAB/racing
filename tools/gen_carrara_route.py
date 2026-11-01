@@ -473,12 +473,20 @@ if OUT_PATH:
 
     # ---- latimi (idx). Jumatati de latime; globalul 4.5 e C si G (9 m). Ordinea conteaza:
     # primul sector care contine fractia castiga, deci tunelurile (cele mai inguste) sunt primele.
+    # Sala galeriei D (zona_d.HALL): sursa unica a amplasarii, citita si de decorul zonei.
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from carrara_decor.zona_d import HALL
     width_segments = [
         # H: tunelul Marmifera — exact intre portaluri. 8 m, nu 6,5 din brief: la 6,5 m masinile de 35 m/s
         # (venind dintr-un arc) loveau rama/aripile portalului (ProbeRace runda 0-1: 5 ejectari la 0.94-0.97).
         (IDX("H portal intrare"), IDX("H portal iesire"), 4.0),
         # D + E: galeria si cariera de sus, de la portalul de jos la capatul lui E. 8 m (brief: 7).
-        (IDX("D portal jos"), IDX("E sfarsit"), 4.0),
+        # Rupt in trei pentru SALA (16 m, zona_d.HALL): trei sectoare LIPITE, intr-o fereastra de curgere
+        # (`flow_windows`), ca trecerea 4 -> 8 m sa se faca in sectorul salii, cu panta 1/15, fara treapta
+        # (rampa unui sector merge spre latimea GLOBALA, 4.5, deci fara fereastra ar ramane 0.5 m de prag).
+        (IDX("D portal jos"), HALL["f0"], 4.0),
+        (HALL["f0"], HALL["f1"], HALL["hw"]),
+        (HALL["f1"], IDX("E sfarsit"), 4.0),
         # F: podul NU mai are sector (era 6 m): la 6 m AI-ul tinea linia la 2,6 m de axa si rotile
         # treceau peste marginea tablierului fara parapet (18 repuneri in 16 curse, runda 0).
         # Iese cu latimea globala, 9 m; trecerea 7 -> 9 m e rampa de 30 m a sectorului E.
@@ -491,6 +499,11 @@ if OUT_PATH:
     flow_windows = [
         # H -> A: iesirea din tunel (6,5 m) direct in piazzale (10 m).
         (IDX("H portal iesire", -20.0), IDX("H portal iesire", 55.0)),
+        # sala galeriei D: marginile la ~37 m in afara sectorului. Nu mai aproape: dupa f1 regula veche aplica
+        # inca rampa de iesire a sectorului salii (WIDTH_RAMP_M = 30 m, spre latimea GLOBALA, si salii ii vine
+        # randul inaintea sectorului de 4 m de dupa ea): la +20 m latimea veche era 5.46, cea curgatoare 4.00 —
+        # treapta de 1.5 m mutata pe marginea ferestrei (`Track._validate_width_flow`).
+        (round(HALL["f0"] - 0.018, 4), round(HALL["f1"] + 0.018, 4)),
     ]
 
     # ---- rape (len). ADANCIMEA e relativa la cota drumului MEDIATA (`road_level`, nu cea locala), deci
@@ -671,7 +684,7 @@ wall_m = {w_}
     # portalului GLB, nu pe beton, iar aripile coboara spre capat (zid-aripa care tine molozul din spate,
     # zona_d/zona_h). Ambele portaluri GLB sunt pe marmura (`gallery_portal`; `marmifera_portal` din POI H
     # runda 3, CLASSES_CARRARA), deci rama si aripile la fel. Zero materiale noi.
-    def tunnel_node(name, tag, tag_end, hw, ceil_h, tail, frame_cls="carrara_marble"):
+    def tunnel_node(name, tag, tag_end, hw, ceil_h, tail, frame_cls="carrara_marble", hall=""):
         x, y = pos_at(tag_s[tag])
         x2, y2 = pos_at(tag_s[tag] + 3.0)
         dx, dz = (x2 - x), -(y2 - y)   # directia de mers in lume (gx, gz)
@@ -695,8 +708,16 @@ tube_only = true
 tube_class = "carrara_marble"
 frame_class = "{frame_cls}"
 wing_end_height_m = 1.1
-"""
-    tunnels_txt = tunnel_node("TunelGalerie", "D portal jos", "D portal sus (E inceput)", 4.0, 9.0, 14.0) \
+{hall}"""
+    # Sala: intervalul tubului in metri de la linia de oprire. Fractiile salii sunt pe INDEX (pas uniform, ~2 m),
+    # deci metri ~ (f - f_portal) * lungime, cu cativa metri de eroare: intervalul se ia cu 10 m in plus de
+    # fiecare parte. In afara sectorului salii drumul are exact `hw`, iar tubul ia max(hw, drum), deci marginea
+    # in plus nu schimba nimic.
+    hall_m0 = (HALL["f0"] - IDX("D portal jos")) * total - 10.0
+    hall_m1 = (HALL["f1"] - IDX("D portal jos")) * total + 10.0
+    hall_txt = f"hall_ceiling = {HALL['ceil']}\nhall_from_m = {r2(hall_m0)}\nhall_to_m = {r2(hall_m1)}\n"
+    tunnels_txt = tunnel_node("TunelGalerie", "D portal jos", "D portal sus (E inceput)", 4.0, 9.0, 14.0,
+                              hall=hall_txt) \
         + tunnel_node("TunelMarmifera", "H portal intrare", "H portal iesire", 4.0, 7.0, 12.0)
 
     # ---- Plase de repunere sub marginile cu gol (RespawnZone, ca ViaductNet): berma de 0,6 m nu opreste o
@@ -1382,6 +1403,46 @@ rock_phase = {SLED_PHASE}
 [node name="Jgheab" type="Path3D" parent="Hazarduri/Sanie"]
 curve = SubResource("Curve3D_jgheab")
 """
+        # ---- 2b. BLOCUL BASCULAT din sala galeriei (POI D, brief par.2 D): RockfallHazard cu traseu, ca sania, dar
+        # blocul SE ROSTOGOLESTE (rock_roll_model implicit). Pleaca de pe patul de moloz lipit de peretele din dreapta
+        # (D_SalaPatMoloz, zona_d), cade 2,2 m pe asfalt si se rostogoleste pe banda dreapta pana la HALL["block_lat"],
+        # unde dispare. Traseul e perpendicular pe axa, deci orizontal (panta de 10 % e in lung); fara lipire de sol
+        # (`rock_stick_to_ground` false): patul de moloz e fantoma, raza in jos l-ar fi pus direct pe asfalt.
+        # Ciclul de ~29 s (brief), cu clopotul de 2 s al saniei ca telegraf.
+        BLOCK_SPEED, BLOCK_CYCLE, BLOCK_BELL, BLOCK_PHASE = 7.0, 29.0, 2.0, 0.5
+        pb, (fxb, fzb), i_b = road_pt(HALL["block_f"], 0.0)
+        yb = brow[i_b][1]
+        block_route = [road_pt(HALL["block_f"], 6.4)[0], road_pt(HALL["block_f"], 5.2)[0],
+                       road_pt(HALL["block_f"], HALL["block_lat"])[0]]
+        block_route = [(block_route[0][0], yb + 2.2, block_route[0][2]),
+                       (block_route[1][0], yb, block_route[1][2]),
+                       (block_route[2][0], yb, block_route[2][2])]
+        block_len = sum(math.dist(a_, b_) for a_, b_ in zip(block_route, block_route[1:]))
+        # Curba se scrie RELATIV la marker, ca jgheabul saniei (Path3D e copil al lui; in lume iesea dublata).
+        block_route = [(round(a_ - pb[0], 2), round(b_ - yb, 2), round(c_ - pb[2], 2)) for a_, b_, c_ in block_route]
+        t_acc_b = BLOCK_SPEED / 4.0                    # RockfallHazard.ROUTE_ACCEL = 4
+        d_acc_b = 0.5 * BLOCK_SPEED * t_acc_b
+        travel_b = (math.sqrt(2.0 * block_len / 4.0) if block_len <= d_acc_b
+                    else t_acc_b + (block_len - d_acc_b) / BLOCK_SPEED)
+        kit_ext += '[ext_resource type="PackedScene" path="res://assets/models/carrara/rocks/block_informe_a.glb" id="13_bloc"]\n'
+        kit_sub += curve_sub("Curve3D_bloc", block_route)
+        kit_nodes += f"""
+[node name="BlocSala" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {r2(pb[0])}, {r2(yb)}, {r2(pb[2])})
+script = ExtResource("9_marker")
+kind = 1
+model = ExtResource("13_bloc")
+rock_speed = {BLOCK_SPEED}
+rock_pause = {round(BLOCK_CYCLE - travel_b, 2)}
+rock_stick_to_ground = false
+rock_warn_bell_s = {BLOCK_BELL}
+rock_phase = {BLOCK_PHASE}
+
+[node name="Traseu" type="Path3D" parent="Hazarduri/BlocSala"]
+curve = SubResource("Curve3D_bloc")
+"""
+        print(f"  blocul salii: frac {brow[i_b][4]:.4f}, traseu {block_len:.2f} m, {travel_b:.2f} s + pauza "
+              f"{round(BLOCK_CYCLE - travel_b, 2)} s = {BLOCK_CYCLE} s")
         print(f"  sania: trecere la x {ps[0]:.1f} z {ps[2]:.1f} y {ps[1]:.2f} (frac {brow[i_s][4]:.4f}), jgheab {chute_len:.1f} m (3D) "
               f"la 40 grade de axa, {travel:.2f} s de mers + pauza {sled_pause} s = {SLED_CYCLE} s")
         print(f"         s: start {S_START} (platou), buza {s_lip:.2f}, piciorul peretelui {s_foot:.2f}, stop {S_STOP}; "
@@ -1703,6 +1764,7 @@ custom_bench_patches = Array[Dictionary]([{patch_txt}])
 custom_width_segments = Array[Vector3]([{w_txt}])
 custom_parapets = Array[Vector4]([{par_txt}])
 width_flow_windows = Array[Vector2]([{fw_txt}])
+custom_lane_bias = Array[Vector3]([{V3(*HALL["bias"])}])
 terrain_pad_m = 160.0
 {zones_meta}
 [node name="Path" type="Path3D" parent="."]

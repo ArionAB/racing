@@ -181,6 +181,27 @@ func _add_perf_tests(box: VBoxContainer) -> void:
 		func(i: int) -> void:
 			GameState.dbg_lod = i
 			GameState.apply_gfx_tier())
+	# Continutul (nov 2026): care familie de decor costa cadrul.
+	_add_choice(box, "Test: houses", GameState.DBG_HIDE_NAMES,
+		GameState.dbg_hide_houses,
+		func(i: int) -> void:
+			GameState.dbg_hide_houses = i
+			GameState.apply_gfx_tier())
+	_add_choice(box, "Test: forest", GameState.DBG_HIDE_NAMES,
+		GameState.dbg_hide_forest,
+		func(i: int) -> void:
+			GameState.dbg_hide_forest = i
+			GameState.apply_gfx_tier())
+	_add_choice(box, "Test: placed decor", GameState.DBG_HIDE_NAMES,
+		GameState.dbg_hide_decor,
+		func(i: int) -> void:
+			GameState.dbg_hide_decor = i
+			GameState.apply_gfx_tier())
+	_add_choice(box, "Test: view distance", GameState.DBG_FAR_NAMES,
+		GameState.dbg_far,
+		func(i: int) -> void:
+			GameState.dbg_far = i
+			GameState.apply_gfx_tier())
 
 
 ## Camera vie afla imediat, prin grup. Salvarea merge in acelasi apel: sliderele

@@ -652,7 +652,23 @@ func _gfx_line() -> String:
 		h3d, star.call(GameState.dbg_scale > 0),
 		shadows, star.call(shadows_forced),
 		glow, star.call(GameState.dbg_glow > 0),
-		roundi(vpn.mesh_lod_threshold), star.call(GameState.dbg_lod > 0)]
+		roundi(vpn.mesh_lod_threshold), star.call(GameState.dbg_lod > 0)] 		+ _hidden_line()
+
+
+## Ce familii de decor sunt ascunse de comutatoarele de test, ca o captura sa
+## nu poata fi confundata cu jocul intreg.
+func _hidden_line() -> String:
+	var parts: Array[String] = []
+	if GameState.dbg_hide_houses > 0:
+		parts.append("houses")
+	if GameState.dbg_hide_forest > 0:
+		parts.append("forest")
+	if GameState.dbg_hide_decor > 0:
+		parts.append("decor")
+	var out := "" if parts.is_empty() else "  |  hidden: " + ", ".join(parts)
+	if GameState.dbg_far > 0:
+		out += "  |  view %s*" % GameState.DBG_FAR_NAMES[GameState.dbg_far]
+	return out
 
 
 ## Fontul HUD-ului: Barlow Condensed (SIL OFL, vezi

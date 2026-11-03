@@ -737,6 +737,13 @@ const CLASS_TEXTURES := {
 	# ROTITA (CLASS_LIFT / CLASS_LIFT_ROTATE): venele ei sunt verticale, iar taietura cu
 	# fir diamantat lasa dungi ORIZONTALE. Tenta e calibrata in joc, vezi CLASS_TINT.
 	"carrara_marble": "res://assets/textures/classes/olkhon_marble.png",
+	# GRESIA ANGKOR (Track24, brief angkor.md §4, TESTUL DE LOC — pasul 0). ACEEASI dala ca
+	# `cut_stone` (zidaria uscata alpina): templele khmere sunt blocuri de gresie asezate fara
+	# mortar, deci randurile dalei sunt chiar subiectul. A = gri-ocru cald (brief); `_real` =
+	# gri-verzui (martorul "fara antidoturi", ca B la Carrara). Lichenul si darele de muson vin
+	# din vertex color pe geometria mostrei, nu din clasa.
+	"angkor_sandstone": "res://assets/textures/classes/alpine_granite.png",
+	"angkor_sandstone_real": "res://assets/textures/classes/alpine_granite.png",
 	# PIETRISUL carierei Carrara (Track23): solul de teren citea NISIP ("sand ripples" pe 10/10 cadre ale
 	# mostrei) fiindca terenul avea doar perechea `surface_sand`. ACEEASI dala ca `branch_texture`
 	# (`surface_gravel.png`, granulatie fina de pietris, media 0,842 ca nisipul si iarba) pusa pe
@@ -1098,6 +1105,10 @@ const CLASS_TINT := {
 	# (H 196, S 0.25 — "gheata albastra" la criticii orbi ai mostrei). Acum tenta e aproape
 	# NEUTRA (usor mai putin albastra decat verdele), iar ambientul mai putin saturat.
 	"carrara_marble": Color(0.76, 0.765, 0.75),
+	# Gresia Angkor (testul de loc): A gri-ocru cald, B (martor) gri-verzui rece. Provizoriu:
+	# se calibreaza pe captura --gamecam, ca la Carrara.
+	"angkor_sandstone": Color(1.0, 0.86, 0.66),
+	"angkor_sandstone_real": Color(0.80, 0.85, 0.80),
 	# Granitul Serengeti — valoare de INTEGRARE, nu a unui singur POI.
 	# Sase bucati au masurat aceeasi clasa independent, pe capturi diferite:
 	# A (0.50,0.56,0.68), B (0.56,0.60,0.68), C (0.520,0.578,0.723),
@@ -1553,6 +1564,9 @@ const CLASS_TRIPLANAR_SCALE := {
 	"granite": 0.09,
 	# Marmura Carrara: dala rotita (dungi orizontale), o repetitie la ~8 m.
 	"carrara_marble": 0.12,
+	# Gresia Angkor: scara lui `cut_stone` (o repetitie la ~3,6 m, blocuri de 0,4-0,7 m).
+	"angkor_sandstone": 0.28,
+	"angkor_sandstone_real": 0.28,
 	# Zidaria taiata: 0.5 = o repetitie la 2 m, adica SCARA REALA a sursei.
 	# Blocurile din fotografie ies atunci la 20-40 cm, randurile din geometrie
 	# sunt la 0.9 m: doua scari de zidarie care se sprijina una pe alta, exact

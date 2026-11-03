@@ -4436,6 +4436,80 @@ static func themes() -> Dictionary:
 		"hazard_model": "",
 		"water": false,
 	}
+	# ANGKOR (Track24, docs/track_briefs/angkor.md §4, §7 pasul 0 — TESTUL DE LOC). Doua variante
+	# pentru critic orb, in aceeasi runda (memoria `criticul-orb-citeste-relativ-la-set`):
+	#   `angkor`      = A, brief-ul: dupa-amiaza de muson, soare jos si cald din VSV pe fatada
+	#                   de vest, cer vanat-violet, drum de laterita rosie, sol de jungla inchis;
+	#   `angkor_real` = B, martorul "fara antidoturi": soare sus, cer albastru, drum de pamant
+	#                   gri-bej, gresie gri-verzuie — ce ar fi Angkor desenat "corect" si plat.
+	# Valorile sunt PROVIZORII, calibrate pe captura --gamecam a mostrei, nu din socoteala.
+	# Azimutul: rotatia Y = -67.5 trimite lumina spre ENE, deci soarele sta in VSV (conventia
+	# din `carrara`: Y 30 = soare din SE).
+	_themes_cache["angkor"] = {
+		"sun_color": Color.html("FFC48A"),
+		"sun_energy": 1.35,
+		"exposure": 1.0,
+		"sun_rotation_deg": Vector3(-24, -67.5, 0),
+		# Ambient rece-violet din cerul de furtuna, mic: raport soare/ambient ~3.4 (memoria
+		# `geometria-fara-lumina-e-invizibila`).
+		"ambient_color": Color.html("A9A4C6"),
+		"ambient_energy": 0.40,
+		"sky_top": Color.html("3B3550"),
+		"sky_horizon": Color.html("9C8296"),
+		"sky_cover_alpha": 0.45,
+		"fog": Color.html("857A88"),
+		"fog_sky_affect": 0.20,
+		"fog_aerial": 0.30,
+		"fog_depth": true,
+		"fog_begin": 120.0,
+		"fog_end": 280.0,
+		"fog_curve": 1.5,
+		"fog_max": 0.70,
+		"shadows": true,
+		"shadow_opacity": 0.70,
+		"shadow_distance": 150.0,
+		"shadow_blur": 1.0,
+		"dune_scale": 0.0,
+		# Solul de jungla: frunze moarte + verde inchis. Drumul: laterita (TILE_TERRACOTTA ca familie).
+		"ground_tint": Color(0.36, 0.40, 0.22),
+		"hill_color": Color(0.16, 0.24, 0.14),
+		"scarp_tint": Color(0.62, 0.34, 0.24),
+		"scarp_slope_deg": 30.0,
+		"scarp_fade_deg": 10.0,
+		"dirt_road_tint": Color(0.60, 0.42, 0.38),
+		# Solul de jungla: covorul de iarba (perechea a doua a shaderului) pe tot terenul, nu nisipul
+		# cu dune (prima captura a mostrei citea desert).
+		"savanna_grass_w": 1.0,
+		"savanna_grass_tint": Color(0.16, 0.22, 0.10),
+		"dust_color": Palette.color(Palette.TILE_TERRACOTTA),
+		"walls": false,
+		"kerbs": false,
+		"cliffs": false,
+		"decor": "none",
+		"props": "",
+		"prop_contact_flat": [],
+		"hazard_model": "",
+		"horizon_model": "",
+		"water": false,
+	}
+	var angkor_real: Dictionary = _themes_cache["angkor"].duplicate(true)
+	angkor_real.merge({
+		"sun_color": Color(1.0, 0.95, 0.85),
+		"sun_energy": 1.35,
+		"sun_rotation_deg": Vector3(-45, -67.5, 0),
+		"ambient_color": Color.html("B4C2D2"),
+		"ambient_energy": 0.46,
+		"sky_top": Color.html("2A5BA6"),
+		"sky_horizon": Color.html("B9CFE3"),
+		"sky_cover_alpha": 0.12,
+		"fog": Color(0.86, 0.87, 0.89),
+		"ground_tint": Color.html("5F6B3E"),
+		"dirt_road_tint": Color.html("C9C3B8"),
+		"dust_color": Palette.color(Palette.SAND_SHADOW),
+		"scarp_tint": Color.html("4A4844"),
+		"savanna_grass_tint": Color(0.36, 0.45, 0.22),
+	}, true)
+	_themes_cache["angkor_real"] = angkor_real
 	return _themes_cache
 
 

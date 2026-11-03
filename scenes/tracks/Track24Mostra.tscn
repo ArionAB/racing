@@ -1,0 +1,919 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
+[ext_resource type="Script" path="res://scenes/tracks/angkor_mostra.gd" id="2_mostra"]
+[ext_resource type="Script" path="res://scenes/props/world_prop.gd" id="3_prop"]
+[ext_resource type="Script" path="res://scenes/hazards/rain_cycle.gd" id="4_rain"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/fan_palm.glb" id="m_palm"]
+[ext_resource type="PackedScene" path="res://assets/models/trees/banyan.glb" id="m_banyan"]
+[ext_resource type="PackedScene" path="res://assets/models/trees/banyan.glb" id="m_ficus_a"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/fukugi_tree_a.glb" id="m_ficus_b"]
+[ext_resource type="PackedScene" path="res://assets/models/plants/fern_cluster.glb" id="m_fern"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/plants/bamboo_clump.glb" id="m_bamboo"]
+[ext_resource type="PackedScene" path="res://assets/models/plants/broadleaf_shrub.glb" id="m_shrub"]
+
+[sub_resource type="Curve3D" id="Curve3D_mostra"]
+closed = true
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 80, 0, 0, 0, 0, 0, 0, 0, 0, 110, 0, 0, 0, 0, 0, 0, 0, 0, 122, 0, -6, 0, 0, 0, 0, 0, 0, 127, 0, -20, 0, 0, 0, 0, 0, 0, 128, 0, -50, 0, 0, 0, 0, 0, 0, 124, 0, -80, 0, 0, 0, 0, 0, 0, 112, 0, -102, 0, 0, 0, 0, 0, 0, 90, 0, -116, 0, 0, 0, 0, 0, 0, 60, 0, -122, 0, 0, 0, 0, 0, 0, 30, 0, -122, 0, 0, 0, 0, 0, 0, 5, 0, -116, 0, 0, 0, 0, 0, 0, -15, 0, -104, 0, 0, 0, 0, 0, 0, -26, 0, -84, 0, 0, 0, 0, 0, 0, -30, 0, -60, 0, 0, 0, 0, 0, 0, -29, 0, -35, 0, 0, 0, 0, 0, 0, -24, 0, -16, 0, 0, 0, 0, 0, 0, -14, 0, -4),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 19
+
+[node name="Track24" type="Node3D"]
+script = ExtResource("1_track")
+custom_name = "Mostra Angkor A"
+custom_theme = "angkor"
+custom_world_seed_name = "angkor_mostra"
+custom_half_width = 4.5
+custom_gate_model = "none"
+custom_dirt_ranges = Array[Vector2]([Vector2(0, 1)])
+traffic_count = 0
+
+[node name="Path" type="Path3D" parent="."]
+curve = SubResource("Curve3D_mostra")
+
+[node name="Mostra" type="Node3D" parent="."]
+script = ExtResource("2_mostra")
+stone_class = "angkor_sandstone"
+accents = true
+
+[node name="Ploaie" type="Node" parent="."]
+script = ExtResource("4_rain")
+start_clock = 50.0
+
+[node name="DecorManual" type="Node3D" parent="."]
+script = ExtResource("3_prop")
+
+[node name="Ficus_PoartaCopac" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(1.40954, 0, -0.51303, 0, 1.5000, 0, 0.51303, 0, 1.40954, 50.00, 0, -139.50)
+
+[node name="Palmier_0_-1" parent="DecorManual" instance=ExtResource("m_palm")]
+transform = Transform3D(0.55466, 0, -1.23032, 0, 1.3496, 0, 1.23032, 0, 0.55466, 19.27, 0, -32.64)
+
+[node name="Palmier_0_1" parent="DecorManual" instance=ExtResource("m_palm")]
+transform = Transform3D(1.08088, 0, -0.70309, 0, 1.2894, 0, 0.70309, 0, 1.08088, 16.16, 0, 34.68)
+
+[node name="Palmier_1_-1" parent="DecorManual" instance=ExtResource("m_palm")]
+transform = Transform3D(-0.20645, 0, 1.27488, 0, 1.2915, 0, -1.27488, 0, -0.20645, 41.91, 0, -33.17)
+
+[node name="Palmier_1_1" parent="DecorManual" instance=ExtResource("m_palm")]
+transform = Transform3D(1.12564, 0, 0.08568, 0, 1.1289, 0, -0.08568, 0, 1.12564, 43.65, 0, 35.46)
+
+[node name="Palmier_2_-1" parent="DecorManual" instance=ExtResource("m_palm")]
+transform = Transform3D(-0.08250, 0, 1.20824, 0, 1.2111, 0, -1.20824, 0, -0.08250, 70.10, 0, -32.17)
+
+[node name="Palmier_2_1" parent="DecorManual" instance=ExtResource("m_palm")]
+transform = Transform3D(1.10999, 0, -0.65756, 0, 1.2901, 0, 0.65756, 0, 1.10999, 68.83, 0, 35.81)
+
+[node name="Palmier_3_-1" parent="DecorManual" instance=ExtResource("m_palm")]
+transform = Transform3D(-0.54633, 0, -1.04178, 0, 1.1763, 0, 1.04178, 0, -0.54633, 98.06, 0, -35.37)
+
+[node name="Palmier_3_1" parent="DecorManual" instance=ExtResource("m_palm")]
+transform = Transform3D(1.04507, 0, 0.82450, 0, 1.3312, 0, -0.82450, 0, 1.04507, 96.25, 0, 33.47)
+
+[node name="Palmier_start_-1" parent="DecorManual" instance=ExtResource("m_palm")]
+transform = Transform3D(-0.48465, 0, -1.09778, 0, 1.2000, 0, 1.09778, 0, -0.48465, -8.00, 0, -13.00)
+
+[node name="Palmier_start_1" parent="DecorManual" instance=ExtResource("m_palm")]
+transform = Transform3D(0.94717, 0, 0.73680, 0, 1.2000, 0, -0.73680, 0, 0.94717, -8.00, 0, 13.00)
+
+[node name="J_ficus_b_0" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(1.54321, 0, -1.02896, 0, 1.8548, 0, 1.02896, 0, 1.54321, 116.33, 0, -115.06)
+
+[node name="J_banyan_1" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.48033, 0, -1.41527, 0, 1.4946, 0, 1.41527, 0, 0.48033, 28.66, 0, -140.29)
+
+[node name="J_banyan_2" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.38778, 0, -1.38497, 0, 1.4382, 0, 1.38497, 0, 0.38778, -57.21, 0, -104.49)
+
+[node name="J_ficus_a_3" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(0.80041, 0, 1.55157, 0, 1.7459, 0, -1.55157, 0, 0.80041, -2.99, 0, -101.71)
+
+[node name="J_bamboo_4" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(0.90998, 0, 0.95657, 0, 1.3203, 0, -0.95657, 0, 0.90998, -8.06, 0, 24.34)
+
+[node name="J_ficus_b_5" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(0.95317, 0, 1.53896, 0, 1.8102, 0, -1.53896, 0, 0.95317, 8.20, 0, -90.34)
+
+[node name="J_banyan_6" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.12441, 0, 1.37867, 0, 1.7791, 0, -1.37867, 0, -1.12441, -55.01, 0, -7.46)
+
+[node name="J_ficus_b_7" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-0.68893, 0, 1.41122, 0, 1.5704, 0, -1.41122, 0, -0.68893, 10.62, 0, -32.65)
+
+[node name="J_banyan_8" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.52687, 0, -0.18701, 0, 1.5383, 0, 0.18701, 0, 1.52687, -0.87, 0, 21.06)
+
+[node name="J_ficus_a_9" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(1.36251, 0, -1.16887, 0, 1.7952, 0, 1.16887, 0, 1.36251, -38.87, 0, -74.71)
+
+[node name="J_fern_10" parent="DecorManual" instance=ExtResource("m_fern")]
+transform = Transform3D(-1.13291, 0, -1.08464, 0, 1.5684, 0, 1.08464, 0, -1.13291, 35.21, 0, -106.12)
+
+[node name="J_banyan_11" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.80699, 0, -1.16190, 0, 1.4147, 0, 1.16190, 0, 0.80699, 87.41, 0, -140.21)
+
+[node name="J_ficus_a_12" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(1.11236, 0, -1.26534, 0, 1.6848, 0, 1.26534, 0, 1.11236, -22.29, 0, 20.88)
+
+[node name="J_ficus_a_13" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-1.00856, 0, -0.98922, 0, 1.4127, 0, 0.98922, 0, -1.00856, 125.10, 0, 31.87)
+
+[node name="J_banyan_14" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.90816, 0, -1.62238, 0, 1.8593, 0, 1.62238, 0, 0.90816, 19.24, 0, 21.24)
+
+[node name="J_banyan_15" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-0.50729, 0, -1.34824, 0, 1.4405, 0, 1.34824, 0, -0.50729, -44.48, 0, 10.61)
+
+[node name="J_ficus_a_16" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-1.45626, 0, -0.23881, 0, 1.4757, 0, 0.23881, 0, -1.45626, -32.81, 0, -100.98)
+
+[node name="J_ficus_b_17" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(1.28967, 0, -0.76528, 0, 1.4996, 0, 0.76528, 0, 1.28967, -37.47, 0, 12.41)
+
+[node name="J_bamboo_18" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-1.84609, 0, -0.33663, 0, 1.8765, 0, 0.33663, 0, -1.84609, 16.62, 0, 33.15)
+
+[node name="J_banyan_19" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.67397, 0, 0.21068, 0, 1.6872, 0, -0.21068, 0, -1.67397, 92.90, 0, -38.52)
+
+[node name="J_bamboo_20" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-1.38366, 0, 0.17046, 0, 1.3941, 0, -0.17046, 0, -1.38366, -38.74, 0, -118.13)
+
+[node name="J_ficus_a_21" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-1.29204, 0, 0.70295, 0, 1.4709, 0, -0.70295, 0, -1.29204, 17.56, 0, 20.63)
+
+[node name="J_banyan_22" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.19828, 0, 1.43466, 0, 1.4483, 0, -1.43466, 0, 0.19828, 112.85, 0, -120.66)
+
+[node name="J_ficus_a_23" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-1.06275, 0, -1.45906, 0, 1.8051, 0, 1.45906, 0, -1.06275, -56.57, 0, -54.11)
+
+[node name="J_ficus_a_24" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(1.68807, 0, 0.17436, 0, 1.6970, 0, -0.17436, 0, 1.68807, -63.04, 0, -34.10)
+
+[node name="J_banyan_25" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.33455, 0, 1.30754, 0, 1.8683, 0, -1.30754, 0, 1.33455, -50.56, 0, 10.33)
+
+[node name="J_ficus_a_26" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-0.95788, 0, -1.02502, 0, 1.4029, 0, 1.02502, 0, -0.95788, 18.36, 0, -34.08)
+
+[node name="J_ficus_a_27" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-0.26991, 0, -1.48129, 0, 1.5057, 0, 1.48129, 0, -0.26991, 58.73, 0, -146.29)
+
+[node name="J_banyan_28" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.19839, 0, -1.75878, 0, 1.7699, 0, 1.75878, 0, 0.19839, -25.63, 0, -140.86)
+
+[node name="J_banyan_29" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.21514, 0, -1.23561, 0, 1.7330, 0, 1.23561, 0, 1.21514, 100.85, 0, -148.91)
+
+[node name="J_ficus_b_30" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(0.73148, 0, 1.53987, 0, 1.7048, 0, -1.53987, 0, 0.73148, 129.40, 0, -133.04)
+
+[node name="J_banyan_31" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.18565, 0, -1.81818, 0, 1.8276, 0, 1.81818, 0, 0.18565, -17.46, 0, -39.84)
+
+[node name="J_banyan_32" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.44706, 0, -0.98355, 0, 1.7497, 0, 0.98355, 0, 1.44706, -51.40, 0, 3.17)
+
+[node name="J_fern_33" parent="DecorManual" instance=ExtResource("m_fern")]
+transform = Transform3D(-1.52029, 0, -0.28676, 0, 1.5471, 0, 0.28676, 0, -1.52029, 126.92, 0, -112.62)
+
+[node name="J_banyan_34" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.84893, 0, 1.68377, 0, 1.8857, 0, -1.68377, 0, 0.84893, 4.07, 0, 24.84)
+
+[node name="J_ficus_b_35" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-0.84531, 0, -1.08145, 0, 1.3726, 0, 1.08145, 0, -0.84531, -0.37, 0, -147.54)
+
+[node name="J_banyan_36" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.58325, 0, 0.62541, 0, 1.7023, 0, -0.62541, 0, -1.58325, 80.52, 0, -95.61)
+
+[node name="J_ficus_a_37" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-1.27051, 0, -0.89759, 0, 1.5556, 0, 0.89759, 0, -1.27051, 2.18, 0, 33.24)
+
+[node name="J_ficus_b_38" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-1.33845, 0, -0.32914, 0, 1.3783, 0, 0.32914, 0, -1.33845, 143.65, 0, -89.97)
+
+[node name="J_banyan_39" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.67692, 0, -1.26072, 0, 1.4310, 0, 1.26072, 0, 0.67692, -52.36, 0, -32.19)
+
+[node name="J_banyan_40" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.20057, 0, -1.42446, 0, 1.4385, 0, 1.42446, 0, 0.20057, -49.66, 0, -49.73)
+
+[node name="J_ficus_b_41" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-1.34920, 0, -0.51985, 0, 1.4459, 0, 0.51985, 0, -1.34920, 83.42, 0, 32.50)
+
+[node name="J_ficus_a_42" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(1.09393, 0, -0.91409, 0, 1.4256, 0, 0.91409, 0, 1.09393, -12.16, 0, -146.28)
+
+[node name="J_banyan_43" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.26660, 0, -0.79964, 0, 1.4979, 0, 0.79964, 0, -1.26660, 143.21, 0, -103.08)
+
+[node name="J_banyan_44" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.47125, 0, 1.16143, 0, 1.8744, 0, -1.16143, 0, 1.47125, 90.33, 0, -104.29)
+
+[node name="J_ficus_a_45" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-0.10463, 0, -1.65682, 0, 1.6601, 0, 1.65682, 0, -0.10463, 2.13, 0, -151.53)
+
+[node name="J_ficus_a_46" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-1.49578, 0, -0.75854, 0, 1.6771, 0, 0.75854, 0, -1.49578, 125.30, 0, -122.97)
+
+[node name="J_banyan_47" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-0.97680, 0, -0.98760, 0, 1.3891, 0, 0.98760, 0, -0.97680, -1.68, 0, -147.51)
+
+[node name="J_banyan_48" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.33076, 0, -1.18709, 0, 1.7833, 0, 1.18709, 0, 1.33076, 144.96, 0, -70.25)
+
+[node name="J_bamboo_49" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-0.53655, 0, -1.29340, 0, 1.4003, 0, 1.29340, 0, -0.53655, 143.68, 0, -115.73)
+
+[node name="J_bamboo_50" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-1.45230, 0, 0.87198, 0, 1.6940, 0, -0.87198, 0, -1.45230, 98.83, 0, -42.24)
+
+[node name="J_ficus_a_51" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(0.25848, 0, 1.53835, 0, 1.5599, 0, -1.53835, 0, 0.25848, 38.44, 0, -154.45)
+
+[node name="J_fern_52" parent="DecorManual" instance=ExtResource("m_fern")]
+transform = Transform3D(-1.00460, 0, -1.31553, 0, 1.6552, 0, 1.31553, 0, -1.00460, 117.04, 0, -25.14)
+
+[node name="J_banyan_53" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-0.07569, 0, -1.50812, 0, 1.5100, 0, 1.50812, 0, -0.07569, 92.82, 0, 32.42)
+
+[node name="J_banyan_54" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-0.88589, 0, -1.65569, 0, 1.8778, 0, 1.65569, 0, -0.88589, 4.30, 0, -41.25)
+
+[node name="J_ficus_a_55" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-1.48003, 0, 0.91114, 0, 1.7380, 0, -0.91114, 0, -1.48003, 16.08, 0, -29.93)
+
+[node name="J_shrub_56" parent="DecorManual" instance=ExtResource("m_shrub")]
+transform = Transform3D(0.95131, 0, -1.22006, 0, 1.5471, 0, 1.22006, 0, 0.95131, 120.15, 0, 3.66)
+
+[node name="J_banyan_57" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.24794, 0, 0.79048, 0, 1.4772, 0, -0.79048, 0, -1.24794, -20.03, 0, 23.52)
+
+[node name="J_banyan_58" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.48894, 0, -1.67047, 0, 1.7406, 0, 1.67047, 0, 0.48894, 134.53, 0, -103.45)
+
+[node name="J_banyan_59" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-0.68961, 0, 1.54015, 0, 1.6875, 0, -1.54015, 0, -0.68961, 124.06, 0, 2.55)
+
+[node name="J_shrub_60" parent="DecorManual" instance=ExtResource("m_shrub")]
+transform = Transform3D(1.46884, 0, -0.06851, 0, 1.4704, 0, 0.06851, 0, 1.46884, 25.50, 0, -139.75)
+
+[node name="J_bamboo_61" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-1.68330, 0, -0.29185, 0, 1.7084, 0, 0.29185, 0, -1.68330, -49.13, 0, -116.78)
+
+[node name="J_ficus_b_62" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(1.55879, 0, -0.93426, 0, 1.8173, 0, 0.93426, 0, 1.55879, 6.18, 0, 34.35)
+
+[node name="J_ficus_a_63" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-0.43840, 0, -1.37446, 0, 1.4427, 0, 1.37446, 0, -0.43840, 114.77, 0, 18.55)
+
+[node name="J_ficus_a_64" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-1.20514, 0, -1.45127, 0, 1.8864, 0, 1.45127, 0, -1.20514, 43.55, 0, -153.64)
+
+[node name="J_banyan_65" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.03538, 0, -1.00088, 0, 1.4401, 0, 1.00088, 0, 1.03538, 109.04, 0, -146.60)
+
+[node name="J_banyan_66" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.71956, 0, 0.10231, 0, 1.7226, 0, -0.10231, 0, 1.71956, -32.58, 0, 19.72)
+
+[node name="J_ficus_a_67" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(0.64354, 0, 1.13735, 0, 1.3068, 0, -1.13735, 0, 0.64354, -26.56, 0, -4.10)
+
+[node name="J_banyan_68" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.72278, 0, -0.58029, 0, 1.8179, 0, 0.58029, 0, -1.72278, 61.29, 0, -147.48)
+
+[node name="J_banyan_69" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.25692, 0, -1.34306, 0, 1.3674, 0, 1.34306, 0, 0.25692, -15.35, 0, 22.36)
+
+[node name="J_banyan_70" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.21858, 0, -0.49866, 0, 1.3167, 0, 0.49866, 0, -1.21858, 16.04, 0, -142.71)
+
+[node name="J_bamboo_71" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-1.18350, 0, -0.99329, 0, 1.5451, 0, 0.99329, 0, -1.18350, 14.65, 0, 32.66)
+
+[node name="J_fern_72" parent="DecorManual" instance=ExtResource("m_fern")]
+transform = Transform3D(1.03450, 0, 1.04883, 0, 1.4732, 0, -1.04883, 0, 1.03450, 116.14, 0, -18.93)
+
+[node name="J_ficus_a_73" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-0.20203, 0, 1.37370, 0, 1.3885, 0, -1.37370, 0, -0.20203, 13.00, 0, -27.37)
+
+[node name="J_bamboo_74" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-1.33068, 0, 1.01894, 0, 1.6760, 0, -1.01894, 0, -1.33068, -0.02, 0, -45.50)
+
+[node name="J_ficus_b_75" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(0.31231, 0, 1.80087, 0, 1.8278, 0, -1.80087, 0, 0.31231, -21.59, 0, 15.37)
+
+[node name="J_banyan_76" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.57548, 0, 0.23594, 0, 1.5931, 0, -0.23594, 0, -1.57548, -46.35, 0, -86.57)
+
+[node name="J_bamboo_77" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(0.55817, 0, -1.49333, 0, 1.5942, 0, 1.49333, 0, 0.55817, 5.22, 0, -23.25)
+
+[node name="J_banyan_78" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.55481, 0, -0.13068, 0, 1.5603, 0, 0.13068, 0, -1.55481, -1.75, 0, 37.09)
+
+[node name="J_banyan_79" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-0.97760, 0, -1.59348, 0, 1.8695, 0, 1.59348, 0, -0.97760, -5.91, 0, -59.55)
+
+[node name="J_banyan_80" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.36244, 0, 0.64089, 0, 1.5057, 0, -0.64089, 0, 1.36244, 86.16, 0, 31.71)
+
+[node name="J_banyan_81" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.99632, 0, 1.61565, 0, 1.8982, 0, -1.61565, 0, 0.99632, -26.62, 0, -126.17)
+
+[node name="J_ficus_b_82" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-1.39147, 0, -0.09671, 0, 1.3948, 0, 0.09671, 0, -1.39147, -17.18, 0, 28.33)
+
+[node name="J_ficus_b_83" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-0.25173, 0, -1.55883, 0, 1.5790, 0, 1.55883, 0, -0.25173, 6.22, 0, -59.59)
+
+[node name="J_banyan_84" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.18430, 0, 0.54156, 0, 1.3022, 0, -0.54156, 0, -1.18430, 31.10, 0, 36.65)
+
+[node name="J_ficus_b_85" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(1.39202, 0, -1.28422, 0, 1.8939, 0, 1.28422, 0, 1.39202, 13.71, 0, -149.39)
+
+[node name="J_ficus_a_86" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-1.46308, 0, -0.50772, 0, 1.5487, 0, 0.50772, 0, -1.46308, 19.67, 0, -34.76)
+
+[node name="J_ficus_a_87" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(0.93786, 0, 1.41154, 0, 1.6947, 0, -1.41154, 0, 0.93786, 65.29, 0, -105.70)
+
+[node name="J_ficus_a_88" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-1.12848, 0, 0.86314, 0, 1.4207, 0, -0.86314, 0, -1.12848, 42.30, 0, 35.11)
+
+[node name="J_bamboo_89" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-0.93790, 0, -1.29639, 0, 1.6001, 0, 1.29639, 0, -0.93790, -17.35, 0, -40.76)
+
+[node name="J_ficus_a_90" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-0.04128, 0, -1.83501, 0, 1.8355, 0, 1.83501, 0, -0.04128, 140.10, 0, -74.93)
+
+[node name="J_ficus_b_91" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(1.38630, 0, 1.26854, 0, 1.8791, 0, -1.26854, 0, 1.38630, 11.08, 0, -144.18)
+
+[node name="J_banyan_92" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.24593, 0, 1.27071, 0, 1.7796, 0, -1.27071, 0, 1.24593, 134.51, 0, -119.55)
+
+[node name="J_banyan_93" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.51738, 0, -1.33822, 0, 1.4347, 0, 1.33822, 0, 0.51738, 105.05, 0, -136.61)
+
+[node name="J_ficus_b_94" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-0.94580, 0, -1.21771, 0, 1.5419, 0, 1.21771, 0, -0.94580, -12.13, 0, -134.22)
+
+[node name="J_ficus_b_95" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-0.47013, 0, -1.55701, 0, 1.6264, 0, 1.55701, 0, -0.47013, -31.57, 0, -132.14)
+
+[node name="J_banyan_96" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-0.22568, 0, 1.42033, 0, 1.4382, 0, -1.42033, 0, -0.22568, -47.00, 0, -123.74)
+
+[node name="J_bamboo_97" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-1.63909, 0, -0.74672, 0, 1.8012, 0, 0.74672, 0, -1.63909, 89.22, 0, -59.03)
+
+[node name="J_ficus_b_98" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-1.03084, 0, -1.23462, 0, 1.6084, 0, 1.23462, 0, -1.03084, 88.56, 0, -86.71)
+
+[node name="J_banyan_99" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.44409, 0, -0.16855, 0, 1.4539, 0, 0.16855, 0, -1.44409, 84.39, 0, -138.30)
+
+[node name="J_shrub_100" parent="DecorManual" instance=ExtResource("m_shrub")]
+transform = Transform3D(1.22458, 0, 1.27560, 0, 1.7683, 0, -1.27560, 0, 1.22458, 115.26, 0, -73.73)
+
+[node name="J_banyan_101" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-0.27452, 0, -1.32531, 0, 1.3534, 0, 1.32531, 0, -0.27452, 93.59, 0, -147.30)
+
+[node name="J_banyan_102" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.58565, 0, -0.14438, 0, 1.5922, 0, 0.14438, 0, -1.58565, 121.87, 0, 21.93)
+
+[node name="J_banyan_103" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.75741, 0, -0.31776, 0, 1.7859, 0, 0.31776, 0, 1.75741, 0.77, 0, 15.57)
+
+[node name="J_banyan_104" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.39414, 0, -0.94586, 0, 1.6847, 0, 0.94586, 0, 1.39414, 148.08, 0, -84.30)
+
+[node name="J_ficus_a_105" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(0.65883, 0, 1.67718, 0, 1.8019, 0, -1.67718, 0, 0.65883, 55.40, 0, -104.90)
+
+[node name="J_banyan_106" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.28328, 0, -0.91534, 0, 1.5763, 0, 0.91534, 0, -1.28328, 110.52, 0, -142.23)
+
+[node name="J_ficus_a_107" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(1.78645, 0, 0.07152, 0, 1.7879, 0, -0.07152, 0, 1.78645, 128.66, 0, 20.12)
+
+[node name="J_bamboo_108" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-0.47572, 0, 1.58629, 0, 1.6561, 0, -1.58629, 0, -0.47572, 32.25, 0, -145.06)
+
+[node name="J_shrub_109" parent="DecorManual" instance=ExtResource("m_shrub")]
+transform = Transform3D(0.19775, 0, 1.67115, 0, 1.6828, 0, -1.67115, 0, 0.19775, -22.57, 0, -118.54)
+
+[node name="J_ficus_b_110" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(0.47498, 0, -1.22350, 0, 1.3125, 0, 1.22350, 0, 0.47498, 89.01, 0, -80.51)
+
+[node name="J_ficus_a_111" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(0.25445, 0, 1.87404, 0, 1.8912, 0, -1.87404, 0, 0.25445, 52.51, 0, 35.45)
+
+[node name="J_fern_112" parent="DecorManual" instance=ExtResource("m_fern")]
+transform = Transform3D(-1.05932, 0, -0.68712, 0, 1.2627, 0, 0.68712, 0, -1.05932, 8.08, 0, 17.21)
+
+[node name="J_banyan_113" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.84948, 0, 1.69419, 0, 1.8952, 0, -1.69419, 0, 0.84948, -47.80, 0, 4.96)
+
+[node name="J_shrub_114" parent="DecorManual" instance=ExtResource("m_shrub")]
+transform = Transform3D(1.64203, 0, 0.01320, 0, 1.6421, 0, -0.01320, 0, 1.64203, 16.55, 0, -128.22)
+
+[node name="J_banyan_115" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.40258, 0, -1.02843, 0, 1.7392, 0, 1.02843, 0, -1.40258, 30.40, 0, 31.28)
+
+[node name="J_bamboo_116" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-1.33708, 0, -0.96080, 0, 1.6465, 0, 0.96080, 0, -1.33708, 16.36, 0, 22.63)
+
+[node name="J_ficus_a_117" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(0.66619, 0, 1.63463, 0, 1.7652, 0, -1.63463, 0, 0.66619, -9.70, 0, 31.71)
+
+[node name="J_shrub_118" parent="DecorManual" instance=ExtResource("m_shrub")]
+transform = Transform3D(1.74448, 0, -0.66808, 0, 1.8680, 0, 0.66808, 0, 1.74448, 0.91, 0, -125.56)
+
+[node name="J_banyan_119" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.38628, 0, -0.41584, 0, 1.4473, 0, 0.41584, 0, 1.38628, 9.45, 0, -155.78)
+
+[node name="J_fern_120" parent="DecorManual" instance=ExtResource("m_fern")]
+transform = Transform3D(0.14451, 0, -1.39235, 0, 1.3998, 0, 1.39235, 0, 0.14451, 20.39, 0, -9.82)
+
+[node name="J_fern_121" parent="DecorManual" instance=ExtResource("m_fern")]
+transform = Transform3D(-0.17540, 0, -1.53765, 0, 1.5476, 0, 1.53765, 0, -0.17540, -42.06, 0, -47.38)
+
+[node name="J_shrub_122" parent="DecorManual" instance=ExtResource("m_shrub")]
+transform = Transform3D(1.01093, 0, -1.36983, 0, 1.7025, 0, 1.36983, 0, 1.01093, 142.30, 0, -61.37)
+
+[node name="J_ficus_a_123" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-1.19342, 0, -1.12449, 0, 1.6397, 0, 1.12449, 0, -1.19342, 46.89, 0, -104.54)
+
+[node name="J_ficus_b_124" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-1.04987, 0, -1.02646, 0, 1.4683, 0, 1.02646, 0, -1.04987, 146.70, 0, -89.09)
+
+[node name="J_banyan_125" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.67771, 0, 1.18460, 0, 1.3648, 0, -1.18460, 0, 0.67771, 56.06, 0, 31.14)
+
+[node name="J_ficus_a_126" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(1.61036, 0, 0.02563, 0, 1.6106, 0, -0.02563, 0, 1.61036, 53.36, 0, 34.76)
+
+[node name="J_fern_127" parent="DecorManual" instance=ExtResource("m_fern")]
+transform = Transform3D(1.31869, 0, -0.82116, 0, 1.5535, 0, 0.82116, 0, 1.31869, -27.47, 0, -116.37)
+
+[node name="J_bamboo_128" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(0.65174, 0, 1.71123, 0, 1.8311, 0, -1.71123, 0, 0.65174, 120.70, 0, -121.97)
+
+[node name="J_bamboo_129" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(1.15756, 0, 0.86924, 0, 1.4476, 0, -0.86924, 0, 1.15756, 17.23, 0, -92.14)
+
+[node name="J_shrub_130" parent="DecorManual" instance=ExtResource("m_shrub")]
+transform = Transform3D(-1.27929, 0, -0.10496, 0, 1.2836, 0, 0.10496, 0, -1.27929, 114.54, 0, -55.10)
+
+[node name="J_ficus_a_131" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(1.24862, 0, 0.67311, 0, 1.4185, 0, -0.67311, 0, 1.24862, 87.72, 0, 36.06)
+
+[node name="J_ficus_b_132" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(0.68952, 0, 1.64110, 0, 1.7801, 0, -1.64110, 0, 0.68952, -40.15, 0, -89.82)
+
+[node name="J_bamboo_133" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-1.77189, 0, -0.11672, 0, 1.7757, 0, 0.11672, 0, -1.77189, 48.01, 0, -87.26)
+
+[node name="J_bamboo_134" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(1.32450, 0, 0.42905, 0, 1.3923, 0, -0.42905, 0, 1.32450, 110.82, 0, -51.29)
+
+[node name="J_ficus_a_135" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-0.45372, 0, 1.53039, 0, 1.5962, 0, -1.53039, 0, -0.45372, 19.74, 0, -149.29)
+
+[node name="J_ficus_a_136" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-1.50209, 0, -0.50969, 0, 1.5862, 0, 0.50969, 0, -1.50209, 48.04, 0, -101.54)
+
+[node name="J_banyan_137" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.81001, 0, -1.50391, 0, 1.7082, 0, 1.50391, 0, 0.81001, -10.46, 0, 19.51)
+
+[node name="J_bamboo_138" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(1.05908, 0, 1.52177, 0, 1.8540, 0, -1.52177, 0, 1.05908, 134.99, 0, -99.18)
+
+[node name="J_banyan_139" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.36045, 0, 0.61755, 0, 1.4941, 0, -0.61755, 0, -1.36045, 92.60, 0, -88.62)
+
+[node name="J_ficus_a_140" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-1.53088, 0, 0.13210, 0, 1.5366, 0, -0.13210, 0, -1.53088, 126.13, 0, -130.21)
+
+[node name="J_banyan_141" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.38074, 0, 1.12813, 0, 1.7830, 0, -1.12813, 0, -1.38074, 28.51, 0, -83.26)
+
+[node name="J_ficus_b_142" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-0.47859, 0, -1.21784, 0, 1.3085, 0, 1.21784, 0, -0.47859, -62.11, 0, -51.21)
+
+[node name="J_banyan_143" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.73108, 0, 0.30641, 0, 1.7580, 0, -0.30641, 0, -1.73108, 87.51, 0, -138.38)
+
+[node name="J_ficus_a_144" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(1.65353, 0, 0.22598, 0, 1.6689, 0, -0.22598, 0, 1.65353, 78.37, 0, 33.53)
+
+[node name="J_ficus_b_145" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(1.55790, 0, 0.97680, 0, 1.8388, 0, -0.97680, 0, 1.55790, -39.66, 0, 4.96)
+
+[node name="J_banyan_146" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.41599, 0, 1.24739, 0, 1.8871, 0, -1.24739, 0, -1.41599, 137.23, 0, -117.42)
+
+[node name="J_fern_147" parent="DecorManual" instance=ExtResource("m_fern")]
+transform = Transform3D(0.42258, 0, -1.48641, 0, 1.5453, 0, 1.48641, 0, 0.42258, -34.47, 0, -91.45)
+
+[node name="J_bamboo_148" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-0.19429, 0, 1.56314, 0, 1.5752, 0, -1.56314, 0, -0.19429, 111.00, 0, -123.95)
+
+[node name="J_banyan_149" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.57020, 0, 0.79498, 0, 1.7600, 0, -0.79498, 0, -1.57020, 111.57, 0, -134.93)
+
+[node name="J_banyan_150" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-0.94773, 0, 0.98492, 0, 1.3668, 0, -0.98492, 0, -0.94773, 82.19, 0, -153.26)
+
+[node name="J_banyan_151" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.65488, 0, -0.30845, 0, 1.6834, 0, 0.30845, 0, 1.65488, 119.53, 0, -40.86)
+
+[node name="J_ficus_b_152" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-1.70550, 0, 0.46134, 0, 1.7668, 0, -0.46134, 0, -1.70550, 14.05, 0, -152.97)
+
+[node name="J_ficus_b_153" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-1.42341, 0, -0.35985, 0, 1.4682, 0, 0.35985, 0, -1.42341, -57.10, 0, -62.89)
+
+[node name="J_ficus_b_154" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(1.42345, 0, 0.37543, 0, 1.4721, 0, -0.37543, 0, 1.42345, 17.23, 0, -140.84)
+
+[node name="J_ficus_b_155" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-0.95892, 0, -1.23217, 0, 1.5613, 0, 1.23217, 0, -0.95892, 6.33, 0, -88.32)
+
+[node name="J_shrub_156" parent="DecorManual" instance=ExtResource("m_shrub")]
+transform = Transform3D(0.85808, 0, -1.54774, 0, 1.7697, 0, 1.54774, 0, 0.85808, 133.37, 0, -98.39)
+
+[node name="J_banyan_157" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-0.55808, 0, -1.22956, 0, 1.3503, 0, 1.22956, 0, -0.55808, 125.44, 0, -125.90)
+
+[node name="J_shrub_158" parent="DecorManual" instance=ExtResource("m_shrub")]
+transform = Transform3D(1.32578, 0, 0.92375, 0, 1.6159, 0, -0.92375, 0, 1.32578, 118.39, 0, -33.43)
+
+[node name="J_banyan_159" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.52477, 0, 0.96644, 0, 1.8053, 0, -0.96644, 0, -1.52477, 1.17, 0, 18.77)
+
+[node name="J_banyan_160" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.26145, 0, 0.32973, 0, 1.3038, 0, -0.32973, 0, -1.26145, -51.07, 0, -42.06)
+
+[node name="J_ficus_a_161" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-1.17867, 0, 0.70668, 0, 1.3743, 0, -0.70668, 0, -1.17867, 108.29, 0, -41.53)
+
+[node name="J_banyan_162" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-0.09606, 0, 1.32002, 0, 1.3235, 0, -1.32002, 0, -0.09606, -5.08, 0, -30.63)
+
+[node name="J_banyan_163" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.55871, 0, 0.33814, 0, 1.5950, 0, -0.33814, 0, -1.55871, 2.38, 0, -44.43)
+
+[node name="J_ficus_a_164" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-0.61747, 0, 1.16675, 0, 1.3201, 0, -1.16675, 0, -0.61747, 5.28, 0, -43.70)
+
+[node name="J_ficus_b_165" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-1.68776, 0, -0.19357, 0, 1.6988, 0, 0.19357, 0, -1.68776, 6.20, 0, -63.81)
+
+[node name="J_banyan_166" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.53516, 0, -1.36933, 0, 1.4702, 0, 1.36933, 0, 0.53516, 70.01, 0, -94.92)
+
+[node name="J_ficus_b_167" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-1.57108, 0, 0.31705, 0, 1.6028, 0, -0.31705, 0, -1.57108, 30.05, 0, -83.28)
+
+[node name="J_banyan_168" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.25169, 0, -0.70021, 0, 1.4342, 0, 0.70021, 0, -1.25169, 7.75, 0, -100.16)
+
+[node name="J_banyan_169" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.36782, 0, 0.04938, 0, 1.3687, 0, -0.04938, 0, 1.36782, 139.22, 0, -93.49)
+
+[node name="J_bamboo_170" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-1.26179, 0, -0.91605, 0, 1.5592, 0, 0.91605, 0, -1.26179, 140.48, 0, -99.74)
+
+[node name="J_bamboo_171" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(1.72052, 0, 0.63775, 0, 1.8349, 0, -0.63775, 0, 1.72052, -7.33, 0, 36.74)
+
+[node name="J_ficus_b_172" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-0.26527, 0, 1.33392, 0, 1.3600, 0, -1.33392, 0, -0.26527, -34.72, 0, 26.97)
+
+[node name="J_ficus_a_173" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-0.68415, 0, -1.64496, 0, 1.7816, 0, 1.64496, 0, -0.68415, 38.15, 0, -107.18)
+
+[node name="J_banyan_174" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.34956, 0, 1.02996, 0, 1.6977, 0, -1.02996, 0, 1.34956, 129.23, 0, -123.70)
+
+[node name="J_ficus_a_175" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-1.06040, 0, -1.26489, 0, 1.6506, 0, 1.26489, 0, -1.06040, -36.04, 0, -130.94)
+
+[node name="J_shrub_176" parent="DecorManual" instance=ExtResource("m_shrub")]
+transform = Transform3D(-0.57127, 0, -1.90032, 0, 1.9843, 0, 1.90032, 0, -0.57127, 12.10, 0, -13.07)
+
+[node name="J_banyan_177" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.28605, 0, -0.33924, 0, 1.3300, 0, 0.33924, 0, 1.28605, -51.39, 0, -16.62)
+
+[node name="J_fern_178" parent="DecorManual" instance=ExtResource("m_fern")]
+transform = Transform3D(0.66651, 0, 1.31858, 0, 1.4775, 0, -1.31858, 0, 0.66651, -12.03, 0, 8.10)
+
+[node name="J_banyan_179" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-0.60207, 0, 1.18193, 0, 1.3264, 0, -1.18193, 0, -0.60207, 6.70, 0, -94.06)
+
+[node name="J_bamboo_180" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-1.06002, 0, 0.87723, 0, 1.3759, 0, -0.87723, 0, -1.06002, -18.00, 0, 14.21)
+
+[node name="J_banyan_181" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.67126, 0, -0.16277, 0, 1.6792, 0, 0.16277, 0, -1.67126, 111.53, 0, -55.89)
+
+[node name="J_banyan_182" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.50188, 0, -0.48469, 0, 1.5781, 0, 0.48469, 0, 1.50188, 26.95, 0, -143.49)
+
+[node name="J_ficus_a_183" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(1.08978, 0, -1.41691, 0, 1.7875, 0, 1.41691, 0, 1.08978, 11.80, 0, 11.58)
+
+[node name="J_fern_184" parent="DecorManual" instance=ExtResource("m_fern")]
+transform = Transform3D(1.27444, 0, -0.56467, 0, 1.3939, 0, 0.56467, 0, 1.27444, -37.01, 0, -16.38)
+
+[node name="J_banyan_185" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.11480, 0, -1.82584, 0, 1.8294, 0, 1.82584, 0, 0.11480, 47.33, 0, -144.32)
+
+[node name="J_ficus_a_186" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(0.71349, 0, -1.39754, 0, 1.5691, 0, 1.39754, 0, 0.71349, -12.47, 0, 33.38)
+
+[node name="J_banyan_187" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.05788, 0, -1.06666, 0, 1.5023, 0, 1.06666, 0, -1.05788, 39.88, 0, -148.52)
+
+[node name="J_ficus_b_188" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-1.27055, 0, -1.37496, 0, 1.8721, 0, 1.37496, 0, -1.27055, 138.54, 0, -102.13)
+
+[node name="J_ficus_a_189" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-0.05270, 0, 1.59181, 0, 1.5927, 0, -1.59181, 0, -0.05270, 91.97, 0, -149.08)
+
+[node name="J_shrub_190" parent="DecorManual" instance=ExtResource("m_shrub")]
+transform = Transform3D(-0.53881, 0, 1.07959, 0, 1.2066, 0, -1.07959, 0, -0.53881, -39.46, 0, -38.05)
+
+[node name="J_fern_191" parent="DecorManual" instance=ExtResource("m_fern")]
+transform = Transform3D(1.57726, 0, 0.71644, 0, 1.7324, 0, -0.71644, 0, 1.57726, 110.50, 0, -121.11)
+
+[node name="J_banyan_192" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.23241, 0, 1.20928, 0, 1.7266, 0, -1.20928, 0, 1.23241, -49.99, 0, 3.49)
+
+[node name="J_ficus_a_193" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(0.38663, 0, -1.79552, 0, 1.8367, 0, 1.79552, 0, 0.38663, 76.37, 0, -144.74)
+
+[node name="J_ficus_a_194" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-1.49647, 0, -0.27204, 0, 1.5210, 0, 0.27204, 0, -1.49647, 14.03, 0, -101.39)
+
+[node name="J_bamboo_195" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-0.83761, 0, -1.44379, 0, 1.6692, 0, 1.44379, 0, -0.83761, 61.31, 0, -142.73)
+
+[node name="J_shrub_196" parent="DecorManual" instance=ExtResource("m_shrub")]
+transform = Transform3D(-1.24702, 0, -0.48018, 0, 1.3363, 0, 0.48018, 0, -1.24702, 8.75, 0, -100.09)
+
+[node name="J_shrub_197" parent="DecorManual" instance=ExtResource("m_shrub")]
+transform = Transform3D(-0.42535, 0, 1.63961, 0, 1.6939, 0, -1.63961, 0, -0.42535, 9.78, 0, 16.73)
+
+[node name="J_fern_198" parent="DecorManual" instance=ExtResource("m_fern")]
+transform = Transform3D(-1.65471, 0, -1.00391, 0, 1.9354, 0, 1.00391, 0, -1.65471, 114.15, 0, -113.49)
+
+[node name="J_fern_199" parent="DecorManual" instance=ExtResource("m_fern")]
+transform = Transform3D(-0.36849, 0, -1.40452, 0, 1.4520, 0, 1.40452, 0, -0.36849, 17.61, 0, 12.45)
+
+[node name="J_bamboo_200" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-0.17901, 0, -1.72855, 0, 1.7378, 0, 1.72855, 0, -0.17901, 8.40, 0, -84.43)
+
+[node name="J_shrub_201" parent="DecorManual" instance=ExtResource("m_shrub")]
+transform = Transform3D(1.27528, 0, 0.08565, 0, 1.2782, 0, -0.08565, 0, 1.27528, -21.27, 0, 2.44)
+
+[node name="J_banyan_202" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-0.88633, 0, -1.62418, 0, 1.8503, 0, 1.62418, 0, -0.88633, 139.51, 0, -94.74)
+
+[node name="J_banyan_203" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.95667, 0, -1.36771, 0, 1.6691, 0, 1.36771, 0, 0.95667, -0.57, 0, -55.55)
+
+[node name="J_banyan_204" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-0.98757, 0, -1.00270, 0, 1.4074, 0, 1.00270, 0, -0.98757, 12.26, 0, -130.66)
+
+[node name="J_banyan_205" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-0.26401, 0, 1.82542, 0, 1.8444, 0, -1.82542, 0, -0.26401, -6.09, 0, -74.90)
+
+[node name="J_ficus_a_206" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(1.59310, 0, 0.03052, 0, 1.5934, 0, -0.03052, 0, 1.59310, 144.81, 0, -99.55)
+
+[node name="J_ficus_a_207" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-1.60541, 0, 0.37373, 0, 1.6483, 0, -0.37373, 0, -1.60541, 39.60, 0, -143.90)
+
+[node name="J_banyan_208" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-0.93101, 0, -1.23083, 0, 1.5433, 0, 1.23083, 0, -0.93101, 1.81, 0, -72.53)
+
+[node name="J_banyan_209" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-0.93191, 0, 1.52168, 0, 1.7844, 0, -1.52168, 0, -0.93191, 74.84, 0, -89.84)
+
+[node name="J_ficus_a_210" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(1.80700, 0, 0.19779, 0, 1.8178, 0, -0.19779, 0, 1.80700, -5.07, 0, -65.83)
+
+[node name="J_fern_211" parent="DecorManual" instance=ExtResource("m_fern")]
+transform = Transform3D(-1.04378, 0, -1.49297, 0, 1.8217, 0, 1.49297, 0, -1.04378, 20.82, 0, -110.82)
+
+[node name="J_banyan_212" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.43400, 0, -1.13299, 0, 1.8276, 0, 1.13299, 0, 1.43400, -30.51, 0, 6.11)
+
+[node name="J_ficus_b_213" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(0.63497, 0, -1.75619, 0, 1.8675, 0, 1.75619, 0, 0.63497, 26.19, 0, -12.21)
+
+[node name="J_banyan_214" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.06725, 0, 1.42213, 0, 1.4237, 0, -1.42213, 0, 0.06725, 61.95, 0, 31.24)
+
+[node name="J_banyan_215" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-0.81407, 0, 1.21994, 0, 1.4666, 0, -1.21994, 0, -0.81407, -45.39, 0, -8.74)
+
+[node name="J_bamboo_216" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(1.21558, 0, 1.37815, 0, 1.8376, 0, -1.37815, 0, 1.21558, 32.90, 0, -157.64)
+
+[node name="J_banyan_217" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.68742, 0, 0.38515, 0, 1.7308, 0, -0.38515, 0, -1.68742, -9.24, 0, 20.17)
+
+[node name="J_banyan_218" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.39666, 0, 0.89239, 0, 1.6574, 0, -0.89239, 0, 1.39666, 36.44, 0, 33.36)
+
+[node name="J_banyan_219" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.60277, 0, 0.57008, 0, 1.7011, 0, -0.57008, 0, 1.60277, 32.21, 0, -130.52)
+
+[node name="J_bamboo_220" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(0.21830, 0, 1.86115, 0, 1.8739, 0, -1.86115, 0, 0.21830, 130.71, 0, -114.70)
+
+[node name="J_banyan_221" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.59638, 0, -1.47277, 0, 1.5889, 0, 1.47277, 0, 0.59638, 115.11, 0, -79.57)
+
+[node name="J_ficus_a_222" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(1.18608, 0, -0.63958, 0, 1.3475, 0, 0.63958, 0, 1.18608, 21.35, 0, -27.60)
+
+[node name="J_ficus_b_223" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-1.13970, 0, 1.11119, 0, 1.5917, 0, -1.11119, 0, -1.13970, -54.48, 0, -40.24)
+
+[node name="J_banyan_224" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.66276, 0, -0.07255, 0, 1.6643, 0, 0.07255, 0, -1.66276, -37.24, 0, -65.95)
+
+[node name="J_ficus_b_225" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(0.68077, 0, 1.10957, 0, 1.3018, 0, -1.10957, 0, 0.68077, 14.79, 0, -110.32)
+
+[node name="J_shrub_226" parent="DecorManual" instance=ExtResource("m_shrub")]
+transform = Transform3D(1.23394, 0, 0.26958, 0, 1.2630, 0, -0.26958, 0, 1.23394, 17.91, 0, -127.96)
+
+[node name="J_bamboo_227" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(0.99053, 0, -1.19272, 0, 1.5504, 0, 1.19272, 0, 0.99053, 12.28, 0, -22.24)
+
+[node name="J_bamboo_228" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(0.17605, 0, -1.33562, 0, 1.3472, 0, 1.33562, 0, 0.17605, 34.58, 0, -156.82)
+
+[node name="J_banyan_229" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.31893, 0, 0.44143, 0, 1.3908, 0, -0.44143, 0, -1.31893, 86.50, 0, -70.51)
+
+[node name="J_banyan_230" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.53778, 0, 1.76118, 0, 1.8415, 0, -1.76118, 0, 0.53778, 76.14, 0, -156.21)
+
+[node name="J_ficus_a_231" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(1.16043, 0, 0.60955, 0, 1.3108, 0, -0.60955, 0, 1.16043, -4.18, 0, -90.08)
+
+[node name="J_shrub_232" parent="DecorManual" instance=ExtResource("m_shrub")]
+transform = Transform3D(1.87956, 0, 0.01653, 0, 1.8796, 0, -0.01653, 0, 1.87956, 126.78, 0, 13.07)
+
+[node name="J_ficus_a_233" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-1.03533, 0, -1.37330, 0, 1.7198, 0, 1.37330, 0, -1.03533, -35.95, 0, -133.98)
+
+[node name="J_ficus_a_234" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(1.33528, 0, -0.70397, 0, 1.5095, 0, 0.70397, 0, 1.33528, -1.98, 0, -152.99)
+
+[node name="J_bamboo_235" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(0.77645, 0, -1.61157, 0, 1.7889, 0, 1.61157, 0, 0.77645, 129.75, 0, 7.88)
+
+[node name="J_ficus_a_236" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(0.93425, 0, 1.32133, 0, 1.6183, 0, -1.32133, 0, 0.93425, 69.01, 0, 35.13)
+
+[node name="J_ficus_a_237" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(0.62950, 0, -1.27676, 0, 1.4235, 0, 1.27676, 0, 0.62950, 8.00, 0, -107.55)
+
+[node name="J_bamboo_238" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(0.70405, 0, 1.64359, 0, 1.7880, 0, -1.64359, 0, 0.70405, -48.26, 0, -3.14)
+
+[node name="J_banyan_239" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.60561, 0, -0.72323, 0, 1.7610, 0, 0.72323, 0, -1.60561, 123.97, 0, -137.96)
+
+[node name="J_ficus_a_240" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-1.67912, 0, 0.42580, 0, 1.7323, 0, -0.42580, 0, -1.67912, 39.11, 0, -95.56)
+
+[node name="J_ficus_b_241" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-1.46623, 0, 0.15889, 0, 1.4748, 0, -0.15889, 0, -1.46623, 122.28, 0, 19.42)
+
+[node name="J_ficus_a_242" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(1.36129, 0, 0.40429, 0, 1.4201, 0, -0.40429, 0, 1.36129, 108.35, 0, -128.79)
+
+[node name="J_banyan_243" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.04618, 0, 1.78672, 0, 1.7873, 0, -1.78672, 0, 0.04618, 115.59, 0, 26.36)
+
+[node name="J_banyan_244" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.12379, 0, 1.10709, 0, 1.5775, 0, -1.10709, 0, 1.12379, 105.26, 0, -59.76)
+
+[node name="J_ficus_a_245" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(0.91731, 0, 1.43804, 0, 1.7057, 0, -1.43804, 0, 0.91731, 30.33, 0, -100.09)
+
+[node name="J_bamboo_246" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-0.74799, 0, 1.37786, 0, 1.5678, 0, -1.37786, 0, -0.74799, -58.97, 0, -21.43)
+
+[node name="J_banyan_247" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-0.30184, 0, -1.45138, 0, 1.4824, 0, 1.45138, 0, -0.30184, -21.50, 0, 18.27)
+
+[node name="J_banyan_248" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.55264, 0, -0.83287, 0, 1.7619, 0, 0.83287, 0, 1.55264, -3.84, 0, 37.73)
+
+[node name="J_shrub_249" parent="DecorManual" instance=ExtResource("m_shrub")]
+transform = Transform3D(0.82574, 0, 1.50043, 0, 1.7126, 0, -1.50043, 0, 0.82574, 0.40, 0, -123.72)
+
+[node name="J_ficus_b_250" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(1.53518, 0, -0.58450, 0, 1.6427, 0, 0.58450, 0, 1.53518, -62.51, 0, -73.65)
+
+[node name="J_ficus_a_251" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-0.65144, 0, 1.14524, 0, 1.3176, 0, -1.14524, 0, -0.65144, 139.50, 0, -98.21)
+
+[node name="J_ficus_a_252" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(1.13248, 0, -1.17484, 0, 1.6318, 0, 1.17484, 0, 1.13248, 130.50, 0, -125.98)
+
+[node name="J_banyan_253" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.46950, 0, -1.05859, 0, 1.8111, 0, 1.05859, 0, -1.46950, 112.92, 0, -50.21)
+
+[node name="J_banyan_254" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.27633, 0, -0.34198, 0, 1.3214, 0, 0.34198, 0, 1.27633, 4.44, 0, 13.83)
+
+[node name="J_banyan_255" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.86146, 0, 1.23135, 0, 1.5028, 0, -1.23135, 0, 0.86146, 100.16, 0, -141.98)
+
+[node name="J_ficus_b_256" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-0.10893, 0, 1.34817, 0, 1.3526, 0, -1.34817, 0, -0.10893, 10.01, 0, 35.36)
+
+[node name="J_ficus_a_257" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-0.46291, 0, -1.49383, 0, 1.5639, 0, 1.49383, 0, -0.46291, -42.32, 0, 15.18)
+
+[node name="J_ficus_a_258" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(0.49648, 0, -1.25623, 0, 1.3508, 0, 1.25623, 0, 0.49648, -46.68, 0, -41.50)
+
+[node name="J_bamboo_259" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-0.75229, 0, -1.48248, 0, 1.6624, 0, 1.48248, 0, -0.75229, 106.33, 0, 31.33)
+
+[node name="J_shrub_260" parent="DecorManual" instance=ExtResource("m_shrub")]
+transform = Transform3D(1.49176, 0, 0.35701, 0, 1.5339, 0, -0.35701, 0, 1.49176, 135.33, 0, -96.05)
+
+[node name="J_fern_261" parent="DecorManual" instance=ExtResource("m_fern")]
+transform = Transform3D(1.42948, 0, -0.54380, 0, 1.5294, 0, 0.54380, 0, 1.42948, 30.49, 0, -137.53)
+
+[node name="J_fern_262" parent="DecorManual" instance=ExtResource("m_fern")]
+transform = Transform3D(-1.20061, 0, -1.30006, 0, 1.7696, 0, 1.30006, 0, -1.20061, 13.71, 0, -125.94)
+
+[node name="J_banyan_263" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.29493, 0, -0.99168, 0, 1.6310, 0, 0.99168, 0, -1.29493, 147.07, 0, -84.36)
+
+[node name="J_banyan_264" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.33956, 0, -0.89002, 0, 1.6083, 0, 0.89002, 0, 1.33956, 103.99, 0, -141.37)
+
+[node name="J_ficus_a_265" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(0.64193, 0, -1.49477, 0, 1.6268, 0, 1.49477, 0, 0.64193, -19.22, 0, -133.32)
+
+[node name="J_ficus_b_266" parent="DecorManual" instance=ExtResource("m_ficus_b")]
+transform = Transform3D(-0.42225, 0, -1.35393, 0, 1.4182, 0, 1.35393, 0, -0.42225, 11.23, 0, 32.51)
+
+[node name="J_banyan_267" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.63540, 0, 0.71871, 0, 1.7864, 0, -0.71871, 0, -1.63540, 78.06, 0, -108.30)
+
+[node name="J_bamboo_268" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(1.26675, 0, -0.88535, 0, 1.5455, 0, 0.88535, 0, 1.26675, 60.66, 0, -101.34)
+
+[node name="J_bamboo_269" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-1.69168, 0, -0.19402, 0, 1.7028, 0, 0.19402, 0, -1.69168, 129.39, 0, -3.38)
+
+[node name="J_fern_270" parent="DecorManual" instance=ExtResource("m_fern")]
+transform = Transform3D(-1.64323, 0, 0.62255, 0, 1.7572, 0, -0.62255, 0, -1.64323, 108.37, 0, -65.47)
+
+[node name="J_bamboo_271" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(1.71280, 0, 0.36078, 0, 1.7504, 0, -0.36078, 0, 1.71280, 100.32, 0, 35.52)
+
+[node name="J_banyan_272" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(0.98184, 0, -1.58092, 0, 1.8610, 0, 1.58092, 0, 0.98184, -15.58, 0, 12.08)
+
+[node name="J_banyan_273" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(-1.76362, 0, -0.56441, 0, 1.8517, 0, 0.56441, 0, -1.76362, 108.43, 0, 36.04)
+
+[node name="J_ficus_a_274" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(1.59799, 0, 0.48709, 0, 1.6706, 0, -0.48709, 0, 1.59799, 2.18, 0, -154.12)
+
+[node name="J_ficus_a_275" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-1.33420, 0, -0.20522, 0, 1.3499, 0, 0.20522, 0, -1.33420, 127.21, 0, 18.64)
+
+[node name="J_ficus_a_276" parent="DecorManual" instance=ExtResource("m_ficus_a")]
+transform = Transform3D(-0.63469, 0, 1.41226, 0, 1.5483, 0, -1.41226, 0, -0.63469, -12.60, 0, 32.35)
+
+[node name="J_shrub_277" parent="DecorManual" instance=ExtResource("m_shrub")]
+transform = Transform3D(0.61018, 0, -1.21833, 0, 1.3626, 0, 1.21833, 0, 0.61018, 74.92, 0, -108.61)
+
+[node name="J_banyan_278" parent="DecorManual" instance=ExtResource("m_banyan")]
+transform = Transform3D(1.83983, 0, -0.23007, 0, 1.8542, 0, 0.23007, 0, 1.83983, 3.75, 0, -27.66)
+
+[node name="J_bamboo_279" parent="DecorManual" instance=ExtResource("m_bamboo")]
+transform = Transform3D(-1.74528, 0, -0.03702, 0, 1.7457, 0, 0.03702, 0, -1.74528, -59.59, 0, -21.46)

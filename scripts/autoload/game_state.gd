@@ -113,11 +113,15 @@ const TRACK_SCENES: Array[String] = [
 	# (resolve_track_index o gaseste dupa numarul scenei); probe_decor / probe_manual iau DOAR
 	# numarul scenei, 23 (memoria `probe-decor-numar-de-scena`).
 	"res://scenes/tracks/Track23.tscn", # Carrara = INDEXUL 15
+	# MOSTRA ANGKOR — temporar (brief angkor.md §7 pasul 0); se scoate inainte de merge.
+	"res://scenes/tracks/Track24Mostra.tscn", # = INDEXUL 16 (A)
+	"res://scenes/tracks/Track24MostraB.tscn", # = INDEXUL 17 (B, martor)
 ]
 const TRACK_NAMES: Array[String] = [
 	"Dunele", "Okinawa manual", "Transfagarasan", "Baikal", "Stromboli",
 	"Chongqing", "Cappadocia", "Serengeti", "Machu Picchu", "Fiordland",
 	"Jodhpur", "Kyoto", "Monument Valley", "Okinawa", "Ha Long", "Carrara",
+	"Mostra Angkor A", "Mostra Angkor B",
 ]
 
 ## Cupele din WORLD CUP (decizia dezvoltatorului, 30 oct 2026): trei cupe de

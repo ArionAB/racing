@@ -103,6 +103,29 @@ else
 	PASSED+=("Pornirea jocului")
 fi
 
+# Fisiere de joc pe disc, dar nu in git. Build-ul de iOS se face pe GitHub din
+# checkout, deci ce n-a fost comis lipseste pe telefon — fara nicio eroare:
+# imaginile din CURSA RAPIDA (nov 2026) au stat necomise si cartonasele aratau
+# placeholder-ul doar pe mobil. Pica la orice fisier neignorat si necomis din
+# folderele care intra in export; doar AVERTIZEAZA pentru pistele din
+# TRACK_SCENES fara imagine (placeholder-ul e un fallback legitim).
+printf '%-58s ' "Assets necomise (lipsesc din build-ul de pe GitHub)"
+untracked=$(git ls-files --others --exclude-standard -- assets scenes scripts)
+if [ -n "$untracked" ]; then
+	echo "PICA — pe disc, dar nu in git:"
+	echo "$untracked" | head -20 | sed 's/^/    /'
+	FAILED+=("Assets necomise")
+else
+	echo "OK"
+	PASSED+=("Assets necomise")
+fi
+for scene in $(awk '/const TRACK_SCENES/,/^]/' scripts/autoload/game_state.gd \
+		| grep -E '^\s*"res://' | grep -oE 'Track[0-9]+\.tscn' | sed 's/\.tscn$//'); do
+	if [ -z "$(git ls-files "assets/ui/track_thumbs/$scene.*" | grep -vE '\.import$')" ]; then
+		echo "    avertisment: $scene n-are imagine comisa in assets/ui/track_thumbs/"
+	fi
+done
+
 # Restul pasilor sunt aceiasi ca in vechiul ci.yml; motivarea fiecaruia e in
 # sonda respectiva.
 run_step "Garda de draw call-uri (materiale per pista)" probe_decor.log 'VERDICT:' -- \

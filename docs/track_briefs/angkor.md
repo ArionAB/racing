@@ -1,4 +1,4 @@
-# Track brief — Angkor / templele din junglă (`Track24`, temă `angkor`) — v0.1 (concept)
+# Track brief — Angkor / templele din junglă (`Track24`, temă `angkor`) — v0.3 (pasul 1: sondele tehnice)
 
 > Concept de pistă, înaintea listei de assets. Scheletul e cel din
 > `carrara.md` / `halong.md`; secțiunile de assets (§5) sunt schițate, nu
@@ -479,6 +479,77 @@ primească la fel.
    turnului — altfel nu e „aurie pe furtună”, e siluetă), roșul drumului cu
    H diferit de nisipul MV. Cost: câteva ore, zero traseu, zero kit. Dacă
    pică: se intervine pe lichen, rădăcini și cer, **nu** pe loc.
+
+   **Rezultatul (3 nov 2026, ramura `angkor/mostra`, TRECUT pe ambele contracte
+   de citire).** Scenele `Track24Mostra.tscn` (A: tema `angkor`, accente) și
+   `Track24MostraB.tscn` (B: tema `angkor_real`, martorul fără antidoturi:
+   soare sus, cer albastru, drum de pământ gri-bej, gresie gri-verzuie), aceeași
+   geometrie din cod (`angkor_mostra.gd`: templul în quincunx pe soclu, turnuri
+   cu fețe, zid de laterită cu poarta-copac, șanțuri cu lotuși și naga, junglă
+   de banyan, `RainCycle`), capturi `--gamecam` la 0,02 / 0,15 / 0,37 / 0,55 /
+   0,81 (+ `--rain=1`). Setul orb: 30 de cadre — 5 A, 5 B, câte 5 din Machu
+   Picchu, Ha Long, Jodhpur, Monument Valley — doi critici, ordini diferite,
+   fără să știe câte locuri sunt sau ce se testează.
+
+   | variantă | „Angkor / khmer / Ta Prohm” | confundat cu altă pistă | numit „ușor de confundat cu Machu Picchu” |
+   |---|---|---|---|
+   | **A** (brief) | **10/10** (5/5 la fiecare critic) | **0/10** | **0/2** critici |
+   | **B** (martor) | 10/10 | 0/10 | **2/2** critici, independent: „varianta cu drum pal și cer albastru” |
+   | Machu Picchu | 10/10 „Anzi / Machu Picchu” | 0 | — |
+   | Ha Long | 8/10 „coastă de carst”, 2/10 „nesigur” (tunelul, interiorul) | 0 | — |
+   | Jodhpur | 10/10 | 0 | — |
+   | Monument Valley | 10/10 | 0 | — |
+
+   Ce înseamnă: (1) **locul se citește din arhitectură** — silueta turnurilor
+   în quincunx de la capătul căii și rădăcinile peste zid au dat „Angkor Wat”
+   / „Ta Prohm” cu încredere mare pe ambele variante, chiar din cutii; (2)
+   **antidoturile din §4 sunt cele care separă de Machu Picchu**: ambii critici
+   au numit *aceeași* pereche confuzabilă — drumul pal + iarba verde-deschis +
+   cerul albastru ale lui B sunt exact drumul și iarba Machu Picchu; A (laterită,
+   cer violet, sol închis) n-a fost numit niciodată. Riscul „Machu Picchu 2” din
+   antet era real și e rezolvat de paletă, nu de geometrie. (3) Rezerva de citire
+   (memoria `criticul-orb-citeste-relativ-la-set`): A și B au fost grupate
+   împreună și pentru că aveau **aceleași poziții de cameră** — un B singur în set
+   ar fi fost mai expus.
+
+   Contracte măsurate (PIL pe capturi, 5 cadre):
+
+   | contract | A | B | verdict |
+   |---|---|---|---|
+   | ΔV soare/umbră pe gresie (p80 − p20, turnul cu fețe) ≥ 0,28 | **0,36** | 0,32 | ✔ |
+   | piatra mai luminoasă decât cerul din spate pe ≥ 80% din siluetă | **71%** | 0% (siluetă pe cer albastru) | ✘ la limită — mască grosieră (include fețe în umbră și coroane) |
+   | H-ul drumului diferit de nisipul Monument Valley | H 10°, S 0,84 | H 40°, S 0,23 | ✘ — MV are H 16–17°, S 0,80: **aceeași familie** |
+
+   **Patru constatări de dus pe pista reală:**
+   - **Laterita stă în familia Monument Valley** (Δ H ≈ 7°). Niciun critic n-a
+     confundat pistele, fiindcă jungla verde închide drumul pe ambele părți —
+     separarea e **contextul**, nu culoarea. Regula pe pista reală: **laterita
+     nu apare niciodată fără verde lângă ea** (fără luminișuri de pământ roșu
+     gol), iar saturația coboară de la 0,84 spre ~0,6 (MV e 0,80; un drum mai
+     stins decât deșertul se citește „pământ de junglă”, nu „nisip roșu”).
+   - **Fețele Bayonului din cutii nu se citesc**: niciun critic n-a scris „față”
+     — turnurile au fost „prasat”, „Preah Ko / Roluos”, „turn sculptat”. Locul a
+     ieșit totuși khmer; dar semnătura POI E (§2) cere fețe care se văd, deci
+     **`bayon_face_tower` e hero-asset sculptat** (Blender), nu geometrie de cod,
+     și se verifică cu întrebarea „ce vezi pe turn?” la critic orb.
+   - **Vegetația e generică**: amândoi criticii au observat că „copacii cu coroană
+     plată și pilonii goi” apar și pe carst, și în deșert. Banyanul reuse nu
+     poartă locul; §5.4 (tetrameles cu contraforturi argintii, palmier de zahăr,
+     ficus sugrumător) nu e opțional.
+   - **Cerul violet citește „amurg”, nu „furtună”**: criticii au scris „purple
+     dusk”, niciunul „storm”. Fără gradient pe azimut, banda de nori spre est
+     trebuie să fie **geometrie în `horizon_class`** (§4), altfel furtuna există
+     doar când plouă.
+
+   Valorile de pornire pentru Track24 sunt tema `angkor` de pe ramura
+   `angkor/mostra` (soare `FFC48A` × 1,35 la 24° din VSV, ambient `A9A4C6` ×
+   0,40, cer `3B3550` / `9C8296`, sol `savanna_grass_tint` (0,16, 0,22, 0,10),
+   drum `dirt_road_tint` (0,60, 0,42, 0,38) — de stins spre S ~0,6), clasa
+   `angkor_sandstone` (dala `alpine_granite`, tentă (1,0, 0,86, 0,66), scară
+   0,28) și apa pe `SEA_DEEP`. **Ce se scoate înainte de orice merge**: intrările
+   16–17 din `GameState.TRACK_SCENES` (marcate „MOSTRA ANGKOR — temporar”),
+   `Track24Mostra*.tscn`, `angkor_mostra.gd`, `tools/gen_angkor_mostra.py`.
+   Rămân: temele `angkor` / `angkor_real` (martorul se poate scoate) și clasa.
 1. **Trecerea de contracte (§5.7) + sonde tehnice înaintea traseului**
    (`tools/ProbeAngkor.tscn`): (a) dominoul: 3 `RimBoulderHazard` într-un
    coridor de 6 m cu `CameraZone`, 8 AI × 16 seed-uri — strivirile pe trecere,
@@ -488,6 +559,86 @@ primească la fel.
    turnurile pe drum cu `lane_floor_at`; (e) `LightningFlash` + `RainCycle`
    pe laterită: rata de fulgere, plafonul de luminanță, „Reduce flashes”;
    (f) perdeaua: viteza la ieșire.
+
+   **Rezultatul (3 nov 2026, ramurile `angkor/sonde` — sonde, temporar — și
+   `angkor/fulger` — codul care rămâne).** Pista sintetică `tools/SondaAngkor*.tscn`
+   (`tools/gen_angkor_sonda.py`, ~1,2 km, patru laturi: poarta de 7 m +
+   elefantul în piață · terasa Bayon de 14 m cu turnuri pe carosabil · coama de
+   +10 cu creasta la +5 · ocolul de ~150 m și galeria de 6 m cu dominoul),
+   ProbeRace cu observatorul `--angkor` (`tools/probe_angkor_watch.gd`: striviri
+   pe rută, zboruri, secunde oprite în piață), 8 mașini, 150 s, distribuții pe
+   seed-uri (memoria `proberace-nedeterminism`). Martorul: aceeași pistă fără
+   elefant și fără domino.
+
+   | sondă | rezultat | contract | verdict |
+   |---|---|---|---|
+   | (a) dominoul, AI orb | **13%** striviri pe trecere (39 / 289, 16 seed-uri); 10–13% pe celelalte variante | ≤ 30% | ✔ — `DOOR_GROUP` nu e necesar |
+   | (b) elefantul după poartă | 12 `[blocaj]` / 16 seed-uri, toate *așteptări* scurte înaintea lui (nu ating nimic); ~5 s oprit pe seed pentru 8 mașini ≈ 0,2 s pe trecere | fără coadă în pâlnie | ✔ |
+   | (b′) poarta de 7 m | prima rulare: 20 de repuneri / 16 seed-uri — **defect al sondei** (pilonii lăsau 5 m, nu 7); reparat: 2 / 6 seed-uri (prima grămadă din turul 1) | — | ✔ după reparație |
+   | (c) creasta Regelui Lepros | airtime median **0,60 s** (0,53–0,67), ~370 de zboruri, 1 repunere pe 16 seed-uri | 0,5–0,9 s, fără repuneri | ✔ |
+   | (d) turnurile Bayonului, decalate ±3 m, fără ajutor | **~29 de repuneri pe seed**, toate pe Bayon: lovite la 36–46 m/s → ejectarea șoferului | — | ✘ |
+   | (d) aceleași, cu `custom_lane_corridors` de 26 m | ~20 / seed, **identic cu semnul inversat** | — | ✘ — culoarul nu ajunge la AI |
+   | (d) V1: 2 turnuri, culoare **înlănțuite** de la 60 m înainte | **0** repuneri pe Bayon / 6 seed-uri | — | ✔ |
+   | (d) V2: 3 turnuri lângă axă (±1 m) + `custom_lane_bias` 0,62 | 2 ejectări / 6 seed-uri, 0 blocaje | — | ✔ |
+   | (e) `LightningFlash` (`tools/ProbeLightning.tscn`) | 3–5 fulgere pe ploaie, interval minim **2,8 s**, albire maximă **0,37**, „Reduce flashes” albire **0**, soarele revine exact la bază (abatere 0,0000), două rulări = aceleași momente | ≤ 1 / 2 s, albire ≤ 0,5 | ✔ |
+   | (f) perdeaua de liane | nerulată — **trecerea de contracte a schimbat mecanismul** (mai jos) | — | — |
+
+   **De ce n-a mers culoarul scurt pe Bayon** (lecție pentru orice obstacol
+   static pe o dreaptă rapidă): AI-ul citește culoarul la indexul **curent** al
+   mașinii (`ai_controller.gd`, `car.road_index` → `lane_forced_at`), nu la unul
+   din față. Un culoar care începe la 17 m înaintea turnului lasă 0,5 s la 35 m/s
+   pentru 3 m laterali: mașina intră în turn pe oricare semn. Culoarele de la
+   Cappadocia funcționau fiindcă erau într-o piață lentă. Regula: culoarul
+   începe la **≥ 60 m** înainte (sau imediat după obstacolul precedent) și
+   culoarele unui slalom se **înlănțuie** fără gol.
+
+   **Decizia pentru POI E: V2** (tiparul stâlpilor Carrara, validat acolo pe
+   pista reală): 3 turnuri lângă axă, trecere pe ambele părți, podea de linie pe
+   tot sectorul — păstrează „alegi stânga sau dreapta fiecăruia” din §2. V1
+   (slalom impus, 2 turnuri, zero incidente) rămâne alternativa dacă la volan
+   V2 se simte prea liber. Turnurile decalate ±3 m de pe un drum de 14 m, cum le
+   desena §2, **nu se fac**.
+
+   **Ce a corectat trecerea de contracte (§5.7)** — brief-ul presupunea greșit:
+   - **Dominoul în `DOOR_GROUP` nu merge**: grupul e citit doar pentru
+     `SlidingHazard`, doar pe ruta 0, și o ușă „închisă” *trimite* AI-ul în
+     ramură. Dacă vreodată trebuie, tiparul e `TorrentCycle.AI_GROUP` cu
+     `branch_index` 1. Nu trebuie (13%).
+   - **`RimBoulderHazard`**: modelul e constantă (`DEFAULT_MODEL`) — se adaugă
+     `@export var model` / `model_scale` cu implicitul identic; **`invert_steer`
+     e implicit `true`** și **`crush_seconds` implicit 1,75** — pe Track24 se scriu
+     explicit `false` și 3,0. Ordinea: `start_clock` mai mare = cade mai devreme,
+     deci blocul cel mai îndepărtat are 2,4. Materialul: cheia de temă
+     `rockfall_class` = `angkor_sandstone`.
+   - **Elefantul nu e „zero cod”**: tot ce ține de el e legat de numele fișierului
+     `elephant` / mesh-ul `Elephant_Mesh`. `asian_elephant.glb` cere: mesh numit
+     `Elephant_Mesh*`, intrări în `SPLIT_MODELS`, `SLOT_REMAP_BY_MODEL`,
+     `WALK_CYCLE_SPEED_BY_MODEL`, schelet cu oasele `LegFL/FR/RL/RR` + `Body`,
+     clip `Walk`. Perioada nu e expusă: ~23 s cere `sweep_speed` 3 m/s (la 1,5
+     m/s iese ~34 s). Trâmbița la contact nu există (`contact_sfx` neexpus pe
+     marker) — cod mic. `ai_yields = true` (AI-ul încetinește și ocolește, nu
+     oprește) — cu el s-au măsurat cifrele de mai sus.
+   - **Terasa Elefanților NU e GLB pe care se rulează**: carosabilul e panglica
+     din spline; un GLB cu fața de sus carosabilă dublează drumul. Creasta e
+     profilul traseului (cum a fost în sondă); GLB-ul e doar fața sculptată, cu
+     coama la nivelul drumului sau sub.
+   - **Porțile prin care treci (gopura, Poarta de Sud, poarta-copac) cer
+     `coliziune="mesh"`** — implicitul e o carcasă convexă per mesh, care ar
+     astupa deschiderea. Poarta de Sud se strânge cu `custom_width_pinches`, ca
+     ușorii să stea în afara benzii (`ProbeLaneClear`).
+   - **Căile peste șanț nu sunt `TrackChannel`** (acela taie perpendicular, pune
+     piloni la 11 m, apă și plasă forțate). Se fac cu `custom_ravines` +
+     `custom_ravine_water` (plasă `RavineWater_N` automată), balustradele naga din
+     `DecorManual`.
+   - **Perdeaua de liane NU se înscrie în `SoftVegetation`**: registrul pune
+     frânare (`bush_drag` 6 m/s² × adâncime) pe toate mașinile — exact ce un
+     hazard fals nu are voie. Mecanismul corect: decor fără coliziune + un
+     declanșator mic (`Area3D`) care cheamă `PropDebris.leaf_burst` și sunetul.
+     Contractul „≥ 98% din viteză” devine atunci adevărat prin construcție; se
+     verifică pe pista reală, cu ProbeRace pe felie.
+   - **Fulgerul** nu poate folosi `Car.blind()` (eveniment per mașină) și trebuie
+     să ruleze **după** `RainCycle`, care rescrie soarele și ambientul în
+     fiecare cadru — așa e scris `LightningFlash` (prioritate 10, varf adunat).
 2. `Track24.tscn` din `TrackFromPath` (`tools/gen_angkor_route.py`, schela
    `gen_carrara_route.py`: pas 12 m, viraje > 90° pe arc), temă `angkor`
    (doar lumina, cerul, ceața, solul), traseul din §2, `TerrainPeak` pentru

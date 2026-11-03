@@ -829,6 +829,9 @@ var kerb_wheels: int = 0
 var draft: float = 0.0
 var _spinout_on: bool = false
 var _spinout_left: float = 0.0
+## Mersul inapoi a venit din ▼ (marsarier din voie); tine pana masina nu mai
+## ruleaza inapoi, ca ▲ apasat cat inca merge inapoi sa nu para spin-out.
+var _reverse_chosen: bool = false
 const UPRIGHT_FLIPPED_COS: float = 0.3
 const UPRIGHT_FLIPPED_SPEED: float = 4.0
 ## Daca tot nu s-a putut intoarce dupa atat (s de stat rasturnata), recover().
@@ -1406,7 +1409,9 @@ func _steer_taper(fwd_speed: float, drift_amt: float) -> float:
 ## Declansare: unghiul dintre bot si viteza (orizontala, fata de sol) peste
 ## `spinout_slip_deg`, la peste `spinout_min_speed`, fara sa fie marsarier din
 ## voie (fara gaz la viteza de marsarier: frana, sau rulat de-a-ndaratelea pe o
-## panta). Odata pornita (cel mult 2 s),
+## panta; ori gaz dupa un marsarier facut cu ▼, cat masina inca ruleaza inapoi —
+## altfel ▲ dupa ▼ o rotea ~45-80 grade intr-o parte la intamplare, eroarea de
+## 180 grade neavand semn). Odata pornita (cel mult 2 s),
 ## tine pana botul e la `spinout_release_deg` de tinta: directia de mers, iar
 ## sub 3 m/s directia soselei (daca exista pista). Rotatia intra prin
 ## _impact_yaw, ca orice alt impuls de yaw — niciodata cuplu.
@@ -1415,6 +1420,10 @@ func _spinout_assist(throttle: float, fwd_h: Vector3, hvel: Vector3) -> void:
 		_spinout_on = false
 		return
 	var speed := hvel.length()
+	if fwd_h.dot(hvel) > -0.5:
+		_reverse_chosen = false
+	elif throttle < 0.0:
+		_reverse_chosen = true
 	var target := Vector3.ZERO
 	if speed > 3.0:
 		target = hvel / speed
@@ -1426,7 +1435,8 @@ func _spinout_assist(throttle: float, fwd_h: Vector3, hvel: Vector3) -> void:
 	if not _spinout_on:
 		if speed < spinout_min_speed:
 			return
-		var by_choice := throttle <= 0.0 and speed <= reverse_speed * 1.3
+		var by_choice := (throttle <= 0.0 or _reverse_chosen) \
+			and speed <= reverse_speed * 1.3
 		if fwd_h.dot(target) < cos(deg_to_rad(spinout_slip_deg)) and not by_choice:
 			_spinout_on = true
 			_spinout_left = 2.0

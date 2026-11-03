@@ -441,6 +441,17 @@ func _build_bus() -> void:
 @export var hall_from_m: float = 0.0
 @export var hall_to_m: float = 0.0
 
+## PUTUL DE LUMINA din tavanul salii (Carrara, brief §2 POI D): o gaura in tub — tavan SI movila,
+## cu peretii putului intre ele — pe [shaft_from_m, shaft_to_m] metri de la linia de oprire si pe
+## lateralul `shaft_lateral` (m fata de axa, semnul lui `TrackRoute.side_at`), plus raza ([LightShaft])
+## care cade prin ea pe drum. Cere sala (`hall_ceiling` > 0): gaura se taie pe sectiunile cele mai
+## late. Lateralul e ASIMETRIC dinadins: in afara putului fasia dintre margini e tavan, iar un segment
+## centrat pe axa e exact cazul pe care ProbeBuried il numara gresit (`Track.TUNNEL_MOUND_CREST`).
+## 0 / 0 (implicit) = fara put: tubul ramane cel de dinainte, bit-identic.
+@export var shaft_from_m: float = 0.0
+@export var shaft_to_m: float = 0.0
+@export var shaft_lateral: Vector2 = Vector2(-3.5, 2.5)
+
 ## Pe ce banda a tunelului merge autocarul, fata de AXA drumului (m, semn
 ## local X — acelasi semn ca `TrackRoute.side_at` / `lateral_distance`:
 ## POZITIV = dreapta SENSULUI de mers al masinilor, NEGATIV = stanga).

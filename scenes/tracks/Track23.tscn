@@ -1697,6 +1697,9 @@ wing_end_height_m = 1.1
 hall_ceiling = 16.0
 hall_from_m = 146.44
 hall_to_m = 364.16
+shaft_from_m = 248.2
+shaft_to_m = 256.2
+shaft_lateral = Vector2(-3.5, 2.5)
 
 [node name="TunelMarmifera" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(-0.0, 0, 1.0, 0, 1, 0, -1.0, 0, -0.0, -248.8, 26.96, -105.0)

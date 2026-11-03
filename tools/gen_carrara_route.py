@@ -475,7 +475,7 @@ if OUT_PATH:
     # primul sector care contine fractia castiga, deci tunelurile (cele mai inguste) sunt primele.
     # Sala galeriei D (zona_d.HALL): sursa unica a amplasarii, citita si de decorul zonei.
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    from carrara_decor.zona_d import HALL
+    from carrara_decor.zona_d import HALL, SHAFT
     width_segments = [
         # H: tunelul Marmifera — exact intre portaluri. 8 m, nu 6,5 din brief: la 6,5 m masinile de 35 m/s
         # (venind dintr-un arc) loveau rama/aripile portalului (ProbeRace runda 0-1: 5 ejectari la 0.94-0.97).
@@ -716,6 +716,11 @@ wing_end_height_m = 1.1
     hall_m0 = (HALL["f0"] - IDX("D portal jos")) * total - 10.0
     hall_m1 = (HALL["f1"] - IDX("D portal jos")) * total + 10.0
     hall_txt = f"hall_ceiling = {HALL['ceil']}\nhall_from_m = {r2(hall_m0)}\nhall_to_m = {r2(hall_m1)}\n"
+    # Putul: aceeasi conversie fractie -> metri (eroarea de cativa metri doar il muta intre stalpii aflati la
+    # 38 m unul de altul). Gaura se taie pe fasiile tubului cu mijlocul in interval.
+    shaft_mc = (SHAFT["f"] - IDX("D portal jos")) * total
+    hall_txt += (f"shaft_from_m = {r2(shaft_mc - SHAFT['len_m'] / 2)}\nshaft_to_m = {r2(shaft_mc + SHAFT['len_m'] / 2)}\n"
+                 f"shaft_lateral = Vector2({SHAFT['lat'][0]}, {SHAFT['lat'][1]})\n")
     tunnels_txt = tunnel_node("TunelGalerie", "D portal jos", "D portal sus (E inceput)", 4.0, 9.0, 14.0,
                               hall=hall_txt) \
         + tunnel_node("TunelMarmifera", "H portal intrare", "H portal iesire", 4.0, 7.0, 12.0)

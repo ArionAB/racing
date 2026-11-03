@@ -130,6 +130,10 @@ ITEMS += [
 HALL = dict(f0=0.4758, f1=0.5716, hw=8.0, ceil=16.0, bias=(0.4932, 0.5340, 0.70),
             block_f=0.5077, block_lat=0.5)
 PILLARS = (("D_StalpSala1", 0.5145, -1.5), ("D_StalpSala2", 0.5300, 1.5))
+# Putul de lumina din tavanul salii (`TunnelSignalHazard.shaft_*`, generatorul): intre cei doi stalpi, ca
+# raza sa cada pe drumul slalomului si sa-i lumineze din fata. `len_m` pe lungime, `lat` lateralul gaurii,
+# ASIMETRIC (vezi nodul: un segment de tavan centrat pe axa e numarat gresit de ProbeBuried).
+SHAFT = dict(f=round((PILLARS[0][1] + PILLARS[1][1]) * 0.5, 4), len_m=8.0, lat=(-3.5, 2.5))
 
 
 def _pipe_run(prefix, f0, n, lat=3.9):

@@ -208,5 +208,26 @@ sală** (0,47–0,57). Pe drum: podea 0,62 → 3 ejectări în stâlpul 2 pe 16 
 Blocul strivește ~1,5 mașini pe cursă (loviri `RockfallHazard` 0,8 → 2,3 pe seed, sania inclusă), fără repuneri.
 Restul incidentelor sunt la excavator (0,044–0,049), ca pe #637/#638.
 
-**Rămas:** puțul de lumină din tavan (o gaură în tub cere capac separat pentru paritatea ProbeBuried — nefăcut);
-culoarea marmurei, ca peste tot. Verdictul la volan e al dezvoltatorului.
+**Rămas:** puțul de lumină din tavan (făcut pe 1 nov, mai jos); culoarea marmurei, ca peste tot. Verdictul la
+volan e al dezvoltatorului.
+
+**Verdictul (1 nov 2026):** dezvoltatorului îi place sala, iar performanța pe pistă e bună. #640 merge-uit în
+main. Culoarea marmurei: **rămâne așa** (decizie, nu se mai întreabă).
+
+## Puțul de lumină (1 nov 2026)
+
+Ramura `carrara/put-lumina`. O gaură reală în tavanul sălii, între cei doi stâlpi, cu o rază de soare care
+cade prin ea pe drum. Captura: `img/carrara_poi/put_lumina.jpg` (stânga: apropierea pe axă, raza după stâlpul 1;
+dreapta: de aproape, raza scaldă stâlpul 2, prin gură se vede cerul).
+
+| ce | cum |
+|---|---|
+| gaura | `TunnelSignalHazard.shaft_from_m/shaft_to_m/shaft_lateral` (8 m pe lungime, lateral −3,5…+2,5): pe fâșiile tubului cu mijlocul în interval nu se desenează nici tavanul, nici creasta movilei, iar `_tun_shaft_walls`/`_tun_shaft_end` închid golul dintre ele (pereții puțului). Profilele tubului cu puț își mută ruptura tavanului și creasta movilei pe marginile găurii, scalate cu lățimea secțiunii (același număr de vertecși pe tot tubul). Poziția: `zona_d.SHAFT`, mijlocul dintre stâlpi |
+| de ce n-a cerut capac separat | Teama veche: paritatea ProbeBuried. Măsurat: raza în sus din axă trece prin gaură și nu lovește nimic (0 fețe = afară), iar pereții puțului sunt verticali, deci paraleli cu raza. Lateralul e asimetric, ca niciun segment de tavan să nu fie centrat pe axă (`TUNNEL_MOUND_CREST`). ProbeBuried `--track=23` OK |
+| raza | `LightShaft` (conul aditiv al Cappadociei, material partajat), pus de `_tun_shaft_light` în centrul găurii, cât sala de înalt. Tenta = soarele temei, pal; intensitate 0,22 (0,12 nu se vedea pe marmura luminată) |
+| capcana | Primele două capturi la intensități diferite au ieșit **identice la pixel**: conul nu se desena deloc de la distanță. `LightShaft` avea stingerea după distanță **inversată** (min 4 > max 1,5, iar Godot inversează atunci sensul): raza se vede doar de la sub 4 m. Export nou `LightShaft.fade_m`, implicit tot (4; 1,5), deci Cappadocia rămâne cum e; Carrara cere (1,5; 5): se vede de departe, se topește doar când camera trece prin ea. **Raza din caverna Cappadociei are aceeași inversare și probabil nu se vede de la distanța camerei** — neatinsă aici, de verificat separat |
+| bit-identitate | ProbeTunelHash `--scenes=16,21`: aceleași amprente ca înainte (Fiordland `31f5ea47…`, Transfăgărășan `f95ad866…`) |
+
+Fără efect pe condus: raza n-are coliziune, gaura e la 16 m deasupra drumului.
+
+**Gărzi:** `verify_local.sh` OK (66 pași); probe_decor Carrara **24 de materiale** (+1: materialul razei, partajat; plafon 38); ProbeBuried `--track=23` OK.

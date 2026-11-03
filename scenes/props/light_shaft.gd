@@ -71,6 +71,16 @@ extends Node3D
 		sides = value
 		_rebuild()
 
+## Stingerea dupa distanta pana la camera (m): x = `distance_fade_min_distance`, y = `..._max_`.
+## Implicitul (4 -> 1,5) e INVERSAT (min > max), iar Godot inverseaza atunci sensul: raza se stinge
+## cand camera SE DEPARTEAZA si se vede doar de aproape — asa a ramas in caverna Cappadociei, unde
+## nu se schimba. Carrara (putul din sala galeriei) cere invers, 1,5 -> 5: raza se vede de departe si
+## se topeste doar cand camera intra in ea. Intra in cheia materialului partajat.
+@export var fade_m: Vector2 = Vector2(4.0, 1.5):
+	set(value):
+		fade_m = value
+		_rebuild()
+
 ## Materialul e partajat de TOATE coloanele: vezi antetul (garda de materiale).
 static var _shared: StandardMaterial3D
 static var _shared_key: String = ""
@@ -114,7 +124,7 @@ func _rebuild() -> void:
 
 
 func _material() -> StandardMaterial3D:
-	var key := "%s|%.3f" % [tint.to_html(false), strength]
+	var key := "%s|%.3f|%.2f|%.2f" % [tint.to_html(false), strength, fade_m.x, fade_m.y]
 	if _shared != null and _shared_key == key:
 		return _shared
 	var mat := StandardMaterial3D.new()
@@ -165,8 +175,8 @@ func _material() -> StandardMaterial3D:
 	# ochi sunt cei care spala tot cadrul. Fade-ul ii scoate inainte sa devina
 	# perdea, si lasa raza sa se vada de departe, unde ea CHIAR citeste ca raza.
 	mat.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_ALPHA
-	mat.distance_fade_min_distance = 4.0
-	mat.distance_fade_max_distance = 1.5
+	mat.distance_fade_min_distance = fade_m.x
+	mat.distance_fade_max_distance = fade_m.y
 	mat.disable_receive_shadows = true
 	_shared = mat
 	_shared_key = key

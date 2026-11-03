@@ -20,10 +20,6 @@ func _rebuild() -> void:
 
 
 func _build() -> void:
-	set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
-	grow_horizontal = Control.GROW_DIRECTION_BOTH
-	grow_vertical = Control.GROW_DIRECTION_BOTH
-
 	var margin := MarginContainer.new()
 	for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
 		margin.add_theme_constant_override(side, 26)
@@ -139,6 +135,14 @@ func _build() -> void:
 	back.add_theme_font_size_override("font_size", 24)
 	back.pressed.connect(func() -> void: back_pressed.emit())
 	root.add_child(back)
+
+	# Centrarea DUPA continut: MINSIZE ia marimea de acum. Facuta la inceput,
+	# la _rebuild panoul era gol in acel moment si ramanea 0x0 in centrul
+	# ecranului — fundalul disparea, continutul curgea spre dreapta-jos si BACK
+	# iesea din ecran (RESET CAMERA pe telefon, nov 2026).
+	set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
+	grow_horizontal = Control.GROW_DIRECTION_BOTH
+	grow_vertical = Control.GROW_DIRECTION_BOTH
 
 ## COMUTATOARELE DE TEST pe device (vezi GameState.apply_debug_gfx): vizibile
 ## doar cu contorul de performanta pornit, aplicate pe loc, nesalvate. Din pauza

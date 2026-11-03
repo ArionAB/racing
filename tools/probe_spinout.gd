@@ -10,7 +10,11 @@ extends Node
 ##      nu se roteste (<= 10 grade intr-o secunda);
 ##   3. drift cu frana de mana la 85% din max_speed: unghiul de derapaj ramane
 ##      sub 60 grade si asistenta nu porneste NICIODATA;
-##   4. un slip de 80 grade (sub prag) nu declanseaza asistenta.
+##   4. un slip de 80 grade (sub prag) nu declanseaza asistenta;
+##   5. marsarier din voie (▼ pana la viteza de marsarier), apoi ▲: masina se
+##      opreste si porneste inainte DREPT — asistenta nu porneste, botul nu se
+##      roteste (<= 10 grade). Inainte de fix, gazul in timp ce masina inca
+##      ruleaza inapoi o lua drept spin-out si o rotea ~45 grade stanga/dreapta.
 ## Sabotaj (trebuie sa PICE): `-- --off` pune spinout_enabled = false.
 ##
 ## Ruleaza CA SCENA:
@@ -56,6 +60,7 @@ func _ready() -> void:
 	await _test_reverse()
 	await _test_drift()
 	await _test_sub_threshold()
+	await _test_reverse_then_gas()
 	print("")
 	print("VERDICT: ", "PROBLEMA" if _failed else "OK")
 	get_tree().quit(1 if _failed else 0)
@@ -192,5 +197,36 @@ func _test_sub_threshold() -> void:
 		if car._spinout_on:
 			fired = true
 	_check(not fired, "sub prag asistenta nu porneste")
+	car.queue_free()
+	await get_tree().physics_frame
+
+
+func _test_reverse_then_gas() -> void:
+	print("")
+	print("-- 5. marsarier din voie, apoi gaz: porneste inainte drept --")
+	var car := _spawn()
+	await _settle(car)
+	car.rotation.y = 0.0
+	var drv := car.controller as ScriptDriver
+	drv.throttle = -1.0
+	var guard := 0
+	while car.linear_velocity.z < car.reverse_speed * 0.85 and guard < 600:
+		await get_tree().physics_frame
+		guard += 1
+	var back_speed := car.linear_velocity.z
+	var yaw0 := car.rotation.y
+	drv.throttle = 1.0
+	var fired := false
+	var max_dyaw := 0.0
+	for _f in 90:
+		await get_tree().physics_frame
+		if car._spinout_on:
+			fired = true
+		max_dyaw = maxf(max_dyaw, absf(rad_to_deg(angle_difference(yaw0, car.rotation.y))))
+	print("  inapoi la %.1f m/s, apoi gaz 1.5 s: rotatie maxima %.1f grade, asistenta pornita: %s, viteza inainte %.1f m/s"
+		% [back_speed, max_dyaw, fired, -car.linear_velocity.z])
+	_check(back_speed > car.spinout_min_speed, "marsarierul a depasit pragul de viteza al asistentei")
+	_check(not fired and max_dyaw <= 10.0, "gazul dupa marsarier nu roteste masina")
+	_check(-car.linear_velocity.z > 3.0, "masina porneste inainte")
 	car.queue_free()
 	await get_tree().physics_frame

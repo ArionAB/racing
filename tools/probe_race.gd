@@ -232,6 +232,9 @@ var _no_torii: bool = false
 ## `--train-cam`: masoara cat se vede trenul Sagano (Kyoto G2) din camera jucatorului.
 var _train_cam: bool = false
 var _train_meter: Node = null
+## `--angkor`: observatorul sondelor Angkor (tools/probe_angkor_watch.gd).
+var _angkor_watch: Node = null
+var _angkor: bool = false
 ## `--no-tub`: scoate `ShishiOdoshiHazard` din scena (A/B-ul tubului, Kyoto).
 var _no_tub: bool = false
 ## `--no-calm`: zero pe `TorrentCycle.calm_*` (A/B-ul efectului din CALM, #493).
@@ -446,6 +449,8 @@ func _ready() -> void:
 			_no_haboob = true
 		elif arg.begins_with("--haboob-at="):
 			_haboob_at = float(arg.trim_prefix("--haboob-at="))
+		elif arg == "--angkor":
+			_angkor = true
 		elif arg == "--no-daruma":
 			_no_daruma = true
 		elif arg == "--no-shishimai":
@@ -663,6 +668,10 @@ func _setup_rim() -> void:
 ## pista fara ele (`_jump_near` ramane -1).
 func _setup_kyoto() -> void:
 	var track: Track = _race.track
+	if _angkor:
+		_angkor_watch = preload("res://tools/probe_angkor_watch.gd").new()
+		add_child(_angkor_watch)
+		_angkor_watch.setup(_race)
 	if _train_cam:
 		_train_meter = preload("res://tools/train_cam_meter.gd").new()
 		add_child(_train_meter)
@@ -1380,6 +1389,8 @@ func _report_race() -> void:
 	var track: Track = _race.track
 	if _train_meter != null:
 		_train_meter.report()
+	if _angkor_watch != null:
+		_angkor_watch.report()
 	var cars: Array[Car] = _race.cars
 	print("\n=== CURSA: %s — %.0fs, %d masini ===" % [
 		track.track_name, _elapsed, cars.size()])

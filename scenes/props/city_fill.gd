@@ -55,6 +55,17 @@ class_name CityFill
 ## 250 m, masurat de TrackDecorBatch pe Dunele (curba de draw calls se
 ## aplatizeaza la 250; sub, fiecare celula in plus e un buffer in plus pe model).
 @export var cell_m: float = 250.0
+## DISTANTA DE TAIERE a fiecarei felii (m, de la camera la centrul caselor din
+## felie; 0 = oprit, comportamentul dinainte). Kyoto, nov 2026: pe telefon
+## umplutura de case ducea dreapta de start de la 60 la 30 fps, desi adauga doar
+## ~100k triunghiuri. Pe desktop la aspectul telefonului (ProbePerf, 0.85-0.97)
+## casele triplau timpul GPU: 0,31-0,41 ms fara ele, 0,76-1,43 cu ele. Felii
+## de 125 m + taiere la 260 m: 0,43-0,79. Felia mare trimitea si casele din
+## spatele camerei; taierea scoate cartierele din ceata. Cu felii de 125 m cea
+## mai apropiata casa care poate disparea e la ~170 m (ceata Kyoto incepe la 100).
+## Masurat si: material simplu pe case = zero castig; fara umbra aruncata =
+## ~o treime din cost, dar casele par lipite pe sol — nu s-a facut.
+@export var visibility_end_m: float = 0.0
 ## Genereaza LOD-uri pe mesh-urile sabloanelor (peretele rupt si atlasul unit
 ## sunt ArrayMesh-uri NOI, fara LOD-urile importului). Godot alege LOD-ul unui
 ## MultiMesh dupa AABB-ul lui, deci celulele departate coboara singure.
@@ -181,10 +192,11 @@ func _build() -> void:
 		if face_xz.z > 0.0:
 			xf = _faced(xf, mi)
 		var cell := Vector2i(floori(xf.origin.x / cell_m), floori(xf.origin.z / cell_m))
-		if not explicit_xforms.is_empty() and not _cell_forced:
+		if not explicit_xforms.is_empty() and not _cell_forced 				and visibility_end_m <= 0.0:
 			# Randurile explicite sunt o fasie de cateva sute de metri langa
 			# drum: o singura felie (altfel axele x = 0 / z = 0 le taie in
-			# patru si dubleaza desenele fara castig de culling).
+			# patru si dubleaza desenele fara castig de culling). Cu taiere pe
+			# distanta se felieaza: altfel fasia ar fi taiata toata odata.
 			cell = Vector2i.ZERO
 		for part: Dictionary in parts[mi]:
 			if part["variant"] != -1 and int(part["variant"]) != int(ind):
@@ -203,9 +215,18 @@ func _build() -> void:
 		mm.transform_format = MultiMesh.TRANSFORM_3D
 		mm.mesh = part["mesh"]
 		mm.instance_count = xfs.size()
+		# Nodul sta in centrul caselor lui, ca distanta de taiere sa se masoare
+		# de acolo si nu de la originea pistei.
+		var center := Vector3.ZERO
+		for xf_i: Transform3D in xfs:
+			center += xf_i.origin
+		center /= float(xfs.size())
 		for i in xfs.size():
-			mm.set_instance_transform(i, xfs[i])
+			var xf_i: Transform3D = xfs[i]
+			mm.set_instance_transform(i, Transform3D(xf_i.basis, xf_i.origin - center))
 		var mmi := MultiMeshInstance3D.new()
+		mmi.position = center
+		mmi.visibility_range_end = visibility_end_m
 		mmi.name = "CityFill_%s__p%d_%d_%d" % [
 			models[int(g["model"])].resource_path.get_file().get_basename(),
 			int(part["id"]), (g["cell"] as Vector2i).x, (g["cell"] as Vector2i).y]

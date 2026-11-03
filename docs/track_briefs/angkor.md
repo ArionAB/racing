@@ -1,4 +1,4 @@
-# Track brief — Angkor / templele din junglă (`Track24`, temă `angkor`) — v0.2 (testul de loc trecut)
+# Track brief — Angkor / templele din junglă (`Track24`, temă `angkor`) — v0.3 (pasul 1: sondele tehnice)
 
 > Concept de pistă, înaintea listei de assets. Scheletul e cel din
 > `carrara.md` / `halong.md`; secțiunile de assets (§5) sunt schițate, nu
@@ -559,6 +559,86 @@ primească la fel.
    turnurile pe drum cu `lane_floor_at`; (e) `LightningFlash` + `RainCycle`
    pe laterită: rata de fulgere, plafonul de luminanță, „Reduce flashes”;
    (f) perdeaua: viteza la ieșire.
+
+   **Rezultatul (3 nov 2026, ramurile `angkor/sonde` — sonde, temporar — și
+   `angkor/fulger` — codul care rămâne).** Pista sintetică `tools/SondaAngkor*.tscn`
+   (`tools/gen_angkor_sonda.py`, ~1,2 km, patru laturi: poarta de 7 m +
+   elefantul în piață · terasa Bayon de 14 m cu turnuri pe carosabil · coama de
+   +10 cu creasta la +5 · ocolul de ~150 m și galeria de 6 m cu dominoul),
+   ProbeRace cu observatorul `--angkor` (`tools/probe_angkor_watch.gd`: striviri
+   pe rută, zboruri, secunde oprite în piață), 8 mașini, 150 s, distribuții pe
+   seed-uri (memoria `proberace-nedeterminism`). Martorul: aceeași pistă fără
+   elefant și fără domino.
+
+   | sondă | rezultat | contract | verdict |
+   |---|---|---|---|
+   | (a) dominoul, AI orb | **13%** striviri pe trecere (39 / 289, 16 seed-uri); 10–13% pe celelalte variante | ≤ 30% | ✔ — `DOOR_GROUP` nu e necesar |
+   | (b) elefantul după poartă | 12 `[blocaj]` / 16 seed-uri, toate *așteptări* scurte înaintea lui (nu ating nimic); ~5 s oprit pe seed pentru 8 mașini ≈ 0,2 s pe trecere | fără coadă în pâlnie | ✔ |
+   | (b′) poarta de 7 m | prima rulare: 20 de repuneri / 16 seed-uri — **defect al sondei** (pilonii lăsau 5 m, nu 7); reparat: 2 / 6 seed-uri (prima grămadă din turul 1) | — | ✔ după reparație |
+   | (c) creasta Regelui Lepros | airtime median **0,60 s** (0,53–0,67), ~370 de zboruri, 1 repunere pe 16 seed-uri | 0,5–0,9 s, fără repuneri | ✔ |
+   | (d) turnurile Bayonului, decalate ±3 m, fără ajutor | **~29 de repuneri pe seed**, toate pe Bayon: lovite la 36–46 m/s → ejectarea șoferului | — | ✘ |
+   | (d) aceleași, cu `custom_lane_corridors` de 26 m | ~20 / seed, **identic cu semnul inversat** | — | ✘ — culoarul nu ajunge la AI |
+   | (d) V1: 2 turnuri, culoare **înlănțuite** de la 60 m înainte | **0** repuneri pe Bayon / 6 seed-uri | — | ✔ |
+   | (d) V2: 3 turnuri lângă axă (±1 m) + `custom_lane_bias` 0,62 | 2 ejectări / 6 seed-uri, 0 blocaje | — | ✔ |
+   | (e) `LightningFlash` (`tools/ProbeLightning.tscn`) | 3–5 fulgere pe ploaie, interval minim **2,8 s**, albire maximă **0,37**, „Reduce flashes” albire **0**, soarele revine exact la bază (abatere 0,0000), două rulări = aceleași momente | ≤ 1 / 2 s, albire ≤ 0,5 | ✔ |
+   | (f) perdeaua de liane | nerulată — **trecerea de contracte a schimbat mecanismul** (mai jos) | — | — |
+
+   **De ce n-a mers culoarul scurt pe Bayon** (lecție pentru orice obstacol
+   static pe o dreaptă rapidă): AI-ul citește culoarul la indexul **curent** al
+   mașinii (`ai_controller.gd`, `car.road_index` → `lane_forced_at`), nu la unul
+   din față. Un culoar care începe la 17 m înaintea turnului lasă 0,5 s la 35 m/s
+   pentru 3 m laterali: mașina intră în turn pe oricare semn. Culoarele de la
+   Cappadocia funcționau fiindcă erau într-o piață lentă. Regula: culoarul
+   începe la **≥ 60 m** înainte (sau imediat după obstacolul precedent) și
+   culoarele unui slalom se **înlănțuie** fără gol.
+
+   **Decizia pentru POI E: V2** (tiparul stâlpilor Carrara, validat acolo pe
+   pista reală): 3 turnuri lângă axă, trecere pe ambele părți, podea de linie pe
+   tot sectorul — păstrează „alegi stânga sau dreapta fiecăruia” din §2. V1
+   (slalom impus, 2 turnuri, zero incidente) rămâne alternativa dacă la volan
+   V2 se simte prea liber. Turnurile decalate ±3 m de pe un drum de 14 m, cum le
+   desena §2, **nu se fac**.
+
+   **Ce a corectat trecerea de contracte (§5.7)** — brief-ul presupunea greșit:
+   - **Dominoul în `DOOR_GROUP` nu merge**: grupul e citit doar pentru
+     `SlidingHazard`, doar pe ruta 0, și o ușă „închisă” *trimite* AI-ul în
+     ramură. Dacă vreodată trebuie, tiparul e `TorrentCycle.AI_GROUP` cu
+     `branch_index` 1. Nu trebuie (13%).
+   - **`RimBoulderHazard`**: modelul e constantă (`DEFAULT_MODEL`) — se adaugă
+     `@export var model` / `model_scale` cu implicitul identic; **`invert_steer`
+     e implicit `true`** și **`crush_seconds` implicit 1,75** — pe Track24 se scriu
+     explicit `false` și 3,0. Ordinea: `start_clock` mai mare = cade mai devreme,
+     deci blocul cel mai îndepărtat are 2,4. Materialul: cheia de temă
+     `rockfall_class` = `angkor_sandstone`.
+   - **Elefantul nu e „zero cod”**: tot ce ține de el e legat de numele fișierului
+     `elephant` / mesh-ul `Elephant_Mesh`. `asian_elephant.glb` cere: mesh numit
+     `Elephant_Mesh*`, intrări în `SPLIT_MODELS`, `SLOT_REMAP_BY_MODEL`,
+     `WALK_CYCLE_SPEED_BY_MODEL`, schelet cu oasele `LegFL/FR/RL/RR` + `Body`,
+     clip `Walk`. Perioada nu e expusă: ~23 s cere `sweep_speed` 3 m/s (la 1,5
+     m/s iese ~34 s). Trâmbița la contact nu există (`contact_sfx` neexpus pe
+     marker) — cod mic. `ai_yields = true` (AI-ul încetinește și ocolește, nu
+     oprește) — cu el s-au măsurat cifrele de mai sus.
+   - **Terasa Elefanților NU e GLB pe care se rulează**: carosabilul e panglica
+     din spline; un GLB cu fața de sus carosabilă dublează drumul. Creasta e
+     profilul traseului (cum a fost în sondă); GLB-ul e doar fața sculptată, cu
+     coama la nivelul drumului sau sub.
+   - **Porțile prin care treci (gopura, Poarta de Sud, poarta-copac) cer
+     `coliziune="mesh"`** — implicitul e o carcasă convexă per mesh, care ar
+     astupa deschiderea. Poarta de Sud se strânge cu `custom_width_pinches`, ca
+     ușorii să stea în afara benzii (`ProbeLaneClear`).
+   - **Căile peste șanț nu sunt `TrackChannel`** (acela taie perpendicular, pune
+     piloni la 11 m, apă și plasă forțate). Se fac cu `custom_ravines` +
+     `custom_ravine_water` (plasă `RavineWater_N` automată), balustradele naga din
+     `DecorManual`.
+   - **Perdeaua de liane NU se înscrie în `SoftVegetation`**: registrul pune
+     frânare (`bush_drag` 6 m/s² × adâncime) pe toate mașinile — exact ce un
+     hazard fals nu are voie. Mecanismul corect: decor fără coliziune + un
+     declanșator mic (`Area3D`) care cheamă `PropDebris.leaf_burst` și sunetul.
+     Contractul „≥ 98% din viteză” devine atunci adevărat prin construcție; se
+     verifică pe pista reală, cu ProbeRace pe felie.
+   - **Fulgerul** nu poate folosi `Car.blind()` (eveniment per mașină) și trebuie
+     să ruleze **după** `RainCycle`, care rescrie soarele și ambientul în
+     fiecare cadru — așa e scris `LightningFlash` (prioritate 10, varf adunat).
 2. `Track24.tscn` din `TrackFromPath` (`tools/gen_angkor_route.py`, schela
    `gen_carrara_route.py`: pas 12 m, viraje > 90° pe arc), temă `angkor`
    (doar lumina, cerul, ceața, solul), traseul din §2, `TerrainPeak` pentru

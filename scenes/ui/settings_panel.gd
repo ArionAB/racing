@@ -72,6 +72,12 @@ func _build() -> void:
 			GameState.haptics_enabled = on
 			GameState.save_settings())
 
+	# Fotosensibilitate: fulgerele furtunii (Angkor) fara albirea ecranului.
+	_add_toggle(box, "Reduce flashes", GameState.reduce_flashes,
+		func(on: bool) -> void:
+			GameState.reduce_flashes = on
+			GameState.save_settings())
+
 	# --- camera ---
 	# Sliderele lucreaza pe FACTORI, nu pe metri: valorile din ChaseCamera raman
 	# implicitul, iar setarea le scaleaza. Din pauza, camera se muta sub deget —

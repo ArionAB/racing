@@ -116,12 +116,21 @@ const TRACK_SCENES: Array[String] = [
 	# MOSTRA ANGKOR — temporar (brief angkor.md §7 pasul 0); se scoate inainte de merge.
 	"res://scenes/tracks/Track24Mostra.tscn", # = INDEXUL 16 (A)
 	"res://scenes/tracks/Track24MostraB.tscn", # = INDEXUL 17 (B, martor)
+	# SONDELE ANGKOR — temporar (brief angkor.md §7 pasul 1); se scot inainte de merge.
+	"res://tools/SondaAngkor.tscn", # = INDEXUL 18
+	"res://tools/SondaAngkorGol.tscn", # = INDEXUL 19 (martor fara hazarde)
+	"res://tools/SondaAngkorCor.tscn", # = INDEXUL 20 (culoare pe turnurile Bayon)
+	"res://tools/SondaAngkorCorInv.tscn", # = INDEXUL 21 (culoare cu semnul inversat)
+	"res://tools/SondaAngkorLant.tscn", # = INDEXUL 22 (2 turnuri, culoare inlantuite)
+	"res://tools/SondaAngkorAxa.tscn", # = INDEXUL 23 (3 turnuri langa axa, podea de linie)
 ]
 const TRACK_NAMES: Array[String] = [
 	"Dunele", "Okinawa manual", "Transfagarasan", "Baikal", "Stromboli",
 	"Chongqing", "Cappadocia", "Serengeti", "Machu Picchu", "Fiordland",
 	"Jodhpur", "Kyoto", "Monument Valley", "Okinawa", "Ha Long", "Carrara",
-	"Mostra Angkor A", "Mostra Angkor B",
+	"Mostra Angkor A", "Mostra Angkor B", "Sonda Angkor", "Sonda Angkor gol",
+	"Sonda Angkor culoare", "Sonda Angkor culoare inv",
+	"Sonda Angkor lant", "Sonda Angkor axa",
 ]
 
 ## Cupele din WORLD CUP (decizia dezvoltatorului, 30 oct 2026): trei cupe de
@@ -274,6 +283,9 @@ var real_headlight: bool = true
 ## Vibratie la impacturi, aterizari dure si pornirea turbo-ului (telefon si
 ## manete). Doar jucatorul; implicit pornita. Vezi HapticsFeed.
 var haptics_enabled: bool = true
+## ACCESIBILITATE (fotosensibilitate): fulgerul musonului (LightningFlash, Angkor) nu mai
+## albeste ecranul — devine un puls lent de lumina ambientala. Implicit oprita.
+var reduce_flashes: bool = false
 ## NIVELUL GRAFIC — comutatorul de device din planul de grafica pe mobil.
 ##   0 = ECONOMIC: fara umbre dinamice, fara glow, randare 3D la ~720 px
 ##       inaltime pe telefon. Ce ramane e AO-ul copt + blob-ul masinii.
@@ -723,6 +735,7 @@ func load_settings() -> void:
 	real_headlight = bool(cfg.get_value("debug", "real_headlight", true))
 	gfx_tier = clampi(int(cfg.get_value("video", "gfx_tier", 1)), 0, 2)
 	haptics_enabled = bool(cfg.get_value("input", "haptics", true))
+	reduce_flashes = bool(cfg.get_value("video", "reduce_flashes", false))
 
 func save_settings() -> void:
 	var cfg := ConfigFile.new()
@@ -739,6 +752,7 @@ func save_settings() -> void:
 	cfg.set_value("debug", "real_headlight", real_headlight)
 	cfg.set_value("video", "gfx_tier", gfx_tier)
 	cfg.set_value("input", "haptics", haptics_enabled)
+	cfg.set_value("video", "reduce_flashes", reduce_flashes)
 	cfg.save(SETTINGS_PATH)
 
 

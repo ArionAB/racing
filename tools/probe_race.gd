@@ -199,6 +199,8 @@ const CLIFF_FRACS: Array[float] = [0.12, 0.31, 0.44, 0.58, 0.73, 0.91]
 var _mode: String = "race"
 ## Exporturi de masina suprascrise din linia de comanda (`--car-set=`).
 var _car_set: Dictionary = {}
+## `--scene=res://...tscn`: ruleaza cursa pe ACEASTA scena in locul celei din
+## TRACK_SCENES (`GameState.track_scene_override`); --track ramane indexul pistei.
 var _track_index: int = 0
 var _seconds: float = 150.0
 ## `--rain=1`: fortata ploaia peste orice `RainCycle` de pe pista, prin
@@ -410,6 +412,10 @@ func _ready() -> void:
 			_mode = arg.trim_prefix("--mode=")
 		elif arg.begins_with("--track="):
 			_track_index = int(arg.trim_prefix("--track="))
+		elif arg.begins_with("--scene="):
+			# Varianta unei piste (alt .tscn) cu acelasi --track: comparatii A/B in
+			# paralel fara sa rescrii scena reala (Angkor, faza elefantului).
+			GameState.track_scene_override = arg.trim_prefix("--scene=")
 		elif arg.begins_with("--seconds="):
 			_seconds = float(arg.trim_prefix("--seconds="))
 		elif arg.begins_with("--car-set="):

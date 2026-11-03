@@ -1,4 +1,4 @@
-# Track brief — Angkor / templele din junglă (`Track24`, temă `angkor`) — v0.1 (concept)
+# Track brief — Angkor / templele din junglă (`Track24`, temă `angkor`) — v0.2 (testul de loc trecut)
 
 > Concept de pistă, înaintea listei de assets. Scheletul e cel din
 > `carrara.md` / `halong.md`; secțiunile de assets (§5) sunt schițate, nu
@@ -479,6 +479,77 @@ primească la fel.
    turnului — altfel nu e „aurie pe furtună”, e siluetă), roșul drumului cu
    H diferit de nisipul MV. Cost: câteva ore, zero traseu, zero kit. Dacă
    pică: se intervine pe lichen, rădăcini și cer, **nu** pe loc.
+
+   **Rezultatul (3 nov 2026, ramura `angkor/mostra`, TRECUT pe ambele contracte
+   de citire).** Scenele `Track24Mostra.tscn` (A: tema `angkor`, accente) și
+   `Track24MostraB.tscn` (B: tema `angkor_real`, martorul fără antidoturi:
+   soare sus, cer albastru, drum de pământ gri-bej, gresie gri-verzuie), aceeași
+   geometrie din cod (`angkor_mostra.gd`: templul în quincunx pe soclu, turnuri
+   cu fețe, zid de laterită cu poarta-copac, șanțuri cu lotuși și naga, junglă
+   de banyan, `RainCycle`), capturi `--gamecam` la 0,02 / 0,15 / 0,37 / 0,55 /
+   0,81 (+ `--rain=1`). Setul orb: 30 de cadre — 5 A, 5 B, câte 5 din Machu
+   Picchu, Ha Long, Jodhpur, Monument Valley — doi critici, ordini diferite,
+   fără să știe câte locuri sunt sau ce se testează.
+
+   | variantă | „Angkor / khmer / Ta Prohm” | confundat cu altă pistă | numit „ușor de confundat cu Machu Picchu” |
+   |---|---|---|---|
+   | **A** (brief) | **10/10** (5/5 la fiecare critic) | **0/10** | **0/2** critici |
+   | **B** (martor) | 10/10 | 0/10 | **2/2** critici, independent: „varianta cu drum pal și cer albastru” |
+   | Machu Picchu | 10/10 „Anzi / Machu Picchu” | 0 | — |
+   | Ha Long | 8/10 „coastă de carst”, 2/10 „nesigur” (tunelul, interiorul) | 0 | — |
+   | Jodhpur | 10/10 | 0 | — |
+   | Monument Valley | 10/10 | 0 | — |
+
+   Ce înseamnă: (1) **locul se citește din arhitectură** — silueta turnurilor
+   în quincunx de la capătul căii și rădăcinile peste zid au dat „Angkor Wat”
+   / „Ta Prohm” cu încredere mare pe ambele variante, chiar din cutii; (2)
+   **antidoturile din §4 sunt cele care separă de Machu Picchu**: ambii critici
+   au numit *aceeași* pereche confuzabilă — drumul pal + iarba verde-deschis +
+   cerul albastru ale lui B sunt exact drumul și iarba Machu Picchu; A (laterită,
+   cer violet, sol închis) n-a fost numit niciodată. Riscul „Machu Picchu 2” din
+   antet era real și e rezolvat de paletă, nu de geometrie. (3) Rezerva de citire
+   (memoria `criticul-orb-citeste-relativ-la-set`): A și B au fost grupate
+   împreună și pentru că aveau **aceleași poziții de cameră** — un B singur în set
+   ar fi fost mai expus.
+
+   Contracte măsurate (PIL pe capturi, 5 cadre):
+
+   | contract | A | B | verdict |
+   |---|---|---|---|
+   | ΔV soare/umbră pe gresie (p80 − p20, turnul cu fețe) ≥ 0,28 | **0,36** | 0,32 | ✔ |
+   | piatra mai luminoasă decât cerul din spate pe ≥ 80% din siluetă | **71%** | 0% (siluetă pe cer albastru) | ✘ la limită — mască grosieră (include fețe în umbră și coroane) |
+   | H-ul drumului diferit de nisipul Monument Valley | H 10°, S 0,84 | H 40°, S 0,23 | ✘ — MV are H 16–17°, S 0,80: **aceeași familie** |
+
+   **Patru constatări de dus pe pista reală:**
+   - **Laterita stă în familia Monument Valley** (Δ H ≈ 7°). Niciun critic n-a
+     confundat pistele, fiindcă jungla verde închide drumul pe ambele părți —
+     separarea e **contextul**, nu culoarea. Regula pe pista reală: **laterita
+     nu apare niciodată fără verde lângă ea** (fără luminișuri de pământ roșu
+     gol), iar saturația coboară de la 0,84 spre ~0,6 (MV e 0,80; un drum mai
+     stins decât deșertul se citește „pământ de junglă”, nu „nisip roșu”).
+   - **Fețele Bayonului din cutii nu se citesc**: niciun critic n-a scris „față”
+     — turnurile au fost „prasat”, „Preah Ko / Roluos”, „turn sculptat”. Locul a
+     ieșit totuși khmer; dar semnătura POI E (§2) cere fețe care se văd, deci
+     **`bayon_face_tower` e hero-asset sculptat** (Blender), nu geometrie de cod,
+     și se verifică cu întrebarea „ce vezi pe turn?” la critic orb.
+   - **Vegetația e generică**: amândoi criticii au observat că „copacii cu coroană
+     plată și pilonii goi” apar și pe carst, și în deșert. Banyanul reuse nu
+     poartă locul; §5.4 (tetrameles cu contraforturi argintii, palmier de zahăr,
+     ficus sugrumător) nu e opțional.
+   - **Cerul violet citește „amurg”, nu „furtună”**: criticii au scris „purple
+     dusk”, niciunul „storm”. Fără gradient pe azimut, banda de nori spre est
+     trebuie să fie **geometrie în `horizon_class`** (§4), altfel furtuna există
+     doar când plouă.
+
+   Valorile de pornire pentru Track24 sunt tema `angkor` de pe ramura
+   `angkor/mostra` (soare `FFC48A` × 1,35 la 24° din VSV, ambient `A9A4C6` ×
+   0,40, cer `3B3550` / `9C8296`, sol `savanna_grass_tint` (0,16, 0,22, 0,10),
+   drum `dirt_road_tint` (0,60, 0,42, 0,38) — de stins spre S ~0,6), clasa
+   `angkor_sandstone` (dala `alpine_granite`, tentă (1,0, 0,86, 0,66), scară
+   0,28) și apa pe `SEA_DEEP`. **Ce se scoate înainte de orice merge**: intrările
+   16–17 din `GameState.TRACK_SCENES` (marcate „MOSTRA ANGKOR — temporar”),
+   `Track24Mostra*.tscn`, `angkor_mostra.gd`, `tools/gen_angkor_mostra.py`.
+   Rămân: temele `angkor` / `angkor_real` (martorul se poate scoate) și clasa.
 1. **Trecerea de contracte (§5.7) + sonde tehnice înaintea traseului**
    (`tools/ProbeAngkor.tscn`): (a) dominoul: 3 `RimBoulderHazard` într-un
    coridor de 6 m cu `CameraZone`, 8 AI × 16 seed-uri — strivirile pe trecere,

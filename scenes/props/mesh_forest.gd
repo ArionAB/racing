@@ -85,6 +85,14 @@ extends Node3D
 ## (artar 2696 -> 718 in loc de 1348), dar schimbarea la `lod_near_m` se vede
 ## mai mult. Masurat: la 0,5 valea D trecea de 1,6M triunghiuri (vezi `lod_near_m`).
 @export_range(0.2, 0.7, 0.01) var mid_lod_ratio: float = MID_LOD_RATIO_DEFAULT
+## TREAPTA MEDIE = CEA GROSIERA pentru speciile numite (stem-uri, ca in
+## `MeshForestZone.species`). Kyoto, nov 2026: valea de artari pe telefon la
+## 20 fps; artarul mediu are 590-718 triunghiuri, cel grosier 212-348, iar
+## treapta medie (26-65 m) era cea mai mare parte a padurii din cadru (340-400k
+## din ~860k). Pe captura de joc diferenta abia se vede la artari. NU merge
+## generic, pe un prag de fractie: cedrul (116 -> 6) isi pierde conul, iar
+## coroanele de pe dealul din C dispareau de tot.
+@export var mid_from_far_species: PackedStringArray = PackedStringArray()
 ## CELULELE DE DEPARTE (HLOD, 31 oct 2026). Treapta grosiera feliata ca mai sus
 ## costa in desene, nu in triunghiuri: banda apropiata e taiata in felii de 20 m,
 ## deci in valea D se vedeau ~210 felii departate cu 3-5 arbori fiecare (cedrul:
@@ -109,6 +117,14 @@ extends Node3D
 ## opreste oricum la 55 m (`GameState.SHADOW_DISTANCE_MOBILE`). Celulele nu
 ## arunca niciodata.
 @export var far_shadow: bool = false
+## UMBRA DIN TREAPTA URMATOARE: fiecare treapta care arunca umbra o arunca prin
+## mesh-ul treptei mai grosiere (intregul prin cel mediu, mediul prin cel
+## grosier), intr-un MultiMesh frate doar pentru pasa de umbra. Harta de umbra
+## de 2048 pe 55 m nu deosebeste un artar de 2696 de triunghiuri de unul de 718.
+## Kyoto, nov 2026, valea de artari pe telefon: 20 fps cu 1109k + 433k
+## triunghiuri; in sonda (profil telefon, frac 0,36-0,42) treapta intreaga
+## dadea ~200k triunghiuri vizibile si INCA ~200k in umbra.
+@export var shadow_lod: bool = true
 ## Cat intra trunchiul in pamant (m): relieful palpaie sub radacina.
 @export_range(0.0, 1.0, 0.01, "suffix:m") var sink_m: float = 0.25
 ## Cat de mult mai multa marja fata de o sosea obisnuita cere o scurtatura
@@ -232,6 +248,10 @@ func _build() -> void:
 			slice_near_m = float(a.trim_prefix("--forest-slice-near="))
 		elif a.begins_with("--forest-mid-ratio="):
 			mid_lod_ratio = float(a.trim_prefix("--forest-mid-ratio="))
+		elif a.begins_with("--forest-mid-far="):
+			mid_from_far_species = a.trim_prefix("--forest-mid-far=").split(",", false)
+		elif a.begins_with("--forest-shadow-lod="):
+			shadow_lod = a.trim_prefix("--forest-shadow-lod=") == "1"
 	_sampler = track.get("_sampler") as TrackSideSampler
 	_prepare(track)
 	var theme := String(track.theme_decor)
@@ -376,6 +396,8 @@ func _build_species(theme: String) -> void:
 			far = far_s
 			mid = smooth if mid == mesh else Palette.smoothed_mesh(mid, Palette.foliage_surfaces(mid))
 			mesh = smooth
+		if mid_from_far_species.has(stem) and far != mid:
+			mid = far.duplicate()
 		_species_mesh[stem] = mesh
 		_species_mid[stem] = mid
 		_species_far[stem] = far
@@ -1295,9 +1317,18 @@ func _emit(groups: Dictionary) -> void:
 				if begin >= end:
 					continue
 			var shadow := bool(g["shadow"]) and (far_shadow or String(steps[k][3]) != "_far")
-			var mmi := _slice_mmi(String(key).replace("|", "_") + String(steps[k][3]),
-				steps[k][0], xfs, union, begin, end, shadow)
+			var cheap: ArrayMesh = steps[k + 1][0] \
+				if shadow and shadow_lod and k + 1 < steps.size() else null
+			var nm := String(key).replace("|", "_") + String(steps[k][3])
+			var mmi := _slice_mmi(nm, steps[k][0], xfs, union, begin, end,
+				shadow and cheap == null)
 			add_child(mmi)
+			if cheap != null:
+				# Inaintea treptei: ultimul copil trebuie sa ramana `_far` (celulele).
+				var sh := _slice_mmi(nm + "_umbra", cheap, xfs, union, begin, end, true)
+				sh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+				add_child(sh)
+				kids.append(sh)
 			kids.append(mmi)
 		slice_count += 1
 		# Doar feliile care ajung pe treapta grosiera intra in celula: una fara

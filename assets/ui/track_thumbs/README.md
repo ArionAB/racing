@@ -21,3 +21,8 @@ lipseste, cartonasul arata un placeholder cu calea asta.
 
 Dupa ce adaugi imaginile, deschide editorul Godot o data (sau ruleaza
 `--headless --import`) ca sa fie importate.
+
+**Comite imaginea IMPREUNA cu `.import`-ul ei.** Build-ul de iOS se face pe
+GitHub din checkout: o imagine care exista doar pe discul tau apare in joc pe
+desktop, dar pe telefon cartonasul arata placeholder-ul. `tools/verify_local.sh`
+pica daca gaseste assets necomise.

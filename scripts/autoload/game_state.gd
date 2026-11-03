@@ -113,16 +113,22 @@ const TRACK_SCENES: Array[String] = [
 	# (resolve_track_index o gaseste dupa numarul scenei); probe_decor / probe_manual iau DOAR
 	# numarul scenei, 23 (memoria `probe-decor-numar-de-scena`).
 	"res://scenes/tracks/Track23.tscn", # Carrara = INDEXUL 15
+	# Track24 = INDEXUL 16 (Angkor, brief angkor.md §7 pasul 2): la COADA listei, fara swap.
+	# --track=16 SAU --track=24 la snapshot / probe_race / probe_layout; probe_decor / probe_manual
+	# iau DOAR numarul scenei, 24 (memoria `probe-decor-numar-de-scena`).
+	"res://scenes/tracks/Track24.tscn", # Angkor = INDEXUL 16
 ]
 const TRACK_NAMES: Array[String] = [
 	"Dunele", "Okinawa manual", "Transfagarasan", "Baikal", "Stromboli",
 	"Chongqing", "Cappadocia", "Serengeti", "Machu Picchu", "Fiordland",
 	"Jodhpur", "Kyoto", "Monument Valley", "Okinawa", "Ha Long", "Carrara",
+	"Angkor",
 ]
 
 ## Cupele din WORLD CUP (decizia dezvoltatorului, 30 oct 2026): trei cupe de
 ## cate patru curse, puncte cumulate. Raman PE DINAFARA Dunele si Okinawa
-## manual (pistele vechi de test, indicii 0-1), Ha Long si Carrara. Cele 12
+## manual (pistele vechi de test, indicii 0-1), Ha Long, Carrara si Angkor (doar
+## cursa rapida pana decide dezvoltatorul, brief angkor.md §8). Cele 12
 ## piste ramase sunt impartite pe geografie, ALTFEL decat lumile carierei, ca
 ## modul sa nu fie aceeasi grila jucata a doua oara; fiecare cupa se deschide
 ## cu o pista din lumea 1 a carierei (cea mai blanda).

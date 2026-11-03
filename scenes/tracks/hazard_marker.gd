@@ -164,6 +164,13 @@ enum Kind {
 ## vacile si caii de pe celelalte piste raman neatinsi.
 @export var ai_yields: bool = false
 
+## Defazajul ciclului (0..1 dintr-o perioada). Negativ (implicit) = derivat din
+## fractie, ca pana acum (`frac * 3.7`). Doar pentru SLIDING. Elefantul de la
+## Poarta de Sud (Angkor, Track24): cu faza derivata, plutonul din turul 1
+## ajungea in piata exact cand traversa — 9-41 s oprite pe seed fata de ~5 s
+## in sonda pasului 1, unde aceeasi traversare avea alta faza.
+@export_range(-1.0, 1.0, 0.01) var sweep_phase: float = -1.0
+
 ## Perioada ciclului (s). 0 = implicitul clasei. Doar pentru AVALANCHE — pana
 ## la runda 2 (Fiordland) `_build_avalanche` nu citea NIMIC de la marker in
 ## afara de pozitie/latime, deci orice avalansa plantata mostenea implicitul
@@ -314,6 +321,8 @@ func model_spec() -> Dictionary:
 		spec["sweep_speed"] = sweep_speed
 	if ai_yields:
 		spec["ai_yields"] = true
+	if sweep_phase >= 0.0:
+		spec["sweep_phase"] = sweep_phase
 	if avalanche_period > 0.0:
 		spec["avalanche_period"] = avalanche_period
 	if avalanche_from_left:

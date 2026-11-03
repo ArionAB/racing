@@ -70,6 +70,15 @@ class_name CityFill
 ## sunt ArrayMesh-uri NOI, fara LOD-urile importului). Godot alege LOD-ul unui
 ## MultiMesh dupa AABB-ul lui, deci celulele departate coboara singure.
 @export var generate_lods: bool = true
+## UMBRA DINTR-O BUCATA: fiecare model arunca umbra printr-un singur mesh
+## unit (toate partile lui, doar pentru pasa de umbra), iar partile vizibile
+## nu mai arunca. O casa e 4-7 parti (clasele de material + atlasul), deci
+## 4-7 desene de umbra pe model si felie; pasa de umbra nu are nevoie de
+## materiale, deci un singur desen ajunge. Umbra iese identica. Kyoto, nov
+## 2026: in curba de dupa start (frac 0,10) telefonul ramanea la 27 fps cu
+## 706 + 396 desene, iar casele dadeau 218 din cele 318 desene de umbra ale
+## sondei (profilul de telefon: o cascada, 55 m).
+@export var shadow_proxy: bool = true
 @export var seed_value: int = 20260929
 ## Zone fara case (centru XZ in coordonate de lume + raza), pe langa
 ## golurile `TerrainHollow` (fantana) care se exclud singure.
@@ -156,6 +165,8 @@ func _ready() -> void:
 			# felieaza atunci, ca sa se vada ce taie frustumul.
 			cell_m = maxf(10.0, float(a.trim_prefix("--cell=")))
 			_cell_forced = true
+		elif a == "--no-shadow-proxy":
+			shadow_proxy = false
 	if Engine.is_editor_hint() or models.is_empty():
 		return
 	_build.call_deferred()
@@ -227,6 +238,9 @@ func _build() -> void:
 		var mmi := MultiMeshInstance3D.new()
 		mmi.position = center
 		mmi.visibility_range_end = visibility_end_m
+		if shadow_proxy:
+			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY \
+				if part.get("shadow", false) else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mmi.name = "CityFill_%s__p%d_%d_%d" % [
 			models[int(g["model"])].resource_path.get_file().get_basename(),
 			int(part["id"]), (g["cell"] as Vector2i).x, (g["cell"] as Vector2i).y]
@@ -234,7 +248,8 @@ func _build() -> void:
 		mmi.material_override = part["material"]
 		add_child(mmi)
 		batches += 1
-		tris += int(part["tris"]) * xfs.size()
+		if not part.get("shadow", false):
+			tris += int(part["tris"]) * xfs.size()
 	var cen := Vector3.ZERO
 	for p: Dictionary in places:
 		cen += (p["xf"] as Transform3D).origin
@@ -559,11 +574,19 @@ func _templates() -> Array:
 		var parts: Array = []
 		var atlas_st: ArrayMesh = null
 		var atlas_tris := 0
+		var shadow_st: ArrayMesh = null
 		for v in 2:
 			var root: Node3D = roots[mi_idx][v]
 			for mi in _meshes(root):
 				var local := _xf_to(mi, root)
 				var mat := mi.material_override
+				# Forma e aceeasi in ambele tente (difera doar materialul).
+				if shadow_proxy and v == 0 \
+						and mi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
+					for s in mi.mesh.get_surface_count():
+						var sh := SurfaceTool.new()
+						sh.append_from(mi.mesh, s, local)
+						shadow_st = sh.commit(shadow_st)
 				if mat == world or mat == null:
 					if v == 1:
 						continue # atlasul e comun celor doua tente
@@ -582,11 +605,28 @@ func _templates() -> Array:
 			for part: Dictionary in parts:
 				part["mesh"] = _with_lods(part["mesh"])
 		if atlas_st != null:
-			parts.append({"id": 0, "mesh": _with_lods(atlas_st) if generate_lods else atlas_st, "material": world,
+			# Atlasul vine din mai multe noduri (2 suprafete pe machiya a/b/d):
+			# unite, sunt un desen in loc de doua. Acelasi format, deci nimic nu
+			# se pierde la lipire.
+			parts.append({"id": 0, "mesh": _one_surface(atlas_st), "material": world,
 				"local": Transform3D.IDENTITY, "variant": -1, "tris": atlas_tris})
+		if shadow_st != null:
+			parts.append({"id": parts.size() + 1, "shadow": true, "variant": -1,
+				"mesh": _one_surface(shadow_st), "material": world,
+				"local": Transform3D.IDENTITY, "tris": 0})
 		out.append(parts)
 	holder.queue_free()
 	return out
+
+
+## Toate suprafetele intr-una singura (= un desen). `commit` pe acelasi
+## ArrayMesh adauga o suprafata noua la fiecare apel, deci le lipim aici.
+func _one_surface(src: ArrayMesh) -> Mesh:
+	var st := SurfaceTool.new()
+	for s in src.get_surface_count():
+		st.append_from(src, s, Transform3D.IDENTITY)
+	var one := st.commit()
+	return _with_lods(one) if generate_lods else one
 
 
 ## Acelasi mesh, cu LOD-uri generate (ImporterMesh, ca la importul GLB).

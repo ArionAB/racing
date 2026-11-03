@@ -11,10 +11,20 @@ extends Node
 ## generator (aproximativ) -> aceasta sonda -> generator (exact). Punctele de control nu se
 ## schimba intre treceri, deci harta ramane valabila cat timp traseul nu se muta.
 ## (tools/data are .gdignore: .tsv nu e importat ca resursa.)
+##
+## Alta pista (Angkor, Track24): `-- --scene=res://scenes/tracks/Track24.tscn
+## --out=res://tools/data/angkor_fracmap.tsv`. Fara argumente, Carrara ca inainte.
 
 func _ready() -> void:
 	await get_tree().process_frame
-	var scene := load("res://scenes/tracks/Track23.tscn") as PackedScene
+	var scene_path := "res://scenes/tracks/Track23.tscn"
+	var out_path := "res://tools/data/carrara_fracmap.tsv"
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--scene="):
+			scene_path = arg.trim_prefix("--scene=")
+		elif arg.begins_with("--out="):
+			out_path = arg.trim_prefix("--out=")
+	var scene := load(scene_path) as PackedScene
 	var track := scene.instantiate() as Track
 	get_tree().root.add_child(track)
 	await get_tree().process_frame
@@ -22,10 +32,10 @@ func _ready() -> void:
 	var r := track.routes[0]
 	var n := r.count()
 	var dd: PackedFloat32Array = track.get("_dists")
-	var f := FileAccess.open("res://tools/data/carrara_fracmap.tsv", FileAccess.WRITE)
+	var f := FileAccess.open(out_path, FileAccess.WRITE)
 	for i in n:
 		var p: Vector3 = r.baked[i]
 		f.store_line("%.3f %.3f %.6f %.6f" % [p.x, p.z, float(i) / float(n), dd[i] / dd[n]])
 	f.close()
-	print("carrara_fracmap: %d puncte coapte, lungime %.1f m" % [n, r.length()])
+	print("%s: %d puncte coapte, lungime %.1f m" % [out_path, n, r.length()])
 	get_tree().quit()

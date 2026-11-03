@@ -1,4 +1,4 @@
-# Track brief — Angkor / templele din junglă (`Track24`, temă `angkor`) — v0.3 (pasul 1: sondele tehnice)
+# Track brief — Angkor / templele din junglă (`Track24`, temă `angkor`) — v0.4 (pașii 2–3: traseul și ProbeRace)
 
 > Concept de pistă, înaintea listei de assets. Scheletul e cel din
 > `carrara.md` / `halong.md`; secțiunile de assets (§5) sunt schițate, nu
@@ -653,6 +653,48 @@ primească la fel.
    `proberace-la-inceput-nu-la-final`): 8 mașini, 16 seed-uri, fără decor —
    citit pe `[blocaj]` / lent / invers, nu pe repuneri (memoria
    `zero-repuneri-ascunde-blocajul`).
+
+   **Rezultatul pașilor 2–3 (3 nov 2026, ramura `angkor/track24`).** Traseul
+   gol (fără decor și fără hazarde; doar șanțurile cu apă, pâlnia porții,
+   lățimile și ramura galeriei): **2.432 m**, sens orar, 8 POI în ordinea din
+   §2. Ce s-a schimbat față de §2, cu motivul:
+
+   | față de §2 | acum | de ce |
+   |---|---|---|
+   | ~2,25 km | **2.432 m**, tur minim median **75,0 s**, mediu 79,0 s | prima variantă ieșea 2,8 km și la 20 m de zidul lumii; mai scurt de atât nu încap urcarea și coborârea Bakheng sub 13% |
+   | platforma Bakheng **+38**, Angkor Wat la ~200 m | **+31**, Angkor Wat la **~230 m**, în stânga-față pe latura spre S (virajul de intrare la stânga, cu centrul spre turnuri) | la +38 urcarea + coborârea cereau ~550 m; captura `--gamecam` de pe platformă arată zona Angkor Wat în stânga-față, turnurile se măsoară la pasul 4 |
+   | Angkor Thom la **+6/+12/+10** | cetatea pe un **dâm**: poarta **+14**, Bayonul **+20**, coama terasei **+18**, aterizarea **+9,4**, jungla coboară lin spre șanț (+9 → +3) | coborârea de pe Bakheng are 17 m în loc de 32, deci latura de nord e cu ~100 m mai scurtă; ce contează (rampe, căderi) rămâne relativ |
+   | B: pe dinăuntrul galeriei, cu colțuri | **un singur arc** (R 30) după gopura de vest, apoi drept spre N, la ~55 m de turnuri | trei colțuri de 90° la 12 m tăiau „ritm și viteză”; un arc pus în colțul galeriei trecea la 25 m de turnuri |
+   | H: turnurile oglindite **în stânga** | **în dreapta** | într-o buclă orară cu templul în interior, șanțul de pe malul de sud e pe dreapta; Srah Srang stă pe stânga, imediat după colțul de SE (o scurtă cale cu apă pe ambele părți) |
+   | creasta: cădere de 5 m, aterizare pe 8–10% | muchie cu **4,4 m pe 12 m** (37%), apoi o **pantă de aterizare** care se îndulcește 18% → 10% → 5% → 2% (8,6 m în total) | vezi mai jos |
+
+   **Creasta Regelui Lepros, patru încercări pe ProbeRace** (memoria
+   `car-nu-e-lansat-de-panta` e istorică: panta lansează, dar contează
+   *curbura* muchiei):
+
+   | profil | zboruri | airtime | incidente |
+   |---|---|---|---|
+   | două trepte de 17% | 3 / ~24 (doar Taxiul) | 0,37 s | — |
+   | puncte suplimentare la 4/8 m după muchie | 11 / 24 | 0,30 s | spline-ul supraîncarcă: 32,8% copt |
+   | pas de 37% + pantă de 7% | 397 / 16 seed-uri | med **0,58 s** | **12 ejectări „perete”** la ~22 m după muchie: spline-ul uniform trecea de la −45% la −2% în ~8 m și înapoi la −7% — un genunchi în care mașinile care aterizau scurt intrau cu botul |
+   | **pas de 37% + pantă de aterizare 18→2%** | **383 / 16 seed-uri** | med **0,63 s** (0,42–0,77) | **0** |
+
+   Căderea de 37% (și primul pas al pantei, ~23% copt) e peste pragul de 22%
+   al ProbeLayout: fereastra e **excepție numită** în `metadata/jump_crests`
+   pe nodul pistei, iar `tools/probe_layout.gd` o scoate din cifră și îi
+   tipărește panta separat (41,9%). În afara ei: panta maximă 13,2% (un interval
+   copt scurt la piciorul urcării; urcarea însăși e ~11%), raza minimă 14,2 m,
+   apropierea de sine 46 m, ramura câștigă 56 m (ocol 164 m, galerie 109 m).
+
+   **ProbeRace, 8 mașini × 16 seed-uri × 250 s** (`--angkor`): **0 repuneri, 0
+   ejectări**; 2 `[blocaj]`, ambele în grămada de la start (t ≈ 12 s, frac
+   0,04): mașini împinse peste marginea căii de vest, pe malul șanțului —
+   balustrada naga (pasul 6) le închide; offroad median 2,2%, lent median 4,0 s,
+   invers median 0,6 s; scurtătura ~12 treceri pe seed (AI-ul o ia). Pe C, D, E și
+   H: nimic.
+
+   Fracțiile se scriu în două treceri (generator → `ProbeCarraraFracmap` cu
+   `--scene=… --out=tools/data/angkor_fracmap.tsv` → generator), ca la Carrara.
 4. Sonda de feel, un tur singur. **Capturile `--driver`** de pe grilă (turnurile
    întregi?), de pe Bakheng (dezvăluirea?), de la capătul căii uriașilor
    (elefantul prin poartă?), de pe apropierea Terasei Elefanților (fața în

@@ -174,12 +174,32 @@ func _check_route(track: Track, ri: int) -> int:
 			if bool(ch.get("jump", false)) and not bool(ch.get("ford", false)):
 				gap_lo.append(int(ch["near"]))
 				gap_hi.append(int(ch["far"]))
+	# CRESTE DE SARITURA declarate (`metadata/jump_crests` pe nodul pistei: fractii pe INDEX).
+	# Caderea de dupa muchie E sosea, dar e facuta ca masina sa zboare peste ea (Angkor F: 4,4 m pe
+	# 12 m, singura creasta care a dat airtime-ul din brief). Fereastra iese din cifra, dar panta ei
+	# se tipareste separat — exceptie numita, nu ascunsa.
+	var crest_lo: Array[int] = []
+	var crest_hi: Array[int] = []
+	if ri == 0 and track.has_meta("jump_crests"):
+		for w: Vector2 in track.get_meta("jump_crests"):
+			crest_lo.append(int(w.x * float(n)))
+			crest_hi.append(int(w.y * float(n)))
+	var crest_slope := 0.0
 	for i in n - 1:
 		var in_gap := false
 		for k in gap_lo.size():
 			if i >= gap_lo[k] and i < gap_hi[k]:
 				in_gap = true
 		if in_gap:
+			continue
+		var in_crest := false
+		for k in crest_lo.size():
+			if i >= crest_lo[k] and i < crest_hi[k]:
+				in_crest = true
+		if in_crest:
+			var dc := r.baked[i].distance_to(r.baked[i + 1])
+			if dc >= 0.01:
+				crest_slope = maxf(crest_slope, absf(r.baked[i + 1].y - r.baked[i].y) / dc)
 			continue
 		var d := r.baked[i].distance_to(r.baked[i + 1])
 		if d < 0.01:
@@ -226,6 +246,9 @@ func _check_route(track: Track, ri: int) -> int:
 		% [min_radius, min_at, flag_r])
 	print("      panta maxima    %7.1f %% la frac %.2f%s"
 		% [max_slope * 100.0, slope_at, flag_s])
+	if not crest_lo.is_empty():
+		print("      creste de saritura declarate: %d, panta maxima in ele %.1f %% (exceptie numita)"
+			% [crest_lo.size(), crest_slope * 100.0])
 	if min_sep < INF:
 		print("      apropiere de sine %5.1f m la frac %.2f%s"
 			% [min_sep, sep_at, flag_sep])

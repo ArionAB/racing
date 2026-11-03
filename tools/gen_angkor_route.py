@@ -45,7 +45,7 @@ HALF_WIDTH = 4.5   # custom_half_width global (9 m); sectoarele (mai jos) il sup
 Y_CALE = 3.0
 Y_GAL = 4.0
 Y_BAK = 31.0   # brief: +38; coborat ca urcarea si coborarea sa incapa in ~2,4 km la < 13%
-Y_RAMPA_F = 15.0
+Y_PIATA = 14.0   # piata regala, sub fata de 4 m a Terasei Elefantilor
 Y_POARTA = 14.0  # brief: +6; cetatea Angkor Thom pe un dam, vezi D
 Y_BAYON = 20.0
 Y_TERASA = 18.0
@@ -77,20 +77,23 @@ WPTS = [
     (-230.0, 382.0, 0, Y_POARTA, "D poarta"),
     # Piata de dupa poarta (elefantul traverseaza la ~22 m dupa ea), apoi la dreapta spre E.
     (-230.0, 437.0, 25, Y_POARTA, "D colt piata"),
-    # E: Bayonul. Rampa de vest, terasa de 14 m, rampa de est.
+    # E: Bayonul. Rampa de vest, terasa de 14 m, rampa de est care coboara in PIATA REGALA (+14).
     (-180.0, 437.0, 0, Y_POARTA, "E rampa V jos"),
     (-125.0, 437.0, 0, Y_BAYON, "E terasa V"),
-    (-25.0, 437.0, 0, Y_BAYON, "E terasa E"),
-    (30.0, 437.0, 0, Y_RAMPA_F, "E rampa E jos"),
-    # F: Terasa Elefantilor, spre S. Rampa la capatul de N, coama, creasta Regelui Lepros.
-    (95.0, 437.0, 28, None, "F colt"),
-    (95.0, 380.0, 0, Y_RAMPA_F, "F rampa jos"),
-    (95.0, 350.0, 0, Y_TERASA, "F coama inceput"),
-    (95.0, 200.0, 0, Y_TERASA, "F coama sfarsit"),
-    (95.0, 128.0, 0, Y_TERASA - 8.6, "F aterizare"),  # = -CREST_DROP
-    # G: Ta Prohm, spre S, coborand lin spre sant. Perdeaua de liane, ocolul incintei (spre E,
-    # ~145 m), scurtatura pe coarda (~110 m).
-    (110.0, 112.0, 50, 9.0, "G perdea"),
+    (-30.0, 437.0, 0, Y_BAYON, "E terasa E"),
+    (22.0, 437.0, 0, Y_PIATA, "E rampa E jos"),
+    # F: Terasa Elefantilor, spre S. Din piata, drumul o ia pe DIAGONALA spre SE si urca pe terasa
+    # prin capatul ei de nord: pe diagonala, fata de vest (4 m, sculptata) sta la ~30 de grade in
+    # dreapta-fata — "drumul vine spre terasa din piata Bayonului in unghi" (brief §2.0). Prima
+    # varianta urca pe terasa din lateral si mergea pe coama paralel cu fata: captura --gamecam n-a
+    # aratat-o niciodata (memoria `perete-paralel-nu-se-vede`).
+    (52.0, 437.0, 30, Y_PIATA, "F colt piata"),
+    (112.0, 377.0, 30, Y_TERASA, "F colt terasa"),
+    (112.0, 350.0, 0, Y_TERASA, "F coama inceput"),
+    (112.0, 200.0, 0, Y_TERASA, "F coama sfarsit"),
+    (112.0, 128.0, 0, Y_TERASA - 8.6, "F aterizare"),  # = -CREST_DROP
+    # G: Ta Prohm, spre S, coborand lin spre sant. Perdeaua de liane (pasul 6, dupa aterizare),
+    # ocolul incintei (spre E, ~165 m), scurtatura pe coarda (~110 m).
     (126.0, 75.0, 30, 8.5, "G ocol intrare"),
     (230.0, 20.0, 40, 8.0, "G ocol varf"),
     (126.0, -35.0, 30, 7.0, "G ocol iesire"),
@@ -355,7 +358,7 @@ section_slopes("C platforma", "C platforma N", "C platforma S")
 section_slopes("C-D coborarea", "C platforma S", "D cale inceput")
 section_slopes("E rampa V", "E rampa V jos", "E terasa V")
 section_slopes("E rampa E", "E terasa E", "E rampa E jos")
-section_slopes("F rampa", "F rampa jos", "F coama inceput")
+section_slopes("F diagonala", "F colt piata", "F colt terasa")
 section_slopes("F creasta", "F coama sfarsit", "F aterizare")
 
 print("\nfractii waypoint (pe lungimea poligonului de control):")
@@ -546,6 +549,13 @@ MOAT_W_OUT = 200.0      # malul de vest al bratului de V
 WATER_AW = 0.5          # oglinda santului Angkor Wat (cale +3)
 WATER_SRAH = 0.5        # Srah Srang: aceeasi cota ca santul (umplerea rapei 0 ajunge si aici)
 WATER_THOM = 11.0       # santul Angkor Thom (calea uriasilor +14)
+DOMINO_PERIOD = 11.0    # ceasul dominoului (brief §2: nu imparte turul de ~79 s)
+ELEPHANT_AFTER_GATE = 22.0
+# Faza traversarii (HazardMarker.sweep_phase). Cu faza derivata din fractie, plutonul din turul 1
+# ajungea in piata exact cand elefantul traversa: 9-41 s oprite pe seed (16 seed-uri). Pe 4 faze x
+# 4 seed-uri: 0,0 -> 13,4 s / seed, 0,25 -> 8,7, 0,5 -> 12,3, 0,75 -> 7,1 (si turul mediu cel mai mic).
+# ANGKOR_ELEPHANT_PHASE suprascrie, pentru variante A/B.
+ELEPHANT_PHASE = float(os.environ.get("ANGKOR_ELEPHANT_PHASE", "0.75"))
 
 if OUT_PATH:
     def pva(seq):
@@ -580,6 +590,15 @@ if OUT_PATH:
         # 4: santul Angkor Thom, pe ambele parti ale caii uriasilor.
         (LEN("D cale inceput"), LEN("D poarta", -12.0), 20, 0),
     ]
+    # PIATA REGALA (brief §2 randul F): platou de banc (`custom_bench_patches`, tiparul gradonilor
+    # Carrara) la +14, cu marginea de EST DURA pe linia fetei Terasei Elefantilor (marginea dreapta a
+    # coamei): caderea de 4 m e verticala. O rapa-cornisa (prima incercare) cobora terenul doar in
+    # panta, pe grila de 7,92 m: din fata ieseau ~1,5 m. Celelalte margini sunt moi: spre S piata se
+    # scurge in panta de aterizare, ca o masina cazuta de pe coama sa revina fara repunere.
+    face_x = next(w for w in WPTS if w[4] == CREST_TAG)[0] - HALF_WIDTH - 0.5
+    face_y0 = next(w for w in WPTS if w[4] == CREST_TAG)[1]
+    face_y1 = next(w for w in WPTS if w[4] == "F coama inceput")[1] + 16.0
+    bench = [(face_x - 47.0, face_x, face_y0, face_y1, Y_PIATA + 0.3, 25.0, 0.0, 15.0, 30.0)]
     floors = [(0, -2.0), (1, -2.0), (2, -2.0), (3, -1.5), (4, 8.5)]
     widths = [(0, 70.0), (1, 40.0), (2, 36.0), (3, 45.0), (4, 40.0)]
     water = [(0, WATER_AW, 16.0), (1, WATER_AW, 16.0), (2, WATER_AW, 16.0),
@@ -591,7 +610,7 @@ if OUT_PATH:
         (IDXp(-56.0, 40.0), IDXp(-56.0, 112.0)),                     # gopura N + calea de nord
         (IDX("D cale inceput"), IDX("D colt piata", -20.0)),         # calea uriasilor + poarta
         (IDX("E rampa V jos"), IDX("E rampa E jos")),               # terasa Bayonului
-        (IDX("F rampa jos"), IDX("F coama sfarsit")),               # Terasa Elefantilor
+        (IDX("F colt terasa"), IDX("F coama sfarsit")),             # Terasa Elefantilor
     ])
     dirt = []
     for k, (a, b) in enumerate(stone):
@@ -628,13 +647,100 @@ label = "Galeria Ta Prohm"
 speed_factor = 0.85
 bumpiness = 0.08
 """
+    # ---- HAZARDURILE-SEMNATURA (pasul 5). Parametrii sunt cei validati de sondele pasului 1.
+    # Dominoul din galeria Ta Prohm: 3 x RimBoulderHazard la 25 m unul de altul. Nodul sta pe asfalt, in
+    # punctul de impact, cu +X local spre peretele de pe care cade blocul: aici peretele de VEST al
+    # galeriei (rotatie de 180 de grade in jurul lui Y; matricea e simetrica, deci nu conteaza ordinea
+    # randuri/coloane). `start_clock` mai mare = cade mai devreme: cel mai INDEPARTAT are 2,4, deci
+    # valul vine spre masina. Modelul ramane bolovanul implicit pe clasa temei (`rockfall_class`)
+    # pana la blocul de bolta (hero-asset, pasul 7).
+    w_in = next(w for w in WPTS if w[4] == "G ocol intrare")
+    w_out = next(w for w in WPTS if w[4] == "G ocol iesire")
+    hz_txt = ""
+    for k_, (s_, clk_) in enumerate(((30.0, 0.0), (55.0, 1.2), (80.0, 2.4))):
+        t_ = s_ / br_len
+        bx_ = w_in[0] + (w_out[0] - w_in[0]) * t_
+        by_ = w_in[1] + (w_out[1] - w_in[1]) * t_
+        be_ = w_in[3] + (w_out[3] - w_in[3]) * t_
+        hz_txt += f"""
+[node name="Domino{k_}" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, {r2(bx_)}, {r2(be_)}, {r2(-by_)})
+script = ExtResource("4_rim")
+period = {DOMINO_PERIOD}
+start_clock = {clk_}
+rim_offset = 2.0
+rim_height = 6.0
+crush_seconds = 3.0
+invert_steer = false
+"""
+    # Elefantul de la Poarta de Sud: SlidingHazard TRAVERSARE prin HazardMarker (tiparul G_Elefant din
+    # Track14), in piata de DUPA poarta, la 22 m. sweep_speed 3 m/s -> ciclul ~23 s; `ai_yields`: AI-ul
+    # il vede prin CROSSING_GROUP (incetineste si ocoleste), aceeasi informatie ca jucatorul. Modelul e
+    # elefantul african din Serengeti pana la `asian_elephant.glb` (pasul 7, cere cod mic: brief §7).
+    ex_, ey_ = pos_at(tag_s["D poarta"] + ELEPHANT_AFTER_GATE)
+    hz_txt += f"""
+[node name="ElefantPoarta" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {r2(ex_)}, {Y_POARTA}, {r2(-ey_)})
+script = ExtResource("5_hzm")
+model = ExtResource("6_eleph")
+model_classes = {{
+"Elephant_Mesh_Accente": "tri:elephant_hide"
+}}
+face_travel = true
+follow_ground = true
+motion = 1
+sweep_speed = 3.0
+ai_yields = true
+""" + (f"sweep_phase = {ELEPHANT_PHASE}\n" if ELEPHANT_PHASE >= 0.0 else "")
+    print(f"\n  elefant: frac idx {IDX('D poarta', ELEPHANT_AFTER_GATE)} "
+          f"(fereastra sondei {IDX('D poarta', -10.0)},{IDX('D poarta', 45.0)})")
+    print(f"  creasta: fereastra sondei {IDX(CREST_TAG, -30.0)},{IDX(CREST_TAG, 60.0)}")
+
+    # ---- MACHETE (pasul 4): forme de CSG FARA coliziune, la cotele din brief §2.0, ca sa se poata
+    # verifica incadrarea cu --gamecam inainte sa existe vreun asset. TEMPORARE: se scot cand intra
+    # hero-asset-urile (pasul 7). Un singur material.
+    def box(name, cx, cy, cz, sx, sy, sz):
+        return f"""
+[node name="{name}" type="CSGBox3D" parent="Machete"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {r2(cx)}, {r2(cy)}, {r2(cz)})
+size = Vector3({sx}, {sy}, {sz})
+material = SubResource("Mat_macheta")
+"""
+
+    def tower(name, cx, cz, base, h, r):
+        return f"""
+[node name="{name}" type="CSGCylinder3D" parent="Machete"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {r2(cx)}, {r2(base + h / 2)}, {r2(cz)})
+radius = {r}
+height = {h}
+sides = 8
+cone = true
+material = SubResource("Mat_macheta")
+"""
+    # Angkor Wat: soclul in trepte pana la +6, turnul central cu varful la +36, cele de colt la +30.
+    mach = box("AW_Soclu", 0, 2.0, 0, 64, 8, 64) + box("AW_Soclu2", 0, 7.0, 0, 44, 2, 44)
+    mach += tower("AW_TurnCentral", 0, 0, 8.0, 28.0, 7.0)
+    for k_, (sx_, sz_) in enumerate(((-17, -17), (17, -17), (-17, 17), (17, 17))):
+        mach += tower(f"AW_TurnColt{k_}", sx_, sz_, 8.0, 22.0, 5.0)
+    # Poarta de Sud: pilonii in afara deschiderii de 7 m si turnul de 18 m peste ea (cale +14).
+    gx_, gy_ = pos_at(tag_s["D poarta"])
+    mach += box("Poarta_PilonV", gx_ - 6.5, Y_POARTA + 6.0, -gy_, 6, 12, 8)
+    mach += box("Poarta_PilonE", gx_ + 6.5, Y_POARTA + 6.0, -gy_, 6, 12, 8)
+    mach += box("Poarta_Turn", gx_, Y_POARTA + 12.5, -gy_, 19, 11, 8)
+    # Terasa Elefantilor: fata de vest (4 m) de-a lungul coamei.
+    c0_ = next(w for w in WPTS if w[4] == "F coama inceput")
+    c1_ = next(w for w in WPTS if w[4] == CREST_TAG)
+    f0_, f1_ = face_y1, face_y0
+    mach += box("Terasa_FataV", c0_[0] - HALF_WIDTH - 0.5, (Y_TERASA + Y_PIATA) / 2, -(f0_ + f1_) / 2,
+                1, Y_TERASA - Y_PIATA, abs(f0_ - f1_))
+
     # zonele pentru sonde (fractii pe INDEX)
     zz = [("A", IDX("A start"), IDX("B arc galerie", -40.0)),
           ("B", IDX("B arc galerie", -40.0), IDX("B cale N sfarsit")),
           ("C", IDX("B cale N sfarsit"), IDX("D cale inceput")),
           ("D", IDX("D cale inceput"), IDX("E rampa V jos")),
-          ("E", IDX("E rampa V jos"), IDX("F colt")),
-          ("F", IDX("F colt"), IDX("F aterizare", 30.0)),
+          ("E", IDX("E rampa V jos"), IDX("F colt piata")),
+          ("F", IDX("F colt piata"), IDX("F aterizare", 30.0)),
           ("G", IDX("F aterizare", 30.0), IDX("H colt SE")),
           ("H", IDX("H colt SE"), 1.0)]
     zones_meta = "metadata/zones = {" + ", ".join(
@@ -650,6 +756,12 @@ bumpiness = 0.08
 [ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="3_branch"]
+[ext_resource type="Script" path="res://scenes/hazards/rim_boulder_hazard.gd" id="4_rim"]
+[ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="5_hzm"]
+[ext_resource type="PackedScene" path="res://assets/models/serengeti/animals/elephant.glb" id="6_eleph"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_macheta"]
+albedo_color = Color(0.72, 0.64, 0.52, 1)
 
 [sub_resource type="Curve3D" id="Curve3D_angkor"]
 closed = true
@@ -682,13 +794,21 @@ custom_ravine_widths = Array[Vector2]([{", ".join(V2(a, b) for a, b in widths)}]
 custom_ravine_water = Array[Vector3]([{", ".join(V3(*w_) for w_ in water)}])
 custom_width_segments = Array[Vector3]([{", ".join(V3(*w_) for w_ in width_segments)}])
 custom_width_pinches = Array[Vector3]([{", ".join(V3(*w_) for w_ in pinches)}])
+custom_bench_patches = Array[Dictionary]([{", ".join(
+    "{ \"lvl\": PackedVector2Array(-1000.0, %s, 1000.0, %s), \"soft\": Vector4(%s, %s, %s, %s), "
+    "\"x0\": %s, \"x1\": %s, \"z0\": %s, \"z1\": %s }" % (lv_, lv_, sw_, se_, sn_, ss_, r2(x0_), r2(x1_), r2(-y1_), r2(-y0_))
+    for (x0_, x1_, y0_, y1_, lv_, sw_, se_, sn_, ss_) in bench)}])
 terrain_pad_m = 120.0
 {zones_meta}
 [node name="Path" type="Path3D" parent="."]
 curve = SubResource("Curve3D_angkor")
 
 [node name="Peaks" type="Node3D" parent="."]
-{peaks_txt}{branch_txt}"""
+{peaks_txt}{branch_txt}
+[node name="Hazarduri" type="Node3D" parent="."]
+{hz_txt}
+[node name="Machete" type="Node3D" parent="."]
+{mach}"""
     with open(OUT_PATH, "w", encoding="utf-8", newline="\n") as f:
         f.write(tscn)
     print(f"\nscris: {OUT_PATH}")

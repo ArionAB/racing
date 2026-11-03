@@ -4480,6 +4480,8 @@ static func themes() -> Dictionary:
 		"savanna_grass_w": 1.0,
 		"savanna_grass_tint": Color(0.16, 0.22, 0.10),
 		"dust_color": Palette.color(Palette.TILE_TERRACOTTA),
+		# Blocurile dominoului din galeria Ta Prohm (RimBoulderHazard) iau gresia templului.
+		"rockfall_class": "angkor_sandstone",
 		"walls": false,
 		"kerbs": false,
 		"cliffs": false,
@@ -13091,6 +13093,9 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 		# medie ar iesi prin perete exact pe portiunile stramte.
 		ball.road_half_width = hw
 		ball.phase = fposmod(frac * 3.7, 1.0) # doua obstacole nu bat la unison
+		# Un nod poate cere faza explicit (`sweep_phase` pe HazardMarker).
+		if kind.has("sweep_phase"):
+			ball.phase = float(kind["sweep_phase"])
 		# Pendulare (implicit) sau traversare cu sens — vezi SlidingHazard.Motion.
 		# Se pune INAINTE de `travel`: la traversare, capatul cursei e locul de
 		# PARCARE si trebuie sa cada dincolo de asfalt, deci `_clamp_travel` are

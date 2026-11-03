@@ -1,4 +1,4 @@
-# Track brief — Angkor / templele din junglă (`Track24`, temă `angkor`) — v0.4 (pașii 2–3: traseul și ProbeRace)
+# Track brief — Angkor / templele din junglă (`Track24`, temă `angkor`) — v0.5 (pașii 4–5: capturile, dioramă, dominoul și elefantul)
 
 > Concept de pistă, înaintea listei de assets. Scheletul e cel din
 > `carrara.md` / `halong.md`; secțiunile de assets (§5) sunt schițate, nu
@@ -699,8 +699,68 @@ primească la fel.
    întregi?), de pe Bakheng (dezvăluirea?), de la capătul căii uriașilor
    (elefantul prin poartă?), de pe apropierea Terasei Elefanților (fața în
    cadru?). Captura de sus adnotată → dioramă (§9) → foaia de assets.
+
+   **Rezultatul (3 nov 2026, ramura `angkor/pas4-5`).** Capturile sunt
+   `--gamecam` (camera de joc reală), nu `--driver`, care e etalonul înghețat de
+   măsurare (antetul `tools/snapshot.gd`). Ca să existe ceva în cadru, pista are
+   **machete** de CSG fără coliziune (nodul `Machete`, un singur material, se
+   scot la pasul 7): soclul și cele cinci turnuri Angkor Wat (vârful central la
+   +36), pilonii și turnul Porții de Sud (18 m), fața de vest a terasei.
+
+   | întrebarea | captura | verdict |
+   |---|---|---|
+   | turnurile întregi de pe grilă? | frac 0,000 | ✔ toate cinci, cu vârfurile aproape de marginea de sus a cadrului (calculul din §2.0) |
+   | dezvăluirea de pe Bakheng? | 0,214 / 0,222 | ✔ quincunx-ul în stânga-față, deasupra covorului de junglă, cu șanțul sub el |
+   | elefantul prin poartă? | 0,330 | ✔ elefantul se vede **încadrat de deschidere** de la capătul căii — telegraful din §2 |
+   | fața Terasei Elefanților la apropiere? | 0,495 / 0,515 | ✘ în prima geometrie: drumul urca pe coamă la capătul de nord și mergea **paralel** cu fața (memoria `perete-paralel-nu-se-vede`), iar terenul urma șoseaua (+18), deci „căderea de 4 m” nu exista |
+   | — după corectură | 0,505 / 0,520 | ✔ fața ocupă dreapta-fața cadrului pe diagonala de apropiere |
+   | bonus | 0,540 | turnurile Angkor Wat se văd și de pe coama terasei, departe în față — a cincea vedere, neplanificată |
+
+   **Corectura F**: din Bayon drumul coboară în **piața regală** (+14), o ia pe
+   o **diagonală spre SE** (4,8%) și urcă pe terasă prin capătul ei de nord, cu
+   un viraj la dreapta pe coamă: pe diagonală, fața de vest stă la ~30° în
+   dreapta-față — „drumul vine spre terasă în unghi” din §2.0. Piața e un **platou
+   de banc** (`custom_bench_patches`, tiparul gradonilor Carrara) la +14, cu
+   marginea de est **dură** pe linia feței: căderea de 4 m e verticală. O
+   rapă-cornișă (prima încercare) cobora terenul doar în pantă, pe grila de 7,92
+   m: din față ieșeau ~1,5 m. Celelalte margini sunt moi, deci cine cade de pe
+   coamă revine pe panta de aterizare fără repunere.
+
+   Planul adnotat e `img/angkor_plan_adnotat.png`
+   (`tools/annotate_angkor_plan.py`, captura ortografică reală; toate pozițiile
+   citite din `Track24.tscn` și din harta de fracții). Promptul de dioramă e §9.
+   **Sonda de feel la volan rămâne a dezvoltatorului.**
 5. Scurtătura cu dominoul + elefantul (hazardurile-semnătură); ProbeRace A/B
    pe distribuții (memoria `proberace-nedeterminism`).
+
+   **Rezultatul (3 nov 2026, ramura `angkor/pas4-5`).** Parametrii sunt cei din
+   sondele pasului 1: 3 × `RimBoulderHazard` în galerie, la 25 m unul de altul
+   (`period` 11, `start_clock` 0 / 1,2 / 2,4 cu cel mai îndepărtat primul,
+   `rim_offset` 2, `rim_height` 6, `crush_seconds` 3, `invert_steer` oprit), cu
+   bolovanul implicit pe gresia temei (cheia nouă `rockfall_class`) până la
+   blocul de boltă; elefantul e `HazardMarker` traversare la 22 m după poartă
+   (`sweep_speed` 3, `ai_yields`), cu elefantul din Serengeti până la
+   `asian_elephant.glb`.
+
+   **Faza elefantului.** Cu faza derivată din fracție (`frac × 3,7`, ca la toate
+   traversările), plutonul din turul 1 ajungea în piață exact când elefantul
+   traversa: **9–41 s oprite pe seed** (mediana ~22), toate cele 33 de `[blocaj]`
+   din D la t = 38–50 s, turul mediu +2,8 s. Sonda pasului 1 nu văzuse asta
+   fiindcă acolo aceeași traversare avea altă fază. Cod mic, bit-identic pentru
+   restul pistelor: **`HazardMarker.sweep_phase`** (implicit −1 = faza derivată;
+   cheia intră în spec doar când e pusă). Pe 4 faze × 4 seed-uri (`ProbeRace
+   --scene=`, opțiune nouă): 0 → 13,4 s / seed, 0,25 → 8,7, 0,5 → 12,3,
+   **0,75 → 7,1** (și turul cel mai scurt). Aleasă 0,75.
+
+   **ProbeRace final, 8 mașini × 16 seed-uri × 250 s, toată pista:**
+
+   | | rezultat | contract |
+   |---|---|---|
+   | dominoul | 36 striviri / 313 treceri = **11,5%** (AI-ul orb) | ≤ 30% (pasul 1: 13%) |
+   | elefantul | **7,9 s** oprite / seed (2,5–14), 13 `[blocaj]` scurte în piață | fără coadă (pasul 1: ~5 s, 12 blocaje) |
+   | creasta | 386 zboruri, med **0,65 s** | 0,5–0,9 s |
+   | repuneri | **3** în 16 seed-uri: 2 la elefant (un Autobuz ejectat la 28 m/s în el), 1 la creastă (1 din 386 de zboruri) | — |
+   | turul | minim median 75,4 s, mediu **80,3 s** (fără hazarde: 79,0) | hazardurile ≈ +1,3 s / tur |
 6. Musonul și fulgerul, perdeaua, săritura, turnurile Bayonului,
    `CameraZone`-urile, tuk-tuk-urile.
 7. Hero-assets: templul, gopura, poarta cu fețe, turnurile Bayonului,
@@ -752,10 +812,62 @@ primească la fel.
 - **Cariera (modul de joc):** pista intră în `CareerConfig` doar prin decizia
   dezvoltatorului; până atunci, ca Ha Long și Carrara, **doar cursă rapidă**.
 
-## 9. Prompt pentru ChatGPT (dioramă de referință) — se scrie la pasul 4
+## 9. Prompt pentru ChatGPT (dioramă de referință) — v0.1, paste-ready
 
 Decizia din memoria `diorama-din-geometria-reala` (Serengeti, 6 sep 2026):
-imaginea dată pentru dioramă e **captura reală de sus din Godot**
-(`snapshot.gd --track=16`) peste care se desenează legenda (POI, culoarea
-hazardului, loturile, nordul, scara), **după** ce traseul trece de ProbeLayout
-și ProbeRace — nu un plan de propunere. Promptul complet vine atunci.
+imaginea dată pentru dioramă e **captura reală de sus din Godot**, cu legenda
+desenată peste ea. Se atașează `img/angkor_plan_adnotat.png` (din
+`tools/annotate_angkor_plan.py`, după ProbeLayout și ProbeRace, pasul 4).
+Geometria din imagine e obligatorie; literele sunt legenda. Formele bej de pe
+plan (Angkor Wat, poarta) sunt **machete** de încadrare, nu decorul final.
+
+> *Make a stylized toy-diorama of the racing track in the attached
+> top-down plan. The plan is the real geometry from the game and is
+> mandatory: keep the route, its order, the positions of A to H, the
+> moats, the hill and the levels exactly where they are; the letters are a
+> legend, do not paint them. Camera: three-quarter view from the
+> south-west, high, the whole track in frame.*
+>
+> *Place: the temples of Angkor in Cambodia during the monsoon, late
+> afternoon. The sun is low and warm from the west-south-west, behind the
+> camera, lighting the west faces of the stone gold-ochre; to the east a
+> wall of violet-grey storm clouds, so the lit stone glows against a dark
+> sky. Temple stone is grey-ochre sandstone with orange and yellow-green
+> lichen on horizontal ledges and black monsoon streaks under every
+> cornice. Roads in the jungle are red-brick laterite earth, never pale;
+> the causeways and terraces are paved sandstone. The jungle is very dark
+> green with silver-white trunks and roots; the moats are opaque jade green
+> with pink lotus flowers. Nothing reads as Machu Picchu: no pale road, no
+> light-green lawn, no blue sky.*
+>
+> *A — the start on a long sandstone causeway crossing a wide jade moat,
+> naga serpent balustrades with seven-headed cobra ends, a few gaps in the
+> balustrade; straight ahead, Angkor Wat: five lotus-bud towers in a
+> quincunx on stepped terraces, the central one tallest. B — the road
+> enters the west gate tower, curves inside the outer gallery behind a
+> colonnade, leaves by the north gate and crosses the moat again on a
+> causeway. C — Phnom Bakheng: a jungle hill; the red road climbs its east
+> flank and north edge to a small stepped temple-mountain with shrine
+> towers on top, crosses the summit platform toward Angkor Wat, then
+> descends the west flank. D — a causeway over a second moat lined on both
+> sides by rows of giant stone statues holding a long naga serpent as a
+> balustrade, ending at a tall gate tower with four huge serene carved
+> faces and one narrow opening; just past the gate an Asian elephant
+> without saddle crosses the square. E — the Bayon: a raised stone terrace
+> crowded with towers carrying smiling carved faces, three of them standing
+> on the road itself. F — a royal square below a long, 4 m high terrace
+> whose west face is carved with a procession of elephants; the road climbs
+> diagonally onto the terrace, runs along its top and leaps off its end onto
+> a jungle road that drops away. G — Ta Prohm: the red road loops around a
+> ruined temple enclosure swallowed by giant strangler figs whose silver
+> roots pour over the walls; the shortcut (dashed brown) runs straight
+> through a half-collapsed stone gallery entered under a gate held by a
+> huge tree; a curtain of hanging vines over the main road. H — Srah Srang,
+> a royal pool with stone lions on a laterite landing on the left, a few
+> parked tuk-tuk trailers, then the road follows the Angkor Wat moat with
+> the towers reflected on the right, back to the start.*
+>
+> *Low-poly toy look, chunky shapes, painted textures, soft ambient
+> occlusion. No text, no brand names. No people except two or three tiny
+> monks in saffron robes on temple steps, far from the road. No Buddha
+> statues near the road.*

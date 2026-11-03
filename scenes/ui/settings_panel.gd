@@ -120,8 +120,11 @@ func _build() -> void:
 		GameState.reset_camera_settings()
 		get_tree().call_group(ChaseCamera.GROUP, &"refresh_from_settings")
 		# Panoul se reface din setari: altfel sliderele ar arata in continuare
-		# valorile vechi, iar urmatoarea atingere le-ar pune inapoi.
-		_rebuild())
+		# valorile vechi, iar urmatoarea atingere le-ar pune inapoi. AMANAT, ca
+		# la comutatorul de performanta: refacut pe loc, panoul isi distrugea
+		# butonul in mijlocul propriului semnal `pressed` — pe telefon ecranul
+		# ingheta (pe desktop nu se reproduce).
+		_rebuild.call_deferred())
 	root.add_child(reset_cam)
 
 	var back := Button.new()

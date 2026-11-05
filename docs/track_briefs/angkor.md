@@ -871,3 +871,38 @@ plan (Angkor Wat, poarta) sunt **machete** de încadrare, nu decorul final.
 > occlusion. No text, no brand names. No people except two or three tiny
 > monks in saffron robes on temple steps, far from the road. No Buddha
 > statues near the road.*
+
+### 9.1 Rezultatul: `img/angkor_diorama_v03.jpg` (6 nov 2026)
+
+Acceptată de dezvoltator după trei runde (v1 cu promptul de mai sus, v2 și v3
+cu corecturi țintite, cu planul reatașat de fiecare dată). Diorama e
+**referința de atmosferă și de assets** pentru pașii 7–8; **geometria rămâne
+a planului și a `Track24.tscn`**, nu a imaginii.
+
+Corect în v3: ordinea traseului și sensul orar; paleta (laterit roșu, șanțuri
+de jad cu lotuși, jungla închisă cu trunchiuri argintii, piatra aurie pe
+furtuna violetă); Angkor Wat în quincunx, reflectat în șanțul de pe H; B prin
+gopura de vest și pe sub colonada galeriei; C peste vârful Bakhengului; D cu
+cele două șiruri de uriași care țin naga și poarta cu patru fețe; elefantul
+fără șa după poartă; E cu trei turnuri ale Bayonului **pe drum** (etajate, o
+față pe fiecare latură, vârf de lotus — referința pentru hero-asset); F cu
+friza de elefanți pe fața de vest și săritura de la capătul de sud; G cu
+smochinul strangulator, scurtătura de pământ prin galerie și perdeaua de
+liane; H cu Srah Srang în stânga, leii și remorcile de tuk-tuk.
+
+**Abateri cunoscute — nu se copiază din imagine:**
+
+- **F: drumul diagonal peste piață e greșit.** În imagine pleacă din colțul
+  de nord al terasei și se înfige în coborârea de pe Bakheng (C), adică o
+  bifurcație și o scurtătură F→C care nu există. Pe pistă e **un singur drum**:
+  din Bayon coboară în piață (+14), o traversează pe diagonală (4,8%), urcă pe
+  capătul de nord al terasei (+18), merge pe coamă și sare de la capătul de
+  sud. Două runde de corectură au ratat asta (v2: diagonala era o fundătură,
+  v3: s-a legat de C), deci bucla s-a oprit aici.
+- **Piața regală e mult mai lată** decât în Godot, unde e o bandă îngustă la
+  vest de drum (plan, F).
+- **Bakhengul e exagerat** în înălțime și în suprafață față de bucla în U de pe
+  plan; ce contează e că se citește ca urcare.
+- **Bucla de pe C e simplificată**: pe plan, după vârf drumul coboară spre sud,
+  merge spre vest și urcă spre D (sus, stânga, jos, stânga, sus); în imagine
+  coboară direct pe flancul de vest.

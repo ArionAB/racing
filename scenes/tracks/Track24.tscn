@@ -6,9 +6,19 @@
 [ext_resource type="Script" path="res://scenes/hazards/rim_boulder_hazard.gd" id="4_rim"]
 [ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="5_hzm"]
 [ext_resource type="PackedScene" path="res://assets/models/serengeti/animals/elephant.glb" id="6_eleph"]
+[ext_resource type="Script" path="res://scenes/hazards/rain_cycle.gd" id="7_rain"]
+[ext_resource type="Script" path="res://scenes/hazards/lightning_flash.gd" id="8_flash"]
+[ext_resource type="Script" path="res://scenes/hazards/vine_curtain.gd" id="9_vine"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_macheta"]
 albedo_color = Color(0.72, 0.64, 0.52, 1)
+
+[sub_resource type="BoxShape3D" id="Box_bayon"]
+size = Vector3(3.0, 9.0, 3.0)
+
+[sub_resource type="BoxMesh" id="Mesh_bayon"]
+size = Vector3(3.0, 9.0, 3.0)
+material = SubResource("Mat_macheta")
 
 [sub_resource type="Curve3D" id="Curve3D_angkor"]
 closed = true
@@ -41,6 +51,8 @@ custom_ravine_widths = Array[Vector2]([Vector2(0, 70.0), Vector2(1, 40.0), Vecto
 custom_ravine_water = Array[Vector3]([Vector3(0, 0.5, 16.0), Vector3(1, 0.5, 16.0), Vector3(2, 0.5, 16.0), Vector3(3, 0.5, 16.0), Vector3(4, 11.0, 16.0)])
 custom_width_segments = Array[Vector3]([Vector3(0.058, 0.114, 4.0), Vector3(0.121, 0.31, 3.5), Vector3(0.419, 0.467, 7.0)])
 custom_width_pinches = Array[Vector3]([Vector3(0.36, 0.367, 3.5)])
+custom_parapets = Array[Vector4]([Vector4(0.0174, 0.0483, 1, 3), Vector4(0.0511, 0.0695, 1, 3), Vector4(0.0174, 0.0589, -1, 3), Vector4(0.061, 0.0695, -1, 3), Vector4(0.32, 0.359, 0, 3)])
+custom_lane_bias = Array[Vector3]([Vector3(0.41, 0.46, 0.62)])
 custom_bench_patches = Array[Dictionary]([{ "lvl": PackedVector2Array(-1000.0, 14.3, 1000.0, 14.3), "soft": Vector4(25.0, 0.0, 15.0, 30.0), "x0": 60.0, "x1": 107.0, "z0": -366.0, "z1": -200.0 }])
 terrain_pad_m = 120.0
 metadata/zones = {"A": Vector2(0.0, 0.058), "B": Vector2(0.058, 0.114), "C": Vector2(0.114, 0.318), "D": Vector2(0.318, 0.403), "E": Vector2(0.403, 0.498), "F": Vector2(0.498, 0.649), "G": Vector2(0.649, 0.761), "H": Vector2(0.761, 1.0)}
@@ -111,6 +123,55 @@ motion = 1
 sweep_speed = 3.0
 ai_yields = true
 sweep_phase = 0.75
+
+[node name="Muson" type="Node" parent="Hazarduri"]
+script = ExtResource("7_rain")
+period = 137.0
+telegraph = 5.0
+rain_hold = 25.0
+dry_out = 5.0
+start_clock = 87.0
+fog_end_rain = 180.0
+fog_whiten_rain = 0.25
+sun_energy_rain = 0.75
+sky_top_rain = Color(0.17, 0.15, 0.22, 1)
+sky_horizon_rain = Color(0.36, 0.32, 0.4, 1)
+
+[node name="Fulger" type="Node" parent="Hazarduri"]
+script = ExtResource("8_flash")
+
+[node name="PerdeaLiane" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(-0.467, 0, -0.884, 0, 1, 0, 0.884, 0, -0.467, 158.57, 8.3, -57.78)
+script = ExtResource("9_vine")
+
+[node name="Obstacole" type="Node3D" parent="."]
+
+[node name="BayonTurn0" type="StaticBody3D" parent="Obstacole"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -115.83, 23.5, -436.0)
+
+[node name="Forma" type="CollisionShape3D" parent="Obstacole/BayonTurn0"]
+shape = SubResource("Box_bayon")
+
+[node name="Macheta" type="MeshInstance3D" parent="Obstacole/BayonTurn0"]
+mesh = SubResource("Mesh_bayon")
+
+[node name="BayonTurn1" type="StaticBody3D" parent="Obstacole"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -82.83, 23.5, -438.0)
+
+[node name="Forma" type="CollisionShape3D" parent="Obstacole/BayonTurn1"]
+shape = SubResource("Box_bayon")
+
+[node name="Macheta" type="MeshInstance3D" parent="Obstacole/BayonTurn1"]
+mesh = SubResource("Mesh_bayon")
+
+[node name="BayonTurn2" type="StaticBody3D" parent="Obstacole"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.83, 23.5, -436.0)
+
+[node name="Forma" type="CollisionShape3D" parent="Obstacole/BayonTurn2"]
+shape = SubResource("Box_bayon")
+
+[node name="Macheta" type="MeshInstance3D" parent="Obstacole/BayonTurn2"]
+mesh = SubResource("Mesh_bayon")
 
 [node name="Machete" type="Node3D" parent="."]
 

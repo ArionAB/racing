@@ -270,8 +270,9 @@ extends Track
 ## Vezi Track._rail_segments — pe o pista fara gard (`walls: false`) singurul
 ## regim cu efect e RAIL_POSTS: stalpi rari pe buza, fara coliziune.
 @export var custom_rail_segments: Array[Vector4] = []
-## PARAPET DE BETON CU COLIZIUNE: (frac_start, frac_end, latura +-1 sau 0 =
-## ambele, rezervat). Vezi Track._build_parapets. Gol = fara.
+## PARAPET CU COLIZIUNE: (frac_start, frac_end, latura +-1 sau 0 = ambele, STIL:
+## 0 beton alb-rosu, 1 buza de stanca, 2 berma de moloz, 3 balustrada de gresie). Fractiile
+## sunt pe LUNGIME. Vezi Track._build_parapets. Gol = fara.
 @export var custom_parapets: Array[Vector4] = []
 ## APA declarata, ca poligon in plan XZ (coordonate de lume): se sapa la
 ## `lagoon_depth` sub media soselei, cu mal lin (TrackSideSampler.LAGOON_*).

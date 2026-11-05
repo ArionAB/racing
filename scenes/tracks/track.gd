@@ -12629,6 +12629,14 @@ const BERM_BACK_RUN: float = 1.3
 ## pe traiectoria masinii care iese larg dintr-un ac.
 const BERM_TAPER_M: float = 10.0
 const BERM_THICK: float = 1.1
+## Stilul 3 (BALUSTRADA de gresie, Angkor: caile peste sant, brief §2 randurile A si D):
+## un zid jos si drept, in culoarea pietrei templului, nu beton alb-rosu si nu buza de
+## stanca (ROCK_DARK iese rugina pe gresie, memoria `rock-dark-nu-pe-bazalt`). 1 m: peste
+## pragul de 0,3 m e zid pentru roata, deci tine masinile pe cale; golurile din ea sunt
+## intervale lipsa in `custom_parapets`, nu un regim aparte. E PLACEHOLDER-ul de coliziune
+## al balustradei naga (decor, pasul 8), care se aseaza peste el.
+const BALUSTRADE_HEIGHT: float = 1.0
+const BALUSTRADE_THICK: float = 0.5
 
 
 func _parapet_segments() -> Array[Vector4]:
@@ -12657,9 +12665,12 @@ func _build_parapets() -> void:
 				continue
 			var rock := int(seg.w) == 1
 			var berm := int(seg.w) == 2
+			var balus := int(seg.w) == 3
 			var thick := ROCK_LIP_THICK if rock else PARAPET_THICK
 			if berm:
 				thick = BERM_THICK
+			elif balus:
+				thick = BALUSTRADE_THICK
 			# Sectiunea transversala la fiecare punct copt din interval.
 			var secs: Array = [] # [inner_top, outer_top, inner_bot, outer_bot, dist]
 			# Intervalul poate TRECE peste linia de start (`seg.y < seg.x`, ca la rape si sectoare):
@@ -12691,7 +12702,7 @@ func _build_parapets() -> void:
 				var side := _side_at(i)
 				var e := c + side * (width_at_index(i) + PARAPET_GAP) * side_sign
 				var out := side * side_sign
-				var h := PARAPET_HEIGHT
+				var h := BALUSTRADE_HEIGHT if balus else PARAPET_HEIGHT
 				if rock:
 					# Creasta neregulata din doua sinusuri cu perioade prime
 					# intre ele: nu se repeta vizibil pe o tura de elice.
@@ -12731,6 +12742,8 @@ func _build_parapets() -> void:
 					slot = Palette.ROCK_DARK
 				elif berm:
 					slot = Palette.CORAL_SAND if block == 0 else Palette.MARBLE_GREY
+				elif balus:
+					slot = Palette.ROCK_LIGHT if block == 0 else Palette.CORAL_SAND
 				var outv: Vector3 = a[5]
 				# top, fata dinspre sosea, fata dinspre vale
 				_parapet_quad(st, a[0], b[0], b[1], a[1], slot, Vector3.UP)
@@ -12742,6 +12755,8 @@ func _build_parapets() -> void:
 			var d0: Vector3 = (secs[1] as Array)[0] - first[0]
 			var d1: Vector3 = last[0] - (secs[secs.size() - 2] as Array)[0]
 			var cap := Palette.ROCK_DARK if rock else (Palette.MARBLE_GREY if berm else Palette.KERB_RED)
+			if balus:
+				cap = Palette.ROCK_LIGHT
 			_parapet_quad(st, first[0], first[1], first[3], first[2],
 				cap, -d0.normalized())
 			_parapet_quad(st, last[0], last[1], last[3], last[2],

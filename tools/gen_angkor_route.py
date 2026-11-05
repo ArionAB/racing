@@ -484,6 +484,16 @@ def pos_at(sv):
     return (pts[0][0], pts[0][1])
 
 
+def elev_at(sv):
+    """Cota soselei la lungimea `sv` (interpolata pe punctele reesantionate)."""
+    sv = sv % total
+    for j in range(len(pts)):
+        if cum[j] <= sv <= cum[j + 1]:
+            f = (sv - cum[j]) / max(1e-9, cum[j + 1] - cum[j])
+            return elevs[j] + (elevs[(j + 1) % len(pts)] - elevs[j]) * f
+    return elevs[0]
+
+
 def s_near(x, y):
     """Lungimea pe axa a celui mai apropiat punct de (x, y) de harta."""
     best, bs = 1e18, 0.0
@@ -557,6 +567,25 @@ ELEPHANT_AFTER_GATE = 22.0
 # ANGKOR_ELEPHANT_PHASE suprascrie, pentru variante A/B.
 ELEPHANT_PHASE = float(os.environ.get("ANGKOR_ELEPHANT_PHASE", "0.75"))
 
+# ---- PASUL 6 (brief §7): mecanicile ramase.
+# Turnurile Bayonului pe terasa E — decizia V2 din sondele pasului 1 (brief §7 pasul 1): 3 turnuri
+# de 3 x 3 m LANGA AXA (+-1 m), trecere pe ambele parti, `custom_lane_bias` 0,62 pe tot sectorul
+# (tiparul stalpilor Carrara: pilotul ramane pe malul lui). Pe sonda: 2 ejectari / 6 seed-uri,
+# 0 blocaje. Decalate +-3 m (desenul vechi din §2) dadeau ~29 de repuneri pe seed — NU.
+# (s fata de "E terasa V", offset lateral pe harta in y; terasa are 95 m.)
+BAYON_TOWERS = [(15.0, -1.0), (48.0, 1.0), (81.0, -1.0)]
+BAYON_TOWER_SIZE = (3.0, 9.0, 3.0)
+BAYON_BIAS = 0.62
+# Musonul (brief §3 „Ceasuri care nu impart durata turului”): ~137 s, nu multiplu de ~75 s.
+# Cursa porneste pe USCAT (memoria `ceasul-porneste-in-prima-faza`: la ceasul 0 RainCycle e in
+# telegraf); prima ploaie (inceputul telegrafului) la ~50 s, pe turul 1, in cetate.
+RAIN_PERIOD = 137.0
+RAIN_FIRST_AT = 50.0
+# Perdeaua de liane (POI G): pe bucla PRINCIPALA, imediat dupa bifurcatia scurtaturii — la
+# bifurcatie jucatorul vede un „zid verde” pe ocol si galeria cu dominoul pe coarda: hazardul fals
+# contra celui real. (s dupa "G ocol intrare").
+CURTAIN_AFTER_FORK = float(os.environ.get("ANGKOR_CURTAIN_AFTER_FORK", "40.0"))
+
 if OUT_PATH:
     def pva(seq):
         return "PackedVector3Array(" + ", ".join(
@@ -623,6 +652,27 @@ if OUT_PATH:
         else:
             dirt.append((b, nxt))
     dirt = [(r3(a), r3(b)) for a, b in dirt if b - a > 1e-3]
+
+    # ---- PASUL 6: balustradele de gresie (stil 3 in Track._build_parapets) pe caile peste sant.
+    # Fractii pe LUNGIME. Pasul 3 a gasit 2 `[blocaj]` in gramada de la start: masini impinse peste
+    # marginea caii de vest, pe malul santului — balustrada le inchide. Calea de vest are cate UN gol
+    # pe fiecare parte (brief §2 randul A: „singurele locuri unde cazi in sant”, punctuatie, nu
+    # regula), dincolo de gramada de la start (x < -140); calea uriasilor (D) e continua: uriasii
+    # care tin naga sunt zidurile ei (drafting si imbranceli).
+    GAP = 7.0
+
+    # 4 zecimale, nu 3: pe un tur de 2.432 m pasul de 0,001 e 2,4 m, iar un gol de 7 m iesea 4 sau
+    # 12 m (masurat cu tools/probe_angkor_pas6.gd).
+    def lenx(x):
+        return round(F_s(s_near(x, 0.0))[1], 4)
+    parapets = [
+        # calea de vest, latura +1: de la malul de vest la gol, apoi de la gol la gopura
+        (lenx(-198.0), lenx(-120.0 - GAP / 2), 1, 3), (lenx(-120.0 + GAP / 2), lenx(-70.0), 1, 3),
+        # latura -1, golul mai departe
+        (lenx(-198.0), lenx(-95.0 - GAP / 2), -1, 3), (lenx(-95.0 + GAP / 2), lenx(-70.0), -1, 3),
+        # calea uriasilor, ambele laturi, pana inaintea pilonilor portii
+        (LEN("D cale inceput", 2.0), LEN("D poarta", -10.0), 0, 3),
+    ]
 
     # ---- masive (coordonate Godot: gx = x, gz = -y)
     def peak(name, x, y, e, r):
@@ -692,6 +742,64 @@ motion = 1
 sweep_speed = 3.0
 ai_yields = true
 """ + (f"sweep_phase = {ELEPHANT_PHASE}\n" if ELEPHANT_PHASE >= 0.0 else "")
+    # ---- PASUL 6: turnurile Bayonului (corpuri statice cu nume, ca ProbeLaneClear sa le raporteze
+    # pe nume) + macheta lor vizuala. Corpul ramane si dupa hero-asset (pasul 7: `bayon_face_tower`
+    # inlocuieste doar vizualul, ca la stalpii Carrara).
+    e0 = tag_s["E terasa V"]
+    towers_txt = ""
+    for k_, (ds_, off_) in enumerate(BAYON_TOWERS):
+        tx_, ty_ = pos_at(e0 + ds_)
+        ty_ += off_
+        tz_ = Y_BAYON + BAYON_TOWER_SIZE[1] * 0.5 - 1.0   # 1 m sub terasa, ca sa nu ramana fanta
+        towers_txt += f"""
+[node name="BayonTurn{k_}" type="StaticBody3D" parent="Obstacole"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {r2(tx_)}, {r2(tz_)}, {r2(-ty_)})
+
+[node name="Forma" type="CollisionShape3D" parent="Obstacole/BayonTurn{k_}"]
+shape = SubResource("Box_bayon")
+
+[node name="Macheta" type="MeshInstance3D" parent="Obstacole/BayonTurn{k_}"]
+mesh = SubResource("Mesh_bayon")
+"""
+    bias = [(IDX("E terasa V", BAYON_TOWERS[0][0] - 45.0),
+             IDX("E terasa V", BAYON_TOWERS[-1][0] + 8.0), BAYON_BIAS)]
+
+    # ---- PASUL 6: musonul + fulgerul. RainCycle e metronomul (singura cale de ud: `track.rain_wet`);
+    # LightningFlash se aboneaza la el (grupul `rain_cycle`) si ruleaza DUPA el.
+    hz_txt += f"""
+[node name="Muson" type="Node" parent="Hazarduri"]
+script = ExtResource("7_rain")
+period = {RAIN_PERIOD}
+telegraph = 5.0
+rain_hold = 25.0
+dry_out = 5.0
+start_clock = {RAIN_PERIOD - RAIN_FIRST_AT}
+fog_end_rain = 180.0
+fog_whiten_rain = 0.25
+sun_energy_rain = 0.75
+sky_top_rain = Color(0.17, 0.15, 0.22, 1)
+sky_horizon_rain = Color(0.36, 0.32, 0.4, 1)
+
+[node name="Fulger" type="Node" parent="Hazarduri"]
+script = ExtResource("8_flash")
+"""
+    # ---- PASUL 6: perdeaua de liane. Baza scrisa pe RANDURI (memoria `tscn-transform-e-pe-randuri`):
+    # -Z local = sensul de mers. Orientarea se verifica in sonda (tools/probe_angkor_pas6.gd).
+    cs_ = tag_s["G ocol intrare"] + CURTAIN_AFTER_FORK
+    ca_, cb_ = pos_at(cs_ - 1.0), pos_at(cs_ + 1.0)
+    fx_, fz_ = cb_[0] - ca_[0], -(cb_[1] - ca_[1])
+    fl_ = math.hypot(fx_, fz_)
+    fx_, fz_ = fx_ / fl_, fz_ / fl_
+    bzx_, bzz_ = -fx_, -fz_                 # basis.z = -inainte
+    bxx_, bxz_ = bzz_, -bzx_                # basis.x = up x basis.z
+    cx_, cy_ = pos_at(cs_)
+    ce_ = elev_at(cs_)
+    hz_txt += f"""
+[node name="PerdeaLiane" type="Node3D" parent="Hazarduri"]
+transform = Transform3D({r3(bxx_)}, 0, {r3(bzx_)}, 0, 1, 0, {r3(bxz_)}, 0, {r3(bzz_)}, {r2(cx_)}, {r2(ce_)}, {r2(-cy_)})
+script = ExtResource("9_vine")
+"""
+    print(f"  perdea: s {cs_:.1f}, idx {IDX('G ocol intrare', CURTAIN_AFTER_FORK)}, cota {ce_:.2f}")
     print(f"\n  elefant: frac idx {IDX('D poarta', ELEPHANT_AFTER_GATE)} "
           f"(fereastra sondei {IDX('D poarta', -10.0)},{IDX('D poarta', 45.0)})")
     print(f"  creasta: fereastra sondei {IDX(CREST_TAG, -30.0)},{IDX(CREST_TAG, 60.0)}")
@@ -759,9 +867,19 @@ material = SubResource("Mat_macheta")
 [ext_resource type="Script" path="res://scenes/hazards/rim_boulder_hazard.gd" id="4_rim"]
 [ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="5_hzm"]
 [ext_resource type="PackedScene" path="res://assets/models/serengeti/animals/elephant.glb" id="6_eleph"]
+[ext_resource type="Script" path="res://scenes/hazards/rain_cycle.gd" id="7_rain"]
+[ext_resource type="Script" path="res://scenes/hazards/lightning_flash.gd" id="8_flash"]
+[ext_resource type="Script" path="res://scenes/hazards/vine_curtain.gd" id="9_vine"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_macheta"]
 albedo_color = Color(0.72, 0.64, 0.52, 1)
+
+[sub_resource type="BoxShape3D" id="Box_bayon"]
+size = Vector3({BAYON_TOWER_SIZE[0]}, {BAYON_TOWER_SIZE[1]}, {BAYON_TOWER_SIZE[2]})
+
+[sub_resource type="BoxMesh" id="Mesh_bayon"]
+size = Vector3({BAYON_TOWER_SIZE[0]}, {BAYON_TOWER_SIZE[1]}, {BAYON_TOWER_SIZE[2]})
+material = SubResource("Mat_macheta")
 
 [sub_resource type="Curve3D" id="Curve3D_angkor"]
 closed = true
@@ -794,6 +912,8 @@ custom_ravine_widths = Array[Vector2]([{", ".join(V2(a, b) for a, b in widths)}]
 custom_ravine_water = Array[Vector3]([{", ".join(V3(*w_) for w_ in water)}])
 custom_width_segments = Array[Vector3]([{", ".join(V3(*w_) for w_ in width_segments)}])
 custom_width_pinches = Array[Vector3]([{", ".join(V3(*w_) for w_ in pinches)}])
+custom_parapets = Array[Vector4]([{", ".join(V4(*p_) for p_ in parapets)}])
+custom_lane_bias = Array[Vector3]([{", ".join(V3(*b_) for b_ in bias)}])
 custom_bench_patches = Array[Dictionary]([{", ".join(
     "{ \"lvl\": PackedVector2Array(-1000.0, %s, 1000.0, %s), \"soft\": Vector4(%s, %s, %s, %s), "
     "\"x0\": %s, \"x1\": %s, \"z0\": %s, \"z1\": %s }" % (lv_, lv_, sw_, se_, sn_, ss_, r2(x0_), r2(x1_), r2(-y1_), r2(-y0_))
@@ -807,6 +927,8 @@ curve = SubResource("Curve3D_angkor")
 {peaks_txt}{branch_txt}
 [node name="Hazarduri" type="Node3D" parent="."]
 {hz_txt}
+[node name="Obstacole" type="Node3D" parent="."]
+{towers_txt}
 [node name="Machete" type="Node3D" parent="."]
 {mach}"""
     with open(OUT_PATH, "w", encoding="utf-8", newline="\n") as f:
@@ -816,3 +938,5 @@ curve = SubResource("Curve3D_angkor")
     print(f"  rape (len): {ravines}")
     print(f"  latimi (idx): {width_segments}")
     print(f"  zone: {zz}")
+    print(f"  balustrade (len): {parapets}")
+    print(f"  lane_bias (idx): {bias}")

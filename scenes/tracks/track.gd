@@ -12631,12 +12631,21 @@ const BERM_TAPER_M: float = 10.0
 const BERM_THICK: float = 1.1
 ## Stilul 3 (BALUSTRADA de gresie, Angkor: caile peste sant, brief §2 randurile A si D):
 ## un zid jos si drept, in culoarea pietrei templului, nu beton alb-rosu si nu buza de
-## stanca (ROCK_DARK iese rugina pe gresie, memoria `rock-dark-nu-pe-bazalt`). 1 m: peste
+## stanca (ROCK_DARK iese rugina pe gresie, memoria `rock-dark-nu-pe-bazalt`). Un singur slot,
+## fara dungi: `CONCRETE` (gri-bej). ROCK_LIGHT iese PORTOCALIU pe atlas, iar alternat cu
+## CORAL_SAND citea a bariera de trafic (captura --gamecam de pe calea de vest). 1 m: peste
 ## pragul de 0,3 m e zid pentru roata, deci tine masinile pe cale; golurile din ea sunt
 ## intervale lipsa in `custom_parapets`, nu un regim aparte. E PLACEHOLDER-ul de coliziune
 ## al balustradei naga (decor, pasul 8), care se aseaza peste el.
 const BALUSTRADE_HEIGHT: float = 1.0
 const BALUSTRADE_THICK: float = 0.5
+## Capatul dinspre masini al fiecarei portiuni de balustrada se DESFACE spre exterior (ca
+## terminatia unei parapete de autostrada): `BALUSTRADE_FLARE_OUT` m mai departe de drum la capat,
+## lipit de margine dupa `BALUSTRADE_FLARE_M` m. Masurat pe Angkor (ProbeRace, 16 seed-uri): cu
+## capatul drept, masinile impinse pe umar in gramada de la start loveau FATA capatului la
+## 36-43 m/s — 3 ejectari „perete” in primele 7 s. Desfacut, contactul e razant (~9 grade).
+const BALUSTRADE_FLARE_M: float = 16.0
+const BALUSTRADE_FLARE_OUT: float = 2.5
 
 
 func _parapet_segments() -> Array[Vector4]:
@@ -12694,13 +12703,17 @@ func _build_parapets() -> void:
 						order.append(i)
 			var d_first := -1.0
 			var d_last := -1.0
-			if berm and not order.is_empty():
+			if (berm or balus) and not order.is_empty():
 				d_first = _parapet_dist(order[0], wraps, seg.y, total_len)
 				d_last = _parapet_dist(order[order.size() - 1], wraps, seg.y, total_len)
 			for i in order:
 				var c := baked[i]
 				var side := _side_at(i)
 				var e := c + side * (width_at_index(i) + PARAPET_GAP) * side_sign
+				if balus:
+					var din := _parapet_dist(i, wraps, seg.y, total_len) - d_first
+					var fl := 1.0 - smoothstep(0.0, 1.0, din / BALUSTRADE_FLARE_M)
+					e += side * side_sign * BALUSTRADE_FLARE_OUT * fl
 				var out := side * side_sign
 				var h := BALUSTRADE_HEIGHT if balus else PARAPET_HEIGHT
 				if rock:
@@ -12743,7 +12756,7 @@ func _build_parapets() -> void:
 				elif berm:
 					slot = Palette.CORAL_SAND if block == 0 else Palette.MARBLE_GREY
 				elif balus:
-					slot = Palette.ROCK_LIGHT if block == 0 else Palette.CORAL_SAND
+					slot = Palette.CONCRETE
 				var outv: Vector3 = a[5]
 				# top, fata dinspre sosea, fata dinspre vale
 				_parapet_quad(st, a[0], b[0], b[1], a[1], slot, Vector3.UP)
@@ -12756,7 +12769,7 @@ func _build_parapets() -> void:
 			var d1: Vector3 = last[0] - (secs[secs.size() - 2] as Array)[0]
 			var cap := Palette.ROCK_DARK if rock else (Palette.MARBLE_GREY if berm else Palette.KERB_RED)
 			if balus:
-				cap = Palette.ROCK_LIGHT
+				cap = Palette.CONCRETE
 			_parapet_quad(st, first[0], first[1], first[3], first[2],
 				cap, -d0.normalized())
 			_parapet_quad(st, last[0], last[1], last[3], last[2],

@@ -28,21 +28,23 @@ const PropDebris := preload("res://scenes/props/prop_debris.gd")
 ## o fanta prin care se vede ca e decor.
 @export var width: float = 13.0
 ## Cota de sus a suvitelor peste asfalt (m): creanga din care atarna.
-@export var top: float = 5.6
+@export var top: float = 5.0
 ## Cel mai jos varf de suvita peste asfalt (m). Sub capota (~1 m), ca masina sa intre in ele.
 @export var bottom: float = 0.7
 ## Cat variaza lungimea suvitelor in sus fata de `bottom` (m): marginea de jos zdrentuita.
 @export var bottom_jitter: float = 1.6
-## Randuri pe directia de mers si distanta dintre ele (m).
-@export_range(1, 6) var rows: int = 3
-@export var row_gap: float = 1.4
-## Pasul dintre suvite intr-un rand si latimea lor (m). Cu 3 randuri decalate cu pas/3, latimea
-## de 0,16 la pasul de 0,42 acopera geometric practic toata latimea (contractul brief §3: >= 60%
-## din latimea benzii la 40 m).
-@export var spacing: float = 0.42
-@export var strand_width: float = 0.16
+## Randuri pe directia de mers si distanta dintre ele (m). Prima captura `--gamecam` (3 randuri,
+## suvite de 0,16 m) citea ca un pieptene rar, nu ca zid: camera de joc priveste de sus (10 m),
+## deci suvitele verticale se vad scurtate, iar golurile dintre ele raman drum vizibil.
+@export_range(1, 6) var rows: int = 4
+@export var row_gap: float = 1.1
+## Pasul dintre suvite intr-un rand si latimea lor (m). Latimea de 0,30 la pasul de 0,36, in
+## 4 randuri decalate cu pas/4, se suprapune (contractul brief §3: >= 60% din
+## latimea benzii la 40 m).
+@export var spacing: float = 0.36
+@export var strand_width: float = 0.30
 ## Ce fractie din suvite sunt radacini aeriene argintii (restul liane verzi).
-@export_range(0.0, 1.0, 0.01) var root_share: float = 0.25
+@export_range(0.0, 1.0, 0.01) var root_share: float = 0.12
 ## Grosimea crengii de sus (m) — trunchiul argintiu din care atarna totul.
 @export var branch_thick: float = 0.55
 @export var seed_salt: int = 70
@@ -84,7 +86,7 @@ func _build_strands() -> void:
 				continue
 			var is_root := rng.randf() < root_share
 			var slot := Palette.CORAL_SAND if is_root else Palette.TROPICAL_GREEN
-			var w := strand_width * (1.6 if is_root else rng.randf_range(0.8, 1.25))
+			var w := strand_width * (0.7 if is_root else rng.randf_range(0.8, 1.3))
 			var tip := bottom + rng.randf() * rng.randf() * bottom_jitter
 			var zz := z + rng.randf_range(-0.25, 0.25)
 			# Usoara inclinare (vant, crestere): varful se abate cu cativa cm.

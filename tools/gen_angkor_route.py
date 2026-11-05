@@ -575,7 +575,9 @@ ELEPHANT_PHASE = float(os.environ.get("ANGKOR_ELEPHANT_PHASE", "0.75"))
 # (s fata de "E terasa V", offset lateral pe harta in y; terasa are 95 m.)
 BAYON_TOWERS = [(15.0, -1.0), (48.0, 1.0), (81.0, -1.0)]
 BAYON_TOWER_SIZE = (3.0, 9.0, 3.0)
-BAYON_BIAS = 0.62
+# 0,62 pe sonda; pe pista reala (pasul 6, 16 seed-uri) 4 din cele 5 ejectari pe turnuri au venit
+# IN PLOAIE (grip ud): culoarul de 0,74 m dintre linie si turn nu ajungea. 0,72 lasa ~1,4 m.
+BAYON_BIAS = 0.72
 # Musonul (brief §3 „Ceasuri care nu impart durata turului”): ~137 s, nu multiplu de ~75 s.
 # Cursa porneste pe USCAT (memoria `ceasul-porneste-in-prima-faza`: la ceasul 0 RainCycle e in
 # telegraf); prima ploaie (inceputul telegrafului) la ~50 s, pe turul 1, in cetate.
@@ -672,6 +674,17 @@ if OUT_PATH:
         (lenx(-198.0), lenx(-95.0 - GAP / 2), -1, 3), (lenx(-95.0 + GAP / 2), lenx(-70.0), -1, 3),
         # calea uriasilor, ambele laturi, pana inaintea pilonilor portii
         (LEN("D cale inceput", 2.0), LEN("D poarta", -10.0), 0, 3),
+        # Srah Srang, STANGA (spre bazin), de la iesirea din coltul de SE pana dupa bazin. Prima
+        # rulare a pasului 6 (16 seed-uri): 22 de `[blocaj]` la frac 0,78-0,84, TOATE la sfarsitul
+        # ploii — pe ud, masinile ies largi din virajul la dreapta de SE si cad pe malul bazinului,
+        # cu 1 m sub sosea, de unde nu mai urca (prag lateral > 0,3 m = zid). Pe uscat: 0.
+        (round(F_s(s_near(100.0, -112.0))[1], 4), round(F_s(s_near(4.0, -112.0))[1], 4), -1, 3),
+        # Malul santului Angkor Wat, DREAPTA lui H (rapa 2), pana inaintea virajului de vest. A doua
+        # rulare (cu stanga inchisa): 4 `[blocaj]` + 3 repuneri, toate in prima ploaie si toate pe
+        # DREAPTA, cu Autobuzul: rapa 2 n-are apa (avertismentul „rapa 2 n-are nicio celula sub 0.5”,
+        # preexistent pe main), deci masina cazuta nu intra in plasa de apa — ramane in santul uscat,
+        # cu 1 m sub sosea. Balustrada joasa nu ascunde reflexia de la camera de joc (10 m).
+        (round(F_s(s_near(100.0, -112.0))[1], 4), round(F_s(s_near(-196.0, -112.0))[1], 4), 1, 3),
     ]
 
     # ---- masive (coordonate Godot: gx = x, gz = -y)

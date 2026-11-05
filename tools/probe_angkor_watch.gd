@@ -50,9 +50,18 @@ func setup(race: Node) -> void:
 			crest_win = Vector2(float(q[0]), float(q[1]))
 	var cars: Array[Car] = race.cars
 	_curtain = race.track.get_node_or_null("Hazarduri/PerdeaLiane")
+	# MARTORUL: `--angkor-curtain-at=x,z` masoara aceeasi fereastra pe o scena FARA perdea (main),
+	# ca sa se vada cat din „pierderea” de viteza vine din viraj si din imbranceli, nu din perdea.
+	var at := Vector3.INF
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--angkor-curtain-at="):
+			var xz := arg.trim_prefix("--angkor-curtain-at=").split(",")
+			at = Vector3(float(xz[0]), 0.0, float(xz[1]))
 	if _curtain != null:
+		at = (_curtain as Node3D).global_position
+	if at != Vector3.INF:
 		var tr: Track = race.track
-		var ci := tr.closest_index_global((_curtain as Node3D).global_position)
+		var ci := tr.closest_index_global(at)
 		var n := tr.baked.size()
 		var a := ci
 		var b := ci
@@ -156,7 +165,7 @@ func report() -> void:
 		stop_tot += s
 	print("=== ANGKOR elefant: secunde_oprit_in_piata=%.1f (sub %.0f m/s, toate masinile)" % [
 		stop_tot, STOP_V])
-	if _curtain != null:
+	if _cur_win.x >= 0.0:
 		var r := _cur_ratios.duplicate()
 		r.sort()
 		var med := float(r[r.size() / 2]) if not r.is_empty() else -1.0
@@ -166,5 +175,5 @@ func report() -> void:
 			if float(x) < 0.98:
 				under += 1
 		print("=== ANGKOR perdea: treceri=%d iesire/intrare med=%.3f min=%.3f sub_98%%=%d rafale=%d declansari=%d (fereastra %.3f..%.3f)" % [
-			r.size(), med, low, under, int(_curtain.get("burst_count")),
-			int(_curtain.get("pass_count")), _cur_win.x, _cur_win.y])
+			r.size(), med, low, under, int(_curtain.get("burst_count")) if _curtain else 0,
+			int(_curtain.get("pass_count")) if _curtain else 0, _cur_win.x, _cur_win.y])

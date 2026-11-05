@@ -140,18 +140,18 @@ func _check_towers(track: Track) -> void:
 
 func _check_balustrades(track: Track) -> void:
 	var space := track.get_world_3d().direct_space_state
-	# Calea de vest: de la x=-196 la x=-74 (harta), pe axa y=0 (Godot z=0), spre +X.
+	# Calea de vest: de la x=-190 la x=-74 (harta), pe axa y=0 (Godot z=0), spre +X.
 	for side in [1.0, -1.0]:
 		var closed := 0
 		var gaps: Array[Vector2] = []
 		var gap_start := INF
-		var x := -196.0
+		var x := -190.0   # capatul de vest al balustradei cade la ~-198..-194 (rezolutia hartii de fractii)
 		while x <= -74.0:
 			var i := track.closest_index_global(Vector3(x, 0.0, 0.0))
 			var c := track.baked[i]
 			var s: Vector3 = track._side_at(i) * float(side)
 			var from := c + Vector3.UP * 0.5
-			var to: Vector3 = from + s * (track.width_at_index(i) + 2.0)
+			var to: Vector3 = from + s * (track.width_at_index(i) + 4.0)   # + capatul desfacut (2,5 m)
 			var q := PhysicsRayQueryParameters3D.create(from, to)
 			var hit := space.intersect_ray(q)
 			var is_wall: bool = not hit.is_empty() and str((hit["collider"] as Node).name).begins_with("Parapet")

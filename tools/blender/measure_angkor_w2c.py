@@ -10,7 +10,7 @@ Citeste GLB-ul EXPORTAT (coordonate GODOT: Y sus, lungimea modulului pe Z, Blend
 Contracte (kit 1.5):
   balustrada: inaltime <= 1,05 si grosime (X) <= 0,6 (zidul din cod: 1,0 x 0,5, + 0,05
     de toleranta); capetele plane la z = +-2,0 (nimic dincolo, tot ce e la |z| >= 1,99 sta
-    EXACT pe plan); sectiunea trupului la capat: diametru 0,43-0,47;
+    EXACT pe plan); sectiunea trupului la capat: diametru 0,35-0,41 (trup subtire pe baza continua);
   gap: aceleasi limite de inaltime si capete, nimic pe partea drumului (x < -0,3), bucati
     cazute pe +X (x max > 0,5);
   cap: ~2,5 m inaltime (2,3-2,6), latime 1,4-1,9, intrarea trupului la z = 0 plana, aceeasi
@@ -29,7 +29,7 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from verify_glb import load_glb  # noqa: E402
 from measure_angkor import world_points, _write_glb  # noqa: E402
-from measure_angkor_w1a import _edit_positions  # noqa: E402
+from measure_angkor_w1a import _edit_positions, world_tris  # noqa: E402
 
 EPS = 2e-3
 
@@ -82,9 +82,44 @@ def common(names, xform, suffixes, bad):
             bad.append("nod cu nume in afara contractului: %s" % n)
 
 
-def _section_ok(s, z, bad, tag):
-    if not (0.42 <= s[1] <= 0.47 and 0.43 <= s[2] <= 0.47):
-        bad.append("%s: sectiunea trupului la z=%.1f e %.3f x %.3f (cerut 0,42-0,47)" % (tag, z, s[2], s[1]))
+def _section_ok(s, z, bad, tag, lo=0.42, hi=0.47):
+    if not (lo - 0.01 <= s[1] <= hi and lo <= s[2] <= hi):
+        bad.append("%s: sectiunea trupului la z=%.1f e %.3f x %.3f (cerut %.2f-%.2f)" % (tag, z, s[2], s[1], lo, hi))
+
+
+# trupul de pe balustrada (si capul) e mai subtire (0,38): loc pentru unda sub 1,05
+BAL_SEC = (0.35, 0.41)
+BODY_SEL = lambda p: abs(p[0]) < 0.2 and p[1] > 0.5   # exclude coltul placii (x = 0,27) si miezul (0,23)
+
+
+def _hit(tris, z, y):
+    """Punctul (z, y) e acoperit de proiectia (z, y) a vreunui triunghi? (privit pe X)"""
+    for (a, b, c) in tris:
+        p0, p1, p2 = (a[2], a[1]), (b[2], b[1]), (c[2], c[1])
+        d = (p1[1] - p2[1]) * (p0[0] - p2[0]) + (p2[0] - p1[0]) * (p0[1] - p2[1])
+        if abs(d) < 1e-12:
+            continue
+        l1 = ((p1[1] - p2[1]) * (z - p2[0]) + (p2[0] - p1[0]) * (y - p2[1])) / d
+        l2 = ((p2[1] - p0[1]) * (z - p2[0]) + (p0[0] - p2[0]) * (y - p2[1])) / d
+        if l1 >= -1e-6 and l2 >= -1e-6 and 1 - l1 - l2 >= -1e-6:
+            return True
+    return False
+
+
+def solid_base(path, y_levels=(0.1, 0.3, 0.5), step=0.1):
+    """Baza e PIATRA CONTINUA (zidul din cod e masiv: nu se vede prin el). Privita din
+    lateral, fiecare punct (z in -2..2, y in 0,1/0,3/0,5) trebuie acoperit. Intoarce
+    lista punctelor goale."""
+    g, blob = load_glb(path)[:2]
+    tris = world_tris(g, blob)
+    holes = []
+    n = int(round(4.0 / step))
+    for i in range(n + 1):
+        z = -2.0 + 4.0 * i / n
+        for y in y_levels:
+            if not _hit(tris, z, y):
+                holes.append((round(z, 2), y))
+    return holes
 
 
 def check_balustrade(path, report=True, gap=False):
@@ -107,15 +142,21 @@ def check_balustrade(path, report=True, gap=False):
     elif th > 0.6 + EPS:
         bad.append("grosime %.3f > 0,6" % th)
     ends(pts, -2.0, 2.0, bad, "balustrada")
+    if not gap:
+        holes = solid_base(path)
+        if report:
+            print("baza      goluri vazute din lateral (z,y < 0,52): %d" % len(holes))
+        if holes:
+            bad.append("baza nu e continua: %d puncte goale, primul la z=%.2f y=%.2f" % (len(holes), holes[0][0], holes[0][1]))
     for z in (-2.0, 2.0):
-        s = section(pts, z, lambda p: p[1] > 0.3)
+        s = section(pts, z, BODY_SEL)
         if s is None:
             if not gap:
                 bad.append("fara trup la capatul z=%.1f" % z)
             continue
         if report:
             print("sectiune  z=%+.1f: centru y %.3f  inaltime %.3f  latime %.3f" % (z, s[0], s[1], s[2]))
-        _section_ok(s, z, bad, "balustrada")
+        _section_ok(s, z, bad, "balustrada", *BAL_SEC)
         if abs(s[3]) > 0.01:
             bad.append("trupul necentrat pe X la capat (%.3f)" % s[3])
     common(names, xform, ("_Stone", "_Lichen"), bad)
@@ -142,13 +183,13 @@ def check_head(path, report=True):
     near = [p[2] for p in pts if abs(p[2]) < 0.01]
     if not near or max(abs(z) for z in near) > EPS:
         bad.append("intrarea trupului la z=0 lipseste sau nu e plana")
-    s = section(pts, 0.0, lambda p: p[1] > 0.3)
+    s = section(pts, 0.0, BODY_SEL)
     if s is None:
         bad.append("fara trup la intrare")
     else:
         if report:
             print("intrare   centru y %.3f  inaltime %.3f  latime %.3f" % (s[0], s[1], s[2]))
-        _section_ok(s, 0.0, bad, "cap")
+        _section_ok(s, 0.0, bad, "cap", *BAL_SEC)
     common(names, xform, ("_Stone", "_Lichen"), bad)
     for b_ in bad:
         print("   !! " + b_)
@@ -194,6 +235,10 @@ def selftest(bal, giant):
     g = json.loads(json.dumps(g0))
     cases.append(("balustrada ridicata la 1,3", check_balustrade, g,
                   _edit_positions(g, b0, lambda x, y, z: (x, y * 1.3 / 1.0, z))))
+    gap = os.path.join(os.path.dirname(bal), "naga_balustrade_gap.glb")
+    if os.path.exists(gap):
+        gg, gb = load_glb(gap)[:2]
+        cases.append(("balustrada cu baza sparta (modulul gap dat drept intreg)", check_balustrade, gg, gb))
     g1, bl1 = load_glb(giant)[:2]
     g = json.loads(json.dumps(g1))
     cases.append(("uriasul adanc de 2,0", check_giant, g,

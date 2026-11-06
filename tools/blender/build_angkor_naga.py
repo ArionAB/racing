@@ -47,8 +47,6 @@ BODY_N = 10               # laturi
 GROOVE = 0.20             # adancimea jgheabului de solz (din raza)
 PERIOD = 0.5              # distanta intre jgheaburi (4,0 / 0,5 = 8 solzi pe modul)
 
-BAL_Z = 0.76              # cota centrului trupului pe balustrada
-BAL_AMP = 0.035           # ondulatia verticala (zero la capete, panta egala)
 GIANT_Z = 1.40            # cota trupului prin bratele uriasilor (1,3-1,7 cerut)
 GIANT_AMP = 0.04
 
@@ -114,12 +112,12 @@ def tube(b, pts, radius, slot, n=BODY_N, groove=GROOVE, period=PERIOD,
     b._tag(allv, slot)
 
 
-def body_path(z0, amp, y0=-HALF_LEN, y1=HALF_LEN, x=0.0, step=0.0625):
+def body_path(z0, amp, y0=-HALF_LEN, y1=HALF_LEN, x=0.0, step=0.0625, waves=1):
     """Calea trupului pe Y: ondulatie sinus cu perioada 4 m (zero si aceeasi panta la
     ambele capete, deci la lipirea a doua module nu apare treapta)."""
     n = int(round((y1 - y0) / step))
     return [Vector((x, y0 + (y1 - y0) * i / n,
-                    z0 + amp * math.sin(math.pi * (y0 + (y1 - y0) * i / n) / 2.0)))
+                    z0 + amp * math.sin(2.0 * math.pi * waves * (y0 + (y1 - y0) * i / n) / LEN)))
             for i in range(n + 1)]
 
 
@@ -131,68 +129,105 @@ def lichen_on(b, rnd, y, x, z, kind, scale=1.0):
 
 
 # --- balustrada ------------------------------------------------------------------
+# Piele vizuala a unui zid de coliziune MASIV (Track._build_parapets, stilul 3): baza e
+# piatra continua pe toata lungimea, fara goluri (un jucator care vede prin balustrada
+# ar da de un zid invizibil); sarpele (diametru 0,38) sta PE baza si ondulează usor.
 
-POST_Y = (-1.5, -0.5, 0.5, 1.5)      # pas de 1,0 m: continua peste modul (4 = 4 x 1)
-SILL_W = 0.54                        # <= 0,6; zidul din cod are 0,5
-SILL_H = 0.14
-POST_W, POST_L, POST_TOP = 0.46, 0.42, 0.60
-CAP_W, CAP_L = 0.50, 0.50
+BAL_R = 0.19              # trupul balustradei: diametru 0,38 (loc pentru unda sub 1,05)
+BAL_Z = 0.78              # cota centrului trupului pe balustrada
+BAL_AMP = 0.07            # ondulatie (2 cocoase pe modul), varf-la-varf 0,14
+BAL_WAVES = 2
+CORE_H = 0.23             # miezul bazei: +-0,23 (0,46 gros)
+PROUD = 0.04              # blocurile in relief pe cele doua fete: suprafata la +-0,27
+BASE_TOP = 0.52           # varful blocurilor; apoi placa de coronament .52-.60
+SLAB_TOP = 0.60
+PILASTER_Y = (-1.5, -0.5, 0.5, 1.5)
+
+# randurile de blocuri (muchii pe Y; capetele modulului raman la +-2,0, la ras)
+COURSES = [(0.0, 0.18, [-2.0, -1.1, -0.05, 1.0, 2.0]),
+           (0.18, 0.35, [-2.0, -1.55, -0.6, 0.5, 1.45, 2.0]),
+           (0.35, 0.52, [-2.0, -0.95, 0.1, 1.2, 2.0])]
 
 
-def posts_and_sill(st, ys, sill_ranges):
-    for (ya, yb) in sill_ranges:
-        st.box((0.0, (ya + yb) / 2, SILL_H / 2), (SILL_W, yb - ya, SILL_H), S)
+def base_blocks(st, y_lo=-HALF_LEN, y_hi=HALF_LEN, trim_lo=None, trim_hi=None):
+    """Randuri de blocuri in relief pe ambele fete. `trim_lo/hi[c]` = cota y la care se
+    opreste randul c (rupere zimtata); blocurile intregi dinauntru raman."""
+    for c, (z0, z1, edges) in enumerate(COURSES):
+        lo = y_lo if trim_lo is None else trim_lo[c]
+        hi = y_hi if trim_hi is None else trim_hi[c]
+        for ea, eb in zip(edges[:-1], edges[1:]):
+            if ea < lo - 1e-6 or eb > hi + 1e-6:
+                continue
+            a = ea if abs(ea + HALF_LEN) < 1e-6 else ea + 0.015
+            b_ = eb if abs(eb - HALF_LEN) < 1e-6 else eb - 0.015
+            za, zb = z0 + 0.012, z1 - 0.012
+            for sx in (-1, 1):
+                st.box((sx * (CORE_H + PROUD / 2 - 0.002), (a + b_) / 2, (za + zb) / 2),
+                       (PROUD + 0.004, b_ - a, zb - za), S)
+
+
+def base_wall(st, ya, yb):
+    """Miez + placa de coronament, de la ya la yb (capete plane)."""
+    st.box((0.0, (ya + yb) / 2, 0.30), (2 * CORE_H, yb - ya, 0.60), S)
+    st.box((0.0, (ya + yb) / 2, (BASE_TOP + SLAB_TOP) / 2), (0.54, yb - ya, SLAB_TOP - BASE_TOP), S)
+
+
+def pilasters(st, ys):
     for y in ys:
-        st.box((0.0, y, (SILL_H + POST_TOP) / 2 - 0.01), (POST_W, POST_L, POST_TOP - SILL_H + 0.02), S)
-        st.box((0.0, y, POST_TOP + 0.03), (CAP_W, CAP_L, 0.06), S)
+        for sx in (-1, 1):
+            st.box((sx * 0.265, y, 0.27), (0.06, 0.34, 0.50), S)
 
 
 def build_balustrade(gap=False):
     st, li = Builder(), Builder()
     rnd = lcg(91 if not gap else 97)
+
+    def wave(y):
+        return BAL_AMP * math.sin(2 * math.pi * BAL_WAVES * y / LEN)
+
     if not gap:
-        posts_and_sill(st, POST_Y, [(-HALF_LEN, HALF_LEN)])
-        tube(st, body_path(BAL_Z, BAL_AMP), BODY_R, S, flat_y=True)
+        base_wall(st, -HALF_LEN, HALF_LEN)
+        base_blocks(st)
+        pilasters(st, PILASTER_Y)
+        tube(st, body_path(BAL_Z, BAL_AMP, waves=BAL_WAVES), BAL_R, S, flat_y=True)
     else:
-        # mijlocul lipseste (|y| < ~1,0): soclul si trupul se opresc cu muchie sparta,
-        # stalpii de la +-0,5 sunt buturi de 0,3 m
-        posts_and_sill(st, (-1.5, 1.5), [(-HALF_LEN, -0.95), (1.1, HALF_LEN)])
-        for y, sgn in ((-0.5, -1), (0.5, 1)):
-            st.box((0.0, y, 0.22), (POST_W, POST_L, 0.16 + 0.12), S, rotation=Matrix.Rotation(math.radians(sgn * 9.0), 3, "Z"))
-        left = [p for p in body_path(BAL_Z, BAL_AMP, y1=-1.0)]
-        right = [p for p in body_path(BAL_Z, BAL_AMP, y0=1.12)]
-        # ruptura: inelul de la capatul spart e inclinat (y mutat dupa unghi)
-        tube(st, left, BODY_R, S, flat_y=True,
-             break_end=lambda a: 0.16 * math.cos(a) + 0.07 * math.sin(a))
-        # bucata dreapta: in oglinda (cap_start nu mai e plan -> il rupem prin inversare)
-        right_rev = list(reversed(right))
-        tube(st, right_rev, BODY_R, S, flat_y=True,
-             break_end=lambda a: -0.13 * math.cos(a) + 0.09 * math.sin(a), cap_start=True)
+        # golul: baza si trupul rupte zimtat; golul liber ~2,2-3,0 m
+        e = [1.0, 1.3, 1.05, 1.45]       # unde se opreste |y| miezul jos, randul 2, randul 3, placa
+        for sgn in (-1, 1):
+            pts = []
+            for x in (-CORE_H, CORE_H):
+                for z, ee in ((0.0, e[0]), (0.30, e[1]), (0.60, e[3])):
+                    pts.append(Vector((x, sgn * ee * (1.0 + (0.08 if x > 0 else -0.05)), z)))
+                    pts.append(Vector((x, sgn * HALF_LEN, z)))
+            hull(st, pts, S)
+            ys0, ys1 = sorted((sgn * e[3], sgn * HALF_LEN))
+            st.box((0.0, (ys0 + ys1) / 2, (BASE_TOP + SLAB_TOP) / 2), (0.54, ys1 - ys0, SLAB_TOP - BASE_TOP), S)
+        base_blocks(st, y_hi=-e[0] - 0.1, trim_hi=[-e[0] - 0.1, -e[1] - 0.1, -e[2] - 0.1])
+        base_blocks(st, y_lo=e[0] + 0.1, trim_lo=[e[0] + 0.1, e[1] + 0.1, e[2] + 0.1])
+        pilasters(st, (-1.5, 1.5))
+        left = body_path(BAL_Z, BAL_AMP, y1=-1.45, waves=BAL_WAVES)
+        right = list(reversed(body_path(BAL_Z, BAL_AMP, y0=1.5, waves=BAL_WAVES)))
+        tube(st, left, BAL_R, S, flat_y=True, break_end=lambda a: 0.14 * math.cos(a) + 0.06 * math.sin(a))
+        tube(st, right, BAL_R, S, flat_y=True, break_end=lambda a: -0.12 * math.cos(a) + 0.08 * math.sin(a))
         # --- bucati cazute PE PARTEA EXTERIOARA (+X), jos pe pamant ---
-        # (1) bucata de trup: lungime ~1,2 m, culcata, usor oblic
-        base = Vector((0.82, -0.25, BODY_R * (1 - GROOVE * 0.5)))
+        base_z = BAL_R * (1 - GROOVE * 0.5)
         d = Vector((0.30, 1.0, 0.0)).normalized()
-        pts = [base + d * (-0.6 + 0.1 * i) for i in range(13)]
-        tube(st, pts, BODY_R, S, groove=GROOVE, cap_start=True, cap_end=True,
-             break_end=lambda a: 0.0)
-        # (2) un stalp cazut, pe o latura
-        st.box((0.95, 0.85, 0.23), (POST_L, 0.46, POST_W - 0.04), S,
-               rotation=Matrix.Rotation(math.radians(24.0), 3, "Z"))
-        # (3) capac de stalp si bolovani de soclu
-        st.box((0.55, 0.62, 0.05), (CAP_W, CAP_L, 0.10), S, rotation=Matrix.Rotation(math.radians(-31.0), 3, "Z"))
-        st.box((1.10, -0.82, 0.10), (0.34, 0.26, 0.20), S, rotation=Matrix.Rotation(math.radians(17.0), 3, "Z"))
-        st.box((0.70, -1.15, 0.08), (0.26, 0.22, 0.16), S, rotation=Matrix.Rotation(math.radians(-40.0), 3, "Z"))
-        st.box((1.20, 0.25, 0.07), (0.20, 0.18, 0.14), S, rotation=Matrix.Rotation(math.radians(55.0), 3, "Z"))
-    # lichen: pete mici pe capacele stalpilor, pe sorturi si pe spinarea trupului
-    for y in POST_Y:
-        if gap and abs(y) < 1.0:
+        c0 = Vector((0.85, -0.15, base_z))
+        tube(st, [c0 + d * (-0.55 + 0.1 * i) for i in range(12)], BAL_R, S)
+        st.box((0.92, 0.95, 0.12), (0.54, 0.80, 0.24), S, rotation=Matrix.Rotation(math.radians(28.0), 3, "Z"))
+        st.box((0.70, -1.10, 0.10), (0.46, 0.42, 0.20), S, rotation=Matrix.Rotation(math.radians(-35.0), 3, "Z"))
+        st.box((1.22, -0.78, 0.09), (0.30, 0.26, 0.18), S, rotation=Matrix.Rotation(math.radians(17.0), 3, "Z"))
+        st.box((0.55, 0.50, 0.07), (0.30, 0.22, 0.14), S, rotation=Matrix.Rotation(math.radians(60.0), 3, "Z"))
+        st.box((1.18, 0.18, 0.06), (0.20, 0.16, 0.12), S, rotation=Matrix.Rotation(math.radians(50.0), 3, "Z"))
+    # lichen: pete mici pe placa si pe spinarea trupului (doar acolo unde exista)
+    for y in (-1.7, -0.4, 0.9, 1.75):
+        if gap and -1.45 < y < 1.5:
             continue
-        if rnd() < 0.75:
-            lichen_on(li, rnd, y + (rnd() - 0.5) * 0.1, (rnd() - 0.5) * 0.1, POST_TOP + 0.06, "g" if rnd() < 0.7 else "o", 0.8)
-    for y in (-1.2, -0.3, 0.9, 1.7):
-        if gap and -1.0 < y < 1.1:
+        lichen_on(li, rnd, y, 0.17, SLAB_TOP + 0.002, "g", 0.5)
+    for y in (-1.8, -0.9, 0.2, 1.1, 1.8):
+        if gap and -1.45 < y < 1.5:
             continue
-        lichen_on(li, rnd, y, 0.0, BAL_Z + BODY_R * 0.97 + BAL_AMP * math.sin(math.pi * y / 2) - 0.02, "g", 0.55)
+        lichen_on(li, rnd, y, 0.0, BAL_Z + wave(y) + BAL_R * 0.97 - 0.02, "g" if rnd() < 0.75 else "o", 0.45)
     return [st.to_object("Naga_Stone"), li.to_object("Naga_Lichen")]
 
 
@@ -205,20 +240,20 @@ HEAD_ANGLES = [-54.0, -36.0, -18.0, 0.0, 18.0, 36.0, 54.0]
 def build_head():
     st, li = Builder(), Builder()
     rnd = lcg(131)
-    # soclu: sort + stalp ca la balustrada, apoi trei randuri de piedestal sub evantai
-    st.box((0.0, -0.70, SILL_H / 2), (SILL_W, 0.60, SILL_H), S)
-    st.box((0.0, -0.70, (SILL_H + POST_TOP) / 2 - 0.01), (POST_W, POST_L, POST_TOP - SILL_H + 0.02), S)
-    st.box((0.0, -0.70, POST_TOP + 0.03), (CAP_W, CAP_L, 0.06), S)
+    # soclu: aceeasi baza continua ca la balustrada (y -1,0..-0,4), apoi trei randuri de piedestal
+    base_wall(st, -1.0, -0.40)
+    for sx in (-1, 1):
+        st.box((sx * (CORE_H + PROUD / 2 - 0.002), -0.70, 0.26), (PROUD + 0.004, 0.57, 0.50), S)
     st.box((0.0, 0.25, 0.10), (1.10, 1.30, 0.20), S)
     st.box((0.0, 0.25, 0.31), (0.92, 1.10, 0.22), S)
     st.box((0.0, 0.25, 0.51), (0.80, 0.96, 0.18), S)
     # trupul: intra plat la 0,76 (aceeasi sectiune si cota ca balustrada), apoi urca
     path = [Vector((0.0, -1.0, BAL_Z)), Vector((0.0, -0.75, BAL_Z)), Vector((0.0, -0.5, BAL_Z)),
             Vector((0.0, -0.3, BAL_Z + 0.05)), Vector((0.0, -0.1, BAL_Z + 0.22)),
-            Vector((0.0, 0.06, BAL_Z + 0.46)), Vector((0.0, 0.18, BAL_Z + 0.66)),
+            Vector((0.0, 0.06, BAL_Z + 0.46)), Vector((0.0, 0.18, BAL_Z + 0.58)),
             Vector((0.0, 0.26, HEAD_C.z))]
-    tube(st, path, BODY_R, S, flat_y=True, cap_end=False, groove=0.07, period=0.4,
-         taper=lambda f: 1.0 + 0.18 * max(0.0, f - 0.75) / 0.25)
+    tube(st, path, BAL_R, S, flat_y=True, cap_end=False, groove=0.07, period=0.4,
+         taper=lambda f: 1.0 + 0.30 * max(0.0, f - 0.75) / 0.25)
     # butucul: disc gros in spatele evantaiului
     hub = HEAD_C + Vector((0.0, -0.02, 0.0))
     st.cylinder(hub, 0.30, 0.20, S, segments=12, axis="Y")

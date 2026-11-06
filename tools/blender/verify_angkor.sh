@@ -262,6 +262,29 @@ if [ -f "$ROOT/effects/angkor_horizon.glb" ]; then
   [ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei grupului C (val 4) a esuat"; fail=1; }
 fi
 # --- sfarsit val 4, grupul C ---
+# --- val 4, grupul B ---
+echo
+echo "== val 4, grupul B: vegetatia mica (ficus strangulator, suvite de liane, lotus, nuferi) (kit 1.7) =="
+W4="tools/blender/measure_angkor_w4b.py"
+PL="$ROOT/plants"
+# ficusul: mai multe noduri pe rol, offset calculat pe ansamblu; suvitele ATARNA sub origine (punctul
+# de agatare, sus): --origin=rim; lotusul si nuferii au originea la cota apei, deci talpa la 0
+check "plants/strangler_fig.glb" --origin=assembly
+check "plants/vine_strands.glb" --origin=rim
+# slotul 31 (FLAMINGO_PINK) e declarat: florile de lotus (kit 1.7), ca la penguin_tawaki / rooftop_clutter
+check "plants/lotus_cluster.glb" --origin=assembly --allow-slots=31
+check "plants/water_lily_pads.glb" --origin=assembly
+if [ -f "$PL/strangler_fig.glb" ] && [ -f "$PL/vine_strands.glb" ] && [ -f "$PL/water_lily_pads.glb" ]; then
+  python $W4 fig "$PL/strangler_fig.glb" || fail=1
+  python $W4 vine "$PL/vine_strands.glb" || fail=1
+  python $W4 lotus "$PL/lotus_cluster.glb" || fail=1
+  python $W4 lily "$PL/water_lily_pads.glb" || fail=1
+  st=$(python $W4 --selftest "$PL" 2>&1); rc=$?
+  printf '%s
+' "$st" | grep -E "^-- sabotaj|garda a|SELFTEST"
+  [ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei grupului B (val 4) a esuat"; fail=1; }
+fi
+# --- sfarsit val 4, grupul B ---
 
 echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="

@@ -9,16 +9,14 @@
 [ext_resource type="Script" path="res://scenes/hazards/rain_cycle.gd" id="7_rain"]
 [ext_resource type="Script" path="res://scenes/hazards/lightning_flash.gd" id="8_flash"]
 [ext_resource type="Script" path="res://scenes/hazards/vine_curtain.gd" id="9_vine"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/bayon_face_tower_a.glb" id="10_bayon"]
+[ext_resource type="Script" path="res://scenes/props/world_prop.gd" id="11_prop"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_macheta"]
 albedo_color = Color(0.72, 0.64, 0.52, 1)
 
 [sub_resource type="BoxShape3D" id="Box_bayon"]
 size = Vector3(3.0, 9.0, 3.0)
-
-[sub_resource type="BoxMesh" id="Mesh_bayon"]
-size = Vector3(3.0, 9.0, 3.0)
-material = SubResource("Mat_macheta")
 
 [sub_resource type="Curve3D" id="Curve3D_angkor"]
 closed = true
@@ -152,8 +150,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -115.83, 23.5, -436.0)
 [node name="Forma" type="CollisionShape3D" parent="Obstacole/BayonTurn0"]
 shape = SubResource("Box_bayon")
 
-[node name="Macheta" type="MeshInstance3D" parent="Obstacole/BayonTurn0"]
-mesh = SubResource("Mesh_bayon")
 
 [node name="BayonTurn1" type="StaticBody3D" parent="Obstacole"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -82.83, 23.5, -438.0)
@@ -161,8 +157,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -82.83, 23.5, -438.0)
 [node name="Forma" type="CollisionShape3D" parent="Obstacole/BayonTurn1"]
 shape = SubResource("Box_bayon")
 
-[node name="Macheta" type="MeshInstance3D" parent="Obstacole/BayonTurn1"]
-mesh = SubResource("Mesh_bayon")
 
 [node name="BayonTurn2" type="StaticBody3D" parent="Obstacole"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.83, 23.5, -436.0)
@@ -170,8 +164,21 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.83, 23.5, -436.0)
 [node name="Forma" type="CollisionShape3D" parent="Obstacole/BayonTurn2"]
 shape = SubResource("Box_bayon")
 
-[node name="Macheta" type="MeshInstance3D" parent="Obstacole/BayonTurn2"]
-mesh = SubResource("Mesh_bayon")
+
+[node name="DecorManual" type="Node3D" parent="."]
+script = ExtResource("11_prop")
+
+[node name="BayonA0" parent="DecorManual" instance=ExtResource("10_bayon")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -115.83, 19.0, -436.0)
+metadata/coliziune = "none"
+
+[node name="BayonA1" parent="DecorManual" instance=ExtResource("10_bayon")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -82.83, 19.0, -438.0)
+metadata/coliziune = "none"
+
+[node name="BayonA2" parent="DecorManual" instance=ExtResource("10_bayon")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.83, 19.0, -436.0)
+metadata/coliziune = "none"
 
 [node name="Machete" type="Node3D" parent="."]
 

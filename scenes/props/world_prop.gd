@@ -2343,6 +2343,13 @@ const CLASSES_HALONG := {
 	"grotto_massif": {"Grotto_Rock": _HL_KARST},
 	"grotto_portal": {"Portal_Rock": _HL_KARST},
 }
+## Angkor (Track24, docs/asset_briefs/angkor_kit.md regula 5): gresia pe `*_Stone` ia
+## `angkor_sandstone`; lichenul (`*_Lichen`) si darele (`*_Streak`) sunt noduri separate si raman
+## pe atlas (clasa triplanara ar sterge sloturile de pe corp).
+const _ANK_SANDSTONE: String = Palette.TRI_PREFIX + "angkor_sandstone"
+const CLASSES_ANGKOR := {
+	"bayon_face_tower_a": {"Bayon_Stone": _ANK_SANDSTONE},
+}
 const CLASSES_TRANSFAGARASAN := {
 	"schist_outcrop_a": _TF_OUTCROP, "schist_outcrop_b": _TF_OUTCROP,
 	"schist_outcrop_c": _TF_OUTCROP,
@@ -2477,6 +2484,8 @@ const CLASSES_BY_THEME := {
 	"carrara": CLASSES_CARRARA,
 	# Ha Long (Track22, #598): vezi `CLASSES_HALONG`.
 	"halong": CLASSES_HALONG,
+	# Angkor (Track24): vezi `CLASSES_ANGKOR`.
+	"angkor": CLASSES_ANGKOR,
 }
 
 ## Modelele care NU arunca umbra: siluetele de orizont, scalate/asezate la

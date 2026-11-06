@@ -756,10 +756,11 @@ sweep_speed = 3.0
 ai_yields = true
 """ + (f"sweep_phase = {ELEPHANT_PHASE}\n" if ELEPHANT_PHASE >= 0.0 else "")
     # ---- PASUL 6: turnurile Bayonului (corpuri statice cu nume, ca ProbeLaneClear sa le raporteze
-    # pe nume) + macheta lor vizuala. Corpul ramane si dupa hero-asset (pasul 7: `bayon_face_tower`
-    # inlocuieste doar vizualul, ca la stalpii Carrara).
+    # pe nume). Corpul ramane si dupa hero-asset: `bayon_face_tower_a` (pasul 7) e doar vizualul,
+    # in DecorManual, ca la stalpii Carrara.
     e0 = tag_s["E terasa V"]
     towers_txt = ""
+    decor_txt = ""
     for k_, (ds_, off_) in enumerate(BAYON_TOWERS):
         tx_, ty_ = pos_at(e0 + ds_)
         ty_ += off_
@@ -771,8 +772,15 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {r2(tx_)}, {r2(tz_)}, {r2(-ty
 [node name="Forma" type="CollisionShape3D" parent="Obstacole/BayonTurn{k_}"]
 shape = SubResource("Box_bayon")
 
-[node name="Macheta" type="MeshInstance3D" parent="Obstacole/BayonTurn{k_}"]
-mesh = SubResource("Mesh_bayon")
+"""
+        # Vizualul (pasul 7, kit §1.1): `bayon_face_tower_a.glb` in DecorManual, FARA corp
+        # (`coliziune="none"`): coliziunea ramane cutia de mai sus, pe care modelul o umple exact
+        # (originea la baza, deci baza cutiei = 1 m sub terasa). Toate trei pe varianta `a` pana la
+        # valul 1 (b, c).
+        decor_txt += f"""
+[node name="BayonA{k_}" parent="DecorManual" instance=ExtResource("10_bayon")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {r2(tx_)}, {r2(Y_BAYON - 1.0)}, {r2(-ty_)})
+metadata/coliziune = "none"
 """
     bias = [(IDX("E terasa V", BAYON_TOWERS[0][0] - 45.0),
              IDX("E terasa V", BAYON_TOWERS[-1][0] + 8.0), BAYON_BIAS)]
@@ -883,16 +891,14 @@ material = SubResource("Mat_macheta")
 [ext_resource type="Script" path="res://scenes/hazards/rain_cycle.gd" id="7_rain"]
 [ext_resource type="Script" path="res://scenes/hazards/lightning_flash.gd" id="8_flash"]
 [ext_resource type="Script" path="res://scenes/hazards/vine_curtain.gd" id="9_vine"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/bayon_face_tower_a.glb" id="10_bayon"]
+[ext_resource type="Script" path="res://scenes/props/world_prop.gd" id="11_prop"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_macheta"]
 albedo_color = Color(0.72, 0.64, 0.52, 1)
 
 [sub_resource type="BoxShape3D" id="Box_bayon"]
 size = Vector3({BAYON_TOWER_SIZE[0]}, {BAYON_TOWER_SIZE[1]}, {BAYON_TOWER_SIZE[2]})
-
-[sub_resource type="BoxMesh" id="Mesh_bayon"]
-size = Vector3({BAYON_TOWER_SIZE[0]}, {BAYON_TOWER_SIZE[1]}, {BAYON_TOWER_SIZE[2]})
-material = SubResource("Mat_macheta")
 
 [sub_resource type="Curve3D" id="Curve3D_angkor"]
 closed = true
@@ -942,6 +948,9 @@ curve = SubResource("Curve3D_angkor")
 {hz_txt}
 [node name="Obstacole" type="Node3D" parent="."]
 {towers_txt}
+[node name="DecorManual" type="Node3D" parent="."]
+script = ExtResource("11_prop")
+{decor_txt}
 [node name="Machete" type="Node3D" parent="."]
 {mach}"""
     with open(OUT_PATH, "w", encoding="utf-8", newline="\n") as f:

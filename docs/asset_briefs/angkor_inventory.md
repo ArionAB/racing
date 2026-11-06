@@ -194,3 +194,29 @@ pentru că sunt joase (voit). Verdictul real îl dă criticul orb.
 2. Placa feței e netedă și lată; fără modelarea obrajilor și a buzelor din desen.
 3. Lichenul e mult mai discret decât în desen (contract); dârele sunt albăstrii.
 4. Fără bevel pe gresie; etajele sunt plăci octogonale netede.
+
+## Integrare pe Track24 (coordonator, 6 nov 2026)
+
+**Acceptat** după runda 6, cu datoria deschisă de mai sus (fețele simplificate).
+Schimbarea e scrisă de `tools/gen_angkor_route.py` (scena rămâne generată):
+
+- `Obstacole/BayonTurn0..2` își păstrează **corpul** (cutia de 3 × 9 × 3 m, baza la
+  1 m sub terasă); macheta gri (`Macheta`, `Mesh_bayon`) e scoasă;
+- vizualul e `DecorManual/BayonA0..2` = `bayon_face_tower_a.glb`, cu originea pe
+  baza cutiei (cota terasei − 1) și `metadata/coliziune = "none"` (corpul e al
+  cutiei). Toate trei pe varianta `a` până la valul 1 (`b`, `c`);
+- clasa: `CLASSES_ANGKOR` în `world_prop.gd` (`Bayon_Stone` → `angkor_sandstone`),
+  intrarea `"angkor"` în `CLASSES_BY_THEME`. Lichenul și dârele rămân pe atlas.
+
+Gărzi: `ProbeAngkorPas6` OK (turnurile și podeaua de linie neschimbate);
+`probe_manual --track=24` OK (bazele la 0,70–0,75 m sub teren, adică îngropate
+cât trebuie, fiindcă terasa e drumul); `probe_decor --track=24` **19 materiale**
+(plafon 38). Cele trei turnuri apar ca „MultiMesh neatribuit” (25.050 tris =
+3 × 8.350): decorul manual e copt în loturi. **Găsit pe drum:** `probe_decor`
+scana doar `Track01..23`, deci Angkor n-a avut niciodată garda de materiale —
+singura cu drept de veto; bucla merge acum până la 99.
+
+În joc (`--gamecam`, `img/angkor_montaj/bayon_E_0415.png`, `bayon_E_0430.png`):
+turnul cel mai apropiat se citește „turn de piatră cu față calmă” (ochi, nas,
+zâmbet vizibile pe clasa de gresie). Terasa e încă asfalt cu marcaj (puntea de
+gresie e la pasul 8, brief §5.1).

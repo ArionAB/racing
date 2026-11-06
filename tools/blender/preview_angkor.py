@@ -88,6 +88,13 @@ SPECS = {
     "south_gate_face_tower": {"camera": {"azimuth": 62.0, "elevation": 8.0, "lens": 60.0, "margin": 1.06},
                               "views_aspect": 1.2, "bury": 0.0,
                               "face_center": (0.0, 3.0, 12.6), "face_dist": 22.0},
+    # val 2, grupul B: bolta (modul de 4 m, drumul pe Y), bloc, sprijin
+    "vault_intact": {"camera": {"azimuth": 38.0, "elevation": 12.0, "lens": 55.0, "margin": 1.08},
+                     "views_aspect": 1.1, "bury": 0.0},
+    "vault_broken": {"camera": {"azimuth": 38.0, "elevation": 14.0, "lens": 55.0, "margin": 1.08},
+                     "views_aspect": 1.1, "bury": 0.0},
+    "fallen_block": {"camera": {"azimuth": 62.0, "elevation": 16.0, "lens": 60.0, "margin": 1.12}},
+    "restoration_prop": {"camera": {"azimuth": 35.0, "elevation": 14.0, "lens": 60.0, "margin": 1.1}},
 }
 
 # camera de joc (scenes/race/chase_camera.gd: DEFAULT_HEIGHT/DISTANCE/BASE_FOV/

@@ -31,18 +31,18 @@ numește provizorie: se recalibrează pe captura pistei.
 Garda (`measure_angkor.py bayon`) citește fișierul, nu build-ul. Vârful nasului
 e la 1,49 (nucleul de 1,19 + 0,30 m de relief), treapta de jos la 1,50 exact.
 
-- Triunghiuri: **8.330** (`Bayon_Stone` 5.422, `Bayon_Lichen` 1.900,
-  `Bayon_Streak` 1.008). Fără plafon.
+- Triunghiuri: **7.022** (`Bayon_Stone` 4.906, `Bayon_Lichen` 1.900,
+  `Bayon_Streak` 216). Fără plafon.
 - Noduri și sloturi: `Bayon_Stone` = `ROCK_LIGHT` 3 (clasa `angkor_sandstone`
   la integrare); `Bayon_Lichen` = `LAVA_ORANGE` 30 (44 de pete) + `CACTUS_GREEN`
   12 (16 tufe); `Bayon_Streak` = `VOLCANIC_BLACK` 20 (nu `ROCK_DARK`). **Materiale: 3**
   (un nod = un material). Fără alb, fără `ROCK_DARK`, fără texturi proprii.
-- Arii (din fișier): total 447 m² (include suprafețele ascunse dintre
-  învelitorile suprapuse), lichen portocaliu **0,86%** (limita 3%, verificată de
-  garda), verde 0,28%, dâre 2,84%.
+- Arii (din fișier): total 446 m² (include suprafețele ascunse dintre
+  învelitorile suprapuse), lichen portocaliu **0,70%** (limita 3%, verificată de
+  garda), verde 0,35%, dâre 0,60%.
 - Origine: baza amprentei, centrat pe X și Z; scala 1 și rotația identitate pe
   cele trei rădăcini (verificat în `verify_angkor.sh`).
-- Primitive rotunde: bobocul 14 laturi, finialul 8. Restul sunt cutii și
+- Primitive rotunde: bobocul 14 laturi, finialul 8. Restul sunt prisme octogonale, cutii și
   învelitori convexe.
 - AO copt în vertex colors (28 de raze, distanță 0,7 m, forță 1,35, plafon
   0,30): crăpăturile (fanta ochilor, linia gurii, rosturile) ies întunecate.
@@ -79,48 +79,68 @@ primesc 3,7× triunghiuri; la 40 m nu se vedea), în schimb AO mai tare (distan�
 Garda a prins în runda 3 un defect real: o pată de lichen de pe treapta de jos
 ieșea cu 1 mm din patrat (Z = 1,501); fixat (`rw ≤ 0,40·lățimea pervazului`).
 
-### Element cu element
+**Runda 4** (corectura coordonatorului după runda 3; 7.022 tri). Cinci schimbări:
+1. **Fără nișă și fără pilaștri.** Blocul fețelor (3,0–6,6 m) are jumătate-lățimea
+   1,28 și e cel mai lat element de deasupra bazei; fusul de sub el are 1,20
+   (≈ 2,4 m), deci fețele sunt umflătura. Fața se bombează în afară (trei straturi:
+   nucleu, obraji, față), diadema stă direct pe frunte și face trecerea spre
+   etaje, urechile cu lobi lungi stau la colțuri, unde se întâlnesc două fețe.
+2. **Fața rescrisă** (`face_relief`): lată (0,80·H, maxilar lat, fără bărbie
+   ascuțită); sprânceană = arc continuu care urcă din puntea nasului (nu bară);
+   pleoape grele, închise, semilună cu partea convexă în jos; nas lat și plat cu
+   aripi late; buze late (mai late decât aripile nasului), cea de jos mai plină,
+   colțurile ridicate (zâmbet 0,9). Adâncimea e în nas (0,15 m peste obraz),
+   buze, pleoape și masa obrajilor, nu într-un raft de sprânceană.
+3. **Fața mărită:** H = 3,0 m (era 2,2), în 3,0–6,6 m.
+4. **Vârful:** frontoanele triunghiulare și țepii de colț scoși; etajele sunt
+   două rânduri de blocuri octogonale (colțuri chanfrenate), fiecare mai îngust,
+   sub o cornișă subțire, cu mici finialuri rotunjite la colțuri; con continuu
+   până la boboc (0,83 m).
+5. **Dârele:** 14 în total, scurte, late sus și ascuțite jos, doar sub cornișa
+   gâtului și sub primele două etaje; 0,60% din arie (era 2,84%).
+Baza rămâne 3,0 m la treapta de jos (1,50 / 1,40 / 1,30). Garda confirmă ±1,5.
+Două iterații interne în rundă: prima versiune a ochilor ieșea ca ochelari de
+soare (pleoapă + arc separat + punte), iar buzele, ca o dungă; ochii au devenit
+o singură masă sprânceană-pleoapă, buzele s-au îngroșat și zâmbetul a crescut.
+
+### Element cu element (după runda 4)
 
 | element | pe desen | în GLB | verdict |
 |---|---|---|---|
-| siluetă | turn subțire, fețele în mijloc, etaje care se îngustează | TURN: 3,0 × 9,0 m (h/l = 3,0), bază 0–1,5, soclu 1,5–2,7, fețe 3,0–6,1, 4 etaje, boboc | OK ca structură; mai **în trepte și mai cutie** decât desenul, care e un con continuu |
-| baza | trepte largi de blocuri | 3 trepte (1,50 / 1,38 / 1,27), blocuri în relief | OK |
-| soclu | rânduri mari de blocuri sub fețe | 3 rânduri de blocuri, cornișă dublă pe gât | OK |
-| fețe | 2 vizibile, ochi închiși, zâmbet, nas lat, urechi cu lobi lungi | 4 (câte una pe latură), ~2,2 m sprânceană–bărbie, ochi închiși (pleoape cu fantă), nas lat 0,30 m în relief, buze pline, urechi cu lobi | OK ca citire; **fațetate** (învelitori convexe), mai „sculptate în piatră” și mai puțin rotunjite decât desenul |
-| diademă | bandă arcuită cu nervuri, fronton | bandă arcuită cu 9 nervuri + fronton | OK |
-| urna de pe frunte | punct pe frunte | **absentă, voit** (iconografie de Buddha, brief angkor.md §8) | abatere voită |
-| pilaștri de colt | coloană îngustă între fețe | 4 pilaștri de 0,3 m | mai prezenți decât pe desen: fața stă într-o „fereastră” |
-| etaje | 4–5, colțuri cu ornamente ascuțite | 4 etaje, frontoane la mijlocul laturii, finialuri în colțuri | OK; ornamentele sunt piramide simple |
-| vârf | boboc de lotus cu petale | boboc de revoluție (14 laturi), 8 + 8 petale-învelitori, finial | OK ca rol; mai colțuros decât desenul |
-| lichen | pete portocalii mari, mult, și pe fețe verticale | 44 portocalii + 16 verzi, **doar pe orizontale**, 0,86% / 0,28% din arie | **abatere voită** (contract: sub 3%, pe orizontale); pe randările de la înălțimea ochiului pervazurile abia se văd, deci piesa e mult mai „curată” decât desenul |
-| dâre | negre sub cornișe | 2,84% din arie, benzi pe jumătatea de sus a pereților, sub cornișe | OK ca loc; mai înguste, mai dure și mai albăstrii (`VOLCANIC_BLACK`) decât cele pictate |
-| culoare | ocru-portocaliu saturat | gresie `#AD9877` (clasa) + AO | **abatere voită** (paleta; culoarea o dă clasa) |
-| iese din contur | nimic | nimic dincolo de ±1,5 | OK (măsurat) |
+| siluetă | turn, fețele în mijloc, con de etaje | 3,0 × 9,0 m; bază 0–1,5, fus 1,5–2,7, fețe 3,0–6,6, 4 etaje, boboc | OK: fețele SUNT volumul turnului; etajele fac un con din rânduri; mai în trepte decât conul desenului |
+| baza | piramidă în trepte, mai lată decât corpul | 3 trepte 1,50 / 1,40 / 1,30, blocuri în relief; fus de 2,4 m | OK |
+| blocul fețelor | fețele umplu lățimea turnului | 2,56 m pe latură (nucleu), cu fața bombată; ~3,0 m sprânceană–bărbie | OK |
+| fețe | rotunde, senine, ochi închiși, zâmbet | late, pleoape grele, nas lat, buze late; **fațetate** (învelitori convexe) și mai „de piatră” | citește ca față cu zâmbet; încă puțin masivă/„moai” față de desen |
+| urechi | lobi lungi lângă față | la colțuri, 0,1 m în relief | OK |
+| diademă | bandă cu nervuri peste frunte | bandă arcuită cu 11 nervuri, direct pe frunte | OK; seamănă și cu o „streașină” văzută de sus |
+| urna | punct pe frunte | **absentă, voit** (brief §8) | abatere voită |
+| etaje | 4–5 rânduri, colțuri rotunjite | 4 etaje × 2 rânduri octogonale + cornișe subțiri | OK; mai plate/disciplinate decât blocurile desenului |
+| vârf | boboc de lotus | boboc de revoluție 14 laturi, 8 + 8 petale | OK; mai colțuros |
+| lichen | pete portocalii pe tot | 44 + 16 pete, doar pe orizontale, 0,70% / 0,35% | **abatere voită** (contract) |
+| dâre | negre sub cornișe | 14, scurte, ascuțite, 0,60% | OK; încă albăstrii |
+| culoare | ocru saturat | gresie `#AD9877` (clasa) + AO | **abatere voită** |
+| iese din contur | nimic | nimic dincolo de ±1,5 (măsurat) | OK |
 
 ## Camera de joc (`--gamecam`) — verdict onest, nu acceptare
 
 Camera la 10 m înălțime și 12,5 m în spatele unui punct aflat la 30 m înaintea
 turnului, fov 68°, soare la 24° din spatele camerei, baza îngropată 1 m.
-**La rezoluția nativă a cadrului (1920×1080) fața are ~25 px înălțime**: se
-vede o bandă de diademă, o pată luminoasă cu nasul ca o muchie și gura ca o
-liniuță; ca „față” citește marginal. În decuparea mărită 3× (pixeli nativi,
-nu randare nouă) citește clar: sprâncene, ochi închiși, nas, gură, urechi. Ce
-ține citirea: relieful la nas/sprâncene care aruncă umbră sub soarele jos și
-AO în fanta ochilor și în linia gurii. Ce o slăbește: fața e doar ~25% din
-înălțimea turnului (contract: 2,2 m din 9,0), iar planul feței e mai întunecat
-decât nucleul din jur, deci pare o „mască într-o nișă”. Verdictul real îl dă
-criticul orb pe capturi din joc (§1.1: „față”/„chip” la ≥ 2 din 3 capturi).
+După runda 4 fața are ~35 px înălțime la rezoluția nativă (era ~25) și ocupă
+mijlocul turnului pe toată lățimea. În decuparea mărită 3× citește ca „turn
+făcut din fețe”: bloc lat cu nasul ca muchie luminată, ochi închiși sub sprâncene,
+gură largă, urechi la colțuri, coroană de etaje deasupra; nu mai e un tablou
+într-un cadru. Seren: în general da (pleoape grele, zâmbet); nu e caricatură,
+dar are ceva de „statuie de insulă” prin nasul lung și fălcile pătrate. La 1×
+(cadrul întreg) rămân vizibile mai ales silueta de con, blocul lat din mijloc și
+umbra nasului; ochii și gura sunt puncte. Verdictul real îl dă criticul orb
+(§1.1: „față”/„chip” la ≥ 2 din 3 capturi).
 
 ## Abateri rămase, pe față
 
-1. Fețele sunt din învelitori convexe: fațetate, cu muchii vizibile la
-   aproape. Rotunjirea (subdiviziune sau profile de revoluție pe obraz) n-a
-   încăput în buget de muncă în pilot.
-2. Lichenul e prea discret față de desen (contract), iar dârele sunt albăstrii.
-3. Fără bevel pe gresie: muchiile sunt vii; clasa triplanară va da rosturile
-   fine, dar nu muchiile rotunjite ale desenului.
-4. Silueta e în trepte; desenul are etajele mai late la bază și mai
-   continue spre vârf.
-5. Pe cadrul nativ din joc fața e mică (vezi mai sus). Dacă criticul orb o
-   respinge, pârghiile sunt ale coordonatorului (contractul: 2,2 m) — fața
-   mai mare cere ori nucleu mai lat, ori ieșit din cutia de 3 m.
+1. Fețele sunt din învelitori convexe: fațetate, cu muchii vizibile la aproape
+   și mai „moai” decât desenul (nas lung, fălci pătrate).
+2. Lichenul e mult mai discret decât în desen (contract: sub 3%, pe orizontale);
+   dârele sunt încă albăstrii (`VOLCANIC_BLACK`).
+3. Fără bevel pe gresie: muchiile sunt vii.
+4. Etajele sunt plăci octogonale netede; desenul are blocuri vizibile pe ele.
+5. Diadema citește uneori ca streașină.

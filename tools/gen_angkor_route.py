@@ -566,6 +566,24 @@ TREE_GATE_S = 26.0      # poarta-copac pe ramura. 14 m: ramura inca se racorda l
                         # -1,5). 22 m: aripa de est la ~4 m de virajul buclei (ProbeRace val 1: 1 ejectare + 1 blocaj
                         # langa ea). 26 m: primul bloc al dominoului se muta de la 30 la 33 m (in spatele portii).
 WATER_AW = 0.5          # oglinda santului Angkor Wat (cale +3)
+
+# Apa de JAD (gauntlet POI, piesa S): bara = verde-albastrui saturat, opac, fara turcoazul luminos al
+# recifului si fara spuma alba (`water_foam` 0: malul nu mai e banda cian). Culorile merg prin
+# `water_tint` (calibrare pe CPU); scriem RGB direct, nu slot nou de paleta. Cota apei ramane cea din
+# `custom_ravine_water` (lotusii stau pe ea). Stil = scena, deci alte piste nu se misca.
+JADE_STYLE = chr(10).join([
+    "{",
+    '"ravines": Array[int]([0, 1, 2, 3, 4]),',
+    '"water_shallow_rgb": Color(0.25, 0.46, 0.33, 1),',
+    '"water_deep_rgb": Color(0.10, 0.30, 0.20, 1),',
+    '"water_shore_rgb": Color(0.20, 0.34, 0.18, 1),',
+    '"water_dim": 0.9,',
+    '"water_foam": 0.0,',
+    '"water_crest": 0.0,',
+    '"water_band": 0.0,',
+    '"water_wave_amp_k": 0.25,',
+    '"water_glint": 0.10',
+    "}"])
 WATER_SRAH = 0.5        # Srah Srang: aceeasi cota ca santul (umplerea rapei 0 ajunge si aici)
 WATER_THOM = 11.0       # santul Angkor Thom (calea uriasilor +14)
 DOMINO_PERIOD = 11.0    # ceasul dominoului (brief §2: nu imparte turul de ~79 s)
@@ -1409,6 +1427,7 @@ custom_ravines = Array[Vector4]([{", ".join(V4(*r_) for r_ in ravines)}])
 custom_ravine_floors = Array[Vector2]([{", ".join(V2(a, b) for a, b in floors)}])
 custom_ravine_widths = Array[Vector2]([{", ".join(V2(a, b) for a, b in widths)}])
 custom_ravine_water = Array[Vector3]([{", ".join(V3(*w_) for w_ in water)}])
+custom_water_styles = Array[Dictionary]([{JADE_STYLE}])
 custom_width_segments = Array[Vector3]([{", ".join(V3(*w_) for w_ in width_segments)}])
 custom_width_pinches = Array[Vector3]([{", ".join(V3(*w_) for w_ in pinches)}])
 custom_parapets = Array[Vector4]([{", ".join(V4(*p_) for p_ in parapets)}])

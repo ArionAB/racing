@@ -148,6 +148,26 @@ if [ -f "$ROOT/kit/elephant_terrace_module.glb" ] && [ -f "$ROOT/kit/giant_root_
   [ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei grupului A (val 2) a esuat"; fail=1; }
 fi
 # --- sfarsit val 2, grupul A ---
+# --- val 2, grupul C ---
+echo
+echo "== val 2, grupul C: naga (balustrada, gap, cap) + uriasii deva/asura (kit 1.5) =="
+W2="tools/blender/measure_angkor_w2c.py"
+for F in naga_balustrade naga_balustrade_gap naga_head deva_giant asura_giant; do
+  check "kit/$F.glb" --origin=assembly
+done
+KB="$ROOT/kit"
+if [ -f "$KB/naga_balustrade.glb" ] && [ -f "$KB/deva_giant.glb" ]; then
+  python $W2 balustrade "$KB/naga_balustrade.glb" || fail=1
+  python $W2 gap "$KB/naga_balustrade_gap.glb" || fail=1
+  python $W2 head "$KB/naga_head.glb" || fail=1
+  python $W2 giant "$KB/deva_giant.glb" || fail=1
+  python $W2 giant "$KB/asura_giant.glb" || fail=1
+  st=$(python $W2 --selftest "$KB/naga_balustrade.glb" "$KB/deva_giant.glb" 2>&1); rc=$?
+  printf '%s
+' "$st" | grep -E "^-- sabotaj|garda a|SELFTEST"
+  [ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei grupului C (val 2) a esuat"; fail=1; }
+fi
+# --- sfarsit val 2, grupul C ---
 
 echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="

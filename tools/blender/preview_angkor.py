@@ -147,6 +147,17 @@ SPECS = {
                              "views_aspect": 0.8, "bury": 0.0},
     "bakheng_side_stair": {"camera": {"azimuth": 58.0, "elevation": 18.0, "lens": 60.0, "margin": 1.08},
                            "views_aspect": 0.9, "bury": 0.0},
+    # val 4, grupul B: vegetatia mica. Ficusul: zidul pe X, fetele pe +-Y (camera din +Y, usor lateral);
+    # suvitele au toate originea in (0,0,0) -- `preview_angkor_w4b.py` le desface pe X inainte de randare;
+    # lotusul si nuferii se vad de sus-lateral, de pe apa
+    "strangler_fig": {"camera": {"azimuth": 72.0, "elevation": 8.0, "lens": 60.0, "margin": 1.06},
+                      "views_aspect": 1.1, "bury": 0.0},
+    "vine_strands": {"camera": {"azimuth": 90.0, "elevation": 0.0, "lens": 70.0, "margin": 1.1},
+                     "views_aspect": 1.2, "bury": 0.0},
+    "lotus_cluster": {"camera": {"azimuth": 62.0, "elevation": 34.0, "lens": 60.0, "margin": 1.1},
+                      "views_aspect": 1.5, "bury": 0.0},
+    "water_lily_pads": {"camera": {"azimuth": 62.0, "elevation": 38.0, "lens": 60.0, "margin": 1.1},
+                        "views_aspect": 1.7, "bury": 0.0},
 }
 
 # camera de joc (scenes/race/chase_camera.gd: DEFAULT_HEIGHT/DISTANCE/BASE_FOV/

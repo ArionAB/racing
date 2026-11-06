@@ -39,8 +39,8 @@ MOD = 8.0 * S - 0.1                  # pas intre module, cu o ghidare de 10 cm d
 CZ = -213.0                          # axa piramidei (Godot z)
 YAW_E = -90.0                        # -Z al piesei spre E (+X)
 # (nume, x fata, cota baza, nr. module): fiecare etaj incepe cu 6 m mai in spate si cu 1,9 m mai sus
-LEVELS = [(-88.0, 23.8, 4), (-94.0, 25.7, 3), (-100.0, 27.6, 3), (-106.0, 29.5, 2)]
-TOP_Y = 29.5 + 1.5 * S               # fata de sus a ultimului etaj
+LEVELS = [(-88.0, 23.8, 4), (-94.0, 25.7, 3), (-100.0, 27.6, 3), (-106.0, 29.5, 2), (-112.0, 31.4, 2)]
+TOP_Y = 31.4 + 1.5 * S               # fata de sus a ultimului etaj
 
 ITEMS = []
 KIT_Y = {}
@@ -61,9 +61,16 @@ for li_, (fx_, by_, n_) in enumerate(LEVELS):
     ITEMS.append((f"C_Stair{li_}", "kit/bakheng_side_stair.glb", 0.0, 0.0, YAW_E,
                   {"world": (fx_ + 3.46 * sc_ / 2.0, CZ), "scale": sc_, "y": y0_, "scufundat": True}))
 
+# Balustrade naga pe paliere, de-o parte si de alta a scarii (modul de 4 m, lungimea pe X dupa yaw 90).
+for li_ in range(1, 4):
+    fx_ = LEVELS[li_ - 1][0]
+    for sg_ in (-1, 1):
+        ITEMS.append((f"C_Naga{li_}{'N' if sg_ < 0 else 'S'}", "kit/naga_balustrade.glb", 0.0, 0.0, 90.0,
+                      {"world": (fx_ - 3.0, CZ + sg_ * 2.4), "y": LEVELS[li_ - 1][1] + 1.5 * S, "scufundat": True}))
+
 # Turnuletele-altar: trei pe etajul de sus (cel din mijloc mai mare), cate doua pe fiecare palier dedesubt.
-TOWERS = [(-109.0, CZ, 1.9), (-109.0, CZ - 9.0, 1.45), (-109.0, CZ + 9.0, 1.45)]
-for li_ in range(3):
+TOWERS = [(-115.0, CZ, 1.8), (-115.0, CZ - 8.0, 1.4), (-115.0, CZ + 8.0, 1.4)]
+for li_ in range(4):
     fx_, by_, n_ = LEVELS[li_]
     TOWERS.append((fx_ - 3.0, CZ - (n_ * MOD) / 2.0 + 4.5, 1.15))
     TOWERS.append((fx_ - 3.0, CZ + (n_ * MOD) / 2.0 - 4.5, 1.15))
@@ -76,4 +83,9 @@ FOREST = [
     {"kind": "disc", "center": (-95.0, CZ - 14.0), "radius": 19.0, "claim": True, "label": "templul-munte Bakheng nord"},
     {"kind": "disc", "center": (-95.0, CZ + 14.0), "radius": 19.0, "claim": True, "label": "templul-munte Bakheng sud"},
     {"kind": "disc", "center": (-112.0, CZ), "radius": 15.0, "claim": True, "label": "templul-munte Bakheng sus"},
+    # culoare de vedere dinspre urcare (x -56) si dinspre bucla de sus (z -254) spre fata templului
+    {"kind": "disc", "center": (-74.0, CZ + 12.0), "radius": 14.0, "claim": True, "label": "vedere Bakheng urcare 1"},
+    {"kind": "disc", "center": (-74.0, CZ - 14.0), "radius": 14.0, "claim": True, "label": "vedere Bakheng urcare 2"},
+    {"kind": "disc", "center": (-92.0, -246.0), "radius": 9.0, "claim": True, "label": "vedere Bakheng bucla 1"},
+    {"kind": "disc", "center": (-76.0, -245.0), "radius": 9.0, "claim": True, "label": "vedere Bakheng bucla 2"},
 ]

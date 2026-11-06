@@ -169,6 +169,28 @@ if [ -f "$KB/naga_balustrade.glb" ] && [ -f "$KB/deva_giant.glb" ]; then
 fi
 # --- sfarsit val 2, grupul C ---
 
+# --- val 3, grupul B ---
+echo
+echo "== val 3, grupul B: galeria (stalp, acoperis, zid de relief, colt) + Bakheng (etaj, turnulet, scara) (kit 1.5) =="
+W3="tools/blender/measure_angkor_w3b.py"
+KB3="$ROOT/kit"
+for F in gallery_column gallery_roof gallery_relief_wall gallery_corner bakheng_terrace_tier bakheng_shrine_tower bakheng_side_stair; do
+  check "kit/$F.glb" --origin=assembly
+done
+if [ -f "$KB3/gallery_column.glb" ] && [ -f "$KB3/gallery_roof.glb" ] && [ -f "$KB3/bakheng_side_stair.glb" ]; then
+  python $W3 column "$KB3/gallery_column.glb" || fail=1
+  python $W3 roof "$KB3/gallery_roof.glb" || fail=1
+  python $W3 wall "$KB3/gallery_relief_wall.glb" || fail=1
+  python $W3 corner "$KB3/gallery_corner.glb" || fail=1
+  python $W3 tier "$KB3/bakheng_terrace_tier.glb" || fail=1
+  python $W3 shrine "$KB3/bakheng_shrine_tower.glb" || fail=1
+  python $W3 stair "$KB3/bakheng_side_stair.glb" || fail=1
+  st=$(python $W3 --selftest "$KB3" 2>&1); rc=$?
+  printf '%s\n' "$st" | grep -E "^-- sabotaj|garda a|SELFTEST"
+  [ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei grupului B (val 3) a esuat"; fail=1; }
+fi
+# --- sfarsit val 3, grupul B ---
+
 echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then

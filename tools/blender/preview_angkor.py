@@ -117,6 +117,21 @@ SPECS = {
                           "bury": 0.0},
     "giant_root_ramp": {"camera": {"azimuth": -58.0, "elevation": 20.0, "lens": 55.0, "margin": 1.06},
                         "views_aspect": 1.4, "bury": 0.0},
+    # val 3, grupul B: kitul galeriei (lant pe Y la acoperis, pe X la zid) si Bakheng (fata pe +Y)
+    "gallery_column": {"camera": {"azimuth": 50.0, "elevation": 8.0, "lens": 70.0, "margin": 1.08},
+                       "views_aspect": 0.4, "bury": 0.0},
+    "gallery_roof": {"camera": {"azimuth": 35.0, "elevation": 22.0, "lens": 55.0, "margin": 1.08},
+                     "views_aspect": 1.3, "bury": 0.0},
+    "gallery_relief_wall": {"camera": {"azimuth": 78.0, "elevation": 10.0, "lens": 60.0, "margin": 1.06},
+                            "views_aspect": 1.6, "bury": 0.0},
+    "gallery_corner": {"camera": {"azimuth": 235.0, "elevation": 22.0, "lens": 55.0, "margin": 1.06},
+                       "views_aspect": 1.2, "bury": 0.0},
+    "bakheng_terrace_tier": {"camera": {"azimuth": 72.0, "elevation": 22.0, "lens": 55.0, "margin": 1.06},
+                             "views_aspect": 1.8, "bury": 0.0},
+    "bakheng_shrine_tower": {"camera": {"azimuth": 68.0, "elevation": 12.0, "lens": 65.0, "margin": 1.08},
+                             "views_aspect": 0.8, "bury": 0.0},
+    "bakheng_side_stair": {"camera": {"azimuth": 58.0, "elevation": 18.0, "lens": 60.0, "margin": 1.08},
+                           "views_aspect": 0.9, "bury": 0.0},
 }
 
 # camera de joc (scenes/race/chase_camera.gd: DEFAULT_HEIGHT/DISTANCE/BASE_FOV/

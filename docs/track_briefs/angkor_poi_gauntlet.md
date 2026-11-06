@@ -339,3 +339,10 @@ prăbușită (există: bolți, dominoul, rampa-rădăcină, poarta-copac). Kitul
   ruine solide în fața ei pe bandă;
 - ruinele de lângă drumul principal: arc rapid, mașinile ies larg — corp la ≥ 4 m
   de margine, ProbeRace citit pe 0,65–0,76.
+
+**Deciziile dezvoltatorului după valul 1 (6 nov 2026):**
+- **Copacii: acceptați deocamdată, datorie** (ca fețele sculptate). Forma asset-urilor de
+  junglă (trunchi gol înalt, coroană plată sus) rămâne; criticii care o numesc se filtrează
+  ca globali. De revenit cu un val de asset-uri (copaci cu coroană joasă, lată, în etaje).
+- **Cerul și lumina: gradient de cer pe azimut + soare mai cald** (piersică spre soare,
+  violet de furtună spre est), opt-in pe temă, hash neutru pe celelalte piste — S, runda 3.

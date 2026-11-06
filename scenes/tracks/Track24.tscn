@@ -81,6 +81,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/angkor/plants/strangler_fig.glb" id="z19_strangler_fig"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/props/restoration_prop.glb" id="z20_restoration_prop"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/plants/vine_strands.glb" id="z21_vine_strands"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/sugar_palm.glb" id="z22_sugar_palm"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_macheta"]
 albedo_color = Color(0.72, 0.64, 0.52, 1)
@@ -9743,6 +9744,1070 @@ metadata/coliziune = "none"
 
 [node name="G_Liane8" parent="DecorManual/ZonaG" instance=ExtResource("z21_vine_strands")]
 transform = Transform3D(-0.231, 0.0, -0.973, 0.0, 1.0, 0.0, 0.973, 0.0, -0.231, 107.22, 7.86, 85.71)
+metadata/coliziune = "none"
+
+[node name="ZonaH" type="Node3D" parent="DecorManual"]
+
+[node name="H_Basin0_0" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(1.969, 0.0, 2.183, 0.0, 2.94, 0.0, -2.183, 0.0, 1.969, 27.2, 0.5, 144.72)
+metadata/coliziune = "none"
+
+[node name="H_Basin0_1" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-1.584, 0.0, 0.916, 0.0, 1.83, 0.0, -0.916, 0.0, -1.584, 30.48, 0.5, 142.0)
+metadata/coliziune = "none"
+
+[node name="H_Basin0_2" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(1.401, 0.0, -1.016, 0.0, 1.73, 0.0, 1.016, 0.0, 1.401, 26.63, 0.5, 140.57)
+metadata/coliziune = "none"
+
+[node name="H_Basin0_3" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(2.82, 0.0, -0.037, 0.0, 2.82, 0.0, 0.037, 0.0, 2.82, 30.85, 0.5, 139.31)
+metadata/coliziune = "none"
+
+[node name="H_Basin0_4" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(2.039, 0.0, 0.799, 0.0, 2.19, 0.0, -0.799, 0.0, 2.039, 27.25, 0.5, 134.92)
+metadata/coliziune = "none"
+
+[node name="H_Basin0_5" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.339, 0.0, -1.459, 0.0, 1.98, 0.0, 1.459, 0.0, -1.339, 33.39, 0.5, 139.43)
+metadata/coliziune = "none"
+
+[node name="H_Basin0_6" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(1.431, 0.0, 0.164, 0.0, 1.44, 0.0, -0.164, 0.0, 1.431, 30.89, 0.5, 136.77)
+metadata/coliziune = "none"
+
+[node name="H_Basin0_7" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-0.553, 0.0, -1.308, 0.0, 1.42, 0.0, 1.308, 0.0, -0.553, 29.9, 0.5, 136.94)
+metadata/coliziune = "none"
+
+[node name="H_Basin0_8" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-0.596, 0.0, 2.356, 0.0, 2.43, 0.0, -2.356, 0.0, -0.596, 32.31, 0.5, 135.64)
+metadata/coliziune = "none"
+
+[node name="H_Basin1_0" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.067, 0.0, 1.947, 0.0, 2.22, 0.0, -1.947, 0.0, -1.067, 40.54, 0.5, 159.74)
+metadata/coliziune = "none"
+
+[node name="H_Basin1_1" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-0.945, 0.0, -1.341, 0.0, 1.64, 0.0, 1.341, 0.0, -0.945, 37.19, 0.5, 162.24)
+metadata/coliziune = "none"
+
+[node name="H_Basin1_2" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(2.477, 0.0, -0.757, 0.0, 2.59, 0.0, 0.757, 0.0, 2.477, 32.48, 0.5, 161.32)
+metadata/coliziune = "none"
+
+[node name="H_Basin1_3" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.486, 0.0, -0.826, 0.0, 1.7, 0.0, 0.826, 0.0, -1.486, 36.73, 0.5, 163.11)
+metadata/coliziune = "none"
+
+[node name="H_Basin1_4" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-1.256, 0.0, -1.345, 0.0, 1.84, 0.0, 1.345, 0.0, -1.256, 38.27, 0.5, 156.24)
+metadata/coliziune = "none"
+
+[node name="H_Basin1_5" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-2.006, 0.0, 1.424, 0.0, 2.46, 0.0, -1.424, 0.0, -2.006, 40.58, 0.5, 159.98)
+metadata/coliziune = "none"
+
+[node name="H_Basin1_6" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-1.694, 0.0, 1.555, 0.0, 2.3, 0.0, -1.555, 0.0, -1.694, 35.45, 0.5, 157.97)
+metadata/coliziune = "none"
+
+[node name="H_Basin1_7" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(0.113, 0.0, 1.897, 0.0, 1.9, 0.0, -1.897, 0.0, 0.113, 32.01, 0.5, 161.4)
+metadata/coliziune = "none"
+
+[node name="H_Basin1_8" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-0.212, 0.0, -2.381, 0.0, 2.39, 0.0, 2.381, 0.0, -0.212, 32.36, 0.5, 158.9)
+metadata/coliziune = "none"
+
+[node name="H_Basin1_9" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(0.71, 0.0, -1.276, 0.0, 1.46, 0.0, 1.276, 0.0, 0.71, 33.45, 0.5, 161.75)
+metadata/coliziune = "none"
+
+[node name="H_Basin1_10" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.299, 0.0, 1.97, 0.0, 2.36, 0.0, -1.97, 0.0, -1.299, 34.41, 0.5, 163.75)
+metadata/coliziune = "none"
+
+[node name="H_Basin2_0" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-1.241, 0.0, 1.439, 0.0, 1.9, 0.0, -1.439, 0.0, -1.241, 47.2, 0.5, 151.79)
+metadata/coliziune = "none"
+
+[node name="H_Basin2_1" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-2.12, 0.0, 0.624, 0.0, 2.21, 0.0, -0.624, 0.0, -2.12, 48.31, 0.5, 147.43)
+metadata/coliziune = "none"
+
+[node name="H_Basin2_2" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(2.942, 0.0, -0.843, 0.0, 3.06, 0.0, 0.843, 0.0, 2.942, 54.52, 0.5, 144.58)
+metadata/coliziune = "none"
+
+[node name="H_Basin2_3" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(1.644, 0.0, 2.413, 0.0, 2.92, 0.0, -2.413, 0.0, 1.644, 49.13, 0.5, 150.41)
+metadata/coliziune = "none"
+
+[node name="H_Basin2_4" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-2.454, 0.0, -1.655, 0.0, 2.96, 0.0, 1.655, 0.0, -2.454, 50.99, 0.5, 149.5)
+metadata/coliziune = "none"
+
+[node name="H_Basin2_5" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(1.72, 0.0, 0.625, 0.0, 1.83, 0.0, -0.625, 0.0, 1.72, 50.66, 0.5, 150.3)
+metadata/coliziune = "none"
+
+[node name="H_Basin2_6" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(1.779, 0.0, 2.328, 0.0, 2.93, 0.0, -2.328, 0.0, 1.779, 48.61, 0.5, 149.26)
+metadata/coliziune = "none"
+
+[node name="H_Basin2_7" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.559, 0.0, 0.068, 0.0, 1.56, 0.0, -0.068, 0.0, -1.559, 49.84, 0.5, 153.33)
+metadata/coliziune = "none"
+
+[node name="H_Basin2_8" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(0.357, 0.0, -3.361, 0.0, 3.38, 0.0, 3.361, 0.0, 0.357, 46.73, 0.5, 147.98)
+metadata/coliziune = "none"
+
+[node name="H_Basin2_9" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.691, 0.0, -0.449, 0.0, 1.75, 0.0, 0.449, 0.0, -1.691, 53.61, 0.5, 147.72)
+metadata/coliziune = "none"
+
+[node name="H_Basin3_0" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(0.301, 0.0, 2.431, 0.0, 2.45, 0.0, -2.431, 0.0, 0.301, 57.19, 0.5, 138.89)
+metadata/coliziune = "none"
+
+[node name="H_Basin3_1" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(1.076, 0.0, 1.709, 0.0, 2.02, 0.0, -1.709, 0.0, 1.076, 57.49, 0.5, 136.63)
+metadata/coliziune = "none"
+
+[node name="H_Basin3_2" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(1.542, 0.0, 0.909, 0.0, 1.79, 0.0, -0.909, 0.0, 1.542, 62.3, 0.5, 140.37)
+metadata/coliziune = "none"
+
+[node name="H_Basin3_3" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.558, 0.0, 1.035, 0.0, 1.87, 0.0, -1.035, 0.0, -1.558, 65.31, 0.5, 142.15)
+metadata/coliziune = "none"
+
+[node name="H_Basin3_4" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(2.356, 0.0, -0.339, 0.0, 2.38, 0.0, 0.339, 0.0, 2.356, 67.26, 0.5, 135.4)
+metadata/coliziune = "none"
+
+[node name="H_Basin3_5" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(1.973, 0.0, -0.478, 0.0, 2.03, 0.0, 0.478, 0.0, 1.973, 65.35, 0.5, 141.54)
+metadata/coliziune = "none"
+
+[node name="H_Basin3_6" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.108, 0.0, -1.367, 0.0, 1.76, 0.0, 1.367, 0.0, -1.108, 65.79, 0.5, 141.86)
+metadata/coliziune = "none"
+
+[node name="H_Basin3_7" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(2.142, 0.0, -1.309, 0.0, 2.51, 0.0, 1.309, 0.0, 2.142, 63.65, 0.5, 136.78)
+metadata/coliziune = "none"
+
+[node name="H_Basin3_8" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(1.729, 0.0, 1.209, 0.0, 2.11, 0.0, -1.209, 0.0, 1.729, 59.03, 0.5, 132.62)
+metadata/coliziune = "none"
+
+[node name="H_Basin4_0" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-2.325, 0.0, 2.411, 0.0, 3.35, 0.0, -2.411, 0.0, -2.325, 70.64, 0.5, 159.89)
+metadata/coliziune = "none"
+
+[node name="H_Basin4_1" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-0.936, 0.0, -3.05, 0.0, 3.19, 0.0, 3.05, 0.0, -0.936, 67.18, 0.5, 155.82)
+metadata/coliziune = "none"
+
+[node name="H_Basin4_2" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-2.679, 0.0, 1.823, 0.0, 3.24, 0.0, -1.823, 0.0, -2.679, 71.7, 0.5, 158.65)
+metadata/coliziune = "none"
+
+[node name="H_Basin4_3" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-0.681, 0.0, 1.612, 0.0, 1.75, 0.0, -1.612, 0.0, -0.681, 68.31, 0.5, 159.9)
+metadata/coliziune = "none"
+
+[node name="H_Basin4_4" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(0.871, 0.0, 1.778, 0.0, 1.98, 0.0, -1.778, 0.0, 0.871, 64.91, 0.5, 156.89)
+metadata/coliziune = "none"
+
+[node name="H_Basin4_5" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-0.297, 0.0, -1.907, 0.0, 1.93, 0.0, 1.907, 0.0, -0.297, 64.99, 0.5, 160.32)
+metadata/coliziune = "none"
+
+[node name="H_Basin4_6" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(2.899, 0.0, 1.447, 0.0, 3.24, 0.0, -1.447, 0.0, 2.899, 63.82, 0.5, 159.52)
+metadata/coliziune = "none"
+
+[node name="H_Basin4_7" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.996, 0.0, 1.017, 0.0, 2.24, 0.0, -1.017, 0.0, -1.996, 69.89, 0.5, 161.26)
+metadata/coliziune = "none"
+
+[node name="H_Basin4_8" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.767, 0.0, 0.751, 0.0, 1.92, 0.0, -0.751, 0.0, -1.767, 65.35, 0.5, 159.52)
+metadata/coliziune = "none"
+
+[node name="H_Basin4_9" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(1.286, 0.0, -1.479, 0.0, 1.96, 0.0, 1.479, 0.0, 1.286, 67.48, 0.5, 157.76)
+metadata/coliziune = "none"
+
+[node name="H_Basin4_10" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-0.893, 0.0, 1.912, 0.0, 2.11, 0.0, -1.912, 0.0, -0.893, 70.86, 0.5, 159.58)
+metadata/coliziune = "none"
+
+[node name="H_Basin5_0" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(1.554, 0.0, -1.243, 0.0, 1.99, 0.0, 1.243, 0.0, 1.554, 49.7, 0.5, 168.57)
+metadata/coliziune = "none"
+
+[node name="H_Basin5_1" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(1.583, 0.0, 0.291, 0.0, 1.61, 0.0, -0.291, 0.0, 1.583, 48.78, 0.5, 167.3)
+metadata/coliziune = "none"
+
+[node name="H_Basin5_2" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(2.441, 0.0, 0.378, 0.0, 2.47, 0.0, -0.378, 0.0, 2.441, 47.97, 0.5, 166.59)
+metadata/coliziune = "none"
+
+[node name="H_Basin5_3" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-2.05, 0.0, -0.205, 0.0, 2.06, 0.0, 0.205, 0.0, -2.05, 42.7, 0.5, 165.01)
+metadata/coliziune = "none"
+
+[node name="H_Basin5_4" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(2.032, 0.0, 0.734, 0.0, 2.16, 0.0, -0.734, 0.0, 2.032, 49.69, 0.5, 163.12)
+metadata/coliziune = "none"
+
+[node name="H_Basin5_5" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(1.806, 0.0, 0.223, 0.0, 1.82, 0.0, -0.223, 0.0, 1.806, 48.33, 0.5, 163.76)
+metadata/coliziune = "none"
+
+[node name="H_Basin5_6" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(0.692, 0.0, 2.131, 0.0, 2.24, 0.0, -2.131, 0.0, 0.692, 50.53, 0.5, 166.83)
+metadata/coliziune = "none"
+
+[node name="H_Basin5_7" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-2.154, 0.0, 1.167, 0.0, 2.45, 0.0, -1.167, 0.0, -2.154, 44.5, 0.5, 163.62)
+metadata/coliziune = "none"
+
+[node name="H_Basin5_8" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(2.726, 0.0, 1.751, 0.0, 3.24, 0.0, -1.751, 0.0, 2.726, 43.19, 0.5, 168.17)
+metadata/coliziune = "none"
+
+[node name="H_Basin6_0" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-1.484, 0.0, -1.053, 0.0, 1.82, 0.0, 1.053, 0.0, -1.484, 69.45, 0.5, 146.64)
+metadata/coliziune = "none"
+
+[node name="H_Basin6_1" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(0.278, 0.0, 1.89, 0.0, 1.91, 0.0, -1.89, 0.0, 0.278, 74.95, 0.5, 149.15)
+metadata/coliziune = "none"
+
+[node name="H_Basin6_2" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(1.397, 0.0, -1.403, 0.0, 1.98, 0.0, 1.403, 0.0, 1.397, 72.21, 0.5, 143.74)
+metadata/coliziune = "none"
+
+[node name="H_Basin6_3" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(1.859, 0.0, 0.203, 0.0, 1.87, 0.0, -0.203, 0.0, 1.859, 70.41, 0.5, 150.95)
+metadata/coliziune = "none"
+
+[node name="H_Basin6_4" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(0.184, 0.0, 1.941, 0.0, 1.95, 0.0, -1.941, 0.0, 0.184, 73.77, 0.5, 152.46)
+metadata/coliziune = "none"
+
+[node name="H_Basin6_5" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(2.359, 0.0, 0.053, 0.0, 2.36, 0.0, -0.053, 0.0, 2.359, 70.03, 0.5, 145.46)
+metadata/coliziune = "none"
+
+[node name="H_Basin6_6" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.126, 0.0, 0.881, 0.0, 1.43, 0.0, -0.881, 0.0, -1.126, 76.67, 0.5, 150.48)
+metadata/coliziune = "none"
+
+[node name="H_Basin6_7" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(0.256, 0.0, 2.135, 0.0, 2.15, 0.0, -2.135, 0.0, 0.256, 69.97, 0.5, 146.06)
+metadata/coliziune = "none"
+
+[node name="H_Basin7_0" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-2.128, 0.0, 0.874, 0.0, 2.3, 0.0, -0.874, 0.0, -2.128, 22.89, 0.5, 151.73)
+metadata/coliziune = "none"
+
+[node name="H_Basin7_1" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-0.216, 0.0, 3.092, 0.0, 3.1, 0.0, -3.092, 0.0, -0.216, 24.78, 0.5, 152.99)
+metadata/coliziune = "none"
+
+[node name="H_Basin7_2" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.462, 0.0, 0.233, 0.0, 1.48, 0.0, -0.233, 0.0, -1.462, 26.86, 0.5, 149.49)
+metadata/coliziune = "none"
+
+[node name="H_Basin7_3" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(0.362, 0.0, 1.435, 0.0, 1.48, 0.0, -1.435, 0.0, 0.362, 27.88, 0.5, 155.39)
+metadata/coliziune = "none"
+
+[node name="H_Basin7_4" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(1.815, 0.0, -0.233, 0.0, 1.83, 0.0, 0.233, 0.0, 1.815, 27.02, 0.5, 153.89)
+metadata/coliziune = "none"
+
+[node name="H_Basin7_5" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-2.191, 0.0, -1.245, 0.0, 2.52, 0.0, 1.245, 0.0, -2.191, 26.31, 0.5, 149.25)
+metadata/coliziune = "none"
+
+[node name="H_Basin7_6" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-1.338, 0.0, 2.573, 0.0, 2.9, 0.0, -2.573, 0.0, -1.338, 22.55, 0.5, 147.1)
+metadata/coliziune = "none"
+
+[node name="H_BKerb0" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.5, 0.0, -0.026, 0.0, 1.5, 0.0, 0.026, 0.0, 1.5, 15.0, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb1" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.5, 0.0, -0.019, 0.0, 1.5, 0.0, 0.019, 0.0, 1.5, 17.2, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb2" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.5, 0.0, 0.022, 0.0, 1.5, 0.0, -0.022, 0.0, 1.5, 19.4, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb3" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.5, 0.0, -0.006, 0.0, 1.5, 0.0, 0.006, 0.0, 1.5, 21.6, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb4" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.499, 0.0, -0.046, 0.0, 1.5, 0.0, 0.046, 0.0, 1.499, 23.8, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb5" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.5, 0.0, -0.029, 0.0, 1.5, 0.0, 0.029, 0.0, 1.5, 26.0, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb6" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.499, 0.0, 0.051, 0.0, 1.5, 0.0, -0.051, 0.0, 1.499, 28.2, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb7" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.499, 0.0, 0.05, 0.0, 1.5, 0.0, -0.05, 0.0, 1.499, 30.4, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb8" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.5, 0.0, -0.002, 0.0, 1.5, 0.0, 0.002, 0.0, 1.5, 32.6, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb9" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.5, 0.0, -0.034, 0.0, 1.5, 0.0, 0.034, 0.0, 1.5, 34.8, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb10" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.5, 0.0, 0.017, 0.0, 1.5, 0.0, -0.017, 0.0, 1.5, 39.2, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb11" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.499, 0.0, -0.044, 0.0, 1.5, 0.0, 0.044, 0.0, 1.499, 61.2, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb12" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.5, 0.0, 0.034, 0.0, 1.5, 0.0, -0.034, 0.0, 1.5, 65.6, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb13" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.5, 0.0, -0.003, 0.0, 1.5, 0.0, 0.003, 0.0, 1.5, 67.8, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb14" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.5, 0.0, 0.007, 0.0, 1.5, 0.0, -0.007, 0.0, 1.5, 70.0, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb15" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.499, 0.0, -0.052, 0.0, 1.5, 0.0, 0.052, 0.0, 1.499, 72.2, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb16" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.5, 0.0, 0.017, 0.0, 1.5, 0.0, -0.017, 0.0, 1.5, 74.4, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb17" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.5, 0.0, 0.006, 0.0, 1.5, 0.0, -0.006, 0.0, 1.5, 76.6, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb18" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.5, 0.0, 0.007, 0.0, 1.5, 0.0, -0.007, 0.0, 1.5, 78.8, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb19" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.5, 0.0, 0.009, 0.0, 1.5, 0.0, -0.009, 0.0, 1.5, 81.0, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb20" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(1.5, 0.0, -0.035, 0.0, 1.5, 0.0, 0.035, 0.0, 1.5, 83.2, 0.52, 127.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb21" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(-0.02, 0.0, 1.5, 0.0, 1.5, 0.0, -1.5, 0.0, -0.02, 14.0, 0.52, 128.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb22" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(0.004, 0.0, 1.5, 0.0, 1.5, 0.0, -1.5, 0.0, 0.004, 14.0, 0.52, 130.2)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb23" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(-0.045, 0.0, 1.499, 0.0, 1.5, 0.0, -1.499, 0.0, -0.045, 14.0, 0.52, 132.4)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb24" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(-0.051, 0.0, 1.499, 0.0, 1.5, 0.0, -1.499, 0.0, -0.051, 14.0, 0.52, 134.6)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb25" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(-0.021, 0.0, 1.5, 0.0, 1.5, 0.0, -1.5, 0.0, -0.021, 14.0, 0.52, 136.8)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb26" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(-0.032, 0.0, 1.5, 0.0, 1.5, 0.0, -1.5, 0.0, -0.032, 14.0, 0.52, 139.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb27" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(0.042, 0.0, 1.499, 0.0, 1.5, 0.0, -1.499, 0.0, 0.042, 14.0, 0.52, 141.2)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb28" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(0.042, 0.0, 1.499, 0.0, 1.5, 0.0, -1.499, 0.0, 0.042, 14.0, 0.52, 143.4)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb29" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(0.014, 0.0, 1.5, 0.0, 1.5, 0.0, -1.5, 0.0, 0.014, 14.0, 0.52, 145.6)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb30" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(0.002, 0.0, 1.5, 0.0, 1.5, 0.0, -1.5, 0.0, 0.002, 14.0, 0.52, 147.8)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb31" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(0.03, 0.0, 1.5, 0.0, 1.5, 0.0, -1.5, 0.0, 0.03, 14.0, 0.52, 150.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb32" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(0.042, 0.0, 1.499, 0.0, 1.5, 0.0, -1.499, 0.0, 0.042, 14.0, 0.52, 152.2)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb33" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(-0.011, 0.0, 1.5, 0.0, 1.5, 0.0, -1.5, 0.0, -0.011, 14.0, 0.52, 154.4)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb34" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(-0.006, 0.0, 1.5, 0.0, 1.5, 0.0, -1.5, 0.0, -0.006, 14.0, 0.52, 156.6)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb35" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(-0.042, 0.0, 1.499, 0.0, 1.5, 0.0, -1.499, 0.0, -0.042, 14.0, 0.52, 158.8)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb36" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(-0.043, 0.0, 1.499, 0.0, 1.5, 0.0, -1.499, 0.0, -0.043, 14.0, 0.52, 161.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb37" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(0.04, 0.0, 1.499, 0.0, 1.5, 0.0, -1.499, 0.0, 0.04, 14.0, 0.52, 163.2)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb38" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(0.03, 0.0, 1.5, 0.0, 1.5, 0.0, -1.5, 0.0, 0.03, 14.0, 0.52, 165.4)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb39" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(0.045, 0.0, 1.499, 0.0, 1.5, 0.0, -1.499, 0.0, 0.045, 14.0, 0.52, 167.6)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb40" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(-0.001, 0.0, 1.5, 0.0, 1.5, 0.0, -1.5, 0.0, -0.001, 14.0, 0.52, 169.8)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb41" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(0.036, 0.0, 1.5, 0.0, 1.5, 0.0, -1.5, 0.0, 0.036, 84.5, 0.52, 130.2)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb42" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(0.049, 0.0, 1.499, 0.0, 1.5, 0.0, -1.499, 0.0, 0.049, 84.5, 0.52, 134.6)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb43" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(0.014, 0.0, 1.5, 0.0, 1.5, 0.0, -1.5, 0.0, 0.014, 84.5, 0.52, 136.8)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb44" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(-0.001, 0.0, 1.5, 0.0, 1.5, 0.0, -1.5, 0.0, -0.001, 84.5, 0.52, 139.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb45" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(-0.03, 0.0, 1.5, 0.0, 1.5, 0.0, -1.5, 0.0, -0.03, 84.5, 0.52, 141.2)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb46" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(0.046, 0.0, 1.499, 0.0, 1.5, 0.0, -1.499, 0.0, 0.046, 84.5, 0.52, 145.6)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb47" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(-0.038, 0.0, 1.5, 0.0, 1.5, 0.0, -1.5, 0.0, -0.038, 84.5, 0.52, 147.8)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb48" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(0.039, 0.0, 1.499, 0.0, 1.5, 0.0, -1.499, 0.0, 0.039, 84.5, 0.52, 150.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb49" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(0.043, 0.0, 1.499, 0.0, 1.5, 0.0, -1.499, 0.0, 0.043, 84.5, 0.52, 152.2)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb50" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(0.044, 0.0, 1.499, 0.0, 1.5, 0.0, -1.499, 0.0, 0.044, 84.5, 0.52, 154.4)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb51" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(-0.001, 0.0, 1.5, 0.0, 1.5, 0.0, -1.5, 0.0, -0.001, 84.5, 0.52, 156.6)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb52" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(0.046, 0.0, 1.499, 0.0, 1.5, 0.0, -1.499, 0.0, 0.046, 84.5, 0.52, 158.8)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb53" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(-0.048, 0.0, 1.499, 0.0, 1.5, 0.0, -1.499, 0.0, -0.048, 84.5, 0.52, 161.0)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb54" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(-0.04, 0.0, 1.499, 0.0, 1.5, 0.0, -1.499, 0.0, -0.04, 84.5, 0.52, 163.2)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb55" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(-0.038, 0.0, 1.5, 0.0, 1.5, 0.0, -1.5, 0.0, -0.038, 84.5, 0.52, 165.4)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb56" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(0.011, 0.0, 1.5, 0.0, 1.5, 0.0, -1.5, 0.0, 0.011, 84.5, 0.52, 167.6)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_BKerb57" parent="DecorManual/ZonaH" instance=ExtResource("z2_laterite_block")]
+transform = Transform3D(0.025, 0.0, 1.5, 0.0, 1.5, 0.0, -1.5, 0.0, 0.025, 84.5, 0.52, 169.8)
+metadata/coliziune = "none"
+metadata/scufundat = true
+
+[node name="H_MoatLot0_0" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.63, 0.0, -0.007, 0.0, 1.63, 0.0, 0.007, 0.0, -1.63, 53.9, 0.5, 94.34)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot0_1" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-3.196, 0.0, -0.589, 0.0, 3.25, 0.0, 0.589, 0.0, -3.196, 50.4, 0.5, 88.78)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot0_2" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(1.95, 0.0, 0.997, 0.0, 2.19, 0.0, -0.997, 0.0, 1.95, 51.9, 0.5, 88.3)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot0_3" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-1.574, 0.0, -1.494, 0.0, 2.17, 0.0, 1.494, 0.0, -1.574, 56.4, 0.5, 88.94)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot0_4" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-1.469, 0.0, -1.744, 0.0, 2.28, 0.0, 1.744, 0.0, -1.469, 50.4, 0.5, 93.03)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot0_5" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(2.056, 0.0, 1.688, 0.0, 2.66, 0.0, -1.688, 0.0, 2.056, 51.9, 0.5, 90.86)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot0_6" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(1.23, 0.0, 1.188, 0.0, 1.71, 0.0, -1.188, 0.0, 1.23, 56.4, 0.5, 88.01)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot0_7" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-1.945, 0.0, 0.314, 0.0, 1.97, 0.0, -0.314, 0.0, -1.945, 51.9, 0.5, 86.76)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot1_0" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(2.233, 0.0, 2.062, 0.0, 3.04, 0.0, -2.062, 0.0, 2.233, 34.9, 0.5, 79.86)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot1_1" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-1.761, 0.0, 0.499, 0.0, 1.83, 0.0, -0.499, 0.0, -1.761, 36.4, 0.5, 84.13)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot1_2" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-0.403, 0.0, -1.682, 0.0, 1.73, 0.0, 1.682, 0.0, -0.403, 29.9, 0.5, 80.44)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot1_3" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-2.46, 0.0, 2.093, 0.0, 3.23, 0.0, -2.093, 0.0, -2.46, 29.9, 0.5, 86.15)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot1_4" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-1.542, 0.0, 1.076, 0.0, 1.88, 0.0, -1.076, 0.0, -1.542, 29.9, 0.5, 78.85)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot1_5" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-0.931, 0.0, 1.059, 0.0, 1.41, 0.0, -1.059, 0.0, -0.931, 34.9, 0.5, 84.25)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot1_6" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(2.381, 0.0, 0.658, 0.0, 2.47, 0.0, -0.658, 0.0, 2.381, 32.4, 0.5, 82.65)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot1_7" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.564, 0.0, 1.461, 0.0, 2.14, 0.0, -1.461, 0.0, -1.564, 29.9, 0.5, 79.96)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot1_8" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-1.581, 0.0, -2.999, 0.0, 3.39, 0.0, 2.999, 0.0, -1.581, 34.9, 0.5, 86.0)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot2_0" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(1.509, 0.0, -1.981, 0.0, 2.49, 0.0, 1.981, 0.0, 1.509, 12.4, 0.5, 89.06)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot2_1" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.287, 0.0, 1.064, 0.0, 1.67, 0.0, -1.064, 0.0, -1.287, 14.4, 0.5, 84.4)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot2_2" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(1.74, 0.0, -1.878, 0.0, 2.56, 0.0, 1.878, 0.0, 1.74, 20.4, 0.5, 88.47)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot2_3" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(2.525, 0.0, -1.884, 0.0, 3.15, 0.0, 1.884, 0.0, 2.525, 17.9, 0.5, 91.42)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot2_4" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(0.939, 0.0, 1.571, 0.0, 1.83, 0.0, -1.571, 0.0, 0.939, 20.4, 0.5, 86.59)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot2_5" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(2.771, 0.0, -1.953, 0.0, 3.39, 0.0, 1.953, 0.0, 2.771, 14.4, 0.5, 89.63)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot3_0" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(1.138, 0.0, 1.067, 0.0, 1.56, 0.0, -1.067, 0.0, 1.138, -6.1, 0.5, 79.56)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot3_1" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(0.202, 0.0, 2.993, 0.0, 3.0, 0.0, -2.993, 0.0, 0.202, 0.4, 0.5, 72.86)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot3_2" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(0.378, 0.0, -1.913, 0.0, 1.95, 0.0, 1.913, 0.0, 0.378, -1.1, 0.5, 79.75)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot3_3" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.758, 0.0, 0.638, 0.0, 1.87, 0.0, -0.638, 0.0, -1.758, -1.1, 0.5, 76.26)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot3_4" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(1.269, 0.0, -1.205, 0.0, 1.75, 0.0, 1.205, 0.0, 1.269, -3.6, 0.5, 73.41)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot3_5" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(0.682, 0.0, -2.674, 0.0, 2.76, 0.0, 2.674, 0.0, 0.682, -6.1, 0.5, 79.87)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot3_6" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(0.816, 0.0, -1.48, 0.0, 1.69, 0.0, 1.48, 0.0, 0.816, 0.4, 0.5, 76.3)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot4_0" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-2.325, 0.0, 0.458, 0.0, 2.37, 0.0, -0.458, 0.0, -2.325, -9.6, 0.5, 84.97)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot4_1" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-0.789, 0.0, 1.403, 0.0, 1.61, 0.0, -1.403, 0.0, -0.789, -9.6, 0.5, 84.21)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot4_2" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-0.052, 0.0, -2.199, 0.0, 2.2, 0.0, 2.199, 0.0, -0.052, -13.1, 0.5, 85.14)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot4_3" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(2.199, 0.0, -0.564, 0.0, 2.27, 0.0, 0.564, 0.0, 2.199, -9.6, 0.5, 90.01)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot4_4" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(1.347, 0.0, 3.1, 0.0, 3.38, 0.0, -3.1, 0.0, 1.347, -11.6, 0.5, 86.61)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot4_5" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-2.051, 0.0, -0.453, 0.0, 2.1, 0.0, 0.453, 0.0, -2.051, -11.6, 0.5, 84.18)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot4_6" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(2.147, 0.0, -1.448, 0.0, 2.59, 0.0, 1.448, 0.0, 2.147, -9.6, 0.5, 86.34)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot4_7" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-1.86, 0.0, 1.831, 0.0, 2.61, 0.0, -1.831, 0.0, -1.86, -9.6, 0.5, 84.58)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot5_0" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(0.843, 0.0, 1.301, 0.0, 1.55, 0.0, -1.301, 0.0, 0.843, -32.1, 0.5, 85.81)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot5_1" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(0.519, 0.0, -1.514, 0.0, 1.6, 0.0, 1.514, 0.0, 0.519, -27.6, 0.5, 87.96)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot5_2" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.093, 0.0, 0.952, 0.0, 1.45, 0.0, -0.952, 0.0, -1.093, -32.1, 0.5, 88.9)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot5_3" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-2.03, 0.0, 0.576, 0.0, 2.11, 0.0, -0.576, 0.0, -2.03, -33.6, 0.5, 87.95)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot5_4" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(0.162, 0.0, 1.652, 0.0, 1.66, 0.0, -1.652, 0.0, 0.162, -32.1, 0.5, 87.77)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot5_5" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(1.713, 0.0, 1.332, 0.0, 2.17, 0.0, -1.332, 0.0, 1.713, -27.6, 0.5, 89.92)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot6_0" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(0.44, 0.0, -2.623, 0.0, 2.66, 0.0, 2.623, 0.0, 0.44, -44.1, 0.5, 81.76)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot6_1" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.338, 0.0, -1.784, 0.0, 2.23, 0.0, 1.784, 0.0, -1.338, -51.6, 0.5, 80.8)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot6_2" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.352, 0.0, -1.607, 0.0, 2.1, 0.0, 1.607, 0.0, -1.352, -47.6, 0.5, 83.66)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot6_3" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(1.313, 0.0, 0.842, 0.0, 1.56, 0.0, -0.842, 0.0, 1.313, -44.1, 0.5, 81.88)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot6_4" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-0.598, 0.0, -1.877, 0.0, 1.97, 0.0, 1.877, 0.0, -0.598, -47.6, 0.5, 81.21)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot6_5" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-0.476, 0.0, 2.352, 0.0, 2.4, 0.0, -2.352, 0.0, -0.476, -45.6, 0.5, 83.36)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot6_6" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(1.803, 0.0, -0.794, 0.0, 1.97, 0.0, 0.794, 0.0, 1.803, -49.1, 0.5, 77.69)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot7_0" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(1.238, 0.0, 1.634, 0.0, 2.05, 0.0, -1.634, 0.0, 1.238, -63.6, 0.5, 80.78)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot7_1" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-1.51, 0.0, 1.53, 0.0, 2.15, 0.0, -1.53, 0.0, -1.51, -61.1, 0.5, 81.83)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot7_2" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(0.065, 0.0, -1.999, 0.0, 2.0, 0.0, 1.999, 0.0, 0.065, -66.1, 0.5, 85.37)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot7_3" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-1.627, 0.0, -2.364, 0.0, 2.87, 0.0, 2.364, 0.0, -1.627, -63.6, 0.5, 81.94)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot7_4" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(0.951, 0.0, 2.398, 0.0, 2.58, 0.0, -2.398, 0.0, 0.951, -63.6, 0.5, 80.0)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot7_5" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-0.68, 0.0, 1.591, 0.0, 1.73, 0.0, -1.591, 0.0, -0.68, -61.1, 0.5, 84.44)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot7_6" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.332, 0.0, 1.518, 0.0, 2.02, 0.0, -1.518, 0.0, -1.332, -59.6, 0.5, 83.6)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot7_7" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-2.394, 0.0, -0.351, 0.0, 2.42, 0.0, 0.351, 0.0, -2.394, -63.6, 0.5, 79.82)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot7_8" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(0.056, 0.0, -1.889, 0.0, 1.89, 0.0, 1.889, 0.0, 0.056, -61.1, 0.5, 80.69)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot8_0" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(1.181, 0.0, 2.78, 0.0, 3.02, 0.0, -2.78, 0.0, 1.181, -87.6, 0.5, 93.46)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot8_1" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(2.569, 0.0, 1.325, 0.0, 2.89, 0.0, -1.325, 0.0, 2.569, -90.1, 0.5, 95.0)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot8_2" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-3.229, 0.0, -0.267, 0.0, 3.24, 0.0, 0.267, 0.0, -3.229, -90.1, 0.5, 90.2)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot8_3" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-2.264, 0.0, -0.884, 0.0, 2.43, 0.0, 0.884, 0.0, -2.264, -92.1, 0.5, 90.1)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot8_4" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-0.695, 0.0, -2.599, 0.0, 2.69, 0.0, 2.599, 0.0, -0.695, -92.1, 0.5, 93.96)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot8_5" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.565, 0.0, -1.532, 0.0, 2.19, 0.0, 1.532, 0.0, -1.565, -87.6, 0.5, 90.57)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot8_6" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(1.073, 0.0, 1.724, 0.0, 2.03, 0.0, -1.724, 0.0, 1.073, -90.1, 0.5, 95.0)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot9_0" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-0.234, 0.0, 1.926, 0.0, 1.94, 0.0, -1.926, 0.0, -0.234, -105.6, 0.5, 86.85)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot9_1" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-0.908, 0.0, -1.86, 0.0, 2.07, 0.0, 1.86, 0.0, -0.908, -102.1, 0.5, 90.57)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot9_2" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(0.846, 0.0, 3.159, 0.0, 3.27, 0.0, -3.159, 0.0, 0.846, -105.6, 0.5, 87.98)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot9_3" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(1.767, 0.0, -1.609, 0.0, 2.39, 0.0, 1.609, 0.0, 1.767, -105.6, 0.5, 88.77)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot9_4" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.819, 0.0, -0.335, 0.0, 1.85, 0.0, 0.335, 0.0, -1.819, -102.1, 0.5, 90.44)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot9_5" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-2.582, 0.0, 1.941, 0.0, 3.23, 0.0, -1.941, 0.0, -2.582, -105.6, 0.5, 89.83)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot9_6" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(0.487, 0.0, 3.112, 0.0, 3.15, 0.0, -3.112, 0.0, 0.487, -105.6, 0.5, 86.75)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot9_7" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.848, 0.0, -1.059, 0.0, 2.13, 0.0, 1.059, 0.0, -1.848, -102.1, 0.5, 90.75)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot10_0" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-1.654, 0.0, -0.829, 0.0, 1.85, 0.0, 0.829, 0.0, -1.654, -126.1, 0.5, 86.9)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot10_1" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(1.65, 0.0, 2.361, 0.0, 2.88, 0.0, -2.361, 0.0, 1.65, -126.1, 0.5, 82.87)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot10_2" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-0.051, 0.0, 2.199, 0.0, 2.2, 0.0, -2.199, 0.0, -0.051, -123.6, 0.5, 84.83)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot10_3" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(0.258, 0.0, -2.878, 0.0, 2.89, 0.0, 2.878, 0.0, 0.258, -123.6, 0.5, 83.18)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot10_4" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-0.237, 0.0, 1.461, 0.0, 1.48, 0.0, -1.461, 0.0, -0.237, -129.6, 0.5, 86.3)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot10_5" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-1.605, 0.0, -1.77, 0.0, 2.39, 0.0, 1.77, 0.0, -1.605, -123.6, 0.5, 85.1)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot11_0" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-2.083, 0.0, -0.491, 0.0, 2.14, 0.0, 0.491, 0.0, -2.083, -129.6, 0.5, 83.69)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot11_1" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-0.762, 0.0, 1.598, 0.0, 1.77, 0.0, -1.598, 0.0, -0.762, -129.6, 0.5, 80.7)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot11_2" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.173, 0.0, 1.029, 0.0, 1.56, 0.0, -1.029, 0.0, -1.173, -135.6, 0.5, 85.3)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot11_3" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(2.091, 0.0, -2.369, 0.0, 3.16, 0.0, 2.369, 0.0, 2.091, -135.6, 0.5, 81.04)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot11_4" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-2.28, 0.0, 0.039, 0.0, 2.28, 0.0, -0.039, 0.0, -2.28, -131.6, 0.5, 84.58)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot12_0" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(0.515, 0.0, -1.964, 0.0, 2.03, 0.0, 1.964, 0.0, 0.515, -162.1, 0.5, 87.96)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot12_1" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(0.697, 0.0, -2.202, 0.0, 2.31, 0.0, 2.202, 0.0, 0.697, -162.1, 0.5, 87.17)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot12_2" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(0.117, 0.0, 2.257, 0.0, 2.26, 0.0, -2.257, 0.0, 0.117, -162.1, 0.5, 90.38)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot12_3" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(1.839, 0.0, 0.066, 0.0, 1.84, 0.0, -0.066, 0.0, 1.839, -162.1, 0.5, 90.92)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot12_4" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-2.517, 0.0, -0.114, 0.0, 2.52, 0.0, 0.114, 0.0, -2.517, -157.1, 0.5, 87.04)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot12_5" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.86, 0.0, 0.909, 0.0, 2.07, 0.0, -0.909, 0.0, -1.86, -159.6, 0.5, 86.81)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot12_6" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(2.27, 0.0, -0.03, 0.0, 2.27, 0.0, 0.03, 0.0, 2.27, -157.1, 0.5, 90.08)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot13_0" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-2.582, 0.0, 0.305, 0.0, 2.6, 0.0, -0.305, 0.0, -2.582, -174.1, 0.5, 80.92)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot13_1" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(2.436, 0.0, 0.603, 0.0, 2.51, 0.0, -0.603, 0.0, 2.436, -171.6, 0.5, 81.88)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot13_2" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.277, 0.0, 1.226, 0.0, 1.77, 0.0, -1.226, 0.0, -1.277, -176.1, 0.5, 84.68)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot13_3" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-1.644, 0.0, -1.307, 0.0, 2.1, 0.0, 1.307, 0.0, -1.644, -174.1, 0.5, 88.12)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot13_4" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(0.338, 0.0, -1.379, 0.0, 1.42, 0.0, 1.379, 0.0, 0.338, -176.1, 0.5, 85.08)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot13_5" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(0.159, 0.0, 3.256, 0.0, 3.26, 0.0, -3.256, 0.0, 0.159, -174.1, 0.5, 87.36)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot13_6" parent="DecorManual/ZonaH" instance=ExtResource("z1_lotus_cluster")]
+transform = Transform3D(-2.328, 0.0, -0.387, 0.0, 2.36, 0.0, 0.387, 0.0, -2.328, -174.1, 0.5, 83.76)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot13_7" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(1.914, 0.0, 1.329, 0.0, 2.33, 0.0, -1.329, 0.0, 1.914, -171.6, 0.5, 80.95)
+metadata/coliziune = "none"
+
+[node name="H_MoatLot13_8" parent="DecorManual/ZonaH" instance=ExtResource("z0_water_lily_pads")]
+transform = Transform3D(-1.849, 0.0, 2.247, 0.0, 2.91, 0.0, -2.247, 0.0, -1.849, -179.6, 0.5, 84.08)
+metadata/coliziune = "none"
+
+[node name="H_Palm0" parent="DecorManual/ZonaH" instance=ExtResource("z22_sugar_palm")]
+transform = Transform3D(-1.188, 0.0, 0.277, 0.0, 1.22, 0.0, -0.277, 0.0, -1.188, -30.1, 2.9, 130.37)
+metadata/coliziune = "trunk"
+
+[node name="H_Palm1" parent="DecorManual/ZonaH" instance=ExtResource("z22_sugar_palm")]
+transform = Transform3D(0.34, 0.0, 1.161, 0.0, 1.21, 0.0, -1.161, 0.0, 0.34, -59.6, 2.9, 136.62)
+metadata/coliziune = "trunk"
+
+[node name="H_Palm2" parent="DecorManual/ZonaH" instance=ExtResource("z22_sugar_palm")]
+transform = Transform3D(-0.13, 0.0, -1.082, 0.0, 1.09, 0.0, 1.082, 0.0, -0.13, -97.1, 2.9, 132.22)
+metadata/coliziune = "trunk"
+
+[node name="H_Palm3" parent="DecorManual/ZonaH" instance=ExtResource("z22_sugar_palm")]
+transform = Transform3D(-1.039, 0.0, 0.151, 0.0, 1.05, 0.0, -0.151, 0.0, -1.039, -135.6, 2.9, 131.28)
+metadata/coliziune = "trunk"
+
+[node name="H_Palm4" parent="DecorManual/ZonaH" instance=ExtResource("z22_sugar_palm")]
+transform = Transform3D(-0.825, 0.0, 0.926, 0.0, 1.24, 0.0, -0.926, 0.0, -0.825, -177.6, 2.9, 132.54)
+metadata/coliziune = "trunk"
+
+[node name="H_Palm5" parent="DecorManual/ZonaH" instance=ExtResource("z22_sugar_palm")]
+transform = Transform3D(0.499, 0.0, 0.947, 0.0, 1.07, 0.0, -0.947, 0.0, 0.499, -210.1, 2.9, 139.76)
+metadata/coliziune = "trunk"
+
+[node name="H_Palm6" parent="DecorManual/ZonaH" instance=ExtResource("z22_sugar_palm")]
+transform = Transform3D(-1.164, 0.0, 0.397, 0.0, 1.23, 0.0, -0.397, 0.0, -1.164, -248.1, 2.9, 134.24)
+metadata/coliziune = "trunk"
+
+[node name="H_Palm7" parent="DecorManual/ZonaH" instance=ExtResource("z22_sugar_palm")]
+transform = Transform3D(0.639, 0.0, 1.039, 0.0, 1.22, 0.0, -1.039, 0.0, 0.639, -285.22, 2.9, 131.71)
+metadata/coliziune = "trunk"
+
+[node name="H_BPalm0" parent="DecorManual/ZonaH" instance=ExtResource("z22_sugar_palm")]
+transform = Transform3D(0.737, 0.0, 0.691, 0.0, 1.01, 0.0, -0.691, 0.0, 0.737, 8.0, 1.06, 138.0)
+metadata/coliziune = "trunk"
+
+[node name="H_BPalm1" parent="DecorManual/ZonaH" instance=ExtResource("z22_sugar_palm")]
+transform = Transform3D(0.655, 0.0, 1.005, 0.0, 1.2, 0.0, -1.005, 0.0, 0.655, 9.0, 0.92, 150.0)
+metadata/coliziune = "trunk"
+
+[node name="H_BPalm2" parent="DecorManual/ZonaH" instance=ExtResource("z22_sugar_palm")]
+transform = Transform3D(-0.329, 0.0, 1.175, 0.0, 1.22, 0.0, -1.175, 0.0, -0.329, 10.0, 0.64, 162.0)
+metadata/coliziune = "trunk"
+
+[node name="H_BPalm3" parent="DecorManual/ZonaH" instance=ExtResource("z22_sugar_palm")]
+transform = Transform3D(-0.047, 0.0, -1.239, 0.0, 1.24, 0.0, 1.239, 0.0, -0.047, 10.0, 0.97, 172.0)
+metadata/coliziune = "trunk"
+
+[node name="H_BPalm4" parent="DecorManual/ZonaH" instance=ExtResource("z22_sugar_palm")]
+transform = Transform3D(-1.225, 0.0, -0.108, 0.0, 1.23, 0.0, 0.108, 0.0, -1.225, 90.0, 1.02, 142.0)
+metadata/coliziune = "trunk"
+
+[node name="H_BPalm5" parent="DecorManual/ZonaH" instance=ExtResource("z22_sugar_palm")]
+transform = Transform3D(1.04, 0.0, 0.49, 0.0, 1.15, 0.0, -0.49, 0.0, 1.04, 91.0, 1.68, 156.0)
+metadata/coliziune = "trunk"
+
+[node name="H_TukL0" parent="DecorManual/ZonaH" instance=ExtResource("z17_tuk_tuk")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, 46.2, 2.0, 122.0)
+metadata/coliziune = "none"
+
+[node name="H_TukL1" parent="DecorManual/ZonaH" instance=ExtResource("z17_tuk_tuk")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, 50.0, 2.0, 122.0)
+metadata/coliziune = "none"
+
+[node name="H_TukL2" parent="DecorManual/ZonaH" instance=ExtResource("z17_tuk_tuk")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, 53.8, 2.0, 122.0)
 metadata/coliziune = "none"
 
 [node name="PadureMasa" type="Node3D" parent="."]

@@ -95,6 +95,20 @@ SPECS = {
                      "views_aspect": 1.1, "bury": 0.0},
     "fallen_block": {"camera": {"azimuth": 62.0, "elevation": 16.0, "lens": 60.0, "margin": 1.12}},
     "restoration_prop": {"camera": {"azimuth": 35.0, "elevation": 14.0, "lens": 60.0, "margin": 1.1}},
+    # val 2, grupul A: terasa elefantilor (fata pe +X, procesiunea priveste spre +Y), stalpul,
+    # statuia, radacina-rampa (capatul de jos la -Y: camera din sud-est). Terasa NU are baza
+    # ingropata in gamecam: coama e la cota drumului (kit 1.4); `gc_yaw` o intoarce cu fata
+    # spre camera de joc (+X devine -Y), ca sa se vada din drum.
+    "elephant_terrace_module": {"camera": {"azimuth": 28.0, "elevation": 12.0, "lens": 60.0, "margin": 1.06},
+                                "views_aspect": 1.5, "bury": 0.0, "gc_yaw": -90.0},
+    "elephant_terrace_end": {"camera": {"azimuth": 28.0, "elevation": 12.0, "lens": 60.0, "margin": 1.06},
+                             "views_aspect": 1.5, "bury": 0.0, "gc_yaw": -90.0},
+    "elephant_trunk_pillar": {"camera": {"azimuth": 62.0, "elevation": 9.0, "lens": 70.0, "margin": 1.06},
+                              "bury": 0.0},
+    "leper_king_statue": {"camera": {"azimuth": 62.0, "elevation": 10.0, "lens": 70.0, "margin": 1.06},
+                          "bury": 0.0},
+    "giant_root_ramp": {"camera": {"azimuth": -58.0, "elevation": 20.0, "lens": 55.0, "margin": 1.06},
+                        "views_aspect": 1.4, "bury": 0.0},
 }
 
 # camera de joc (scenes/race/chase_camera.gd: DEFAULT_HEIGHT/DISTANCE/BASE_FOV/
@@ -431,6 +445,9 @@ def gamecam(name, ahead=None, suffix="_gamecam", cars=(("a", 0.0), ("b", -4.0)))
         return
     scene = bpy.context.scene
     for o in meshes:
+        gy = SPECS.get(name, {}).get("gc_yaw", 0.0)
+        if gy:
+            o.rotation_euler = (0.0, 0.0, math.radians(gy))
         o.location = o.location + Vector((0.0, 0.0, -SPECS.get(name, {}).get("bury", GC_BURY)))
         o.hide_render = False
     bpy.context.view_layer.update()

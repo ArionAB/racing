@@ -346,3 +346,35 @@ prăbușită (există: bolți, dominoul, rampa-rădăcină, poarta-copac). Kitul
   ca globali. De revenit cu un val de asset-uri (copaci cu coroană joasă, lată, în etaje).
 - **Cerul și lumina: gradient de cer pe azimut + soare mai cald** (piersică spre soare,
   violet de furtună spre est), opt-in pe temă, hash neutru pe celelalte piste — S, runda 3.
+
+## Valul 3: C (pornit în paralel cu finalul lui G), apoi B, F, H
+
+### C — Phnom Bakheng (frac 0,114–0,318, `zona_c.py`)
+
+**Din decupaj și din ambele runde oarbe** (criticul a numit-o PRIMA de două ori, ca
+decor C): **lipsește templul-munte** — „terase de gresie ocru-aurii în trepte, o scară
+centrală, trei turnulețe-altar în etaje, balustrade naga”; la noi, „doar o pată
+rozalie la capătul drumului”. Dealul cu junglă și drumul în serpentine există.
+
+**Ce există în generator** (nu se mută): domul `PhnomBakheng` (TerrainPeak, vârful
++29 la (−110, 205) pe hartă), platforma de sus la +31 pe x −138, y 196…224 (hartă;
+Godot z = −y), cele 4 `BakhengAltar*` și 2 `BakhengScara*` lângă platformă, călugărul
+de pe platformă. Kitul: `kit/bakheng_terrace_tier.glb` (etajul de terasă),
+`kit/bakheng_shrine_tower.glb`, `kit/bakheng_side_stair.glb`, plus `gallery_*`,
+`naga_*`, `props/*` (mărimile în inventare).
+
+**Obligația vizuală:** etajele templului-munte trebuie să se **vadă din mașină**
+la urcare și pe platformă: socluri în trepte (3–5 etaje descrescătoare) în jurul
+vârfului, pe flancul dinspre drum, scara centrală, turnulețele pe etaje, nu doar
+pe platformă. Luminișuri `FOREST` (disc, claim, fără specii) ca jungla să nu le
+îngroape; jungla rămâne pe flancuri și pe urcarea „sub coronament”.
+
+**Capcana:**
+- serpentinele și platforma sunt late de 7 m: nimic cu corp la mai puțin de 3 m de
+  asfalt; etajele pe flancul de **dedesubtul** drumului nu au voie să urce peste cota
+  lui (ar deveni ziduri pe bandă) — măsoară cu `ProbeCarraraMontaj --decor --no-batch`;
+- `probe_manual`: piesele de terasă înfipte în deal prin proiect cer `"scufundat": True`
+  sau `"anchor"`;
+- **dezvăluirea** de pe platformă (Angkor Wat ieșind din junglă, pe stânga-față) nu se
+  acoperă: nimic înalt pe stânga platformei;
+- capturi: 0,150 · 0,200 · 0,250 · 0,290 · 0,310 (cu `tools/angkor_capture.sh`).

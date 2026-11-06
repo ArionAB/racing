@@ -4491,7 +4491,21 @@ static func themes() -> Dictionary:
 		"props": "",
 		"prop_contact_flat": [],
 		"hazard_model": "",
-		"horizon_model": "",
+		# Fundalul (kit §1.8, val 4): coronament, creasta Kulen spre NE, orezarii cu palmieri spre V.
+		# Benzile de furtuna (`StormBand_*`) NU intra: sub camera de joc (marginea de sus a cadrului la
+		# ~31 m peste sol la 240 m) baza lor de 46-54 m iese din cadru, iar coborate citesc platouri
+		# cenusii (Monument Valley in jungla). Furtuna spre est ramane decizie deschisa (kit §3).
+		"horizon_model": "res://assets/models/angkor/effects/angkor_horizon.glb",
+		# Atlasul (coronament verde, orezarii), nu clasa implicita "rock" (iesea maro-portocaliu).
+		"horizon_class": "",
+		"horizon_rings": [
+			{"count": 1, "angle_deg": -52.0, "yaw_deg": 142.0, "near": 200.0, "far": 260.0, "clear": 60.0,
+				"scale": 1.0, "picks": ["KulenRidge"]},
+			{"count": 1, "angle_deg": 180.0, "yaw_deg": -90.0, "near": 200.0, "far": 260.0, "clear": 60.0,
+				"scale": 1.0, "picks": ["Paddies_W"]},
+			{"count": 10, "near": 200.0, "far": 260.0, "clear": 60.0, "scale": 1.0,
+				"picks": ["Canopy_A", "Canopy_B", "Canopy_C"]},
+		],
 		"water": false,
 	}
 	return _themes_cache

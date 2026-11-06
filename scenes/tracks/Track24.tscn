@@ -29,6 +29,26 @@
 [ext_resource type="PackedScene" path="res://assets/models/angkor/kit/vault_intact.glb" id="27_vault"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/kit/vault_broken.glb" id="28_vault_b"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/kit/giant_root_ramp.glb" id="29_ramp"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/angkor_wat_temple.glb" id="30_temple"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/gallery_column.glb" id="31_gcol"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/gallery_roof.glb" id="32_groof"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/gallery_relief_wall.glb" id="33_gwall"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/bakheng_shrine_tower.glb" id="34_shrine"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/bakheng_side_stair.glb" id="35_stair"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/srah_srang_landing.glb" id="36_landing"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/vehicles/tuk_tuk.glb" id="37_tuk"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/animals/monk_standing.glb" id="38_monk"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/props/rubble_pile.glb" id="39_rubble"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/props/restoration_prop.glb" id="40_restore"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/props/numbered_block.glb" id="41_numbered"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/props/laterite_block.glb" id="42_laterite"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/strangler_fig.glb" id="43_fig"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/tetrameles_a.glb" id="44_tetra_a"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/tetrameles_b.glb" id="45_tetra_b"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/dipterocarp.glb" id="46_dipt"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/sugar_palm.glb" id="47_palm"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/lotus_cluster.glb" id="48_lotus"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/water_lily_pads.glb" id="49_lily"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_macheta"]
 albedo_color = Color(0.72, 0.64, 0.52, 1)
@@ -214,7 +234,7 @@ transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -97.5, 3.82, -0.0)
 metadata/coliziune = "mesh"
 
 [node name="PoartaCopac" parent="DecorManual" instance=ExtResource("16_treegate")]
-transform = Transform3D(-1.2, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 8.15, -49.0)
+transform = Transform3D(-1.45, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 8.15, -49.0)
 metadata/coliziune = "mesh"
 
 [node name="NagaCap0" parent="DecorManual" instance=ExtResource("19_nagahead")]
@@ -1212,6 +1232,317 @@ metadata/coliziune = "mesh"
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 7.16, 12.57)
 metadata/coliziune = "mesh"
 
+[node name="AngkorWat" parent="DecorManual" instance=ExtResource("30_temple")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0.0, 0.0, 0.0)
+metadata/coliziune = "hull"
+metadata/ancora_sol = Vector3(31.0, 4.1, 0.0)
+
+[node name="GalStalp0" parent="DecorManual" instance=ExtResource("31_gcol")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.0, 4.0, -26.0)
+metadata/coliziune = "none"
+
+[node name="GalAcoperis0" parent="DecorManual" instance=ExtResource("32_groof")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.0, 7.5, -28.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.75, -3.5, 0.0)
+
+[node name="GalZid0" parent="DecorManual" instance=ExtResource("33_gwall")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -66.3, 4.0, -28.0)
+metadata/coliziune = "none"
+
+[node name="GalStalp1" parent="DecorManual" instance=ExtResource("31_gcol")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.0, 4.0, -30.0)
+metadata/coliziune = "none"
+
+[node name="GalAcoperis1" parent="DecorManual" instance=ExtResource("32_groof")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.0, 7.5, -32.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.75, -3.5, 0.0)
+
+[node name="GalZid1" parent="DecorManual" instance=ExtResource("33_gwall")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -66.3, 4.0, -32.0)
+metadata/coliziune = "none"
+
+[node name="GalStalp2" parent="DecorManual" instance=ExtResource("31_gcol")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.0, 4.0, -34.0)
+metadata/coliziune = "none"
+
+[node name="GalAcoperis2" parent="DecorManual" instance=ExtResource("32_groof")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.0, 7.5, -36.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.75, -3.5, 0.0)
+
+[node name="GalZid2" parent="DecorManual" instance=ExtResource("33_gwall")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -66.3, 4.0, -36.0)
+metadata/coliziune = "none"
+
+[node name="GalStalp3" parent="DecorManual" instance=ExtResource("31_gcol")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.0, 4.0, -38.0)
+metadata/coliziune = "none"
+
+[node name="GalAcoperis3" parent="DecorManual" instance=ExtResource("32_groof")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.0, 7.5, -40.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.75, -3.5, 0.0)
+
+[node name="GalZid3" parent="DecorManual" instance=ExtResource("33_gwall")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -66.3, 4.0, -40.0)
+metadata/coliziune = "none"
+
+[node name="GalStalp4" parent="DecorManual" instance=ExtResource("31_gcol")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.0, 4.0, -42.0)
+metadata/coliziune = "none"
+
+[node name="GalAcoperis4" parent="DecorManual" instance=ExtResource("32_groof")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.0, 7.5, -44.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.75, -3.5, 0.0)
+
+[node name="GalZid4" parent="DecorManual" instance=ExtResource("33_gwall")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -66.3, 4.0, -44.0)
+metadata/coliziune = "none"
+
+[node name="GalStalp5" parent="DecorManual" instance=ExtResource("31_gcol")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.0, 4.0, -46.0)
+metadata/coliziune = "none"
+
+[node name="GalAcoperis5" parent="DecorManual" instance=ExtResource("32_groof")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.0, 7.5, -48.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.75, -3.5, 0.0)
+
+[node name="GalZid5" parent="DecorManual" instance=ExtResource("33_gwall")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -66.3, 4.0, -48.0)
+metadata/coliziune = "none"
+
+[node name="GalStalp6" parent="DecorManual" instance=ExtResource("31_gcol")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.0, 4.0, -50.0)
+metadata/coliziune = "none"
+
+[node name="GalAcoperis6" parent="DecorManual" instance=ExtResource("32_groof")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.0, 7.5, -52.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.75, -3.5, 0.0)
+
+[node name="GalZid6" parent="DecorManual" instance=ExtResource("33_gwall")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -66.3, 4.0, -52.0)
+metadata/coliziune = "none"
+
+[node name="GalStalp7" parent="DecorManual" instance=ExtResource("31_gcol")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.0, 4.0, -54.0)
+metadata/coliziune = "none"
+
+[node name="GalAcoperis7" parent="DecorManual" instance=ExtResource("32_groof")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.0, 7.5, -56.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.75, -3.5, 0.0)
+
+[node name="GalZid7" parent="DecorManual" instance=ExtResource("33_gwall")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -66.3, 4.0, -56.0)
+metadata/coliziune = "none"
+
+[node name="GalStalp8" parent="DecorManual" instance=ExtResource("31_gcol")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.0, 4.0, -58.0)
+metadata/coliziune = "none"
+
+[node name="GalAcoperis8" parent="DecorManual" instance=ExtResource("32_groof")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.0, 7.5, -60.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.75, -3.5, 0.0)
+
+[node name="GalZid8" parent="DecorManual" instance=ExtResource("33_gwall")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -66.3, 4.0, -60.0)
+metadata/coliziune = "none"
+
+[node name="GalStalpN" parent="DecorManual" instance=ExtResource("31_gcol")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.0, 4.0, -62.0)
+metadata/coliziune = "none"
+
+[node name="BakhengAltar0" parent="DecorManual" instance=ExtResource("34_shrine")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -148.0, 31.0, -220.0)
+metadata/coliziune = "none"
+
+[node name="BakhengAltar1" parent="DecorManual" instance=ExtResource("34_shrine")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -148.0, 31.0, -200.0)
+metadata/coliziune = "none"
+
+[node name="BakhengAltar2" parent="DecorManual" instance=ExtResource("34_shrine")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -128.0, 31.0, -220.0)
+metadata/coliziune = "none"
+
+[node name="BakhengAltar3" parent="DecorManual" instance=ExtResource("34_shrine")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -128.0, 31.0, -200.0)
+metadata/coliziune = "none"
+
+[node name="BakhengScara0" parent="DecorManual" instance=ExtResource("35_stair")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -152.0, 30.25, -210.0)
+metadata/coliziune = "none"
+
+[node name="BakhengScara1" parent="DecorManual" instance=ExtResource("35_stair")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -124.0, 30.1, -210.0)
+metadata/coliziune = "none"
+
+[node name="SrahSrangDebarcader" parent="DecorManual" instance=ExtResource("36_landing")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50.0, 2.0, 122.5)
+metadata/coliziune = "none"
+
+[node name="TukTuk0" parent="DecorManual" instance=ExtResource("37_tuk")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -88.0, 3.0, -14.0)
+metadata/coliziune = "none"
+
+[node name="Moto" parent="DecorManual/TukTuk0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.95)
+
+[node name="TukTuk1" parent="DecorManual" instance=ExtResource("37_tuk")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -84.0, 3.0, -15.0)
+metadata/coliziune = "none"
+
+[node name="Moto" parent="DecorManual/TukTuk1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.95)
+
+[node name="TukTuk2" parent="DecorManual" instance=ExtResource("37_tuk")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -80.0, 3.0, -14.5)
+metadata/coliziune = "none"
+
+[node name="Moto" parent="DecorManual/TukTuk2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.95)
+
+[node name="Calugar0" parent="DecorManual" instance=ExtResource("38_monk")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -90.0, 3.0, 16.0)
+metadata/coliziune = "none"
+
+[node name="Calugar1" parent="DecorManual" instance=ExtResource("38_monk")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -89.0, 3.0, 17.5)
+metadata/coliziune = "none"
+
+[node name="Calugar2" parent="DecorManual" instance=ExtResource("38_monk")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -147.0, 31.0, -228.0)
+metadata/coliziune = "none"
+
+[node name="MolozGalerie0" parent="DecorManual" instance=ExtResource("39_rubble")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 134.0, 7.95, -35.0)
+metadata/coliziune = "none"
+
+[node name="MolozGalerie1" parent="DecorManual" instance=ExtResource("39_rubble")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 117.5, 7.71, -17.0)
+metadata/coliziune = "none"
+
+[node name="MolozGalerie2" parent="DecorManual" instance=ExtResource("40_restore")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 134.0, 7.6, -9.0)
+metadata/coliziune = "none"
+
+[node name="MolozGalerie3" parent="DecorManual" instance=ExtResource("41_numbered")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 118.0, 7.86, -28.0)
+metadata/coliziune = "none"
+
+[node name="MolozGalerie4" parent="DecorManual" instance=ExtResource("42_laterite")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 117.5, 7.52, -3.0)
+metadata/coliziune = "none"
+
+[node name="Ficus0" parent="DecorManual" instance=ExtResource("43_fig")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 115.0, 7.81, -39.0)
+metadata/coliziune = "none"
+
+[node name="Ficus1" parent="DecorManual" instance=ExtResource("43_fig")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 137.0, 7.45, -13.0)
+metadata/coliziune = "none"
+
+[node name="Ficus2" parent="DecorManual" instance=ExtResource("43_fig")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 114.5, 7.26, 1.0)
+metadata/coliziune = "none"
+
+[node name="JunglaTaProhm0" parent="DecorManual" instance=ExtResource("44_tetra_a")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 150.0, 8.0, -40.0)
+metadata/coliziune = "trunk"
+
+[node name="JunglaTaProhm1" parent="DecorManual" instance=ExtResource("45_tetra_b")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 104.0, 8.0, -55.0)
+metadata/coliziune = "trunk"
+
+[node name="JunglaTaProhm2" parent="DecorManual" instance=ExtResource("44_tetra_a")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 152.0, 8.0, 10.0)
+metadata/coliziune = "trunk"
+
+[node name="JunglaTaProhm3" parent="DecorManual" instance=ExtResource("46_dipt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100.0, 8.0, -0.0)
+metadata/coliziune = "trunk"
+
+[node name="JunglaTaProhm4" parent="DecorManual" instance=ExtResource("45_tetra_b")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 165.0, 8.0, -15.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierV0" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -212.0, 3.0, 48.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierH0" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40.0, 3.0, 128.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierV1" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -218.0, 3.0, 36.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierH1" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70.0, 3.0, 131.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierV2" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -212.0, 3.0, 26.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierH2" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -100.0, 3.0, 128.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierV3" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -218.0, 3.0, -26.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierH3" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -130.0, 3.0, 131.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierV4" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -212.0, 3.0, -36.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierH4" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160.0, 3.0, 128.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierV5" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -218.0, 3.0, -48.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierH5" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -190.0, 3.0, 131.0)
+metadata/coliziune = "trunk"
+
+[node name="Lotus0" parent="DecorManual" instance=ExtResource("48_lotus")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160.0, 0.5, -22.0)
+metadata/coliziune = "none"
+
+[node name="Lotus1" parent="DecorManual" instance=ExtResource("48_lotus")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -135.0, 0.5, 26.0)
+metadata/coliziune = "none"
+
+[node name="Lotus2" parent="DecorManual" instance=ExtResource("49_lily")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -180.0, 0.5, 18.0)
+metadata/coliziune = "none"
+
+[node name="Lotus3" parent="DecorManual" instance=ExtResource("49_lily")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -120.0, 0.5, -30.0)
+metadata/coliziune = "none"
+
+[node name="Lotus4" parent="DecorManual" instance=ExtResource("48_lotus")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40.0, 0.5, 150.0)
+metadata/coliziune = "none"
+
+[node name="Lotus5" parent="DecorManual" instance=ExtResource("49_lily")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 65.0, 0.5, 140.0)
+metadata/coliziune = "none"
+
 [node name="CameraPoartaDeSud" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -230.0, 14.0, -381.36)
 script = ExtResource("17_camzone")
@@ -1249,53 +1580,3 @@ ceiling_dist = 16.0
 blend_time = 0.35
 
 [node name="Machete" type="Node3D" parent="."]
-
-[node name="AW_Soclu" type="CSGBox3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 0)
-size = Vector3(64, 8, 64)
-material = SubResource("Mat_macheta")
-
-[node name="AW_Soclu2" type="CSGBox3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.0, 0)
-size = Vector3(44, 2, 44)
-material = SubResource("Mat_macheta")
-
-[node name="AW_TurnCentral" type="CSGCylinder3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 22.0, 0)
-radius = 7.0
-height = 28.0
-sides = 8
-cone = true
-material = SubResource("Mat_macheta")
-
-[node name="AW_TurnColt0" type="CSGCylinder3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 19.0, -17)
-radius = 5.0
-height = 22.0
-sides = 8
-cone = true
-material = SubResource("Mat_macheta")
-
-[node name="AW_TurnColt1" type="CSGCylinder3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 19.0, -17)
-radius = 5.0
-height = 22.0
-sides = 8
-cone = true
-material = SubResource("Mat_macheta")
-
-[node name="AW_TurnColt2" type="CSGCylinder3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 19.0, 17)
-radius = 5.0
-height = 22.0
-sides = 8
-cone = true
-material = SubResource("Mat_macheta")
-
-[node name="AW_TurnColt3" type="CSGCylinder3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 19.0, 17)
-radius = 5.0
-height = 22.0
-sides = 8
-cone = true
-material = SubResource("Mat_macheta")

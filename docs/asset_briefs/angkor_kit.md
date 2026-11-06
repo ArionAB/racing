@@ -321,3 +321,20 @@ de stil 3 doar coliziune (`balustrade_skin` în temă), cu naga, capete naga și
 zidului; terasa din module cu stâlpi-trompă; galeria scurtăturii din bolți, prăbușite unde cade
 dominoul; dominoul pe `fallen_block` (`RimBoulderHazard.model`, cod mic, implicitul neschimbat);
 rădăcina-rampă cu coliziune în locul cocoașei din profil.
+
+**Valurile 3–4 pe Track24 (aceeași zi):** templul în locul machetelor (aceleași cote; soclul îngropat
+~4 m ca și machetele), galeria de vest a incintei pe stânga lui B (stâlpi, acoperiș, zid cu
+basorelief), altarele și scările Bakhengului pe platformă, debarcaderul Srah Srang, tuk-tuk-uri
+parcate și călugări lângă gopura (decor; împingerea rămâne decizie), moloz / restaurare / bloc
+numerotat lângă galeria scurtăturii, ficuși, tetrameles și dipterocarpi în jurul Ta Prohm, palmieri
+de zahăr pe malul de vest și pe H, lotuși și nuferi pe șanțuri. Fundalul: coronament, creasta Kulen
+și orezăriile (`horizon_class` gol = atlasul). **Benzile de furtună NU intră:** sub camera de joc baza
+lor iese din cadru, iar coborâte citesc platouri cenușii (riscul „Monument Valley în junglă”).
+**Furtuna spre est e decizie deschisă** (gradient de cer pe azimut = cod nou). Jungla în masă
+(scatter) și perdeaua de liane pe `vine_strands` sunt pasul 8.
+
+**ProbeRace, 16 seed-uri, starea finală față de pasul 6:** repuneri 7 (2), ejectări 6 (2): 2 pe
+turnul Bayon b și 1 la creastă (tipuri preexistente), 3 în coridorul scurtăturii (aripa porții-copac,
+exteriorul unei bolți, aterizarea după rampă) — mașinile care ies de pe ramură lovesc acum ziduri
+solide. Domino 9,7%, creasta 0,66 s, elefantul 10,9 s/seed (main: 10). **Decizie la volan:** zidurile
+galeriei rămân solide sau devin decor.

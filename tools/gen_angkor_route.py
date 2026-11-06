@@ -819,6 +819,7 @@ transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, {r2(gpx_)}, {r2(elev_at(gs_)
 metadata/coliziune = "mesh"
 """
     # Poarta-copac: la intrarea ramurii, care merge spre S (+Z Godot) -> rotatie de 180 de grade, LATA de
+    # 1,45 ori (golul 9,9 m; la 1,2 ProbeRace val 3 mai gasea 2 ejectari pe stalpi). Istoric:
     # 1,2 ori de-a curmezisul (golul 6,8 -> 8,2 m): ProbeRace val 2, masinile care intra in ramura pe
     # linia virajului loveau stalpul portii la 28 m/s. Suprafata ramurii ramane reteta temei (nisipul de
     # la pasul 6) cu tenta; GRAVEL (incercat la val 1) aducea doua ejectari noi la iesirea ramurii.
@@ -831,7 +832,7 @@ metadata/coliziune = "mesh"
     tge_ = tb0_[3] + (tb1_[3] - tb0_[3]) * tt_
     decor_txt += f"""
 [node name="PoartaCopac" parent="DecorManual" instance=ExtResource("16_treegate")]
-transform = Transform3D(-1.2, 0, 0, 0, 1, 0, 0, 0, -1, {r2(tgx_)}, {r2(tge_)}, {r2(-tgy_)})
+transform = Transform3D(-1.45, 0, 0, 0, 1, 0, 0, 0, -1, {r2(tgx_)}, {r2(tge_)}, {r2(-tgy_)})
 metadata/coliziune = "mesh"
 """
     cam_txt = f"""
@@ -1016,6 +1017,83 @@ ceiling = 6.6
 ceiling_dist = 16.0
 blend_time = 0.35
 """
+    # ---- VAL 3-4 (kit §1.2, §1.4-§1.7): piesele mari ale locului. Decor (coliziune "none") in afara
+    # benzii, cu exceptia templului (corp pe carcasa; e departe de drum, in mijlocul inelului de sant).
+    # Junglă in masa (scatter) = pasul 8 al brief-ului; aici doar reperele asezate de mana.
+    R90N = ((0, 0, -1), (0, 1, 0), (1, 0, 0))   # model -Z -> lume +X (fata spre est)
+    R90P = ((0, 0, 1), (0, 1, 0), (-1, 0, 0))   # model -Z -> lume -X (fata spre vest)
+    R180 = ((-1, 0, 0), (0, 1, 0), (0, 0, -1))
+    RID = ((1, 0, 0), (0, 1, 0), (0, 0, 1))
+
+    def put(name, rid, R, gx, gy, gz, col="none", anchor=None):
+        X = (R[0][0], R[1][0], R[2][0])
+        Y = (R[0][1], R[1][1], R[2][1])
+        Z = (R[0][2], R[1][2], R[2][2])
+        return place(name, rid, X, Y, Z, gx, gy, gz, col, anchor)
+
+    # Angkor Wat: in locul machetelor, aceleasi cote (varful central +36, colturile +30, baza la 0),
+    # fata cu scara (+Y Blender = -Z model) spre VEST, spre calea de start.
+    # Soclul in trepte e ingropat ~4 m (terenul are +4 in centrul inelului), ca si machetele: varfurile
+    # raman la +36 / +30, cotele verificate in brief §2.0. Ancora de sol pe treapta soclului.
+    decor_txt += put("AngkorWat", "30_temple", R90P, 0.0, 0.0, 0.0, col="hull", anchor=(31.0, 4.1, 0.0))
+
+    # Galeria de vest a incintei, pe stanga lui B (spre vest), pe uscat intre arc si santul de nord
+    # (y 24..60): stalpi la x = -62, acoperisul pe ei, zidul cu basorelief la -66,3, relieful spre drum.
+    for k_ in range(9):
+        gy_ = 26.0 + 4.0 * k_
+        ge_ = Y_GAL
+        decor_txt += put(f"GalStalp{k_}", "31_gcol", RID, -62.0, ge_, -gy_)
+        decor_txt += put(f"GalAcoperis{k_}", "32_groof", RID, -64.0, ge_ + 3.5, -(gy_ + 2.0),
+                         anchor=(1.75, -3.5, 0.0))
+        decor_txt += put(f"GalZid{k_}", "33_gwall", R90N, -66.3, ge_, -(gy_ + 2.0))
+    decor_txt += put("GalStalpN", "31_gcol", RID, -62.0, Y_GAL, -(26.0 + 36.0))
+
+    # Phnom Bakheng: platforma de sus (+31), turnulete-altar si scari pe margini, in afara benzii (7 m).
+    for k_, (bx_, by_) in enumerate(((-148.0, 220.0), (-148.0, 200.0), (-128.0, 220.0), (-128.0, 200.0))):
+        decor_txt += put(f"BakhengAltar{k_}", "34_shrine", R90P if bx_ < -138 else R90N, bx_, Y_BAK, -by_)
+    decor_txt += put("BakhengScara0", "35_stair", R90P, -152.0, Y_BAK - 0.75, -210.0)
+    decor_txt += put("BakhengScara1", "35_stair", R90N, -124.0, Y_BAK - 0.9, -210.0)
+
+    # Srah Srang: debarcaderul pe STANGA lui H (spre sud, spre bazin), dincolo de balustrada; treptele
+    # coboara spre apa (-Y Blender = +Z model -> +Z lume = sud).
+    decor_txt += put("SrahSrangDebarcader", "36_landing", RID, 50.0, 2.0, -(-112.0 - 10.5))
+
+    # Viata: tuk-tuk-uri parcate pe malul interior, langa gopura (fara corp: impingerea e decizie amanata,
+    # kit §1.6), calugari in fundal.
+    for k_, (tx_, ty_) in enumerate(((-88.0, 14.0), (-84.0, 15.0), (-80.0, 14.5))):
+        decor_txt += put(f"TukTuk{k_}", "37_tuk", R90N, tx_, Y_CALE, -ty_)
+        # cele doua radacini ale GLB-ului (kit §1.6) stau amandoua in origine: motocicleta se muta in
+        # fata remorcii (-Z model = sensul de mers)
+        decor_txt += (f'\n[node name="Moto" parent="DecorManual/TukTuk{k_}"]\n'
+                      "transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.95)\n")
+    for k_, (mx_, my_) in enumerate(((-90.0, -16.0), (-89.0, -17.5), (-147.0, 228.0))):
+        decor_txt += put(f"Calugar{k_}", "38_monk", R90P, mx_, Y_CALE if k_ < 2 else Y_BAK, -my_)
+
+    # Moloz si restaurare pe langa galeria scurtaturii, IN AFARA peretilor (|x - 126| >= 7).
+    for k_, (sv_, dx_, rid_) in enumerate(((40.0, 8.0, "39_rubble"), (58.0, -8.5, "39_rubble"),
+                                         (66.0, 8.0, "40_restore"), (47.0, -8.0, "41_numbered"),
+                                         (72.0, -8.5, "42_laterite"))):
+        bx_, by_, be_ = br_at(sv_)
+        decor_txt += put(f"MolozGalerie{k_}", rid_, R90N if dx_ > 0 else R90P, bx_ + dx_, be_, -by_)
+
+    # Ficusi sugrumatori pe langa galerie si jungla Ta Prohm (tetrameles), palmieri de zahar pe malul
+    # de vest al santului si pe malul de sud al lui H; lotusi si nuferi pe santul de vest si in Srah Srang.
+    for k_, (sv_, dx_) in enumerate(((36.0, -11.0), (62.0, 11.0), (76.0, -11.5))):
+        bx_, by_, be_ = br_at(sv_)
+        decor_txt += put(f"Ficus{k_}", "43_fig", R90N if dx_ < 0 else R90P, bx_ + dx_, be_ - 0.2, -by_)
+    for k_, (px_, py_, rid_) in enumerate(((150.0, 40.0, "44_tetra_a"), (104.0, 55.0, "45_tetra_b"),
+                                         (152.0, -10.0, "44_tetra_a"), (100.0, 0.0, "46_dipt"),
+                                         (165.0, 15.0, "45_tetra_b"))):
+        decor_txt += put(f"JunglaTaProhm{k_}", rid_, RID, px_, 8.0, -py_, col="trunk")
+    for k_ in range(6):
+        # departe de calea de start (camera de pe grila sta in x -250..-230)
+        pyv_ = (-48.0, -36.0, -26.0, 26.0, 36.0, 48.0)[k_]
+        decor_txt += put(f"PalmierV{k_}", "47_palm", RID, -212.0 - 6.0 * (k_ % 2), Y_CALE, -pyv_, col="trunk")
+        decor_txt += put(f"PalmierH{k_}", "47_palm", RID, -40.0 - 30.0 * k_, Y_CALE, -(-128.0 - 3.0 * (k_ % 2)), col="trunk")
+    for k_, (lx_, ly_, rid_) in enumerate(((-160.0, 22.0, "48_lotus"), (-135.0, -26.0, "48_lotus"),
+                                         (-180.0, -18.0, "49_lily"), (-120.0, 30.0, "49_lily"),
+                                         (40.0, -150.0, "48_lotus"), (65.0, -140.0, "49_lily"))):
+        decor_txt += put(f"Lotus{k_}", rid_, RID, lx_, WATER_AW, -ly_)
     bias = [(IDX("E terasa V", BAYON_TOWERS[0][0] - 45.0),
              IDX("E terasa V", BAYON_TOWERS[-1][0] + 8.0), BAYON_BIAS)]
 
@@ -1081,10 +1159,8 @@ cone = true
 material = SubResource("Mat_macheta")
 """
     # Angkor Wat: soclul in trepte pana la +6, turnul central cu varful la +36, cele de colt la +30.
-    mach = box("AW_Soclu", 0, 2.0, 0, 64, 8, 64) + box("AW_Soclu2", 0, 7.0, 0, 44, 2, 44)
-    mach += tower("AW_TurnCentral", 0, 0, 8.0, 28.0, 7.0)
-    for k_, (sx_, sz_) in enumerate(((-17, -17), (17, -17), (-17, 17), (17, 17))):
-        mach += tower(f"AW_TurnColt{k_}", sx_, sz_, 8.0, 22.0, 5.0)
+    # Angkor Wat: machetele au iesit la val 3 (angkor_wat_temple.glb, aceleasi cote, DecorManual).
+    mach = ""
     # Poarta de Sud: macheta a iesit la val 1 (south_gate_face_tower.glb, DecorManual).
     # Terasa Elefantilor: fata de vest (4 m) de-a lungul coamei.
     c0_ = next(w for w in WPTS if w[4] == "F coama inceput")
@@ -1140,6 +1216,26 @@ material = SubResource("Mat_macheta")
 [ext_resource type="PackedScene" path="res://assets/models/angkor/kit/vault_intact.glb" id="27_vault"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/kit/vault_broken.glb" id="28_vault_b"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/kit/giant_root_ramp.glb" id="29_ramp"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/angkor_wat_temple.glb" id="30_temple"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/gallery_column.glb" id="31_gcol"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/gallery_roof.glb" id="32_groof"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/gallery_relief_wall.glb" id="33_gwall"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/bakheng_shrine_tower.glb" id="34_shrine"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/bakheng_side_stair.glb" id="35_stair"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/srah_srang_landing.glb" id="36_landing"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/vehicles/tuk_tuk.glb" id="37_tuk"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/animals/monk_standing.glb" id="38_monk"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/props/rubble_pile.glb" id="39_rubble"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/props/restoration_prop.glb" id="40_restore"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/props/numbered_block.glb" id="41_numbered"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/props/laterite_block.glb" id="42_laterite"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/strangler_fig.glb" id="43_fig"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/tetrameles_a.glb" id="44_tetra_a"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/tetrameles_b.glb" id="45_tetra_b"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/dipterocarp.glb" id="46_dipt"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/sugar_palm.glb" id="47_palm"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/lotus_cluster.glb" id="48_lotus"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/water_lily_pads.glb" id="49_lily"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_macheta"]
 albedo_color = Color(0.72, 0.64, 0.52, 1)

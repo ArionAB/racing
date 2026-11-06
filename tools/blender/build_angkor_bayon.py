@@ -53,18 +53,19 @@ ONLY = os.environ.get("ANK_ONLY", "")
 ENV_HALF = 1.5          # patratul contractului: +-1,5 m
 TOP_Z = 9.0             # inaltimea contractului
 
-# nucleul fetelor si marimea lor
-FACE_H = 2.2
+# fetele (runda 4, corectura coordonatorului): ~3,0 m sprancene-barbie, blocul
+# fetelor = latimea turnului, FARA nisa si FARA pilastri
+FACE_H = 3.0
 CORE_HALF = ENV_HALF - 0.01 - FACE_DEPTH * FACE_H     # varful nasului la 1,49
 Z_CHIN = 3.0
-Z_FACE_TOP = 6.1
+Z_FACE_TOP = 6.6
+SHAFT_HALF = 1.20       # fusul dintre baza si fete (~2,4 m): fetele sunt UMFLATURA
 
-BASE_STEPS = [(0.0, 0.5, 1.50), (0.5, 1.0, 1.38), (1.0, 1.5, 1.27)]
+BASE_STEPS = [(0.0, 0.5, 1.50), (0.5, 1.0, 1.40), (1.0, 1.5, 1.30)]
 
-# etajele: (inaltimea corpului, jumatate-latimea, inaltimea cornisei, frontoane+finialuri)
+# etajele: (inaltimea corpului, jumatate-latimea, inaltimea cornisei)
 VARIANTE = {
-    "a": dict(tiers=[(0.42, 1.12, 0.10, True), (0.38, 0.92, 0.09, True), (0.34, 0.72, 0.08, True),
-                     (0.26, 0.52, 0.06, False)],
+    "a": dict(tiers=[(0.36, 1.12, 0.05), (0.33, 0.92, 0.05), (0.31, 0.72, 0.05), (0.27, 0.54, 0.05)],
               lotus_r=0.36, petals=8, ruin=None, seed=11),
 }
 
@@ -75,53 +76,44 @@ AO_BAYON = dict(samples=28, dist=0.7, gradient="vertical", low=0.60, high=1.0,
 def build_tower(name, spec):
     stone, lichen, streaks = Builder(), Builder(), Builder()
     rnd = lcg(spec["seed"])
-    ledges = []       # (z suprafata, jum. exterioara, jum. interioara, fara_fete)
-    streak_sites = [] # (z sus, jum. perete, latura dinspre care se vede, u_min, u_max)
+    ledges = []       # (z suprafata, jum. exterioara, jum. interioara)
+    streak_sites = [] # (z sus, jum. perete, n)
 
-    # --- 1. baza -----------------------------------------------------------------
+    # --- 1. baza: piramida in trepte, 3,0 m la treapta de jos ---------------------
     stepped_base(stone, BASE_STEPS)
-    for (z0, z1, half), nxt in zip(BASE_STEPS, BASE_STEPS[1:] + [(1.5, 1.5, 1.15)]):
-        ledges.append((z1, half, nxt[2], False))
+    for (z0, z1, half), nxt in zip(BASE_STEPS, BASE_STEPS[1:] + [(1.5, 1.5, SHAFT_HALF)]):
+        ledges.append((z1, half, nxt[2]))
 
-    # --- 2. soclul cu randuri de blocuri --------------------------------------------
-    stone_box(stone, 0, 0, 1.5, 2.7, 1.11)
-    block_courses(stone, 1.15, 1.5, 2.7, 3, 0.8, proud=0.04, seed=5)
-    streak_sites.append((2.7, 1.15, 0.0, 0.9))
+    # --- 2. fusul ingust cu randuri de blocuri --------------------------------------
+    stone_box(stone, 0, 0, 1.5, 2.7, SHAFT_HALF - 0.04)
+    block_courses(stone, SHAFT_HALF, 1.5, 2.7, 3, 0.8, proud=0.04, seed=5)
+    streak_sites.append((2.7, SHAFT_HALF, 10))
 
-    # --- 3. cornisa gatului -----------------------------------------------------------
-    stone_box(stone, 0, 0, 2.7, 2.85, 1.28)
-    stone_box(stone, 0, 0, 2.85, Z_CHIN, 1.38)
-    ledges.append((Z_CHIN, 1.38, CORE_HALF, True))
+    # --- 3. cornisa gatului ---------------------------------------------------------------
+    stone_box(stone, 0, 0, 2.7, 2.85, 1.30)
+    stone_box(stone, 0, 0, 2.85, Z_CHIN, 1.36)
 
-    # --- 4. treimea de mijloc: nucleu, 4 fete, 4 pilastri ----------------------------------
+    # --- 4. blocul fetelor: patru fete, latimea turnului, urechile la colturi ------------
     stone_box(stone, 0, 0, Z_CHIN, Z_FACE_TOP, CORE_HALF)
-    pil_c, pil_h = 1.32, 0.15
-    for sx in (-1, 1):
-        for sy in (-1, 1):
-            stone_box(stone, sx * pil_c, sy * pil_c, Z_CHIN, Z_FACE_TOP - 0.10, pil_h)
-            stone_box(stone, sx * pil_c, sy * pil_c, Z_FACE_TOP - 0.10, Z_FACE_TOP, pil_h + 0.0)
-    face_top = 0.0
     for k in range(4):
         fr = Frame((0.0, 0.0, 0.0), 90.0 * k)
-        face_top = face_relief(stone, fr.p(0.0, CORE_HALF, Z_CHIN), 90.0 * k, FACE_H)
-    streak_sites.append((Z_FACE_TOP, pil_c + pil_h, 0.0, 0.0, "pilastri"))
+        face_relief(stone, fr.p(0.0, CORE_HALF, Z_CHIN), 90.0 * k, FACE_H)
 
-    # --- 5. cornisa de sus a fetelor ---------------------------------------------------
-    stone_box(stone, 0, 0, Z_FACE_TOP, Z_FACE_TOP + 0.10, 1.32)
-    stone_box(stone, 0, 0, Z_FACE_TOP + 0.10, Z_FACE_TOP + 0.22, 1.42)
-    z = Z_FACE_TOP + 0.22
-    ledges.append((z, 1.42, spec["tiers"][0][1], False))
+    # --- 5. capacul blocului fetelor (subtire) -------------------------------------------
+    stone_box(stone, 0, 0, Z_FACE_TOP, Z_FACE_TOP + 0.10, 1.36)
+    z = Z_FACE_TOP + 0.10
+    ledges.append((z, 1.36, spec["tiers"][0][1] + 0.05))
 
-    # --- 6. etajele ---------------------------------------------------------------------
-    for i, (th, half, ch, orn) in enumerate(spec["tiers"]):
+    # --- 6. etajele: un con din randuri ---------------------------------------------------
+    for i, (th, half, ch) in enumerate(spec["tiers"]):
         z0 = z
-        z = tier(stone, z0, z0 + th, half, ch, gables=orn, corner_finials=orn)
-        streak_sites.append((z0 + th, half, 0.0, 0.0))
-        nxt = spec["tiers"][i + 1][1] if i + 1 < len(spec["tiers"]) else 0.40
-        ledges.append((z, half + 0.10, nxt + 0.06, False))
+        z = tier(stone, z0, z0 + th, half, ch)
+        if i < 2:
+            streak_sites.append((z0 + th, half * 0.96, 4))
+        nxt = spec["tiers"][i + 1][1] if i + 1 < len(spec["tiers"]) else 0.42
+        ledges.append((z, half + 0.05, nxt))
 
     # --- 7. bobocul de lotus ----------------------------------------------------------------
-    last_half = spec["tiers"][-1][1]
     height = TOP_Z - z
     assert height > 0.45, "etajele lasa prea putin pentru boboc: %.2f" % height
     lotus_bud(stone, 0, 0, z, height, spec["lotus_r"], petals=spec["petals"], segments=14)
@@ -130,12 +122,10 @@ def build_tower(name, spec):
     tot_len = sum(l[1] for l in ledges)
     n_orange, n_green = 44, 16
     spots = ["o"] * n_orange + ["g"] * n_green
-    # amesteca determinist
     for i in range(len(spots) - 1, 0, -1):
         j = int(rnd() * (i + 1))
         spots[i], spots[j] = spots[j], spots[i]
     for si, kind in enumerate(spots):
-        # alege pervazul proportional cu lungimea lui
         r = rnd() * tot_len
         acc = 0.0
         led = ledges[-1]
@@ -144,15 +134,13 @@ def build_tower(name, spec):
             if r <= acc:
                 led = l
                 break
-        zs, outer, inner, keep_face = led
+        zs, outer, inner = led
         wid = outer - inner
         if wid < 0.07:
             continue
         side = int(rnd() * 4)
-        lim = outer - 0.12
+        lim = outer - max(0.12, 0.2 * outer)
         u = (rnd() * 2 - 1) * lim
-        if keep_face and abs(u) < 0.62:
-            u = math.copysign(0.62 + rnd() * (lim - 0.62), u if u != 0 else 1.0)
         rw = min(wid * 0.40, 0.09 + 0.14 * rnd())   # 0,40 * 1,12 (zgomotul) < 0,5: ramane in ledge
         ru = min(0.40, rw * (1.6 + 1.8 * rnd()), lim - abs(u) + 0.02)
         wc = inner + wid * 0.5
@@ -163,31 +151,17 @@ def build_tower(name, spec):
             ru, rw = ru * 1.15, rw * 1.1
         lichen_spot(lichen, (pt.x, pt.y, pt.z), ru, rw, 0.028, slot, yaw_deg=90.0 * side, seed=si)
 
-    # --- 9. dare negre sub cornise -----------------------------------------------------------------
-    for site in streak_sites:
-        z_top, half = site[0], site[1]
-        if len(site) == 5:           # pilastri: patru colturi, doua fete fiecare
-            for sx in (-1, 1):
-                for sy in (-1, 1):
-                    for (ox, oy, yaw) in ((sx * (pil_c + pil_h), sy * pil_c, 270 if sx > 0 else 90),
-                                          (sx * pil_c, sy * (pil_c + pil_h), 0 if sy > 0 else 180)):
-                        w = 0.10 + 0.08 * rnd()
-                        ln = 0.35 + 0.45 * rnd()
-                        off = (rnd() - 0.5) * 0.18
-                        fr = Frame((ox, oy, 0), yaw)
-                        p = fr.p(off, 0.0, 0.0)
-                        streak(streaks, (p.x, p.y, Z_FACE_TOP - 0.10), yaw, w, ln, 0.03, ANK_STREAK)
-            continue
+    # --- 9. dare: putine, scurte, se subtiaza, doar sub cornisele mari --------------------------
+    for (z_top, half, n) in streak_sites:
         for k in range(4):
             fr = Frame((0, 0, 0), 90.0 * k)
-            n = 5 if half > 1.0 else 3
-            for _ in range(n):
-                span = half * 0.80
-                u = (rnd() * 2 - 1) * span
-                w = 0.09 + 0.09 * rnd()
-                ln = min(0.25 + 0.45 * rnd(), 0.7 * (0.9 if half < 1.0 else 1.3))
+            cnt = n // 4 + (1 if k < n % 4 else 0)
+            for _ in range(cnt):
+                u = (rnd() * 2 - 1) * half * 0.6
+                w = 0.18 + 0.10 * rnd()
+                ln = 0.35 + 0.35 * rnd()
                 p = fr.p(u, half, 0.0)
-                streak(streaks, (p.x, p.y, z_top - 0.02), 90.0 * k, w, ln, 0.03, ANK_STREAK)
+                streak(streaks, (p.x, p.y, z_top - 0.02), 90.0 * k, w, ln, 0.025, ANK_STREAK)
 
     objs = [stone.to_object(name + "_Stone"),
             lichen.to_object(name + "_Lichen"),

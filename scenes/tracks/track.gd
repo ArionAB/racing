@@ -4444,18 +4444,18 @@ static func themes() -> Dictionary:
 	# Azimutul: rotatia Y = -67.5 trimite lumina spre ENE, deci soarele sta in VSV (conventia
 	# din `carrara`: Y 30 = soare din SE).
 	_themes_cache["angkor"] = {
-		"sun_color": Color.html("FFC48A"),
-		"sun_energy": 1.35,
+		"sun_color": Color.html("FFB475"),
+		"sun_energy": 1.25,
 		"exposure": 1.0,
-		"sun_rotation_deg": Vector3(-24, -67.5, 0),
+		"sun_rotation_deg": Vector3(-17, -67.5, 0),
 		# Ambient rece-violet din cerul de furtuna, mic: raport soare/ambient ~3.4 (memoria
 		# `geometria-fara-lumina-e-invizibila`).
-		"ambient_color": Color.html("A9A4C6"),
-		"ambient_energy": 0.40,
-		"sky_top": Color.html("3B3550"),
-		"sky_horizon": Color.html("9C8296"),
-		"sky_cover_alpha": 0.45,
-		"fog": Color.html("857A88"),
+		"ambient_color": Color.html("A39EC0"),
+		"ambient_energy": 0.34,
+		"sky_top": Color.html("2D2740"),
+		"sky_horizon": Color.html("A6788A"),
+		"sky_cover_alpha": 0.55,
+		"fog": Color.html("7B6C76"),
 		"fog_sky_affect": 0.20,
 		"fog_aerial": 0.30,
 		"fog_depth": true,
@@ -4464,25 +4464,28 @@ static func themes() -> Dictionary:
 		"fog_curve": 1.5,
 		"fog_max": 0.70,
 		"shadows": true,
-		"shadow_opacity": 0.70,
+		"shadow_opacity": 0.62,
 		"shadow_distance": 150.0,
-		"shadow_blur": 1.0,
+		"shadow_blur": 2.5,
 		"dune_scale": 0.0,
 		# Solul de jungla: frunze moarte + verde inchis. Drumul: laterita (TILE_TERRACOTTA ca familie).
-		"ground_tint": Color(0.17, 0.33, 0.15),
+		"ground_tint": Color(0.21, 0.25, 0.11),
 		"hill_color": Color(0.16, 0.24, 0.14),
-		"scarp_tint": Color(0.62, 0.34, 0.24),
+		"scarp_tint": Color(0.34, 0.26, 0.17),
 		"scarp_slope_deg": 30.0,
 		"scarp_fade_deg": 10.0,
-		"dirt_road_tint": Color(0.60, 0.42, 0.38),
+		"dirt_road_tint": Color(0.62, 0.45, 0.42),
 		# Pavajul de gresie al cailor de piatra (A, B, D, E, F: soseaua "asfalt" dintre intervalele
 		# de laterita) e tot materialul de asfalt, doar cu alt albedo: fizica neatinsa. Fara marcaje.
 		"road_tint": Color(0.66, 0.53, 0.38),
 		"center_line": false,
+		# Umarul de langa drum (_build_shoulders) lua `dust_color` (terracotta saturat) si iesea
+		# banda portocalie vie pe ambele laturi; bara n-are chenar, doar pamant care se pierde in sol.
+		"shoulder_color": Color(0.40, 0.31, 0.23),
 		# Solul de jungla: covorul de iarba (perechea a doua a shaderului) pe tot terenul, nu nisipul
 		# cu dune (prima captura a mostrei citea desert).
 		"savanna_grass_w": 1.0,
-		"savanna_grass_tint": Color(0.10, 0.22, 0.08),
+		"savanna_grass_tint": Color(0.12, 0.16, 0.07),
 		"dust_color": Palette.color(Palette.TILE_TERRACOTTA),
 		# Blocurile dominoului din galeria Ta Prohm (RimBoulderHazard) iau gresia templului.
 		"rockfall_class": "angkor_sandstone",

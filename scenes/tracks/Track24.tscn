@@ -1106,7 +1106,7 @@ custom_ravine_widths = Array[Vector2]([Vector2(0, 70.0), Vector2(1, 40.0), Vecto
 custom_ravine_water = Array[Vector3]([Vector3(0, 0.5, 16.0), Vector3(1, 0.5, 16.0), Vector3(2, 0.5, 16.0), Vector3(3, 0.5, 16.0), Vector3(4, 11.0, 16.0)])
 custom_water_styles = Array[Dictionary]([{
 "ravines": Array[int]([0, 1, 2, 3, 4]),
-"water_shallow_rgb": Color(0.25, 0.46, 0.33, 1),
+"water_shallow_rgb": Color(0.27, 0.44, 0.34, 1),
 "water_deep_rgb": Color(0.10, 0.30, 0.20, 1),
 "water_shore_rgb": Color(0.20, 0.34, 0.18, 1),
 "water_dim": 0.9,

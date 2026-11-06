@@ -1043,3 +1043,43 @@ deschidere, îngustă, cu fețe pe toate patru laturile; (2)
 `bayon_face_tower_*` sunt **turnuri** etajate, nu capete (abaterea din v2 a
 diorama); (3) `asian_elephant` n-are șa și are urechile mici. Corecturile de
 proporție le face modelatorul din cotele kitului, nu ChatGPT.
+
+### 9.3 Rezultatul: planșa de inventar (6 nov 2026)
+
+Trei generări în aceeași conversație cu diorama v3, păstrate în
+`img/angkor_plan/`:
+
+| fișier | ce s-a cerut | ce s-a luat |
+|---|---|---|
+| `inventar_v01_a.jpg` | promptul §9.2 | doar **`tuk_tuk`**: remorca trasă de motocicletă (tuk-tuk-ul cambodgian, și piesele încap separat sub plafonul de 2 m al `BumpProp`) |
+| `inventar_v01_b.jpg` | același prompt, a doua generare | **baza**: mai mult detaliu pictat (lichen, dâre, uzură), `giant_root_ramp` citit ca rampă, turnul Bayon `c` ruinat, elefantul cu urechi mici |
+| `inventar_v01_c.jpg` | corectura de mai jos | **suprascrie** b pe 7 piese: cele trei turnuri Bayon, `deva_giant`, `asura_giant`, `leper_king_statue`, `angkor_wat_temple` |
+
+Cele trei verificări: (1) Poarta de Sud — o singură deschidere, fețe pe toate
+laturile, pe a și b; (2) turnurile Bayonului — **picată pe a și b** (busturi
+cu vârf, nu turnuri), trecută pe c; (3) elefantul fără șa — pe a și b, cu
+urechile mai mici pe b. Pe lângă ele, b pusese **fețe pe turnurile Angkor Wat**
+(sunt ale Bayonului), iar uriașii și Regele Lepros stăteau pe ambele planșe
+în poză de meditație (citește Buddha, §8) — de aici corectura:
+
+> *Good. Redraw only these items, same style, same palette, same light-grey
+> background, same labels: bayon_face_tower_a, bayon_face_tower_b,
+> bayon_face_tower_c — these must read as slender TOWERS, not heads: a square
+> stepped base about 3 x 3 m, total height about three times the width (about
+> 9 m); the faces occupy only the middle third, one serene face on each of the
+> four sides, with stacked narrowing tiers above ending in a lotus-bud tip. The
+> three differ in tier count and damage; c is partly ruined with fallen blocks
+> at its base. deva_giant and asura_giant — seated on a low plinth, both arms
+> wrapped around a thick stone naga serpent body that runs across their laps
+> and continues out of frame on both sides, as if pulling it like a rope. Deva
+> calm with a tall conical crown; asura with bulging eyes, fangs and a fierce
+> frown. Not a cross-legged meditation pose. leper_king_statue — seated on a
+> plain pedestal with one knee raised and one hand resting on it, plain hair,
+> no crown, no halo. Not a meditation pose, not a Buddha. angkor_wat_temple —
+> same as the left version of the previous sheet: five plain lotus-bud towers
+> with carved tiers, NO faces on any tower.*
+
+A trecut din prima pe toate patru. Decupările per piesă (44 + mașinuța de
+scară) sunt în `img/angkor_assets_v1/` (`tools/blender/crop_angkor_sheet.py`),
+iar contractul kitului e `docs/asset_briefs/angkor_kit.md`: cotele vin de
+acolo, din Track24, nu din planșă.

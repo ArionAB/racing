@@ -5,20 +5,56 @@
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="3_branch"]
 [ext_resource type="Script" path="res://scenes/hazards/rim_boulder_hazard.gd" id="4_rim"]
 [ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="5_hzm"]
-[ext_resource type="PackedScene" path="res://assets/models/serengeti/animals/elephant.glb" id="6_eleph"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/animals/asian_elephant.glb" id="6_eleph"]
 [ext_resource type="Script" path="res://scenes/hazards/rain_cycle.gd" id="7_rain"]
 [ext_resource type="Script" path="res://scenes/hazards/lightning_flash.gd" id="8_flash"]
 [ext_resource type="Script" path="res://scenes/hazards/vine_curtain.gd" id="9_vine"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/bayon_face_tower_a.glb" id="10_bayon"]
+[ext_resource type="Script" path="res://scenes/props/world_prop.gd" id="11_prop"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/bayon_face_tower_b.glb" id="12_bayon_b"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/bayon_face_tower_c.glb" id="13_bayon_c"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/south_gate_face_tower.glb" id="14_gate_s"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/aw_west_gopura.glb" id="15_gopura"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/ta_prohm_tree_gate.glb" id="16_treegate"]
+[ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="17_camzone"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/naga_balustrade.glb" id="18_naga"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/naga_head.glb" id="19_nagahead"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/deva_giant.glb" id="20_deva"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/asura_giant.glb" id="21_asura"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/props/fallen_block.glb" id="22_block"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/elephant_terrace_module.glb" id="23_terrace"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/elephant_terrace_end.glb" id="24_terrace_end"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/elephant_trunk_pillar.glb" id="25_pillar"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/props/leper_king_statue.glb" id="26_leper"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/vault_intact.glb" id="27_vault"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/vault_broken.glb" id="28_vault_b"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/giant_root_ramp.glb" id="29_ramp"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/angkor_wat_temple.glb" id="30_temple"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/gallery_column.glb" id="31_gcol"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/gallery_roof.glb" id="32_groof"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/gallery_relief_wall.glb" id="33_gwall"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/bakheng_shrine_tower.glb" id="34_shrine"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/bakheng_side_stair.glb" id="35_stair"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/srah_srang_landing.glb" id="36_landing"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/vehicles/tuk_tuk.glb" id="37_tuk"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/animals/monk_standing.glb" id="38_monk"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/props/rubble_pile.glb" id="39_rubble"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/props/restoration_prop.glb" id="40_restore"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/props/numbered_block.glb" id="41_numbered"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/props/laterite_block.glb" id="42_laterite"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/strangler_fig.glb" id="43_fig"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/tetrameles_a.glb" id="44_tetra_a"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/tetrameles_b.glb" id="45_tetra_b"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/dipterocarp.glb" id="46_dipt"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/sugar_palm.glb" id="47_palm"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/lotus_cluster.glb" id="48_lotus"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/water_lily_pads.glb" id="49_lily"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_macheta"]
 albedo_color = Color(0.72, 0.64, 0.52, 1)
 
 [sub_resource type="BoxShape3D" id="Box_bayon"]
 size = Vector3(3.0, 9.0, 3.0)
-
-[sub_resource type="BoxMesh" id="Mesh_bayon"]
-size = Vector3(3.0, 9.0, 3.0)
-material = SubResource("Mat_macheta")
 
 [sub_resource type="Curve3D" id="Curve3D_angkor"]
 closed = true
@@ -45,13 +81,13 @@ custom_road_surface = "asphalt"
 custom_gate_model = "none"
 custom_sea_level_offset = -17.42
 custom_dirt_ranges = Array[Vector2]([Vector2(0.117, 0.318), Vector2(0.375, 0.403), Vector2(0.488, 0.532), Vector2(0.607, 0.988)])
-custom_ravines = Array[Vector4]([Vector4(0.016, 0.071, 20, 0), Vector4(0.098, 0.114, 20, 0), Vector4(0.769, 0.895, 20, 1), Vector4(0.774, 0.809, 20, -1), Vector4(0.319, 0.359, 20, 0)])
+custom_ravines = Array[Vector4]([Vector4(0.016, 0.056, 20, 0), Vector4(0.098, 0.114, 20, 0), Vector4(0.769, 0.895, 20, 1), Vector4(0.774, 0.809, 20, -1), Vector4(0.319, 0.359, 20, 0)])
 custom_ravine_floors = Array[Vector2]([Vector2(0, -2.0), Vector2(1, -2.0), Vector2(2, -2.0), Vector2(3, -1.5), Vector2(4, 8.5)])
 custom_ravine_widths = Array[Vector2]([Vector2(0, 70.0), Vector2(1, 40.0), Vector2(2, 36.0), Vector2(3, 45.0), Vector2(4, 40.0)])
 custom_ravine_water = Array[Vector3]([Vector3(0, 0.5, 16.0), Vector3(1, 0.5, 16.0), Vector3(2, 0.5, 16.0), Vector3(3, 0.5, 16.0), Vector3(4, 11.0, 16.0)])
 custom_width_segments = Array[Vector3]([Vector3(0.058, 0.114, 4.0), Vector3(0.121, 0.31, 3.5), Vector3(0.419, 0.467, 7.0)])
 custom_width_pinches = Array[Vector3]([Vector3(0.36, 0.367, 3.5)])
-custom_parapets = Array[Vector4]([Vector4(0.0174, 0.0483, 1, 3), Vector4(0.0511, 0.0695, 1, 3), Vector4(0.0174, 0.0589, -1, 3), Vector4(0.061, 0.0695, -1, 3), Vector4(0.32, 0.359, 0, 3), Vector4(0.7708, 0.8106, -1, 3), Vector4(0.7708, 0.8933, 1, 3)])
+custom_parapets = Array[Vector4]([Vector4(0.0174, 0.0483, 1, 3), Vector4(0.0511, 0.0554, 1, 3), Vector4(0.0174, 0.0397, -1, 3), Vector4(0.0433, 0.0554, -1, 3), Vector4(0.32, 0.359, 0, 3), Vector4(0.7708, 0.8106, -1, 3), Vector4(0.7708, 0.8933, 1, 3)])
 custom_lane_bias = Array[Vector3]([Vector3(0.41, 0.46, 0.72)])
 custom_bench_patches = Array[Dictionary]([{ "lvl": PackedVector2Array(-1000.0, 14.3, 1000.0, 14.3), "soft": Vector4(25.0, 0.0, 15.0, 30.0), "x0": 60.0, "x1": 107.0, "z0": -366.0, "z1": -200.0 }])
 terrain_pad_m = 120.0
@@ -77,11 +113,12 @@ branch_half_width = 3.0
 label = "Galeria Ta Prohm"
 speed_factor = 0.85
 bumpiness = 0.08
+tint = Color(0.78, 0.6, 0.48, 1)
 
 [node name="Hazarduri" type="Node3D" parent="."]
 
 [node name="Domino0" type="Node3D" parent="Hazarduri"]
-transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 8.09, -45.0)
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 8.05, -42.0)
 script = ExtResource("4_rim")
 period = 11.0
 start_clock = 0.0
@@ -89,6 +126,8 @@ rim_offset = 2.0
 rim_height = 6.0
 crush_seconds = 3.0
 invert_steer = false
+model = ExtResource("22_block")
+model_scale = 1.0
 
 [node name="Domino1" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 7.75, -20.0)
@@ -99,6 +138,8 @@ rim_offset = 2.0
 rim_height = 6.0
 crush_seconds = 3.0
 invert_steer = false
+model = ExtResource("22_block")
+model_scale = 1.0
 
 [node name="Domino2" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 7.41, 5.0)
@@ -109,6 +150,8 @@ rim_offset = 2.0
 rim_height = 6.0
 crush_seconds = 3.0
 invert_steer = false
+model = ExtResource("22_block")
+model_scale = 1.0
 
 [node name="ElefantPoarta" type="Marker3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -230.0, 14.0, -403.36)
@@ -152,8 +195,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -115.83, 23.5, -436.0)
 [node name="Forma" type="CollisionShape3D" parent="Obstacole/BayonTurn0"]
 shape = SubResource("Box_bayon")
 
-[node name="Macheta" type="MeshInstance3D" parent="Obstacole/BayonTurn0"]
-mesh = SubResource("Mesh_bayon")
 
 [node name="BayonTurn1" type="StaticBody3D" parent="Obstacole"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -82.83, 23.5, -438.0)
@@ -161,8 +202,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -82.83, 23.5, -438.0)
 [node name="Forma" type="CollisionShape3D" parent="Obstacole/BayonTurn1"]
 shape = SubResource("Box_bayon")
 
-[node name="Macheta" type="MeshInstance3D" parent="Obstacole/BayonTurn1"]
-mesh = SubResource("Mesh_bayon")
 
 [node name="BayonTurn2" type="StaticBody3D" parent="Obstacole"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.83, 23.5, -436.0)
@@ -170,77 +209,1374 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.83, 23.5, -436.0)
 [node name="Forma" type="CollisionShape3D" parent="Obstacole/BayonTurn2"]
 shape = SubResource("Box_bayon")
 
-[node name="Macheta" type="MeshInstance3D" parent="Obstacole/BayonTurn2"]
-mesh = SubResource("Mesh_bayon")
+
+[node name="DecorManual" type="Node3D" parent="."]
+script = ExtResource("11_prop")
+
+[node name="BayonA0" parent="DecorManual" instance=ExtResource("10_bayon")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -115.83, 19.0, -436.0)
+metadata/coliziune = "none"
+
+[node name="BayonB1" parent="DecorManual" instance=ExtResource("12_bayon_b")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -82.83, 19.0, -438.0)
+metadata/coliziune = "none"
+
+[node name="BayonC2" parent="DecorManual" instance=ExtResource("13_bayon_c")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.83, 19.0, -436.0)
+metadata/coliziune = "none"
+
+[node name="PoartaDeSud" parent="DecorManual" instance=ExtResource("14_gate_s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -230.0, 14.0, -381.36)
+metadata/coliziune = "mesh"
+
+[node name="GopuraVest" parent="DecorManual" instance=ExtResource("15_gopura")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -97.5, 3.82, -0.0)
+metadata/coliziune = "mesh"
+
+[node name="PoartaCopac" parent="DecorManual" instance=ExtResource("16_treegate")]
+transform = Transform3D(-1.45, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 8.15, -49.0)
+metadata/coliziune = "mesh"
+
+[node name="NagaCap0" parent="DecorManual" instance=ExtResource("19_nagahead")]
+transform = Transform3D(-0.028, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.028, -199.0, 3.24, 7.5)
+metadata/coliziune = "none"
+
+[node name="Naga1_0" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.122, 0.0, -0.992, 0.0, 1.0, 0.0, 0.992, 0.0, 0.122, -197.0, 3.25, 7.39)
+metadata/coliziune = "none"
+
+[node name="Naga1_1" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.22, 0.0, -0.975, 0.0, 1.0, 0.0, 0.975, 0.0, 0.22, -193.0, 3.27, 6.71)
+metadata/coliziune = "none"
+
+[node name="Naga1_2" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.207, 0.0, -0.978, 0.0, 1.0, 0.0, 0.978, 0.0, 0.207, -189.0, 3.29, 5.79)
+metadata/coliziune = "none"
+
+[node name="Naga1_3" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.079, 0.0, -0.997, 0.0, 1.0, 0.0, 0.997, 0.0, 0.079, -185.0, 3.32, 5.11)
+metadata/coliziune = "none"
+
+[node name="Naga1_4" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -181.0, 3.34, 5.0)
+metadata/coliziune = "none"
+
+[node name="Naga1_5" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -177.0, 3.36, 5.0)
+metadata/coliziune = "none"
+
+[node name="Naga1_6" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -173.0, 3.38, 5.0)
+metadata/coliziune = "none"
+
+[node name="Naga1_7" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -169.0, 3.41, 5.0)
+metadata/coliziune = "none"
+
+[node name="Naga1_8" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -165.0, 3.43, 5.0)
+metadata/coliziune = "none"
+
+[node name="Naga1_9" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -161.0, 3.45, 5.0)
+metadata/coliziune = "none"
+
+[node name="Naga1_10" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -157.0, 3.48, 5.0)
+metadata/coliziune = "none"
+
+[node name="Naga1_11" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -153.0, 3.5, 5.0)
+metadata/coliziune = "none"
+
+[node name="Naga1_12" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -149.0, 3.52, 5.0)
+metadata/coliziune = "none"
+
+[node name="Naga1_13" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -145.0, 3.55, 5.0)
+metadata/coliziune = "none"
+
+[node name="Naga1_14" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -141.0, 3.57, 5.0)
+metadata/coliziune = "none"
+
+[node name="Naga1_15" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -137.0, 3.59, 5.0)
+metadata/coliziune = "none"
+
+[node name="Naga1_16" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -133.0, 3.61, 5.0)
+metadata/coliziune = "none"
+
+[node name="Naga1_17" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -129.0, 3.64, 5.0)
+metadata/coliziune = "none"
+
+[node name="NagaCap1" parent="DecorManual" instance=ExtResource("19_nagahead")]
+transform = Transform3D(0.0, 0.0, -1.0, -0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -124.5, 3.66, 5.0)
+metadata/coliziune = "none"
+
+[node name="NagaCap2" parent="DecorManual" instance=ExtResource("19_nagahead")]
+transform = Transform3D(-0.028, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.028, -117.0, 3.71, 7.5)
+metadata/coliziune = "none"
+
+[node name="Naga3_0" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.122, 0.0, -0.992, 0.0, 1.0, 0.0, 0.992, 0.0, 0.122, -115.0, 3.72, 7.39)
+metadata/coliziune = "none"
+
+[node name="Naga3_1" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.22, 0.0, -0.975, 0.0, 1.0, 0.0, 0.975, 0.0, 0.22, -111.0, 3.74, 6.71)
+metadata/coliziune = "none"
+
+[node name="NagaCap3" parent="DecorManual" instance=ExtResource("19_nagahead")]
+transform = Transform3D(0.207, 0.0, -0.978, -0.0, 1.0, 0.0, 0.978, 0.0, 0.207, -107.0, 3.76, 5.79)
+metadata/coliziune = "none"
+
+[node name="NagaCap4" parent="DecorManual" instance=ExtResource("19_nagahead")]
+transform = Transform3D(0.028, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.028, -199.0, 3.24, -7.5)
+metadata/coliziune = "none"
+
+[node name="Naga5_0" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.122, 0.0, 0.992, 0.0, 1.0, -0.0, -0.992, 0.0, 0.122, -197.0, 3.25, -7.39)
+metadata/coliziune = "none"
+
+[node name="Naga5_1" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.22, 0.0, 0.975, 0.0, 1.0, -0.0, -0.975, 0.0, 0.22, -193.0, 3.27, -6.71)
+metadata/coliziune = "none"
+
+[node name="Naga5_2" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.207, 0.0, 0.978, 0.0, 1.0, -0.0, -0.978, 0.0, 0.207, -189.0, 3.29, -5.79)
+metadata/coliziune = "none"
+
+[node name="Naga5_3" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.079, 0.0, 0.997, 0.0, 1.0, -0.0, -0.997, 0.0, 0.079, -185.0, 3.32, -5.11)
+metadata/coliziune = "none"
+
+[node name="Naga5_4" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.0, -181.0, 3.34, -5.0)
+metadata/coliziune = "none"
+
+[node name="Naga5_5" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.0, -177.0, 3.36, -5.0)
+metadata/coliziune = "none"
+
+[node name="Naga5_6" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.0, -173.0, 3.38, -5.0)
+metadata/coliziune = "none"
+
+[node name="Naga5_7" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.0, -169.0, 3.41, -5.0)
+metadata/coliziune = "none"
+
+[node name="Naga5_8" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.0, -165.0, 3.43, -5.0)
+metadata/coliziune = "none"
+
+[node name="Naga5_9" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.0, -161.0, 3.45, -5.0)
+metadata/coliziune = "none"
+
+[node name="Naga5_10" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.0, -157.0, 3.48, -5.0)
+metadata/coliziune = "none"
+
+[node name="Naga5_11" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.0, -153.0, 3.5, -5.0)
+metadata/coliziune = "none"
+
+[node name="Naga5_12" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.0, -149.0, 3.52, -5.0)
+metadata/coliziune = "none"
+
+[node name="NagaCap5" parent="DecorManual" instance=ExtResource("19_nagahead")]
+transform = Transform3D(0.0, 0.0, -1.0, -0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -144.5, 3.55, -5.0)
+metadata/coliziune = "none"
+
+[node name="NagaCap6" parent="DecorManual" instance=ExtResource("19_nagahead")]
+transform = Transform3D(0.028, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.028, -136.5, 3.59, -7.5)
+metadata/coliziune = "none"
+
+[node name="Naga7_0" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.122, 0.0, 0.992, 0.0, 1.0, -0.0, -0.992, 0.0, 0.122, -134.5, 3.61, -7.39)
+metadata/coliziune = "none"
+
+[node name="Naga7_1" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.22, 0.0, 0.975, 0.0, 1.0, -0.0, -0.975, 0.0, 0.22, -130.5, 3.63, -6.71)
+metadata/coliziune = "none"
+
+[node name="Naga7_2" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.207, 0.0, 0.978, 0.0, 1.0, -0.0, -0.978, 0.0, 0.207, -126.5, 3.65, -5.79)
+metadata/coliziune = "none"
+
+[node name="Naga7_3" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.079, 0.0, 0.997, 0.0, 1.0, -0.0, -0.997, 0.0, 0.079, -122.5, 3.67, -5.11)
+metadata/coliziune = "none"
+
+[node name="Naga7_4" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.0, -118.5, 3.7, -5.0)
+metadata/coliziune = "none"
+
+[node name="Naga7_5" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.0, -114.5, 3.72, -5.0)
+metadata/coliziune = "none"
+
+[node name="Naga7_6" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, -0.0, -110.5, 3.74, -5.0)
+metadata/coliziune = "none"
+
+[node name="NagaCap7" parent="DecorManual" instance=ExtResource("19_nagahead")]
+transform = Transform3D(0.0, 0.0, -1.0, -0.0, 1.0, 0.0, 1.0, 0.0, 0.0, -107.0, 3.76, -5.0)
+metadata/coliziune = "none"
+
+[node name="NagaCap8" parent="DecorManual" instance=ExtResource("19_nagahead")]
+transform = Transform3D(-1.0, 0.0, 0.028, 0.0, 1.0, 0.0, -0.028, 0.0, -1.0, -237.5, 14.0, -276.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_0" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-0.992, 0.0, 0.122, 0.0, 1.0, 0.0, -0.122, 0.0, -0.992, -237.94, 14.0, -278.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_1" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-0.975, 0.0, 0.22, 0.0, 1.0, 0.0, -0.22, 0.0, -0.975, -237.26, 14.0, -282.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_2" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-0.978, 0.0, 0.207, 0.0, 1.0, 0.0, -0.207, 0.0, -0.978, -236.34, 14.0, -286.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_3" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-0.997, 0.0, 0.079, 0.0, 1.0, 0.0, -0.079, 0.0, -0.997, -235.66, 14.0, -290.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_4" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, -1.0, -235.55, 14.0, -294.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_5" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, -1.0, -235.55, 14.0, -298.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_6" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, -1.0, -235.55, 14.0, -302.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_7" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, -1.0, -235.55, 14.0, -306.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_8" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, -1.0, -235.55, 14.0, -310.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_9" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, -1.0, -235.55, 14.0, -314.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_10" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, -1.0, -235.55, 14.0, -318.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_11" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, -1.0, -235.55, 14.0, -322.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_12" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, -1.0, -235.55, 14.0, -326.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_13" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, -1.0, -235.55, 14.0, -330.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_14" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, -1.0, -235.55, 14.0, -334.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_15" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, -1.0, -235.55, 14.0, -338.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_16" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, -1.0, -235.55, 14.0, -342.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_17" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, -1.0, -235.55, 14.0, -346.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_18" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, -1.0, -235.55, 14.0, -350.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_19" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, -1.0, -235.55, 14.0, -354.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_20" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, -1.0, -235.55, 14.0, -358.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_21" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, -1.0, -235.55, 14.0, -362.27)
+metadata/coliziune = "none"
+
+[node name="Urias9_22" parent="DecorManual" instance=ExtResource("20_deva")]
+transform = Transform3D(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.0, 0.0, -1.0, -235.55, 14.0, -366.27)
+metadata/coliziune = "none"
+
+[node name="NagaCap9" parent="DecorManual" instance=ExtResource("19_nagahead")]
+transform = Transform3D(1.0, 0.0, -0.0, -0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -235.0, 14.0, -370.27)
+metadata/coliziune = "none"
+
+[node name="NagaCap10" parent="DecorManual" instance=ExtResource("19_nagahead")]
+transform = Transform3D(-1.0, 0.0, -0.028, 0.0, 1.0, 0.0, 0.028, 0.0, -1.0, -222.5, 14.0, -276.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_0" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(0.992, 0.0, 0.122, 0.0, 1.0, -0.0, -0.122, 0.0, 0.992, -222.06, 14.0, -278.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_1" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(0.975, 0.0, 0.22, 0.0, 1.0, -0.0, -0.22, 0.0, 0.975, -222.74, 14.0, -282.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_2" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(0.978, 0.0, 0.207, 0.0, 1.0, -0.0, -0.207, 0.0, 0.978, -223.66, 14.0, -286.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_3" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(0.997, 0.0, 0.079, 0.0, 1.0, -0.0, -0.079, 0.0, 0.997, -224.34, 14.0, -290.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_4" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -224.45, 14.0, -294.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_5" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -224.45, 14.0, -298.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_6" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -224.45, 14.0, -302.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_7" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -224.45, 14.0, -306.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_8" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -224.45, 14.0, -310.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_9" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -224.45, 14.0, -314.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_10" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -224.45, 14.0, -318.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_11" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -224.45, 14.0, -322.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_12" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -224.45, 14.0, -326.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_13" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -224.45, 14.0, -330.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_14" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -224.45, 14.0, -334.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_15" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -224.45, 14.0, -338.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_16" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -224.45, 14.0, -342.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_17" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -224.45, 14.0, -346.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_18" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -224.45, 14.0, -350.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_19" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -224.45, 14.0, -354.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_20" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -224.45, 14.0, -358.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_21" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -224.45, 14.0, -362.27)
+metadata/coliziune = "none"
+
+[node name="Urias11_22" parent="DecorManual" instance=ExtResource("21_asura")]
+transform = Transform3D(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -224.45, 14.0, -366.27)
+metadata/coliziune = "none"
+
+[node name="NagaCap11" parent="DecorManual" instance=ExtResource("19_nagahead")]
+transform = Transform3D(1.0, 0.0, -0.0, -0.0, 1.0, 0.0, 0.0, 0.0, 1.0, -225.0, 14.0, -370.27)
+metadata/coliziune = "none"
+
+[node name="NagaCap12" parent="DecorManual" instance=ExtResource("19_nagahead")]
+transform = Transform3D(0.275, 0.0, -0.961, -0.0, 1.0, 0.0, 0.961, 0.0, 0.275, 102.04, 4.59, 117.79)
+metadata/coliziune = "none"
+
+[node name="Naga13_0" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.119, 0.0, -0.993, 0.0, 1.0, 0.0, 0.993, 0.0, 0.119, 99.94, 4.54, 118.34)
+metadata/coliziune = "none"
+
+[node name="Naga13_1" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.169, 0.0, -0.986, 0.0, 1.0, 0.0, 0.986, 0.0, -0.169, 94.24, 4.43, 118.26)
+metadata/coliziune = "none"
+
+[node name="Naga13_2" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.155, 0.0, -0.988, 0.0, 1.0, 0.0, 0.988, 0.0, -0.155, 90.2, 4.32, 117.55)
+metadata/coliziune = "none"
+
+[node name="Naga13_3" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.043, 0.0, -0.999, 0.0, 1.0, 0.0, 0.999, 0.0, -0.043, 86.14, 4.22, 117.08)
+metadata/coliziune = "none"
+
+[node name="Naga13_4" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 81.9, 4.11, 117.0)
+metadata/coliziune = "none"
+
+[node name="Naga13_5" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 77.9, 4.01, 117.0)
+metadata/coliziune = "none"
+
+[node name="Naga13_6" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 73.9, 3.9, 117.0)
+metadata/coliziune = "none"
+
+[node name="Naga13_7" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 69.9, 3.79, 117.0)
+metadata/coliziune = "none"
+
+[node name="Naga13_8" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 65.9, 3.69, 117.0)
+metadata/coliziune = "none"
+
+[node name="Naga13_9" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 61.9, 3.58, 117.0)
+metadata/coliziune = "none"
+
+[node name="Naga13_10" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 57.9, 3.47, 117.0)
+metadata/coliziune = "none"
+
+[node name="Naga13_11" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 53.9, 3.37, 117.0)
+metadata/coliziune = "none"
+
+[node name="Naga13_12" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 49.9, 3.26, 117.0)
+metadata/coliziune = "none"
+
+[node name="Naga13_13" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 45.9, 3.18, 117.0)
+metadata/coliziune = "none"
+
+[node name="Naga13_14" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 41.9, 3.09, 117.0)
+metadata/coliziune = "none"
+
+[node name="Naga13_15" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 37.9, 3.01, 117.0)
+metadata/coliziune = "none"
+
+[node name="Naga13_16" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 33.9, 3.0, 117.0)
+metadata/coliziune = "none"
+
+[node name="Naga13_17" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 29.9, 3.0, 117.0)
+metadata/coliziune = "none"
+
+[node name="Naga13_18" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 25.9, 3.0, 117.0)
+metadata/coliziune = "none"
+
+[node name="Naga13_19" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 21.9, 3.0, 117.0)
+metadata/coliziune = "none"
+
+[node name="Naga13_20" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 17.9, 3.0, 117.0)
+metadata/coliziune = "none"
+
+[node name="Naga13_21" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 13.9, 3.0, 117.0)
+metadata/coliziune = "none"
+
+[node name="Naga13_22" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 9.9, 3.0, 117.0)
+metadata/coliziune = "none"
+
+[node name="Naga13_23" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.0, 5.9, 3.0, 117.0)
+metadata/coliziune = "none"
+
+[node name="NagaCap13" parent="DecorManual" instance=ExtResource("19_nagahead")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, 3.9, 3.0, 117.0)
+metadata/coliziune = "none"
+
+[node name="NagaCap14" parent="DecorManual" instance=ExtResource("19_nagahead")]
+transform = Transform3D(0.328, 0.0, -0.945, -0.0, 1.0, 0.0, 0.945, 0.0, 0.328, 97.51, 4.59, 103.49)
+metadata/coliziune = "none"
+
+[node name="Naga15_0" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.013, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.013, 95.79, 4.54, 104.15)
+metadata/coliziune = "none"
+
+[node name="Naga15_1" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.271, 0.0, 0.963, 0.0, 1.0, 0.0, -0.963, 0.0, -0.271, 93.54, 4.43, 104.86)
+metadata/coliziune = "none"
+
+[node name="Naga15_2" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.258, 0.0, 0.966, 0.0, 1.0, 0.0, -0.966, 0.0, -0.258, 89.59, 4.32, 105.99)
+metadata/coliziune = "none"
+
+[node name="Naga15_3" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(-0.123, 0.0, 0.992, 0.0, 1.0, 0.0, -0.992, 0.0, -0.123, 85.66, 4.22, 106.88)
+metadata/coliziune = "none"
+
+[node name="Naga15_4" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 81.9, 4.11, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_5" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 77.9, 4.01, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_6" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 73.9, 3.9, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_7" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 69.9, 3.79, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_8" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 65.9, 3.69, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_9" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 61.9, 3.58, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_10" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 57.9, 3.47, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_11" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 53.9, 3.37, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_12" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 49.9, 3.26, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_13" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 45.9, 3.18, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_14" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 41.9, 3.09, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_15" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 37.9, 3.01, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_16" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 33.9, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_17" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 29.9, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_18" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 25.9, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_19" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 21.9, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_20" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 17.9, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_21" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 13.9, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_22" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 9.9, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_23" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 5.9, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_24" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, 1.9, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_25" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -2.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_26" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -6.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_27" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -10.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_28" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -14.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_29" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -18.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_30" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -22.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_31" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -26.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_32" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -30.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_33" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -34.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_34" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -38.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_35" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -42.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_36" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -46.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_37" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -50.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_38" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -54.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_39" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -58.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_40" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -62.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_41" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -66.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_42" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -70.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_43" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -74.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_44" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -78.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_45" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -82.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_46" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -86.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_47" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -90.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_48" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -94.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_49" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -98.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_50" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -102.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_51" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -106.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_52" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -110.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_53" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -114.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_54" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -118.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_55" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -122.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_56" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -126.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_57" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -130.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_58" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -134.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_59" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -138.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_60" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -142.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_61" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -146.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_62" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -150.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_63" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -154.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_64" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -158.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_65" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -162.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_66" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -166.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_67" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -170.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_68" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -174.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_69" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -178.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_70" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -182.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_71" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -186.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Naga15_72" parent="DecorManual" instance=ExtResource("18_naga")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, -0.0, -1.0, 0.0, 0.0, -190.1, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="NagaCap15" parent="DecorManual" instance=ExtResource("19_nagahead")]
+transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, -195.6, 3.0, 107.0)
+metadata/coliziune = "none"
+
+[node name="Terasa0" parent="DecorManual" instance=ExtResource("23_terrace")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -204.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="Terasa1" parent="DecorManual" instance=ExtResource("23_terrace")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -212.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="Terasa2" parent="DecorManual" instance=ExtResource("23_terrace")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -220.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="StalpTrompa2" parent="DecorManual" instance=ExtResource("25_pillar")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.4, 14.0, -224.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.3, 0, 0)
+
+[node name="Terasa3" parent="DecorManual" instance=ExtResource("23_terrace")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -228.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="Terasa4" parent="DecorManual" instance=ExtResource("23_terrace")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -236.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="Terasa5" parent="DecorManual" instance=ExtResource("23_terrace")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -244.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="StalpTrompa5" parent="DecorManual" instance=ExtResource("25_pillar")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.4, 14.0, -248.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.3, 0, 0)
+
+[node name="Terasa6" parent="DecorManual" instance=ExtResource("23_terrace")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -252.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="Terasa7" parent="DecorManual" instance=ExtResource("23_terrace")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -260.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="Terasa8" parent="DecorManual" instance=ExtResource("23_terrace")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -268.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="StalpTrompa8" parent="DecorManual" instance=ExtResource("25_pillar")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.4, 14.0, -272.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.3, 0, 0)
+
+[node name="Terasa9" parent="DecorManual" instance=ExtResource("23_terrace")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -276.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="Terasa10" parent="DecorManual" instance=ExtResource("23_terrace")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -284.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="Terasa11" parent="DecorManual" instance=ExtResource("23_terrace")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -292.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="StalpTrompa11" parent="DecorManual" instance=ExtResource("25_pillar")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.4, 14.0, -296.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.3, 0, 0)
+
+[node name="Terasa12" parent="DecorManual" instance=ExtResource("23_terrace")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -300.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="Terasa13" parent="DecorManual" instance=ExtResource("23_terrace")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -308.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="Terasa14" parent="DecorManual" instance=ExtResource("23_terrace")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -316.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="StalpTrompa14" parent="DecorManual" instance=ExtResource("25_pillar")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.4, 14.0, -320.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.3, 0, 0)
+
+[node name="Terasa15" parent="DecorManual" instance=ExtResource("23_terrace")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -324.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="Terasa16" parent="DecorManual" instance=ExtResource("23_terrace")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -332.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="Terasa17" parent="DecorManual" instance=ExtResource("23_terrace")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -340.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="StalpTrompa17" parent="DecorManual" instance=ExtResource("25_pillar")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.4, 14.0, -344.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.3, 0, 0)
+
+[node name="Terasa18" parent="DecorManual" instance=ExtResource("23_terrace")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -348.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="Terasa19" parent="DecorManual" instance=ExtResource("23_terrace")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -356.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="TerasaCapat" parent="DecorManual" instance=ExtResource("24_terrace_end")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 107.71, 14.0, -363.97)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.2, 0, 0)
+
+[node name="RegeleLepros" parent="DecorManual" instance=ExtResource("26_leper")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 100.0, 14.3, -210.0)
+metadata/coliziune = "hull"
+
+[node name="Bolta0" parent="DecorManual" instance=ExtResource("27_vault")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 8.0, -38.2)
+metadata/coliziune = "mesh"
+
+[node name="Bolta1" parent="DecorManual" instance=ExtResource("27_vault")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 7.95, -34.6)
+metadata/coliziune = "mesh"
+
+[node name="Bolta2" parent="DecorManual" instance=ExtResource("27_vault")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 7.9, -31.0)
+metadata/coliziune = "mesh"
+
+[node name="Bolta3" parent="DecorManual" instance=ExtResource("27_vault")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 7.85, -27.4)
+metadata/coliziune = "mesh"
+
+[node name="Bolta4" parent="DecorManual" instance=ExtResource("27_vault")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 7.8, -23.8)
+metadata/coliziune = "mesh"
+
+[node name="Bolta5" parent="DecorManual" instance=ExtResource("27_vault")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 7.7, -16.25)
+metadata/coliziune = "mesh"
+
+[node name="Bolta6" parent="DecorManual" instance=ExtResource("27_vault")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 7.65, -12.75)
+metadata/coliziune = "mesh"
+
+[node name="Bolta7" parent="DecorManual" instance=ExtResource("27_vault")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 7.6, -9.25)
+metadata/coliziune = "mesh"
+
+[node name="Bolta8" parent="DecorManual" instance=ExtResource("27_vault")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 7.56, -5.75)
+metadata/coliziune = "mesh"
+
+[node name="Bolta9" parent="DecorManual" instance=ExtResource("27_vault")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 7.51, -2.25)
+metadata/coliziune = "mesh"
+
+[node name="Bolta10" parent="DecorManual" instance=ExtResource("27_vault")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 7.46, 1.25)
+metadata/coliziune = "mesh"
+
+[node name="BoltaPrabusita0" parent="DecorManual" instance=ExtResource("28_vault_b")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 8.05, -42.0)
+metadata/coliziune = "mesh"
+
+[node name="BoltaPrabusita1" parent="DecorManual" instance=ExtResource("28_vault_b")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 7.75, -20.0)
+metadata/coliziune = "mesh"
+
+[node name="BoltaPrabusita2" parent="DecorManual" instance=ExtResource("28_vault_b")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 7.41, 5.0)
+metadata/coliziune = "mesh"
+
+[node name="RadacinaRampa" parent="DecorManual" instance=ExtResource("29_ramp")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 7.16, 12.57)
+metadata/coliziune = "mesh"
+
+[node name="AngkorWat" parent="DecorManual" instance=ExtResource("30_temple")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0.0, 0.0, 0.0)
+metadata/coliziune = "hull"
+metadata/ancora_sol = Vector3(31.0, 4.1, 0.0)
+
+[node name="GalStalp0" parent="DecorManual" instance=ExtResource("31_gcol")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.0, 4.0, -26.0)
+metadata/coliziune = "none"
+
+[node name="GalAcoperis0" parent="DecorManual" instance=ExtResource("32_groof")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.0, 7.5, -28.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.75, -3.5, 0.0)
+
+[node name="GalZid0" parent="DecorManual" instance=ExtResource("33_gwall")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -66.3, 4.0, -28.0)
+metadata/coliziune = "none"
+
+[node name="GalStalp1" parent="DecorManual" instance=ExtResource("31_gcol")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.0, 4.0, -30.0)
+metadata/coliziune = "none"
+
+[node name="GalAcoperis1" parent="DecorManual" instance=ExtResource("32_groof")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.0, 7.5, -32.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.75, -3.5, 0.0)
+
+[node name="GalZid1" parent="DecorManual" instance=ExtResource("33_gwall")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -66.3, 4.0, -32.0)
+metadata/coliziune = "none"
+
+[node name="GalStalp2" parent="DecorManual" instance=ExtResource("31_gcol")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.0, 4.0, -34.0)
+metadata/coliziune = "none"
+
+[node name="GalAcoperis2" parent="DecorManual" instance=ExtResource("32_groof")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.0, 7.5, -36.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.75, -3.5, 0.0)
+
+[node name="GalZid2" parent="DecorManual" instance=ExtResource("33_gwall")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -66.3, 4.0, -36.0)
+metadata/coliziune = "none"
+
+[node name="GalStalp3" parent="DecorManual" instance=ExtResource("31_gcol")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.0, 4.0, -38.0)
+metadata/coliziune = "none"
+
+[node name="GalAcoperis3" parent="DecorManual" instance=ExtResource("32_groof")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.0, 7.5, -40.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.75, -3.5, 0.0)
+
+[node name="GalZid3" parent="DecorManual" instance=ExtResource("33_gwall")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -66.3, 4.0, -40.0)
+metadata/coliziune = "none"
+
+[node name="GalStalp4" parent="DecorManual" instance=ExtResource("31_gcol")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.0, 4.0, -42.0)
+metadata/coliziune = "none"
+
+[node name="GalAcoperis4" parent="DecorManual" instance=ExtResource("32_groof")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.0, 7.5, -44.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.75, -3.5, 0.0)
+
+[node name="GalZid4" parent="DecorManual" instance=ExtResource("33_gwall")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -66.3, 4.0, -44.0)
+metadata/coliziune = "none"
+
+[node name="GalStalp5" parent="DecorManual" instance=ExtResource("31_gcol")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.0, 4.0, -46.0)
+metadata/coliziune = "none"
+
+[node name="GalAcoperis5" parent="DecorManual" instance=ExtResource("32_groof")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.0, 7.5, -48.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.75, -3.5, 0.0)
+
+[node name="GalZid5" parent="DecorManual" instance=ExtResource("33_gwall")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -66.3, 4.0, -48.0)
+metadata/coliziune = "none"
+
+[node name="GalStalp6" parent="DecorManual" instance=ExtResource("31_gcol")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.0, 4.0, -50.0)
+metadata/coliziune = "none"
+
+[node name="GalAcoperis6" parent="DecorManual" instance=ExtResource("32_groof")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.0, 7.5, -52.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.75, -3.5, 0.0)
+
+[node name="GalZid6" parent="DecorManual" instance=ExtResource("33_gwall")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -66.3, 4.0, -52.0)
+metadata/coliziune = "none"
+
+[node name="GalStalp7" parent="DecorManual" instance=ExtResource("31_gcol")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.0, 4.0, -54.0)
+metadata/coliziune = "none"
+
+[node name="GalAcoperis7" parent="DecorManual" instance=ExtResource("32_groof")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.0, 7.5, -56.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.75, -3.5, 0.0)
+
+[node name="GalZid7" parent="DecorManual" instance=ExtResource("33_gwall")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -66.3, 4.0, -56.0)
+metadata/coliziune = "none"
+
+[node name="GalStalp8" parent="DecorManual" instance=ExtResource("31_gcol")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.0, 4.0, -58.0)
+metadata/coliziune = "none"
+
+[node name="GalAcoperis8" parent="DecorManual" instance=ExtResource("32_groof")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64.0, 7.5, -60.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(1.75, -3.5, 0.0)
+
+[node name="GalZid8" parent="DecorManual" instance=ExtResource("33_gwall")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -66.3, 4.0, -60.0)
+metadata/coliziune = "none"
+
+[node name="GalStalpN" parent="DecorManual" instance=ExtResource("31_gcol")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.0, 4.0, -62.0)
+metadata/coliziune = "none"
+
+[node name="BakhengAltar0" parent="DecorManual" instance=ExtResource("34_shrine")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -148.0, 31.0, -220.0)
+metadata/coliziune = "none"
+
+[node name="BakhengAltar1" parent="DecorManual" instance=ExtResource("34_shrine")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -148.0, 31.0, -200.0)
+metadata/coliziune = "none"
+
+[node name="BakhengAltar2" parent="DecorManual" instance=ExtResource("34_shrine")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -128.0, 31.0, -220.0)
+metadata/coliziune = "none"
+
+[node name="BakhengAltar3" parent="DecorManual" instance=ExtResource("34_shrine")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -128.0, 31.0, -200.0)
+metadata/coliziune = "none"
+
+[node name="BakhengScara0" parent="DecorManual" instance=ExtResource("35_stair")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -152.0, 30.25, -210.0)
+metadata/coliziune = "none"
+
+[node name="BakhengScara1" parent="DecorManual" instance=ExtResource("35_stair")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -124.0, 30.1, -210.0)
+metadata/coliziune = "none"
+
+[node name="SrahSrangDebarcader" parent="DecorManual" instance=ExtResource("36_landing")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50.0, 2.0, 122.5)
+metadata/coliziune = "none"
+
+[node name="TukTuk0" parent="DecorManual" instance=ExtResource("37_tuk")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -88.0, 3.0, -14.0)
+metadata/coliziune = "none"
+
+[node name="Moto" parent="DecorManual/TukTuk0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.95)
+
+[node name="TukTuk1" parent="DecorManual" instance=ExtResource("37_tuk")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -84.0, 3.0, -15.0)
+metadata/coliziune = "none"
+
+[node name="Moto" parent="DecorManual/TukTuk1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.95)
+
+[node name="TukTuk2" parent="DecorManual" instance=ExtResource("37_tuk")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -80.0, 3.0, -14.5)
+metadata/coliziune = "none"
+
+[node name="Moto" parent="DecorManual/TukTuk2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.95)
+
+[node name="Calugar0" parent="DecorManual" instance=ExtResource("38_monk")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -90.0, 3.0, 16.0)
+metadata/coliziune = "none"
+
+[node name="Calugar1" parent="DecorManual" instance=ExtResource("38_monk")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -89.0, 3.0, 17.5)
+metadata/coliziune = "none"
+
+[node name="Calugar2" parent="DecorManual" instance=ExtResource("38_monk")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -147.0, 31.0, -228.0)
+metadata/coliziune = "none"
+
+[node name="MolozGalerie0" parent="DecorManual" instance=ExtResource("39_rubble")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 134.0, 7.95, -35.0)
+metadata/coliziune = "none"
+
+[node name="MolozGalerie1" parent="DecorManual" instance=ExtResource("39_rubble")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 117.5, 7.71, -17.0)
+metadata/coliziune = "none"
+
+[node name="MolozGalerie2" parent="DecorManual" instance=ExtResource("40_restore")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 134.0, 7.6, -9.0)
+metadata/coliziune = "none"
+
+[node name="MolozGalerie3" parent="DecorManual" instance=ExtResource("41_numbered")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 118.0, 7.86, -28.0)
+metadata/coliziune = "none"
+
+[node name="MolozGalerie4" parent="DecorManual" instance=ExtResource("42_laterite")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 117.5, 7.52, -3.0)
+metadata/coliziune = "none"
+
+[node name="Ficus0" parent="DecorManual" instance=ExtResource("43_fig")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 115.0, 7.81, -39.0)
+metadata/coliziune = "none"
+
+[node name="Ficus1" parent="DecorManual" instance=ExtResource("43_fig")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 137.0, 7.45, -13.0)
+metadata/coliziune = "none"
+
+[node name="Ficus2" parent="DecorManual" instance=ExtResource("43_fig")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 114.5, 7.26, 1.0)
+metadata/coliziune = "none"
+
+[node name="JunglaTaProhm0" parent="DecorManual" instance=ExtResource("44_tetra_a")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 150.0, 8.0, -40.0)
+metadata/coliziune = "trunk"
+
+[node name="JunglaTaProhm1" parent="DecorManual" instance=ExtResource("45_tetra_b")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 104.0, 8.0, -55.0)
+metadata/coliziune = "trunk"
+
+[node name="JunglaTaProhm2" parent="DecorManual" instance=ExtResource("44_tetra_a")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 152.0, 8.0, 10.0)
+metadata/coliziune = "trunk"
+
+[node name="JunglaTaProhm3" parent="DecorManual" instance=ExtResource("46_dipt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100.0, 8.0, -0.0)
+metadata/coliziune = "trunk"
+
+[node name="JunglaTaProhm4" parent="DecorManual" instance=ExtResource("45_tetra_b")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 165.0, 8.0, -15.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierV0" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -212.0, 3.0, 48.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierH0" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40.0, 3.0, 128.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierV1" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -218.0, 3.0, 36.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierH1" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70.0, 3.0, 131.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierV2" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -212.0, 3.0, 26.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierH2" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -100.0, 3.0, 128.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierV3" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -218.0, 3.0, -26.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierH3" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -130.0, 3.0, 131.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierV4" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -212.0, 3.0, -36.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierH4" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160.0, 3.0, 128.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierV5" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -218.0, 3.0, -48.0)
+metadata/coliziune = "trunk"
+
+[node name="PalmierH5" parent="DecorManual" instance=ExtResource("47_palm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -190.0, 3.0, 131.0)
+metadata/coliziune = "trunk"
+
+[node name="Lotus0" parent="DecorManual" instance=ExtResource("48_lotus")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160.0, 0.5, -22.0)
+metadata/coliziune = "none"
+
+[node name="Lotus1" parent="DecorManual" instance=ExtResource("48_lotus")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -135.0, 0.5, 26.0)
+metadata/coliziune = "none"
+
+[node name="Lotus2" parent="DecorManual" instance=ExtResource("49_lily")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -180.0, 0.5, 18.0)
+metadata/coliziune = "none"
+
+[node name="Lotus3" parent="DecorManual" instance=ExtResource("49_lily")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -120.0, 0.5, -30.0)
+metadata/coliziune = "none"
+
+[node name="Lotus4" parent="DecorManual" instance=ExtResource("48_lotus")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40.0, 0.5, 150.0)
+metadata/coliziune = "none"
+
+[node name="Lotus5" parent="DecorManual" instance=ExtResource("49_lily")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 65.0, 0.5, 140.0)
+metadata/coliziune = "none"
+
+[node name="CameraPoartaDeSud" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -230.0, 14.0, -381.36)
+script = ExtResource("17_camzone")
+frac_from = 0.357
+frac_to = 0.367
+size = Vector3(12.0, 10.0, 24.0)
+ceiling = 8.4
+ceiling_dist = 20.0
+blend_time = 0.35
+
+[node name="CameraGopura" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -97.5, 3.82, -0.0)
+script = ExtResource("17_camzone")
+frac_from = 0.052
+frac_to = 0.064
+size = Vector3(28.0, 10.0, 14.0)
+ceiling = 9.0
+ceiling_dist = 22.0
+blend_time = 0.35
+
+[node name="CameraPoartaCopac" type="Area3D" parent="."]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 8.15, -49.0)
+script = ExtResource("17_camzone")
+size = Vector3(10.0, 8.0, 22.0)
+ceiling = 5.6
+ceiling_dist = 16.0
+blend_time = 0.35
+
+[node name="CameraGaleria" type="Area3D" parent="."]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 7.71, -17.0)
+script = ExtResource("17_camzone")
+size = Vector3(12.0, 9.0, 56.0)
+ceiling = 6.6
+ceiling_dist = 16.0
+blend_time = 0.35
 
 [node name="Machete" type="Node3D" parent="."]
-
-[node name="AW_Soclu" type="CSGBox3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 0)
-size = Vector3(64, 8, 64)
-material = SubResource("Mat_macheta")
-
-[node name="AW_Soclu2" type="CSGBox3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.0, 0)
-size = Vector3(44, 2, 44)
-material = SubResource("Mat_macheta")
-
-[node name="AW_TurnCentral" type="CSGCylinder3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 22.0, 0)
-radius = 7.0
-height = 28.0
-sides = 8
-cone = true
-material = SubResource("Mat_macheta")
-
-[node name="AW_TurnColt0" type="CSGCylinder3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 19.0, -17)
-radius = 5.0
-height = 22.0
-sides = 8
-cone = true
-material = SubResource("Mat_macheta")
-
-[node name="AW_TurnColt1" type="CSGCylinder3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 19.0, -17)
-radius = 5.0
-height = 22.0
-sides = 8
-cone = true
-material = SubResource("Mat_macheta")
-
-[node name="AW_TurnColt2" type="CSGCylinder3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 19.0, 17)
-radius = 5.0
-height = 22.0
-sides = 8
-cone = true
-material = SubResource("Mat_macheta")
-
-[node name="AW_TurnColt3" type="CSGCylinder3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 19.0, 17)
-radius = 5.0
-height = 22.0
-sides = 8
-cone = true
-material = SubResource("Mat_macheta")
-
-[node name="Poarta_PilonV" type="CSGBox3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -236.5, 20.0, -381.36)
-size = Vector3(6, 12, 8)
-material = SubResource("Mat_macheta")
-
-[node name="Poarta_PilonE" type="CSGBox3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -223.5, 20.0, -381.36)
-size = Vector3(6, 12, 8)
-material = SubResource("Mat_macheta")
-
-[node name="Poarta_Turn" type="CSGBox3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -230.0, 26.5, -381.36)
-size = Vector3(19, 11, 8)
-material = SubResource("Mat_macheta")
-
-[node name="Terasa_FataV" type="CSGBox3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 107.0, 16.0, -283.0)
-size = Vector3(1, 4.0, 166.0)
-material = SubResource("Mat_macheta")

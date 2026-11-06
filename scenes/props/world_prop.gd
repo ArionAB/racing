@@ -681,6 +681,8 @@ const SPLIT_MODELS := {
 	# `church_arch`/`fig_tree`/`fever_tree`: ACCENT_HOLDS_CLASS, nu
 	# CLASSES_BY_MODEL direct pe corp.
 	"elephant": true,
+	# Elefantul asiatic (Angkor, kit §1.3): acelasi schelet si acelasi `Elephant_Mesh`.
+	"asian_elephant": true,
 	# Rata (Fiordland, lotul PADUREA DE FAGI): tufa densa cu flori rosii, UN
 	# SINGUR nod de mesh (`Rata`, nu Trunk+Crown ca fagii). Masurat
 	# (probe_slots.gd): 28.2% slot 7 (KERB_RED, florile — brief-ul le numeste
@@ -905,6 +907,8 @@ const ACCENT_HOLDS_CLASS := {
 	# ramas pe corp) ia `elephant_hide`; corpul original ramane doar cu
 	# fildesii pe atlas.
 	"elephant": true,
+	# Elefantul asiatic (Angkor, kit §1.3): acelasi schelet si acelasi `Elephant_Mesh`.
+	"asian_elephant": true,
 	# Rata (Fiordland, lotul PADUREA DE FAGI): accentul (`Rata_Accente`, tufa
 	# de frunzis 21+28) ia `beech_canopy`; corpul original ramane cu florile
 	# (KERB_RED) pe atlas. Nu exista astazi vreo instanta cu metadata
@@ -1657,6 +1661,9 @@ const CLASSES_BY_MODEL := {
 	"elephant": {
 		"Elephant_Mesh_Accente": Palette.TRI_PREFIX + "elephant_hide",
 	},
+	"asian_elephant": {
+		"Elephant_Mesh_Accente": Palette.TRI_PREFIX + "elephant_hide",
+	},
 
 	# --- Fiordland: GNEISUL UD (Track16) ----------------------------------
 	#
@@ -2343,6 +2350,40 @@ const CLASSES_HALONG := {
 	"grotto_massif": {"Grotto_Rock": _HL_KARST},
 	"grotto_portal": {"Portal_Rock": _HL_KARST},
 }
+## Angkor (Track24, docs/asset_briefs/angkor_kit.md regula 5): gresia pe `*_Stone` ia
+## `angkor_sandstone`; lichenul (`*_Lichen`) si darele (`*_Streak`) sunt noduri separate si raman
+## pe atlas (clasa triplanara ar sterge sloturile de pe corp).
+const _ANK_SANDSTONE: String = Palette.TRI_PREFIX + "angkor_sandstone"
+const CLASSES_ANGKOR := {
+	"bayon_face_tower_a": {"Bayon_Stone": _ANK_SANDSTONE},
+	"bayon_face_tower_b": {"Bayon_Stone": _ANK_SANDSTONE},
+	"bayon_face_tower_c": {"Bayon_Stone": _ANK_SANDSTONE},
+	"south_gate_face_tower": {"Gate_Stone": _ANK_SANDSTONE},
+	"aw_west_gopura": {"Gopura_Stone": _ANK_SANDSTONE},
+	"ta_prohm_tree_gate": {"TreeGate_Stone": _ANK_SANDSTONE},
+	"angkor_wat_temple": {"Temple_Stone": _ANK_SANDSTONE},
+	"gallery_column": {"GalleryColumn_Stone": _ANK_SANDSTONE},
+	"gallery_roof": {"GalleryRoof_Stone": _ANK_SANDSTONE},
+	"gallery_relief_wall": {"GalleryRelief_Stone": _ANK_SANDSTONE},
+	"bakheng_shrine_tower": {"BakhengShrine_Stone": _ANK_SANDSTONE},
+	"bakheng_side_stair": {"BakhengStair_Stone": _ANK_SANDSTONE},
+	"srah_srang_landing": {"Landing_Stone": _ANK_SANDSTONE},
+	"rubble_pile": {"Rubble_Stone": _ANK_SANDSTONE},
+	"numbered_block": {"Block_Stone": _ANK_SANDSTONE},
+	"strangler_fig": {"Fig_Stone": _ANK_SANDSTONE},
+	"naga_balustrade": {"Naga_Stone": _ANK_SANDSTONE},
+	"naga_balustrade_gap": {"Naga_Stone": _ANK_SANDSTONE},
+	"naga_head": {"Naga_Stone": _ANK_SANDSTONE},
+	"deva_giant": {"Deva_Stone": _ANK_SANDSTONE},
+	"asura_giant": {"Asura_Stone": _ANK_SANDSTONE},
+	"elephant_terrace_module": {"Terrace_Stone": _ANK_SANDSTONE},
+	"elephant_terrace_end": {"Terrace_Stone": _ANK_SANDSTONE},
+	"elephant_trunk_pillar": {"Pillar_Stone": _ANK_SANDSTONE},
+	"leper_king_statue": {"Statue_Stone": _ANK_SANDSTONE},
+	"vault_intact": {"Vault_Stone": _ANK_SANDSTONE},
+	"vault_broken": {"Vault_Stone": _ANK_SANDSTONE},
+	"fallen_block": {"Block_Stone": _ANK_SANDSTONE},
+}
 const CLASSES_TRANSFAGARASAN := {
 	"schist_outcrop_a": _TF_OUTCROP, "schist_outcrop_b": _TF_OUTCROP,
 	"schist_outcrop_c": _TF_OUTCROP,
@@ -2477,6 +2518,8 @@ const CLASSES_BY_THEME := {
 	"carrara": CLASSES_CARRARA,
 	# Ha Long (Track22, #598): vezi `CLASSES_HALONG`.
 	"halong": CLASSES_HALONG,
+	# Angkor (Track24): vezi `CLASSES_ANGKOR`.
+	"angkor": CLASSES_ANGKOR,
 }
 
 ## Modelele care NU arunca umbra: siluetele de orizont, scalate/asezate la
@@ -2919,6 +2962,10 @@ const SLOT_REMAP_BY_MODEL := {
 	# Griurile NEUTRE ale .glb-ului ies crem sub soarele cald (1.0,0.90,0.72) +
 	# saturatia 1.18 din post; doar sloturile RECI raman gri.
 	"elephant": {
+		2: Palette.ASPHALT,
+		29: Palette.VOLCANIC_BLACK,
+	},
+	"asian_elephant": {
 		2: Palette.ASPHALT,
 		29: Palette.VOLCANIC_BLACK,
 	},
@@ -3868,6 +3915,10 @@ func _glow_spec(model: Node3D) -> String:
 ## respingea hull-ul la unele rotatii (`zid82_col`, 30 sep 2026). Vezi
 ## `TrackDecor.add_hull_collision`.
 const HULL_SKIP_PARTS := {
+	# Angkor, poarta-copac (kit §1.2): corp DOAR pe gresie. Radacinile se intind pe 20 m si ating
+	# solul langa intrarea in ramura; ProbeRace val 1 (16 seed-uri): 3 ejectari „perete” la 28 m/s pe
+	# masinile care intrau in scurtatura pe linia virajului. Radacinile sunt decor (datoria organica).
+	"ta_prohm_tree_gate": ["TreeGate_Root", "TreeGate_Canopy", "TreeGate_Lichen", "TreeGate_Streak"],
 	# Carrara: lemnaria turnului (usa pe +Y si grinda cu scripete pe +X) si a magaziei (usile,
 	# sina) sta pe fete diferite: un hull pe nodul ei ar fi o pana convexa intre ele, in aer.
 	# Corpul de zidarie / tabla acopera deja amprenta. Golurile stau in perete.

@@ -54,6 +54,27 @@ if [ -f "$ROOT/structures/bayon_face_tower_a.glb" ]; then
   [ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei a esuat"; fail=1; }
 fi
 
+
+# --- val 1, grupul C ---
+# Elefantul asiatic (kit 1.3). Aceleasi flaguri ca elefantul din Serengeti
+# (verify_serengeti.sh: --origin=assembly) si plafon de triunghiuri propriu
+# (plasa 3000, ca acolo: meshul e rigat si decimat la ~1100). Garda de cote
+# (umar, lungime, oase, animatii, radacina) e measure_angkor_w1c.py, cu selftest.
+echo
+echo "== val 1, grupul C: elefantul asiatic =="
+ELE="$ROOT/animals/asian_elephant.glb"
+BIG_SAVE=$BIG; BIG=3000
+check "animals/asian_elephant.glb" --origin=assembly
+BIG=$BIG_SAVE
+if [ -f "$ELE" ]; then
+  python tools/blender/measure_angkor_w1c.py elephant "$ELE" || fail=1
+  st=$(python tools/blender/measure_angkor_w1c.py --selftest "$ELE" 2>&1); rc=$?
+  printf '%s
+' "$st" | grep -E "^-- sabotaj|garda a|SELFTEST"
+  [ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei elefantului a esuat"; fail=1; }
+fi
+# --- sfarsit val 1, grupul C ---
+
 echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then

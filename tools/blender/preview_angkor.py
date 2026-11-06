@@ -78,6 +78,8 @@ CLASS_BY_SUFFIX = {"_Stone": STONE_HEX}
 
 SPECS = {
     "bayon_face_tower_a": {"camera": {"azimuth": 62.0, "elevation": 9.0, "lens": 70.0, "margin": 1.06}},
+    # elefantul: capul pe +Y, vazut din dreapta-fata ca pe desen (cap la dreapta)
+    "asian_elephant": {"camera": {"azimuth": 38.0, "elevation": 6.0, "lens": 60.0, "margin": 1.08}},
 }
 
 # camera de joc (scenes/race/chase_camera.gd: DEFAULT_HEIGHT/DISTANCE/BASE_FOV/
@@ -536,6 +538,109 @@ def face(name, res_height=1000):
     _rm(*outs)
 
 
+
+# --- animale cu schelet (val 1, grupul C: asian_elephant) --------------------
+# Mesh-ul skinuit se randeaza in poza de repaus; cadrele de Walk/Trumpet se pun
+# pe armatura importata. Chenarul (`bound_box`) ramane cel de repaus, de unde
+# marja `margin` mai larga.
+
+def _armatures():
+    return [o for o in bpy.data.objects if o.type == "ARMATURE"]
+
+
+def _set_pose(prefix, frame):
+    """Actiunea al carei nume incepe cu `prefix` ("Walk", "Trumpet") pe
+    armatura, la cadrul `frame` (relativ la inceputul ei). prefix=None: repaus."""
+    scene = bpy.context.scene
+    for arm in _armatures():
+        ad = arm.animation_data
+        if ad is None:
+            continue
+        for tr in ad.nla_tracks:
+            tr.mute = True
+        ad.action = None
+        if prefix is None:
+            continue
+        act = next((a for a in bpy.data.actions if a.name.startswith(prefix)), None)
+        if act is None:
+            print("LIPSA actiunea:", prefix)
+            continue
+        ad.action = act
+        scene.frame_set(int(act.frame_range[0]) + int(frame))
+    if prefix is None:
+        scene.frame_set(1)
+    bpy.context.view_layer.update()
+
+
+def _move_group(objs, offset):
+    """Muta un grup de obiecte radacina (mesh + armatura) cu `offset`."""
+    for o in objs:
+        if o.parent is None:
+            o.location = o.location + Vector(offset)
+    bpy.context.view_layer.update()
+
+
+def _import_group(path, offset=(0.0, 0.0, 0.0)):
+    before = set(bpy.data.objects)
+    meshes = _import_path(path)
+    new = [o for o in bpy.data.objects if o not in before]
+    _move_group(new, offset)
+    return meshes, [o for o in new if o.type == "ARMATURE"]
+
+
+def pose_sheet(name, res_height=700):
+    """Repaus din 3 parti + Walk la 1/4 si 1/2 din ciclu + Trumpet la capat:
+    ce se rupe la schelet se vede aici, nu in rest."""
+    os.makedirs(FID_DIR, exist_ok=True)
+    _clear()
+    meshes = _import(name)
+    if not meshes:
+        return
+    cam = _camera_for(name)
+    groups = {
+        "pose": [("rest_side", None, 0, 0.0), ("walk_a", "Walk", 9, 0.0),
+                 ("walk_b", "Walk", 18, 0.0), ("walk_c", "Walk", 27, 0.0)],
+        "pose34": [("rest_a", None, 0, 62.0), ("walk_a", "Walk", 9, 62.0),
+                   ("walk_b", "Walk", 18, 62.0), ("walk_c", "Walk", 27, 62.0)],
+        "trumpet": [("t_a", "Trumpet", 20, 62.0), ("t_side", "Trumpet", 20, 0.0),
+                    ("t_front", "Trumpet", 20, 110.0)],
+    }
+    for gname, shots in groups.items():
+        outs = []
+        for tag, prefix, frame, az in shots:
+            _set_pose(prefix, frame)
+            c = dict(cam)
+            c["azimuth"] = az
+            c["margin"] = 1.25
+            p = os.path.join(FID_DIR, "_pose_%s_%s.png" % (name, tag))
+            _render(meshes, p, res_height=res_height, aspect=1.2, **c)
+            outs.append(p)
+        _compose(["--montage", ",".join(outs), "--out",
+                  os.path.join(FID_DIR, "%s_%s.png" % (name, gname))])
+        _rm(*outs)
+    _set_pose(None, 0)
+
+
+def versus(name, other, res_height=800):
+    """`name` (assets/models/angkor/...) lang `other` (cale sub assets/models/),
+    aceeasi scara, doua vederi (3/4 si profil) -> <name>_vs.png."""
+    os.makedirs(FID_DIR, exist_ok=True)
+    outs = []
+    for az in (62.0, 0.0):
+        _clear()
+        right = Vector((-math.sin(math.radians(az)), math.cos(math.radians(az)), 0.0))
+        ma, _a = _import_group(_find_glb(name), right * 3.6)
+        mb, _b = _import_group(os.path.join(ALL_MODELS, other), right * -3.6)
+        c = _camera_for(name)
+        c["azimuth"] = az
+        c["margin"] = 1.1
+        p = os.path.join(FID_DIR, "_vs_%s_%d.png" % (name, int(az)))
+        _render(ma + mb, p, res_height=res_height, aspect=1.9, **c)
+        outs.append(p)
+    _compose(["--montage", ",".join(outs), "--out", os.path.join(FID_DIR, name + "_vs.png")])
+    _rm(*outs)
+
+
 argv = sys.argv
 args = argv[argv.index("--") + 1:] if "--" in argv else []
 if "--compare" in args:
@@ -546,5 +651,10 @@ elif "--face" in args:
     face(args[args.index("--face") + 1])
 elif "--gamecam" in args:
     gamecam(args[args.index("--gamecam") + 1])
+elif "--pose" in args:
+    pose_sheet(args[args.index("--pose") + 1])
+elif "--vs" in args:
+    i = args.index("--vs")
+    versus(args[i + 1], args[i + 2])
 else:
     print(__doc__)

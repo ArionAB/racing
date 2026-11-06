@@ -66,6 +66,16 @@
 [ext_resource type="PackedScene" path="res://assets/models/angkor/props/rubble_pile.glb" id="z4_rubble_pile"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/props/fallen_block.glb" id="z5_fallen_block"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/animals/monk_standing.glb" id="z6_monk_standing"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/gallery_column.glb" id="z7_gallery_column"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/gallery_roof.glb" id="z8_gallery_roof"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/vault_broken.glb" id="z9_vault_broken"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/gallery_corner.glb" id="z10_gallery_corner"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/vault_intact.glb" id="z11_vault_intact"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/strangler_fig.glb" id="z12_strangler_fig"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/props/laterite_block.glb" id="z13_laterite_block"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/props/numbered_block.glb" id="z14_numbered_block"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/props/restoration_prop.glb" id="z15_restoration_prop"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/vine_strands.glb" id="z16_vine_strands"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_macheta"]
 albedo_color = Color(0.72, 0.64, 0.52, 1)
@@ -90,6 +100,114 @@ point_count = 9
 
 [sub_resource type="Resource" id="MFZ_0"]
 script = ExtResource("mf_zone")
+label = "Ta Prohm incinta 0"
+kind = 1
+species = PackedStringArray("fern_cluster", "tropical_shrub")
+weights = PackedFloat32Array(0.6, 0.4)
+spacing = 4.5
+edge_clear_m = 3.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.9
+scale_max = 1.5
+seed_value = 649
+center = Vector3(153.31, 0, -32.27)
+radius = 20.0
+
+[sub_resource type="Resource" id="MFZ_1"]
+script = ExtResource("mf_zone")
+label = "Ta Prohm incinta 1"
+kind = 1
+species = PackedStringArray("fern_cluster", "tropical_shrub")
+weights = PackedFloat32Array(0.6, 0.4)
+spacing = 4.5
+edge_clear_m = 3.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.9
+scale_max = 1.5
+seed_value = 650
+center = Vector3(167.62, 0, -23.49)
+radius = 20.0
+
+[sub_resource type="Resource" id="MFZ_2"]
+script = ExtResource("mf_zone")
+label = "Ta Prohm incinta 2"
+kind = 1
+species = PackedStringArray("fern_cluster", "tropical_shrub")
+weights = PackedFloat32Array(0.6, 0.4)
+spacing = 4.5
+edge_clear_m = 3.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.9
+scale_max = 1.5
+seed_value = 651
+center = Vector3(167.96, 0, -15.01)
+radius = 20.0
+
+[sub_resource type="Resource" id="MFZ_3"]
+script = ExtResource("mf_zone")
+label = "Ta Prohm incinta 3"
+kind = 1
+species = PackedStringArray("fern_cluster", "tropical_shrub")
+weights = PackedFloat32Array(0.6, 0.4)
+spacing = 4.5
+edge_clear_m = 3.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.9
+scale_max = 1.5
+seed_value = 652
+center = Vector3(163.18, 0, -12.95)
+radius = 20.0
+
+[sub_resource type="Resource" id="MFZ_4"]
+script = ExtResource("mf_zone")
+label = "Ta Prohm incinta 4"
+kind = 1
+species = PackedStringArray("fern_cluster", "tropical_shrub")
+weights = PackedFloat32Array(0.6, 0.4)
+spacing = 4.5
+edge_clear_m = 3.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.9
+scale_max = 1.5
+seed_value = 653
+center = Vector3(102.14, 0, 57.57)
+radius = 20.0
+
+[sub_resource type="Resource" id="MFZ_5"]
+script = ExtResource("mf_zone")
+label = "Ta Prohm incinta 5"
+kind = 1
+species = PackedStringArray("fern_cluster", "tropical_shrub")
+weights = PackedFloat32Array(0.6, 0.4)
+spacing = 4.5
+edge_clear_m = 3.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.9
+scale_max = 1.5
+seed_value = 654
+center = Vector3(102.76, 0, 75.91)
+radius = 20.0
+
+[sub_resource type="Resource" id="MFZ_6"]
+script = ExtResource("mf_zone")
 label = "incinta Angkor Wat"
 kind = 1
 species = PackedStringArray()
@@ -102,11 +220,11 @@ max_below_road_m = 200.0
 claim = true
 scale_min = 0.85
 scale_max = 1.2
-seed_value = 1
+seed_value = 7
 center = Vector3(0.00, 0, 0.00)
 radius = 78.0
 
-[sub_resource type="Resource" id="MFZ_1"]
+[sub_resource type="Resource" id="MFZ_7"]
 script = ExtResource("mf_zone")
 label = "platforma Bakheng"
 kind = 1
@@ -120,11 +238,11 @@ max_below_road_m = 200.0
 claim = true
 scale_min = 0.85
 scale_max = 1.2
-seed_value = 2
+seed_value = 8
 center = Vector3(-138.00, 0, -210.00)
 radius = 38.0
 
-[sub_resource type="Resource" id="MFZ_2"]
+[sub_resource type="Resource" id="MFZ_8"]
 script = ExtResource("mf_zone")
 label = "piata regala 1"
 kind = 1
@@ -138,11 +256,11 @@ max_below_road_m = 200.0
 claim = true
 scale_min = 0.85
 scale_max = 1.2
-seed_value = 3
+seed_value = 9
 center = Vector3(72.00, 0, -400.00)
 radius = 30.0
 
-[sub_resource type="Resource" id="MFZ_3"]
+[sub_resource type="Resource" id="MFZ_9"]
 script = ExtResource("mf_zone")
 label = "piata regala 2"
 kind = 1
@@ -156,11 +274,11 @@ max_below_road_m = 200.0
 claim = true
 scale_min = 0.85
 scale_max = 1.2
-seed_value = 4
+seed_value = 10
 center = Vector3(72.00, 0, -330.00)
 radius = 30.0
 
-[sub_resource type="Resource" id="MFZ_4"]
+[sub_resource type="Resource" id="MFZ_10"]
 script = ExtResource("mf_zone")
 label = "piata regala 3"
 kind = 1
@@ -174,11 +292,11 @@ max_below_road_m = 200.0
 claim = true
 scale_min = 0.85
 scale_max = 1.2
-seed_value = 5
+seed_value = 11
 center = Vector3(72.00, 0, -260.00)
 radius = 30.0
 
-[sub_resource type="Resource" id="MFZ_5"]
+[sub_resource type="Resource" id="MFZ_11"]
 script = ExtResource("mf_zone")
 label = "piata regala 4"
 kind = 1
@@ -192,11 +310,11 @@ max_below_road_m = 200.0
 claim = true
 scale_min = 0.85
 scale_max = 1.2
-seed_value = 6
+seed_value = 12
 center = Vector3(72.00, 0, -195.00)
 radius = 30.0
 
-[sub_resource type="Resource" id="MFZ_6"]
+[sub_resource type="Resource" id="MFZ_12"]
 script = ExtResource("mf_zone")
 label = "terasa Bayon 1"
 kind = 1
@@ -210,11 +328,11 @@ max_below_road_m = 200.0
 claim = true
 scale_min = 0.85
 scale_max = 1.2
-seed_value = 7
+seed_value = 13
 center = Vector3(-120.00, 0, -437.00)
 radius = 22.0
 
-[sub_resource type="Resource" id="MFZ_7"]
+[sub_resource type="Resource" id="MFZ_13"]
 script = ExtResource("mf_zone")
 label = "terasa Bayon 2"
 kind = 1
@@ -228,11 +346,11 @@ max_below_road_m = 200.0
 claim = true
 scale_min = 0.85
 scale_max = 1.2
-seed_value = 8
+seed_value = 14
 center = Vector3(-75.00, 0, -437.00)
 radius = 22.0
 
-[sub_resource type="Resource" id="MFZ_8"]
+[sub_resource type="Resource" id="MFZ_14"]
 script = ExtResource("mf_zone")
 label = "terasa Bayon 3"
 kind = 1
@@ -246,11 +364,11 @@ max_below_road_m = 200.0
 claim = true
 scale_min = 0.85
 scale_max = 1.2
-seed_value = 9
+seed_value = 15
 center = Vector3(-30.00, 0, -437.00)
 radius = 22.0
 
-[sub_resource type="Resource" id="MFZ_9"]
+[sub_resource type="Resource" id="MFZ_15"]
 script = ExtResource("mf_zone")
 label = "coronament aproape 0.000"
 kind = 0
@@ -271,7 +389,7 @@ side = 0
 lat_min = 30.0
 lat_max = 60.0
 
-[sub_resource type="Resource" id="MFZ_10"]
+[sub_resource type="Resource" id="MFZ_16"]
 script = ExtResource("mf_zone")
 label = "coronament aproape 0.070"
 kind = 0
@@ -292,7 +410,7 @@ side = 0
 lat_min = 30.0
 lat_max = 60.0
 
-[sub_resource type="Resource" id="MFZ_11"]
+[sub_resource type="Resource" id="MFZ_17"]
 script = ExtResource("mf_zone")
 label = "coronament aproape 0.088"
 kind = 0
@@ -313,7 +431,7 @@ side = 0
 lat_min = 30.0
 lat_max = 60.0
 
-[sub_resource type="Resource" id="MFZ_12"]
+[sub_resource type="Resource" id="MFZ_18"]
 script = ExtResource("mf_zone")
 label = "coronament aproape 0.122"
 kind = 0
@@ -334,7 +452,7 @@ side = 0
 lat_min = 30.0
 lat_max = 60.0
 
-[sub_resource type="Resource" id="MFZ_13"]
+[sub_resource type="Resource" id="MFZ_19"]
 script = ExtResource("mf_zone")
 label = "coronament aproape 0.308"
 kind = 0
@@ -355,7 +473,7 @@ side = 0
 lat_min = 30.0
 lat_max = 60.0
 
-[sub_resource type="Resource" id="MFZ_14"]
+[sub_resource type="Resource" id="MFZ_20"]
 script = ExtResource("mf_zone")
 label = "coronament aproape 0.372"
 kind = 0
@@ -376,7 +494,7 @@ side = 0
 lat_min = 30.0
 lat_max = 60.0
 
-[sub_resource type="Resource" id="MFZ_15"]
+[sub_resource type="Resource" id="MFZ_21"]
 script = ExtResource("mf_zone")
 label = "coronament aproape 0.758"
 kind = 0
@@ -397,7 +515,7 @@ side = 0
 lat_min = 30.0
 lat_max = 60.0
 
-[sub_resource type="Resource" id="MFZ_16"]
+[sub_resource type="Resource" id="MFZ_22"]
 script = ExtResource("mf_zone")
 label = "coronament aproape 0.905"
 kind = 0
@@ -418,7 +536,7 @@ side = 0
 lat_min = 30.0
 lat_max = 60.0
 
-[sub_resource type="Resource" id="MFZ_17"]
+[sub_resource type="Resource" id="MFZ_23"]
 script = ExtResource("mf_zone")
 label = "coronament mediu 0.000"
 kind = 0
@@ -439,7 +557,7 @@ side = 0
 lat_min = 60.0
 lat_max = 120.0
 
-[sub_resource type="Resource" id="MFZ_18"]
+[sub_resource type="Resource" id="MFZ_24"]
 script = ExtResource("mf_zone")
 label = "coronament mediu 0.070"
 kind = 0
@@ -460,7 +578,7 @@ side = 0
 lat_min = 60.0
 lat_max = 120.0
 
-[sub_resource type="Resource" id="MFZ_19"]
+[sub_resource type="Resource" id="MFZ_25"]
 script = ExtResource("mf_zone")
 label = "coronament mediu 0.088"
 kind = 0
@@ -481,7 +599,7 @@ side = 0
 lat_min = 60.0
 lat_max = 120.0
 
-[sub_resource type="Resource" id="MFZ_20"]
+[sub_resource type="Resource" id="MFZ_26"]
 script = ExtResource("mf_zone")
 label = "coronament mediu 0.122"
 kind = 0
@@ -502,7 +620,7 @@ side = 0
 lat_min = 60.0
 lat_max = 120.0
 
-[sub_resource type="Resource" id="MFZ_21"]
+[sub_resource type="Resource" id="MFZ_27"]
 script = ExtResource("mf_zone")
 label = "coronament mediu 0.308"
 kind = 0
@@ -523,7 +641,7 @@ side = 0
 lat_min = 60.0
 lat_max = 120.0
 
-[sub_resource type="Resource" id="MFZ_22"]
+[sub_resource type="Resource" id="MFZ_28"]
 script = ExtResource("mf_zone")
 label = "coronament mediu 0.372"
 kind = 0
@@ -544,7 +662,7 @@ side = 0
 lat_min = 60.0
 lat_max = 120.0
 
-[sub_resource type="Resource" id="MFZ_23"]
+[sub_resource type="Resource" id="MFZ_29"]
 script = ExtResource("mf_zone")
 label = "coronament mediu 0.758"
 kind = 0
@@ -565,7 +683,7 @@ side = 0
 lat_min = 60.0
 lat_max = 120.0
 
-[sub_resource type="Resource" id="MFZ_24"]
+[sub_resource type="Resource" id="MFZ_30"]
 script = ExtResource("mf_zone")
 label = "coronament mediu 0.905"
 kind = 0
@@ -586,7 +704,7 @@ side = 0
 lat_min = 60.0
 lat_max = 120.0
 
-[sub_resource type="Resource" id="MFZ_25"]
+[sub_resource type="Resource" id="MFZ_31"]
 script = ExtResource("mf_zone")
 label = "coronament departe 0.000"
 kind = 0
@@ -607,7 +725,7 @@ side = 0
 lat_min = 120.0
 lat_max = 190.0
 
-[sub_resource type="Resource" id="MFZ_26"]
+[sub_resource type="Resource" id="MFZ_32"]
 script = ExtResource("mf_zone")
 label = "coronament departe 0.070"
 kind = 0
@@ -628,7 +746,7 @@ side = 0
 lat_min = 120.0
 lat_max = 190.0
 
-[sub_resource type="Resource" id="MFZ_27"]
+[sub_resource type="Resource" id="MFZ_33"]
 script = ExtResource("mf_zone")
 label = "coronament departe 0.088"
 kind = 0
@@ -649,7 +767,7 @@ side = 0
 lat_min = 120.0
 lat_max = 190.0
 
-[sub_resource type="Resource" id="MFZ_28"]
+[sub_resource type="Resource" id="MFZ_34"]
 script = ExtResource("mf_zone")
 label = "coronament departe 0.122"
 kind = 0
@@ -670,7 +788,7 @@ side = 0
 lat_min = 120.0
 lat_max = 190.0
 
-[sub_resource type="Resource" id="MFZ_29"]
+[sub_resource type="Resource" id="MFZ_35"]
 script = ExtResource("mf_zone")
 label = "coronament departe 0.308"
 kind = 0
@@ -691,7 +809,7 @@ side = 0
 lat_min = 120.0
 lat_max = 190.0
 
-[sub_resource type="Resource" id="MFZ_30"]
+[sub_resource type="Resource" id="MFZ_36"]
 script = ExtResource("mf_zone")
 label = "coronament departe 0.372"
 kind = 0
@@ -712,7 +830,7 @@ side = 0
 lat_min = 120.0
 lat_max = 190.0
 
-[sub_resource type="Resource" id="MFZ_31"]
+[sub_resource type="Resource" id="MFZ_37"]
 script = ExtResource("mf_zone")
 label = "coronament departe 0.758"
 kind = 0
@@ -733,7 +851,7 @@ side = 0
 lat_min = 120.0
 lat_max = 190.0
 
-[sub_resource type="Resource" id="MFZ_32"]
+[sub_resource type="Resource" id="MFZ_38"]
 script = ExtResource("mf_zone")
 label = "coronament departe 0.905"
 kind = 0
@@ -754,7 +872,7 @@ side = 0
 lat_min = 120.0
 lat_max = 190.0
 
-[sub_resource type="Resource" id="MFZ_33"]
+[sub_resource type="Resource" id="MFZ_39"]
 script = ExtResource("mf_zone")
 label = "etaj mijloc 0.000"
 kind = 0
@@ -775,7 +893,7 @@ side = 0
 lat_min = 10.0
 lat_max = 34.0
 
-[sub_resource type="Resource" id="MFZ_34"]
+[sub_resource type="Resource" id="MFZ_40"]
 script = ExtResource("mf_zone")
 label = "etaj mijloc 0.070"
 kind = 0
@@ -796,7 +914,7 @@ side = 0
 lat_min = 10.0
 lat_max = 34.0
 
-[sub_resource type="Resource" id="MFZ_35"]
+[sub_resource type="Resource" id="MFZ_41"]
 script = ExtResource("mf_zone")
 label = "etaj mijloc 0.088"
 kind = 0
@@ -817,7 +935,7 @@ side = 0
 lat_min = 10.0
 lat_max = 34.0
 
-[sub_resource type="Resource" id="MFZ_36"]
+[sub_resource type="Resource" id="MFZ_42"]
 script = ExtResource("mf_zone")
 label = "etaj mijloc 0.122"
 kind = 0
@@ -838,7 +956,7 @@ side = 0
 lat_min = 10.0
 lat_max = 34.0
 
-[sub_resource type="Resource" id="MFZ_37"]
+[sub_resource type="Resource" id="MFZ_43"]
 script = ExtResource("mf_zone")
 label = "etaj mijloc 0.308"
 kind = 0
@@ -859,7 +977,7 @@ side = 0
 lat_min = 10.0
 lat_max = 34.0
 
-[sub_resource type="Resource" id="MFZ_38"]
+[sub_resource type="Resource" id="MFZ_44"]
 script = ExtResource("mf_zone")
 label = "etaj mijloc 0.372"
 kind = 0
@@ -880,7 +998,7 @@ side = 0
 lat_min = 10.0
 lat_max = 34.0
 
-[sub_resource type="Resource" id="MFZ_39"]
+[sub_resource type="Resource" id="MFZ_45"]
 script = ExtResource("mf_zone")
 label = "etaj mijloc 0.758"
 kind = 0
@@ -901,7 +1019,7 @@ side = 0
 lat_min = 10.0
 lat_max = 34.0
 
-[sub_resource type="Resource" id="MFZ_40"]
+[sub_resource type="Resource" id="MFZ_46"]
 script = ExtResource("mf_zone")
 label = "etaj mijloc 0.905"
 kind = 0
@@ -922,7 +1040,7 @@ side = 0
 lat_min = 10.0
 lat_max = 34.0
 
-[sub_resource type="Resource" id="MFZ_41"]
+[sub_resource type="Resource" id="MFZ_47"]
 script = ExtResource("mf_zone")
 label = "ciorchine 1"
 kind = 1
@@ -940,7 +1058,7 @@ seed_value = 201
 center = Vector3(-68.38, 0, -191.84)
 radius = 9.215292025840135
 
-[sub_resource type="Resource" id="MFZ_42"]
+[sub_resource type="Resource" id="MFZ_48"]
 script = ExtResource("mf_zone")
 label = "ciorchine 6"
 kind = 1
@@ -958,7 +1076,7 @@ seed_value = 206
 center = Vector3(-128.05, 0, -466.00)
 radius = 9.783755494390423
 
-[sub_resource type="Resource" id="MFZ_43"]
+[sub_resource type="Resource" id="MFZ_49"]
 script = ExtResource("mf_zone")
 label = "ciorchine 9"
 kind = 1
@@ -976,7 +1094,7 @@ seed_value = 209
 center = Vector3(128.50, 0, -320.37)
 radius = 6.865530500144625
 
-[sub_resource type="Resource" id="MFZ_44"]
+[sub_resource type="Resource" id="MFZ_50"]
 script = ExtResource("mf_zone")
 label = "ciorchine 12"
 kind = 1
@@ -994,7 +1112,7 @@ seed_value = 212
 center = Vector3(-80.24, 0, -233.97)
 radius = 9.286466794257347
 
-[sub_resource type="Resource" id="MFZ_45"]
+[sub_resource type="Resource" id="MFZ_51"]
 script = ExtResource("mf_zone")
 label = "ciorchine 14"
 kind = 1
@@ -1012,7 +1130,7 @@ seed_value = 214
 center = Vector3(162.24, 0, -26.69)
 radius = 8.793611195038043
 
-[sub_resource type="Resource" id="MFZ_46"]
+[sub_resource type="Resource" id="MFZ_52"]
 script = ExtResource("mf_zone")
 label = "ciorchine 16"
 kind = 1
@@ -1030,7 +1148,7 @@ seed_value = 216
 center = Vector3(-160.73, 0, -137.76)
 radius = 7.464579064332917
 
-[sub_resource type="Resource" id="MFZ_47"]
+[sub_resource type="Resource" id="MFZ_53"]
 script = ExtResource("mf_zone")
 label = "ciorchine 17"
 kind = 1
@@ -1048,7 +1166,7 @@ seed_value = 217
 center = Vector3(79.30, 0, -374.54)
 radius = 7.727626589341119
 
-[sub_resource type="Resource" id="MFZ_48"]
+[sub_resource type="Resource" id="MFZ_54"]
 script = ExtResource("mf_zone")
 label = "ciorchine 19"
 kind = 1
@@ -1066,7 +1184,7 @@ seed_value = 219
 center = Vector3(-143.55, 0, -423.11)
 radius = 8.933778602854833
 
-[sub_resource type="Resource" id="MFZ_49"]
+[sub_resource type="Resource" id="MFZ_55"]
 script = ExtResource("mf_zone")
 label = "ciorchine 20"
 kind = 1
@@ -1084,7 +1202,7 @@ seed_value = 220
 center = Vector3(138.72, 0, -48.52)
 radius = 8.10107032631501
 
-[sub_resource type="Resource" id="MFZ_50"]
+[sub_resource type="Resource" id="MFZ_56"]
 script = ExtResource("mf_zone")
 label = "ciorchine 24"
 kind = 1
@@ -1102,7 +1220,7 @@ seed_value = 224
 center = Vector3(-218.32, 0, -153.31)
 radius = 10.208952127826542
 
-[sub_resource type="Resource" id="MFZ_51"]
+[sub_resource type="Resource" id="MFZ_57"]
 script = ExtResource("mf_zone")
 label = "ciorchine 25"
 kind = 1
@@ -1120,7 +1238,7 @@ seed_value = 225
 center = Vector3(-256.47, 0, 16.41)
 radius = 8.314748654680265
 
-[sub_resource type="Resource" id="MFZ_52"]
+[sub_resource type="Resource" id="MFZ_58"]
 script = ExtResource("mf_zone")
 label = "ciorchine 27"
 kind = 1
@@ -1138,7 +1256,7 @@ seed_value = 227
 center = Vector3(-77.61, 0, -231.73)
 radius = 7.3092466489180765
 
-[sub_resource type="Resource" id="MFZ_53"]
+[sub_resource type="Resource" id="MFZ_59"]
 script = ExtResource("mf_zone")
 label = "ciorchine 28"
 kind = 1
@@ -1156,7 +1274,7 @@ seed_value = 228
 center = Vector3(110.02, 0, 43.39)
 radius = 11.228531844757796
 
-[sub_resource type="Resource" id="MFZ_54"]
+[sub_resource type="Resource" id="MFZ_60"]
 script = ExtResource("mf_zone")
 label = "ciorchine 29"
 kind = 1
@@ -1174,7 +1292,7 @@ seed_value = 229
 center = Vector3(-68.05, 0, -409.22)
 radius = 10.915679027014448
 
-[sub_resource type="Resource" id="MFZ_55"]
+[sub_resource type="Resource" id="MFZ_61"]
 script = ExtResource("mf_zone")
 label = "ciorchine 30"
 kind = 1
@@ -1192,7 +1310,7 @@ seed_value = 230
 center = Vector3(-203.48, 0, -194.87)
 radius = 10.09633835632471
 
-[sub_resource type="Resource" id="MFZ_56"]
+[sub_resource type="Resource" id="MFZ_62"]
 script = ExtResource("mf_zone")
 label = "ciorchine 31"
 kind = 1
@@ -1210,7 +1328,7 @@ seed_value = 231
 center = Vector3(-123.65, 0, -189.80)
 radius = 7.391741200917215
 
-[sub_resource type="Resource" id="MFZ_57"]
+[sub_resource type="Resource" id="MFZ_63"]
 script = ExtResource("mf_zone")
 label = "ciorchine 32"
 kind = 1
@@ -1228,7 +1346,7 @@ seed_value = 232
 center = Vector3(17.95, 0, -452.99)
 radius = 6.024561620310384
 
-[sub_resource type="Resource" id="MFZ_58"]
+[sub_resource type="Resource" id="MFZ_64"]
 script = ExtResource("mf_zone")
 label = "ciorchine 34"
 kind = 1
@@ -1246,7 +1364,7 @@ seed_value = 234
 center = Vector3(136.12, 0, -296.37)
 radius = 9.09294859842467
 
-[sub_resource type="Resource" id="MFZ_59"]
+[sub_resource type="Resource" id="MFZ_65"]
 script = ExtResource("mf_zone")
 label = "ciorchine 35"
 kind = 1
@@ -1264,7 +1382,7 @@ seed_value = 235
 center = Vector3(172.43, 0, -72.70)
 radius = 11.22587700694663
 
-[sub_resource type="Resource" id="MFZ_60"]
+[sub_resource type="Resource" id="MFZ_66"]
 script = ExtResource("mf_zone")
 label = "ciorchine 36"
 kind = 1
@@ -1282,7 +1400,7 @@ seed_value = 236
 center = Vector3(165.61, 0, -33.06)
 radius = 8.364720095852185
 
-[sub_resource type="Resource" id="MFZ_61"]
+[sub_resource type="Resource" id="MFZ_67"]
 script = ExtResource("mf_zone")
 label = "ciorchine 37"
 kind = 1
@@ -1300,7 +1418,7 @@ seed_value = 237
 center = Vector3(-186.05, 0, -449.28)
 radius = 7.252579112676987
 
-[sub_resource type="Resource" id="MFZ_62"]
+[sub_resource type="Resource" id="MFZ_68"]
 script = ExtResource("mf_zone")
 label = "ciorchine 40"
 kind = 1
@@ -1318,7 +1436,7 @@ seed_value = 240
 center = Vector3(-85.03, 0, -191.84)
 radius = 9.682423577852585
 
-[sub_resource type="Resource" id="MFZ_63"]
+[sub_resource type="Resource" id="MFZ_69"]
 script = ExtResource("mf_zone")
 label = "ciorchine 41"
 kind = 1
@@ -1336,7 +1454,7 @@ seed_value = 241
 center = Vector3(-149.89, 0, -248.29)
 radius = 7.513546539342464
 
-[sub_resource type="Resource" id="MFZ_64"]
+[sub_resource type="Resource" id="MFZ_70"]
 script = ExtResource("mf_zone")
 label = "ciorchine 43"
 kind = 1
@@ -1354,7 +1472,7 @@ seed_value = 243
 center = Vector3(-26.13, 0, -124.34)
 radius = 8.795936754959602
 
-[sub_resource type="Resource" id="MFZ_65"]
+[sub_resource type="Resource" id="MFZ_71"]
 script = ExtResource("mf_zone")
 label = "ciorchine 44"
 kind = 1
@@ -1372,7 +1490,7 @@ seed_value = 244
 center = Vector3(-81.24, 0, -35.84)
 radius = 10.442107346568564
 
-[sub_resource type="Resource" id="MFZ_66"]
+[sub_resource type="Resource" id="MFZ_72"]
 script = ExtResource("mf_zone")
 label = "ciorchine 45"
 kind = 1
@@ -1390,7 +1508,7 @@ seed_value = 245
 center = Vector3(207.16, 0, -32.98)
 radius = 11.712125682603897
 
-[sub_resource type="Resource" id="MFZ_67"]
+[sub_resource type="Resource" id="MFZ_73"]
 script = ExtResource("mf_zone")
 label = "ciorchine 46"
 kind = 1
@@ -1408,7 +1526,7 @@ seed_value = 246
 center = Vector3(211.06, 0, -49.18)
 radius = 7.78853814207768
 
-[sub_resource type="Resource" id="MFZ_68"]
+[sub_resource type="Resource" id="MFZ_74"]
 script = ExtResource("mf_zone")
 label = "ciorchine 49"
 kind = 1
@@ -1426,7 +1544,7 @@ seed_value = 249
 center = Vector3(98.12, 0, -415.99)
 radius = 7.336756536331432
 
-[sub_resource type="Resource" id="MFZ_69"]
+[sub_resource type="Resource" id="MFZ_75"]
 script = ExtResource("mf_zone")
 label = "ciorchine 50"
 kind = 1
@@ -1444,7 +1562,7 @@ seed_value = 250
 center = Vector3(70.09, 0, -449.36)
 radius = 10.73039558462468
 
-[sub_resource type="Resource" id="MFZ_70"]
+[sub_resource type="Resource" id="MFZ_76"]
 script = ExtResource("mf_zone")
 label = "ciorchine 51"
 kind = 1
@@ -1462,7 +1580,7 @@ seed_value = 251
 center = Vector3(-114.42, 0, -229.00)
 radius = 10.439238122254284
 
-[sub_resource type="Resource" id="MFZ_71"]
+[sub_resource type="Resource" id="MFZ_77"]
 script = ExtResource("mf_zone")
 label = "ciorchine 52"
 kind = 1
@@ -1480,7 +1598,7 @@ seed_value = 252
 center = Vector3(66.91, 0, -386.89)
 radius = 11.937621520218421
 
-[sub_resource type="Resource" id="MFZ_72"]
+[sub_resource type="Resource" id="MFZ_78"]
 script = ExtResource("mf_zone")
 label = "ciorchine 53"
 kind = 1
@@ -1498,7 +1616,7 @@ seed_value = 253
 center = Vector3(-11.55, 0, -461.16)
 radius = 11.739090458048027
 
-[sub_resource type="Resource" id="MFZ_73"]
+[sub_resource type="Resource" id="MFZ_79"]
 script = ExtResource("mf_zone")
 label = "ciorchine 54"
 kind = 1
@@ -1516,7 +1634,7 @@ seed_value = 254
 center = Vector3(-272.81, 0, 82.78)
 radius = 8.187815312171196
 
-[sub_resource type="Resource" id="MFZ_74"]
+[sub_resource type="Resource" id="MFZ_80"]
 script = ExtResource("mf_zone")
 label = "ciorchine 55"
 kind = 1
@@ -1534,7 +1652,7 @@ seed_value = 255
 center = Vector3(-120.58, 0, -197.30)
 radius = 8.895919812801468
 
-[sub_resource type="Resource" id="MFZ_75"]
+[sub_resource type="Resource" id="MFZ_81"]
 script = ExtResource("mf_zone")
 label = "ciorchine 56"
 kind = 1
@@ -1552,7 +1670,7 @@ seed_value = 256
 center = Vector3(132.11, 0, -190.37)
 radius = 9.917868257046054
 
-[sub_resource type="Resource" id="MFZ_76"]
+[sub_resource type="Resource" id="MFZ_82"]
 script = ExtResource("mf_zone")
 label = "ciorchine 57"
 kind = 1
@@ -1570,7 +1688,7 @@ seed_value = 257
 center = Vector3(-84.14, 0, -35.94)
 radius = 10.69381730458854
 
-[sub_resource type="Resource" id="MFZ_77"]
+[sub_resource type="Resource" id="MFZ_83"]
 script = ExtResource("mf_zone")
 label = "ciorchine 58"
 kind = 1
@@ -1588,7 +1706,7 @@ seed_value = 258
 center = Vector3(2.45, 0, -456.24)
 radius = 9.815053328835242
 
-[sub_resource type="Resource" id="MFZ_78"]
+[sub_resource type="Resource" id="MFZ_84"]
 script = ExtResource("mf_zone")
 label = "ciorchine 59"
 kind = 1
@@ -1606,7 +1724,7 @@ seed_value = 259
 center = Vector3(-285.02, 0, 78.51)
 radius = 10.460116264825924
 
-[sub_resource type="Resource" id="MFZ_79"]
+[sub_resource type="Resource" id="MFZ_85"]
 script = ExtResource("mf_zone")
 label = "ciorchine 60"
 kind = 1
@@ -1624,7 +1742,7 @@ seed_value = 260
 center = Vector3(-67.52, 0, -212.34)
 radius = 9.544873814501706
 
-[sub_resource type="Resource" id="MFZ_80"]
+[sub_resource type="Resource" id="MFZ_86"]
 script = ExtResource("mf_zone")
 label = "ciorchine 61"
 kind = 1
@@ -1642,7 +1760,7 @@ seed_value = 261
 center = Vector3(103.24, 0, -73.81)
 radius = 8.102445072945017
 
-[sub_resource type="Resource" id="MFZ_81"]
+[sub_resource type="Resource" id="MFZ_87"]
 script = ExtResource("mf_zone")
 label = "ciorchine 62"
 kind = 1
@@ -1660,7 +1778,7 @@ seed_value = 262
 center = Vector3(-82.19, 0, -143.84)
 radius = 10.358220338061809
 
-[sub_resource type="Resource" id="MFZ_82"]
+[sub_resource type="Resource" id="MFZ_88"]
 script = ExtResource("mf_zone")
 label = "ciorchine 63"
 kind = 1
@@ -1678,7 +1796,7 @@ seed_value = 263
 center = Vector3(146.94, 0, 74.67)
 radius = 11.230457567936424
 
-[sub_resource type="Resource" id="MFZ_83"]
+[sub_resource type="Resource" id="MFZ_89"]
 script = ExtResource("mf_zone")
 label = "ciorchine 64"
 kind = 1
@@ -1696,7 +1814,7 @@ seed_value = 264
 center = Vector3(-153.04, 0, -235.80)
 radius = 9.00697151901749
 
-[sub_resource type="Resource" id="MFZ_84"]
+[sub_resource type="Resource" id="MFZ_90"]
 script = ExtResource("mf_zone")
 label = "ciorchine 66"
 kind = 1
@@ -1714,7 +1832,7 @@ seed_value = 266
 center = Vector3(124.16, 0, -351.37)
 radius = 10.43953229578364
 
-[sub_resource type="Resource" id="MFZ_85"]
+[sub_resource type="Resource" id="MFZ_91"]
 script = ExtResource("mf_zone")
 label = "ciorchine 67"
 kind = 1
@@ -1732,7 +1850,7 @@ seed_value = 267
 center = Vector3(121.76, 0, -47.50)
 radius = 11.269012682213587
 
-[sub_resource type="Resource" id="MFZ_86"]
+[sub_resource type="Resource" id="MFZ_92"]
 script = ExtResource("mf_zone")
 label = "ciorchine 68"
 kind = 1
@@ -1750,7 +1868,7 @@ seed_value = 268
 center = Vector3(-83.58, 0, -193.84)
 radius = 10.659036942561324
 
-[sub_resource type="Resource" id="MFZ_87"]
+[sub_resource type="Resource" id="MFZ_93"]
 script = ExtResource("mf_zone")
 label = "ciorchine 70"
 kind = 1
@@ -1768,7 +1886,7 @@ seed_value = 270
 center = Vector3(-76.00, 0, -190.34)
 radius = 10.351159622684268
 
-[sub_resource type="Resource" id="MFZ_88"]
+[sub_resource type="Resource" id="MFZ_94"]
 script = ExtResource("mf_zone")
 label = "ciorchine 72"
 kind = 1
@@ -1786,7 +1904,7 @@ seed_value = 272
 center = Vector3(67.25, 0, -385.12)
 radius = 6.636656502629569
 
-[sub_resource type="Resource" id="MFZ_89"]
+[sub_resource type="Resource" id="MFZ_95"]
 script = ExtResource("mf_zone")
 label = "ciorchine 73"
 kind = 1
@@ -1804,7 +1922,7 @@ seed_value = 273
 center = Vector3(-162.14, 0, -173.81)
 radius = 6.586471639918416
 
-[sub_resource type="Resource" id="MFZ_90"]
+[sub_resource type="Resource" id="MFZ_96"]
 script = ExtResource("mf_zone")
 label = "ciorchine 77"
 kind = 1
@@ -1822,7 +1940,7 @@ seed_value = 277
 center = Vector3(-319.97, 0, 1.17)
 radius = 8.714074753589458
 
-[sub_resource type="Resource" id="MFZ_91"]
+[sub_resource type="Resource" id="MFZ_97"]
 script = ExtResource("mf_zone")
 label = "ciorchine 78"
 kind = 1
@@ -1840,7 +1958,7 @@ seed_value = 278
 center = Vector3(2.45, 0, -461.29)
 radius = 11.25921289068356
 
-[sub_resource type="Resource" id="MFZ_92"]
+[sub_resource type="Resource" id="MFZ_98"]
 script = ExtResource("mf_zone")
 label = "ciorchine 79"
 kind = 1
@@ -1858,7 +1976,7 @@ seed_value = 279
 center = Vector3(-187.18, 0, -135.04)
 radius = 6.822806615381109
 
-[sub_resource type="Resource" id="MFZ_93"]
+[sub_resource type="Resource" id="MFZ_99"]
 script = ExtResource("mf_zone")
 label = "ciorchine 80"
 kind = 1
@@ -1876,7 +1994,7 @@ seed_value = 280
 center = Vector3(-85.05, 0, -460.75)
 radius = 8.570032063415084
 
-[sub_resource type="Resource" id="MFZ_94"]
+[sub_resource type="Resource" id="MFZ_100"]
 script = ExtResource("mf_zone")
 label = "ciorchine 81"
 kind = 1
@@ -1894,7 +2012,7 @@ seed_value = 281
 center = Vector3(-258.04, 0, -234.77)
 radius = 6.926679742612153
 
-[sub_resource type="Resource" id="MFZ_95"]
+[sub_resource type="Resource" id="MFZ_101"]
 script = ExtResource("mf_zone")
 label = "ciorchine 82"
 kind = 1
@@ -1912,7 +2030,7 @@ seed_value = 282
 center = Vector3(142.58, 0, -85.33)
 radius = 6.8235276177918065
 
-[sub_resource type="Resource" id="MFZ_96"]
+[sub_resource type="Resource" id="MFZ_102"]
 script = ExtResource("mf_zone")
 label = "ciorchine 83"
 kind = 1
@@ -1930,7 +2048,7 @@ seed_value = 283
 center = Vector3(146.17, 0, 65.30)
 radius = 8.92356464994528
 
-[sub_resource type="Resource" id="MFZ_97"]
+[sub_resource type="Resource" id="MFZ_103"]
 script = ExtResource("mf_zone")
 label = "ciorchine 85"
 kind = 1
@@ -1948,7 +2066,7 @@ seed_value = 285
 center = Vector3(-26.11, 0, -217.84)
 radius = 8.422858506699628
 
-[sub_resource type="Resource" id="MFZ_98"]
+[sub_resource type="Resource" id="MFZ_104"]
 script = ExtResource("mf_zone")
 label = "ciorchine 90"
 kind = 1
@@ -1966,7 +2084,7 @@ seed_value = 290
 center = Vector3(-45.55, 0, -455.30)
 radius = 9.10460313963564
 
-[sub_resource type="Resource" id="MFZ_99"]
+[sub_resource type="Resource" id="MFZ_105"]
 script = ExtResource("mf_zone")
 label = "ciorchine 91"
 kind = 1
@@ -1984,7 +2102,7 @@ seed_value = 291
 center = Vector3(-334.72, 0, 42.84)
 radius = 10.730178336585485
 
-[sub_resource type="Resource" id="MFZ_100"]
+[sub_resource type="Resource" id="MFZ_106"]
 script = ExtResource("mf_zone")
 label = "ciorchine 93"
 kind = 1
@@ -2002,7 +2120,7 @@ seed_value = 293
 center = Vector3(-202.94, 0, -134.03)
 radius = 7.089308348467027
 
-[sub_resource type="Resource" id="MFZ_101"]
+[sub_resource type="Resource" id="MFZ_107"]
 script = ExtResource("mf_zone")
 label = "ciorchine 96"
 kind = 1
@@ -2020,7 +2138,7 @@ seed_value = 296
 center = Vector3(154.49, 0, -38.77)
 radius = 9.219593342505611
 
-[sub_resource type="Resource" id="MFZ_102"]
+[sub_resource type="Resource" id="MFZ_108"]
 script = ExtResource("mf_zone")
 label = "ciorchine 97"
 kind = 1
@@ -2038,7 +2156,7 @@ seed_value = 297
 center = Vector3(40.14, 0, -423.76)
 radius = 6.345159074645678
 
-[sub_resource type="Resource" id="MFZ_103"]
+[sub_resource type="Resource" id="MFZ_109"]
 script = ExtResource("mf_zone")
 label = "ciorchine 98"
 kind = 1
@@ -2056,7 +2174,7 @@ seed_value = 298
 center = Vector3(-126.05, 0, -453.11)
 radius = 6.100990338672974
 
-[sub_resource type="Resource" id="MFZ_104"]
+[sub_resource type="Resource" id="MFZ_110"]
 script = ExtResource("mf_zone")
 label = "ciorchine 99"
 kind = 1
@@ -2074,7 +2192,7 @@ seed_value = 299
 center = Vector3(-189.18, 0, -149.73)
 radius = 11.176649814323078
 
-[sub_resource type="Resource" id="MFZ_105"]
+[sub_resource type="Resource" id="MFZ_111"]
 script = ExtResource("mf_zone")
 label = "ciorchine 101"
 kind = 1
@@ -2092,7 +2210,7 @@ seed_value = 301
 center = Vector3(89.19, 0, -328.87)
 radius = 6.259234139036313
 
-[sub_resource type="Resource" id="MFZ_106"]
+[sub_resource type="Resource" id="MFZ_112"]
 script = ExtResource("mf_zone")
 label = "ciorchine 102"
 kind = 1
@@ -2110,7 +2228,7 @@ seed_value = 302
 center = Vector3(-311.42, 0, 106.21)
 radius = 7.086875805337797
 
-[sub_resource type="Resource" id="MFZ_107"]
+[sub_resource type="Resource" id="MFZ_113"]
 script = ExtResource("mf_zone")
 label = "ciorchine 103"
 kind = 1
@@ -2128,7 +2246,7 @@ seed_value = 303
 center = Vector3(128.51, 0, -147.37)
 radius = 9.000531599171037
 
-[sub_resource type="Resource" id="MFZ_108"]
+[sub_resource type="Resource" id="MFZ_114"]
 script = ExtResource("mf_zone")
 label = "ciorchine 107"
 kind = 1
@@ -2146,7 +2264,7 @@ seed_value = 307
 center = Vector3(132.77, 0, -332.37)
 radius = 7.474077117501624
 
-[sub_resource type="Resource" id="MFZ_109"]
+[sub_resource type="Resource" id="MFZ_115"]
 script = ExtResource("mf_zone")
 label = "ciorchine 108"
 kind = 1
@@ -2164,7 +2282,7 @@ seed_value = 308
 center = Vector3(110.41, 0, -62.35)
 radius = 9.275437511560943
 
-[sub_resource type="Resource" id="MFZ_110"]
+[sub_resource type="Resource" id="MFZ_116"]
 script = ExtResource("mf_zone")
 label = "ciorchine 109"
 kind = 1
@@ -2182,7 +2300,7 @@ seed_value = 309
 center = Vector3(-279.48, 0, 24.74)
 radius = 11.894643242488783
 
-[sub_resource type="Resource" id="MFZ_111"]
+[sub_resource type="Resource" id="MFZ_117"]
 script = ExtResource("mf_zone")
 label = "ciorchine 111"
 kind = 1
@@ -2200,7 +2318,7 @@ seed_value = 311
 center = Vector3(201.27, 0, 11.71)
 radius = 8.085313080931392
 
-[sub_resource type="Resource" id="MFZ_112"]
+[sub_resource type="Resource" id="MFZ_118"]
 script = ExtResource("mf_zone")
 label = "ciorchine 112"
 kind = 1
@@ -2218,7 +2336,7 @@ seed_value = 312
 center = Vector3(-78.88, 0, -142.34)
 radius = 11.279125627380335
 
-[sub_resource type="Resource" id="MFZ_113"]
+[sub_resource type="Resource" id="MFZ_119"]
 script = ExtResource("mf_zone")
 label = "ciorchine 114"
 kind = 1
@@ -2236,7 +2354,7 @@ seed_value = 314
 center = Vector3(-207.15, 0, -411.86)
 radius = 10.156113101231686
 
-[sub_resource type="Resource" id="MFZ_114"]
+[sub_resource type="Resource" id="MFZ_120"]
 script = ExtResource("mf_zone")
 label = "ciorchine 115"
 kind = 1
@@ -2254,7 +2372,7 @@ seed_value = 315
 center = Vector3(-88.04, 0, -272.69)
 radius = 7.5794584019843345
 
-[sub_resource type="Resource" id="MFZ_115"]
+[sub_resource type="Resource" id="MFZ_121"]
 script = ExtResource("mf_zone")
 label = "ciorchine 116"
 kind = 1
@@ -2272,7 +2390,7 @@ seed_value = 316
 center = Vector3(-287.08, 0, 23.73)
 radius = 11.79400062035271
 
-[sub_resource type="Resource" id="MFZ_116"]
+[sub_resource type="Resource" id="MFZ_122"]
 script = ExtResource("mf_zone")
 label = "ciorchine 119"
 kind = 1
@@ -2290,7 +2408,7 @@ seed_value = 319
 center = Vector3(-8.05, 0, -452.72)
 radius = 10.657428458554321
 
-[sub_resource type="Resource" id="MFZ_117"]
+[sub_resource type="Resource" id="MFZ_123"]
 script = ExtResource("mf_zone")
 label = "ciorchine 121"
 kind = 1
@@ -2308,7 +2426,7 @@ seed_value = 321
 center = Vector3(-74.49, 0, -176.34)
 radius = 7.797876356731857
 
-[sub_resource type="Resource" id="MFZ_118"]
+[sub_resource type="Resource" id="MFZ_124"]
 script = ExtResource("mf_zone")
 label = "ciorchine 122"
 kind = 1
@@ -2326,7 +2444,7 @@ seed_value = 322
 center = Vector3(-79.38, 0, -35.33)
 radius = 10.295960640193869
 
-[sub_resource type="Resource" id="MFZ_119"]
+[sub_resource type="Resource" id="MFZ_125"]
 script = ExtResource("mf_zone")
 label = "ciorchine 123"
 kind = 1
@@ -2344,7 +2462,7 @@ seed_value = 323
 center = Vector3(-207.71, 0, -411.10)
 radius = 8.96514452171906
 
-[sub_resource type="Resource" id="MFZ_120"]
+[sub_resource type="Resource" id="MFZ_126"]
 script = ExtResource("mf_zone")
 label = "ciorchine 124"
 kind = 1
@@ -2362,7 +2480,7 @@ seed_value = 324
 center = Vector3(123.83, 0, -171.37)
 radius = 11.011737259403361
 
-[sub_resource type="Resource" id="MFZ_121"]
+[sub_resource type="Resource" id="MFZ_127"]
 script = ExtResource("mf_zone")
 label = "ciorchine 125"
 kind = 1
@@ -2380,7 +2498,7 @@ seed_value = 325
 center = Vector3(140.29, 0, -148.87)
 radius = 10.517202951209443
 
-[sub_resource type="Resource" id="MFZ_122"]
+[sub_resource type="Resource" id="MFZ_128"]
 script = ExtResource("mf_zone")
 label = "ciorchine 129"
 kind = 1
@@ -2398,7 +2516,7 @@ seed_value = 329
 center = Vector3(183.49, 0, 18.66)
 radius = 6.251172608126396
 
-[sub_resource type="Resource" id="MFZ_123"]
+[sub_resource type="Resource" id="MFZ_129"]
 script = ExtResource("mf_zone")
 label = "ciorchine 130"
 kind = 1
@@ -2416,7 +2534,7 @@ seed_value = 330
 center = Vector3(-278.12, 0, 46.34)
 radius = 9.351163478975607
 
-[sub_resource type="Resource" id="MFZ_124"]
+[sub_resource type="Resource" id="MFZ_130"]
 script = ExtResource("mf_zone")
 label = "ciorchine 131"
 kind = 1
@@ -2434,7 +2552,7 @@ seed_value = 331
 center = Vector3(132.30, 0, -152.37)
 radius = 6.019885962767088
 
-[sub_resource type="Resource" id="MFZ_125"]
+[sub_resource type="Resource" id="MFZ_131"]
 script = ExtResource("mf_zone")
 label = "ciorchine 132"
 kind = 1
@@ -2452,7 +2570,7 @@ seed_value = 332
 center = Vector3(151.20, 0, 69.64)
 radius = 6.396302137332912
 
-[sub_resource type="Resource" id="MFZ_126"]
+[sub_resource type="Resource" id="MFZ_132"]
 script = ExtResource("mf_zone")
 label = "ciorchine 133"
 kind = 1
@@ -2470,7 +2588,7 @@ seed_value = 333
 center = Vector3(-169.68, 0, -134.92)
 radius = 7.4087137309909625
 
-[sub_resource type="Resource" id="MFZ_127"]
+[sub_resource type="Resource" id="MFZ_133"]
 script = ExtResource("mf_zone")
 label = "ciorchine 134"
 kind = 1
@@ -2488,7 +2606,7 @@ seed_value = 334
 center = Vector3(-158.39, 0, -189.80)
 radius = 8.29536286339491
 
-[sub_resource type="Resource" id="MFZ_128"]
+[sub_resource type="Resource" id="MFZ_134"]
 script = ExtResource("mf_zone")
 label = "ciorchine 135"
 kind = 1
@@ -2506,7 +2624,7 @@ seed_value = 335
 center = Vector3(193.55, 0, -63.89)
 radius = 9.856577852291917
 
-[sub_resource type="Resource" id="MFZ_129"]
+[sub_resource type="Resource" id="MFZ_135"]
 script = ExtResource("mf_zone")
 label = "ciorchine 136"
 kind = 1
@@ -2524,7 +2642,7 @@ seed_value = 336
 center = Vector3(-32.62, 0, -184.34)
 radius = 10.157320945162347
 
-[sub_resource type="Resource" id="MFZ_130"]
+[sub_resource type="Resource" id="MFZ_136"]
 script = ExtResource("mf_zone")
 label = "ciorchine 137"
 kind = 1
@@ -2542,7 +2660,7 @@ seed_value = 337
 center = Vector3(-43.85, 0, -150.84)
 radius = 7.612636594735488
 
-[sub_resource type="Resource" id="MFZ_131"]
+[sub_resource type="Resource" id="MFZ_137"]
 script = ExtResource("mf_zone")
 label = "ciorchine 138"
 kind = 1
@@ -2560,7 +2678,7 @@ seed_value = 338
 center = Vector3(176.20, 0, -27.60)
 radius = 9.099214164266446
 
-[sub_resource type="Resource" id="MFZ_132"]
+[sub_resource type="Resource" id="MFZ_138"]
 script = ExtResource("mf_zone")
 label = "ciorchine 139"
 kind = 1
@@ -2578,7 +2696,7 @@ seed_value = 339
 center = Vector3(-27.05, 0, -466.87)
 radius = 9.294459038939328
 
-[sub_resource type="Resource" id="MFZ_133"]
+[sub_resource type="Resource" id="MFZ_139"]
 script = ExtResource("mf_zone")
 label = "ciorchine 140"
 kind = 1
@@ -2596,7 +2714,7 @@ seed_value = 340
 center = Vector3(-44.67, 0, -35.84)
 radius = 8.753824937781584
 
-[sub_resource type="Resource" id="MFZ_134"]
+[sub_resource type="Resource" id="MFZ_140"]
 script = ExtResource("mf_zone")
 label = "ciorchine 141"
 kind = 1
@@ -2614,7 +2732,7 @@ seed_value = 341
 center = Vector3(-274.31, 0, 29.21)
 radius = 8.321090081773871
 
-[sub_resource type="Resource" id="MFZ_135"]
+[sub_resource type="Resource" id="MFZ_141"]
 script = ExtResource("mf_zone")
 label = "ciorchine 142"
 kind = 1
@@ -2632,7 +2750,7 @@ seed_value = 342
 center = Vector3(-290.97, 0, 129.98)
 radius = 6.850444067157187
 
-[sub_resource type="Resource" id="MFZ_136"]
+[sub_resource type="Resource" id="MFZ_142"]
 script = ExtResource("mf_zone")
 label = "ciorchine 143"
 kind = 1
@@ -2650,7 +2768,7 @@ seed_value = 343
 center = Vector3(-327.46, 0, 62.84)
 radius = 9.790009193513288
 
-[sub_resource type="Resource" id="MFZ_137"]
+[sub_resource type="Resource" id="MFZ_143"]
 script = ExtResource("mf_zone")
 label = "ciorchine 146"
 kind = 1
@@ -2668,7 +2786,7 @@ seed_value = 346
 center = Vector3(45.78, 0, -417.13)
 radius = 6.9543916137631445
 
-[sub_resource type="Resource" id="MFZ_138"]
+[sub_resource type="Resource" id="MFZ_144"]
 script = ExtResource("mf_zone")
 label = "ciorchine 147"
 kind = 1
@@ -2686,7 +2804,7 @@ seed_value = 347
 center = Vector3(167.79, 0, -33.97)
 radius = 6.844243321546071
 
-[sub_resource type="Resource" id="MFZ_139"]
+[sub_resource type="Resource" id="MFZ_145"]
 script = ExtResource("mf_zone")
 label = "ciorchine 153"
 kind = 1
@@ -2704,7 +2822,7 @@ seed_value = 353
 center = Vector3(-282.91, 0, 138.47)
 radius = 7.738997753853152
 
-[sub_resource type="Resource" id="MFZ_140"]
+[sub_resource type="Resource" id="MFZ_146"]
 script = ExtResource("mf_zone")
 label = "ciorchine 154"
 kind = 1
@@ -2722,7 +2840,7 @@ seed_value = 354
 center = Vector3(-206.58, 0, -454.47)
 radius = 8.568316508337396
 
-[sub_resource type="Resource" id="MFZ_141"]
+[sub_resource type="Resource" id="MFZ_147"]
 script = ExtResource("mf_zone")
 label = "ciorchine 157"
 kind = 1
@@ -2740,7 +2858,7 @@ seed_value = 357
 center = Vector3(-245.74, 0, -192.27)
 radius = 7.594368089865479
 
-[sub_resource type="Resource" id="MFZ_142"]
+[sub_resource type="Resource" id="MFZ_148"]
 script = ExtResource("mf_zone")
 label = "ciorchine 158"
 kind = 1
@@ -2758,7 +2876,7 @@ seed_value = 358
 center = Vector3(-97.87, 0, -280.13)
 radius = 8.566485817027086
 
-[sub_resource type="Resource" id="MFZ_143"]
+[sub_resource type="Resource" id="MFZ_149"]
 script = ExtResource("mf_zone")
 label = "ciorchine 160"
 kind = 1
@@ -2776,7 +2894,7 @@ seed_value = 360
 center = Vector3(-188.05, 0, -461.67)
 radius = 6.2968562066614036
 
-[sub_resource type="Resource" id="MFZ_144"]
+[sub_resource type="Resource" id="MFZ_150"]
 script = ExtResource("mf_zone")
 label = "ciorchine 161"
 kind = 1
@@ -2794,7 +2912,7 @@ seed_value = 361
 center = Vector3(-63.05, 0, -460.25)
 radius = 7.717249921809513
 
-[sub_resource type="Resource" id="MFZ_145"]
+[sub_resource type="Resource" id="MFZ_151"]
 script = ExtResource("mf_zone")
 label = "ciorchine 162"
 kind = 1
@@ -2812,7 +2930,7 @@ seed_value = 362
 center = Vector3(-280.73, 0, 124.67)
 radius = 8.489199907049365
 
-[sub_resource type="Resource" id="MFZ_146"]
+[sub_resource type="Resource" id="MFZ_152"]
 script = ExtResource("mf_zone")
 label = "ciorchine 163"
 kind = 1
@@ -2830,7 +2948,7 @@ seed_value = 363
 center = Vector3(-177.18, 0, -180.72)
 radius = 7.431990145184232
 
-[sub_resource type="Resource" id="MFZ_147"]
+[sub_resource type="Resource" id="MFZ_153"]
 script = ExtResource("mf_zone")
 label = "ciorchine 164"
 kind = 1
@@ -2848,7 +2966,7 @@ seed_value = 364
 center = Vector3(155.28, 0, -75.56)
 radius = 6.969941768430349
 
-[sub_resource type="Resource" id="MFZ_148"]
+[sub_resource type="Resource" id="MFZ_154"]
 script = ExtResource("mf_zone")
 label = "ciorchine 165"
 kind = 1
@@ -2866,7 +2984,7 @@ seed_value = 365
 center = Vector3(-227.60, 0, 90.54)
 radius = 8.717916454654606
 
-[sub_resource type="Resource" id="MFZ_149"]
+[sub_resource type="Resource" id="MFZ_155"]
 script = ExtResource("mf_zone")
 label = "ciorchine 167"
 kind = 1
@@ -2884,7 +3002,7 @@ seed_value = 367
 center = Vector3(-121.05, 0, -452.64)
 radius = 7.048170552043105
 
-[sub_resource type="Resource" id="MFZ_150"]
+[sub_resource type="Resource" id="MFZ_156"]
 script = ExtResource("mf_zone")
 label = "ciorchine 171"
 kind = 1
@@ -2902,7 +3020,7 @@ seed_value = 371
 center = Vector3(-119.61, 0, -230.22)
 radius = 8.476689951844715
 
-[sub_resource type="Resource" id="MFZ_151"]
+[sub_resource type="Resource" id="MFZ_157"]
 script = ExtResource("mf_zone")
 label = "ciorchine 172"
 kind = 1
@@ -2920,7 +3038,7 @@ seed_value = 372
 center = Vector3(84.06, 0, -382.12)
 radius = 10.512666019591368
 
-[sub_resource type="Resource" id="MFZ_152"]
+[sub_resource type="Resource" id="MFZ_158"]
 script = ExtResource("mf_zone")
 label = "ciorchine 173"
 kind = 1
@@ -2938,7 +3056,7 @@ seed_value = 373
 center = Vector3(98.61, 0, -276.87)
 radius = 9.020374485666707
 
-[sub_resource type="Resource" id="MFZ_153"]
+[sub_resource type="Resource" id="MFZ_159"]
 script = ExtResource("mf_zone")
 label = "ciorchine 175"
 kind = 1
@@ -2956,7 +3074,7 @@ seed_value = 375
 center = Vector3(-166.04, 0, -225.80)
 radius = 8.307364556182495
 
-[sub_resource type="Resource" id="MFZ_154"]
+[sub_resource type="Resource" id="MFZ_160"]
 script = ExtResource("mf_zone")
 label = "ciorchine 176"
 kind = 1
@@ -2974,7 +3092,7 @@ seed_value = 376
 center = Vector3(-109.05, 0, -409.88)
 radius = 11.237345917584317
 
-[sub_resource type="Resource" id="MFZ_155"]
+[sub_resource type="Resource" id="MFZ_161"]
 script = ExtResource("mf_zone")
 label = "ciorchine 179"
 kind = 1
@@ -2992,7 +3110,7 @@ seed_value = 379
 center = Vector3(-9.55, 0, -426.00)
 radius = 8.349126574258737
 
-[sub_resource type="Resource" id="MFZ_156"]
+[sub_resource type="Resource" id="MFZ_162"]
 script = ExtResource("mf_zone")
 label = "ciorchine 182"
 kind = 1
@@ -3010,7 +3128,7 @@ seed_value = 382
 center = Vector3(-322.72, 0, 2.43)
 radius = 7.342802486764418
 
-[sub_resource type="Resource" id="MFZ_157"]
+[sub_resource type="Resource" id="MFZ_163"]
 script = ExtResource("mf_zone")
 label = "ciorchine 183"
 kind = 1
@@ -3028,7 +3146,7 @@ seed_value = 383
 center = Vector3(-326.33, 0, 2.60)
 radius = 10.330411733731793
 
-[sub_resource type="Resource" id="MFZ_158"]
+[sub_resource type="Resource" id="MFZ_164"]
 script = ExtResource("mf_zone")
 label = "ciorchine 185"
 kind = 1
@@ -3046,7 +3164,7 @@ seed_value = 385
 center = Vector3(-47.55, 0, -448.03)
 radius = 6.753910626437223
 
-[sub_resource type="Resource" id="MFZ_159"]
+[sub_resource type="Resource" id="MFZ_165"]
 script = ExtResource("mf_zone")
 label = "ciorchine 187"
 kind = 1
@@ -3064,7 +3182,7 @@ seed_value = 387
 center = Vector3(-283.96, 0, 38.84)
 radius = 8.624583171244646
 
-[sub_resource type="Resource" id="MFZ_160"]
+[sub_resource type="Resource" id="MFZ_166"]
 script = ExtResource("mf_zone")
 label = "ciorchine 189"
 kind = 1
@@ -3082,7 +3200,7 @@ seed_value = 389
 center = Vector3(-248.37, 0, -228.27)
 radius = 7.341498201660239
 
-[sub_resource type="Resource" id="MFZ_161"]
+[sub_resource type="Resource" id="MFZ_167"]
 script = ExtResource("mf_zone")
 label = "ciorchine 191"
 kind = 1
@@ -3100,7 +3218,7 @@ seed_value = 391
 center = Vector3(-39.05, 0, -413.75)
 radius = 11.30264417420436
 
-[sub_resource type="Resource" id="MFZ_162"]
+[sub_resource type="Resource" id="MFZ_168"]
 script = ExtResource("mf_zone")
 label = "ciorchine 192"
 kind = 1
@@ -3118,7 +3236,7 @@ seed_value = 392
 center = Vector3(-126.97, 0, -177.21)
 radius = 8.470860900192871
 
-[sub_resource type="Resource" id="MFZ_163"]
+[sub_resource type="Resource" id="MFZ_169"]
 script = ExtResource("mf_zone")
 label = "ciorchine 195"
 kind = 1
@@ -3136,7 +3254,7 @@ seed_value = 395
 center = Vector3(133.79, 0, -107.70)
 radius = 10.004130293026078
 
-[sub_resource type="Resource" id="MFZ_164"]
+[sub_resource type="Resource" id="MFZ_170"]
 script = ExtResource("mf_zone")
 label = "ciorchine 196"
 kind = 1
@@ -3154,7 +3272,7 @@ seed_value = 396
 center = Vector3(-113.78, 0, -197.30)
 radius = 10.309993449772456
 
-[sub_resource type="Resource" id="MFZ_165"]
+[sub_resource type="Resource" id="MFZ_171"]
 script = ExtResource("mf_zone")
 label = "ciorchine 197"
 kind = 1
@@ -3172,7 +3290,7 @@ seed_value = 397
 center = Vector3(-195.05, 0, -463.14)
 radius = 10.434775330654519
 
-[sub_resource type="Resource" id="MFZ_166"]
+[sub_resource type="Resource" id="MFZ_172"]
 script = ExtResource("mf_zone")
 label = "ciorchine 198"
 kind = 1
@@ -3190,7 +3308,7 @@ seed_value = 398
 center = Vector3(-118.38, 0, -244.20)
 radius = 10.92002696665823
 
-[sub_resource type="Resource" id="MFZ_167"]
+[sub_resource type="Resource" id="MFZ_173"]
 script = ExtResource("mf_zone")
 label = "ciorchine 199"
 kind = 1
@@ -3208,7 +3326,7 @@ seed_value = 399
 center = Vector3(-151.07, 0, -211.80)
 radius = 9.741582087983105
 
-[sub_resource type="Resource" id="MFZ_168"]
+[sub_resource type="Resource" id="MFZ_174"]
 script = ExtResource("mf_zone")
 label = "ciorchine 201"
 kind = 1
@@ -3226,7 +3344,7 @@ seed_value = 401
 center = Vector3(17.95, 0, -466.03)
 radius = 6.878298323836485
 
-[sub_resource type="Resource" id="MFZ_169"]
+[sub_resource type="Resource" id="MFZ_175"]
 script = ExtResource("mf_zone")
 label = "ciorchine 202"
 kind = 1
@@ -3244,7 +3362,7 @@ seed_value = 402
 center = Vector3(-119.11, 0, -231.30)
 radius = 10.259151535934295
 
-[sub_resource type="Resource" id="MFZ_170"]
+[sub_resource type="Resource" id="MFZ_176"]
 script = ExtResource("mf_zone")
 label = "ciorchine 203"
 kind = 1
@@ -3262,7 +3380,7 @@ seed_value = 403
 center = Vector3(-68.05, 0, -412.08)
 radius = 11.985178831787163
 
-[sub_resource type="Resource" id="MFZ_171"]
+[sub_resource type="Resource" id="MFZ_177"]
 script = ExtResource("mf_zone")
 label = "ciorchine 205"
 kind = 1
@@ -3280,7 +3398,7 @@ seed_value = 405
 center = Vector3(-88.81, 0, -264.86)
 radius = 9.986579182388365
 
-[sub_resource type="Resource" id="MFZ_172"]
+[sub_resource type="Resource" id="MFZ_178"]
 script = ExtResource("mf_zone")
 label = "ciorchine 206"
 kind = 1
@@ -3298,7 +3416,7 @@ seed_value = 406
 center = Vector3(-210.57, 0, -405.30)
 radius = 6.65374580038506
 
-[sub_resource type="Resource" id="MFZ_173"]
+[sub_resource type="Resource" id="MFZ_179"]
 script = ExtResource("mf_zone")
 label = "ciorchine 207"
 kind = 1
@@ -3316,7 +3434,7 @@ seed_value = 407
 center = Vector3(-28.43, 0, -18.72)
 radius = 6.742249692728917
 
-[sub_resource type="Resource" id="MFZ_174"]
+[sub_resource type="Resource" id="MFZ_180"]
 script = ExtResource("mf_zone")
 label = "ciorchine 208"
 kind = 1
@@ -3334,7 +3452,7 @@ seed_value = 408
 center = Vector3(-160.07, 0, -254.56)
 radius = 7.852195269853233
 
-[sub_resource type="Resource" id="MFZ_175"]
+[sub_resource type="Resource" id="MFZ_181"]
 script = ExtResource("mf_zone")
 label = "ciorchine 209"
 kind = 1
@@ -3352,7 +3470,7 @@ seed_value = 409
 center = Vector3(-41.28, 0, -40.34)
 radius = 9.249174218751776
 
-[sub_resource type="Resource" id="MFZ_176"]
+[sub_resource type="Resource" id="MFZ_182"]
 script = ExtResource("mf_zone")
 label = "ciorchine 211"
 kind = 1
@@ -3370,7 +3488,7 @@ seed_value = 411
 center = Vector3(117.01, 0, 42.82)
 radius = 8.46481097853242
 
-[sub_resource type="Resource" id="MFZ_177"]
+[sub_resource type="Resource" id="MFZ_183"]
 script = ExtResource("mf_zone")
 label = "ciorchine 215"
 kind = 1
@@ -3388,7 +3506,7 @@ seed_value = 415
 center = Vector3(-261.60, 0, 97.30)
 radius = 6.377110446924796
 
-[sub_resource type="Resource" id="MFZ_178"]
+[sub_resource type="Resource" id="MFZ_184"]
 script = ExtResource("mf_zone")
 label = "ciorchine 218"
 kind = 1
@@ -3406,7 +3524,7 @@ seed_value = 418
 center = Vector3(-320.98, 0, 60.34)
 radius = 10.299814478587091
 
-[sub_resource type="Resource" id="MFZ_179"]
+[sub_resource type="Resource" id="MFZ_185"]
 script = ExtResource("mf_zone")
 label = "ciorchine 219"
 kind = 1
@@ -3424,7 +3542,7 @@ seed_value = 419
 center = Vector3(-242.11, 0, -155.55)
 radius = 9.573408942660373
 
-[sub_resource type="Resource" id="MFZ_180"]
+[sub_resource type="Resource" id="MFZ_186"]
 script = ExtResource("mf_zone")
 label = "ciorchine 220"
 kind = 1
@@ -3442,7 +3560,7 @@ seed_value = 420
 center = Vector3(-316.27, 0, 79.03)
 radius = 7.4031975615290415
 
-[sub_resource type="Resource" id="MFZ_181"]
+[sub_resource type="Resource" id="MFZ_187"]
 script = ExtResource("mf_zone")
 label = "ciorchine 221"
 kind = 1
@@ -3460,7 +3578,7 @@ seed_value = 421
 center = Vector3(-278.99, 0, 52.84)
 radius = 11.481263790872905
 
-[sub_resource type="Resource" id="MFZ_182"]
+[sub_resource type="Resource" id="MFZ_188"]
 script = ExtResource("mf_zone")
 label = "ciorchine 222"
 kind = 1
@@ -3478,7 +3596,7 @@ seed_value = 422
 center = Vector3(-41.52, 0, -148.34)
 radius = 10.815409940379391
 
-[sub_resource type="Resource" id="MFZ_183"]
+[sub_resource type="Resource" id="MFZ_189"]
 script = ExtResource("mf_zone")
 label = "ciorchine 225"
 kind = 1
@@ -3496,7 +3614,7 @@ seed_value = 425
 center = Vector3(84.64, 0, -198.87)
 radius = 8.764687181794276
 
-[sub_resource type="Resource" id="MFZ_184"]
+[sub_resource type="Resource" id="MFZ_190"]
 script = ExtResource("mf_zone")
 label = "ciorchine 226"
 kind = 1
@@ -3514,7 +3632,7 @@ seed_value = 426
 center = Vector3(130.44, 0, -226.37)
 radius = 6.959624301521815
 
-[sub_resource type="Resource" id="MFZ_185"]
+[sub_resource type="Resource" id="MFZ_191"]
 script = ExtResource("mf_zone")
 label = "ciorchine 227"
 kind = 1
@@ -3532,7 +3650,7 @@ seed_value = 427
 center = Vector3(99.05, 0, -92.84)
 radius = 7.954550124437766
 
-[sub_resource type="Resource" id="MFZ_186"]
+[sub_resource type="Resource" id="MFZ_192"]
 script = ExtResource("mf_zone")
 label = "ciorchine 229"
 kind = 1
@@ -3550,7 +3668,7 @@ seed_value = 429
 center = Vector3(-270.80, 0, 22.92)
 radius = 7.250046242613609
 
-[sub_resource type="Resource" id="MFZ_187"]
+[sub_resource type="Resource" id="MFZ_193"]
 script = ExtResource("mf_zone")
 label = "subarboret margine 0.000"
 kind = 0
@@ -3571,7 +3689,7 @@ side = 0
 lat_min = 6.0
 lat_max = 26.0
 
-[sub_resource type="Resource" id="MFZ_188"]
+[sub_resource type="Resource" id="MFZ_194"]
 script = ExtResource("mf_zone")
 label = "subarboret margine 0.070"
 kind = 0
@@ -3592,7 +3710,7 @@ side = 0
 lat_min = 6.0
 lat_max = 26.0
 
-[sub_resource type="Resource" id="MFZ_189"]
+[sub_resource type="Resource" id="MFZ_195"]
 script = ExtResource("mf_zone")
 label = "subarboret margine 0.088"
 kind = 0
@@ -3613,7 +3731,7 @@ side = 0
 lat_min = 6.0
 lat_max = 26.0
 
-[sub_resource type="Resource" id="MFZ_190"]
+[sub_resource type="Resource" id="MFZ_196"]
 script = ExtResource("mf_zone")
 label = "subarboret margine 0.122"
 kind = 0
@@ -3634,7 +3752,7 @@ side = 0
 lat_min = 6.0
 lat_max = 26.0
 
-[sub_resource type="Resource" id="MFZ_191"]
+[sub_resource type="Resource" id="MFZ_197"]
 script = ExtResource("mf_zone")
 label = "subarboret margine 0.308"
 kind = 0
@@ -3655,7 +3773,7 @@ side = 0
 lat_min = 6.0
 lat_max = 26.0
 
-[sub_resource type="Resource" id="MFZ_192"]
+[sub_resource type="Resource" id="MFZ_198"]
 script = ExtResource("mf_zone")
 label = "subarboret margine 0.372"
 kind = 0
@@ -3676,7 +3794,7 @@ side = 0
 lat_min = 6.0
 lat_max = 26.0
 
-[sub_resource type="Resource" id="MFZ_193"]
+[sub_resource type="Resource" id="MFZ_199"]
 script = ExtResource("mf_zone")
 label = "subarboret margine 0.758"
 kind = 0
@@ -3697,7 +3815,7 @@ side = 0
 lat_min = 6.0
 lat_max = 26.0
 
-[sub_resource type="Resource" id="MFZ_194"]
+[sub_resource type="Resource" id="MFZ_200"]
 script = ExtResource("mf_zone")
 label = "subarboret margine 0.905"
 kind = 0
@@ -5590,10 +5708,597 @@ metadata/coliziune = "none"
 transform = Transform3D(-1.0, 0.0, -0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -1.0, -45.55, 19.64, -447.0)
 metadata/coliziune = "none"
 
+[node name="ZonaG" type="Node3D" parent="DecorManual"]
+
+[node name="G_Zid0" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.872, 0.0, -0.489, 0.0, 1.0, 0.0, 0.489, 0.0, 0.872, 148.74, 7.61, -49.3)
+metadata/scufundat = true
+
+[node name="G_Zid1" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.848, 0.0, -0.53, 0.0, 1.0, 0.0, 0.53, 0.0, 0.848, 152.0, 6.36, -47.97)
+metadata/scufundat = true
+
+[node name="G_Zid2" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.904, 0.0, -0.427, 0.0, 1.0, 0.0, 0.427, 0.0, 0.904, 156.22, 7.42, -46.32)
+metadata/scufundat = true
+
+[node name="G_Zid3" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.915, 0.0, -0.403, 0.0, 1.0, 0.0, 0.403, 0.0, 0.915, 159.42, 6.9, -43.83)
+metadata/scufundat = true
+
+[node name="G_Zid4" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.909, 0.0, -0.416, 0.0, 1.0, 0.0, 0.416, 0.0, 0.909, 162.61, 6.88, -42.36)
+metadata/scufundat = true
+
+[node name="G_Zid5" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.892, 0.0, -0.452, 0.0, 1.0, 0.0, 0.452, 0.0, 0.892, 166.72, 7.34, -40.51)
+metadata/scufundat = true
+
+[node name="G_Zid6" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.905, 0.0, -0.425, 0.0, 1.0, 0.0, 0.425, 0.0, 0.905, 170.01, 5.61, -38.18)
+metadata/scufundat = true
+
+[node name="G_Zid7" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.834, 0.0, -0.552, 0.0, 1.0, 0.0, 0.552, 0.0, 0.834, 171.77, 7.3, -37.64)
+metadata/scufundat = true
+
+[node name="G_Zid8" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.845, 0.0, -0.535, 0.0, 1.0, 0.0, 0.535, 0.0, 0.845, 175.06, 7.77, -34.52)
+
+[node name="G_Zid9" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.774, 0.0, -0.634, 0.0, 1.0, 0.0, 0.634, 0.0, 0.774, 178.29, 7.23, -32.17)
+metadata/scufundat = true
+
+[node name="G_Zid10" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.495, 0.0, -0.869, 0.0, 1.0, 0.0, 0.869, 0.0, 0.495, 177.65, 5.54, -32.5)
+metadata/scufundat = true
+
+[node name="G_Zid11" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.522, 0.0, -0.853, 0.0, 1.0, 0.0, 0.853, 0.0, 0.522, 180.41, 6.1, -28.93)
+metadata/scufundat = true
+
+[node name="G_Zid12" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.552, 0.0, -0.834, 0.0, 1.0, 0.0, 0.834, 0.0, 0.552, 181.89, 7.66, -25.55)
+
+[node name="G_Zid16" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.2, 0.0, -0.98, 0.0, 1.0, 0.0, 0.98, 0.0, -0.2, 182.65, 5.98, -19.3)
+metadata/scufundat = true
+
+[node name="G_Zid17" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.162, 0.0, -0.987, 0.0, 1.0, 0.0, 0.987, 0.0, -0.162, 181.05, 5.29, -14.51)
+metadata/scufundat = true
+
+[node name="G_Zid18" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.121, 0.0, -0.993, 0.0, 1.0, 0.0, 0.993, 0.0, -0.121, 180.66, 6.94, -11.03)
+metadata/scufundat = true
+
+[node name="G_Zid19" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.606, 0.0, -0.796, 0.0, 1.0, 0.0, 0.796, 0.0, -0.606, 181.16, 6.95, -12.09)
+metadata/scufundat = true
+
+[node name="G_Zid20" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.509, 0.0, -0.861, 0.0, 1.0, 0.0, 0.861, 0.0, -0.509, 178.43, 5.78, -8.5)
+metadata/scufundat = true
+
+[node name="G_Zid21" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.615, 0.0, -0.788, 0.0, 1.0, 0.0, 0.788, 0.0, -0.615, 176.16, 7.32, -5.21)
+
+[node name="G_Zid22" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.817, 0.0, -0.576, 0.0, 1.0, 0.0, 0.576, 0.0, -0.817, 176.13, 6.34, -6.29)
+metadata/scufundat = true
+
+[node name="G_Zid23" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.805, 0.0, -0.593, 0.0, 1.0, 0.0, 0.593, 0.0, -0.805, 172.4, 5.67, -3.77)
+metadata/scufundat = true
+
+[node name="G_Zid27" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.908, 0.0, -0.419, 0.0, 1.0, 0.0, 0.419, 0.0, -0.908, 160.07, 5.49, 3.62)
+metadata/scufundat = true
+
+[node name="G_Zid28" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.861, 0.0, -0.509, 0.0, 1.0, 0.0, 0.509, 0.0, -0.861, 157.01, 7.06, 5.32)
+
+[node name="G_Zid29" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.863, 0.0, -0.506, 0.0, 1.0, 0.0, 0.506, 0.0, -0.863, 153.25, 4.85, 7.84)
+metadata/scufundat = true
+
+[node name="G_Zid30" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.895, 0.0, -0.446, 0.0, 1.0, 0.0, 0.446, 0.0, -0.895, 149.42, 6.57, 9.15)
+metadata/scufundat = true
+
+[node name="G_Zid40" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.172, 0.0, -0.985, 0.0, 1.0, 0.0, 0.985, 0.0, -0.172, 116.4, 6.01, 44.25)
+metadata/scufundat = true
+
+[node name="G_Zid41" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.203, 0.0, -0.979, 0.0, 1.0, 0.0, 0.979, 0.0, -0.203, 115.88, 4.59, 49.23)
+metadata/scufundat = true
+
+[node name="G_Zid42" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.086, 0.0, -0.996, 0.0, 1.0, 0.0, 0.996, 0.0, -0.086, 116.01, 4.49, 52.78)
+metadata/scufundat = true
+
+[node name="G_Zid43" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.118, 0.0, -0.993, 0.0, 1.0, 0.0, 0.993, 0.0, 0.118, 115.19, 5.45, 58.4)
+metadata/scufundat = true
+
+[node name="G_Zid44" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.02, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.02, 115.41, 5.81, 63.39)
+
+[node name="G_Zid45" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.073, 0.0, -0.997, 0.0, 1.0, 0.0, 0.997, 0.0, 0.073, 115.82, 5.22, 66.87)
+metadata/scufundat = true
+
+[node name="G_Zid46" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.075, 0.0, -0.997, 0.0, 1.0, 0.0, 0.997, 0.0, 0.075, 116.26, 4.62, 69.82)
+metadata/scufundat = true
+
+[node name="G_Zid49" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.157, 0.0, -0.988, 0.0, 1.0, 0.0, 0.988, 0.0, -0.157, 115.89, 5.32, 79.03)
+
+[node name="G_Zid50" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.152, 0.0, -0.988, 0.0, 1.0, 0.0, 0.988, 0.0, -0.152, 114.19, 3.54, 83.77)
+metadata/scufundat = true
+
+[node name="G_Zid51" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.288, 0.0, -0.958, 0.0, 1.0, 0.0, 0.958, 0.0, -0.288, 113.89, 3.43, 87.29)
+metadata/scufundat = true
+
+[node name="G_Zid52" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.561, 0.0, -0.828, 0.0, 1.0, 0.0, 0.828, 0.0, -0.561, 113.95, 5.04, 86.47)
+
+[node name="G_Usa0" parent="DecorManual/ZonaG" instance=ExtResource("z7_gallery_column")]
+transform = Transform3D(-0.581, 0.0, 0.814, 0.0, 1.0, 0.0, -0.814, 0.0, -0.581, 168.32, 7.24, -2.6)
+
+[node name="G_Usa1" parent="DecorManual/ZonaG" instance=ExtResource("z7_gallery_column")]
+transform = Transform3D(-0.467, 0.0, 0.884, 0.0, 1.0, 0.0, -0.884, 0.0, -0.467, 166.79, 6.02, -1.84)
+metadata/scufundat = true
+
+[node name="G_Usa2" parent="DecorManual/ZonaG" instance=ExtResource("z8_gallery_roof")]
+transform = Transform3D(-0.467, 0.0, 0.884, 0.0, 1.0, 0.0, -0.884, 0.0, -0.467, 166.56, 5.39, -2.29)
+metadata/scufundat = true
+
+[node name="G_Usa3" parent="DecorManual/ZonaG" instance=ExtResource("z9_vault_broken")]
+transform = Transform3D(-0.884, 0.0, -0.467, 0.0, 1.0, 0.0, 0.467, 0.0, -0.884, 164.35, 7.23, -10.74)
+
+[node name="G_Usa4" parent="DecorManual/ZonaG" instance=ExtResource("z4_rubble_pile")]
+transform = Transform3D(-0.91, 0.0, 0.415, 0.0, 1.0, 0.0, -0.415, 0.0, -0.91, 169.08, 7.27, -4.98)
+metadata/coliziune = "none"
+
+[node name="G_Usa5" parent="DecorManual/ZonaG" instance=ExtResource("z4_rubble_pile")]
+transform = Transform3D(0.377, 0.0, 0.926, 0.0, 1.0, 0.0, -0.926, 0.0, 0.377, 164.09, 7.2, -2.68)
+metadata/coliziune = "none"
+
+[node name="G_Gal00" parent="DecorManual/ZonaG" instance=ExtResource("z10_gallery_corner")]
+transform = Transform3D(0.884, 0.0, -0.467, 0.0, 1.0, 0.0, 0.467, 0.0, 0.884, 159.68, 7.82, -36.83)
+
+[node name="G_Gal01" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.884, 0.0, -0.467, 0.0, 1.0, 0.0, 0.467, 0.0, 0.884, 163.66, 7.2, -34.72)
+metadata/scufundat = true
+
+[node name="G_Gal02" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.884, 0.0, -0.467, 0.0, 1.0, 0.0, 0.467, 0.0, 0.884, 167.2, 6.26, -32.85)
+metadata/scufundat = true
+
+[node name="G_Gal03" parent="DecorManual/ZonaG" instance=ExtResource("z7_gallery_column")]
+transform = Transform3D(-0.467, 0.0, -0.884, 0.0, 1.0, 0.0, 0.884, 0.0, -0.467, 161.08, 7.87, -39.48)
+
+[node name="G_Gal04" parent="DecorManual/ZonaG" instance=ExtResource("z7_gallery_column")]
+transform = Transform3D(-0.467, 0.0, -0.884, 0.0, 1.0, 0.0, 0.884, 0.0, -0.467, 165.06, 7.83, -37.37)
+
+[node name="G_Gal05" parent="DecorManual/ZonaG" instance=ExtResource("z7_gallery_column")]
+transform = Transform3D(-0.467, 0.0, -0.884, 0.0, 1.0, 0.0, 0.884, 0.0, -0.467, 167.27, 6.02, -36.21)
+metadata/scufundat = true
+
+[node name="G_Gal06" parent="DecorManual/ZonaG" instance=ExtResource("z8_gallery_roof")]
+transform = Transform3D(-0.467, 0.0, -0.884, 0.0, 1.0, 0.0, 0.884, 0.0, -0.467, 162.85, 11.33, -38.54)
+
+[node name="G_Gal07" parent="DecorManual/ZonaG" instance=ExtResource("z4_rubble_pile")]
+transform = Transform3D(-0.281, 0.0, -0.96, 0.0, 1.0, 0.0, 0.96, 0.0, -0.281, 166.8, 7.79, -34.25)
+metadata/coliziune = "none"
+
+[node name="G_Gal08" parent="DecorManual/ZonaG" instance=ExtResource("z5_fallen_block")]
+transform = Transform3D(-0.592, 0.0, -0.806, 0.0, 1.0, 0.0, 0.806, 0.0, -0.592, 168.57, 7.5, -36.67)
+metadata/scufundat = true
+
+[node name="G_Gal10" parent="DecorManual/ZonaG" instance=ExtResource("z10_gallery_corner")]
+transform = Transform3D(0.43, 0.0, -0.903, 0.0, 1.0, 0.0, 0.903, 0.0, 0.43, 165.69, 7.6, -24.61)
+
+[node name="G_Gal11" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.43, 0.0, -0.903, 0.0, 1.0, 0.0, 0.903, 0.0, 0.43, 167.7, 6.94, -20.54)
+metadata/scufundat = true
+
+[node name="G_Gal12" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.402, 0.0, -0.916, 0.0, 1.0, 0.0, 0.916, 0.0, 0.402, 169.01, 5.98, -17.59)
+metadata/scufundat = true
+
+[node name="G_Gal13" parent="DecorManual/ZonaG" instance=ExtResource("z7_gallery_column")]
+transform = Transform3D(-0.903, 0.0, -0.43, 0.0, 1.0, 0.0, 0.43, 0.0, -0.903, 168.05, 7.68, -26.17)
+
+[node name="G_Gal14" parent="DecorManual/ZonaG" instance=ExtResource("z7_gallery_column")]
+transform = Transform3D(-0.903, 0.0, -0.43, 0.0, 1.0, 0.0, 0.43, 0.0, -0.903, 170.18, 7.6, -22.18)
+
+[node name="G_Gal15" parent="DecorManual/ZonaG" instance=ExtResource("z7_gallery_column")]
+transform = Transform3D(-0.903, 0.0, -0.43, 0.0, 1.0, 0.0, 0.43, 0.0, -0.903, 170.94, 5.77, -20.28)
+metadata/scufundat = true
+
+[node name="G_Gal16" parent="DecorManual/ZonaG" instance=ExtResource("z8_gallery_roof")]
+transform = Transform3D(-0.903, 0.0, -0.43, 0.0, 1.0, 0.0, 0.43, 0.0, -0.903, 168.98, 11.1, -24.38)
+
+[node name="G_Gal17" parent="DecorManual/ZonaG" instance=ExtResource("z4_rubble_pile")]
+transform = Transform3D(-0.928, 0.0, -0.372, 0.0, 1.0, 0.0, 0.372, 0.0, -0.928, 166.34, 7.65, -25.88)
+metadata/coliziune = "none"
+
+[node name="G_Gal18" parent="DecorManual/ZonaG" instance=ExtResource("z5_fallen_block")]
+transform = Transform3D(-0.999, 0.0, -0.033, 0.0, 1.0, 0.0, 0.033, 0.0, -0.999, 169.4, 7.36, -26.41)
+metadata/scufundat = true
+
+[node name="G_Gal20" parent="DecorManual/ZonaG" instance=ExtResource("z10_gallery_corner")]
+transform = Transform3D(-0.051, 0.0, -0.999, 0.0, 1.0, 0.0, 0.999, 0.0, -0.051, 168.94, 7.42, -14.82)
+
+[node name="G_Gal21" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.438, 0.0, -0.899, 0.0, 1.0, 0.0, 0.899, 0.0, -0.438, 171.92, 6.95, -20.13)
+metadata/scufundat = true
+
+[node name="G_Gal22" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.438, 0.0, -0.899, 0.0, 1.0, 0.0, 0.899, 0.0, -0.438, 170.42, 5.98, -16.92)
+metadata/scufundat = true
+
+[node name="G_Gal23" parent="DecorManual/ZonaG" instance=ExtResource("z7_gallery_column")]
+transform = Transform3D(-0.999, 0.0, 0.051, 0.0, 1.0, 0.0, -0.051, 0.0, -0.999, 171.99, 7.46, -14.23)
+
+[node name="G_Gal24" parent="DecorManual/ZonaG" instance=ExtResource("z7_gallery_column")]
+transform = Transform3D(-0.999, 0.0, 0.051, 0.0, 1.0, 0.0, -0.051, 0.0, -0.999, 172.12, 7.44, -12.68)
+
+[node name="G_Gal25" parent="DecorManual/ZonaG" instance=ExtResource("z7_gallery_column")]
+transform = Transform3D(-0.899, 0.0, 0.438, 0.0, 1.0, 0.0, -0.438, 0.0, -0.899, 173.9, 5.72, -16.99)
+metadata/scufundat = true
+
+[node name="G_Gal26" parent="DecorManual/ZonaG" instance=ExtResource("z8_gallery_roof")]
+transform = Transform3D(-0.999, 0.0, 0.051, 0.0, 1.0, 0.0, -0.051, 0.0, -0.999, 171.91, 10.9, -12.72)
+
+[node name="G_Gal27" parent="DecorManual/ZonaG" instance=ExtResource("z4_rubble_pile")]
+transform = Transform3D(-0.995, 0.0, 0.104, 0.0, 1.0, 0.0, -0.104, 0.0, -0.995, 170.2, 7.44, -14.06)
+metadata/coliziune = "none"
+
+[node name="G_Gal28" parent="DecorManual/ZonaG" instance=ExtResource("z5_fallen_block")]
+transform = Transform3D(-0.899, 0.0, 0.438, 0.0, 1.0, 0.0, -0.438, 0.0, -0.899, 173.94, 7.15, -14.55)
+metadata/scufundat = true
+
+[node name="G_Gal30" parent="DecorManual/ZonaG" instance=ExtResource("z10_gallery_corner")]
+transform = Transform3D(-0.87, 0.0, -0.492, 0.0, 1.0, 0.0, 0.492, 0.0, -0.87, 163.38, 7.28, -9.52)
+
+[node name="G_Gal31" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.928, 0.0, -0.373, 0.0, 1.0, 0.0, 0.373, 0.0, -0.928, 162.62, 6.7, -9.73)
+metadata/scufundat = true
+
+[node name="G_Gal32" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.928, 0.0, -0.373, 0.0, 1.0, 0.0, 0.373, 0.0, -0.928, 158.45, 5.74, -8.0)
+metadata/scufundat = true
+
+[node name="G_Gal33" parent="DecorManual/ZonaG" instance=ExtResource("z7_gallery_column")]
+transform = Transform3D(-0.492, 0.0, 0.87, 0.0, 1.0, 0.0, -0.87, 0.0, -0.492, 165.06, 7.29, -7.17)
+
+[node name="G_Gal34" parent="DecorManual/ZonaG" instance=ExtResource("z7_gallery_column")]
+transform = Transform3D(-0.373, 0.0, 0.928, 0.0, 1.0, 0.0, -0.928, 0.0, -0.373, 164.02, 7.29, -7.09)
+
+[node name="G_Gal35" parent="DecorManual/ZonaG" instance=ExtResource("z7_gallery_column")]
+transform = Transform3D(-0.373, 0.0, 0.928, 0.0, 1.0, 0.0, -0.928, 0.0, -0.373, 162.1, 5.46, -6.43)
+metadata/scufundat = true
+
+[node name="G_Gal36" parent="DecorManual/ZonaG" instance=ExtResource("z8_gallery_roof")]
+transform = Transform3D(-0.373, 0.0, 0.928, 0.0, 1.0, 0.0, -0.928, 0.0, -0.373, 165.86, 10.77, -7.89)
+
+[node name="G_Gal37" parent="DecorManual/ZonaG" instance=ExtResource("z4_rubble_pile")]
+transform = Transform3D(-0.667, 0.0, 0.745, 0.0, 1.0, 0.0, -0.745, 0.0, -0.667, 157.0, 7.2, -6.46)
+metadata/coliziune = "none"
+
+[node name="G_Gal38" parent="DecorManual/ZonaG" instance=ExtResource("z5_fallen_block")]
+transform = Transform3D(-0.373, 0.0, 0.928, 0.0, 1.0, 0.0, -0.928, 0.0, -0.373, 158.44, 6.86, -3.73)
+metadata/scufundat = true
+
+[node name="G_Gal40" parent="DecorManual/ZonaG" instance=ExtResource("z10_gallery_corner")]
+transform = Transform3D(0.139, 0.0, -0.99, 0.0, 1.0, 0.0, 0.99, 0.0, 0.139, 107.31, 5.72, 60.81)
+
+[node name="G_Gal41" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.139, 0.0, -0.99, 0.0, 1.0, 0.0, 0.99, 0.0, 0.139, 107.92, 5.01, 65.78)
+metadata/scufundat = true
+
+[node name="G_Gal42" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.092, 0.0, -0.996, 0.0, 1.0, 0.0, 0.996, 0.0, 0.092, 108.37, 4.04, 68.36)
+metadata/scufundat = true
+
+[node name="G_Gal43" parent="DecorManual/ZonaG" instance=ExtResource("z7_gallery_column")]
+transform = Transform3D(-0.99, 0.0, -0.139, 0.0, 1.0, 0.0, 0.139, 0.0, -0.99, 110.39, 5.86, 60.65)
+
+[node name="G_Gal44" parent="DecorManual/ZonaG" instance=ExtResource("z7_gallery_column")]
+transform = Transform3D(-0.99, 0.0, -0.139, 0.0, 1.0, 0.0, 0.139, 0.0, -0.99, 110.91, 5.72, 65.63)
+
+[node name="G_Gal45" parent="DecorManual/ZonaG" instance=ExtResource("z7_gallery_column")]
+transform = Transform3D(-0.99, 0.0, -0.139, 0.0, 1.0, 0.0, 0.139, 0.0, -0.99, 111.25, 3.88, 67.11)
+metadata/scufundat = true
+
+[node name="G_Gal46" parent="DecorManual/ZonaG" instance=ExtResource("z8_gallery_roof")]
+transform = Transform3D(-0.99, 0.0, -0.139, 0.0, 1.0, 0.0, 0.139, 0.0, -0.99, 110.68, 9.2, 63.64)
+
+[node name="G_Gal47" parent="DecorManual/ZonaG" instance=ExtResource("z4_rubble_pile")]
+transform = Transform3D(-0.904, 0.0, -0.427, 0.0, 1.0, 0.0, 0.427, 0.0, -0.904, 109.63, 5.52, 69.85)
+metadata/coliziune = "none"
+
+[node name="G_Gal48" parent="DecorManual/ZonaG" instance=ExtResource("z5_fallen_block")]
+transform = Transform3D(-0.996, 0.0, -0.092, 0.0, 1.0, 0.0, 0.092, 0.0, -0.996, 112.53, 5.33, 68.34)
+metadata/scufundat = true
+
+[node name="G_Gal50" parent="DecorManual/ZonaG" instance=ExtResource("z10_gallery_corner")]
+transform = Transform3D(-0.396, 0.0, -0.918, 0.0, 1.0, 0.0, 0.918, 0.0, -0.396, 101.32, 4.93, 77.63)
+
+[node name="G_Gal51" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.396, 0.0, -0.918, 0.0, 1.0, 0.0, 0.918, 0.0, -0.396, 99.5, 4.15, 82.33)
+metadata/scufundat = true
+
+[node name="G_Gal52" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(-0.701, 0.0, -0.713, 0.0, 1.0, 0.0, 0.713, 0.0, -0.701, 101.63, 3.55, 76.18)
+metadata/scufundat = true
+
+[node name="G_Gal53" parent="DecorManual/ZonaG" instance=ExtResource("z7_gallery_column")]
+transform = Transform3D(-0.918, 0.0, 0.396, 0.0, 1.0, 0.0, -0.396, 0.0, -0.918, 104.03, 5.11, 78.27)
+
+[node name="G_Gal54" parent="DecorManual/ZonaG" instance=ExtResource("z7_gallery_column")]
+transform = Transform3D(-0.918, 0.0, 0.396, 0.0, 1.0, 0.0, -0.396, 0.0, -0.918, 102.37, 4.89, 83.01)
+
+[node name="G_Gal55" parent="DecorManual/ZonaG" instance=ExtResource("z7_gallery_column")]
+transform = Transform3D(-0.918, 0.0, 0.396, 0.0, 1.0, 0.0, -0.396, 0.0, -0.918, 101.51, 3.01, 84.35)
+metadata/scufundat = true
+
+[node name="G_Gal56" parent="DecorManual/ZonaG" instance=ExtResource("z8_gallery_roof")]
+transform = Transform3D(-0.918, 0.0, 0.396, 0.0, 1.0, 0.0, -0.396, 0.0, -0.918, 103.08, 8.35, 81.13)
+
+[node name="G_Gal57" parent="DecorManual/ZonaG" instance=ExtResource("z4_rubble_pile")]
+transform = Transform3D(-0.91, 0.0, 0.415, 0.0, 1.0, 0.0, -0.415, 0.0, -0.91, 101.16, 5.0, 77.68)
+metadata/coliziune = "none"
+
+[node name="G_Gal58" parent="DecorManual/ZonaG" instance=ExtResource("z5_fallen_block")]
+transform = Transform3D(-0.713, 0.0, 0.701, 0.0, 1.0, 0.0, -0.701, 0.0, -0.713, 103.74, 4.68, 79.45)
+metadata/scufundat = true
+
+[node name="G_Frag0" parent="DecorManual/ZonaG" instance=ExtResource("z10_gallery_corner")]
+transform = Transform3D(-0.137, 0.0, -0.991, 0.0, 1.0, 0.0, 0.991, 0.0, -0.137, 150.04, 6.34, -26.09)
+metadata/scufundat = true
+
+[node name="G_Frag1" parent="DecorManual/ZonaG" instance=ExtResource("z9_vault_broken")]
+transform = Transform3D(-0.877, 0.0, -0.48, 0.0, 1.0, 0.0, 0.48, 0.0, -0.877, 158.77, 6.74, -16.57)
+metadata/scufundat = true
+
+[node name="G_Frag2" parent="DecorManual/ZonaG" instance=ExtResource("z10_gallery_corner")]
+transform = Transform3D(-0.176, 0.0, -0.984, 0.0, 1.0, 0.0, 0.984, 0.0, -0.176, 159.67, 5.51, -20.66)
+metadata/scufundat = true
+
+[node name="G_Frag3" parent="DecorManual/ZonaG" instance=ExtResource("z9_vault_broken")]
+transform = Transform3D(-0.982, 0.0, 0.19, 0.0, 1.0, 0.0, -0.19, 0.0, -0.982, 154.56, 7.59, -24.73)
+
+[node name="G_Frag4" parent="DecorManual/ZonaG" instance=ExtResource("z10_gallery_corner")]
+transform = Transform3D(-0.943, 0.0, 0.334, 0.0, 1.0, 0.0, -0.334, 0.0, -0.943, 164.56, 6.61, -25.1)
+metadata/scufundat = true
+
+[node name="G_Frag5" parent="DecorManual/ZonaG" instance=ExtResource("z3_gallery_relief_wall")]
+transform = Transform3D(0.377, 0.0, 0.926, 0.0, 1.0, 0.0, -0.926, 0.0, 0.377, 150.24, 6.42, -11.76)
+metadata/scufundat = true
+
+[node name="G_Frag6" parent="DecorManual/ZonaG" instance=ExtResource("z10_gallery_corner")]
+transform = Transform3D(-0.68, 0.0, 0.733, 0.0, 1.0, 0.0, -0.733, 0.0, -0.68, 142.73, 5.85, -7.78)
+metadata/scufundat = true
+
+[node name="G_Frag7" parent="DecorManual/ZonaG" instance=ExtResource("z11_vault_intact")]
+transform = Transform3D(-0.467, 0.0, -0.884, 0.0, 1.0, 0.0, 0.884, 0.0, -0.467, 153.71, 7.21, -10.57)
+
+[node name="G_Frag8" parent="DecorManual/ZonaG" instance=ExtResource("z10_gallery_corner")]
+transform = Transform3D(-0.845, 0.0, -0.534, 0.0, 1.0, 0.0, 0.534, 0.0, -0.845, 95.63, 4.42, 48.5)
+metadata/scufundat = true
+
+[node name="G_Frag9" parent="DecorManual/ZonaG" instance=ExtResource("z9_vault_broken")]
+transform = Transform3D(-0.868, 0.0, 0.496, 0.0, 1.0, 0.0, -0.496, 0.0, -0.868, 93.69, -1.92, 71.93)
+metadata/scufundat = true
+
+[node name="G_Frag10" parent="DecorManual/ZonaG" instance=ExtResource("z10_gallery_corner")]
+transform = Transform3D(-0.998, 0.0, 0.058, 0.0, 1.0, 0.0, -0.058, 0.0, -0.998, 90.09, -3.45, 81.64)
+metadata/scufundat = true
+
+[node name="G_Ficus0" parent="DecorManual/ZonaG" instance=ExtResource("z12_strangler_fig")]
+transform = Transform3D(1.326, 0.0, -0.701, 0.0, 1.5, 0.0, 0.701, 0.0, 1.326, 161.32, 7.64, -30.3)
+
+[node name="G_Ficus1" parent="DecorManual/ZonaG" instance=ExtResource("z12_strangler_fig")]
+transform = Transform3D(1.102, 0.0, -1.669, 0.0, 2.0, 0.0, 1.669, 0.0, 1.102, 167.6, 7.3, -18.08)
+
+[node name="G_Ficus2" parent="DecorManual/ZonaG" instance=ExtResource("z12_strangler_fig")]
+transform = Transform3D(-0.894, 0.0, -1.327, 0.0, 1.6, 0.0, 1.327, 0.0, -0.894, 167.28, 7.31, -16.02)
+
+[node name="G_Ficus3" parent="DecorManual/ZonaG" instance=ExtResource("z12_strangler_fig")]
+transform = Transform3D(-1.326, 0.0, -0.701, 0.0, 1.5, 0.0, 0.701, 0.0, -1.326, 151.28, 7.13, -5.52)
+
+[node name="G_Ficus4" parent="DecorManual/ZonaG" instance=ExtResource("z12_strangler_fig")]
+transform = Transform3D(-0.228, 0.0, -1.685, 0.0, 1.7, 0.0, 1.685, 0.0, -0.228, 102.37, 5.69, 50.93)
+
+[node name="G_Ficus5" parent="DecorManual/ZonaG" instance=ExtResource("z12_strangler_fig")]
+transform = Transform3D(-0.323, 0.0, -1.362, 0.0, 1.4, 0.0, 1.362, 0.0, -0.323, 104.06, 4.61, 83.42)
+
+[node name="G_Moloz0" parent="DecorManual/ZonaG" instance=ExtResource("z13_laterite_block")]
+transform = Transform3D(-0.513, 0.0, -0.858, 0.0, 1.0, 0.0, 0.858, 0.0, -0.513, 149.91, 8.08, -39.73)
+metadata/coliziune = "none"
+
+[node name="G_Moloz1" parent="DecorManual/ZonaG" instance=ExtResource("z14_numbered_block")]
+transform = Transform3D(-0.922, 0.0, 0.387, 0.0, 1.0, 0.0, -0.387, 0.0, -0.922, 156.98, 7.85, -35.99)
+metadata/coliziune = "none"
+
+[node name="G_Moloz2" parent="DecorManual/ZonaG" instance=ExtResource("z13_laterite_block")]
+transform = Transform3D(0.993, 0.0, -0.121, 0.0, 1.0, 0.0, 0.121, 0.0, 0.993, 163.65, 7.89, -44.34)
+metadata/coliziune = "none"
+
+[node name="G_Moloz3" parent="DecorManual/ZonaG" instance=ExtResource("z4_rubble_pile")]
+transform = Transform3D(-0.56, 0.0, -0.828, 0.0, 1.0, 0.0, 0.828, 0.0, -0.56, 171.17, 7.82, -40.37)
+metadata/coliziune = "none"
+
+[node name="G_Moloz4" parent="DecorManual/ZonaG" instance=ExtResource("z5_fallen_block")]
+transform = Transform3D(0.723, 0.0, -0.691, 0.0, 1.0, 0.0, 0.691, 0.0, 0.723, 169.3, 7.67, -34.28)
+metadata/scufundat = true
+
+[node name="G_Moloz5" parent="DecorManual/ZonaG" instance=ExtResource("z13_laterite_block")]
+transform = Transform3D(0.947, 0.0, 0.32, 0.0, 1.0, 0.0, -0.32, 0.0, 0.947, 172.09, 7.79, -34.7)
+metadata/coliziune = "none"
+
+[node name="G_Moloz6" parent="DecorManual/ZonaG" instance=ExtResource("z5_fallen_block")]
+transform = Transform3D(0.036, 0.0, -0.999, 0.0, 1.0, 0.0, 0.999, 0.0, 0.036, 173.35, 7.64, -32.06)
+metadata/scufundat = true
+
+[node name="G_Moloz7" parent="DecorManual/ZonaG" instance=ExtResource("z13_laterite_block")]
+transform = Transform3D(-0.866, 0.0, 0.499, 0.0, 1.0, 0.0, -0.499, 0.0, -0.866, 171.8, 7.68, -26.24)
+metadata/coliziune = "none"
+
+[node name="G_Moloz8" parent="DecorManual/ZonaG" instance=ExtResource("z13_laterite_block")]
+transform = Transform3D(-0.707, 0.0, -0.707, 0.0, 1.0, 0.0, 0.707, 0.0, -0.707, 175.05, 7.59, -21.33)
+metadata/coliziune = "none"
+
+[node name="G_Moloz9" parent="DecorManual/ZonaG" instance=ExtResource("z14_numbered_block")]
+transform = Transform3D(-0.107, 0.0, -0.994, 0.0, 1.0, 0.0, 0.994, 0.0, -0.107, 183.38, 7.7, -27.32)
+metadata/coliziune = "none"
+
+[node name="G_Moloz10" parent="DecorManual/ZonaG" instance=ExtResource("z5_fallen_block")]
+transform = Transform3D(0.986, 0.0, -0.169, 0.0, 1.0, 0.0, 0.169, 0.0, 0.986, 167.98, 7.43, -19.57)
+metadata/scufundat = true
+
+[node name="G_Moloz11" parent="DecorManual/ZonaG" instance=ExtResource("z5_fallen_block")]
+transform = Transform3D(-0.834, 0.0, -0.551, 0.0, 1.0, 0.0, 0.551, 0.0, -0.834, 174.48, 7.49, -22.41)
+metadata/scufundat = true
+
+[node name="G_Moloz12" parent="DecorManual/ZonaG" instance=ExtResource("z14_numbered_block")]
+transform = Transform3D(0.781, 0.0, -0.625, 0.0, 1.0, 0.0, 0.625, 0.0, 0.781, 178.23, 7.56, -18.12)
+metadata/coliziune = "none"
+
+[node name="G_Moloz13" parent="DecorManual/ZonaG" instance=ExtResource("z14_numbered_block")]
+transform = Transform3D(0.408, 0.0, -0.913, 0.0, 1.0, 0.0, 0.913, 0.0, 0.408, 179.25, 7.48, -12.83)
+metadata/coliziune = "none"
+
+[node name="G_Moloz14" parent="DecorManual/ZonaG" instance=ExtResource("z4_rubble_pile")]
+transform = Transform3D(-0.767, 0.0, -0.642, 0.0, 1.0, 0.0, 0.642, 0.0, -0.767, 179.33, 7.47, -13.33)
+metadata/coliziune = "none"
+
+[node name="G_Moloz15" parent="DecorManual/ZonaG" instance=ExtResource("z13_laterite_block")]
+transform = Transform3D(-0.944, 0.0, -0.329, 0.0, 1.0, 0.0, 0.329, 0.0, -0.944, 176.81, 7.41, -9.59)
+metadata/coliziune = "none"
+
+[node name="G_Moloz16" parent="DecorManual/ZonaG" instance=ExtResource("z14_numbered_block")]
+transform = Transform3D(0.99, 0.0, 0.144, 0.0, 1.0, 0.0, -0.144, 0.0, 0.99, 169.2, 7.53, -18.58)
+metadata/coliziune = "none"
+
+[node name="G_Moloz17" parent="DecorManual/ZonaG" instance=ExtResource("z5_fallen_block")]
+transform = Transform3D(0.949, 0.0, 0.316, 0.0, 1.0, 0.0, -0.316, 0.0, 0.949, 173.9, 7.21, -5.97)
+metadata/scufundat = true
+
+[node name="G_Moloz18" parent="DecorManual/ZonaG" instance=ExtResource("z4_rubble_pile")]
+transform = Transform3D(0.314, 0.0, -0.949, 0.0, 1.0, 0.0, 0.949, 0.0, 0.314, 172.27, 7.24, -0.5)
+metadata/coliziune = "none"
+
+[node name="G_Moloz19" parent="DecorManual/ZonaG" instance=ExtResource("z13_laterite_block")]
+transform = Transform3D(0.934, 0.0, 0.356, 0.0, 1.0, 0.0, -0.356, 0.0, 0.934, 164.09, 7.21, -2.68)
+metadata/coliziune = "none"
+
+[node name="G_Moloz20" parent="DecorManual/ZonaG" instance=ExtResource("z4_rubble_pile")]
+transform = Transform3D(0.997, 0.0, 0.071, 0.0, 1.0, 0.0, -0.071, 0.0, 0.997, 159.28, 7.11, 2.13)
+metadata/coliziune = "none"
+
+[node name="G_Moloz21" parent="DecorManual/ZonaG" instance=ExtResource("z13_laterite_block")]
+transform = Transform3D(-0.877, 0.0, -0.481, 0.0, 1.0, 0.0, 0.481, 0.0, -0.877, 157.59, 7.08, 6.42)
+metadata/coliziune = "none"
+
+[node name="G_Moloz22" parent="DecorManual/ZonaG" instance=ExtResource("z13_laterite_block")]
+transform = Transform3D(0.53, 0.0, -0.848, 0.0, 1.0, 0.0, 0.848, 0.0, 0.53, 155.82, 7.06, 7.35)
+metadata/coliziune = "none"
+
+[node name="G_Moloz23" parent="DecorManual/ZonaG" instance=ExtResource("z4_rubble_pile")]
+transform = Transform3D(0.783, 0.0, -0.622, 0.0, 1.0, 0.0, 0.622, 0.0, 0.783, 150.44, 7.06, 6.8)
+metadata/coliziune = "none"
+
+[node name="G_Moloz31" parent="DecorManual/ZonaG" instance=ExtResource("z14_numbered_block")]
+transform = Transform3D(-0.998, 0.0, 0.063, 0.0, 1.0, 0.0, -0.063, 0.0, -0.998, 114.63, 6.55, 46.03)
+metadata/coliziune = "none"
+
+[node name="G_Moloz32" parent="DecorManual/ZonaG" instance=ExtResource("z14_numbered_block")]
+transform = Transform3D(-0.761, 0.0, -0.649, 0.0, 1.0, 0.0, 0.649, 0.0, -0.761, 114.23, 6.34, 49.0)
+metadata/coliziune = "none"
+
+[node name="G_Moloz33" parent="DecorManual/ZonaG" instance=ExtResource("z4_rubble_pile")]
+transform = Transform3D(-0.639, 0.0, 0.77, 0.0, 1.0, 0.0, -0.77, 0.0, -0.639, 117.73, 6.1, 53.01)
+metadata/coliziune = "none"
+
+[node name="G_Moloz34" parent="DecorManual/ZonaG" instance=ExtResource("z4_rubble_pile")]
+transform = Transform3D(0.967, 0.0, -0.254, 0.0, 1.0, 0.0, 0.254, 0.0, 0.967, 116.7, 5.97, 58.32)
+metadata/coliziune = "none"
+
+[node name="G_Moloz35" parent="DecorManual/ZonaG" instance=ExtResource("z13_laterite_block")]
+transform = Transform3D(0.808, 0.0, 0.589, 0.0, 1.0, 0.0, -0.589, 0.0, 0.808, 114.06, 5.77, 65.46)
+metadata/coliziune = "none"
+
+[node name="G_Moloz36" parent="DecorManual/ZonaG" instance=ExtResource("z4_rubble_pile")]
+transform = Transform3D(0.795, 0.0, -0.606, 0.0, 1.0, 0.0, 0.606, 0.0, 0.795, 107.68, 5.47, 69.86)
+metadata/coliziune = "none"
+
+[node name="G_Moloz37" parent="DecorManual/ZonaG" instance=ExtResource("z13_laterite_block")]
+transform = Transform3D(-0.988, 0.0, -0.153, 0.0, 1.0, 0.0, 0.153, 0.0, -0.988, 114.21, 5.42, 76.83)
+metadata/coliziune = "none"
+
+[node name="G_Moloz38" parent="DecorManual/ZonaG" instance=ExtResource("z14_numbered_block")]
+transform = Transform3D(0.971, 0.0, 0.239, 0.0, 1.0, 0.0, -0.239, 0.0, 0.971, 117.21, 5.42, 77.8)
+metadata/coliziune = "none"
+
+[node name="G_Moloz39" parent="DecorManual/ZonaG" instance=ExtResource("z14_numbered_block")]
+transform = Transform3D(-0.857, 0.0, -0.516, 0.0, 1.0, 0.0, 0.516, 0.0, -0.857, 107.16, 5.18, 79.01)
+metadata/coliziune = "none"
+
+[node name="G_Rest0" parent="DecorManual/ZonaG" instance=ExtResource("z15_restoration_prop")]
+transform = Transform3D(-0.002, 0.0, -1.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.002, 180.15, 7.57, -19.65)
+
+[node name="G_Rest1" parent="DecorManual/ZonaG" instance=ExtResource("z15_restoration_prop")]
+transform = Transform3D(-0.789, 0.0, -0.614, 0.0, 1.0, 0.0, 0.614, 0.0, -0.789, 160.35, 7.13, -0.13)
+
+[node name="G_Liane0" parent="DecorManual/ZonaG" instance=ExtResource("z16_vine_strands")]
+transform = Transform3D(0.884, 0.0, -0.467, 0.0, 1.0, 0.0, 0.467, 0.0, 0.884, 151.92, 10.94, -47.83)
+metadata/coliziune = "none"
+
+[node name="G_Liane1" parent="DecorManual/ZonaG" instance=ExtResource("z16_vine_strands")]
+transform = Transform3D(0.884, 0.0, -0.467, 0.0, 1.0, 0.0, 0.467, 0.0, 0.884, 162.53, 10.79, -42.22)
+metadata/coliziune = "none"
+
+[node name="G_Liane2" parent="DecorManual/ZonaG" instance=ExtResource("z16_vine_strands")]
+transform = Transform3D(0.806, 0.0, -0.592, 0.0, 1.0, 0.0, 0.592, 0.0, 0.806, 178.28, 10.65, -32.14)
+metadata/coliziune = "none"
+
+[node name="G_Liane3" parent="DecorManual/ZonaG" instance=ExtResource("z16_vine_strands")]
+transform = Transform3D(-0.19, 0.0, -0.982, 0.0, 1.0, 0.0, 0.982, 0.0, -0.19, 181.77, 10.47, -17.43)
+metadata/coliziune = "none"
+
+[node name="G_Liane4" parent="DecorManual/ZonaG" instance=ExtResource("z16_vine_strands")]
+transform = Transform3D(-0.559, 0.0, -0.829, 0.0, 1.0, 0.0, 0.829, 0.0, -0.559, 175.9, 10.24, -5.38)
+metadata/coliziune = "none"
+
+[node name="G_Liane5" parent="DecorManual/ZonaG" instance=ExtResource("z16_vine_strands")]
+transform = Transform3D(-0.884, 0.0, -0.467, 0.0, 1.0, 0.0, 0.467, 0.0, -0.884, 152.95, 9.95, 7.28)
+metadata/coliziune = "none"
+
+[node name="G_Liane6" parent="DecorManual/ZonaG" instance=ExtResource("z16_vine_strands")]
+transform = Transform3D(-0.134, 0.0, -0.991, 0.0, 1.0, 0.0, 0.991, 0.0, -0.134, 115.82, 9.18, 49.22)
+metadata/coliziune = "none"
+
+[node name="G_Liane7" parent="DecorManual/ZonaG" instance=ExtResource("z16_vine_strands")]
+transform = Transform3D(0.052, 0.0, -0.999, 0.0, 1.0, 0.0, 0.999, 0.0, 0.052, 115.66, 8.7, 65.38)
+metadata/coliziune = "none"
+
+[node name="G_Liane8" parent="DecorManual/ZonaG" instance=ExtResource("z16_vine_strands")]
+transform = Transform3D(-0.231, 0.0, -0.973, 0.0, 1.0, 0.0, 0.973, 0.0, -0.231, 113.54, 7.97, 87.21)
+metadata/coliziune = "none"
+
 [node name="PadureMasa" type="Node3D" parent="."]
 script = ExtResource("mf_script")
 scenes = Array[PackedScene]([ExtResource("mf_tetrameles_a"), ExtResource("mf_tetrameles_b"), ExtResource("mf_dipterocarp"), ExtResource("mf_strangler_fig"), ExtResource("mf_sugar_palm"), ExtResource("mf_fern_cluster"), ExtResource("mf_tropical_shrub"), ExtResource("mf_bamboo_clump")])
-zones = Array[ExtResource("mf_zone")]([SubResource("MFZ_0"), SubResource("MFZ_1"), SubResource("MFZ_2"), SubResource("MFZ_3"), SubResource("MFZ_4"), SubResource("MFZ_5"), SubResource("MFZ_6"), SubResource("MFZ_7"), SubResource("MFZ_8"), SubResource("MFZ_9"), SubResource("MFZ_10"), SubResource("MFZ_11"), SubResource("MFZ_12"), SubResource("MFZ_13"), SubResource("MFZ_14"), SubResource("MFZ_15"), SubResource("MFZ_16"), SubResource("MFZ_17"), SubResource("MFZ_18"), SubResource("MFZ_19"), SubResource("MFZ_20"), SubResource("MFZ_21"), SubResource("MFZ_22"), SubResource("MFZ_23"), SubResource("MFZ_24"), SubResource("MFZ_25"), SubResource("MFZ_26"), SubResource("MFZ_27"), SubResource("MFZ_28"), SubResource("MFZ_29"), SubResource("MFZ_30"), SubResource("MFZ_31"), SubResource("MFZ_32"), SubResource("MFZ_33"), SubResource("MFZ_34"), SubResource("MFZ_35"), SubResource("MFZ_36"), SubResource("MFZ_37"), SubResource("MFZ_38"), SubResource("MFZ_39"), SubResource("MFZ_40"), SubResource("MFZ_41"), SubResource("MFZ_42"), SubResource("MFZ_43"), SubResource("MFZ_44"), SubResource("MFZ_45"), SubResource("MFZ_46"), SubResource("MFZ_47"), SubResource("MFZ_48"), SubResource("MFZ_49"), SubResource("MFZ_50"), SubResource("MFZ_51"), SubResource("MFZ_52"), SubResource("MFZ_53"), SubResource("MFZ_54"), SubResource("MFZ_55"), SubResource("MFZ_56"), SubResource("MFZ_57"), SubResource("MFZ_58"), SubResource("MFZ_59"), SubResource("MFZ_60"), SubResource("MFZ_61"), SubResource("MFZ_62"), SubResource("MFZ_63"), SubResource("MFZ_64"), SubResource("MFZ_65"), SubResource("MFZ_66"), SubResource("MFZ_67"), SubResource("MFZ_68"), SubResource("MFZ_69"), SubResource("MFZ_70"), SubResource("MFZ_71"), SubResource("MFZ_72"), SubResource("MFZ_73"), SubResource("MFZ_74"), SubResource("MFZ_75"), SubResource("MFZ_76"), SubResource("MFZ_77"), SubResource("MFZ_78"), SubResource("MFZ_79"), SubResource("MFZ_80"), SubResource("MFZ_81"), SubResource("MFZ_82"), SubResource("MFZ_83"), SubResource("MFZ_84"), SubResource("MFZ_85"), SubResource("MFZ_86"), SubResource("MFZ_87"), SubResource("MFZ_88"), SubResource("MFZ_89"), SubResource("MFZ_90"), SubResource("MFZ_91"), SubResource("MFZ_92"), SubResource("MFZ_93"), SubResource("MFZ_94"), SubResource("MFZ_95"), SubResource("MFZ_96"), SubResource("MFZ_97"), SubResource("MFZ_98"), SubResource("MFZ_99"), SubResource("MFZ_100"), SubResource("MFZ_101"), SubResource("MFZ_102"), SubResource("MFZ_103"), SubResource("MFZ_104"), SubResource("MFZ_105"), SubResource("MFZ_106"), SubResource("MFZ_107"), SubResource("MFZ_108"), SubResource("MFZ_109"), SubResource("MFZ_110"), SubResource("MFZ_111"), SubResource("MFZ_112"), SubResource("MFZ_113"), SubResource("MFZ_114"), SubResource("MFZ_115"), SubResource("MFZ_116"), SubResource("MFZ_117"), SubResource("MFZ_118"), SubResource("MFZ_119"), SubResource("MFZ_120"), SubResource("MFZ_121"), SubResource("MFZ_122"), SubResource("MFZ_123"), SubResource("MFZ_124"), SubResource("MFZ_125"), SubResource("MFZ_126"), SubResource("MFZ_127"), SubResource("MFZ_128"), SubResource("MFZ_129"), SubResource("MFZ_130"), SubResource("MFZ_131"), SubResource("MFZ_132"), SubResource("MFZ_133"), SubResource("MFZ_134"), SubResource("MFZ_135"), SubResource("MFZ_136"), SubResource("MFZ_137"), SubResource("MFZ_138"), SubResource("MFZ_139"), SubResource("MFZ_140"), SubResource("MFZ_141"), SubResource("MFZ_142"), SubResource("MFZ_143"), SubResource("MFZ_144"), SubResource("MFZ_145"), SubResource("MFZ_146"), SubResource("MFZ_147"), SubResource("MFZ_148"), SubResource("MFZ_149"), SubResource("MFZ_150"), SubResource("MFZ_151"), SubResource("MFZ_152"), SubResource("MFZ_153"), SubResource("MFZ_154"), SubResource("MFZ_155"), SubResource("MFZ_156"), SubResource("MFZ_157"), SubResource("MFZ_158"), SubResource("MFZ_159"), SubResource("MFZ_160"), SubResource("MFZ_161"), SubResource("MFZ_162"), SubResource("MFZ_163"), SubResource("MFZ_164"), SubResource("MFZ_165"), SubResource("MFZ_166"), SubResource("MFZ_167"), SubResource("MFZ_168"), SubResource("MFZ_169"), SubResource("MFZ_170"), SubResource("MFZ_171"), SubResource("MFZ_172"), SubResource("MFZ_173"), SubResource("MFZ_174"), SubResource("MFZ_175"), SubResource("MFZ_176"), SubResource("MFZ_177"), SubResource("MFZ_178"), SubResource("MFZ_179"), SubResource("MFZ_180"), SubResource("MFZ_181"), SubResource("MFZ_182"), SubResource("MFZ_183"), SubResource("MFZ_184"), SubResource("MFZ_185"), SubResource("MFZ_186"), SubResource("MFZ_187"), SubResource("MFZ_188"), SubResource("MFZ_189"), SubResource("MFZ_190"), SubResource("MFZ_191"), SubResource("MFZ_192"), SubResource("MFZ_193"), SubResource("MFZ_194")])
+zones = Array[ExtResource("mf_zone")]([SubResource("MFZ_0"), SubResource("MFZ_1"), SubResource("MFZ_2"), SubResource("MFZ_3"), SubResource("MFZ_4"), SubResource("MFZ_5"), SubResource("MFZ_6"), SubResource("MFZ_7"), SubResource("MFZ_8"), SubResource("MFZ_9"), SubResource("MFZ_10"), SubResource("MFZ_11"), SubResource("MFZ_12"), SubResource("MFZ_13"), SubResource("MFZ_14"), SubResource("MFZ_15"), SubResource("MFZ_16"), SubResource("MFZ_17"), SubResource("MFZ_18"), SubResource("MFZ_19"), SubResource("MFZ_20"), SubResource("MFZ_21"), SubResource("MFZ_22"), SubResource("MFZ_23"), SubResource("MFZ_24"), SubResource("MFZ_25"), SubResource("MFZ_26"), SubResource("MFZ_27"), SubResource("MFZ_28"), SubResource("MFZ_29"), SubResource("MFZ_30"), SubResource("MFZ_31"), SubResource("MFZ_32"), SubResource("MFZ_33"), SubResource("MFZ_34"), SubResource("MFZ_35"), SubResource("MFZ_36"), SubResource("MFZ_37"), SubResource("MFZ_38"), SubResource("MFZ_39"), SubResource("MFZ_40"), SubResource("MFZ_41"), SubResource("MFZ_42"), SubResource("MFZ_43"), SubResource("MFZ_44"), SubResource("MFZ_45"), SubResource("MFZ_46"), SubResource("MFZ_47"), SubResource("MFZ_48"), SubResource("MFZ_49"), SubResource("MFZ_50"), SubResource("MFZ_51"), SubResource("MFZ_52"), SubResource("MFZ_53"), SubResource("MFZ_54"), SubResource("MFZ_55"), SubResource("MFZ_56"), SubResource("MFZ_57"), SubResource("MFZ_58"), SubResource("MFZ_59"), SubResource("MFZ_60"), SubResource("MFZ_61"), SubResource("MFZ_62"), SubResource("MFZ_63"), SubResource("MFZ_64"), SubResource("MFZ_65"), SubResource("MFZ_66"), SubResource("MFZ_67"), SubResource("MFZ_68"), SubResource("MFZ_69"), SubResource("MFZ_70"), SubResource("MFZ_71"), SubResource("MFZ_72"), SubResource("MFZ_73"), SubResource("MFZ_74"), SubResource("MFZ_75"), SubResource("MFZ_76"), SubResource("MFZ_77"), SubResource("MFZ_78"), SubResource("MFZ_79"), SubResource("MFZ_80"), SubResource("MFZ_81"), SubResource("MFZ_82"), SubResource("MFZ_83"), SubResource("MFZ_84"), SubResource("MFZ_85"), SubResource("MFZ_86"), SubResource("MFZ_87"), SubResource("MFZ_88"), SubResource("MFZ_89"), SubResource("MFZ_90"), SubResource("MFZ_91"), SubResource("MFZ_92"), SubResource("MFZ_93"), SubResource("MFZ_94"), SubResource("MFZ_95"), SubResource("MFZ_96"), SubResource("MFZ_97"), SubResource("MFZ_98"), SubResource("MFZ_99"), SubResource("MFZ_100"), SubResource("MFZ_101"), SubResource("MFZ_102"), SubResource("MFZ_103"), SubResource("MFZ_104"), SubResource("MFZ_105"), SubResource("MFZ_106"), SubResource("MFZ_107"), SubResource("MFZ_108"), SubResource("MFZ_109"), SubResource("MFZ_110"), SubResource("MFZ_111"), SubResource("MFZ_112"), SubResource("MFZ_113"), SubResource("MFZ_114"), SubResource("MFZ_115"), SubResource("MFZ_116"), SubResource("MFZ_117"), SubResource("MFZ_118"), SubResource("MFZ_119"), SubResource("MFZ_120"), SubResource("MFZ_121"), SubResource("MFZ_122"), SubResource("MFZ_123"), SubResource("MFZ_124"), SubResource("MFZ_125"), SubResource("MFZ_126"), SubResource("MFZ_127"), SubResource("MFZ_128"), SubResource("MFZ_129"), SubResource("MFZ_130"), SubResource("MFZ_131"), SubResource("MFZ_132"), SubResource("MFZ_133"), SubResource("MFZ_134"), SubResource("MFZ_135"), SubResource("MFZ_136"), SubResource("MFZ_137"), SubResource("MFZ_138"), SubResource("MFZ_139"), SubResource("MFZ_140"), SubResource("MFZ_141"), SubResource("MFZ_142"), SubResource("MFZ_143"), SubResource("MFZ_144"), SubResource("MFZ_145"), SubResource("MFZ_146"), SubResource("MFZ_147"), SubResource("MFZ_148"), SubResource("MFZ_149"), SubResource("MFZ_150"), SubResource("MFZ_151"), SubResource("MFZ_152"), SubResource("MFZ_153"), SubResource("MFZ_154"), SubResource("MFZ_155"), SubResource("MFZ_156"), SubResource("MFZ_157"), SubResource("MFZ_158"), SubResource("MFZ_159"), SubResource("MFZ_160"), SubResource("MFZ_161"), SubResource("MFZ_162"), SubResource("MFZ_163"), SubResource("MFZ_164"), SubResource("MFZ_165"), SubResource("MFZ_166"), SubResource("MFZ_167"), SubResource("MFZ_168"), SubResource("MFZ_169"), SubResource("MFZ_170"), SubResource("MFZ_171"), SubResource("MFZ_172"), SubResource("MFZ_173"), SubResource("MFZ_174"), SubResource("MFZ_175"), SubResource("MFZ_176"), SubResource("MFZ_177"), SubResource("MFZ_178"), SubResource("MFZ_179"), SubResource("MFZ_180"), SubResource("MFZ_181"), SubResource("MFZ_182"), SubResource("MFZ_183"), SubResource("MFZ_184"), SubResource("MFZ_185"), SubResource("MFZ_186"), SubResource("MFZ_187"), SubResource("MFZ_188"), SubResource("MFZ_189"), SubResource("MFZ_190"), SubResource("MFZ_191"), SubResource("MFZ_192"), SubResource("MFZ_193"), SubResource("MFZ_194"), SubResource("MFZ_195"), SubResource("MFZ_196"), SubResource("MFZ_197"), SubResource("MFZ_198"), SubResource("MFZ_199"), SubResource("MFZ_200")])
 
 [node name="CameraPoartaDeSud" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -230.0, 14.0, -381.36)

@@ -31,15 +31,15 @@ numește provizorie: se recalibrează pe captura pistei.
 Garda (`measure_angkor.py bayon`) citește fișierul, nu build-ul. Vârful nasului
 e la 1,49 (nucleul de 1,19 + 0,30 m de relief), treapta de jos la 1,50 exact.
 
-- Triunghiuri: **19.862** (`Bayon_Stone` 17.746, `Bayon_Lichen` 1.900,
-  `Bayon_Streak` 216; fețele rotunjite au cerut segmente, ~3.700 tri pe față). Fără plafon.
+- Triunghiuri: **8.350** (`Bayon_Stone` 6.234, `Bayon_Lichen` 1.900,
+  `Bayon_Streak` 216). Fără plafon.
 - Noduri și sloturi: `Bayon_Stone` = `ROCK_LIGHT` 3 (clasa `angkor_sandstone`
   la integrare); `Bayon_Lichen` = `LAVA_ORANGE` 30 (44 de pete) + `CACTUS_GREEN`
   12 (16 tufe); `Bayon_Streak` = `VOLCANIC_BLACK` 20 (nu `ROCK_DARK`). **Materiale: 3**
   (un nod = un material). Fără alb, fără `ROCK_DARK`, fără texturi proprii.
-- Arii (din fișier): total 423 m² (include suprafețele ascunse dintre
-  învelitorile suprapuse), lichen portocaliu **0,69%** (limita 3%, verificată de
-  garda), verde 0,37%, dâre 0,64%.
+- Arii (din fișier): total 419 m² (include suprafețele ascunse dintre
+  învelitorile suprapuse), lichen portocaliu **0,70%** (limita 3%, verificată de
+  garda), verde 0,38%, dâre 0,64%.
 - Origine: baza amprentei, centrat pe X și Z; scala 1 și rotația identitate pe
   cele trei rădăcini (verificat în `verify_angkor.sh`).
 - Primitive rotunde: bobocul 14 laturi, finialul 8. Restul sunt prisme octogonale, cutii și
@@ -131,6 +131,34 @@ distanță dau impresia unei mustăți, nasul e un con, iar fața e netedă și 
 cauciuc”, fără masa de piatră a modelului. În decuparea gamecam citește clar ca
 față cu ochii închiși și zâmbet; ca „Bayon senin” nu o semnez. Nu am mai iterat.
 
+**Rundele 3–5, pe scurt, și de ce a picat fiecare** (fețe construite din cod):
+- **Runda 3:** fața de 2,2 m ca placă într-o nișă între pilaștri. A picat: citea
+  ca **mască într-un cadru**, iar fața era prea mică pentru camera de joc (~25 px).
+- **Runda 4:** fața de 3,0 m, blocul fețelor = lățimea turnului. Corpul turnului a
+  fost acceptat; fața a picat: **Moai** (nas lung cu creastă, obraji plani, falcă
+  pătrată) și ochi-ochelari (sprânceană și pleoapă într-o bandă peste nas).
+- **Runda 5:** forme netede (elipsoizi, tuburi). A picat: **clovn / desen animat**
+  (obraji-discuri, buze-bare ca mustața, nas conic, aspect de cauciuc).
+
+**Runda 6** (decizia dezvoltatorului, 6 nov 2026: fără față sculptată; 8.350 tri).
+Înapoi la blocul de piatră fațetat din runda 4, cu fața redusă la câteva forme
+MARI și PUȚIN ADÂNCI: două sprâncene separate (arcuri, ~7 cm relief, fără
+bandă); doi ochi separați, semilună convexă în jos, ca o creastă de pleoapă cu
+o a doua creastă dedesubt și jgheabul între ele (nimic nu trece peste nas); nas
+pană scurtă și lată (~0,25·H, vârf bont, relief ≤ 0,12 m); o singură gură
+largă (0,36·H, ~0,45 din fața de 0,82·H), colțurile urcate, două părți apropiate
+care citesc ca o buză cu linie; fără discuri de obraz, fără bile la nări sau în
+colțuri, fără gropițe; maxilarul e un contur rotunjit tăiat în bloc; urechile
+la colțuri; diadema plată cu 3 rozete rămâne (runda 5). Etajele, dârele,
+baza și fusul rămân din runda 4. Garda verde, anvelopa ±1,5 exactă.
+
+**Datorie deschisă — fețele sculptate.** Fețele sunt simplificate prin decizia
+dezvoltatorului (6 nov 2026) după cinci runde de fețe din cod. Ele cer sculptură
+reală mai târziu (image-to-3D din decupare, modele CC-BY/CC0 sau modelare
+manuală). Aceeași decizie se aplică pieselor sculptate din valurile următoare:
+`south_gate_face_tower`, `deva_giant`/`asura_giant`, `leper_king_statue`,
+`naga_head`, reliefurile de elefanți. (Textul și în `angkor_kit.md` §1.1.)
+
 ### Element cu element (după runda 4)
 
 | element | pe desen | în GLB | verdict |
@@ -138,7 +166,7 @@ față cu ochii închiși și zâmbet; ca „Bayon senin” nu o semnez. Nu am m
 | siluetă | turn, fețele în mijloc, con de etaje | 3,0 × 9,0 m; bază 0–1,5, fus 1,5–2,7, fețe 3,0–6,6, 4 etaje, boboc | OK: fețele SUNT volumul turnului; etajele fac un con din rânduri; mai în trepte decât conul desenului |
 | baza | piramidă în trepte, mai lată decât corpul | 3 trepte 1,50 / 1,40 / 1,30, blocuri în relief; fus de 2,4 m | OK |
 | blocul fețelor | fețele umplu lățimea turnului | 2,56 m pe latură (nucleu), cu fața bombată; ~3,0 m sprânceană–bărbie | OK |
-| fețe | rotunde, senine, ochi închiși, zâmbet | după runda 5: netede, ochi separați, nas rotund, buze late, obraji pline | citește ca față zâmbitoare, dar „desen animat/clovn”, nu Bayon senin |
+| fețe | rotunde, senine, ochi închiși, zâmbet | după runda 6: placă ovală fațetată, sprâncene și ochi-semilună separați, nas pană scurtă, un zâmbet | calm, citește ca „față sculptată în piatră”; **simplificată** (datorie deschisă), nu portret |
 | urechi | lobi lungi lângă față | la colțuri, 0,1 m în relief | OK |
 | diademă | bandă cu nervuri peste frunte | bandă plată ~0,3 m cu 3 rozete, fără surplomb | OK |
 | urna | punct pe frunte | **absentă, voit** (brief §8) | abatere voită |
@@ -153,17 +181,16 @@ față cu ochii închiși și zâmbet; ca „Bayon senin” nu o semnez. Nu am m
 
 Camera la 10 m înălțime și 12,5 m în spatele unui punct aflat la 30 m înaintea
 turnului, fov 68°, soare la 24° din spatele camerei, baza îngropată 1 m.
-Fața are ~35 px la rezoluția nativă și ocupă mijlocul turnului pe toată lățimea.
-În decuparea 3×: turn făcut din fețe (rămâne), ochi închiși separați, nas, gură
-zâmbitoare, obraji pliniți. Citește ca față; stilul e de desen animat (obrajii și
-mustața-buze), nu Moai și nu ochelari. La 1× rămân silueta de con, blocul lat și
-două pete pentru ochi.
+Fața are ~35 px la rezoluția nativă. În decuparea 3× citește ca „turn de piatră
+cu o față calmă pe fiecare latură”: ochi închiși ca două semilune, nas pană,
+zâmbet discret, urechi la colțuri, coroană de etaje. Nu e portret, nu e mască,
+nu e caricatură. La 1× (cadrul întreg) rămân silueta de con, blocul lat din
+mijloc și o pată mai luminoasă cu urme de trăsături; trăsăturile fine se pierd,
+pentru că sunt joase (voit). Verdictul real îl dă criticul orb.
 
 ## Abateri rămase, pe față
 
-1. Fața e „de desen animat”: obraji prea mari și rotunzi, buze-bare, nas conic,
-   suprafață de cauciuc. Cere sculptură adevărată (subdiviziune/modelare manuală
-   sau o a doua trecere de proiectare), nu alți parametri.
-2. Lichenul e mult mai discret decât în desen (contract); dârele sunt albăstrii.
-3. Fără bevel pe gresie; etajele sunt plăci octogonale netede.
-4. 19,9k triunghiuri, 3× piesa, fără plafon, dar de ținut în ochi.
+1. **Fețele sunt simplificate, nu sculptate** (datorie deschisă, vezi mai sus).
+2. Placa feței e netedă și lată; fără modelarea obrajilor și a buzelor din desen.
+3. Lichenul e mult mai discret decât în desen (contract); dârele sunt albăstrii.
+4. Fără bevel pe gresie; etajele sunt plăci octogonale netede.

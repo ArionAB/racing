@@ -161,6 +161,18 @@ nu 65, ca să încapă în cadru de pe grilă.
 | `structures/bayon_face_tower_b.glb` | ca `a` | ~2,5 | alt număr de etaje (`a` 4, `b` 3) și alt boboc, aceleași fețe; pe drum stau unul lângă altul la 33 m, deci diferența se vede din mers |
 | `structures/bayon_face_tower_c.glb` | ca `a`; molozul **în amprentă** | ~2,3 | **parțial ruinat**: un colț de sus prăbușit, o nișă spartă în bază, blocuri căzute **lipite de bază, în interiorul pătratului de 3 m** (pe un drum de 14 m, un bloc în afara cutiei ar fi un obstacol fără coliziune). Turnurile **nu se sparg** în joc (brief §8): ruina e formă, nu stare |
 
+**Datorie deschisă — fețele sculptate.** Fețele turnurilor sunt **simplificate prin
+decizia dezvoltatorului (6 nov 2026)**, după cinci runde de fețe construite din
+cod (mască într-un cadru → Moai → clovn → ochelari/desen animat): acum sunt
+câteva forme mari și puțin adânci (sprâncene, ochi-semilună, nas pană scurtă,
+un zâmbet), fără pretenția unui portret. Ele cer **sculptură reală, mai târziu**:
+image-to-3D pornind de la decupare, modele CC-BY/CC0 sau modelare manuală. **Aceeași
+decizie se aplică celorlalte piese sculptate, când le vine valul:** fețele de la
+`south_gate_face_tower`, `deva_giant`/`asura_giant`, `leper_king_statue`,
+`naga_head` și reliefurile de elefanți (`elephant_terrace_*`). Nu se mai încearcă
+fețe „din primitive” pe ele; se livrează forme simple lizibile, iar sculptura
+rămâne în lista de datorii.
+
 Verificare specifică: critic orb pe capturi `--gamecam` de pe terasa E, cu
 întrebarea „ce vezi pe turn?”. Contractul e „față” / „chip” / „Buddha-face”
 (oricare) la ≥ 2 din 3 capturi. La mostră, cutiile au primit 0 din 10.

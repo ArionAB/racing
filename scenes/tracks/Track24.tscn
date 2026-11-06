@@ -9297,196 +9297,200 @@ transform = Transform3D(-1.224, 0.0, -0.571, 0.0, 1.35, 0.0, 0.571, 0.0, -1.224,
 metadata/coliziune = "none"
 
 [node name="D_ZidL0_0" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -241.7, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -248.3, 13.6, -380.77)
 
 [node name="D_ZidL0_1" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -244.3, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -250.9, 13.6, -380.77)
 
 [node name="D_ZidL0_2" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -246.9, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -253.5, 13.6, -380.77)
 
 [node name="D_ZidL0_3" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -249.5, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -256.1, 13.6, -380.77)
 
 [node name="D_ZidL0_4" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -252.1, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -258.7, 13.6, -380.77)
 
 [node name="D_ZidL0_5" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -254.7, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -261.3, 13.6, -380.77)
 
 [node name="D_ZidL0_6" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -257.3, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -263.9, 13.6, -380.77)
 
 [node name="D_ZidL0_7" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -259.9, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -266.5, 13.6, -380.77)
 
 [node name="D_ZidL0_8" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -262.5, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -269.1, 13.6, -380.77)
 
 [node name="D_ZidL0_9" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -265.1, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -271.7, 13.6, -380.77)
 
 [node name="D_ZidL0_10" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -267.7, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -274.3, 13.6, -380.77)
 
 [node name="D_ZidL0_11" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -270.3, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -276.9, 13.6, -380.77)
 
 [node name="D_ZidL0_12" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -272.9, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -279.5, 13.6, -380.77)
 
 [node name="D_ZidL1_0" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -243.0, 15.11, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -249.6, 15.11, -380.77)
 
 [node name="D_ZidL1_1" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -245.6, 15.11, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -252.2, 15.11, -380.77)
 
 [node name="D_ZidL1_2" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -248.2, 15.11, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -254.8, 15.11, -380.77)
 
 [node name="D_ZidL1_3" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -250.8, 15.11, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -257.4, 15.11, -380.77)
 
 [node name="D_ZidL1_4" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -253.4, 15.11, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -260.0, 15.11, -380.77)
 
 [node name="D_ZidL1_5" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -256.0, 15.11, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -262.6, 15.11, -380.77)
 
 [node name="D_ZidL1_6" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -258.6, 15.11, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -265.2, 15.11, -380.77)
 
 [node name="D_ZidL1_7" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -261.2, 15.11, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -267.8, 15.11, -380.77)
 
 [node name="D_ZidL1_8" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -263.8, 15.11, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -270.4, 15.11, -380.77)
 
 [node name="D_ZidL1_9" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -266.4, 15.11, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -273.0, 15.11, -380.77)
 
 [node name="D_ZidL2_0" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -241.7, 16.62, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -248.3, 16.62, -380.77)
 
 [node name="D_ZidL2_1" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -244.3, 16.62, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -250.9, 16.62, -380.77)
 
 [node name="D_ZidL2_2" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -246.9, 16.62, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -253.5, 16.62, -380.77)
 
 [node name="D_ZidL2_3" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -249.5, 16.62, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -256.1, 16.62, -380.77)
 
 [node name="D_ZidL2_4" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -252.1, 16.62, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -258.7, 16.62, -380.77)
 
 [node name="D_ZidL2_5" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -254.7, 16.62, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -261.3, 16.62, -380.77)
 
 [node name="D_ZidL2_6" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -257.3, 16.62, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -263.9, 16.62, -380.77)
 
 [node name="D_ZidR0_0" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -218.3, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -211.7, 13.6, -380.77)
 
 [node name="D_ZidR0_1" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -215.7, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -209.1, 13.6, -380.77)
 
 [node name="D_ZidR0_2" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -213.1, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -206.5, 13.6, -380.77)
 
 [node name="D_ZidR0_3" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -210.5, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -203.9, 13.6, -380.77)
 
 [node name="D_ZidR0_4" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -207.9, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -201.3, 13.6, -380.77)
 
 [node name="D_ZidR0_5" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -205.3, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -198.7, 13.6, -380.77)
 
 [node name="D_ZidR0_6" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -202.7, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -196.1, 13.6, -380.77)
 
 [node name="D_ZidR0_7" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -200.1, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -193.5, 13.6, -380.77)
 
 [node name="D_ZidR0_8" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -197.5, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -190.9, 13.6, -380.77)
 
 [node name="D_ZidR0_9" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -194.9, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -188.3, 13.6, -380.77)
 
 [node name="D_ZidR0_10" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -192.3, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -185.7, 13.6, -380.77)
 
 [node name="D_ZidR0_11" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -189.7, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -183.1, 13.6, -380.77)
 
 [node name="D_ZidR0_12" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -187.1, 13.6, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -180.5, 13.6, -380.77)
 
 [node name="D_ZidR1_0" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -217.0, 15.11, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -210.4, 15.11, -380.77)
 
 [node name="D_ZidR1_1" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -214.4, 15.11, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -207.8, 15.11, -380.77)
 
 [node name="D_ZidR1_2" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -211.8, 15.11, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -205.2, 15.11, -380.77)
 
 [node name="D_ZidR1_3" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -209.2, 15.11, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -202.6, 15.11, -380.77)
 
 [node name="D_ZidR1_4" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -206.6, 15.11, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -200.0, 15.11, -380.77)
 
 [node name="D_ZidR1_5" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -204.0, 15.11, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -197.4, 15.11, -380.77)
 
 [node name="D_ZidR1_6" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -201.4, 15.11, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -194.8, 15.11, -380.77)
 
 [node name="D_ZidR1_7" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -198.8, 15.11, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -192.2, 15.11, -380.77)
 
 [node name="D_ZidR1_8" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -196.2, 15.11, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -189.6, 15.11, -380.77)
 
 [node name="D_ZidR1_9" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -193.6, 15.11, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -187.0, 15.11, -380.77)
 
 [node name="D_ZidR2_0" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -218.3, 16.62, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -211.7, 16.62, -380.77)
 
 [node name="D_ZidR2_1" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -215.7, 16.62, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -209.1, 16.62, -380.77)
 
 [node name="D_ZidR2_2" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -213.1, 16.62, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -206.5, 16.62, -380.77)
 
 [node name="D_ZidR2_3" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -210.5, 16.62, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -203.9, 16.62, -380.77)
 
 [node name="D_ZidR2_4" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -207.9, 16.62, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -201.3, 16.62, -380.77)
 
 [node name="D_ZidR2_5" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -205.3, 16.62, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -198.7, 16.62, -380.77)
 
 [node name="D_ZidR2_6" parent="DecorManual/ZonaD" instance=ExtResource("z2_laterite_block")]
-transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -202.7, 16.62, -380.77)
+transform = Transform3D(2.6, 0.0, -0.0, 0.0, 2.6, 0.0, 0.0, 0.0, 2.6, -196.1, 16.62, -380.77)
 
 [node name="D_MolozL" parent="DecorManual/ZonaD" instance=ExtResource("z3_rubble_pile")]
 transform = Transform3D(0.866, 0.0, 0.5, 0.0, 1.0, 0.0, -0.5, 0.0, 0.866, -241.5, 13.7, -374.27)
+metadata/coliziune = "none"
 
 [node name="D_MolozR" parent="DecorManual/ZonaD" instance=ExtResource("z3_rubble_pile")]
 transform = Transform3D(0.643, 0.0, -0.766, 0.0, 1.0, 0.0, 0.766, 0.0, 0.643, -218.0, 13.7, -376.77)
+metadata/coliziune = "none"
 
 [node name="D_BlocL" parent="DecorManual/ZonaD" instance=ExtResource("z4_fallen_block")]
 transform = Transform3D(0.94, 0.0, 0.342, 0.0, 1.0, 0.0, -0.342, 0.0, 0.94, -243.5, 13.7, -386.27)
+metadata/coliziune = "none"
 
 [node name="D_BlocR" parent="DecorManual/ZonaD" instance=ExtResource("z4_fallen_block")]
 transform = Transform3D(0.342, 0.0, 0.94, 0.0, 1.0, 0.0, -0.94, 0.0, 0.342, -215.5, 13.7, -386.27)
+metadata/coliziune = "none"
 
 [node name="ZonaE" type="Node3D" parent="DecorManual"]
 

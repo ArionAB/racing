@@ -177,11 +177,15 @@ for k, (s_, lat, t) in enumerate(LOTS):
 # la scara 1) la scara 2,6, trei randuri, rosturi decalate; scade spre capete (ruina). Incepe la 10 m de
 # axa (poarta ocupa +-9,5), deci cel mai apropiat colt e la >= 5 m de asfalt (contract: >= 3 m).
 BLK = 2.6
+# A/B ProbeRace pe scena integrata (7 nov 2026): zidul pornit la 10,4 m inchidea ocolul pe langa turnul portii
+# cand elefantul ocupa deschiderea: blocaje la poarta 28 cu zid / 14 fara (istoric 10-21). Zidul porneste la 17 m:
+# ramane un culoar de ~7 m pe fiecare parte a turnului (+-9,5). Molozul de la poale = fantome, din acelasi motiv.
+WALL_LAT0 = 17.0
 for side, sg in (("L", -1), ("R", 1)):
     for course in range(3):
         n = 13 - course * 3
         for k in range(n):
-            lat = 10.4 + BLK * 0.5 + k * BLK + (BLK * 0.5 if course == 1 else 0.0)
+            lat = WALL_LAT0 + BLK * 0.5 + k * BLK + (BLK * 0.5 if course == 1 else 0.0)
             ITEMS.append((f"D_Zid{side}{course}_{k}", "props/laterite_block.glb", fr(0.0), sg * lat, 0,
                           {"scale": BLK, "dy": -0.4 + course * 0.58 * BLK}))
 
@@ -193,4 +197,5 @@ EXTRA = [
     ("D_BlocR", "props/fallen_block.glb", 6.0, 14.5, 70, {}),
 ]
 for nm, g, s_, lat, yw, o in EXTRA:
+    o = dict(o, coliziune="none")
     ITEMS.append((nm, g, fr(s_), lat, yw, o))

@@ -120,6 +120,18 @@ SPECS = {
     # val 3, grupul A: templul Angkor Wat, scara pe +Y; gc_yaw 180 il intoarce cu fata spre camera de joc
     "angkor_wat_temple": {"camera": {"azimuth": 78.0, "elevation": 9.0, "lens": 45.0, "margin": 1.06},
                           "views_aspect": 1.2, "bury": 0.0, "gc_yaw": 180.0},
+    # val 3, grupul C: debarcaderul (treptele coboara spre -Y: camera din sud-est), tuk-tuk-ul
+    # (motocicleta pe +Y trage remorca: vazut din -X, motocicleta ramane in stanga ca pe desen),
+    # calugarul, blocurile mici
+    "srah_srang_landing": {"camera": {"azimuth": -68.0, "elevation": 22.0, "lens": 55.0, "margin": 1.06},
+                           "views_aspect": 1.7, "bury": 0.0},
+    "tuk_tuk": {"camera": {"azimuth": 205.0, "elevation": 12.0, "lens": 60.0, "margin": 1.06},
+                "views_aspect": 1.8, "bury": 0.0},
+    "monk_standing": {"camera": {"azimuth": 62.0, "elevation": 4.0, "lens": 70.0, "margin": 1.08},
+                      "views_aspect": 0.6, "bury": 0.0},
+    "laterite_block": {"camera": {"azimuth": 38.0, "elevation": 20.0, "lens": 60.0, "margin": 1.12}},
+    "rubble_pile": {"camera": {"azimuth": 40.0, "elevation": 22.0, "lens": 60.0, "margin": 1.12}},
+    "numbered_block": {"camera": {"azimuth": 68.0, "elevation": 16.0, "lens": 60.0, "margin": 1.12}},
 }
 
 # camera de joc (scenes/race/chase_camera.gd: DEFAULT_HEIGHT/DISTANCE/BASE_FOV/

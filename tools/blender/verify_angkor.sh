@@ -182,6 +182,30 @@ if [ -f "$ROOT/structures/angkor_wat_temple.glb" ]; then
   [ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei grupului A (val 3) a esuat"; fail=1; }
 fi
 # --- sfarsit val 3, grupul A ---
+# --- val 3, grupul C ---
+echo
+echo "== val 3, grupul C: debarcader, tuk-tuk (2 radacini), calugar, blocuri mici (kit 1.4-1.6) =="
+W3="tools/blender/measure_angkor_w3c.py"
+# debarcaderul are originea la cota platformei (geometria incaleca Y=0, ca la ponton): --origin=waterline
+check "structures/srah_srang_landing.glb" --origin=waterline
+check "vehicles/tuk_tuk.glb" --origin=assembly
+check "animals/monk_standing.glb" --origin=assembly
+check "props/laterite_block.glb" --origin=assembly
+check "props/rubble_pile.glb" --origin=assembly
+check "props/numbered_block.glb" --origin=assembly
+if [ -f "$ROOT/vehicles/tuk_tuk.glb" ] && [ -f "$ROOT/structures/srah_srang_landing.glb" ]; then
+  python $W3 landing "$ROOT/structures/srah_srang_landing.glb" || fail=1
+  python $W3 tuk "$ROOT/vehicles/tuk_tuk.glb" || fail=1
+  python $W3 monk "$ROOT/animals/monk_standing.glb" || fail=1
+  python $W3 laterite "$ROOT/props/laterite_block.glb" || fail=1
+  python $W3 rubble "$ROOT/props/rubble_pile.glb" || fail=1
+  python $W3 numbered "$ROOT/props/numbered_block.glb" || fail=1
+  st=$(python $W3 --selftest "$ROOT/vehicles/tuk_tuk.glb" "$ROOT/structures/srah_srang_landing.glb" 2>&1); rc=$?
+  printf '%s
+' "$st" | grep -E "^-- sabotaj|garda a|SELFTEST"
+  [ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei grupului C (val 3) a esuat"; fail=1; }
+fi
+# --- sfarsit val 3, grupul C ---
 
 echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="

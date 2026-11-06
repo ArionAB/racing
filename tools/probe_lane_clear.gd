@@ -60,6 +60,8 @@ const DRIVABLE := [
 	# pe feat/capp-poi-b. Aceeasi poveste ca `ChannelDeckSides` de mai sus.
 	"BranchDeck", "BranchDirt", "BranchSand", "BranchRails", "TunnelShell",
 	"Ramp", "ChannelKicker", "FlyoffRamp", "HummockBody",
+	# Angkor (kit §1.4): radacina-rampa de la iesirea scurtaturii — suprafata de rulare (un plan).
+	"RadacinaRampa_col",
 	"IceSheet",
 	# TERENUL. E podeaua de sub tot, deci contactul cu el nu e blocaj — dar
 	# aparea la aproape fiecare proba si de aceea sonda iesea rosie pe TOATE
@@ -362,6 +364,17 @@ const BASELINE := {
 	# 0.530 (lat +0.0 si +2.7: stalpul sta la +1.5). Sala are 16 m, deci sondele de +-1/3 cad la
 	# +-2.7 m; fanta pe langa fiecare stalp e de 5 m pe o parte si 8 m pe cealalta (zona_d.HALL).
 	"Carrara (Track23)": 13,
+	# Angkor (Track24), armata la pasul 6 (brief angkor.md §7, 6 nov 2026): 7 raportari, masurate
+	# de 2 ori, identic — TOATE pe turnurile Bayonului de pe terasa E (`Obstacole/BayonTurn0..2`,
+	# frac 0.430-0.455): 2 + 2 pe lateral si 3 pe INAINTE (h 0.4/1.0/1.6). Turnurile PE carosabil
+	# sunt hazardul-semnatura nr. 2 (decizia V2: langa axa, trecere pe ambele parti, podea de linie
+	# 0,62 — `tools/probe_angkor_pas6.gd`), deci exceptie NUMITA, ca oalele de pe Cappadocia.
+	# Balustradele de gresie de pe caile peste sant (stil 3) si perdeaua de liane nu apar. Baza =
+	# cifra masurata, fara marja (memoria `garda-fara-linie-de-baza-iese-zero`).
+	# Kitul Angkor (val 2, 6 nov 2026): +34 pe radacina-rampa de la iesirea scurtaturii
+	# (`RadacinaRampa_col`, suprafata de rulare, scuzata pe nume ca podea): toate pe testul INAINTE la
+	# h 0,4/1,0 — raza orizontala loveste panta de 17% in fata, ca la `FlyoffRamp`. 7 + 34 = 41.
+	"Angkor (Track24)": 41,
 }
 
 

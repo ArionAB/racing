@@ -763,6 +763,59 @@ primească la fel.
    | turul | minim median 75,4 s, mediu **80,3 s** (fără hazarde: 79,0) | hazardurile ≈ +1,3 s / tur |
 6. Musonul și fulgerul, perdeaua, săritura, turnurile Bayonului,
    `CameraZone`-urile, tuk-tuk-urile.
+   **Rezultatul (6 nov 2026, ramura `angkor/pas6`).** Totul e scris de
+   `tools/gen_angkor_route.py` (scena rămâne generată), cu garda nouă
+   `tools/probe_angkor_pas6.gd` (orientarea perdelei, turnurile și podeaua de
+   linie, golurile balustradei, musonul; `--sabotaj` o face să pice) și cu
+   `ProbeLaneClear` armat pe Angkor: **7** raportări, toate pe turnurile
+   Bayonului (excepție numită).
+
+   | piesa | cum e făcută | contract |
+   |---|---|---|
+   | turnurile Bayonului | 3 corpuri `Obstacole/BayonTurn0..2` de 3 × 3 × 9 m, la ±1 m de axă (V2), cu machetă vizuală până la `bayon_face_tower_*`; `custom_lane_bias` **0,72** de la 45 m înainte | 0,62 de pe sondă nu ajungea **în ploaie**: 4 din 5 ejectări pe turnuri veneau pe ud |
+   | musonul + fulgerul | `RainCycle` cu perioada **137 s**, cursa pornește pe uscat, **prima ploaie la 50 s** (pe turul 1, în cetate), ceață și cer vânăt în ploaie; `LightningFlash` legat de el | perioada nu împarte turul (1,71 tururi) |
+   | perdeaua de liane | **cod mic, nou: `VineCurtain`** — un singur mesh pe atlas (4 rânduri de șuvițe verzi și argintii, creanga de sus), **fără coliziune**, cu un `Area3D` care aruncă frunze (`PropDebris.leaf_burst`) și fâșâie; pe bucla principală, la 40 m după bifurcația scurtăturii — la bifurcație vezi „zidul verde” pe ocol și galeria cu dominoul pe coardă | viteza la ieșirea ferestrei de ±15 m / la intrare: mediana **1,57** (ieși din viraj accelerând), 12,1% din treceri sub 98%; **martorul** — aceeași fereastră pe main, fără perdea (`--angkor-curtain-at=`): 1,59 și **14,1%**. Pierderile vin din viraj și din îmbrânceli, nu din perdea (fără coliziune, prin construcție). 207 rafale de frunze pe 214 treceri. Captura `--gamecam` de la 40 m: zid verde peste drum (prima variantă, 3 rânduri de 0,16 m, citea pieptene rar). Acoperirea ≥ 60% se remăsoară cu șuvițele de asset (pasul 8) |
+   | balustradele | **stil 3 în `Track._build_parapets`** (bit-identic pentru stilurile vechi): zid de 1 m, un singur slot (`CONCRETE` — `ROCK_LIGHT` iese portocaliu pe atlas și, alternat, citea a barieră de trafic), cu **capătul dinspre mașini desfăcut** 2,5 m pe 16 m; pe calea de vest (câte un gol de ~7 m pe latură), pe calea uriașilor și pe ambele maluri ale lui H | vezi mai jos |
+
+   **Balustradele, trei rulări** (16 seed-uri × 8 mașini × 250 s fiecare,
+   martorul = main):
+
+   | | main | rularea 1 | rularea 2 | **rularea 3** |
+   |---|---|---|---|---|
+   | ce s-a schimbat | — | totul de mai sus, bias 0,62, capete drepte | capete desfăcute, stânga la Srah Srang, bias 0,72 | + dreapta lui H |
+   | repuneri | 5 | 10 | 6 | **2** |
+   | ejectări | 4 | 8 (3 la capătul balustradei, 5 pe turnuri) | 3 | **2** |
+   | `[blocaj]` | 18 (toate la elefant) | 31 (22 la Srah Srang) | 15 | **10 (toate la elefant)** |
+   | tur mediu (mediana) | 80,8 s | 81,7 s | 81,5 s | **81,2 s** |
+
+   - **Rularea 1** a găsit două defecte: capătul drept al balustradei, lovit
+     din față la 36–43 m/s de mașinile împinse pe umăr în grămada de la start
+     (3 ejectări în primele 7 s); și o **capcană de ploaie la Srah Srang** —
+     pe ud, mașinile ies largi din virajul la dreapta de SE și cad pe malul
+     bazinului, cu 1 m sub șosea, de unde nu mai urcă. Toate cele 22 de
+     blocaje erau la sfârșitul unei ploi; pe uscat, zero.
+   - **Rularea 2** a mutat problema pe **dreapta** lui H: rapa 2 (șanțul
+     Angkor Wat de pe malul de sud) **n-are apă** (avertismentul „rapa 2 n-are
+     nicio celulă sub 0.5”, preexistent pe main), deci o mașină căzută nu
+     intră în plasa de apă — rămâne în șanțul uscat. Balustrada pe dreapta l-a
+     închis; reflexia turnurilor din §2 cere oricum apă acolo — **de reparat
+     la pasul 8** (cota apei sau podeaua rapei 2).
+   - **Rularea 3** e mai bună decât main pe toate cifrele de siguranță; restul
+     neschimbat: dominoul **9,3%** striviri pe trecere (main 11,0%), creasta
+     384 de zboruri, mediana **0,65 s**, elefantul 6 s oprit pe seed (main
+     10 s). Turul mediu +0,4 s = ploaia (brief: +1–2 s pe tur).
+
+   **Amânate, cu motiv:**
+   - **`CameraZone`-urile** (gopura, galeria, Poarta de Sud): fără tavan nu
+     au ce corecta — intră cu hero-asset-urile (pasul 7), cu `ceiling`
+     declarat explicit (memoria `camera-zone-tavan-per-sala`).
+   - **Tuk-tuk-urile**: `BumpProp` primește doar piese de cel mult 2 m în plan
+     și le plafonează masa la **4 kg** (jucărie care zboară) — contrazice
+     „Buggy-ul le împinge greu, Autobuzul le aruncă” din §3. Se decide la
+     integrarea `tuk_tuk.glb`: remorca separată de motocicletă (încape sub
+     2 m) și o masă per piesă, sau rămân colizor static.
+   - **Tunetul** n-are încă sunet (`LightningFlash.thunder_stream` gol, iar în
+     `assets/audio/` nu există tunet) — e în lista de sunet (§5.6, pasul 8).
 7. Hero-assets: templul, gopura, poarta cu fețe, turnurile Bayonului,
    poarta-copac, rădăcina, capătul terasei, elefantul asiatic.
 8. Kituri, jungla, fundalul, teatrul, sunetul; probe_decor; **testul de loc**
@@ -906,3 +959,127 @@ liane; H cu Srah Srang în stânga, leii și remorcile de tuk-tuk.
 - **Bucla de pe C e simplificată**: pe plan, după vârf drumul coboară spre sud,
   merge spre vest și urcă spre D (sus, stânga, jos, stânga, sus); în imagine
   coboară direct pe flancul de vest.
+
+### 9.2 Prompt pentru ChatGPT (planșa de inventar de assets) — v0.1, paste-ready
+
+Se dă **în aceeași conversație cu diorama acceptată** (v3), ca la Carrara
+(§9.1 acolo). Numele de fișier de pe planșă sunt contractul pentru
+`assets/models/angkor/` și pentru kitul `docs/asset_briefs/angkor_kit.md`
+(de scris după planșă). **Nu intră în planșă** ce face codul sau ce se
+refolosește (§5): banyanul, ferigile, bambusul, tufele tropicale, macacii
+(`halong/animals/macaque.glb`), suprafețele de drum și balustradele de
+coliziune (cod, pasul 6), apa, ploaia, perdeaua ca mecanism (doar șuvița ca
+piesă). Cotele de mai jos vin din `Track24` (pasul 6), nu din dioramă:
+deschiderea Porții de Sud e de 7 m, turnurile Bayonului au 3 × 3 m și ~9 m,
+calea de vest are 9 m.
+
+> *Now make an asset inventory sheet for this diorama, in the same low-poly
+> toy style, palette and late-afternoon storm light: every distinct object
+> drawn once, isolated, on a plain light-grey background, in a neat grid, in
+> a 3/4 view, all at the same scale (a small toy car shown for scale in one
+> corner), with small simple text labels under each object using exactly
+> these file names (labels are the only text allowed). Stone is grey-ochre
+> sandstone with orange and yellow-green lichen on ledges and black streaks
+> under cornices; laterite is red-brick and porous. No Buddha statues
+> anywhere on the sheet, no brand names on vehicles.*
+>
+> *Temples and gates: angkor_wat_temple (five lotus-bud towers in a
+> quincunx on three stepped terraces, central tower tallest at about 32 m,
+> corner towers about 24 m, galleries around the base), aw_west_gopura (a
+> long gate gallery with three towers and a wide central passage about 10 m
+> wide that a road drives through), south_gate_face_tower (a 23 m gate tower
+> with a huge serene face on each of its four sides and ONE narrow passage
+> 7 m wide at road level, flanked by stone elephants with trunks reaching to
+> the ground), bayon_face_tower_a, bayon_face_tower_b, bayon_face_tower_c
+> (three different tiered towers on a 3 x 3 m base, about 9 m tall, a
+> smiling face on each of the four sides, lotus-bud tip; one of them
+> partly ruined), elephant_terrace_end (the end of a 4 m high terrace wall
+> carved with a procession of elephants in relief, with a short flat top and
+> a sharp edge), leper_king_statue (a seated stone figure on a small
+> pedestal, not a Buddha), ta_prohm_tree_gate (a small stone gate tower
+> gripped by a giant strangler fig, its silver roots pouring over the
+> roof and walls, the passage still open, about 7 m wide),
+> giant_root_ramp (one huge silver tree root about 1.2 m high, sloped like a
+> ramp on one side), srah_srang_landing (a laterite landing stage with steps
+> down to water, two stone lions and naga balustrade ends).*
+>
+> *Animals and life: asian_elephant (Asian elephant, small rounded ears,
+> domed head, NO saddle, NO rider, walking pose), tuk_tuk (a motorbike
+> pulling a small roofed passenger trailer, faded paint), monk_standing (a
+> monk in a saffron robe, standing, small).*
+>
+> *Modular kit: gallery_column (square sandstone column), gallery_roof (a
+> section of corbelled gallery roof with curved tiles), gallery_relief_wall
+> (a wall section carved with a long bas-relief), gallery_corner,
+> naga_balustrade (a straight module: a stone serpent body lying on short
+> posts), naga_balustrade_gap (the same module broken, with fallen pieces),
+> naga_head (the raised seven-headed cobra end), deva_giant and asura_giant
+> (seated giant figures about 3 m tall holding the naga body in their
+> arms; deva calm, asura with a fierce face), elephant_terrace_module (a
+> wall module with elephants in relief), elephant_trunk_pillar (a pillar
+> shaped as an elephant head with its trunk down), bakheng_terrace_tier (one
+> stepped terrace level), bakheng_shrine_tower (a small brick shrine
+> tower), bakheng_side_stair (a steep narrow stone stair), vault_intact and
+> vault_broken (a corbelled stone vault section, whole and collapsed),
+> fallen_block (a carved sandstone block lying on the ground),
+> restoration_prop (a wooden prop of restorers holding up a wall), laterite_block,
+> rubble_pile, numbered_block (a stone block with a painted restoration
+> number — the only allowed marking, a digit).*
+>
+> *Vegetation: tetrameles_a and tetrameles_b (tall trees with huge pale
+> silver buttress roots), strangler_fig (a fig tree whose roots wrap a
+> wall), sugar_palm (a straight trunk with a round crown of fan leaves),
+> dipterocarp (a very tall canopy tree), vine_strands (a few hanging lianas
+> and aerial roots, green and silver), lotus_cluster (pink lotus flowers and
+> leaves on water), water_lily_pads.*
+>
+> *Background: angkor_horizon (a long strip: a sea of jungle canopy, a low
+> flat ridge to the north-east, a band of violet-grey storm clouds, and on
+> the west rice paddies with sugar palms).*
+
+Ce verifici la primirea planșei (ca la Carrara §9.2, trei verificări
+înainte de orice altceva): (1) `south_gate_face_tower` are **o singură**
+deschidere, îngustă, cu fețe pe toate patru laturile; (2)
+`bayon_face_tower_*` sunt **turnuri** etajate, nu capete (abaterea din v2 a
+diorama); (3) `asian_elephant` n-are șa și are urechile mici. Corecturile de
+proporție le face modelatorul din cotele kitului, nu ChatGPT.
+
+### 9.3 Rezultatul: planșa de inventar (6 nov 2026)
+
+Trei generări în aceeași conversație cu diorama v3, păstrate în
+`img/angkor_plan/`:
+
+| fișier | ce s-a cerut | ce s-a luat |
+|---|---|---|
+| `inventar_v01_a.jpg` | promptul §9.2 | doar **`tuk_tuk`**: remorca trasă de motocicletă (tuk-tuk-ul cambodgian, și piesele încap separat sub plafonul de 2 m al `BumpProp`) |
+| `inventar_v01_b.jpg` | același prompt, a doua generare | **baza**: mai mult detaliu pictat (lichen, dâre, uzură), `giant_root_ramp` citit ca rampă, turnul Bayon `c` ruinat, elefantul cu urechi mici |
+| `inventar_v01_c.jpg` | corectura de mai jos | **suprascrie** b pe 7 piese: cele trei turnuri Bayon, `deva_giant`, `asura_giant`, `leper_king_statue`, `angkor_wat_temple` |
+
+Cele trei verificări: (1) Poarta de Sud — o singură deschidere, fețe pe toate
+laturile, pe a și b; (2) turnurile Bayonului — **picată pe a și b** (busturi
+cu vârf, nu turnuri), trecută pe c; (3) elefantul fără șa — pe a și b, cu
+urechile mai mici pe b. Pe lângă ele, b pusese **fețe pe turnurile Angkor Wat**
+(sunt ale Bayonului), iar uriașii și Regele Lepros stăteau pe ambele planșe
+în poză de meditație (citește Buddha, §8) — de aici corectura:
+
+> *Good. Redraw only these items, same style, same palette, same light-grey
+> background, same labels: bayon_face_tower_a, bayon_face_tower_b,
+> bayon_face_tower_c — these must read as slender TOWERS, not heads: a square
+> stepped base about 3 x 3 m, total height about three times the width (about
+> 9 m); the faces occupy only the middle third, one serene face on each of the
+> four sides, with stacked narrowing tiers above ending in a lotus-bud tip. The
+> three differ in tier count and damage; c is partly ruined with fallen blocks
+> at its base. deva_giant and asura_giant — seated on a low plinth, both arms
+> wrapped around a thick stone naga serpent body that runs across their laps
+> and continues out of frame on both sides, as if pulling it like a rope. Deva
+> calm with a tall conical crown; asura with bulging eyes, fangs and a fierce
+> frown. Not a cross-legged meditation pose. leper_king_statue — seated on a
+> plain pedestal with one knee raised and one hand resting on it, plain hair,
+> no crown, no halo. Not a meditation pose, not a Buddha. angkor_wat_temple —
+> same as the left version of the previous sheet: five plain lotus-bud towers
+> with carved tiers, NO faces on any tower.*
+
+A trecut din prima pe toate patru. Decupările per piesă (44 + mașinuța de
+scară) sunt în `img/angkor_assets_v1/` (`tools/blender/crop_angkor_sheet.py`),
+iar contractul kitului e `docs/asset_briefs/angkor_kit.md`: cotele vin de
+acolo, din Track24, nu din planșă.

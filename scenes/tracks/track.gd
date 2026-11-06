@@ -4482,6 +4482,8 @@ static func themes() -> Dictionary:
 		"dust_color": Palette.color(Palette.TILE_TERRACOTTA),
 		# Blocurile dominoului din galeria Ta Prohm (RimBoulderHazard) iau gresia templului.
 		"rockfall_class": "angkor_sandstone",
+		# Balustradele de stil 3 raman doar coliziune: vizualul il dau naga si uriasii (kit §1.5).
+		"balustrade_skin": true,
 		"walls": false,
 		"kerbs": false,
 		"cliffs": false,
@@ -4489,7 +4491,21 @@ static func themes() -> Dictionary:
 		"props": "",
 		"prop_contact_flat": [],
 		"hazard_model": "",
-		"horizon_model": "",
+		# Fundalul (kit §1.8, val 4): coronament, creasta Kulen spre NE, orezarii cu palmieri spre V.
+		# Benzile de furtuna (`StormBand_*`) NU intra: sub camera de joc (marginea de sus a cadrului la
+		# ~31 m peste sol la 240 m) baza lor de 46-54 m iese din cadru, iar coborate citesc platouri
+		# cenusii (Monument Valley in jungla). Furtuna spre est ramane decizie deschisa (kit §3).
+		"horizon_model": "res://assets/models/angkor/effects/angkor_horizon.glb",
+		# Atlasul (coronament verde, orezarii), nu clasa implicita "rock" (iesea maro-portocaliu).
+		"horizon_class": "",
+		"horizon_rings": [
+			{"count": 1, "angle_deg": -52.0, "yaw_deg": 142.0, "near": 200.0, "far": 260.0, "clear": 120.0,
+				"scale": 1.0, "picks": ["KulenRidge"]},
+			{"count": 1, "angle_deg": 180.0, "yaw_deg": -90.0, "near": 200.0, "far": 260.0, "clear": 120.0,
+				"scale": 1.0, "picks": ["Paddies_W"]},
+			{"count": 10, "near": 200.0, "far": 260.0, "clear": 120.0, "scale": 1.0,
+				"picks": ["Canopy_A", "Canopy_B", "Canopy_C"]},
+		],
 		"water": false,
 	}
 	return _themes_cache
@@ -12629,6 +12645,23 @@ const BERM_BACK_RUN: float = 1.3
 ## pe traiectoria masinii care iese larg dintr-un ac.
 const BERM_TAPER_M: float = 10.0
 const BERM_THICK: float = 1.1
+## Stilul 3 (BALUSTRADA de gresie, Angkor: caile peste sant, brief §2 randurile A si D):
+## un zid jos si drept, in culoarea pietrei templului, nu beton alb-rosu si nu buza de
+## stanca (ROCK_DARK iese rugina pe gresie, memoria `rock-dark-nu-pe-bazalt`). Un singur slot,
+## fara dungi: `CONCRETE` (gri-bej). ROCK_LIGHT iese PORTOCALIU pe atlas, iar alternat cu
+## CORAL_SAND citea a bariera de trafic (captura --gamecam de pe calea de vest). 1 m: peste
+## pragul de 0,3 m e zid pentru roata, deci tine masinile pe cale; golurile din ea sunt
+## intervale lipsa in `custom_parapets`, nu un regim aparte. E PLACEHOLDER-ul de coliziune
+## al balustradei naga (decor, pasul 8), care se aseaza peste el.
+const BALUSTRADE_HEIGHT: float = 1.0
+const BALUSTRADE_THICK: float = 0.5
+## Capatul dinspre masini al fiecarei portiuni de balustrada se DESFACE spre exterior (ca
+## terminatia unei parapete de autostrada): `BALUSTRADE_FLARE_OUT` m mai departe de drum la capat,
+## lipit de margine dupa `BALUSTRADE_FLARE_M` m. Masurat pe Angkor (ProbeRace, 16 seed-uri): cu
+## capatul drept, masinile impinse pe umar in gramada de la start loveau FATA capatului la
+## 36-43 m/s — 3 ejectari „perete” in primele 7 s. Desfacut, contactul e razant (~9 grade).
+const BALUSTRADE_FLARE_M: float = 16.0
+const BALUSTRADE_FLARE_OUT: float = 2.5
 
 
 func _parapet_segments() -> Array[Vector4]:
@@ -12651,15 +12684,26 @@ func _build_parapets() -> void:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var emitted := false
+	# `balustrade_skin` (tema): stilul 3 ramane DOAR coliziune, iar vizualul il dau modulele GLB ale
+	# pistei (Angkor: naga si uriasii, asezati de generator pe aceeasi linie). Fara cheie: identic.
+	var skin := bool(theme_flag("balustrade_skin", false))
+	var st_skin := SurfaceTool.new()
+	st_skin.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var emitted_skin := false
+	var st_main := st
 	for seg in segs:
 		for side_sign: float in [-1.0, 1.0]:
 			if not is_zero_approx(seg.z) and signf(seg.z) != side_sign:
 				continue
 			var rock := int(seg.w) == 1
 			var berm := int(seg.w) == 2
+			var balus := int(seg.w) == 3
+			st = st_skin if (balus and skin) else st_main
 			var thick := ROCK_LIP_THICK if rock else PARAPET_THICK
 			if berm:
 				thick = BERM_THICK
+			elif balus:
+				thick = BALUSTRADE_THICK
 			# Sectiunea transversala la fiecare punct copt din interval.
 			var secs: Array = [] # [inner_top, outer_top, inner_bot, outer_bot, dist]
 			# Intervalul poate TRECE peste linia de start (`seg.y < seg.x`, ca la rape si sectoare):
@@ -12683,15 +12727,19 @@ func _build_parapets() -> void:
 						order.append(i)
 			var d_first := -1.0
 			var d_last := -1.0
-			if berm and not order.is_empty():
+			if (berm or balus) and not order.is_empty():
 				d_first = _parapet_dist(order[0], wraps, seg.y, total_len)
 				d_last = _parapet_dist(order[order.size() - 1], wraps, seg.y, total_len)
 			for i in order:
 				var c := baked[i]
 				var side := _side_at(i)
 				var e := c + side * (width_at_index(i) + PARAPET_GAP) * side_sign
+				if balus:
+					var din := _parapet_dist(i, wraps, seg.y, total_len) - d_first
+					var fl := 1.0 - smoothstep(0.0, 1.0, din / BALUSTRADE_FLARE_M)
+					e += side * side_sign * BALUSTRADE_FLARE_OUT * fl
 				var out := side * side_sign
-				var h := PARAPET_HEIGHT
+				var h := BALUSTRADE_HEIGHT if balus else PARAPET_HEIGHT
 				if rock:
 					# Creasta neregulata din doua sinusuri cu perioade prime
 					# intre ele: nu se repeta vizibil pe o tura de elice.
@@ -12721,7 +12769,10 @@ func _build_parapets() -> void:
 					_dists[i], side * side_sign])
 			if secs.size() < 2:
 				continue
-			emitted = true
+			if balus and skin:
+				emitted_skin = true
+			else:
+				emitted = true
 			for k in secs.size() - 1:
 				var a: Array = secs[k]
 				var b: Array = secs[k + 1]
@@ -12731,6 +12782,8 @@ func _build_parapets() -> void:
 					slot = Palette.ROCK_DARK
 				elif berm:
 					slot = Palette.CORAL_SAND if block == 0 else Palette.MARBLE_GREY
+				elif balus:
+					slot = Palette.CONCRETE
 				var outv: Vector3 = a[5]
 				# top, fata dinspre sosea, fata dinspre vale
 				_parapet_quad(st, a[0], b[0], b[1], a[1], slot, Vector3.UP)
@@ -12742,14 +12795,20 @@ func _build_parapets() -> void:
 			var d0: Vector3 = (secs[1] as Array)[0] - first[0]
 			var d1: Vector3 = last[0] - (secs[secs.size() - 2] as Array)[0]
 			var cap := Palette.ROCK_DARK if rock else (Palette.MARBLE_GREY if berm else Palette.KERB_RED)
+			if balus:
+				cap = Palette.CONCRETE
 			_parapet_quad(st, first[0], first[1], first[3], first[2],
 				cap, -d0.normalized())
 			_parapet_quad(st, last[0], last[1], last[3], last[2],
 				cap, d1.normalized())
+	if emitted_skin:
+		st_skin.generate_normals()
+		_add_mesh_with_collision(st_skin.commit(), Color.WHITE, null, 1.0, 0.5,
+			BaseMaterial3D.CULL_DISABLED, null, null, false, null, "ParapetBalustrada")
 	if not emitted:
 		return
-	st.generate_normals()
-	var mesh := st.commit()
+	st_main.generate_normals()
+	var mesh := st_main.commit()
 	_add_mesh_with_collision(mesh, Color.WHITE, null, 1.0, 0.5,
 		BaseMaterial3D.CULL_DISABLED, null, null, true,
 		Palette.world_material(), "Parapet")

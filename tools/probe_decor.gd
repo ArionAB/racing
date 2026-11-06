@@ -163,8 +163,10 @@ func _initialize() -> void:
 	# cu 21. Acum 23, pentru Track22 (Ha Long, 15 oct 2026) — garda de materiale
 	# e singura cu drept de veto (CLAUDE.md), deci o pista pe care n-o scaneaza
 	# e o pista fara garda, nu o pista care trece. Acum 24, pentru Track23 (Carrara, 25 oct
-	# 2026): `--track=23`, NUMARUL scenei (indexul din lista e 15).
-	for i in range(1, 24):
+	# 2026): `--track=23`, NUMARUL scenei (indexul din lista e 15). Si Track24 (Angkor) a ramas
+	# nescanata din 3 pana pe 6 nov 2026 — de aceea limita nu mai e un numar de mutat: se cauta
+	# pana la 99, iar scenele care lipsesc se sar.
+	for i in range(1, 100):
 		var path := "res://scenes/tracks/Track%02d.tscn" % i
 		if not ResourceLoader.exists(path):
 			continue

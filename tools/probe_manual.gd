@@ -250,6 +250,9 @@ const SPANS_ROAD_PREFIXES: Array[String] = [
 	# SUB asfalt, parapetul e la 6,25-7 m), trecerea la nivel (stalpii la 9 m),
 	# santierul din tunel. Garda adevarata e probe_solid (gabaritul pe axa).
 	"Portal_", "Dam_", "Trecere_nivel", "Santier_",
+	# Angkor (Track24, kit val 1): portile prin care trece soseaua (coliziune `mesh`;
+	# golurile masurate in measure_angkor_w1a/w1b.py, banda verificata de ProbeLaneClear).
+	"PoartaDeSud", "GopuraVest", "PoartaCopac",
 ]
 
 ## Piese de MARGINE: originea sta pe marginea asfaltului prin proiect (zid de

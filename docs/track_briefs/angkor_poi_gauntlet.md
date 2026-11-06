@@ -378,3 +378,47 @@ pe platformă. Luminișuri `FOREST` (disc, claim, fără specii) ca jungla să n
 - **dezvăluirea** de pe platformă (Angkor Wat ieșind din junglă, pe stânga-față) nu se
   acoperă: nimic înalt pe stânga platformei;
 - capturi: 0,150 · 0,200 · 0,250 · 0,290 · 0,310 (cu `tools/angkor_capture.sh`).
+
+**Regula găsită de G (valul 2), pentru toate POI-urile rămase:** pe viraje, AI-ul taie
+interiorul până la **~14 m de axă**. Zidul lui G la 11,5 m a dat 100 de repuneri (față
+de 6) și 157 de blocaje: mașinile intrau în zid și erau repuse la furcă. **Orice piesă
+cu corp pe interiorul unui viraj stă la ≥ 18 m de axă**; la < 18 m doar piese joase
+(< 0,5 m) cu `coliziune: none`. ProbeRace e obligatoriu înainte de raport.
+
+### F — Piața regală și Terasa Elefanților (frac 0,498–0,649, `zona_f.py`)
+
+**Din decupaj:** piața pavată cu dale de gresie, **fața Terasei Elefanților** cu
+elefanții sculptați (există: `Terasa*`, `StalpTrompa*`, `TerasaCapat`), drumul pe
+coama terasei, jungla pe margini; Regele Lepros (există).
+
+**Din brief:** din piață drumul o ia pe diagonală spre SE și urcă pe terasă; pe coamă
+(~170 m, +18): pe dreapta căderea de 4 m în piață, pe stânga **curtea palatului cu
+Phimeanakas în fundal**; la capăt, creasta care lansează (săritura pistei).
+
+**Capcana:**
+- **săritura**: nimic pe linia de zbor și pe aterizare (`F aterizare`), `zboruri`/`airtime`
+  din ProbeRace la bază (~0,65 s, ~380 zboruri);
+- căderea de 4 m de pe coamă în piață e intenționată (fără repunere): nimic solid pe
+  piață sub coamă, unde aterizează mașinile căzute;
+- piața e mare și goală (luminișul junglei): o umple decor JOS (dale sparte, blocuri,
+  câțiva călugări, tuk-tuk parcat), nu ziduri; Phimeanakas pe stânga coamei = templu în
+  trepte departe (≥ 25 m), din kit (`bakheng_terrace_tier` / `bakheng_shrine_tower`);
+- capturi: 0,520 · 0,550 · 0,590 · 0,620 · 0,640.
+
+### H — Srah Srang și malul de sud (frac 0,761–1,000, `zona_h.py`)
+
+**Din decupaj:** debarcaderul de laterită cu **lei de piatră** și naga (există
+`SrahSrangDebarcader`), **tuk-tuk-uri parcate** (există 3), bazinul cu lotuși,
+palmieri de zahăr, drumul pe malul șanțului cu **turnurile oglindite** pe stânga.
+
+**Din brief:** ieșire din junglă la bazinul regal; apoi pe malul de sud al șanțului
+spre vest, colțul de SV și virajul de 90° pe calea de vest, sprintul final spre turnuri.
+
+**Capcana:**
+- **virajul de 90° de la colțul de SV** și orice alt viraj: regula de 18 m de mai sus;
+- lotușii pe cota apei (`WATER_AW` la șanț; verifică cota bazinului Srah Srang în
+  generator), `coliziune: none`;
+- malul șanțului: perspectiva spre turnurile oglindite rămâne deschisă pe stânga;
+- linia de start/sosire e la frac 0: nimic cu corp la < 3 m de asfalt pe 0,95–1,00
+  (plutonul strâns la sprint);
+- capturi: 0,780 · 0,820 · 0,870 · 0,930 · 0,975.

@@ -228,6 +228,25 @@ if [ -f "$KB3/gallery_column.glb" ] && [ -f "$KB3/gallery_roof.glb" ] && [ -f "$
 fi
 # --- sfarsit val 3, grupul B ---
 
+# --- val 4, grupul A ---
+echo
+echo "== val 4, grupul A: copaci Ta Prohm / Cambodgia (tetrameles a/b, dipterocarp, palmier de zahar, kit 1.7) =="
+W4="tools/blender/measure_angkor_w4a.py"
+for F in tetrameles_a tetrameles_b dipterocarp sugar_palm; do
+  check "plants/$F.glb" --origin=assembly
+done
+if [ -f "$ROOT/plants/tetrameles_a.glb" ] && [ -f "$ROOT/plants/sugar_palm.glb" ]; then
+  python $W4 tetrameles "$ROOT/plants/tetrameles_a.glb" || fail=1
+  python $W4 tetrameles "$ROOT/plants/tetrameles_b.glb" || fail=1
+  python $W4 dipterocarp "$ROOT/plants/dipterocarp.glb" || fail=1
+  python $W4 palm "$ROOT/plants/sugar_palm.glb" || fail=1
+  st=$(python $W4 --selftest "$ROOT/plants/tetrameles_a.glb" 2>&1); rc=$?
+  printf '%s
+' "$st" | grep -E "^-- sabotaj|garda a|SELFTEST"
+  [ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei grupului A (val 4) a esuat"; fail=1; }
+fi
+# --- sfarsit val 4, grupul A ---
+
 echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then

@@ -4469,16 +4469,20 @@ static func themes() -> Dictionary:
 		"shadow_blur": 1.0,
 		"dune_scale": 0.0,
 		# Solul de jungla: frunze moarte + verde inchis. Drumul: laterita (TILE_TERRACOTTA ca familie).
-		"ground_tint": Color(0.36, 0.40, 0.22),
+		"ground_tint": Color(0.17, 0.33, 0.15),
 		"hill_color": Color(0.16, 0.24, 0.14),
 		"scarp_tint": Color(0.62, 0.34, 0.24),
 		"scarp_slope_deg": 30.0,
 		"scarp_fade_deg": 10.0,
 		"dirt_road_tint": Color(0.60, 0.42, 0.38),
+		# Pavajul de gresie al cailor de piatra (A, B, D, E, F: soseaua "asfalt" dintre intervalele
+		# de laterita) e tot materialul de asfalt, doar cu alt albedo: fizica neatinsa. Fara marcaje.
+		"road_tint": Color(0.66, 0.53, 0.38),
+		"center_line": false,
 		# Solul de jungla: covorul de iarba (perechea a doua a shaderului) pe tot terenul, nu nisipul
 		# cu dune (prima captura a mostrei citea desert).
 		"savanna_grass_w": 1.0,
-		"savanna_grass_tint": Color(0.16, 0.22, 0.10),
+		"savanna_grass_tint": Color(0.10, 0.22, 0.08),
 		"dust_color": Palette.color(Palette.TILE_TERRACOTTA),
 		# Blocurile dominoului din galeria Ta Prohm (RimBoulderHazard) iau gresia templului.
 		"rockfall_class": "angkor_sandstone",
@@ -6007,6 +6011,10 @@ func _build_center_line() -> void:
 	# suprafata care nu poarta marcaje, si prima care ar fi spus "asta e tot
 	# asfalt, doar vopsit in nisipiu".
 	if road_is_loose():
+		return
+	# Cheie de tema `center_line` (implicit true): Angkor are pavaj de gresie
+	# si laterita, fara vopsea (bara: nicio marcare pe drum).
+	if not bool(theme_flag("center_line", true)):
 		return
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)

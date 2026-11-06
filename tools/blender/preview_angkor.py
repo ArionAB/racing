@@ -85,7 +85,7 @@ SPECS = {
     # (baza la cota drumului); fata de close-up e cea de pe +Y, centrul la ~14 m
     "south_gate_face_tower": {"camera": {"azimuth": 62.0, "elevation": 8.0, "lens": 60.0, "margin": 1.06},
                               "views_aspect": 1.2, "bury": 0.0,
-                              "face_center": (0.0, 3.0, 15.2), "face_dist": 24.0},
+                              "face_center": (0.0, 3.0, 12.6), "face_dist": 22.0},
 }
 
 # camera de joc (scenes/race/chase_camera.gd: DEFAULT_HEIGHT/DISTANCE/BASE_FOV/

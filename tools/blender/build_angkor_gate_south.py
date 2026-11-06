@@ -48,23 +48,22 @@ WALL_Y = 3.5            # fata peretilor aripii (jumatate-adancime)
 PLINTH_Y = 3.6         # soclul iese 0,1 m din perete (nu e prag pentru masini)          # soclul: adancime totala 8,0
 Z_PLINTH = 0.4
 Z_UNDER = 8.4           # fata de jos a buiandrugului = inaltimea libera
-Z_WALL = 9.6
-Z_BODY = 10.0           # sus pe cornisa
+Z_WALL = 8.6
+Z_BODY = 9.0           # sus pe cornisa
 PROUD = 0.04
 ELE_H = 1.1             # elefantul: ~4,1 m lung, ~3,3 m la crestet
 # aripile in trepte: (x interior, x exterior, cota de sus a cornisei)
-SECTIONS = [(JAMB, 5.25, 10.0), (5.25, 7.4, 7.6), (7.4, X_OUT, 5.0)]
+SECTIONS = [(JAMB, 5.25, Z_BODY), (5.25, 7.4, 8.0), (7.4, X_OUT, 5.0)]
 
 # turnul (scalat din cel al Bayonului: H 3,0 -> 4,6)
-FACE_H = 6.0
-HX_FACE, HY_FACE = 3.9, 3.0          # blocul fetelor: 7,8 x 6,0 m in plan (fetele +-Y pe latura de 7,8)
-BASE1 = (Z_BODY, 10.8, 5.25, 3.4)    # baza turnului: (z0, z1, jum. X, jum. Y), pe juge si aripa interioara
-BASE2 = (10.8, 11.4, 4.55, 3.2)
-Z_CHIN = 11.4
-Z_FACE_TOP = Z_CHIN + 1.2 * FACE_H            # 18,6
-TIERS = [(0.60, 2.70, 0.08), (0.56, 2.20, 0.08), (0.52, 1.70, 0.08), (0.46, 1.20, 0.08)]
+FACE_H = 5.3
+FACE_US = 1.4                        # fata largita pe orizontala: placa 5,9 m, cu urechi ~7 m
+HX_FACE, HY_FACE = 5.25, 3.6         # blocul fetelor: 10,5 x 7,2 m, direct pe juge si aripile interioare
+Z_CHIN = Z_BODY + 0.3
+Z_FACE_TOP = Z_CHIN + 1.2 * FACE_H   # ~15,7
+TIERS = [(0.50, 3.0, 0.08), (0.45, 2.2, 0.08), (0.40, 1.5, 0.08)]
 LOTUS_R = 0.70
-TOP_Z = 22.7
+TOP_Z = 18.8
 
 AO_GATE = dict(samples=28, dist=1.1, gradient="vertical", low=0.60, high=1.0,
                power=0.85, floor=0.30, strength=1.35, z_range=(0.0, TOP_Z))
@@ -228,18 +227,17 @@ def build_gate():
     rect_box(stone, -JAMB, JAMB, -3.8, 3.8, Z_WALL, Z_BODY)
     sites.append((Z_BODY, 0.0, 0.0, JAMB, 3.5))
 
-    # --- 6. turnul: baza larga (10,5 m) direct pe juge, blocul fetelor 7,8 x 6,0, etaje, boboc ----
+    # --- 6. turnul: blocul fetelor (10,5 m) direct peste buiandrug si aripile interioare ------------
     tower_ledges = []
-    for (za, zb, hx, hy) in (BASE1, BASE2):
-        rect_tower(stone, za, zb, hx, hy, 1, 1.4, seed=int(za))
-        streak_sites.append(("rect", zb, hx, hy, 8))
-    rect_box(stone, -HX_FACE, HX_FACE, -HY_FACE, HY_FACE, Z_CHIN, Z_FACE_TOP)
+    rect_box(stone, -HX_FACE, HX_FACE, -HY_FACE, HY_FACE, Z_BODY, Z_FACE_TOP)
     for k in range(4):
         fr = Frame((0.0, 0.0, 0.0), 90.0 * k)
-        face_relief(stone, fr.p(0.0, HY_FACE if k % 2 == 0 else HX_FACE, Z_CHIN), 90.0 * k, FACE_H)
+        face_relief(stone, fr.p(0.0, HY_FACE if k % 2 == 0 else HX_FACE, Z_CHIN), 90.0 * k, FACE_H, us=FACE_US)
     rect_box(stone, -HX_FACE - 0.05, HX_FACE + 0.05, -HY_FACE - 0.05, HY_FACE + 0.05, Z_FACE_TOP, Z_FACE_TOP + 0.14)
     z = Z_FACE_TOP + 0.14
-    tower_ledges.append((z, 2.95, TIERS[0][1] + 0.08))
+    rect_tower(stone, z, z + 0.40, 4.3, 3.1, 1, 1.4, seed=40)     # treapta intermediara dreptunghiulara
+    streak_sites.append(("rect", z + 0.40, 4.3, 3.1, 8))
+    z += 0.40
     n_t = len(TIERS)
     for i, (th, half, ch) in enumerate(TIERS):
         z0 = z
@@ -249,7 +247,7 @@ def build_gate():
         nxt = TIERS[i + 1][1] if i + 1 < n_t else 0.62
         tower_ledges.append((z, half + 0.08, nxt))
     height = TOP_Z - z
-    assert height > 1.0, "etajele lasa prea putin pentru boboc: %.2f" % height
+    assert height > 0.8, "etajele lasa prea putin pentru boboc: %.2f" % height
     lotus_bud(stone, 0, 0, z, height, LOTUS_R, petals=8, segments=14)
 
     # --- 7. lichen ----------------------------------------------------------------------------

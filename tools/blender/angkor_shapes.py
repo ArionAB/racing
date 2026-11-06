@@ -216,7 +216,7 @@ def ellipsoid(b, center, radii, slot, rot, seg=10, rings=6, roll_deg=0.0):
     b._tag(res["verts"], slot)
 
 
-def face_relief(b, origin, yaw_deg, H, slot=ANK_STONE, smile=0.9):
+def face_relief(b, origin, yaw_deg, H, slot=ANK_STONE, smile=0.9, us=1.0):
     """Fata Bayon SIMPLIFICATA (runda 6, decizia dezvoltatorului din 6 nov 2026,
     dupa cinci runde de fete construite din cod: masca in cadru -> Moai -> clovn).
     Cateva forme MARI si PUTIN ADANCI, in limbajul de piatra fatetata din runda 4;
@@ -225,6 +225,8 @@ def face_relief(b, origin, yaw_deg, H, slot=ANK_STONE, smile=0.9):
     origin   punctul (x, y, z) de pe PLANUL NUCLEULUI, sub barbie, pe axa fetei
     yaw_deg  0 = fata priveste spre +Y; 90 spre -X; 180 spre -Y; 270 spre +X
     H        inaltimea sprancene-barbie in metri (3,0 pentru turn)
+    us       intinderea pe orizontala (u) a fetei: 1,0 = proportiile turnului; poarta de
+             sud o largeste (1,4) ca fata sa umple blocul de 10 m
 
     Elemente: placa ovala; doua sprancene separate (arcuri joase, ~7 cm); doi ochi
     separati (semiluna convexa in jos: creasta pleoapei + creasta de jos, cu jgheabul
@@ -237,10 +239,10 @@ def face_relief(b, origin, yaw_deg, H, slot=ANK_STONE, smile=0.9):
     rot = fr.rot
 
     def P(u, t, w):
-        return fr.p(u * h, w * h, t * h)
+        return fr.p(u * h * us, w * h, t * h)
 
     def E(u, t, w, ru, rt, rw, seg=10, rings=6, roll=0.0):
-        ellipsoid(b, P(u, t, w), (ru * h, rw * h, rt * h), slot, rot, seg, rings, roll)
+        ellipsoid(b, P(u, t, w), (ru * h * us, rw * h, rt * h), slot, rot, seg, rings, roll)
 
     pl = FACE_PLATE
     D = FACE_DEPTH
@@ -316,7 +318,7 @@ def face_relief(b, origin, yaw_deg, H, slot=ANK_STONE, smile=0.9):
                  P(sgn * 0.42, 0.14, 0.032), P(sgn * 0.395, 0.26, 0.012), P(sgn * 0.40, 0.20, 0.0)], slot)
 
     def E(u, t, w, ru, rt, rw, seg=10, rings=6):
-        ellipsoid(b, P(u, t, w), (ru * h, rw * h, rt * h), slot, rot, seg, rings)
+        ellipsoid(b, P(u, t, w), (ru * h * us, rw * h, rt * h), slot, rot, seg, rings)
 
     # --- diadema: banda PLATA (~0,3 m), lipita de frunte, fara surplomb, cu 3 rozete -----
     bl, bh = 1.075, 1.175

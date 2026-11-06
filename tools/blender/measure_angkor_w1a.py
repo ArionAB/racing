@@ -4,7 +4,7 @@
     python tools/blender/measure_angkor_w1a.py --selftest <glb>
 
 Citeste GLB-ul EXPORTAT (coordonate GODOT: Y sus, drumul merge pe Z). Contract
-(kit §1.2): latimea 18-20 m (X), adancimea 7-9 m (Z), varful 20-23 m; UN singur gol:
+(kit §1.2): latimea 18-20 m (X), adancimea 7-9 m (Z), varful 17-19 m (corectura coordonatorului, runda 4); UN singur gol:
   * GOLUL la nivelul drumului se masoara ca GOL -- proiectia triunghiurilor pe planul
     de-a curmezisul drumului (X, Y); pentru inaltimile 0-2,5 m, distanta dintre cea mai
     apropiata geometrie din dreapta si din stanga axei trebuie sa fie >= 7,2 m (nimic
@@ -32,7 +32,7 @@ GAP_MIN = 7.2
 GAP_ZONE_H = 2.5
 BAND = 3.6
 CLEAR_MIN = 8.0
-W_RANGE, D_RANGE, H_RANGE = (18.0, 20.0), (7.0, 9.0), (20.0, 23.0)
+W_RANGE, D_RANGE, H_RANGE = (18.0, 20.0), (7.0, 9.0), (17.0, 19.0)
 NODES = ["Gate_Lichen", "Gate_Stone", "Gate_Streak"]
 EPS = 1e-3
 

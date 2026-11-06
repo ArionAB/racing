@@ -26,7 +26,7 @@ discuri de obraz. Sculptura reală rămâne datorie deschisă (kit §1.1).
 |---|---:|---:|---:|---:|
 | `bayon_face_tower_b.glb` | −1,500…+1,500 (**3,000**) | idem (**3,000**) | **9,003** | 0,000 |
 | `bayon_face_tower_c.glb` | −1,500…+1,500 (**3,000**) | idem (**3,000**) | **8,972** (bobocul înclinat) | 0,000 |
-| `south_gate_face_tower.glb` | **19,000** | **7,880** | **22,706** | 0,000 |
+| `south_gate_face_tower.glb` | **19,000** | **7,880** | **18,804** (contract relaxat: 17–19 m) | 0,000 |
 
 Poarta (garda `measure_angkor_w1a.py gate`, proiecție pe planul de-a curmezișul
 drumului, triunghiuri tăiate cu dreptunghiul, inclusiv cele degenerate în proiecție):
@@ -40,11 +40,11 @@ drumului, triunghiuri tăiate cu dreptunghiul, inclusiv cele degenerate în proi
 |---|---:|---:|---:|---:|---:|
 | `bayon_face_tower_b` | 8.250 | 6.134 | 1.900 | 216 | 3 |
 | `bayon_face_tower_c` | 7.902 | 6.138 | 1.548 | 216 | 3 |
-| `south_gate_face_tower` | 15.790 | 12.042 | 3.028 | 720 | 3 |
+| `south_gate_face_tower` | 15.046 | 11.394 | 3.028 | 624 | 3 |
 
 Sloturi ca în pilot: `*_Stone` = `ROCK_LIGHT` 3 (clasa `angkor_sandstone`),
 `*_Lichen` = `LAVA_ORANGE` 30 + `CACTUS_GREEN` 12, `*_Streak` = `VOLCANIC_BLACK` 20.
-Lichen portocaliu: b 0,72%, c 0,55%, poartă 0,51% (limita 3%). Scala 1 / rotație
+Lichen portocaliu: b 0,72%, c 0,55%, poartă 0,58% (limita 3%). Scala 1 / rotație
 identitate pe rădăcini (verificat). Fără alb, fără `ROCK_DARK`, fără texturi proprii.
 Poarta: primitive rotunde doar bobocul (14) și finialul (8).
 
@@ -62,9 +62,9 @@ Poarta: primitive rotunde doar bobocul (14) și finialul (8).
 | **c** colț de sus | colț prăbușit | (runda 4) etajele 3 și 4 pierd o **bucată în trepte** (zona x,y > c, două învelitori în L), fără finialuri pe colțul lipsă; bobocul, cu jumătate din bază în aer, e **înclinat 16°** spre gol; 3 blocuri căzute pe pervazul etajului 2 | citește ca „bucată scoasă”; înălțimea scade la 8,97 m (în toleranță) |
 | **c** nișă | spartă în bază | fereastră 0,65 × 0,40 m, adâncă 0,32 m, pe fața +Y, blocuri lipsă | OK, gaură întunecată |
 | **c** baza | moloz lipit de bază | **același plan de tăiere** (colțul −X,+Y, d = 1,45) pe cele 3 trepte ȘI pe fus, deci nimic nu atârnă; 6 blocuri 0,36–0,58 m (două straturi) în triunghiul gol, toate în ±1,49 | OK; mai puține blocuri decât pe desen: triunghiul e mic |
-| poartă siluetă | piramidă, turnul = masa centrală | (runda 3) aripile urcă în 3 trepte (5,0 / 7,6 / 10,0 m) spre o bază de 10,5 m lățime așezată direct pe juge, apoi blocul fețelor 7,8 × 6,0 m, 4 etaje, boboc; vârful 22,7 m | mult mai aproape de desen: turnul e acum masa centrală. Încă mai înalt/subțire decât desenul (cote de contract) |
+| poartă siluetă | piramidă joasă, turnul = masa centrală | (runda 4, contract relaxat la 17–19 m) aripile urcă 5,0 / 8,0 / 9,0 m, apoi **blocul fețelor 10,5 × 7,2 m direct peste buiandrug (de la 9,0 la 15,7 m)**, treaptă intermediară, 3 etaje, boboc; vârful 18,8 m | scund și lat ca desenul, dar **blocul fețelor rămâne o cutie pe un portal**: coborârea în trepte a desenului (fețe care ies din masa piramidei) nu e reprodusă |
 | poartă gol | arc în trepte | gol dreptunghiular 7,5 × 8,4 m; juga cu 3 trepte de pilaștri (relief 0,10 / 0,22 / 0,34 m, lățime 1,0 / 0,65 / 0,30), grinzi în trepte deasupra și console, **toate la |x| ≥ 3,75 sau z ≥ 8,4** | **abatere voită** față de arcul în console (ar fi intrat în banda ±3,6 m) |
-| fețe | patru, zâmbitoare | patru, H = 4,6 m, stilul rundei 6 | simplificate (datorie deschisă) |
+| fețe | patru, zâmbitoare | patru, H = 5,3 m, largite pe orizontală 1,4× (`face_relief(us=1.4)`: placa ~5,9 m, cu urechi ~7 m), stilul rundei 6 | simplificate (datorie deschisă) |
 | elefanți | cu fildeși, trompa jos | 4 siluete blocate de ~4,1 m lungime (ELE_H 1,1), de la sol, trompa până la sol, ureche, fildeș, coadă; pe +Y și −Y, câte unul pe aripă, fața spre exterior | citesc ca „elefant” abia de aproape; în gamecam sunt blocuri |
 | lichen | verde-gălbui bogat | 70 + 26 pete, 0,5% | **abatere voită** (contract) |
 
@@ -76,7 +76,8 @@ Poarta: primitive rotunde doar bobocul (14) și finialul (8).
   era în spatele turnului. (2) mutat: baza în (−X,+Y), nișa pe fața +Y; colțul de sus
   încă prea fin. (3) tăieturi mai mari ale bazei, blocuri mai mari și mai multe, colț de
   sus tras cu 0,85·jumătate-lățime; rămâne slab (vezi tabel).
-- **Poartă**: **3 runde.** (1) aripi drepte de 9,6 m: citea ca o masă cu un cap deasupra,
+- **Poartă**: **4 runde.** (4) contract relaxat de coordonator (vârf 17–19 m): blocul fetelor 10,5 m de la 9,0 m, fețe largite 1,4×, doar 3 etaje; garda are intervalul 17–19. Adaugat parametrul `us` la `face_relief` (implicit 1,0: `a`, `b`, `c` neschimbate).
+  Rundele 1–3: (1) aripi drepte de 9,6 m: citea ca o masă cu un cap deasupra,
   elefanții de 3 m erau puncte. (2) aripi în trepte, cornișe pe fiecare treaptă, elefanți
   de 3,6 m, fața treptei cu blocuri; silueta e acum mai aproape de piramida desenului.
   (3) cerința coordonatorului: baza turnului 10,5 m pe juge, fețe H = 6,0 m (placa 4,8 m, cu urechi 5,7 m, într-un bloc de 7,8 m; nu am scalat fața la 7–8 m, ar fi cerut H ≈ 9), aripi în 3 trepte care urcă, juga cu pilaștri în 3 trepte, soclu scos la 0,1 m din perete (y ±3,6), elefanți de ~4,1 m pornind de la sol (relieful de 0,4 m dă adâncimea 7,88 m). O trecere intermediară a ieșit cu lățimea 19,10 (un bloc de parapet): corectat, acum 19,000.
@@ -84,7 +85,7 @@ Poarta: primitive rotunde doar bobocul (14) și finialul (8).
 ## Camera de joc (`--gamecam`) — citire onestă
 
 Camera la 10 m sus, 12,5 m în spate, punctul la 30 m în fața porții, fov 68, fără
-îngropare. **Turnul central e tăiat de marginea de sus a cadrului**: la 30 m, cu
+îngropare. **Blocul fețelor încape aproape întreg (la 30 m se taie doar frunte și diademă), vârful etajelor nu**: la 30 m, cu
 camera de joc, fața de 4,6 m a turnului nu încape. Se văd aripile în trepte, golul și, doar jos, bărbia
 primei fețe. Fețele se citesc de la ~60–80 m, nu de aproape; elefanții de la 30 m sunt
 două pete cu forma unui bloc cu picioare. Verdictul îl dă criticul orb pe capturile

@@ -109,6 +109,27 @@ if [ -f "$ROOT/structures/south_gate_face_tower.glb" ]; then
 fi
 # --- sfarsit val 1, grupul A ---
 
+# --- val 2, grupul A ---
+echo
+echo "== val 2, grupul A: terasa elefantilor, stalp, Regele Lepros, radacina-rampa (kit 1.4) =="
+W2="tools/blender/measure_angkor_w2a.py"
+check "kit/elephant_terrace_module.glb" --origin=assembly
+check "kit/elephant_terrace_end.glb" --origin=assembly
+check "kit/elephant_trunk_pillar.glb" --origin=assembly
+check "props/leper_king_statue.glb" --origin=assembly
+check "kit/giant_root_ramp.glb" --origin=assembly
+if [ -f "$ROOT/kit/elephant_terrace_module.glb" ] && [ -f "$ROOT/kit/giant_root_ramp.glb" ]; then
+  python $W2 terrace "$ROOT/kit/elephant_terrace_module.glb" "$ROOT/kit/elephant_terrace_end.glb" || fail=1
+  python $W2 pillar "$ROOT/kit/elephant_trunk_pillar.glb" || fail=1
+  python $W2 statue "$ROOT/props/leper_king_statue.glb" || fail=1
+  python $W2 ramp "$ROOT/kit/giant_root_ramp.glb" || fail=1
+  st=$(python $W2 --selftest "$ROOT/kit/elephant_terrace_module.glb" "$ROOT/kit/giant_root_ramp.glb" 2>&1); rc=$?
+  printf '%s
+' "$st" | grep -E "^-- sabotaj|garda a|SELFTEST"
+  [ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei grupului A (val 2) a esuat"; fail=1; }
+fi
+# --- sfarsit val 2, grupul A ---
+
 echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then

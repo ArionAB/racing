@@ -119,7 +119,7 @@ O captură nu e un verdict (memoria `o-captura-nu-e-un-verdict`): se fac 2–3 p
 POI, planșa oarbă se face pe cea mai reprezentativă.
 
 Capturile de bază (înainte de gauntlet) sunt în
-`docs/track_briefs/img/angkor_poi/r0/<POI>_<frac>.png`.
+`docs/track_briefs/img/angkor_poi/baza/<POI>_<frac>.png`.
 
 | POI | frac (index) | capturi | bară |
 |---|---|---|---|

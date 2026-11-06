@@ -296,3 +296,28 @@ Trei constructori pe val, nu mai mulți (memoria `valuri-de-trei-nu-opt-agenti`)
 
 După valul 4, brief §7 pasul 8: `probe_decor`, testul de loc repetat pe pista
 reală, **verdict la volan** (al dezvoltatorului).
+
+## 3. Starea kitului după valurile 1–3 (coordonator, 6 nov 2026)
+
+Toate piesele valurilor 1–3 sunt acceptate (inventarele `angkor_inventory_w1a..w3c.md`) și
+integrate pe `angkor/kit-val1`. Abaterile acceptate, pe categorii:
+
+**Datoria de sculptură** (decizia dezvoltatorului, §1.1): fețele Bayonului și ale Porții de Sud
+(cutia cu fețe pe portal: de la 80 m citește poartă cu față, de aproape nu), uriașii deva/asura,
+Regele Lepros, stâlpul-trompă, capul naga. **Datoria organică** (aceeași cauză: formele din
+primitive în cod): rădăcinile porții-copac (țevi netede, „picioare”) și rădăcina-rampă (se
+citește placă, nu rădăcină — contractul de rulare, un singur plan, e respectat). Ambele se
+rezolvă cu sculptură reală, nu cu încă o rundă de parametri.
+
+**Corecturi de contract ale coordonatorului, pe parcurs:** Poarta de Sud cu vârful 17–19 m (era
+20–23; machetele și verificarea din brief §2.0 erau la 18 m); bolta prăbușită deschisă doar pe
+latura de unde cade dominoul; balustrada naga cu bază plină (zidul de coliziune din cod e plin);
+elefantul din Serengeti măsoară 4,62 / 6,20 m, nu 3,4 / 6,4.
+
+**Integrare pe Track24 (generatorul):** porțile cu coliziune `mesh` și câte un `CameraZone` cu
+tavan; malul de est al șanțului de vest mutat la −104 (gopura nu avea loc); poarta-copac la 26 m
+pe ramură, lățită de 1,2 ori (golul 8,2 m), corp doar pe gresie (`HULL_SKIP_PARTS`); balustradele
+de stil 3 doar coliziune (`balustrade_skin` în temă), cu naga, capete naga și uriași pe linia
+zidului; terasa din module cu stâlpi-trompă; galeria scurtăturii din bolți, prăbușite unde cade
+dominoul; dominoul pe `fallen_block` (`RimBoulderHazard.model`, cod mic, implicitul neschimbat);
+rădăcina-rampă cu coliziune în locul cocoașei din profil.

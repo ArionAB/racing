@@ -60,6 +60,8 @@ const DRIVABLE := [
 	# pe feat/capp-poi-b. Aceeasi poveste ca `ChannelDeckSides` de mai sus.
 	"BranchDeck", "BranchDirt", "BranchSand", "BranchRails", "TunnelShell",
 	"Ramp", "ChannelKicker", "FlyoffRamp", "HummockBody",
+	# Angkor (kit §1.4): radacina-rampa de la iesirea scurtaturii — suprafata de rulare (un plan).
+	"RadacinaRampa_col",
 	"IceSheet",
 	# TERENUL. E podeaua de sub tot, deci contactul cu el nu e blocaj — dar
 	# aparea la aproape fiecare proba si de aceea sonda iesea rosie pe TOATE

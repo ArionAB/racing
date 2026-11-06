@@ -392,8 +392,8 @@ def branch_points():
         t = s / L
         e = e0 + (e1 - e0) * t
         d_exit = L - s
-        if abs(d_exit - 22.0) <= 4.0:
-            e += 1.2 * (1.0 - abs(d_exit - 22.0) / 4.0)
+        # Val 2: cocoasa de 1,2 m (sonda pasului 1) a iesit din profil: o inlocuieste
+        # `giant_root_ramp.glb` (coliziune mesh, buza la 22 m inaintea iesirii).
         out.append((w0[0] + (w1[0] - w0[0]) * t, w0[1] + (w1[1] - w0[1]) * t, e))
         s += 10.0
     return out, L
@@ -562,8 +562,9 @@ MOAT_W_OUT = 200.0      # malul de vest al bratului de V
 # galeriile, cu gopura pe dreapta (x -103..-92), inaintea arcului.
 MOAT_IN_W = 104.0
 GOPURA_X = -97.5
-TREE_GATE_S = 22.0      # poarta-copac: la 22 m pe ramura. La 14 m (prima incercare) ramura inca se racorda la bucla
-                        # si ProbeLaneClear gasea poarta pe banda -1,5; primul bloc al dominoului cade la 30 m.
+TREE_GATE_S = 26.0      # poarta-copac pe ramura. 14 m: ramura inca se racorda la bucla (ProbeLaneClear pe banda
+                        # -1,5). 22 m: aripa de est la ~4 m de virajul buclei (ProbeRace val 1: 1 ejectare + 1 blocaj
+                        # langa ea). 26 m: primul bloc al dominoului se muta de la 30 la 33 m (in spatele portii).
 WATER_AW = 0.5          # oglinda santului Angkor Wat (cale +3)
 WATER_SRAH = 0.5        # Srah Srang: aceeasi cota ca santul (umplerea rapei 0 ajunge si aici)
 WATER_THOM = 11.0       # santul Angkor Thom (calea uriasilor +14)
@@ -722,7 +723,6 @@ branch_half_width = 3.0
 label = "Galeria Ta Prohm"
 speed_factor = 0.85
 bumpiness = 0.08
-surface = 3
 tint = Color(0.78, 0.6, 0.48, 1)
 """
     # ---- HAZARDURILE-SEMNATURA (pasul 5). Parametrii sunt cei validati de sondele pasului 1.
@@ -735,7 +735,7 @@ tint = Color(0.78, 0.6, 0.48, 1)
     w_in = next(w for w in WPTS if w[4] == "G ocol intrare")
     w_out = next(w for w in WPTS if w[4] == "G ocol iesire")
     hz_txt = ""
-    for k_, (s_, clk_) in enumerate(((30.0, 0.0), (55.0, 1.2), (80.0, 2.4))):
+    for k_, (s_, clk_) in enumerate(((33.0, 0.0), (55.0, 1.2), (80.0, 2.4))):
         t_ = s_ / br_len
         bx_ = w_in[0] + (w_out[0] - w_in[0]) * t_
         by_ = w_in[1] + (w_out[1] - w_in[1]) * t_
@@ -750,6 +750,8 @@ rim_offset = 2.0
 rim_height = 6.0
 crush_seconds = 3.0
 invert_steer = false
+model = ExtResource("22_block")
+model_scale = 1.0
 """
     # Elefantul de la Poarta de Sud: SlidingHazard TRAVERSARE prin HazardMarker (tiparul G_Elefant din
     # Track14), in piata de DUPA poarta, la 22 m. sweep_speed 3 m/s -> ciclul ~23 s; `ai_yields`: AI-ul
@@ -816,7 +818,10 @@ metadata/coliziune = "mesh"
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, {r2(gpx_)}, {r2(elev_at(gs_))}, {r2(-gpy_)})
 metadata/coliziune = "mesh"
 """
-    # Poarta-copac: la intrarea ramurii, care merge spre S (+Z Godot) -> rotatie de 180 de grade.
+    # Poarta-copac: la intrarea ramurii, care merge spre S (+Z Godot) -> rotatie de 180 de grade, LATA de
+    # 1,2 ori de-a curmezisul (golul 6,8 -> 8,2 m): ProbeRace val 2, masinile care intra in ramura pe
+    # linia virajului loveau stalpul portii la 28 m/s. Suprafata ramurii ramane reteta temei (nisipul de
+    # la pasul 6) cu tenta; GRAVEL (incercat la val 1) aducea doua ejectari noi la iesirea ramurii.
     tb0_ = next(w for w in WPTS if w[4] == "G ocol intrare")
     tb1_ = next(w for w in WPTS if w[4] == "G ocol iesire")
     tbl_ = math.hypot(tb1_[0] - tb0_[0], tb1_[1] - tb0_[1])
@@ -826,7 +831,7 @@ metadata/coliziune = "mesh"
     tge_ = tb0_[3] + (tb1_[3] - tb0_[3]) * tt_
     decor_txt += f"""
 [node name="PoartaCopac" parent="DecorManual" instance=ExtResource("16_treegate")]
-transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, {r2(tgx_)}, {r2(tge_)}, {r2(-tgy_)})
+transform = Transform3D(-1.2, 0, 0, 0, 1, 0, 0, 0, -1, {r2(tgx_)}, {r2(tge_)}, {r2(-tgy_)})
 metadata/coliziune = "mesh"
 """
     cam_txt = f"""
@@ -855,6 +860,159 @@ transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, {r2(tgx_)}, {r2(tge_)}, {r2
 script = ExtResource("17_camzone")
 size = Vector3(10.0, 8.0, 22.0)
 ceiling = 5.6
+ceiling_dist = 16.0
+blend_time = 0.35
+"""
+    # ---- VAL 2 (kit §1.4, §1.5): balustradele naga si uriasii pe LINIA zidului din cod (stil 3,
+    # `Track._build_parapets`: marginea + PARAPET_GAP 0,25, grosimea 0,5, capatul dinspre masini
+    # desfacut cu BALUSTRADE_FLARE_OUT 2,5 m pe BALUSTRADE_FLARE_M 16 m), cu tema `balustrade_skin`:
+    # zidul ramane doar coliziune, modulele sunt vizualul (coliziune "none"). Latura +1 = DREAPTA
+    # sensului (`_side_at` = dir x UP). Orientarea: X = spre exterior, Y = sus, Z = X x Y.
+    def _rows(X, Y, Z):
+        return (f"{r3(X[0])}, {r3(Y[0])}, {r3(Z[0])}, {r3(X[1])}, {r3(Y[1])}, {r3(Z[1])}, "
+                f"{r3(X[2])}, {r3(Y[2])}, {r3(Z[2])}")
+
+    def _cross(a, b):
+        return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
+
+    _len_tab = [(sv_, F_s(sv_)[1]) for sv_ in [k_ * 0.5 for k_ in range(int(total / 0.5))]]
+
+    def s_of_len(L):
+        return min(_len_tab, key=lambda t: abs(t[1] - L))[0]
+
+    def wall_pt(sv, sign, s_first, extra=0.0):
+        """Punct pe axa zidului (harta) + tangenta lui (harta), cu desfacerea capatului."""
+        def raw(u):
+            px, py = pos_at(u)
+            ax, ay = pos_at(u + 0.5)
+            bx, by = pos_at(u - 0.5)
+            tx, ty = ax - bx, ay - by
+            n = math.hypot(tx, ty)
+            tx, ty = tx / n, ty / n
+            k = min(1.0, max(0.0, u - s_first) / 16.0)
+            fl = 2.5 * (1.0 - (k * k * (3.0 - 2.0 * k)))
+            off = HALF_WIDTH + 0.25 + 0.25 + fl + extra
+            # dreapta sensului pe harta: (ty, -tx)
+            return px + ty * sign * off, py - tx * sign * off
+        x0, y0 = raw(sv)
+        x1, y1 = raw(sv + 1.0)
+        tx, ty = x1 - x0, y1 - y0
+        n = math.hypot(tx, ty)
+        return x0, y0, tx / n, ty / n
+
+    def g_basis_out(tx, ty, sign):
+        # in Godot: dir = (tx, 0, -ty); exteriorul = dreapta * sign = (ty, 0, tx) * sign
+        X = (ty * sign, 0.0, tx * sign)
+        Y = (0.0, 1.0, 0.0)
+        return X, Y, _cross(X, Y)
+
+    def g_basis_fwd(tx, ty, back=False):
+        Z = (tx, 0.0, -ty) if not back else (-tx, 0.0, ty)
+        Y = (0.0, 1.0, 0.0)
+        return _cross(Y, Z), Y, Z
+
+    def place(name, rid, X, Y, Z, gx, gy, gz, col="none", anchor=None):
+        # `anchor` = `metadata/ancora_sol` (punct LOCAL, tools/probe_manual.gd): fata terasei are
+        # originea sub coama pe care o sustine; solul ei e piata, in fata fetei.
+        an = "" if anchor is None else f"metadata/ancora_sol = Vector3({anchor[0]}, {anchor[1]}, {anchor[2]})\n"
+        return an_wrap(name, rid, X, Y, Z, gx, gy, gz, col) + an
+
+    def an_wrap(name, rid, X, Y, Z, gx, gy, gz, col):
+        return (f'\n[node name="{name}" parent="DecorManual" instance=ExtResource("{rid}")]\n'
+                f"transform = Transform3D({_rows(X, Y, Z)}, {r2(gx)}, {r2(gy)}, {r2(gz)})\n"
+                f'metadata/coliziune = "{col}"\n')
+
+    nb_ = 0
+    for (L0, L1, side_, sty_) in parapets:
+        s0_, s1_ = s_of_len(L0), s_of_len(L1)
+        giants_ = abs(L0 - LEN("D cale inceput", 2.0)) < 1e-4
+        for sign_ in ((-1.0, 1.0) if side_ == 0 else (float(side_),)):
+            # capul naga la inceputul segmentului (spre masinile care vin), pe linia desfacuta
+            hx_, hy_, htx_, hty_ = wall_pt(s0_, sign_, s0_)
+            X_, Y_, Z_ = g_basis_fwd(htx_, hty_)
+            decor_txt += place(f"NagaCap{nb_}", "19_nagahead", X_, Y_, Z_, hx_, elev_at(s0_), -hy_)
+            nb_ += 1
+            sv_ = s0_ + 2.0
+            k_ = 0
+            while sv_ <= s1_ - 2.0 + 1e-6:
+                if giants_:
+                    rid_ = "20_deva" if sign_ < 0 else "21_asura"
+                    wx_, wy_, wtx_, wty_ = wall_pt(sv_, sign_, s0_, extra=0.55)
+                else:
+                    rid_ = "18_naga"
+                    wx_, wy_, wtx_, wty_ = wall_pt(sv_, sign_, s0_)
+                X_, Y_, Z_ = g_basis_out(wtx_, wty_, sign_)
+                decor_txt += place(f"{'Urias' if giants_ else 'Naga'}{nb_}_{k_}", rid_, X_, Y_, Z_,
+                                   wx_, elev_at(sv_), -wy_)
+                sv_ += 4.0
+                k_ += 1
+            # cap si la celalalt capat, privind inainte
+            ex_, ey_, etx_, ety_ = wall_pt(s1_, sign_, s0_)
+            X_, Y_, Z_ = g_basis_fwd(etx_, ety_, back=True)
+            decor_txt += place(f"NagaCap{nb_}", "19_nagahead", X_, Y_, Z_, ex_, elev_at(s1_), -ey_)
+            nb_ += 1
+
+    # Terasa Elefantilor (kit §1.4): fata sculptata (+X model) spre VEST (piata) -> rotatie de 180 de
+    # grade; fata cade pe linia muchiei dure a platoului (face_x), baza la cota pietei, varful = coama.
+    tf_x = face_x + 0.71
+    tf_n = int((face_y1 - face_y0) // 8.0)
+    for k_ in range(tf_n):
+        cy_ = face_y0 + 4.0 + 8.0 * k_
+        decor_txt += place(f"Terasa{k_}", "23_terrace", (-1, 0, 0), (0, 1, 0), (0, 0, -1), tf_x, Y_PIATA, -cy_,
+                           anchor=(1.2, 0, 0))
+        if k_ % 3 == 2:
+            decor_txt += place(f"StalpTrompa{k_}", "25_pillar", (-1, 0, 0), (0, 1, 0), (0, 0, -1),
+                               face_x + 0.4, Y_PIATA, -(cy_ + 4.0), anchor=(1.3, 0, 0))
+    decor_txt += place("TerasaCapat", "24_terrace_end", (-1, 0, 0), (0, 1, 0), (0, 0, -1),
+                       tf_x, Y_PIATA, -(face_y0 + 8.0 * tf_n + 3.97), anchor=(1.2, 0, 0))
+    # Regele Lepros: in piata, la capatul de sud al fetei, in afara benzii, privind spre drum (+X lume).
+    decor_txt += place("RegeleLepros", "26_leper", (0, 0, 1), (0, 1, 0), (-1, 0, 0),
+                       face_x - 7.0, Y_PIATA + 0.3, -(face_y0 + 10.0), col="hull")
+
+    # Galeria Ta Prohm (kit §1.5): bolti de 4 m pe ramura, prabusite (`vault_broken`) unde cade dominoul,
+    # cu partea deschisa (+X model) spre peretele de VEST (rotatie de 180: +X model -> -X lume), ca
+    # nodurile `Domino*`. Peretii boltilor au corp (`mesh`): sunt peretii galeriei.
+    gw0_ = next(w for w in WPTS if w[4] == "G ocol intrare")
+    gw1_ = next(w for w in WPTS if w[4] == "G ocol iesire")
+    gL_ = math.hypot(gw1_[0] - gw0_[0], gw1_[1] - gw0_[1])
+
+    def br_at(sv):
+        t = sv / gL_
+        return (gw0_[0] + (gw1_[0] - gw0_[0]) * t, gw0_[1] + (gw1_[1] - gw0_[1]) * t,
+                gw0_[3] + (gw1_[3] - gw0_[3]) * t)
+
+    broken_ = [33.0, 55.0, 80.0]
+    # boltile se opresc la 82 (capatul boltii prabusite de la 80): o bolta peste rampa (prima
+    # integrare) prindea masinile urcate cu 1,2 m in corbele (ProbeLaneClear, `Bolta11`).
+    edges_ = [TREE_GATE_S + 6.5] + [b for bk in broken_ for b in (bk - 2.0, bk + 2.0)][:-1] + [82.0]
+    spans_ = []
+    for a_, b_ in zip(edges_[0::2], edges_[1::2]):
+        if b_ - a_ > 0.5:
+            n_ = max(1, math.ceil((b_ - a_) / 4.0))
+            for j_ in range(n_):
+                spans_.append(a_ + (b_ - a_) * (j_ + 0.5) / n_)
+    for j_, sv_ in enumerate(spans_):
+        bx_, by_, be_ = br_at(sv_)
+        decor_txt += place(f"Bolta{j_}", "27_vault", (-1, 0, 0), (0, 1, 0), (0, 0, -1), bx_, be_, -by_, col="mesh")
+    for j_, sv_ in enumerate(broken_):
+        bx_, by_, be_ = br_at(sv_)
+        decor_txt += place(f"BoltaPrabusita{j_}", "28_vault_b", (-1, 0, 0), (0, 1, 0), (0, 0, -1),
+                           bx_, be_, -by_, col="mesh")
+    # Radacina-rampa: buza la 18 m inaintea capatului ramurii (cocoasa veche era la 22; mutata ca sa
+    # nu stea sub bolta prabusita de la 80 m); modelul urca spre -Z, rotit cu 180 de grade.
+    rx_, ry_, re_ = br_at(gL_ - 18.0 - 4.43)
+    # Cota: banda de nisip a ramurii sta la ~0,13 m SUB cota punctelor ei (sonda tools/sv_angkor_rampa.gd), deci
+    # rampa pusa pe cota punctelor avea muchia de jos ca o bordura de 13 cm: ProbeRace val 2, 5 ejectari
+    # „perete” la ~40 m/s fix pe muchie. Coborata cu 0,15 m: muchia intra sub nisip.
+    decor_txt += place("RadacinaRampa", "29_ramp", (-1, 0, 0), (0, 1, 0), (0, 0, -1), rx_, re_ - 0.15, -ry_, col="mesh")
+    gc0_ = br_at(TREE_GATE_S + 6.0)
+    gc1_ = br_at(84.0)
+    cam_txt += f"""
+[node name="CameraGaleria" type="Area3D" parent="."]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, {r2((gc0_[0] + gc1_[0]) / 2)}, {r2((gc0_[2] + gc1_[2]) / 2)}, {r2(-(gc0_[1] + gc1_[1]) / 2)})
+script = ExtResource("17_camzone")
+size = Vector3(12.0, 9.0, {r2(abs(gc1_[1] - gc0_[1]) + 4.0)})
+ceiling = 6.6
 ceiling_dist = 16.0
 blend_time = 0.35
 """
@@ -932,8 +1090,7 @@ material = SubResource("Mat_macheta")
     c0_ = next(w for w in WPTS if w[4] == "F coama inceput")
     c1_ = next(w for w in WPTS if w[4] == CREST_TAG)
     f0_, f1_ = face_y1, face_y0
-    mach += box("Terasa_FataV", c0_[0] - HALF_WIDTH - 0.5, (Y_TERASA + Y_PIATA) / 2, -(f0_ + f1_) / 2,
-                1, Y_TERASA - Y_PIATA, abs(f0_ - f1_))
+    # (macheta fetei de vest a iesit la val 2: modulele terasei, in DecorManual)
 
     # zonele pentru sonde (fractii pe INDEX)
     zz = [("A", IDX("A start"), IDX("B arc galerie", -40.0)),
@@ -971,6 +1128,18 @@ material = SubResource("Mat_macheta")
 [ext_resource type="PackedScene" path="res://assets/models/angkor/structures/aw_west_gopura.glb" id="15_gopura"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/structures/ta_prohm_tree_gate.glb" id="16_treegate"]
 [ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="17_camzone"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/naga_balustrade.glb" id="18_naga"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/naga_head.glb" id="19_nagahead"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/deva_giant.glb" id="20_deva"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/asura_giant.glb" id="21_asura"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/props/fallen_block.glb" id="22_block"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/elephant_terrace_module.glb" id="23_terrace"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/elephant_terrace_end.glb" id="24_terrace_end"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/elephant_trunk_pillar.glb" id="25_pillar"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/props/leper_king_statue.glb" id="26_leper"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/vault_intact.glb" id="27_vault"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/vault_broken.glb" id="28_vault_b"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/giant_root_ramp.glb" id="29_ramp"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_macheta"]
 albedo_color = Color(0.72, 0.64, 0.52, 1)

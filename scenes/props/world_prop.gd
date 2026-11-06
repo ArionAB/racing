@@ -3893,6 +3893,10 @@ func _glow_spec(model: Node3D) -> String:
 ## respingea hull-ul la unele rotatii (`zid82_col`, 30 sep 2026). Vezi
 ## `TrackDecor.add_hull_collision`.
 const HULL_SKIP_PARTS := {
+	# Angkor, poarta-copac (kit §1.2): corp DOAR pe gresie. Radacinile se intind pe 20 m si ating
+	# solul langa intrarea in ramura; ProbeRace val 1 (16 seed-uri): 3 ejectari „perete” la 28 m/s pe
+	# masinile care intrau in scurtatura pe linia virajului. Radacinile sunt decor (datoria organica).
+	"ta_prohm_tree_gate": ["TreeGate_Root", "TreeGate_Canopy", "TreeGate_Lichen", "TreeGate_Streak"],
 	# Carrara: lemnaria turnului (usa pe +Y si grinda cu scripete pe +X) si a magaziei (usile,
 	# sina) sta pe fete diferite: un hull pe nodul ei ar fi o pana convexa intre ele, in aer.
 	# Corpul de zidarie / tabla acopera deja amprenta. Golurile stau in perete.

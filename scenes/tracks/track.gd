@@ -4482,6 +4482,8 @@ static func themes() -> Dictionary:
 		"dust_color": Palette.color(Palette.TILE_TERRACOTTA),
 		# Blocurile dominoului din galeria Ta Prohm (RimBoulderHazard) iau gresia templului.
 		"rockfall_class": "angkor_sandstone",
+		# Balustradele de stil 3 raman doar coliziune: vizualul il dau naga si uriasii (kit §1.5).
+		"balustrade_skin": true,
 		"walls": false,
 		"kerbs": false,
 		"cliffs": false,
@@ -12668,6 +12670,13 @@ func _build_parapets() -> void:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var emitted := false
+	# `balustrade_skin` (tema): stilul 3 ramane DOAR coliziune, iar vizualul il dau modulele GLB ale
+	# pistei (Angkor: naga si uriasii, asezati de generator pe aceeasi linie). Fara cheie: identic.
+	var skin := bool(theme_flag("balustrade_skin", false))
+	var st_skin := SurfaceTool.new()
+	st_skin.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var emitted_skin := false
+	var st_main := st
 	for seg in segs:
 		for side_sign: float in [-1.0, 1.0]:
 			if not is_zero_approx(seg.z) and signf(seg.z) != side_sign:
@@ -12675,6 +12684,7 @@ func _build_parapets() -> void:
 			var rock := int(seg.w) == 1
 			var berm := int(seg.w) == 2
 			var balus := int(seg.w) == 3
+			st = st_skin if (balus and skin) else st_main
 			var thick := ROCK_LIP_THICK if rock else PARAPET_THICK
 			if berm:
 				thick = BERM_THICK
@@ -12745,7 +12755,10 @@ func _build_parapets() -> void:
 					_dists[i], side * side_sign])
 			if secs.size() < 2:
 				continue
-			emitted = true
+			if balus and skin:
+				emitted_skin = true
+			else:
+				emitted = true
 			for k in secs.size() - 1:
 				var a: Array = secs[k]
 				var b: Array = secs[k + 1]
@@ -12774,10 +12787,14 @@ func _build_parapets() -> void:
 				cap, -d0.normalized())
 			_parapet_quad(st, last[0], last[1], last[3], last[2],
 				cap, d1.normalized())
+	if emitted_skin:
+		st_skin.generate_normals()
+		_add_mesh_with_collision(st_skin.commit(), Color.WHITE, null, 1.0, 0.5,
+			BaseMaterial3D.CULL_DISABLED, null, null, false, null, "ParapetBalustrada")
 	if not emitted:
 		return
-	st.generate_normals()
-	var mesh := st.commit()
+	st_main.generate_normals()
+	var mesh := st_main.commit()
 	_add_mesh_with_collision(mesh, Color.WHITE, null, 1.0, 0.5,
 		BaseMaterial3D.CULL_DISABLED, null, null, true,
 		Palette.world_material(), "Parapet")

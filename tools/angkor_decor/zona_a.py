@@ -58,9 +58,9 @@ _rng = random.Random(2406)
 #    Fiecare petic = centru (frac, lateral de la mal) + 7-13 piese in raza ~4-6 m; intre petice, piese singure.
 for side, tab, tag in ((-1, BANK_L, "L"), (1, BANK_R, "R")):
     n = 0
-    for k in range(15):
-        fc = F0 + (F1 - F0) * (k + _rng.random() * 0.8) / 15.0
-        dist = 4.0 + _rng.random() * 26.0                     # metri de la mal spre larg
+    for k in range(21):
+        fc = F0 + (F1 - F0) * (k + _rng.random() * 0.8) / 21.0
+        dist = 3.5 + (_rng.random() ** 1.6) * 28.0                     # metri de la mal spre larg
         pieces = _rng.randint(7, 13)
         rad = 3.0 + _rng.random() * 3.0
         for j in range(pieces):
@@ -87,9 +87,29 @@ for side, tab, tag in ((-1, BANK_L, "L"), (1, BANK_R, "R")):
         f = m / M_PER_FRAC
         if _rng.random() > 0.07 and (tag, n) not in SKIP_KERB:                              # ~7% goluri (blocuri cazute in apa)
             ITEMS.append(_place(f"A_Kerb{tag}{n}", "props/laterite_block.glb", f, side * (_bank(tab, f) + 0.35),
-                                90.0 + (_rng.random() - 0.5) * 5.0, y=WATER_Y - 0.12, scufundat=True))
+                                90.0 + (_rng.random() - 0.5) * 5.0, y=WATER_Y + 0.02, scale=1.5, scufundat=True))
         n += 1
-        m += 1.08
+        m += 1.58
 
 KIT_Y = {
+    "A_RubL0": 2.06,
+    "A_RubL1": 1.96,
+    "A_RubL2": 2.11,
+    "A_RubL3": 2.24,
+    "A_RubL4": 2.49,
+    "A_RubR0": 1.58,
+    "A_RubR1": 1.54,
+    "A_RubR2": 0.71,
+    "A_RubR3": 1.61,
+    "A_RubR4": 2.22,
 }
+
+# 3) Moloz si blocuri cazute la baza balustradei, DINCOLO de ea (lateral 7,0-8,2): nu intra in banda drumului.
+#    Doar pe 0,027-0,054, rar. Cota din ProbeCarraraMontaj (teren minim - 3 cm), in KIT_Y.
+for side, tag in ((-1, "L"), (1, "R")):
+    for k, f in enumerate((0.0275, 0.0330, 0.0385, 0.0440, 0.0495)):
+        f += (_rng.random() - 0.5) * 0.002
+        nm = f"A_Rub{tag}{k}"
+        ITEMS.append(_place(nm, "props/rubble_pile.glb" if k % 2 == 0 else "props/fallen_block.glb", f,
+                            side * (7.0 + _rng.random() * 1.2), _rng.random() * 360.0,
+                            scale=round(0.9 + _rng.random() * 0.3, 2) if k % 2 == 0 else 0.45))

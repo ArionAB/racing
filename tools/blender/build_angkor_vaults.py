@@ -229,61 +229,88 @@ def build_vault(broken):
                 else:
                     ox0, ox1 = X(CAP_HALF, CR_OUT[3])
                     sites.append((min(ox0, ox1) + 0.02, max(ox0, ox1) - 0.02, -HL + 0.2, HL - 0.2, za + CR_H))
+        elif sx < 0:
+            # -X: SEMI-BOLTA ramasa. Peretele plin + randuri de consola pe bucati (cate
+            # randuri a pastrat fiecare); ultimul rand al fiecarei bucati e scurtat (margine
+            # zimtata), cu un bloc inclinat pe el. Nimic nu trece de x = +0,2.
+            x0, x1 = X(W_IN, W_OUT)
+            bx(S, x0, x1, -HL, HL, 0.0, Z_WALL)
+            wall_faces(S, x0, x1, -HL, HL, 0.0, Z_WALL, [inner, outer], ch=0.85, bw=1.3, seed=5 + sx)
+            for (ya, yb, n, trim) in ((-2.0, -0.8, 4, 0.0), (-0.8, 0.5, 3, 0.35), (0.5, 2.0, 2, 0.3)):
+                for k in range(n):
+                    za = Z_WALL + k * CR_H
+                    xin = CR_IN[k] + (trim if k == n - 1 else 0.0)
+                    x0, x1 = X(xin, CR_OUT[k])
+                    bx(S, x0, x1, ya, yb, za, za + CR_H)
+                    wall_faces(S, x0, x1, ya, yb, za, za + CR_H, [inner, outer], ch=CR_H, bw=1.2,
+                               seed=41 + 3 * k + int(ya * 5))
+                    if k < 3:
+                        ox0, ox1 = X(CR_OUT[k + 1], CR_OUT[k])
+                        sites.append((min(ox0, ox1) + 0.02, max(ox0, ox1) - 0.02, ya + 0.1, yb - 0.1, za + CR_H))
+                top_k = n - 1
+                ztop = Z_WALL + n * CR_H
+                xin_top = CR_IN[top_k] + trim
+                if n == 4:
+                    # placa de cheie pe jumatate: de la -1,3 pana la +0,2 (nu mai departe)
+                    bx(S, -CAP_HALF, 0.2, ya, yb, Z_CAP, TOP_V)
+                    wall_faces(S, -CAP_HALF, 0.2, ya, yb, Z_CAP, TOP_V, ["+x", "-x"], ch=CAP_H, bw=1.2, seed=97)
+                    sites.append((-CAP_HALF + 0.02, 0.2 - 0.02, ya + 0.1, yb - 0.1, TOP_V))
+                    ztop = TOP_V
+                    xin_top = -0.5
+                # blocuri inclinate pe marginea zimtata
+                cy = (ya + yb) * 0.5
+                s_ = 0.5 + 0.15 * rnd()
+                chunk(S, (-(abs(xin_top) + 0.55), cy, ztop + s_ * 0.4), (s_ * 1.2, s_, s_ * 0.8), rnd, tilt=16.0)
         else:
-            chunks = {1: [(-2.0, -0.7, 5.8), (-0.7, 0.6, 2.2), (0.6, 2.0, 4.2)],
-                      -1: [(-2.0, -1.2, 3.6), (-1.2, 0.3, 1.4), (0.3, 1.3, 5.0), (1.3, 2.0, 3.4)]}[sx]
-            for (ya, yb, h) in chunks:
+            # +X: peretele rupt jos (varf zimtat la 3-4,5 m); randurile de consola sunt taiate
+            # la fata interioara (x = 3,40), deci nimic nu atarna peste drum.
+            for (ya, yb, h) in [(-2.0, -0.9, 4.2), (-0.9, 0.3, 3.0), (0.3, 1.2, 4.0), (1.2, 2.0, 3.4)]:
                 x0, x1 = X(W_IN, W_OUT)
                 zb = min(h, Z_WALL)
                 bx(S, x0, x1, ya, yb, 0.0, zb)
-                wall_faces(S, x0, x1, ya, yb, 0.0, zb, [inner, outer], ch=0.85, bw=1.3, seed=21 + sx + int(ya * 5))
+                wall_faces(S, x0, x1, ya, yb, 0.0, zb, [inner, outer], ch=0.85, bw=1.3, seed=21 + int(ya * 5))
                 top = zb
                 if h > Z_WALL + 0.01:
-                    n = int(round((h - Z_WALL) / CR_H))
-                    for k in range(n):
-                        za = Z_WALL + k * CR_H
-                        x0, x1 = X(W_IN, CR_OUT[k])
-                        bx(S, x0, x1, ya, yb, za, za + CR_H)
-                        wall_faces(S, x0, x1, ya, yb, za, za + CR_H, [inner, outer], ch=CR_H, bw=1.2,
-                                   seed=31 + 3 * k + sx + int(ya * 5))
-                        if k < 3 and k < n - 1:
-                            ox0, ox1 = X(CR_OUT[k + 1], CR_OUT[k])
-                            sites.append((min(ox0, ox1) + 0.02, max(ox0, ox1) - 0.02, ya + 0.1, yb - 0.1, za + CR_H))
-                    top = Z_WALL + n * CR_H
-                kk = max(0, int(round((h - Z_WALL) / CR_H)) - 1) if h > Z_WALL + 0.01 else 0
-                tx0, tx1 = X(W_IN, CR_OUT[kk] if h > Z_WALL + 0.01 else W_OUT)
-                sites.append((min(tx0, tx1) + 0.05, max(tx0, tx1) - 0.05, ya + 0.1, yb - 0.1, top))
-                # blocuri rasturnate pe creasta (in grosimea peretelui, x >= 3,6)
-                for _ in range(2):
-                    cx = sx * (3.95 + 0.25 * rnd())
-                    cy = max(-1.3, min(1.3, ya + (yb - ya) * (0.25 + 0.5 * rnd())))
-                    s_ = 0.45 + 0.25 * rnd()
-                    if (yb - ya) < 0.9:
-                        continue
-                    chunk(S, (cx, cy, top + s_ * 0.5 - 0.03), (s_ * 1.3, s_, s_ * 0.8), rnd, tilt=14.0)
+                    x0, x1 = X(W_IN, CR_OUT[0])
+                    bx(S, x0, x1, ya, yb, Z_WALL, h)
+                    wall_faces(S, x0, x1, ya, yb, Z_WALL, h, [inner, outer], ch=h - Z_WALL, bw=1.2,
+                               seed=31 + int(ya * 5))
+                    top = h
+                sites.append((min(X(W_IN, W_OUT)) + 0.05, max(X(W_IN, W_OUT)) - 0.05, ya + 0.1, yb - 0.1, top))
+                if (yb - ya) > 0.85:
+                    s_ = 0.45 + 0.2 * rnd()
+                    chunk(S, (3.95 + 0.25 * rnd(), (ya + yb) * 0.5, top + s_ * 0.4), (s_ * 1.3, s_, s_ * 0.8),
+                          rnd, tilt=14.0)
         if not broken:
             continue
-        # moloz in afara peretelui, DOAR la |x| >= 4,45
-        n_big, n_small = (9, 12)
-        for i in range(n_big):
-            s_ = 0.55 + 0.5 * rnd()
-            cx = sx * (4.65 + 1.9 * rnd())
-            cy = -1.0 + 2.0 * rnd()
-            chunk(S, (cx, cy, s_ * 0.45), (s_, s_ * (0.8 + 0.4 * rnd()), s_ * 0.8), rnd, tilt=12.0)
-        for i in range(n_small):
-            s_ = 0.22 + 0.22 * rnd()
-            cx = sx * (4.5 + 2.3 * rnd())
-            cy = -1.2 + 2.4 * rnd()
-            chunk(S, (cx, cy, s_ * 0.4), (s_, s_, s_ * 0.8), rnd, tilt=20.0)
-        # un bloc de consola cazut, sprijinit pe fata exterioara (placa lunga, inclinata)
-        chunk(S, (sx * 5.0, 0.4 * sx, 0.85), (1.7, 0.65, 0.55), rnd, jit=0.06, yaw=90.0 + 8.0 * sx, tilt=6.0)
-        chunk(S, (sx * 4.75, -0.9 * sx, 1.55), (0.8, 0.7, 0.6), rnd, tilt=12.0)
-        # pe golul scund al peretelui: moloz in grosimea lui (|x| >= 3,9)
-        for (ya, yb, h) in ([(-0.7, 0.6, 2.2)] if sx > 0 else [(-1.2, 0.3, 1.4)]):
+        # --- moloz (doar la |x| >= 3,4) ---
+        if sx > 0:
+            # movila de blocuri de acoperis cazute, pe EXTERIORUL peretelui +X, pana la ~2 m
+            for (z_lo, nb, xr, sz) in ((0.0, 9, (4.5, 7.0), (0.85, 1.0)),
+                                       (0.9, 6, (4.5, 6.0), (0.75, 0.95)),
+                                       (1.6, 3, (4.5, 5.3), (0.6, 0.8))):
+                for i in range(nb):
+                    s_ = sz[0] + (sz[1] - sz[0]) * rnd()
+                    cx = xr[0] + (xr[1] - xr[0]) * rnd()
+                    cy = -0.9 + 1.8 * (i + rnd() * 0.6) / nb
+                    chunk(S, (cx, max(-0.95, min(0.95, cy)), z_lo + s_ * 0.5), (s_, s_ * (0.8 + 0.3 * rnd()), s_ * 0.8),
+                          rnd, tilt=14.0)
+            for i in range(10):
+                s_ = 0.22 + 0.2 * rnd()
+                chunk(S, (4.5 + 3.4 * rnd(), -1.3 + 2.6 * rnd(), s_ * 0.4), (s_, s_, s_ * 0.8), rnd, tilt=20.0)
+            # placa de consola cazuta, sprijinita de movila
+            chunk(S, (5.1, 0.3, 2.35), (1.5, 0.6, 0.5), rnd, jit=0.06, yaw=92.0, tilt=10.0)
+            # pe golul scund al peretelui: moloz in grosimea lui (x >= 3,9)
             for _ in range(5):
-                s_ = 0.3 + 0.25 * rnd()
-                chunk(S, (sx * (4.0 + 0.55 * rnd()), ya + (yb - ya) * (0.15 + 0.7 * rnd()),
-                          h + s_ * 0.4), (s_, s_, s_ * 0.8), rnd, tilt=18.0)
+                s_ = 0.3 + 0.2 * rnd()
+                chunk(S, (4.0 + 0.55 * rnd(), -0.9 + 1.2 * rnd(), 3.0 + s_ * 0.4), (s_, s_, s_ * 0.8), rnd, tilt=18.0)
+        else:
+            for i in range(7):
+                s_ = 0.3 + 0.35 * rnd()
+                chunk(S, (-(4.6 + 1.8 * rnd()), -1.0 + 2.0 * rnd(), s_ * 0.45), (s_, s_, s_ * 0.8), rnd, tilt=16.0)
+            # blocuri cazute pe semi-bolta: pe capul randului 3 (z 6,6) si pe treapta randului 2
+            chunk(S, (-2.3, -1.3, Z_CAP + 0.3), (0.65, 0.55, 0.5), rnd, tilt=12.0)
+            chunk(S, (-3.3, -1.45, Z_WALL + 3 * CR_H + 0.22), (0.4, 0.4, 0.4), rnd, tilt=14.0)
 
     if not broken:
         # piatra de cheie: placa plata care inchide golul ramas intre ultimele randuri

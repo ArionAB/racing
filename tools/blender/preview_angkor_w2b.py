@@ -1,4 +1,4 @@
-"""Cadre de control pentru grupul B, val 2 (bolta): lantul intact | prabusit | intact,
+"""Cadre de control pentru grupul B, val 2 (bolta): lantul prabusit | intact | intact,
 vazut de camera de joc. `preview_angkor.py` ramane neatins (doar SPECS adaugate);
 acest script ii refoloseste functiile.
 
@@ -27,7 +27,7 @@ def chain():
     os.makedirs(FID_DIR, exist_ok=True)
     _clear()
     meshes = []
-    for i, nm in enumerate(("vault_intact", "vault_broken", "vault_intact")):
+    for i, nm in enumerate(("vault_broken", "vault_intact", "vault_intact")):
         path = _find_glb(nm)
         meshes += _import_path(path, offset=(0.0, 4.0 * i, 0.0))
     for o in meshes:
@@ -85,7 +85,7 @@ def chain():
         scene.render.filepath = p
         bpy.ops.render.render(write_still=True)
         outs.append(p)
-    # d: vedere oblica de sus, ca sa se citeasca lantul intact | prabusit | intact
+    # d: vedere oblica de sus, ca sa se citeasca lantul prabusit | intact | intact
     cam.location = Vector((13.0, -9.0, 8.0))
     target = Vector((0.0, 4.0, 2.5))
     cam.rotation_euler = (target - cam.location).normalized().to_track_quat("-Z", "Y").to_euler()

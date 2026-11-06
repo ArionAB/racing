@@ -8,7 +8,7 @@ coborată sub tavan, d vedere oblică). Sculptura e SIMPLIFICATĂ (decizia dezvo
 | piesă | tris | noduri | cote (măsurate din GLB) |
 |---|---|---|---|
 | `kit/vault_intact.glb` | 2832 | Vault_Stone/Lichen/Streak | 9,2 × 4,0 × 7,43; gol 6,637 la 0–3 m; cheie la 6,60 m; capete ±2,0 |
-| `kit/vault_broken.glb` | 2948 | idem | 14,35 × 4,0 × 6,51; gol 6,638; nimic în \|x\| < 3,3 peste 3,4 m; moloz doar \|x\| ≥ 3,4 |
+| `kit/vault_broken.glb` | 2996 | idem | 14,33 × 4,0 × 8,02; gol 6,639; +X deschis (nimic în x ∈ [+0,3, +3,3] peste 3,0 m); −X semi-boltă care nu trece de x = +0,2; moloz doar \|x\| ≥ 3,4 |
 | `props/fallen_block.glb` | 584 | Block_Stone/Lichen | 2,500 × 2,528 × 2,500 (boulder_roller × 0,5 = 2,5³); raport 1,000 |
 | `props/restoration_prop.glb` | 564 | Prop_Stone/Wood/Lichen | 3,13 × 3,35 × 3,02 |
 
@@ -16,7 +16,8 @@ coborată sub tavan, d vedere oblică). Sculptura e SIMPLIFICATĂ (decizia dezvo
 - Consola din 4 rânduri a câte 0,8 m (retragere 0,75 m) + placă de cheie plată: golul de
   6,6 m și cheia la 6,6 m ies din construcție, nu din reglaj. Se citește ca arc în trepte, dar
   **drept și unghiular** (nu rotunjit ca în decupare), iar randările de joc îl arată întunecat.
-- `vault_broken` e, prin contract (acoperiș deschis în \|x\| < 3,3), doar **doi pereți ruinați**
+- `vault_broken` (runda 2, contract îngustat de coordonator: blocurile cad doar dinspre +X local): **−X păstrează o semi-boltă** (pereți + 4/3/2 rânduri de consolă pe trei bucăți, ultimul rând scurtat, jumătate de placă de cheie până la x = +0,2, blocuri înclinate pe margine); **+X** e perete rupt jos (varf zimțat 3,0–4,2 m, rândurile de consolă tăiate la fața interioară 3,40); **movilă** de blocuri căzute pe exteriorul peretelui +X (x ≥ 4,5, ~2,4 m, 3 straturi + placă de consolă). Garda verifică acum doar x pozitiv, [0,3, 3,3], peste 3,0 m (3,3 nu 3,4: fața peretelui +X, cu relief, e la 3,34–3,40); sabotaj nou: consolă trecută pe +X. Lanțul din `vault_chain_gamecam.png` începe cu modulul prăbușit.
+- (runda 1, înlocuită:) `vault_broken` era, prin contract (acoperiș deschis în \|x\| < 3,3), doar **doi pereți ruinați**
   cu moloz în afară: nu mai citește ca „bolta prăbușită” din decupare (care are bolta întreagă
   pe jumătate). Profilul exterior păstrează treptele consolei, tăiate curat la fața interioară.
 - **Blocul e 2,5 m pe toate axele** (boulder_roller are AABB 5 m, × 0,5), nu placa lată din

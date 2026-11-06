@@ -10,8 +10,9 @@ Citeste GLB-ul EXPORTAT, in coordonate GODOT (Y sus, drumul pe Z, latimea pe X).
 vault_intact: capetele la z = +-2,0; golul >= 6,6 in banda 0-3 m inaltime (masurat
   ca GOL: triunghiurile taiate pe banda, nu AABB), inaltimea libera la cheie
   (|x| < 0,3) >= 6,5 si EXISTA acoperis acolo.
-vault_broken: capetele la +-2,0; acelasi gol; NICIUN triunghi in |x| in [0,5, 3,3]
-  peste 5,0 m pe toata lungimea (taiat pe banda); niciun triunghi in |x| < 3,3 sub
+vault_broken: capetele la +-2,0; acelasi gol; NICIUN triunghi in x in [+0,3, +3,3]
+  peste 3,0 m pe toata lungimea (taiat pe banda; +X = partea de pe care cad blocurile,
+  -X pastreaza o semi-bolta care nu trece de x = +0,3); niciun triunghi in |x| < 3,3 sub
   1,0 m (molozul sta doar pe margini).
 block: anvelopa in +-10% fata de `rocks/boulder_roller.glb` x 0,5 (masurata din
   fisier, la fiecare rulare), amprenta X/Z (X/Y in Blender) cu raport <= 1,15.
@@ -43,11 +44,12 @@ PROP_SLOTS = {("Prop_Stone", 3), ("Prop_Wood", 9), ("Prop_Wood", 28),
               ("Prop_Lichen", 30), ("Prop_Lichen", 12)}
 
 
-def _band_points(tris, lo, hi):
-    """Punctele poligoanelor taiate pe |x| in [lo, hi] (ambele parti), cu nodul lor."""
+def _band_points(tris, lo, hi, signs=(1, -1)):
+    """Punctele poligoanelor taiate pe |x| in [lo, hi] (ambele parti, sau doar +X cu
+    `signs=(1,)`), cu nodul lor."""
     out = []
     for name, tri in tris:
-        for sgn in (1, -1):
+        for sgn in signs:
             t = tuple((p[0] * sgn, p[1], p[2]) for p in tri)
             xs = [p[0] for p in t]
             if max(xs) < lo or min(xs) > hi:
@@ -97,16 +99,19 @@ def check_intact(tris, names=None, xform=None, slots=None, report=True):
 def check_broken(tris, names=None, xform=None, slots=None, report=True):
     bad = []
     (x0, x1), (y0, y1), (z0, z1) = _common(tris, bad, report, "vault_broken")
-    # nimic in banda de cadere a blocurilor, peste 5 m
-    hi = [(n, p) for n, p in _band_points(tris, 0.5, 3.3 - TOL) if p[1] > 5.0 + TOL]
-    top_in_band = max([p[1] for _, p in _band_points(tris, 0.5, 3.3 - TOL)] or [0.0])
+    # banda de cadere a blocurilor = DOAR +X (hazardul cade dinspre +X local): nimic in
+    # x in [0,3, 3,3] peste 3,0 m. Capatul 3,3 (nu 3,4): fata interioara a peretelui +X e la
+    # 3,34-3,40, deci un perete cu relief ar pica garda fara sa fie in drumul blocului.
+    # Semi-bolta de pe -X poate ajunge pana la x = +0,3, nu mai departe.
+    hi = [(n, p) for n, p in _band_points(tris, 0.3, 3.3 - TOL, (1,)) if p[1] > 3.0 + TOL]
+    top_in_band = max([p[1] for _, p in _band_points(tris, 0.3, 3.3 - TOL, (1,))] or [0.0])
     # moloz pe drum: orice punct din |x| < 3,3 sub 1 m
     low = [(n, p) for n, p in _band_points(tris, 0.0, 3.3 - TOL) if p[1] < 1.0]
     if report:
-        print("         cel mai inalt punct in |x| in [0,5, 3,3]: %.2f m (cerut <= 5,0)" % top_in_band)
+        print("         cel mai inalt punct in x in [+0,3, +3,3]: %.2f m (cerut <= 3,0)" % top_in_band)
         print("         puncte in |x| < 3,3 sub 1,0 m: %d (cerut 0)" % len(low))
     if hi:
-        bad.append("%d puncte in |x| in [0,5, 3,3] peste 5,0 m (max %.2f, %s): acoperisul nu e deschis"
+        bad.append("%d puncte in x in [0,3, 3,3] peste 3,0 m (max %.2f, %s): acoperisul nu e deschis pe partea +X"
                    % (len(hi), max(p[1] for _, p in hi), hi[0][0]))
     if low:
         bad.append("%d puncte in |x| < 3,3 sub 1,0 m (%s): moloz pe banda"
@@ -224,6 +229,8 @@ def sabotage_broken(tris):
     return [("pereti mutati la +-3,2", c),
             ("placa de acoperis inchide bolta",
              tris + _box_tris("Vault_Stone", -3.4, 3.4, 5.6, 6.4, -2.0, 2.0)),
+            ("consola trecuta pe partea +X",
+             tris + _box_tris("Vault_Stone", 0.5, 3.4, 4.2, 5.0, -2.0, 2.0)),
             ("bloc de moloz pe drum",
              tris + _box_tris("Vault_Stone", 1.0, 2.2, 0.0, 0.9, -0.6, 0.6))]
 

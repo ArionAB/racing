@@ -4509,14 +4509,19 @@ static func themes() -> Dictionary:
 		# ~31 m peste sol la 240 m) baza lor de 46-54 m iese din cadru, iar coborate citesc platouri
 		# cenusii (Monument Valley in jungla). Furtuna spre est ramane decizie deschisa (kit §3).
 		"horizon_model": "res://assets/models/angkor/effects/angkor_horizon.glb",
+		# Degajarea pe TOATA amprenta (tiparul Ha Long): Canopy_A are 196 x 126 m, iar degajarea masurata
+		# in pivot l-a lasat peste calea uriasilor (D, frac 0,345-0,358): o cupola verde pe drum.
+		# Cu amprenta, `clear` e de la MARGINEA piesei, nu din pivot: 120 nu mai lasa nicio silueta (0/12);
+		# 40 lasa 5/12, cea mai apropiata la >= 5 m de drum pe AABB (sonda temporara, 6 nov 2026).
+		"horizon_footprint": true,
 		# Atlasul (coronament verde, orezarii), nu clasa implicita "rock" (iesea maro-portocaliu).
 		"horizon_class": "",
 		"horizon_rings": [
-			{"count": 1, "angle_deg": -52.0, "yaw_deg": 142.0, "near": 200.0, "far": 260.0, "clear": 120.0,
+			{"count": 1, "angle_deg": -52.0, "yaw_deg": 142.0, "near": 200.0, "far": 260.0, "clear": 40.0,
 				"scale": 1.0, "picks": ["KulenRidge"]},
-			{"count": 1, "angle_deg": 180.0, "yaw_deg": -90.0, "near": 200.0, "far": 260.0, "clear": 120.0,
+			{"count": 1, "angle_deg": 180.0, "yaw_deg": -90.0, "near": 200.0, "far": 260.0, "clear": 40.0,
 				"scale": 1.0, "picks": ["Paddies_W"]},
-			{"count": 10, "near": 200.0, "far": 260.0, "clear": 120.0, "scale": 1.0,
+			{"count": 10, "near": 200.0, "far": 260.0, "clear": 40.0, "scale": 1.0,
 				"picks": ["Canopy_A", "Canopy_B", "Canopy_C"]},
 		],
 		"water": false,

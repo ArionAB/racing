@@ -1199,6 +1199,10 @@ blend_time = 0.35
                 zone_nodes += f"metadata/ancora_sol = Vector3({a_[0]}, {a_[1]}, {a_[2]})\n"
             if opt_.get("scufundat", False):
                 zone_nodes += "metadata/scufundat = true\n"
+            # "child": {"Nod": (x, y, z)} muta un nod-copil al GLB-ului (tuk_tuk: `Moto` la z -1,95, ca TukTuk0..2).
+            for cn_, cp_ in opt_.get("child", {}).items():
+                zone_nodes += (f'\n[node name="{cn_}" parent="DecorManual/{zn_}/{nm_}"]\n'
+                               f"transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {cp_[0]}, {cp_[1]}, {cp_[2]})\n")
             print(f"    {zn_}/{nm_:22s} frac {F_s(sv_)[0]:.4f} lat {lat_:+6.1f} y {gy_:7.2f} (drum {elev_at(sv_):6.2f})")
 
     if forest_zones:

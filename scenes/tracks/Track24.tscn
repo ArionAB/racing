@@ -10802,13 +10802,22 @@ metadata/coliziune = "trunk"
 transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, 46.2, 2.0, 122.0)
 metadata/coliziune = "none"
 
+[node name="Moto" parent="DecorManual/ZonaH/H_TukL0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.95)
+
 [node name="H_TukL1" parent="DecorManual/ZonaH" instance=ExtResource("z17_tuk_tuk")]
 transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, 50.0, 2.0, 122.0)
 metadata/coliziune = "none"
 
+[node name="Moto" parent="DecorManual/ZonaH/H_TukL1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.95)
+
 [node name="H_TukL2" parent="DecorManual/ZonaH" instance=ExtResource("z17_tuk_tuk")]
 transform = Transform3D(0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, 53.8, 2.0, 122.0)
 metadata/coliziune = "none"
+
+[node name="Moto" parent="DecorManual/ZonaH/H_TukL2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.95)
 
 [node name="PadureMasa" type="Node3D" parent="."]
 script = ExtResource("mf_script")

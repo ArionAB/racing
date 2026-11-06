@@ -18,6 +18,7 @@
 #     "coliziune"  "hull" (implicit in world_prop) / "mesh" / "trunk" / "none"
 #     "anchor"     (x, y, z) local = metadata/ancora_sol pentru probe_manual (piese cu originea in aer)
 #     "scufundat"  True: infipta prin proiect (probe_manual o iarta daca varful iese din teren)
+#     "child"      {"Nod": (x, y, z)}: muta un nod-copil al GLB-ului (tuk_tuk: {"Moto": (0, 0, -1.95)})
 # KIT_Y: cotele MASURATE (terenul minim de sub amprenta - 3 cm), din
 #   `godot --headless --path . res://tools/ProbeCarraraMontaj.tscn -- --track=16 --decor`.
 # FOREST: zone MeshForest (fantome, fara coliziune) — vezi jungla.py; FOREST_GLBS = stem -> glb.

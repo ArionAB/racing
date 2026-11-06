@@ -359,14 +359,19 @@ def streak(b, wall_pt, outward_yaw_deg, width, length, thick, slot):
 # --- emit --------------------------------------------------------------------
 
 def emit_angkor(objs, path, ao, bevels=None, bevel=0.02, smooth_angle=40.0,
-                bevel_angle=30.0, center_y=True):
+                bevel_angle=30.0, center_y=True, anchor=None, ao_tint=None):
     """Finish pe fiecare nod + export in assets/models/angkor/<path>.
 
     Offsetul de origine se calculeaza O DATA pe ansamblu (memoria finish-
     recentreaza-fiecare-nod-separat): amprenta centrata pe X si Y (bbox-ul
     tuturor nodurilor), talpa ansamblului la Z = 0. `bevels` = {sufix: latime}
     suprascrie `bevel` pe nodurile cu acel sufix (petele si darele: 0, sunt
-    prea subtiri pentru bevel)."""
+    prea subtiri pentru bevel).
+
+    `anchor=(x, y)` (val 1) pune originea EXACT pe acel punct al constructiei,
+    in loc de centrul bbox-ului (poarta cu radacini nu e simetrica pe bbox, dar
+    axa trecerii trebuie sa fie x=0). `ao_tint={sufix: (r, g, b)}`: umbrele AO ale
+    nodului primesc o tenta calda (exponent pe canal), nu gri neutru."""
     objs = [o for o in objs if o is not None and len(o.data.vertices) > 0]
     xs = [v.co.x for o in objs for v in o.data.vertices]
     ys = [v.co.y for o in objs for v in o.data.vertices]
@@ -374,6 +379,8 @@ def emit_angkor(objs, path, ao, bevels=None, bevel=0.02, smooth_angle=40.0,
     place = Vector((-(min(xs) + max(xs)) * 0.5,
                     -(min(ys) + max(ys)) * 0.5 if center_y else 0.0,
                     -min(zs)))
+    if anchor is not None:
+        place.x, place.y = -anchor[0], -anchor[1]
     total, per_node = 0, {}
     for o in objs:
         for v in o.data.vertices:
@@ -384,6 +391,12 @@ def emit_angkor(objs, path, ao, bevels=None, bevel=0.02, smooth_angle=40.0,
                 bw = w
         st = finish(o, bevel=bw, bevel_angle=bevel_angle, ao=ao, origin=None,
                     smooth_angle=smooth_angle)
+        for suf, tint in (ao_tint or {}).items():
+            if o.name.endswith(suf):
+                ca = o.data.color_attributes["AO"]
+                for d in ca.data:
+                    v = d.color[0]
+                    d.color = (v ** tint[0], v ** tint[1], v ** tint[2], 1.0)
         total += st["tris"]
         per_node[o.name] = st["tris"]
     xs = [v.co.x for o in objs for v in o.data.vertices]

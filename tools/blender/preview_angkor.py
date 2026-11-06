@@ -78,6 +78,13 @@ CLASS_BY_SUFFIX = {"_Stone": STONE_HEX}
 
 SPECS = {
     "bayon_face_tower_a": {"camera": {"azimuth": 62.0, "elevation": 9.0, "lens": 70.0, "margin": 1.06}},
+    "bayon_face_tower_b": {"camera": {"azimuth": 62.0, "elevation": 9.0, "lens": 70.0, "margin": 1.06}},
+    "bayon_face_tower_c": {"camera": {"azimuth": 62.0, "elevation": 9.0, "lens": 70.0, "margin": 1.06}},
+    # poarta de sud (val 1): drumul merge pe Y prin ea; fara ingropare in gamecam
+    # (baza la cota drumului); fata de close-up e cea de pe +Y, centrul la ~14 m
+    "south_gate_face_tower": {"camera": {"azimuth": 62.0, "elevation": 8.0, "lens": 60.0, "margin": 1.06},
+                              "views_aspect": 1.2, "bury": 0.0,
+                              "face_center": (0.0, 2.0, 14.2), "face_dist": 22.0},
 }
 
 # camera de joc (scenes/race/chase_camera.gd: DEFAULT_HEIGHT/DISTANCE/BASE_FOV/
@@ -398,7 +405,7 @@ def views(name, res_height=800):
         cam = _camera_for(name)
         cam["azimuth"] = az
         p = os.path.join(FID_DIR, "_view_%s_%d.png" % (name, int(az)))
-        _render(meshes, p, res_height=res_height, aspect=0.6, **cam)
+        _render(meshes, p, res_height=res_height, aspect=SPECS.get(name, {}).get("views_aspect", 0.6), **cam)
         outs.append(p)
     _compose(["--montage", ",".join(outs), "--out",
               os.path.join(FID_DIR, name + "_views.png")])
@@ -414,7 +421,7 @@ def gamecam(name):
         return
     scene = bpy.context.scene
     for o in meshes:
-        o.location = o.location + Vector((0.0, 0.0, -GC_BURY))
+        o.location = o.location + Vector((0.0, 0.0, -SPECS.get(name, {}).get("bury", GC_BURY)))
         o.hide_render = False
     bpy.context.view_layer.update()
 
@@ -492,7 +499,8 @@ def face(name, res_height=1000):
     scene = bpy.context.scene
     for o in meshes:
         o.hide_render = False
-    center = Vector((0.0, 1.0, 4.65))
+    center = Vector(SPECS.get(name, {}).get("face_center", (0.0, 1.0, 4.65)))
+    fdist = SPECS.get(name, {}).get("face_dist", 7.5)
     outs = []
     for tag, az in (("front", 90.0), ("q3", 58.0)):
         for o in list(bpy.data.objects):
@@ -508,7 +516,7 @@ def face(name, res_height=1000):
         cam.data.clip_start = 0.1
         cam.data.clip_end = 200.0
         a = math.radians(az)
-        cam.location = center + Vector((math.cos(a), math.sin(a), 0.0)) * 7.5
+        cam.location = center + Vector((math.cos(a), math.sin(a), 0.0)) * fdist
         cam.rotation_euler = (center - cam.location).normalized().to_track_quat("-Z", "Y").to_euler()
         scene.render.resolution_x, scene.render.resolution_y = int(res_height * 0.85), res_height
         # soarele jos (24 grade) din spatele camerei, putin lateral: relieful arunca umbra

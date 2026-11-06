@@ -54,6 +54,25 @@ if [ -f "$ROOT/structures/bayon_face_tower_a.glb" ]; then
   [ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei a esuat"; fail=1; }
 fi
 
+# --- val 1, grupul A ---
+echo
+echo "== val 1, grupul A: turnurile Bayon b/c + Poarta de Sud =="
+for L in b c; do
+  check "structures/bayon_face_tower_$L.glb" --origin=assembly
+  if [ -f "$ROOT/structures/bayon_face_tower_$L.glb" ]; then
+    python tools/blender/measure_angkor.py bayon "$ROOT/structures/bayon_face_tower_$L.glb" || fail=1
+  fi
+done
+check "structures/south_gate_face_tower.glb" --origin=assembly
+if [ -f "$ROOT/structures/south_gate_face_tower.glb" ]; then
+  python tools/blender/measure_angkor_w1a.py gate "$ROOT/structures/south_gate_face_tower.glb" || fail=1
+  st=$(python tools/blender/measure_angkor_w1a.py --selftest "$ROOT/structures/south_gate_face_tower.glb" 2>&1); rc=$?
+  printf '%s
+' "$st" | grep -E "^-- sabotaj|garda a|SELFTEST"
+  [ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei Portii a esuat"; fail=1; }
+fi
+# --- sfarsit val 1, grupul A ---
+
 echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then

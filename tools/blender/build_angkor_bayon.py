@@ -67,10 +67,134 @@ BASE_STEPS = [(0.0, 0.5, 1.50), (0.5, 1.0, 1.40), (1.0, 1.5, 1.30)]
 VARIANTE = {
     "a": dict(tiers=[(0.36, 1.12, 0.05), (0.33, 0.92, 0.05), (0.31, 0.72, 0.05), (0.27, 0.54, 0.05)],
               lotus_r=0.36, petals=8, ruin=None, seed=11),
+    # b (val 1): 3 etaje mai groase, bobocul mai lat si mai scund cu 10 petale
+    "b": dict(tiers=[(0.50, 1.12, 0.06), (0.46, 0.88, 0.06), (0.42, 0.64, 0.06)],
+              lotus_r=0.43, petals=10, ruin=None, seed=23),
+    # c (val 1): ca a, ruinat -- colt de sus prabusit (etajele 3 si 4), nisa sparta
+    # in fus (fata +Y), baza cu coltul (-X,+Y) darimat si blocuri cazute IN patrat
+    "c": dict(tiers=[(0.36, 1.12, 0.05), (0.33, 0.92, 0.05), (0.31, 0.72, 0.05), (0.27, 0.54, 0.05)],
+              lotus_r=0.36, petals=8, seed=37,
+              ruin=dict(top_corner=(1, 1), base_corner=(-1, 1), niche_face=0,
+                        niche_u=(0.05, 0.70), niche_z=(1.90, 2.30))),
 }
 
 AO_BAYON = dict(samples=28, dist=0.7, gradient="vertical", low=0.60, high=1.0,
                 power=0.85, floor=0.30, strength=1.35, z_range=(0.0, TOP_Z))
+
+
+def _clip_corner(p, corner, d):
+    """Taie colturile `corner` = (sx, sy) cu planul vertical sx*x + sy*y = d (proiecteaza
+    punctele de dincolo pe plan, pe diagonala): colt de baza darimat."""
+    sx, sy = corner
+    s = sx * p.x + sy * p.y
+    if s > d:
+        k = (s - d) * 0.5
+        return Vector((p.x - sx * k, p.y - sy * k, p.z))
+    return p
+
+
+def broken_step(b, z0, z1, half, corner, d):
+    """Treapta de baza (cutie) cu un colt taiat pe diagonala (hull pe 8 puncte)."""
+    pts = [Vector((sx * half, sy * half, z)) for sx in (-1, 1) for sy in (-1, 1) for z in (z0, z1)]
+    hull(b, [_clip_corner(p, corner, d) for p in pts], ANK_STONE)
+
+
+def make_warp(corner, half, z_break, pull, keep=0.25):
+    """Colt prabusit: punctele din coltul `corner` de deasupra cotei `z_break` coboara
+    (raman `keep` din inaltimea de peste `z_break`) si se trag spre axa cu `pull` m."""
+    sx, sy = corner
+
+    def warp(p):
+        if p.x * sx > 0.5 * half and p.y * sy > 0.5 * half and p.z > z_break:
+            return Vector((p.x - sx * pull, p.y - sy * pull, z_break + (p.z - z_break) * keep))
+        return p
+    return warp
+
+
+def rubble(b, corner, d_cut, rnd):
+    """Blocuri cazute, LIPITE de baza, in triunghiul ramas gol la colt, TOATE in
+    patratul de 3 m (verificat aici: nimic dincolo de 1,49; garda masoara din fisier)."""
+    sx, sy = corner
+    placed = []
+    tries = 0
+    while len(placed) < 11 and tries < 900:
+        tries += 1
+        s = d_cut + 0.15 + rnd() * 1.1               # departare pe diagonala, de la planul taierii
+        a = (rnd() * 2 - 1) * (3.0 - s - 0.28)       # pozitia de-a lungul muchiei
+        if abs(a) < 0.0 and False:
+            continue
+        x = sx * (s + a) * 0.5
+        y = sy * (s - a) * 0.5
+        sz = (0.42 + 0.26 * rnd(), 0.42 + 0.26 * rnd(), 0.32 + 0.20 * rnd())
+        rot = (Matrix.Rotation(math.radians(rnd() * 90), 3, "Z")
+               @ Matrix.Rotation(math.radians((rnd() - 0.5) * 24), 3, "X")
+               @ Matrix.Rotation(math.radians((rnd() - 0.5) * 24), 3, "Y"))
+        corners = [rot @ Vector((cx * sz[0] / 2, cy * sz[1] / 2, cz * sz[2] / 2))
+                   for cx in (-1, 1) for cy in (-1, 1) for cz in (-1, 1)]
+        zmin = min(c.z for c in corners)
+        c0 = Vector((x, y, -zmin))
+        stacked = len(placed) >= 7
+        if stacked:
+            c0.z += 0.38
+        pts = [c0 + c for c in corners]
+        if any(abs(p.x) > 1.485 or abs(p.y) > 1.485 for p in pts):
+            continue
+        # nu intra in treapta 0 (taiata) nici in baza de sus: dincolo de planul taierii
+        if any(sx * p.x + sy * p.y < d_cut + 0.04 for p in pts):
+            continue
+        if any((c0 - q).length < 0.62 for (q, st) in placed if st == stacked):
+            continue
+        placed.append((c0, stacked))
+        b.box(c0, sz, ANK_STONE, rotation=rot)
+    return len(placed)
+
+
+def _base_skip(k, ua, ub, half, corner, cut):
+    """True daca blocul din fata k (u in ua..ub) ar atarna peste coltul taiat."""
+    fr = Frame((0.0, 0.0, 0.0), 90.0 * k)
+    sx, sy = corner
+    for u in (ua, ub):
+        p = fr.p(u, half, 0.0)
+        if sx * p.x + sy * p.y > cut + 0.10:
+            return True
+    return False
+
+
+def shaft_with_niche(b, ruin):
+    """Fusul (1,5-2,7 m) cu o nisa SPARTA pe fata `niche_face`: miezul se opreste cu
+    0,32 m mai in spate pe acea latura, iar un cadru de 4 placi (stanga, dreapta, jos,
+    sus) inchide restul fetei, lasand fereastra niche_u x niche_z GOALA (adancime
+    0,32 m). Blocurile din fereastra lipsesc (skip)."""
+    h = SHAFT_HALF - 0.04
+    dep = 0.32
+    z0, z1 = 1.5, 2.7
+    nk = ruin["niche_face"]
+    u0, u1 = ruin["niche_u"]
+    nz0, nz1 = ruin["niche_z"]
+    fr = Frame((0, 0, 0), 90.0 * nk)
+
+    def rect(ua, wa, ub, wb, za, zb):
+        pa, pb = fr.p(ua, wa, 0.0), fr.p(ub, wb, 0.0)
+        b.box(((pa.x + pb.x) * 0.5, (pa.y + pb.y) * 0.5, (za + zb) * 0.5),
+              (abs(pb.x - pa.x), abs(pb.y - pa.y), zb - za), ANK_STONE)
+    rect(-h, -h, h, h - dep, z0, z1)                 # miez retras pe fata nisei
+    rect(-h, h - dep, u0, h, z0, z1)                 # cadru: stanga
+    rect(u1, h - dep, h, h, z0, z1)                  # dreapta
+    rect(u0, h - dep, u1, h, z0, nz0)                # jos
+    rect(u0, h - dep, u1, h, nz1, z1)                # sus
+
+    def skip(k, c, ua, ub):
+        return k == nk and c == 1 and ub > u0 and ua < u1
+    block_courses(b, SHAFT_HALF, z0, z1, 3, 0.8, proud=0.04, seed=5, skip=skip)
+
+
+def _in_ruin(pt, ruin):
+    """Pete de lichen nu stau in aer: nu in coltul de baza darimat, nu in coltul de sus."""
+    sx, sy = ruin["base_corner"]
+    if pt.z < 1.6 and sx * pt.x + sy * pt.y > 1.15:
+        return True
+    tx, ty = ruin["top_corner"]
+    return pt.z > 7.1 and pt.x * tx > 0.2 and pt.y * ty > 0.2
 
 
 def build_tower(name, spec):
@@ -80,13 +204,32 @@ def build_tower(name, spec):
     streak_sites = [] # (z sus, jum. perete, n)
 
     # --- 1. baza: piramida in trepte, 3,0 m la treapta de jos ---------------------
-    stepped_base(stone, BASE_STEPS)
+    ruin = spec.get("ruin")
+    if ruin:
+        # baza ruinata: coltul (-X,+Y) darimat pe treptele 0 si 1, blocuri cazute in golul lasat
+        bc = ruin["base_corner"]
+        cuts = [0.95, 1.70, None]
+        for i, (z0, z1, half) in enumerate(BASE_STEPS):
+            if cuts[i] is None:
+                stone_box(stone, 0, 0, z0, z1, half - 0.04)
+                skip = None
+            else:
+                broken_step(stone, z0, z1, half - 0.04, bc, cuts[i] - 0.04)
+                # blocurile din fata nu urca pe colt: sar cele din ultima treime spre colt
+                skip = (lambda cut: lambda k, c, ua, ub: _base_skip(k, ua, ub, half, bc, cut))(cuts[i])
+            block_courses(stone, half, z0, z1, 1, 0.95, proud=0.04, seed=i, skip=skip)
+        rubble(stone, bc, cuts[0], lcg(spec["seed"] + 3))
+    else:
+        stepped_base(stone, BASE_STEPS)
     for (z0, z1, half), nxt in zip(BASE_STEPS, BASE_STEPS[1:] + [(1.5, 1.5, SHAFT_HALF)]):
         ledges.append((z1, half, nxt[2]))
 
     # --- 2. fusul ingust cu randuri de blocuri --------------------------------------
-    stone_box(stone, 0, 0, 1.5, 2.7, SHAFT_HALF - 0.04)
-    block_courses(stone, SHAFT_HALF, 1.5, 2.7, 3, 0.8, proud=0.04, seed=5)
+    if ruin:
+        shaft_with_niche(stone, ruin)
+    else:
+        stone_box(stone, 0, 0, 1.5, 2.7, SHAFT_HALF - 0.04)
+        block_courses(stone, SHAFT_HALF, 1.5, 2.7, 3, 0.8, proud=0.04, seed=5)
     streak_sites.append((2.7, SHAFT_HALF, 10))
 
     # --- 3. cornisa gatului ---------------------------------------------------------------
@@ -105,9 +248,16 @@ def build_tower(name, spec):
     ledges.append((z, 1.31, spec["tiers"][0][1] + 0.05))
 
     # --- 6. etajele: un con din randuri ---------------------------------------------------
+    n_t = len(spec["tiers"])
     for i, (th, half, ch) in enumerate(spec["tiers"]):
         z0 = z
-        z = tier(stone, z0, z0 + th, half, ch)
+        warp = fskip = None
+        if ruin and i >= n_t - 2:
+            tc = ruin["top_corner"]
+            # etajul 3: colt rupt la jumatate; etajul 4: rupt de la baza lui
+            warp = make_warp(tc, half, z0, 0.85 * half, keep=0.0)
+            fskip = (lambda tc_: lambda sx, sy: (sx, sy) == tc_)(tc)
+        z = tier(stone, z0, z0 + th, half, ch, warp=warp, finial_skip=fskip)
         if i < 2:
             streak_sites.append((z0 + th, half * 0.96, 4))
         nxt = spec["tiers"][i + 1][1] if i + 1 < len(spec["tiers"]) else 0.42
@@ -146,6 +296,8 @@ def build_tower(name, spec):
         wc = inner + wid * 0.5
         fr = Frame((0, 0, 0), 90.0 * side)
         pt = fr.p(u, wc, zs)
+        if ruin and _in_ruin(pt, ruin):
+            continue
         slot = ANK_LICHEN_ORANGE if kind == "o" else ANK_LICHEN_GREEN
         if kind == "g":
             ru, rw = ru * 1.15, rw * 1.1

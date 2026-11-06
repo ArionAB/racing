@@ -574,7 +574,7 @@ WATER_AW = 0.5          # oglinda santului Angkor Wat (cale +3)
 JADE_STYLE = chr(10).join([
     "{",
     '"ravines": Array[int]([0, 1, 2, 3, 4]),',
-    '"water_shallow_rgb": Color(0.25, 0.46, 0.33, 1),',
+    '"water_shallow_rgb": Color(0.27, 0.44, 0.34, 1),',
     '"water_deep_rgb": Color(0.10, 0.30, 0.20, 1),',
     '"water_shore_rgb": Color(0.20, 0.34, 0.18, 1),',
     '"water_dim": 0.9,',

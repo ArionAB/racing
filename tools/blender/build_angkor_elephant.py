@@ -58,13 +58,15 @@ def _sm(t):
 
 # Parametri de forma, in spatiul african (inainte de scara). Se regleaza prin iteratie.
 EAR_ANCHOR = Vector((0.70, 0.85, 4.20))   # radacina urechii pe cap (x pe partea dreapta)
+EAR_TOP = 3.95                            # plafonul moale al clapei urechii (african)
 EAR_K = Vector((0.55, 0.80, 0.80))        # factorii de micsorare x, y, z fata de ancora
 ARCH_A = 0.64                             # cat se ridica mijlocul spatelui (m, spatiu african)
 ARCH_Y, ARCH_W = -0.74, 1.1                # centrul si latimea arcului pe Y
-BUMP_X, BUMP_Y, BUMP_H = 0.30, 1.55, 0.28 # cele doua boltiri ale frunții
+BUMP_X, BUMP_Y, BUMP_H = 0.30, 1.55, 0.12 # cele doua boltiri ale frunții
 SC_X = 0.92                               # latimea (SC_Y se deduce din lungimea tinta)
-Z_LEG, LEG_SC, HEAD_BOOST = 2.0, 0.62, 0.12  # tronsonul picioarelor, scara lui, spor de cap
-RUMP_DROP = 0.55                          # coborarea crupei (m, spatiu african)
+RUMP_DROP = 0.30                          # rotunjirea crupei, DOAR in ultimii ~15% spre coada (m, african)
+HEAD_K = 0.88                             # capul mai mic fata de corp (x, z), crescator spre +Y
+LEG_THICK = 1.20                          # picioare mai groase in X/Y (nu mai scurte)
 TUSK_K = 0.45                             # fildesii scurti: factor fata de radacina
 
 
@@ -79,17 +81,26 @@ def warp(p, w_ear=0.0, w_head=0.0, tusk=None):
         a = Vector((sgn * EAR_ANCHOR.x, EAR_ANCHOR.y, EAR_ANCHOR.z))
         d = q - a
         q = a + Vector((d.x * EAR_K.x, d.y * EAR_K.y, d.z * EAR_K.z)) * w_ear + d * (1.0 - w_ear)
+        # coltul de sus al clapei nu trebuie sa iasa deasupra liniei spatelui (un colt
+        # de ureche in ridicare citea ca un ghimpe la Walk/Trumpet)
+        if q.z > EAR_TOP:
+            q.z = EAR_TOP + (q.z - EAR_TOP) * 0.25 * w_ear + (q.z - EAR_TOP) * (1.0 - w_ear)
     # spatele arcuit: mijlocul sus, umarul si crupa coboara
     wy = _sm((1.2 - q.y) / 0.6)
     bump = math.exp(-((q.y - ARCH_Y) / ARCH_W) ** 2)
     q.z += ARCH_A * (bump - 0.50) * _sm((q.z - 2.6) / 1.4) * wy * (1.0 - w_ear)
-    # crupa coboara spre coada (la elefantul asiatic coloana scade dupa sold)
-    q.z -= RUMP_DROP * _sm((-1.2 - q.y) / 0.9) * _sm((q.z - 2.6) / 1.4)
+    # crupa se rotunjeste doar la capatul dinspre coada; soldul ramane la inaltimea umarului
+    q.z -= RUMP_DROP * _sm((-2.35 - q.y) / 0.6) * _sm((q.z - 2.6) / 1.4)
+    # capul mai mic: x si z strânse spre centrul capului, doar deasupra trompei
+    hf = 1.0 - (1.0 - HEAD_K) * _sm((q.y - 0.6) / 0.7)
+    q.x *= hf
+    hz = 1.0 - (1.0 - HEAD_K) * _sm((q.y - 1.1) / 1.1)   # pe Z mai tarziu: fara treapta la ceafa
+    q.z -= (1.0 - hz) * (q.z - 3.4) * _sm((q.z - 1.5) / 1.0)
     if w_head > 0.0:                           # capul bombat cu doua boltiri
         for cx in (-BUMP_X, BUMP_X):
             r2 = ((q.x - cx) / 0.30) ** 2 + ((q.y - BUMP_Y) / 0.85) ** 2
             q.z += BUMP_H * math.exp(-r2) * _sm((q.z - 3.6) / 0.6) * w_head
-        q.z += 0.20 * math.exp(-((q.y - BUMP_Y) / 1.0) ** 2) * _sm((q.z - 3.6) / 0.6) * w_head
+        q.z += 0.08 * math.exp(-((q.y - BUMP_Y) / 1.0) ** 2) * _sm((q.z - 3.6) / 0.6) * w_head
     return q
 
 
@@ -122,7 +133,7 @@ def build():
         if b in ("EarL", "EarR"):
             w_ear = 1.0
         elif b == "Body" and c.y > -0.15 and c.z > 2.8:
-            w_ear = _sm((abs(c.x) - 1.0) / 0.25)
+            w_ear = _sm((abs(c.x) - 0.82) / 0.2)
         w_head = 1.0 if b == "Head" else 0.0
         if b == "Body" and w_ear >= 0.5:
             # jumatatea din spate a urechii africane e legata de Body (la
@@ -132,28 +143,57 @@ def build():
         tusk = roots[1.0 if c.x >= 0 else -1.0] if v.index in ivory else None
         new[v.index] = warp(c, w_ear, w_head, tusk)
 
-    body_vg = ele.vertex_groups["Body"]
-    for i, ear_bone in ear_move:
-        body_vg.remove([i])
-        ele.vertex_groups[ear_bone].add([i], 1.0, "REPLACE")
-    print("  clapa urechii: %d varfuri mutate de pe Body pe Ear" % len(ear_move))
+    # Greutatile urechii: clapa intreaga pe osul ei, dar CU RAMPA spre radacina.
+    # Greutate rigida 1,0 pe Ear lasa varfurile de langa cap sa se desprinda de
+    # vecinii lor de pe Body/Head la Walk (un varf de ureche ridicat ca un ghimpe
+    # deasupra spatelui, masurat 0,10 m fata de media vecinilor). Spre radacina
+    # (|x| mic) varful ramane pe osul de unde venea (Head sau Body).
+    ear_other = {i: "Body" for i, _ in ear_move}
+    for i in new:
+        if dom[i] in ("EarL", "EarR"):
+            ear_other[i] = "Head"
+    ear_bone = {i: ("EarR" if me.vertices[i].co.x >= 0 else "EarL") for i in ear_other}
+    for i, other in ear_other.items():
+        t = _sm((abs(new[i].x) * SC_X - 0.60) / 0.45)
+        for gname_ in ("Body", "Head", "EarL", "EarR"):
+            try:
+                ele.vertex_groups[gname_].remove([i])
+            except RuntimeError:
+                pass
+        if t > 0.999:
+            ele.vertex_groups[ear_bone[i]].add([i], 1.0, "REPLACE")
+        else:
+            ele.vertex_groups[ear_bone[i]].add([i], t, "REPLACE")
+            ele.vertex_groups[other].add([i], 1.0 - t, "REPLACE")
+    print("  urechi: %d varfuri cu rampa Ear/%s" % (len(ear_other), "Head|Body"))
 
-    # scara: PE TRONSOANE pe Z, calibrata pe UMAR (spatele din mijloc iese mai sus, arcuit). Elefantul african din pachet e un butoi inalt
-    # (spatele la 4,6 m): o scara uniforma pana la cota asiatica il facea pui
-    # (picioare scurte). Picioarele (z < Z_LEG) se scaleaza mai putin, corpul
-    # deasupra se turteste mai tare, capul (spre +Y) mai putin decat spatele.
+    # picioare mai groase (X/Y in jurul axei fiecarui picior), nu mai scurte
+    cen = {}
+    for i in new:
+        if dom[i].startswith("Leg"):
+            cen.setdefault(dom[i], []).append(new[i])
+    for i in new:
+        if dom[i].startswith("Leg"):
+            pts = cen[dom[i]]
+            cx = sum(q.x for q in pts) / len(pts)
+            cy = sum(q.y for q in pts) / len(pts)
+            w = 1.0 - _sm((new[i].z - 1.6) / 0.7)
+            f = 1.0 + (LEG_THICK - 1.0) * w
+            new[i].x = cx + (new[i].x - cx) * f
+            new[i].y = cy + (new[i].y - cy) * f
+
+    # O SINGURA scara verticala pentru tot animalul (picioare si corp la fel),
+    # calibrata pe UMAR; spatele din mijloc iese mai sus prin arc. Elefantul
+    # african din pachet e un butoi inalt (spatele la 4,6 m); lungimea cu trompa
+    # se deduce dupa reforma (fildesii scurtati nu mai sunt varful).
     top = max(new[i].z for i in new if dom[i] == "Body" and abs(new[i].x) < 0.8
               and 0.0 < new[i].y < 0.8)           # umarul: deasupra picioarelor din fata
-    leg_h = Z_LEG * LEG_SC
-    # lungimea cu trompa; fildesii scurtati nu mai sunt varful, deci se masoara dupa reforma
+    sc_z = SHOULDER_H / top
     sc_y = LENGTH_TOTAL / (max(q.y for q in new.values()) - min(q.y for q in new.values()))
-    k_body = (SHOULDER_H - leg_h) / (top - Z_LEG)
-    print("  spate (african+arc) %.2f m -> picioare x%.2f, corp x%.3f" % (top, LEG_SC, k_body))
+    print("  umar (african+arc) %.2f m -> scara Z unica %.3f, Y %.3f" % (top, sc_z, sc_y))
 
     def scl(q):
-        k = k_body * (1.0 + HEAD_BOOST * _sm((q.y - 0.4) / 1.0))
-        z = q.z * LEG_SC if q.z < Z_LEG else leg_h + (q.z - Z_LEG) * k
-        return Vector((q.x * SC_X, q.y * sc_y, z))
+        return Vector((q.x * SC_X, q.y * sc_y, q.z * sc_z))
 
     for v in me.vertices:
         v.co = scl(new[v.index])
@@ -171,9 +211,9 @@ def build():
         for fc in fcs:
             if fc.data_path.endswith("location") and fc.array_index == 2:
                 for kp in fc.keyframe_points:
-                    kp.co[1] *= LEG_SC
-                    kp.handle_left[1] *= LEG_SC
-                    kp.handle_right[1] *= LEG_SC
+                    kp.co[1] *= sc_z
+                    kp.handle_left[1] *= sc_z
+                    kp.handle_right[1] *= sc_z
     bpy.context.view_layer.update()
     return arm, ele
 

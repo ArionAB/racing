@@ -1,6 +1,6 @@
 # Inventar — kit Angkor, val 1, grupul C (elefantul asiatic)
 
-Contract: `docs/asset_briefs/angkor_kit.md` §1.3. Desen:
+Contract: `docs/asset_briefs/angkor_kit.md` §1.3 (cotele Serengeti din brief, 3,4 / 6,4, erau greșite; vezi nota de mai jos). Desen:
 `docs/track_briefs/img/angkor_assets_v1/asian_elephant.png`. Pe tiparul
 `angkor_inventory.md`.
 
@@ -24,24 +24,28 @@ rămână în piele:
   `Body` la Serengeti) se strâng spre rădăcina de pe cap (x ×0,55, y/z ×0,80).
   Partea din spate trece **pe osul urechii** (altfel la `Trumpet` clapa se rupea
   în două). Lățime totală 2,6 m față de 4,0 m;
-- **spatele arcuit:** maxim între picioare (3,05 m), umărul 2,90, crupa 2,80
-  (coborâre spre coadă, `RUMP_DROP`);
-- **cap bombat:** două boltiri la x ±0,30 și o boltire de bază (`BUMP_*`);
+- **spatele arcuit, convex:** maxim între picioare (3,05 m), umărul 2,90, șoldul 2,95;
+  crupa se rotunjește doar în ultimii ~15% spre coadă (`RUMP_DROP`, mic). Runda 3 o
+  coborâse mult și dădea un animal pocit; anulat în runda 4;
+- **cap bombat:** două boltiri slabe la x ±0,30 și una de bază (`BUMP_*`);
   forma mesh-ului sursă are puțini vertecși pe frunte, deci boltirile sunt
   rotunjite, nu o creastă dublă clară (vezi deviații);
 - **fildeși:** scurtați la 45% spre rădăcină (nu lipsesc: 56 de fețe pe slotul 29);
-- **scara pe Z pe tronsoane** (picioare ×0,62 sub 2,0 m african, corp ×0,65 deasupra),
-  calibrată pe **umăr**; scara pe Y deduce lungimea de 5,60 m **după** reformă
-  (fildeșii scurtați nu mai sunt vârful), X ×0,92.
+- **O SINGURĂ scară verticală** (×0,636) pentru tot animalul, calibrată pe **umăr**;
+  scara pe Y deduce lungimea de 5,60 m **după** reformă (fildeșii scurtați nu mai
+  sunt vârful), X ×0,92. Picioarele sunt îngroșate ×1,2 în X/Y (nu scurtate);
+- **capul mai mic** (x/z ×0,88 spre +Y, pe Z după ceafă ca să nu apară treaptă),
+  cu vârful sub spatele de la mijloc.
 
 ## Cote măsurate (din fișier, Godot, `measure_angkor_w1c.py elephant`)
 
 | | măsurat | contract |
 |---|---:|---|
 | umăr (corp, Body dominant, la picioarele din față) | **2,900 m** | 2,8–3,0 |
-| spate la mijloc / crupă | 3,050 / 2,801 m | mijloc ≥ umăr + 0,10 |
+| spate la mijloc / șold (la picioarele din spate) | 3,047 / 2,951 m (șold = umăr +0,051) | mijloc ≥ umăr + 0,10; șold ≥ umăr − 0,20 |
+| vârful capului | 2,878 m (sub spatele de la mijloc) | ≤ spatele de la mijloc |
 | lungime cu trompa (Z) | **5,600 m** | 5,4–5,8 |
-| înălțime totală (boltirea capului) | 3,302 m | ≤ 3,4 (garda mea) |
+| înălțime totală | 3,047 m (= spatele de la mijloc; capul nu mai e punctul cel mai înalt) | ≤ 3,4 (garda mea) |
 | lățime cu urechi | 2,605 m | ≤ 2,8 (garda mea; african 4,0) |
 | min Y | 0,000 | origine la sol (la mijlocul lungimii, ca la Serengeti: `SlidingHazard` centrează cutia pe origine) |
 | `Walk` | 1,500 s (min–max al intrărilor: cadrele 1…37 la 24 fps → 0,042…1,542) | 1,5 s |
@@ -82,15 +86,15 @@ spatele la cameră, fiindcă fața e pe +Y).
 
 | element al desenului | în GLB |
 |---|---|
-| corp rotunjit, scund, picioare groase | da, mult mai aproape decât runda 1 |
+| corp rotunjit, picioare groase și drepte | da; picioarele îngroșate, o singură scară verticală |
 | urechi mici, rotunjite | mici (aria ~½ din a celei africane), dar **colțuroase** (low-poly), nu cu marginea ondulată din desen |
 | cap cu două boltiri | boltiri slabe: mesh-ul are foarte puțini vertecși pe frunte; din profil se citește cap bombat, din față o frunte ușor în două |
-| spate cel mai înalt la mijloc | da, +0,15 m peste umăr, crupă mai jos |
+| spate cel mai înalt la mijloc | da, +0,15 m peste umăr; șoldul +0,05 peste umăr, rotunjit doar spre coadă |
 | fildeși scurți, fără șa, fără călăreț | da |
 | coada cu smoc | nu: coada e cea africană, subțire |
 | piele de culoare caldă | clasa `elephant_hide` la integrare; preview-ul arată slotul gri |
 
-## Cele trei runde
+## Rundele (4)
 
 1. **Prima:** scară uniformă pe Z până la 2,9 m (÷0,59). Rezultat: **pui** —
    picioare scurte, cap mic, corp turtit. Cauza: mesh-ul african e înalt (4,6 m).
@@ -101,6 +105,22 @@ spatele la cameră, fiindcă fața e pe +Y).
    durata `Walk` 1,542 (durata e max − min, nu max).
 3. **A treia:** boltiri mai largi și mai joase, crupa coborâtă (garda: crupa era
    mai sus decât umărul), clapa urechii mutată pe osul ei (la `Trumpet` se rupea).
+
+4. **A patra** (verdictul coordonatorului: în profil animalul părea ghemuit,
+   cu crupa lăsată între picioare scurte și strâmbe). Anulat `RUMP_DROP` mare (acum
+   0,30, doar în ultimii ~15%); **o singură scară verticală** în loc de tronsoane;
+   picioarele îngroșate în X/Y, nu scurtate; capul ×0,88 și boltirile reduse (vârful
+   capului sub spatele de la mijloc); garda raportează șoldul, umărul, spatele de la
+   mijloc și vârful capului, cu verificare moale șold ≥ umăr − 0,20 și cap ≤ spate.
+   **Ghimpele la Walk (cadrul 2):** nu era o greutate greșită într-un vârf izolat, ci
+   colțul de sus al clapei urechii, un vârf pe `Body` cu |x| african 1,02 care
+   scăpa de micșorare (pragul era 1,0) și rămânea 0,13 m deasupra spatelui. Pragul
+   coborât la 0,82, colț plafonat moale (`EAR_TOP`), iar greutățile urechii au acum
+   rampă spre rădăcină (Ear/Head sau Ear/Body), nu 1,0 rigid (77 de vârfuri); în plus
+   măsurat cu o sondă temporară: abaterea față de media vecinilor la Walk (cadrele 10
+   și 28) nu mai are nicio ureche în primele locuri (rămân cusăturile
+   picior/burtă, 0,08–0,11 m, ca la Serengeti). Toate cadrele de Walk
+   (`asian_elephant_pose.png`, `_pose34.png`) și Trumpet recitite după ultimul build.
 
 ## Deviații și limite (de spus coordonatorului)
 

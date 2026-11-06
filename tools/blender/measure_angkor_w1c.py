@@ -15,7 +15,9 @@ Contractul (kit 1.3), tot ce se poate masura pe fisier:
     cap si urechi. LUNGIMEA 5,4-5,8 m cu trompa (extinderea pe Z a intregului
     mesh). Inaltimea totala (cu bolta capului) <= 3,4;
   * spatele cel mai inalt LA MIJLOC: maximul dintre picioare e cu >= 0,10 m
-    peste umar si peste crupa;
+    peste umar si >= sold; SOLDUL (la picioarele din spate) nu coboara cu
+    mai mult de 0,20 m sub umar, iar varful capului nu depaseste spatele de
+    la mijloc (cote raportate);
   * urechi MICI: latimea totala (X, cu urechi) <= 2,8 m, fata de 4,0 m la cel african;
   * radacina fara scala/rotatie; sloturile = cele ale elefantului din
     Serengeti (acelasi aranjament, ca jocul sa-l trateze identic).
@@ -37,6 +39,7 @@ SHOULDER = (2.8, 3.0)
 LENGTH = (5.4, 5.8)
 HEIGHT_MAX = 3.4
 ARCH_MIN = 0.10
+HIP_DROP_MAX = 0.20      # soldul (la picioarele din spate) nu cade mai mult de atat sub umar
 EAR_WIDTH_MAX = 2.80
 WALK_S = 1.5
 SERENGETI = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..",
@@ -129,21 +132,28 @@ def check(path, report=True):
     sh = max(p[1] for p in body if abs(p[2] - zf) <= 0.6)
     rump = max(p[1] for p in body if abs(p[2] - zr) <= 0.6)
     mid = max(p[1] for p in body if min(zf, zr) < p[2] < max(zf, zr))
+    head_top = max(p[1] for p, jn, w in zip(pts, joints, wts)
+                   if skin_names[jn[max(range(4), key=lambda q: w[q])]] == "Head")
     ntri = sum(g["accessors"][pr["indices"]]["count"] // 3
                for n in mesh_nodes for pr in g["meshes"][n["mesh"]]["primitives"])
     if report:
-        print("cote      umar %.3f m   spate-mijloc %.3f   crupa %.3f   lungime %.3f   "
+        print("cote      umar %.3f m   spate-mijloc %.3f   sold %.3f (umar%+.3f)   varf cap %.3f   lungime %.3f   "
               "inaltime totala %.3f   latime (cu urechi) %.3f   min Y %.3f   %d tri"
-              % (sh, mid, rump, length, height, width, min(ys), ntri))
+              % (sh, mid, rump, rump - sh, head_top, length, height, width, min(ys), ntri))
     if not SHOULDER[0] <= sh <= SHOULDER[1]:
         bad.append("umarul %.3f in afara %.1f-%.1f" % (sh, SHOULDER[0], SHOULDER[1]))
     if not LENGTH[0] <= length <= LENGTH[1]:
         bad.append("lungimea %.3f in afara %.1f-%.1f" % (length, LENGTH[0], LENGTH[1]))
     if height > HEIGHT_MAX:
         bad.append("inaltimea totala %.3f > %.1f" % (height, HEIGHT_MAX))
-    if mid < sh + ARCH_MIN or mid < rump + ARCH_MIN:
-        bad.append("spatele nu e cel mai inalt la mijloc: mijloc %.3f, umar %.3f, crupa %.3f "
-                   "(cerut >= +%.2f)" % (mid, sh, rump, ARCH_MIN))
+    if mid < sh + ARCH_MIN or mid < rump:
+        bad.append("spatele nu e cel mai inalt la mijloc: mijloc %.3f, umar %.3f, sold %.3f "
+                   "(cerut mijloc >= umar + %.2f si >= sold)" % (mid, sh, rump, ARCH_MIN))
+    if rump < sh - HIP_DROP_MAX:
+        bad.append("soldul %.3f cade cu %.3f sub umar (max %.2f): spate lasat"
+                   % (rump, sh - rump, HIP_DROP_MAX))
+    if head_top > mid + 0.02:
+        bad.append("capul (%.3f) trece peste spatele de la mijloc (%.3f)" % (head_top, mid))
     if width > EAR_WIDTH_MAX:
         bad.append("latime %.3f > %.2f: urechi prea mari" % (width, EAR_WIDTH_MAX))
     if abs(min(ys)) > 0.02:

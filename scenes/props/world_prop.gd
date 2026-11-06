@@ -681,6 +681,8 @@ const SPLIT_MODELS := {
 	# `church_arch`/`fig_tree`/`fever_tree`: ACCENT_HOLDS_CLASS, nu
 	# CLASSES_BY_MODEL direct pe corp.
 	"elephant": true,
+	# Elefantul asiatic (Angkor, kit §1.3): acelasi schelet si acelasi `Elephant_Mesh`.
+	"asian_elephant": true,
 	# Rata (Fiordland, lotul PADUREA DE FAGI): tufa densa cu flori rosii, UN
 	# SINGUR nod de mesh (`Rata`, nu Trunk+Crown ca fagii). Masurat
 	# (probe_slots.gd): 28.2% slot 7 (KERB_RED, florile — brief-ul le numeste
@@ -905,6 +907,8 @@ const ACCENT_HOLDS_CLASS := {
 	# ramas pe corp) ia `elephant_hide`; corpul original ramane doar cu
 	# fildesii pe atlas.
 	"elephant": true,
+	# Elefantul asiatic (Angkor, kit §1.3): acelasi schelet si acelasi `Elephant_Mesh`.
+	"asian_elephant": true,
 	# Rata (Fiordland, lotul PADUREA DE FAGI): accentul (`Rata_Accente`, tufa
 	# de frunzis 21+28) ia `beech_canopy`; corpul original ramane cu florile
 	# (KERB_RED) pe atlas. Nu exista astazi vreo instanta cu metadata
@@ -1657,6 +1661,9 @@ const CLASSES_BY_MODEL := {
 	"elephant": {
 		"Elephant_Mesh_Accente": Palette.TRI_PREFIX + "elephant_hide",
 	},
+	"asian_elephant": {
+		"Elephant_Mesh_Accente": Palette.TRI_PREFIX + "elephant_hide",
+	},
 
 	# --- Fiordland: GNEISUL UD (Track16) ----------------------------------
 	#
@@ -2349,6 +2356,11 @@ const CLASSES_HALONG := {
 const _ANK_SANDSTONE: String = Palette.TRI_PREFIX + "angkor_sandstone"
 const CLASSES_ANGKOR := {
 	"bayon_face_tower_a": {"Bayon_Stone": _ANK_SANDSTONE},
+	"bayon_face_tower_b": {"Bayon_Stone": _ANK_SANDSTONE},
+	"bayon_face_tower_c": {"Bayon_Stone": _ANK_SANDSTONE},
+	"south_gate_face_tower": {"Gate_Stone": _ANK_SANDSTONE},
+	"aw_west_gopura": {"Gopura_Stone": _ANK_SANDSTONE},
+	"ta_prohm_tree_gate": {"TreeGate_Stone": _ANK_SANDSTONE},
 }
 const CLASSES_TRANSFAGARASAN := {
 	"schist_outcrop_a": _TF_OUTCROP, "schist_outcrop_b": _TF_OUTCROP,
@@ -2928,6 +2940,10 @@ const SLOT_REMAP_BY_MODEL := {
 	# Griurile NEUTRE ale .glb-ului ies crem sub soarele cald (1.0,0.90,0.72) +
 	# saturatia 1.18 din post; doar sloturile RECI raman gri.
 	"elephant": {
+		2: Palette.ASPHALT,
+		29: Palette.VOLCANIC_BLACK,
+	},
+	"asian_elephant": {
 		2: Palette.ASPHALT,
 		29: Palette.VOLCANIC_BLACK,
 	},

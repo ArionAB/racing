@@ -5,12 +5,18 @@
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="3_branch"]
 [ext_resource type="Script" path="res://scenes/hazards/rim_boulder_hazard.gd" id="4_rim"]
 [ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="5_hzm"]
-[ext_resource type="PackedScene" path="res://assets/models/serengeti/animals/elephant.glb" id="6_eleph"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/animals/asian_elephant.glb" id="6_eleph"]
 [ext_resource type="Script" path="res://scenes/hazards/rain_cycle.gd" id="7_rain"]
 [ext_resource type="Script" path="res://scenes/hazards/lightning_flash.gd" id="8_flash"]
 [ext_resource type="Script" path="res://scenes/hazards/vine_curtain.gd" id="9_vine"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/structures/bayon_face_tower_a.glb" id="10_bayon"]
 [ext_resource type="Script" path="res://scenes/props/world_prop.gd" id="11_prop"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/bayon_face_tower_b.glb" id="12_bayon_b"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/bayon_face_tower_c.glb" id="13_bayon_c"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/south_gate_face_tower.glb" id="14_gate_s"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/aw_west_gopura.glb" id="15_gopura"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/ta_prohm_tree_gate.glb" id="16_treegate"]
+[ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="17_camzone"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_macheta"]
 albedo_color = Color(0.72, 0.64, 0.52, 1)
@@ -43,13 +49,13 @@ custom_road_surface = "asphalt"
 custom_gate_model = "none"
 custom_sea_level_offset = -17.42
 custom_dirt_ranges = Array[Vector2]([Vector2(0.117, 0.318), Vector2(0.375, 0.403), Vector2(0.488, 0.532), Vector2(0.607, 0.988)])
-custom_ravines = Array[Vector4]([Vector4(0.016, 0.071, 20, 0), Vector4(0.098, 0.114, 20, 0), Vector4(0.769, 0.895, 20, 1), Vector4(0.774, 0.809, 20, -1), Vector4(0.319, 0.359, 20, 0)])
+custom_ravines = Array[Vector4]([Vector4(0.016, 0.056, 20, 0), Vector4(0.098, 0.114, 20, 0), Vector4(0.769, 0.895, 20, 1), Vector4(0.774, 0.809, 20, -1), Vector4(0.319, 0.359, 20, 0)])
 custom_ravine_floors = Array[Vector2]([Vector2(0, -2.0), Vector2(1, -2.0), Vector2(2, -2.0), Vector2(3, -1.5), Vector2(4, 8.5)])
 custom_ravine_widths = Array[Vector2]([Vector2(0, 70.0), Vector2(1, 40.0), Vector2(2, 36.0), Vector2(3, 45.0), Vector2(4, 40.0)])
 custom_ravine_water = Array[Vector3]([Vector3(0, 0.5, 16.0), Vector3(1, 0.5, 16.0), Vector3(2, 0.5, 16.0), Vector3(3, 0.5, 16.0), Vector3(4, 11.0, 16.0)])
 custom_width_segments = Array[Vector3]([Vector3(0.058, 0.114, 4.0), Vector3(0.121, 0.31, 3.5), Vector3(0.419, 0.467, 7.0)])
 custom_width_pinches = Array[Vector3]([Vector3(0.36, 0.367, 3.5)])
-custom_parapets = Array[Vector4]([Vector4(0.0174, 0.0483, 1, 3), Vector4(0.0511, 0.0695, 1, 3), Vector4(0.0174, 0.0589, -1, 3), Vector4(0.061, 0.0695, -1, 3), Vector4(0.32, 0.359, 0, 3), Vector4(0.7708, 0.8106, -1, 3), Vector4(0.7708, 0.8933, 1, 3)])
+custom_parapets = Array[Vector4]([Vector4(0.0174, 0.0483, 1, 3), Vector4(0.0511, 0.0554, 1, 3), Vector4(0.0174, 0.0397, -1, 3), Vector4(0.0433, 0.0554, -1, 3), Vector4(0.32, 0.359, 0, 3), Vector4(0.7708, 0.8106, -1, 3), Vector4(0.7708, 0.8933, 1, 3)])
 custom_lane_bias = Array[Vector3]([Vector3(0.41, 0.46, 0.72)])
 custom_bench_patches = Array[Dictionary]([{ "lvl": PackedVector2Array(-1000.0, 14.3, 1000.0, 14.3), "soft": Vector4(25.0, 0.0, 15.0, 30.0), "x0": 60.0, "x1": 107.0, "z0": -366.0, "z1": -200.0 }])
 terrain_pad_m = 120.0
@@ -75,6 +81,8 @@ branch_half_width = 3.0
 label = "Galeria Ta Prohm"
 speed_factor = 0.85
 bumpiness = 0.08
+surface = 3
+tint = Color(0.78, 0.6, 0.48, 1)
 
 [node name="Hazarduri" type="Node3D" parent="."]
 
@@ -172,13 +180,53 @@ script = ExtResource("11_prop")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -115.83, 19.0, -436.0)
 metadata/coliziune = "none"
 
-[node name="BayonA1" parent="DecorManual" instance=ExtResource("10_bayon")]
+[node name="BayonB1" parent="DecorManual" instance=ExtResource("12_bayon_b")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -82.83, 19.0, -438.0)
 metadata/coliziune = "none"
 
-[node name="BayonA2" parent="DecorManual" instance=ExtResource("10_bayon")]
+[node name="BayonC2" parent="DecorManual" instance=ExtResource("13_bayon_c")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.83, 19.0, -436.0)
 metadata/coliziune = "none"
+
+[node name="PoartaDeSud" parent="DecorManual" instance=ExtResource("14_gate_s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -230.0, 14.0, -381.36)
+metadata/coliziune = "mesh"
+
+[node name="GopuraVest" parent="DecorManual" instance=ExtResource("15_gopura")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -97.5, 3.82, -0.0)
+metadata/coliziune = "mesh"
+
+[node name="PoartaCopac" parent="DecorManual" instance=ExtResource("16_treegate")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 8.2, -53.0)
+metadata/coliziune = "mesh"
+
+[node name="CameraPoartaDeSud" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -230.0, 14.0, -381.36)
+script = ExtResource("17_camzone")
+frac_from = 0.357
+frac_to = 0.367
+size = Vector3(12.0, 10.0, 24.0)
+ceiling = 8.4
+ceiling_dist = 20.0
+blend_time = 0.35
+
+[node name="CameraGopura" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -97.5, 3.82, -0.0)
+script = ExtResource("17_camzone")
+frac_from = 0.052
+frac_to = 0.064
+size = Vector3(28.0, 10.0, 14.0)
+ceiling = 9.0
+ceiling_dist = 22.0
+blend_time = 0.35
+
+[node name="CameraPoartaCopac" type="Area3D" parent="."]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 8.2, -53.0)
+script = ExtResource("17_camzone")
+size = Vector3(10.0, 8.0, 22.0)
+ceiling = 5.6
+ceiling_dist = 16.0
+blend_time = 0.35
 
 [node name="Machete" type="Node3D" parent="."]
 
@@ -230,21 +278,6 @@ radius = 5.0
 height = 22.0
 sides = 8
 cone = true
-material = SubResource("Mat_macheta")
-
-[node name="Poarta_PilonV" type="CSGBox3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -236.5, 20.0, -381.36)
-size = Vector3(6, 12, 8)
-material = SubResource("Mat_macheta")
-
-[node name="Poarta_PilonE" type="CSGBox3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -223.5, 20.0, -381.36)
-size = Vector3(6, 12, 8)
-material = SubResource("Mat_macheta")
-
-[node name="Poarta_Turn" type="CSGBox3D" parent="Machete"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -230.0, 26.5, -381.36)
-size = Vector3(19, 11, 8)
 material = SubResource("Mat_macheta")
 
 [node name="Terasa_FataV" type="CSGBox3D" parent="Machete"]

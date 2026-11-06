@@ -556,6 +556,14 @@ def V4(a, b, c, d):
 MOAT_IN = 66.0
 MOAT_OUT = 104.0
 MOAT_W_OUT = 200.0      # malul de vest al bratului de V
+# Malul de EST al bratului de V (kit val 1, gopura de vest): pana la val 1 santul mergea pana la
+# x=-66, adica pana in arcul R30 al lui B (soseaua coteste de la x~-85). Gopura de 52 m n-avea unde
+# sta: in arc sau cu galeriile in apa. Malul de est se muta la -104 -> o terasa de 38 m pe care stau
+# galeriile, cu gopura pe dreapta (x -103..-92), inaintea arcului.
+MOAT_IN_W = 104.0
+GOPURA_X = -97.5
+TREE_GATE_S = 22.0      # poarta-copac: la 22 m pe ramura. La 14 m (prima incercare) ramura inca se racorda la bucla
+                        # si ProbeLaneClear gasea poarta pe banda -1,5; primul bloc al dominoului cade la 30 m.
 WATER_AW = 0.5          # oglinda santului Angkor Wat (cale +3)
 WATER_SRAH = 0.5        # Srah Srang: aceeasi cota ca santul (umplerea rapei 0 ajunge si aici)
 WATER_THOM = 11.0       # santul Angkor Thom (calea uriasilor +14)
@@ -611,7 +619,7 @@ if OUT_PATH:
     # ---- rape cu apa (len). Adancimea e relativa la cota MEDIATA a drumului; podeaua absoluta taie.
     ravines = [
         # 0: bratul de V al santului Angkor Wat, pe ambele parti ale caii de vest.
-        (LENp(-MOAT_W_OUT, 0.0), LENp(-MOAT_IN, 0.0), 20, 0),
+        (LENp(-MOAT_W_OUT, 0.0), LENp(-MOAT_IN_W, 0.0), 20, 0),
         # 1: bratul de N, pe ambele parti ale caii de nord.
         (LENp(-56.0, MOAT_IN), LENp(-56.0, MOAT_OUT), 20, 0),
         # 2: bratul de S, pe DREAPTA lui H (spre V, dreapta = N): turnurile oglindite.
@@ -669,9 +677,10 @@ if OUT_PATH:
         return round(F_s(s_near(x, 0.0))[1], 4)
     parapets = [
         # calea de vest, latura +1: de la malul de vest la gol, apoi de la gol la gopura
-        (lenx(-198.0), lenx(-120.0 - GAP / 2), 1, 3), (lenx(-120.0 + GAP / 2), lenx(-70.0), 1, 3),
+        (lenx(-198.0), lenx(-120.0 - GAP / 2), 1, 3), (lenx(-120.0 + GAP / 2), lenx(-MOAT_IN_W - 2.0), 1, 3),
         # latura -1, golul mai departe
-        (lenx(-198.0), lenx(-95.0 - GAP / 2), -1, 3), (lenx(-95.0 + GAP / 2), lenx(-70.0), -1, 3),
+        # golul de pe -1 era la -95: cu malul mutat la -104 cadea pe uscat (val 1) -> -140
+        (lenx(-198.0), lenx(-140.0 - GAP / 2), -1, 3), (lenx(-140.0 + GAP / 2), lenx(-MOAT_IN_W - 2.0), -1, 3),
         # calea uriasilor, ambele laturi, pana inaintea pilonilor portii
         (LEN("D cale inceput", 2.0), LEN("D poarta", -10.0), 0, 3),
         # Srah Srang, STANGA (spre bazin), de la iesirea din coltul de SE pana dupa bazin. Prima
@@ -700,6 +709,10 @@ radius_m = {r}
     peaks_txt = peak("PhnomBakheng", -110.0, 205.0, Y_BAK - 2.0, 95.0)
 
     # ---- ramura: galeria Ta Prohm (scurtatura). Fara domino aici (pasul 5).
+    # Val 1: tema `angkor` n-are `branch_surface`, deci banda iesea pe implicit (nisip in culoarea
+    # ierbii): din bucla nu se vedea nicio scurtatura, iar poarta-copac statea in pajiste. `surface = 3`
+    # (GRAVEL) in tenta gresiei/lateritei (brief §3: „molozul din scurtatura”). Comentariile NU intra in
+    # textul .tscn: un `#` intre proprietati opreste parserul (memoria `tscn-comentariu-taie-proprietati`).
     br_godot = [godot(p_, p_[2]) for p_ in br_pts]
     branch_txt = """
 [node name="GaleriaTaProhm" type="Path3D" parent="."]
@@ -709,6 +722,8 @@ branch_half_width = 3.0
 label = "Galeria Ta Prohm"
 speed_factor = 0.85
 bumpiness = 0.08
+surface = 3
+tint = Color(0.78, 0.6, 0.48, 1)
 """
     # ---- HAZARDURILE-SEMNATURA (pasul 5). Parametrii sunt cei validati de sondele pasului 1.
     # Dominoul din galeria Ta Prohm: 3 x RimBoulderHazard la 25 m unul de altul. Nodul sta pe asfalt, in
@@ -739,7 +754,7 @@ invert_steer = false
     # Elefantul de la Poarta de Sud: SlidingHazard TRAVERSARE prin HazardMarker (tiparul G_Elefant din
     # Track14), in piata de DUPA poarta, la 22 m. sweep_speed 3 m/s -> ciclul ~23 s; `ai_yields`: AI-ul
     # il vede prin CROSSING_GROUP (incetineste si ocoleste), aceeasi informatie ca jucatorul. Modelul e
-    # elefantul african din Serengeti pana la `asian_elephant.glb` (pasul 7, cere cod mic: brief §7).
+    # `asian_elephant.glb` (kit §1.3, val 1), cu cheile lui in world_prop.gd si sliding_hazard.gd.
     ex_, ey_ = pos_at(tag_s["D poarta"] + ELEPHANT_AFTER_GATE)
     hz_txt += f"""
 [node name="ElefantPoarta" type="Marker3D" parent="Hazarduri"]
@@ -775,12 +790,73 @@ shape = SubResource("Box_bayon")
 """
         # Vizualul (pasul 7, kit §1.1): `bayon_face_tower_a.glb` in DecorManual, FARA corp
         # (`coliziune="none"`): coliziunea ramane cutia de mai sus, pe care modelul o umple exact
-        # (originea la baza, deci baza cutiei = 1 m sub terasa). Toate trei pe varianta `a` pana la
-        # valul 1 (b, c).
+        # (originea la baza, deci baza cutiei = 1 m sub terasa). Variantele a, b, c (kit §1.1, val 1).
         decor_txt += f"""
-[node name="BayonA{k_}" parent="DecorManual" instance=ExtResource("10_bayon")]
+[node name="Bayon{"ABC"[k_]}{k_}" parent="DecorManual" instance=ExtResource("{("10_bayon", "12_bayon_b", "13_bayon_c")[k_]}")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {r2(tx_)}, {r2(Y_BAYON - 1.0)}, {r2(-ty_)})
 metadata/coliziune = "none"
+"""
+    # ---- VAL 1 (kit §1.2): portile prin care treci, cu `coliziune="mesh"` (carcasa convexa implicita
+    # ar astupa deschiderea, brief §7 pasul 1) si cate un CameraZone cu tavanul declarat (memoria
+    # `camera-zone-tavan-per-sala`: implicitul de 15 m nu corecteaza nimic sub un buiandrug de 8-9 m).
+    # Baza fiecarui model = cota soselei in punctul lui; drumul trece pe -Z al modelului (+Y Blender).
+    gx_, gy_ = pos_at(tag_s["D poarta"])
+    ge_ = elev_at(tag_s["D poarta"])
+    decor_txt += f"""
+[node name="PoartaDeSud" parent="DecorManual" instance=ExtResource("14_gate_s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {r2(gx_)}, {r2(ge_)}, {r2(-gy_)})
+metadata/coliziune = "mesh"
+"""
+    # Gopura de vest: soseaua merge spre +X, modelul o vrea pe -Z -> rotatie de -90 de grade in jurul
+    # lui Y; randurile bazei: (0,0,-1), (0,1,0), (1,0,0) (memoria `tscn-transform-e-pe-randuri`).
+    gs_ = s_near(GOPURA_X, 0.0)
+    gpx_, gpy_ = pos_at(gs_)
+    decor_txt += f"""
+[node name="GopuraVest" parent="DecorManual" instance=ExtResource("15_gopura")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, {r2(gpx_)}, {r2(elev_at(gs_))}, {r2(-gpy_)})
+metadata/coliziune = "mesh"
+"""
+    # Poarta-copac: la intrarea ramurii, care merge spre S (+Z Godot) -> rotatie de 180 de grade.
+    tb0_ = next(w for w in WPTS if w[4] == "G ocol intrare")
+    tb1_ = next(w for w in WPTS if w[4] == "G ocol iesire")
+    tbl_ = math.hypot(tb1_[0] - tb0_[0], tb1_[1] - tb0_[1])
+    tt_ = TREE_GATE_S / tbl_
+    tgx_ = tb0_[0] + (tb1_[0] - tb0_[0]) * tt_
+    tgy_ = tb0_[1] + (tb1_[1] - tb0_[1]) * tt_
+    tge_ = tb0_[3] + (tb1_[3] - tb0_[3]) * tt_
+    decor_txt += f"""
+[node name="PoartaCopac" parent="DecorManual" instance=ExtResource("16_treegate")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, {r2(tgx_)}, {r2(tge_)}, {r2(-tgy_)})
+metadata/coliziune = "mesh"
+"""
+    cam_txt = f"""
+[node name="CameraPoartaDeSud" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {r2(gx_)}, {r2(ge_)}, {r2(-gy_)})
+script = ExtResource("17_camzone")
+frac_from = {r3(IDX("D poarta", -14.0))}
+frac_to = {r3(IDX("D poarta", 10.0))}
+size = Vector3(12.0, 10.0, 24.0)
+ceiling = 8.4
+ceiling_dist = 20.0
+blend_time = 0.35
+
+[node name="CameraGopura" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {r2(gpx_)}, {r2(elev_at(gs_))}, {r2(-gpy_)})
+script = ExtResource("17_camzone")
+frac_from = {r3(F_s(gs_ - 16.0)[0])}
+frac_to = {r3(F_s(gs_ + 12.0)[0])}
+size = Vector3(28.0, 10.0, 14.0)
+ceiling = 9.0
+ceiling_dist = 22.0
+blend_time = 0.35
+
+[node name="CameraPoartaCopac" type="Area3D" parent="."]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, {r2(tgx_)}, {r2(tge_)}, {r2(-tgy_)})
+script = ExtResource("17_camzone")
+size = Vector3(10.0, 8.0, 22.0)
+ceiling = 5.6
+ceiling_dist = 16.0
+blend_time = 0.35
 """
     bias = [(IDX("E terasa V", BAYON_TOWERS[0][0] - 45.0),
              IDX("E terasa V", BAYON_TOWERS[-1][0] + 8.0), BAYON_BIAS)]
@@ -851,11 +927,7 @@ material = SubResource("Mat_macheta")
     mach += tower("AW_TurnCentral", 0, 0, 8.0, 28.0, 7.0)
     for k_, (sx_, sz_) in enumerate(((-17, -17), (17, -17), (-17, 17), (17, 17))):
         mach += tower(f"AW_TurnColt{k_}", sx_, sz_, 8.0, 22.0, 5.0)
-    # Poarta de Sud: pilonii in afara deschiderii de 7 m si turnul de 18 m peste ea (cale +14).
-    gx_, gy_ = pos_at(tag_s["D poarta"])
-    mach += box("Poarta_PilonV", gx_ - 6.5, Y_POARTA + 6.0, -gy_, 6, 12, 8)
-    mach += box("Poarta_PilonE", gx_ + 6.5, Y_POARTA + 6.0, -gy_, 6, 12, 8)
-    mach += box("Poarta_Turn", gx_, Y_POARTA + 12.5, -gy_, 19, 11, 8)
+    # Poarta de Sud: macheta a iesit la val 1 (south_gate_face_tower.glb, DecorManual).
     # Terasa Elefantilor: fata de vest (4 m) de-a lungul coamei.
     c0_ = next(w for w in WPTS if w[4] == "F coama inceput")
     c1_ = next(w for w in WPTS if w[4] == CREST_TAG)
@@ -887,12 +959,18 @@ material = SubResource("Mat_macheta")
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="3_branch"]
 [ext_resource type="Script" path="res://scenes/hazards/rim_boulder_hazard.gd" id="4_rim"]
 [ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="5_hzm"]
-[ext_resource type="PackedScene" path="res://assets/models/serengeti/animals/elephant.glb" id="6_eleph"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/animals/asian_elephant.glb" id="6_eleph"]
 [ext_resource type="Script" path="res://scenes/hazards/rain_cycle.gd" id="7_rain"]
 [ext_resource type="Script" path="res://scenes/hazards/lightning_flash.gd" id="8_flash"]
 [ext_resource type="Script" path="res://scenes/hazards/vine_curtain.gd" id="9_vine"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/structures/bayon_face_tower_a.glb" id="10_bayon"]
 [ext_resource type="Script" path="res://scenes/props/world_prop.gd" id="11_prop"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/bayon_face_tower_b.glb" id="12_bayon_b"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/bayon_face_tower_c.glb" id="13_bayon_c"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/south_gate_face_tower.glb" id="14_gate_s"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/aw_west_gopura.glb" id="15_gopura"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/ta_prohm_tree_gate.glb" id="16_treegate"]
+[ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="17_camzone"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_macheta"]
 albedo_color = Color(0.72, 0.64, 0.52, 1)
@@ -950,7 +1028,7 @@ curve = SubResource("Curve3D_angkor")
 {towers_txt}
 [node name="DecorManual" type="Node3D" parent="."]
 script = ExtResource("11_prop")
-{decor_txt}
+{decor_txt}{cam_txt}
 [node name="Machete" type="Node3D" parent="."]
 {mach}"""
     with open(OUT_PATH, "w", encoding="utf-8", newline="\n") as f:

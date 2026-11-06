@@ -156,6 +156,10 @@ SPECS = {
                     "views_aspect": 0.7, "bury": 0.0},
     "sugar_palm": {"camera": {"azimuth": 62.0, "elevation": 4.0, "lens": 60.0, "margin": 1.06},
                    "views_aspect": 0.6, "bury": 0.0},
+    # val 4, grupul C: fundalul are 7 noduri-piesa de inel, toate centrate in origine: se randeaza cu
+    # `preview_angkor_horizon.py` (--row, --ring), nu cu --compare; intrarea e pentru --views/--gamecam
+    "angkor_horizon": {"camera": {"azimuth": -90.0, "elevation": 3.0, "lens": 35.0, "margin": 1.04},
+                       "views_aspect": 3.0, "bury": 0.0},
 }
 
 # camera de joc (scenes/race/chase_camera.gd: DEFAULT_HEIGHT/DISTANCE/BASE_FOV/

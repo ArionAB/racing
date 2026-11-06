@@ -247,6 +247,22 @@ if [ -f "$ROOT/plants/tetrameles_a.glb" ] && [ -f "$ROOT/plants/sugar_palm.glb" 
 fi
 # --- sfarsit val 4, grupul A ---
 
+# --- val 4, grupul C ---
+echo
+echo "== val 4, grupul C: fundalul angkor_horizon (kit 1.8) =="
+W4="tools/blender/measure_angkor_w4c.py"
+# 7 noduri-radacina; StormBand_* plutesc (baza la 40-60 m), deci --origin=assembly: min Y al
+# FISIERULUI e 0 prin Canopy/Kulen/Paddies.
+check "effects/angkor_horizon.glb" --origin=assembly
+if [ -f "$ROOT/effects/angkor_horizon.glb" ]; then
+  python $W4 horizon "$ROOT/effects/angkor_horizon.glb" || fail=1
+  st=$(python $W4 --selftest "$ROOT/effects/angkor_horizon.glb" 2>&1); rc=$?
+  printf '%s
+' "$st" | grep -E "^-- sabotaj|garda a|SELFTEST"
+  [ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei grupului C (val 4) a esuat"; fail=1; }
+fi
+# --- sfarsit val 4, grupul C ---
+
 echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then

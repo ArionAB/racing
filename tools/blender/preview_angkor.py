@@ -81,6 +81,14 @@ SPECS = {
     "bayon_face_tower_a": {"camera": {"azimuth": 62.0, "elevation": 9.0, "lens": 70.0, "margin": 1.06}},
     # elefantul: capul pe +Y, vazut din dreapta-fata ca pe desen (cap la dreapta)
     "asian_elephant": {"camera": {"azimuth": 38.0, "elevation": 6.0, "lens": 60.0, "margin": 1.08}},
+    # val 2, grupul C: kitul naga. Fata drumului e -X (azimut ~200); capul priveste spre +Y
+    "naga_balustrade": {"camera": {"azimuth": 205.0, "elevation": 14.0, "lens": 60.0, "margin": 1.06},
+                        "views_aspect": 2.4},
+    "naga_balustrade_gap": {"camera": {"azimuth": 335.0, "elevation": 16.0, "lens": 60.0, "margin": 1.06},
+                            "views_aspect": 2.0},
+    "naga_head": {"camera": {"azimuth": 70.0, "elevation": 10.0, "lens": 60.0, "margin": 1.08}},
+    "deva_giant": {"camera": {"azimuth": 205.0, "elevation": 8.0, "lens": 60.0, "margin": 1.06}},
+    "asura_giant": {"camera": {"azimuth": 205.0, "elevation": 8.0, "lens": 60.0, "margin": 1.06}},
     "bayon_face_tower_b": {"camera": {"azimuth": 62.0, "elevation": 9.0, "lens": 70.0, "margin": 1.06}},
     "bayon_face_tower_c": {"camera": {"azimuth": 62.0, "elevation": 9.0, "lens": 70.0, "margin": 1.06}},
     # poarta de sud (val 1): drumul merge pe Y prin ea; fara ingropare in gamecam

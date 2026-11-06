@@ -475,62 +475,94 @@ def build_statue():
 RAMP_HW = 3.7           # jumatate din latimea planului de rulare (7,4 m)
 RAMP_Y0, RAMP_Y1 = -3.5, 3.5
 RAMP_H = 1.2
+CAP_LIFT = 0.02         # capacul radacinii sta cu 2 cm peste umplutura
+ANK_INFILL = LOG_DARK   # 28: umplutura dintre radacini
 AO_RAMP = dict(samples=24, dist=0.9, gradient="vertical", low=0.55, high=1.0,
                power=0.9, floor=0.26, strength=1.3, z_range=(0.0, RAMP_H))
 
 
 def ramp_z(y):
-    return RAMP_H * (y - RAMP_Y0) / (RAMP_Y1 - RAMP_Y0)
+    """Planul de rulare (capacele radacinilor): 0,02 la capatul de jos, 1,2 la buza."""
+    return CAP_LIFT + (RAMP_H - CAP_LIFT) * (y - RAMP_Y0) / (RAMP_Y1 - RAMP_Y0)
+
+
+def _subdivide_tops(bm, cuts):
+    """Grila fina pe fetele late de sus (AO + vertecsi pentru garda): coplanare, deci
+    planul ramane unul."""
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    bmesh.ops.dissolve_limit(bm, angle_limit=0.0005, verts=bm.verts[:], edges=bm.edges[:])
+    edges = set()
+    for f in bm.faces:
+        if f.normal.z > 0.9 and f.calc_area() > 0.4:
+            edges.update(f.edges)
+    bmesh.ops.subdivide_edges(bm, edges=list(edges), cuts=cuts, use_grid_fill=True)
 
 
 def build_ramp():
-    R = Builder()
-    # corpul: pana intre planul de rulare si sol; marginile de jos mai inguste (rădăcina
-    # se strange sub planul de rulare). Planul de sus: 4 colturi -> subimpartit in grila.
-    top = [(sx * RAMP_HW, y, ramp_z(y)) for sx in (-1, 1) for y in (RAMP_Y0, RAMP_Y1)]
+    R, I, W = Builder(), Builder(), Builder()
+    # --- umplutura: pana la 2 cm SUB plan, pe toata latimea (nimic nu cade intre radacini) ---
+    top = [(sx * RAMP_HW, y, ramp_z(y) - CAP_LIFT) for sx in (-1, 1) for y in (RAMP_Y0, RAMP_Y1)]
     bot = [(sx * RAMP_HW, y, 0.0) for sx in (-1, 1) for y in (RAMP_Y0 + 0.001, RAMP_Y1)]
-    hull(R, top + bot, ANK_ROOT)
-    bm = R.bm
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
-    bmesh.ops.dissolve_limit(bm, angle_limit=0.0005, verts=bm.verts[:], edges=bm.edges[:])
-    big = max((f for f in bm.faces if f.normal.z > 0.5), key=lambda f: f.calc_area())
-    bmesh.ops.subdivide_edges(bm, edges=list(big.edges), cuts=13, use_grid_fill=True)
+    hull(I, top + bot, ANK_INFILL)
+    _subdivide_tops(I.bm, 13)
+    for f in I.bm.faces:
+        f[I.slot] = ANK_INFILL
 
-    def lift(pts, rr, sub=3, k=1.35):
+    rnd = lcg(97)
+    # --- sase radacini gatite pe lungime, in evantai (se strang spre buza); capacul fiecarei
+    #     bucati e taiat PLAT pe planul de rulare; umerii coboara 3,5 cm sub plan spre umplutura ---
+    NSEG = 6
+    ys = [RAMP_Y0 + (RAMP_Y1 - RAMP_Y0) * i / NSEG for i in range(NSEG + 1)]
+    for r0 in (-3.08, -1.85, -0.62, 0.62, 1.85, 3.08):
+        wob = [(rnd() - 0.5) * 0.16 for _ in ys]
+        wob[0] = wob[-1] = 0.0 if abs(r0) < 3.0 else wob[0]
+        prev = None
+        for i, y in enumerate(ys):
+            t = (y - RAMP_Y0) / (RAMP_Y1 - RAMP_Y0)
+            cx = r0 * (1.0 - 0.15 * t) + wob[i]
+            wc = 0.50 + 0.05 * t                 # jumatate din latimea capacului
+            ws = wc + 0.10                        # umarul
+            cur = (y, cx, wc, ws)
+            if prev is not None:
+                pts = []
+                for (yy, c, w_c, w_s) in (prev, cur):
+                    zc = ramp_z(yy)
+                    pts += [(c - w_c, yy, zc), (c + w_c, yy, zc),
+                            (c - w_s, yy, zc - 0.035), (c + w_s, yy, zc - 0.035),
+                            (c - w_s * 0.8, yy, zc - 0.30), (c + w_s * 0.8, yy, zc - 0.30)]
+                hull(R, pts, ANK_ROOT)
+            prev = cur
+
+    def lift(pts, rr, sub=3, k=1.0):
         pp, r2 = spline(pts, [r * k if r > 0.05 else r for r in rr], sub=sub)
         R.taper_sweep([tuple(p) for p in pp], r2, ANK_ROOT, segments=8)
 
-    rnd = lcg(97)
+    # --- radacini subtiri pe flancuri (in afara benzii), coboara la sol ---
     for sx in (-1, 1):
-        # contraforturi pe flanc: tuburi ingropate pe jumatate in peretele lateral, sub planul
-        # de rulare, care se desfac spre sol (nu stau pe plan)
-        lift([(sx * 3.60, 3.30, 0.70), (sx * 3.85, 2.00, 0.58), (sx * 3.95, 0.60, 0.45),
-              (sx * 4.10, -1.00, 0.28), (sx * 4.40, -2.40, 0.10)],
-             [0.38, 0.38, 0.34, 0.26, 0.02])
-        lift([(sx * 3.40, 3.10, 0.50), (sx * 4.20, 3.20, 0.40), (sx * 4.90, 2.60, 0.22), (sx * 5.30, 1.90, 0.02)],
-             [0.46, 0.40, 0.28, 0.02])
-        lift([(sx * 3.50, 1.60, 0.40), (sx * 4.30, 1.30, 0.28), (sx * 4.80, 0.30, 0.14), (sx * 5.00, -0.50, 0.02)],
-             [0.34, 0.30, 0.20, 0.02])
-        lift([(sx * 3.55, 2.60, 0.34), (sx * 4.40, 2.20, 0.30), (sx * 5.10, 1.00, 0.16), (sx * 5.40, -0.20, 0.02)],
-             [0.30, 0.28, 0.18, 0.02])
-        lift([(sx * 3.60, -0.40, 0.18), (sx * 4.20, -1.60, 0.14), (sx * 4.50, -2.70, 0.08), (sx * 4.60, -3.40, 0.02)],
-             [0.20, 0.17, 0.10, 0.02], k=1.0)
-        for (ky, kr) in ((2.6, 0.38), (0.2, 0.32), (-1.8, 0.22)):
-            kz = max(kr * 0.9, ramp_z(ky) - kr - 0.12)
-            ellipsoid(R, (sx * (3.75 + kr * 0.45), ky, kz), (kr * 1.05, kr * 1.35, kr * 0.9), ANK_ROOT,
-                      Matrix.Identity(3), seg=8, rings=5)
-    # perdeaua de sub buza: radacini dese pe fata inalta, in contact, pana la sol
-    for i, xk in enumerate((-3.2, -2.2, -1.1, 0.0, 1.1, 2.2, 3.2)):
+        lift([(sx * 3.60, 3.30, 0.62), (sx * 3.90, 2.00, 0.55), (sx * 4.05, 0.60, 0.40),
+              (sx * 4.25, -1.00, 0.24), (sx * 4.55, -2.40, 0.08)], [0.30, 0.30, 0.26, 0.20, 0.02])
+        lift([(sx * 3.45, 3.00, 0.45), (sx * 4.20, 3.20, 0.35), (sx * 4.80, 2.60, 0.20), (sx * 5.10, 1.90, 0.02)],
+             [0.28, 0.24, 0.16, 0.02])
+        lift([(sx * 3.55, 1.40, 0.35), (sx * 4.30, 1.10, 0.26), (sx * 4.70, 0.10, 0.12), (sx * 4.85, -0.60, 0.02)],
+             [0.22, 0.20, 0.14, 0.02])
+    # --- peste buza, radacinile se revarsa pe bucata de zid ---
+    for xk in (-3.0, -1.9, -0.8, 0.5, 1.6, 2.7):
         w = (rnd() - 0.5) * 0.3
-        lift([(xk, 3.40, 0.92), (xk + w, 3.60, 0.60), (xk + w * 1.5, 3.88, 0.24), (xk + w * 2.0, 4.05, 0.02)],
-             [0.26, 0.26, 0.18, 0.02], k=1.0)
-    # radacinile care intra in sol: nimic sub z = 0 (originea la baza ramane planul solului)
-    for v in bm.verts:
+        lift([(xk, 3.35, 1.00), (xk + w, 3.60, 0.78), (xk + w * 1.5, 3.90, 0.40), (xk + w * 2.0, 4.15, 0.04)],
+             [0.20, 0.20, 0.16, 0.02])
+    for v in R.bm.verts:
         v.co.z = max(v.co.z, 0.0)
-    # toata fata pe slotul radacinii
-    for f in bm.faces:
+    _subdivide_tops(R.bm, 5)
+    for f in R.bm.faces:
         f[R.slot] = ANK_ROOT
-    return [R.to_object("Root_Ramp")]
+
+    # --- spartura zidului: bucata de zid de gresie sub buza (inalta pana la 1,15 m, stricata) ---
+    for (cx, wx, top_z, y_a, y_b) in ((-3.1, 1.2, 0.95, 3.55, 4.30), (-1.7, 1.3, 1.12, 3.55, 4.40),
+                                      (-0.2, 1.1, 0.80, 3.55, 4.25), (1.1, 1.5, 1.14, 3.55, 4.40),
+                                      (2.7, 1.2, 0.90, 3.55, 4.40)):
+        rot = Matrix.Rotation(math.radians((rnd() - 0.5) * 8.0), 3, "Z")
+        W.box((cx, (y_a + y_b) * 0.5, top_z * 0.5), (wx - 0.04, y_b - y_a, top_z), ANK_STONE, rotation=rot)
+    return [R.to_object("Root_Ramp"), I.to_object("Root_Infill"), W.to_object("Root_Stone")]
 
 
 # --- emitere -----------------------------------------------------------------------------

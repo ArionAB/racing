@@ -23,7 +23,7 @@ Tot ce e sculptural e **simplificat** (decizia dezvoltatorului): forme mari, blo
 | capăt | L **7,940**, înălțime 4,010; capătul de sud (Z max) are exact secțiunea modulului |
 | stâlp | 1,600 × 1,600 × 4,020 |
 | statuie | 2,300 × 2,300 × 3,660 (soclu 1,2 + figură ~2,4) |
-| rampă | planul de rulare 7,4 m lat (|x| ≤ 3,7); cu rădăcinile laterale 10,86 m; lungime 7,57; înălțime **1,211**; abatere de la plan **0,011 m**, panta **17,2%**, lateral 0,00%, nimic peste plan în bandă (max 0,007) |
+| rampă (runda 2) | planul de rulare 7,4 m lat; cu flancurile 10,24 m; lungime 7,93; înălțime **1,200**; abatere **0,0175 m**, panta **16,9%**, cel mai jos sub plan −0,0175, nimic peste plan (max 0,003) |
 
 **Sensul rampei:** capătul de jos e la −Y Blender = **+Z Godot** (la sol, grosime zero, nimic în față);
 mașinile vin dinspre +Z Godot și urcă spre **−Z Godot** (+Y Blender), unde buza are 1,2 m și cade
@@ -37,7 +37,7 @@ mașinile vin dinspre +Z Godot și urcă spre **−Z Godot** (+Y Blender), unde 
 | capăt | 1.592 | idem (3) |
 | stâlp | 1.104 | Pillar_* (3) |
 | statuie | 990 | Statue_* (3) |
-| rampă | 3.582 | `Root_Ramp` (1, `CORAL_SAND` 19, AO cald) |
+| rampă | 6.438 | `Root_Ramp` (19, AO cald), `Root_Infill` (`LOG_DARK` 28), `Root_Stone` (3): 3 materiale |
 
 Lichen portocaliu la terasă 0,47%. Scala 1 / rotație identitate pe rădăcini.
 
@@ -46,7 +46,7 @@ Lichen portocaliu la terasă 0,47%. Scala 1 / rotație identitate pe rădăcini.
 `<nume>.png` (decupare | randare), `<nume>_views.png` pentru toate cinci; `_gamecam.png` pentru
 modul, statuie, rampă.
 
-## Citire onestă
+## Citire onestă (terasa, stâlpul și statuia: acceptate de coordonator)
 
 - **Modul / capăt:** elefanții în relief se citesc ca elefanți (corp, cap, ureche, trompă la sol), blocați.
   Abateri de la decupare: **2 elefanți pe modul, nu 3** (la 3 ar fi sub 2,4 m și ar fi dispărut sub
@@ -61,13 +61,22 @@ modul, statuie, rampă.
 - **Statuie:** citește ca figură șezând cu un genunchi ridicat și mâna pe el, păr simplu, fără coroană
   și fără aureolă; piciorul stâng e indoit în lateral (nu încrucișat în față). Blocată, cu față
   mică; nu are fusta-șorț din decupare.
-- **Rampă: nu o consider reușită vizual.** Contractul de fizică e îndeplinit și garda e verde (un plan
-  unic, fără trepte), dar **arată ca o placă plată cu rădăcini-pene pe margini**, nu ca o rădăcină
-  uriașă; din gamecam se vede o rampă netedă cu ornamente laterale. După 3 runde n-am găsit o formă
-  care să dea „rădăcină” fără să rupă planul (corpul unic convex cu fața de sus plată e tocmai ce cere
-  contractul). Variantă de luat în calcul: rădăcini mult mai groase, care înfășoară flancurile și
-  ridică marginile **sub** planul de rulare, sau accept ca piesă de decor sub un material de clasă.
+- **Rampă, runda a doua (ideea coordonatorului: suprafața ESTE rădăcinile):** 6 rădăcini în evantai
+  (lățime ~1,1 m, se strâng 15% spre buză), fiecare cu capacul tăiat plat pe planul de rulare (6 bucăți
+  pe lungime, cu mică ondulație laterală), umeri 3,5 cm sub plan; **umplutură `Root_Infill`
+  (`LOG_DARK` 28) la 2 cm sub plan** pe toată lățimea; sub buză, **bucăți de zid `Root_Stone`**
+  (cinci blocuri, 0,8–1,14 m) peste care curg 6 rădăcini subțiri; câteva rădăcini subțiri pe flancuri.
+  Cote: lățime plan 7,4 (10,24 cu flancurile), lungime 7,93, înălțime 1,200, abatere 0,0175 m, cel mai
+  jos sub plan −0,0175, panta 16,9%; 6.438 tri, 3 materiale. **Verdict propriu: tot citește ca placă.**
+  Rostul dintre rădăcini e de 2 cm: din camera de joc se vede ca linii subțiri, nu ca rădăcini rotunde,
+  iar grila de subdivizare apare ca „dale” (artefact de AO/umbrire pe vârfuri, nu relief). Nu ies
+  rădăcini cilindrice din plan fiindcă planul unic și „nimic sub plan − 0,05” le interzic prin
+  contract; forma de rădăcină rămâne doar pe flancuri, pe buză și sub ea. **M-am oprit aici** (cum a
+  cerut coordonatorul). Variante rămase: material de clasă pe `Root_Ramp` cu textură de scoarță, sau
+  acceptat ca decor de pistă cu rădăcinile din cod.
+- **Datorie de sculptură:** Regele Lepros și stâlpul cu cap de elefant rămân figuri blocate, sub
+  datoria deschisă din kit §1.1 (sculptură reală mai târziu).
 
 ## Gărzi (`measure_angkor_w2a.py`)
 
-`--selftest`: terasa ridicată cu 0,3 m, bula de 0,2 m pe rampă și panta rampei ×1,4 pică; originalele trec.
+`--selftest`: terasa ridicată cu 0,3 m, bula de 0,2 m pe rampă, **rostul de 0,2 m adânc între rădăcini** și panta ×1,4 pică; originalele trec.

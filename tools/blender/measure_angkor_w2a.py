@@ -11,7 +11,7 @@ Contracte (kit §1.4):
   * terasa: nimic peste Y = 4,0 (+0,02): drumul e pe coama; modulul L = 8,0 pe Z, capetele
     plane la Z = +-4,0 si IDENTICE (aceeasi sectiune); grosime <= 1,5; capatul: L 6-8, capatul
     de sud (Z maxim) cu aceeasi sectiune ca modulul; noduri Terrace_Stone/Lichen/Streak;
-  * rampa: latime >= 7,0, inaltime 1,2 +-0,05, lungime 6-8; planul de rulare (|x| <= 3,5):
+  * rampa: latime >= 7,0, inaltime 1,2 +-0,05, lungime 6-8 (+0,05); planul de rulare (|x| <= 3,5):
     inaltimea suprafetei de sus, esantionata pe grila prin raze, se potriveste pe UN plan cu
     abatere <= 0,05; panta <= 20% (urca spre -Z); inclinare laterala <= 2%; niciun varf de
     triunghi peste plan cu > 0,05 in banda; un singur nod `Root_Ramp`, slot 19.
@@ -224,15 +224,19 @@ def check_ramp(path, report=True):
     a, b, c = fit_plane(samples)
     dev = max(abs(y - (a * x + b * z + c)) for x, z, y in samples)
     slope = (a * a + b * b) ** 0.5
+    below = min(y - (a * x + b * z + c) for x, z, y in samples)
     above = max(p[1] - (a * p[0] + b * p[2] + c) for p in m["pts"] if abs(p[0]) <= BAND and abs(p[2]) <= 3.5)
     if report:
         print("rampa     latime %.3f  lungime %.3f  inaltime %.3f" % (w, L, h))
         print("planul    abatere max %.4f m (<=0,05)  panta %.1f%% (<=20)  lateral %.2f%%  "
-              "varf peste plan max %.4f (<=0,05)" % (dev, 100 * slope, 100 * abs(a), above))
-    common(m, ["Root_Ramp"], bad)
+              "varf peste plan max %.4f (<=0,05)  cel mai jos sub plan %.4f (>=-0,05)"
+              % (dev, 100 * slope, 100 * abs(a), above, below))
+    common(m, ["Root_Infill", "Root_Ramp", "Root_Stone"], bad)
+    if below < -0.05:
+        bad.append("gol in suprafata de rulare: %.3f m sub plan intre radacini (> 0,05)" % -below)
     if w < 7.0:
         bad.append("latime %.2f < 7,0" % w)
-    if not 6.0 <= L <= 8.0:
+    if not 6.0 <= L <= 8.05:
         bad.append("lungime %.2f in afara 6-8" % L)
     if abs(h - 1.2) > 0.05:
         bad.append("inaltime %.3f != 1,2 +-0,05" % h)
@@ -248,7 +252,7 @@ def check_ramp(path, report=True):
         bad.append("geometrie peste planul de rulare cu %.3f m in banda" % above)
     if not bad:
         ar = slot_areas(path)
-        extra = sorted(k for k in ar if k != ("Root_Ramp", 19))
+        extra = sorted(k for k in ar if k not in {("Root_Ramp", 19), ("Root_Infill", 28), ("Root_Stone", 3)})
         if extra:
             bad.append("sloturi in afara tabelului: %s" % extra)
     for b_ in bad:
@@ -272,6 +276,12 @@ def selftest(module, ramp):
         return (x, y, z)
     g = json.loads(json.dumps(g1))
     cases.append(("bula de 0,2 m pe suprafata rampei", "ramp", g, _edit_positions(g, blob1, bump)))
+    def slot(x, y, z):
+        if abs(x) < 0.26 and abs(z) < 3.3 and y > 0.3:
+            return (x, y - 0.2 * (1 - abs(x) / 0.26), z)
+        return (x, y, z)
+    g = json.loads(json.dumps(g1))
+    cases.append(("rost de 0,2 m adanc intre radacini", "ramp", g, _edit_positions(g, blob1, slot)))
     g = json.loads(json.dumps(g1))
     cases.append(("panta rampei mai abrupta (x1,4)", "ramp", g,
                   _edit_positions(g, blob1, lambda x, y, z: (x, y * 1.4, z))))

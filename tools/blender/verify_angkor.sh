@@ -109,6 +109,26 @@ if [ -f "$ROOT/structures/south_gate_face_tower.glb" ]; then
 fi
 # --- sfarsit val 1, grupul A ---
 
+# --- val 2, grupul B ---
+echo
+echo "== val 2, grupul B: bolta intacta/prabusita, blocul dominoului, sprijinul (kit 1.5) =="
+W2="tools/blender/measure_angkor_w2b.py"
+check "kit/vault_intact.glb" --origin=assembly
+check "kit/vault_broken.glb" --origin=assembly
+check "props/fallen_block.glb" --origin=assembly
+check "props/restoration_prop.glb" --origin=assembly
+if [ -f "$ROOT/kit/vault_intact.glb" ] && [ -f "$ROOT/kit/vault_broken.glb" ] && [ -f "$ROOT/props/fallen_block.glb" ]; then
+  python $W2 vault_intact "$ROOT/kit/vault_intact.glb" || fail=1
+  python $W2 vault_broken "$ROOT/kit/vault_broken.glb" || fail=1
+  python $W2 block "$ROOT/props/fallen_block.glb" || fail=1
+  python $W2 prop "$ROOT/props/restoration_prop.glb" || fail=1
+  st=$(python $W2 --selftest "$ROOT/kit/vault_intact.glb" "$ROOT/kit/vault_broken.glb" "$ROOT/props/fallen_block.glb" 2>&1); rc=$?
+  printf '%s
+' "$st" | grep -E "^-- sabotaj|garda a|SELFTEST"
+  [ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei grupului B (val 2) a esuat"; fail=1; }
+fi
+# --- sfarsit val 2, grupul B ---
+
 echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then

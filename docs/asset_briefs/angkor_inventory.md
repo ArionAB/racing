@@ -31,15 +31,15 @@ numește provizorie: se recalibrează pe captura pistei.
 Garda (`measure_angkor.py bayon`) citește fișierul, nu build-ul. Vârful nasului
 e la 1,49 (nucleul de 1,19 + 0,30 m de relief), treapta de jos la 1,50 exact.
 
-- Triunghiuri: **7.022** (`Bayon_Stone` 4.906, `Bayon_Lichen` 1.900,
-  `Bayon_Streak` 216). Fără plafon.
+- Triunghiuri: **19.862** (`Bayon_Stone` 17.746, `Bayon_Lichen` 1.900,
+  `Bayon_Streak` 216; fețele rotunjite au cerut segmente, ~3.700 tri pe față). Fără plafon.
 - Noduri și sloturi: `Bayon_Stone` = `ROCK_LIGHT` 3 (clasa `angkor_sandstone`
   la integrare); `Bayon_Lichen` = `LAVA_ORANGE` 30 (44 de pete) + `CACTUS_GREEN`
   12 (16 tufe); `Bayon_Streak` = `VOLCANIC_BLACK` 20 (nu `ROCK_DARK`). **Materiale: 3**
   (un nod = un material). Fără alb, fără `ROCK_DARK`, fără texturi proprii.
-- Arii (din fișier): total 446 m² (include suprafețele ascunse dintre
-  învelitorile suprapuse), lichen portocaliu **0,70%** (limita 3%, verificată de
-  garda), verde 0,35%, dâre 0,60%.
+- Arii (din fișier): total 423 m² (include suprafețele ascunse dintre
+  învelitorile suprapuse), lichen portocaliu **0,69%** (limita 3%, verificată de
+  garda), verde 0,37%, dâre 0,64%.
 - Origine: baza amprentei, centrat pe X și Z; scala 1 și rotația identitate pe
   cele trei rădăcini (verificat în `verify_angkor.sh`).
 - Primitive rotunde: bobocul 14 laturi, finialul 8. Restul sunt prisme octogonale, cutii și
@@ -49,7 +49,7 @@ e la 1,49 (nucleul de 1,19 + 0,30 m de relief), treapta de jos la 1,50 exact.
 
 ## Fidelitate
 
-Imagini (`docs/asset_briefs/img/angkor_fidelity/`):
+Imagini (`docs/asset_briefs/img/angkor_fidelity/`; din runda 5 și `bayon_face_tower_a_face.png`, close-up pe față din față și 3/4, ~1000 px, mod `--face`):
 `bayon_face_tower_a.png` (decupare | randare), `bayon_face_tower_a_views.png`
 (4 azimuturi), `bayon_face_tower_a_gamecam.png` (camera de joc: cadrul de
 1920×1080 la jumătate, lângă decuparea turnului la pixeli nativi, mărită 3×;
@@ -103,6 +103,34 @@ Două iterații interne în rundă: prima versiune a ochilor ieșea ca ochelari 
 soare (pleoapă + arc separat + punte), iar buzele, ca o dungă; ochii au devenit
 o singură masă sprânceană-pleoapă, buzele s-au îngroșat și zâmbetul a crescut.
 
+**Runda 5** (doar fața și diadema; 19.862 tri; garda verde). Ce s-a schimbat:
+- **Ochi:** două pleoape SEPARATE (tuburi netede, semilună convexă în jos, colțul
+  exterior coborât), cu suprafața puntii nasului între ele; deasupra fiecăreia o
+  sprânceană arcuită moale, despărțită de pleoapă printr-un jgheab (suprafața
+  fetei). Nu mai e nicio bandă continuă.
+- **Rotunjit:** fața = cupolă ovală din inele (maxilar în arc, fără colțuri la
+  bărbie), obrajii = elipsoizi 16×10, aripile nasului = bumbi rotunzi, buzele și
+  pleoapele = tuburi netede (învelitori de inele eliptice), urechile = elipsoizi;
+  umbrire netedă (prag 55°). Fără subdiviziune propriu-zisă: forma are
+  segmentele în ea.
+- **Nas:** ~0,27·H, bază lată, vârf rotund, fără creastă (corp din inele).
+- **Buze:** sus arc ușor, jos plină, colțuri mai mici și urcate, două gropițe;
+  lățime 0,36·H (~0,45 din fața de 0,82·H).
+- **Diadema:** bandă PLATĂ (~0,3 m), lipită de frunte, fără surplomb, cu 3 rozete
+  pe față; capacul de deasupra: surplomb 3 cm (era 8).
+- Probleme în timpul rundei: primul val de margele-elipsoizi dădea „cârnați”
+  (nu pleoape), iar un artefact de umbrire pe frunte (dungi verticale) și o
+  cută la bărbie au fost corectate; garda a prins vârful nasului la 1,502.
+
+**Verdict onest, runda 5 (oprire, cum s-a cerut).** Nu mai citește ca ochelari
+(ochii sunt separați, cu groapă și sprânceană deasupra) și nu mai citește ca
+Moai (fără creastă ascuțită, fără fălci pătrate, fără planuri). În schimb
+citește **ca o față de desen animat prietenoasă**, nu ca un chip Bayon senin:
+obrajii sunt prea mari și prea rotunzi („clovn”), buzele sunt două bare care la
+distanță dau impresia unei mustăți, nasul e un con, iar fața e netedă și „de
+cauciuc”, fără masa de piatră a modelului. În decuparea gamecam citește clar ca
+față cu ochii închiși și zâmbet; ca „Bayon senin” nu o semnez. Nu am mai iterat.
+
 ### Element cu element (după runda 4)
 
 | element | pe desen | în GLB | verdict |
@@ -110,14 +138,14 @@ o singură masă sprânceană-pleoapă, buzele s-au îngroșat și zâmbetul a c
 | siluetă | turn, fețele în mijloc, con de etaje | 3,0 × 9,0 m; bază 0–1,5, fus 1,5–2,7, fețe 3,0–6,6, 4 etaje, boboc | OK: fețele SUNT volumul turnului; etajele fac un con din rânduri; mai în trepte decât conul desenului |
 | baza | piramidă în trepte, mai lată decât corpul | 3 trepte 1,50 / 1,40 / 1,30, blocuri în relief; fus de 2,4 m | OK |
 | blocul fețelor | fețele umplu lățimea turnului | 2,56 m pe latură (nucleu), cu fața bombată; ~3,0 m sprânceană–bărbie | OK |
-| fețe | rotunde, senine, ochi închiși, zâmbet | late, pleoape grele, nas lat, buze late; **fațetate** (învelitori convexe) și mai „de piatră” | citește ca față cu zâmbet; încă puțin masivă/„moai” față de desen |
+| fețe | rotunde, senine, ochi închiși, zâmbet | după runda 5: netede, ochi separați, nas rotund, buze late, obraji pline | citește ca față zâmbitoare, dar „desen animat/clovn”, nu Bayon senin |
 | urechi | lobi lungi lângă față | la colțuri, 0,1 m în relief | OK |
-| diademă | bandă cu nervuri peste frunte | bandă arcuită cu 11 nervuri, direct pe frunte | OK; seamănă și cu o „streașină” văzută de sus |
+| diademă | bandă cu nervuri peste frunte | bandă plată ~0,3 m cu 3 rozete, fără surplomb | OK |
 | urna | punct pe frunte | **absentă, voit** (brief §8) | abatere voită |
 | etaje | 4–5 rânduri, colțuri rotunjite | 4 etaje × 2 rânduri octogonale + cornișe subțiri | OK; mai plate/disciplinate decât blocurile desenului |
 | vârf | boboc de lotus | boboc de revoluție 14 laturi, 8 + 8 petale | OK; mai colțuros |
 | lichen | pete portocalii pe tot | 44 + 16 pete, doar pe orizontale, 0,70% / 0,35% | **abatere voită** (contract) |
-| dâre | negre sub cornișe | 14, scurte, ascuțite, 0,60% | OK; încă albăstrii |
+| dâre | negre sub cornișe | 14, scurte, ascuțite, 0,64% | OK; încă albăstrii |
 | culoare | ocru saturat | gresie `#AD9877` (clasa) + AO | **abatere voită** |
 | iese din contur | nimic | nimic dincolo de ±1,5 (măsurat) | OK |
 
@@ -125,22 +153,17 @@ o singură masă sprânceană-pleoapă, buzele s-au îngroșat și zâmbetul a c
 
 Camera la 10 m înălțime și 12,5 m în spatele unui punct aflat la 30 m înaintea
 turnului, fov 68°, soare la 24° din spatele camerei, baza îngropată 1 m.
-După runda 4 fața are ~35 px înălțime la rezoluția nativă (era ~25) și ocupă
-mijlocul turnului pe toată lățimea. În decuparea mărită 3× citește ca „turn
-făcut din fețe”: bloc lat cu nasul ca muchie luminată, ochi închiși sub sprâncene,
-gură largă, urechi la colțuri, coroană de etaje deasupra; nu mai e un tablou
-într-un cadru. Seren: în general da (pleoape grele, zâmbet); nu e caricatură,
-dar are ceva de „statuie de insulă” prin nasul lung și fălcile pătrate. La 1×
-(cadrul întreg) rămân vizibile mai ales silueta de con, blocul lat din mijloc și
-umbra nasului; ochii și gura sunt puncte. Verdictul real îl dă criticul orb
-(§1.1: „față”/„chip” la ≥ 2 din 3 capturi).
+Fața are ~35 px la rezoluția nativă și ocupă mijlocul turnului pe toată lățimea.
+În decuparea 3×: turn făcut din fețe (rămâne), ochi închiși separați, nas, gură
+zâmbitoare, obraji pliniți. Citește ca față; stilul e de desen animat (obrajii și
+mustața-buze), nu Moai și nu ochelari. La 1× rămân silueta de con, blocul lat și
+două pete pentru ochi.
 
 ## Abateri rămase, pe față
 
-1. Fețele sunt din învelitori convexe: fațetate, cu muchii vizibile la aproape
-   și mai „moai” decât desenul (nas lung, fălci pătrate).
-2. Lichenul e mult mai discret decât în desen (contract: sub 3%, pe orizontale);
-   dârele sunt încă albăstrii (`VOLCANIC_BLACK`).
-3. Fără bevel pe gresie: muchiile sunt vii.
-4. Etajele sunt plăci octogonale netede; desenul are blocuri vizibile pe ele.
-5. Diadema citește uneori ca streașină.
+1. Fața e „de desen animat”: obraji prea mari și rotunzi, buze-bare, nas conic,
+   suprafață de cauciuc. Cere sculptură adevărată (subdiviziune/modelare manuală
+   sau o a doua trecere de proiectare), nu alți parametri.
+2. Lichenul e mult mai discret decât în desen (contract); dârele sunt albăstrii.
+3. Fără bevel pe gresie; etajele sunt plăci octogonale netede.
+4. 19,9k triunghiuri, 3× piesa, fără plafon, dar de ținut în ochi.

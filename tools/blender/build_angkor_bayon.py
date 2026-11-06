@@ -100,9 +100,9 @@ def build_tower(name, spec):
         face_relief(stone, fr.p(0.0, CORE_HALF, Z_CHIN), 90.0 * k, FACE_H)
 
     # --- 5. capacul blocului fetelor (subtire) -------------------------------------------
-    stone_box(stone, 0, 0, Z_FACE_TOP, Z_FACE_TOP + 0.10, 1.36)
-    z = Z_FACE_TOP + 0.10
-    ledges.append((z, 1.36, spec["tiers"][0][1] + 0.05))
+    stone_box(stone, 0, 0, Z_FACE_TOP, Z_FACE_TOP + 0.08, 1.31)
+    z = Z_FACE_TOP + 0.08
+    ledges.append((z, 1.31, spec["tiers"][0][1] + 0.05))
 
     # --- 6. etajele: un con din randuri ---------------------------------------------------
     for i, (th, half, ch) in enumerate(spec["tiers"]):

@@ -24,6 +24,9 @@ Moduri (rulate prin run_build.py, argumentele dupa al doilea `--`):
                      in dreapta (se vad doua fete). Fiecare cadru e 1920x1080
                      si apare alaturi de decuparea lui la pixeli nativi, de 3x.
                      -> <nume>_gamecam.png
+  --face <nume>      close-up pe o fata (+Y), de ~1000 px inaltime: din fata si
+                     3/4, ca fata sa poata fi judecata singura
+                     -> <nume>_face.png
 
     D:/Blender/blender.exe --background --factory-startup \\
         --python tools/blender/run_build.py -- preview_angkor.py -- --compare bayon_face_tower_a
@@ -479,12 +482,68 @@ def gamecam(name):
     _rm(*frames)
 
 
+def face(name, res_height=1000):
+    """Close-up pe fata +Y a turnului: din fata si 3/4 (azimut 90 / 58)."""
+    os.makedirs(FID_DIR, exist_ok=True)
+    _clear()
+    meshes = _import(name)
+    if not meshes:
+        return
+    scene = bpy.context.scene
+    for o in meshes:
+        o.hide_render = False
+    center = Vector((0.0, 1.0, 4.65))
+    outs = []
+    for tag, az in (("front", 90.0), ("q3", 58.0)):
+        for o in list(bpy.data.objects):
+            if o.type == "LIGHT":
+                bpy.data.objects.remove(o, do_unlink=True)
+        cam = bpy.data.objects.get("PreviewCam")
+        if cam is None:
+            cam = bpy.data.objects.new("PreviewCam", bpy.data.cameras.new("PreviewCam"))
+            scene.collection.objects.link(cam)
+        scene.camera = cam
+        cam.data.sensor_fit = "AUTO"
+        cam.data.lens = 70.0
+        cam.data.clip_start = 0.1
+        cam.data.clip_end = 200.0
+        a = math.radians(az)
+        cam.location = center + Vector((math.cos(a), math.sin(a), 0.0)) * 7.5
+        cam.rotation_euler = (center - cam.location).normalized().to_track_quat("-Z", "Y").to_euler()
+        scene.render.resolution_x, scene.render.resolution_y = int(res_height * 0.85), res_height
+        # soarele jos (24 grade) din spatele camerei, putin lateral: relieful arunca umbra
+        _sun("FSun", _lit_dir(az + 28.0, 24.0), 3.0, color=_hex_lin("FFD9A8"), angle_deg=1.5)
+        _sun("FFill", _lit_dir(az - 80.0, 35.0), 0.7)
+        world = scene.world or bpy.data.worlds.new("KWorld")
+        scene.world = world
+        world.use_nodes = True
+        bg = world.node_tree.nodes.get("Background")
+        if bg:
+            bg.inputs[0].default_value = (0.8, 0.8, 0.85, 1.0)
+            bg.inputs[1].default_value = 0.45
+        scene.view_settings.view_transform = "Standard"
+        scene.view_settings.look = "None"
+        _engine(scene)
+        scene.render.resolution_percentage = 100
+        scene.render.film_transparent = True
+        scene.render.image_settings.color_mode = "RGBA"
+        scene.render.image_settings.file_format = "PNG"
+        p = os.path.join(FID_DIR, "_face_%s_%s.png" % (name, tag))
+        scene.render.filepath = p
+        bpy.ops.render.render(write_still=True)
+        outs.append(p)
+    _compose(["--montage", ",".join(outs), "--out", os.path.join(FID_DIR, name + "_face.png")])
+    _rm(*outs)
+
+
 argv = sys.argv
 args = argv[argv.index("--") + 1:] if "--" in argv else []
 if "--compare" in args:
     compare(args[args.index("--compare") + 1])
 elif "--views" in args:
     views(args[args.index("--views") + 1])
+elif "--face" in args:
+    face(args[args.index("--face") + 1])
 elif "--gamecam" in args:
     gamecam(args[args.index("--gamecam") + 1])
 else:

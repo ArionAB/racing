@@ -193,134 +193,145 @@ FACE_DEPTH = 0.07     # cat iese varful nasului in afara planului nucleului, in 
 FACE_PLATE = 0.02     # cat iese masa obrajilor/fruntii (bombata) peste nucleu, in H
 
 
+def ellipsoid(b, center, radii, slot, rot, seg=10, rings=6, roll_deg=0.0):
+    """Elipsoid neted (sfera UV scalata) in builder-ul `b`. `center` in spatiul
+    lumii, `radii` = (r_u, r_w, r_z) in metri, in axele LOCALE ale fetei
+    (`rot` = matricea 3x3 a cadrului), `roll_deg` = inclinare in planul fetei
+    (in jurul lui w): pleoapele cu colturile exterioare in jos."""
+    m = (Matrix.Translation(Vector(center)) @ rot.to_4x4()
+         @ Matrix.Rotation(math.radians(roll_deg), 4, "Y")
+         @ Matrix.Diagonal(Vector((radii[0], radii[1], radii[2], 1.0))))
+    try:
+        res = bmesh.ops.create_uvsphere(b.bm, u_segments=seg, v_segments=rings, radius=1.0, matrix=m)
+    except TypeError:
+        res = bmesh.ops.create_uvsphere(b.bm, u_segments=seg, v_segments=rings, diameter=1.0, matrix=m)
+    b._tag(res["verts"], slot)
+
+
 def face_relief(b, origin, yaw_deg, H, slot=ANK_STONE, smile=0.9):
-    """Fata Bayon senina ca GEOMETRIE, pe o latura a nucleului (runda 4).
+    """Fata Bayon senina ca GEOMETRIE NETEDA (runda 5): mase rotunjite
+    (elipsoizi cu 8-12 segmente + o cupola din inele), nu fatete plane.
 
     origin   punctul (x, y, z) de pe PLANUL NUCLEULUI, sub barbie, pe axa fetei
     yaw_deg  0 = fata priveste spre +Y; 90 spre -X; 180 spre -Y; 270 spre +X
     H        inaltimea sprancene-barbie in metri (3,0 pentru turn)
-    smile    0 = buze drepte; 0.9 = zambetul Angkor, colturile urcate usor
 
-    Proportii (in H): latimea fetei 0,80 (maxilar lat si rotunjit, FARA barbie
-    ascutita), ochii la 0,55-0,65, nasul 0,34-0,78, gura la 0,20, fruntea pana
-    la 1,10, diadema 1,02-1,20. Relieful peste masa obrajilor (0,02·H): nasul
-    0,05·H (0,15 m la H = 3), buzele 0,042·H, pleoapele 0,03·H. Adancimea sta in
-    nas, pleoape, buze si masa obrajilor, nu intr-un raft de sprancene: sprancena
-    e un arc continuu care curge in puntea nasului.
-
-    Pleoape grele, inchise, curbate in jos (semiluna cu partea convexa in jos).
-    Nas lat cu aripi late. Buze late (mai late decat aripile nasului), cea de jos
-    mai plina. FARA urna de pe frunte (brief angkor.md §8), fara caricatura.
-    Urechile cu lobi lungi stau la colturi, unde se intalnesc doua fete.
-    Intoarce cota de sus a diademei (m, de la origine)."""
+    Proportii (in H): oval lat (0,82), maxilar in arc de oval, FARA colturi la
+    barbie; ochii la t ~0,60, nasul 0,36-0,64 (~0,27·H de intre ochi), gura la
+    0,205 cu latimea 0,36·H (~0,45 din latimea fetei).
+    Ochi: DOUA pleoape separate, fiecare o semiluna cu partea convexa in jos si
+    colturile exterioare usor in jos, cu suprafata puntii nasului intre ele; deasupra
+    fiecareia, o sprancena arcuita moale, despartita de pleoapa printr-un jgheab
+    (suprafata fetei, mai jos): umbra orbitei, care face ochii „inchisi”.
+    Obrajii: mase rotunjite care urca spre colturile zambetului. Nas: baza lata,
+    varf rotund, aripi = doua bumbi rotunzi, fara creasta. Buze: cea de sus un arc
+    usor, cea de jos plina, colturile mai mici si urcate. Urechi cu lobi lungi la
+    colturi. FARA urna (brief angkor.md §8). Intoarce cota de sus a diademei (m)."""
     fr = Frame(origin, yaw_deg)
     h = H
+    rot = fr.rot
 
     def P(u, t, w):
         return fr.p(u * h, w * h, t * h)
 
-    def sym(pts):
-        out = []
-        for (u, t, w) in pts:
-            out.append(P(u, t, w))
-            if abs(u) > 1e-9:
-                out.append(P(-u, t, w))
-        return out
+    def E(u, t, w, ru, rt, rw, seg=10, rings=6, roll=0.0):
+        ellipsoid(b, P(u, t, w), (ru * h, rw * h, rt * h), slot, rot, seg, rings, roll)
 
     pl = FACE_PLATE
     D = FACE_DEPTH
-    # --- masa fetei: oval LAT, bombat spre exterior (trei straturi) -----------
-    outline = [(0.17, 0.00), (0.30, 0.04), (0.37, 0.16), (0.40, 0.36),
-               (0.40, 0.62), (0.385, 0.88), (0.34, 1.10)]
+
+    def tube(path, slot_=slot, n=8):
+        """Tub neted de-a lungul unui drum de (u, t, w, r_t, r_w): inele eliptice
+        in planul (t, w), invelitoare convexa. Un singur corp continuu (nu margele)."""
+        pts = []
+        for (u, t, w, rt, rw) in path:
+            for k in range(n):
+                th = 2.0 * math.pi * k / n
+                pts.append(P(u, t + rt * math.cos(th), w + rw * math.sin(th)))
+        hull(b, pts, slot_)
+
+    def cone(rings, n=12):
+        """Corp neted din inele eliptice in planul (u, w), la t crescator:
+        (t, u_centru, w_centru, r_u, r_w)."""
+        pts = []
+        for (t, uc, wc, ru, rw) in rings:
+            for k in range(n):
+                th = 2.0 * math.pi * k / n
+                pts.append(P(uc + ru * math.cos(th), t, wc + rw * math.sin(th)))
+        hull(b, pts, slot)
+
+    # --- masa fetei: cupola ovala din inele (maxilar in arc, bombata) -----------------
     pts = []
-    for (u, t) in outline:
-        pts += sym([(u, t, 0.0)])
-        pts += sym([(u * 0.96, t * 0.99 + 0.005, pl * 0.55)])
-        pts += sym([(u * 0.86, t * 0.97 + 0.02, pl)])
+    for k in range(25):
+        t = 1.12 * k / 24.0
+        hw = 0.41 * math.sqrt(max(0.03, 1.0 - ((t - 0.60) / 0.64) ** 2))
+        for a in range(-90, 91, 6):
+            ar = math.radians(a)
+            fz = 1.0 if t < 0.85 else 1.0 - 0.55 * ((t - 0.85) / 0.27) ** 2   # fruntea se pierde in diadema
+            pts.append(P(hw * math.sin(ar), t, pl * 1.05 * math.cos(ar) ** 0.8 * fz))
     hull(b, pts, slot)
 
-    # --- barbia: lata, rotunjita ------------------------------------------------
-    hull(b, sym([(0.18, 0.015, 0.0), (0.16, 0.115, 0.0), (0.12, 0.02, pl + 0.016), (0.10, 0.11, pl + 0.018)]), slot)
-
-    # --- nasul lat, plat, cu aripi late -------------------------------------------
-    hull(b, sym([(0.045, 0.70, pl + 0.008), (0.066, 0.55, pl + 0.030), (0.080, 0.415, D),
-                 (0.165, 0.375, pl + 0.032), (0.135, 0.455, pl + 0.026), (0.085, 0.345, D - 0.008),
-                 (0.165, 0.375, pl), (0.05, 0.74, pl)]), slot)
-
-    # --- ochi inchisi + sprancena: lid greu (semiluna convexa in jos), arc continuu --
-    # fiecare ochi = o singura masa: sprancena (arc continuu, urca din puntea nasului)
-    # + pleoapa grea sub ea, a carei margine de jos e o semiluna cu partea convexa in jos
-    eu = [0.045, 0.10, 0.15, 0.20, 0.25, 0.30, 0.345]
+    # --- obraji: mase pline si joase, urca spre colturile zambetului ------------------------
     for sgn in (-1, 1):
-        for i in range(len(eu) - 1):
-            pts = []
-            for j in (i, i + 1):
-                u = eu[j]
-                x = (u - 0.22) / 0.13
-                bulge = max(0.0, 1.0 - x * x)
-                top = 0.715 - 0.035 * (u / 0.345) ** 2 + 0.012 * bulge      # arc continuu spre tample
-                low = 0.625 - 0.080 * bulge - 0.012 * max(0.0, x - 0.4)
-                if u < 0.08:
-                    low = 0.67                                              # in puntea nasului lid-ul se contopeste
-                wlid = pl + 0.012 + 0.020 * bulge
-                pts += [P(sgn * u, low, wlid), P(sgn * u, top, wlid + 0.010),
-                        P(sgn * u, low + 0.004, pl), P(sgn * u, top, pl)]
-            hull(b, pts, slot)
+        E(sgn * 0.245, 0.37, pl, 0.140, 0.100, 0.026, 16, 10)
 
-    # --- buzele: LARGI (peste aripile nasului), colturile urcate usor, cea de jos mai plina
-    hw = 0.235
-    n = 10
-    gap = 0.003
+    # --- nas: un singur corp rotund, baza lata, varf rotund, fara creasta -----------------
+    cone([(0.64, 0.0, pl + 0.004, 0.030, 0.014), (0.55, 0.0, pl + 0.012, 0.048, 0.026),
+          (0.45, 0.0, pl + 0.012, 0.070, 0.032), (0.405, 0.0, D - 0.032, 0.080, 0.030),
+          (0.372, 0.0, pl + 0.018, 0.100, 0.026), (0.352, 0.0, pl + 0.012, 0.070, 0.012)], 12)
+    for sgn in (-1, 1):
+        E(sgn * 0.098, 0.385, pl + 0.012, 0.046, 0.040, 0.030, 12, 8)   # aripile = bumbi rotunzi
+
+    # --- ochi: doua pleoape SEPARATE (semiluna convexa in jos, colt exterior in jos) ----
+    for sgn in (-1, 1):
+        lid = []
+        for i in range(5):
+            f = i / 4.0
+            u = 0.115 + 0.175 * f
+            t = 0.640 - 0.050 * f - 0.020 * math.sin(math.pi * f)
+            e = math.sin(math.pi * f) ** 0.6
+            lid.append((sgn * u, t, pl + 0.003, 0.012 + 0.018 * e, 0.010 + 0.022 * e))
+        tube(lid)
+        # sprancena: arc moale deasupra, cu jgheab (suprafata fetei) intre ea si pleoapa
+        brow = []
+        for i in range(5):
+            f = i / 4.0
+            u = 0.100 + 0.215 * f
+            t = 0.735 - 0.050 * f + 0.030 * math.sin(math.pi * f)
+            e = math.sin(math.pi * f) ** 0.7
+            brow.append((sgn * u, t, pl + 0.003, 0.008 + 0.012 * e, 0.008 + 0.016 * e))
+        tube(brow)
+
+    # --- buze: late (0,36·H), cea de sus un arc usor, cea de jos plina ---------------------
+    hw = 0.180
 
     def zc(u):
-        return 0.205 + 0.035 * smile * (u / hw) ** 2
+        return 0.205 + 0.034 * smile * (u / hw) ** 2
 
-    wU, wL = pl + 0.042, pl + 0.048
-    for i in range(n):
-        ua = -hw + 2 * hw * i / n
-        ub = -hw + 2 * hw * (i + 1) / n
-        up_pts, lo_pts = [], []
-        for u in (ua, ub):
-            a = abs(u) / hw
-            th_u = 0.055 * (1 - 0.40 * a)
-            th_l = 0.078 * (1 - 0.35 * a)
-            wu = wU * (1 - 0.35 * a)
-            wl = wL * (1 - 0.35 * a)
-            z0u = zc(u) + gap
-            up_pts += [P(u, z0u, wu), P(u, z0u + th_u, wu - 0.016), P(u, z0u, pl), P(u, z0u + th_u, pl)]
-            z0l = zc(u) - gap
-            lo_pts += [P(u, z0l, wl - 0.008), P(u, z0l - th_l * 0.5, wl), P(u, z0l - th_l, wl - 0.022),
-                       P(u, z0l, pl), P(u, z0l - th_l, pl)]
-        hull(b, up_pts, slot)
-        hull(b, lo_pts, slot)
+    up, lo = [], []
+    for i in range(9):
+        u = -hw + 2 * hw * i / 8.0
+        a = abs(u) / hw
+        e = 1.0 - 0.55 * a * a                      # colturile mai mici, stranse
+        up.append((u, zc(u) + 0.026 + 0.008 * (1.0 - a), pl + 0.006, 0.014 * e + 0.004, 0.020 * e + 0.006))
+        lo.append((u, zc(u) - 0.022, pl + 0.008, 0.028 * e + 0.004, 0.028 * e + 0.006))
+    tube(up)
+    tube(lo)
+    for sgn in (-1, 1):                              # gropite la colturi
+        E(sgn * 0.200, zc(0.18) + 0.010, pl + 0.004, 0.016, 0.016, 0.012, 8, 6)
 
-    # --- urechile cu lobi lungi: la colturi, unde se intalnesc doua fete -----------
+    # --- urechi cu lobi lungi, la colturi -------------------------------------------------
     for sgn in (-1, 1):
-        hull(b, [P(sgn * 0.395, 0.82, 0.0), P(sgn * 0.45, 0.77, 0.032), P(sgn * 0.475, 0.60, 0.038),
-                 P(sgn * 0.46, 0.45, 0.032), P(sgn * 0.395, 0.45, 0.0), P(sgn * 0.40, 0.76, 0.034)], slot)
-        hull(b, [P(sgn * 0.41, 0.50, 0.0), P(sgn * 0.46, 0.46, 0.028), P(sgn * 0.455, 0.20, 0.032),
-                 P(sgn * 0.42, 0.14, 0.032), P(sgn * 0.395, 0.26, 0.012), P(sgn * 0.40, 0.20, 0.0)], slot)
+        E(sgn * 0.435, 0.52, 0.012, 0.034, 0.230, 0.034, 10, 8)
 
-    # --- diadema: banda arcuita direct pe frunte, cu nervuri ---------------------------
-    xs = [-0.43, -0.32, -0.21, -0.105, 0.0, 0.105, 0.21, 0.32, 0.43]
-
-    def band_lo(u):
-        return 1.02 + 0.025 * (1 - (u / 0.43) ** 2)
-
-    def band_hi(u):
-        return 1.15 + 0.045 * (1 - (u / 0.43) ** 2)
-
-    wb = pl + 0.020
-    for ua, ub in zip(xs[:-1], xs[1:]):
-        pts = []
-        for u in (ua, ub):
-            pts += [P(u, band_lo(u), wb), P(u, band_hi(u), wb - 0.006), P(u, band_lo(u), 0.0), P(u, band_hi(u), 0.0)]
-        hull(b, pts, slot)
-    for u in (-0.38, -0.30, -0.22, -0.14, -0.07, 0.0, 0.07, 0.14, 0.22, 0.30, 0.38):
-        hull(b, [P(u - 0.012, band_lo(u) + 0.012, wb + 0.014), P(u + 0.012, band_lo(u) + 0.012, wb + 0.014),
-                 P(u - 0.012, band_hi(u) - 0.012, wb + 0.010), P(u + 0.012, band_hi(u) - 0.012, wb + 0.010),
-                 P(u - 0.012, band_lo(u) + 0.012, wb - 0.01), P(u + 0.012, band_hi(u) - 0.012, wb - 0.01)], slot)
-    return (1.20 * h)
+    # --- diadema: banda PLATA (~0,3 m), lipita de frunte, fara surplomb, cu 3 rozete -----
+    bl, bh = 1.075, 1.175
+    wb = pl + 0.004
+    hull(b, [P(sgn * 0.43, t, w) for sgn in (-1, 1) for t in (bl, bh) for w in (0.0, wb)], slot)
+    for u in (-0.25, 0.0, 0.25):
+        E(u, (bl + bh) * 0.5, wb + 0.002, 0.040, 0.040, 0.016, 10, 6)
+        E(u, (bl + bh) * 0.5, wb + 0.014, 0.020, 0.020, 0.012, 8, 5)
+    return bh * h
 
 
 # --- pete de culoare ---------------------------------------------------------

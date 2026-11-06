@@ -255,8 +255,8 @@ script = ExtResource("mf_zone")
 label = "coronament aproape 0.000"
 kind = 0
 species = PackedStringArray("tetrameles_a", "tetrameles_b", "dipterocarp", "strangler_fig")
-weights = PackedFloat32Array(0.17, 0.17, 0.64, 0.02)
-spacing = 6.5
+weights = PackedFloat32Array(0.2, 0.2, 0.57, 0.03)
+spacing = 9.0
 edge_clear_m = 10.0
 shadow_m = 20.0
 view_m = 330.0
@@ -268,16 +268,16 @@ seed_value = 101
 frac_from = 0.0000
 frac_to = 0.0700
 side = 0
-lat_min = 16.0
-lat_max = 55.0
+lat_min = 30.0
+lat_max = 60.0
 
 [sub_resource type="Resource" id="MFZ_10"]
 script = ExtResource("mf_zone")
 label = "coronament aproape 0.070"
 kind = 0
 species = PackedStringArray("tetrameles_a", "tetrameles_b", "dipterocarp", "strangler_fig")
-weights = PackedFloat32Array(0.17, 0.17, 0.64, 0.02)
-spacing = 6.5
+weights = PackedFloat32Array(0.2, 0.2, 0.57, 0.03)
+spacing = 9.0
 edge_clear_m = 10.0
 shadow_m = 20.0
 view_m = 330.0
@@ -289,16 +289,16 @@ seed_value = 101
 frac_from = 0.0700
 frac_to = 0.0880
 side = 0
-lat_min = 16.0
-lat_max = 55.0
+lat_min = 30.0
+lat_max = 60.0
 
 [sub_resource type="Resource" id="MFZ_11"]
 script = ExtResource("mf_zone")
 label = "coronament aproape 0.088"
 kind = 0
 species = PackedStringArray("tetrameles_a", "tetrameles_b", "dipterocarp", "strangler_fig")
-weights = PackedFloat32Array(0.17, 0.17, 0.64, 0.02)
-spacing = 6.5
+weights = PackedFloat32Array(0.2, 0.2, 0.57, 0.03)
+spacing = 9.0
 edge_clear_m = 10.0
 shadow_m = 20.0
 view_m = 330.0
@@ -310,16 +310,16 @@ seed_value = 101
 frac_from = 0.0880
 frac_to = 0.1220
 side = 0
-lat_min = 16.0
-lat_max = 55.0
+lat_min = 30.0
+lat_max = 60.0
 
 [sub_resource type="Resource" id="MFZ_12"]
 script = ExtResource("mf_zone")
 label = "coronament aproape 0.122"
 kind = 0
 species = PackedStringArray("tetrameles_a", "tetrameles_b", "dipterocarp", "strangler_fig")
-weights = PackedFloat32Array(0.17, 0.17, 0.64, 0.02)
-spacing = 6.5
+weights = PackedFloat32Array(0.2, 0.2, 0.57, 0.03)
+spacing = 9.0
 edge_clear_m = 10.0
 shadow_m = 20.0
 view_m = 330.0
@@ -331,16 +331,16 @@ seed_value = 101
 frac_from = 0.1220
 frac_to = 0.3080
 side = 0
-lat_min = 16.0
-lat_max = 55.0
+lat_min = 30.0
+lat_max = 60.0
 
 [sub_resource type="Resource" id="MFZ_13"]
 script = ExtResource("mf_zone")
 label = "coronament aproape 0.308"
 kind = 0
 species = PackedStringArray("tetrameles_a", "tetrameles_b", "dipterocarp", "strangler_fig")
-weights = PackedFloat32Array(0.17, 0.17, 0.64, 0.02)
-spacing = 6.5
+weights = PackedFloat32Array(0.2, 0.2, 0.57, 0.03)
+spacing = 9.0
 edge_clear_m = 10.0
 shadow_m = 20.0
 view_m = 330.0
@@ -352,16 +352,16 @@ seed_value = 101
 frac_from = 0.3080
 frac_to = 0.3720
 side = 0
-lat_min = 16.0
-lat_max = 55.0
+lat_min = 30.0
+lat_max = 60.0
 
 [sub_resource type="Resource" id="MFZ_14"]
 script = ExtResource("mf_zone")
 label = "coronament aproape 0.372"
 kind = 0
 species = PackedStringArray("tetrameles_a", "tetrameles_b", "dipterocarp", "strangler_fig")
-weights = PackedFloat32Array(0.17, 0.17, 0.64, 0.02)
-spacing = 6.5
+weights = PackedFloat32Array(0.2, 0.2, 0.57, 0.03)
+spacing = 9.0
 edge_clear_m = 10.0
 shadow_m = 20.0
 view_m = 330.0
@@ -373,16 +373,16 @@ seed_value = 101
 frac_from = 0.3720
 frac_to = 0.7580
 side = 0
-lat_min = 16.0
-lat_max = 55.0
+lat_min = 30.0
+lat_max = 60.0
 
 [sub_resource type="Resource" id="MFZ_15"]
 script = ExtResource("mf_zone")
 label = "coronament aproape 0.758"
 kind = 0
 species = PackedStringArray("tetrameles_a", "tetrameles_b", "dipterocarp", "strangler_fig")
-weights = PackedFloat32Array(0.17, 0.17, 0.64, 0.02)
-spacing = 6.5
+weights = PackedFloat32Array(0.2, 0.2, 0.57, 0.03)
+spacing = 9.0
 edge_clear_m = 10.0
 shadow_m = 20.0
 view_m = 330.0
@@ -394,16 +394,16 @@ seed_value = 101
 frac_from = 0.7580
 frac_to = 0.9050
 side = 0
-lat_min = 16.0
-lat_max = 55.0
+lat_min = 30.0
+lat_max = 60.0
 
 [sub_resource type="Resource" id="MFZ_16"]
 script = ExtResource("mf_zone")
 label = "coronament aproape 0.905"
 kind = 0
 species = PackedStringArray("tetrameles_a", "tetrameles_b", "dipterocarp", "strangler_fig")
-weights = PackedFloat32Array(0.17, 0.17, 0.64, 0.02)
-spacing = 6.5
+weights = PackedFloat32Array(0.2, 0.2, 0.57, 0.03)
+spacing = 9.0
 edge_clear_m = 10.0
 shadow_m = 20.0
 view_m = 330.0
@@ -415,8 +415,8 @@ seed_value = 101
 frac_from = 0.9050
 frac_to = 1.0000
 side = 0
-lat_min = 16.0
-lat_max = 55.0
+lat_min = 30.0
+lat_max = 60.0
 
 [sub_resource type="Resource" id="MFZ_17"]
 script = ExtResource("mf_zone")
@@ -436,7 +436,7 @@ seed_value = 102
 frac_from = 0.0000
 frac_to = 0.0700
 side = 0
-lat_min = 55.0
+lat_min = 60.0
 lat_max = 120.0
 
 [sub_resource type="Resource" id="MFZ_18"]
@@ -457,7 +457,7 @@ seed_value = 102
 frac_from = 0.0700
 frac_to = 0.0880
 side = 0
-lat_min = 55.0
+lat_min = 60.0
 lat_max = 120.0
 
 [sub_resource type="Resource" id="MFZ_19"]
@@ -478,7 +478,7 @@ seed_value = 102
 frac_from = 0.0880
 frac_to = 0.1220
 side = 0
-lat_min = 55.0
+lat_min = 60.0
 lat_max = 120.0
 
 [sub_resource type="Resource" id="MFZ_20"]
@@ -499,7 +499,7 @@ seed_value = 102
 frac_from = 0.1220
 frac_to = 0.3080
 side = 0
-lat_min = 55.0
+lat_min = 60.0
 lat_max = 120.0
 
 [sub_resource type="Resource" id="MFZ_21"]
@@ -520,7 +520,7 @@ seed_value = 102
 frac_from = 0.3080
 frac_to = 0.3720
 side = 0
-lat_min = 55.0
+lat_min = 60.0
 lat_max = 120.0
 
 [sub_resource type="Resource" id="MFZ_22"]
@@ -541,7 +541,7 @@ seed_value = 102
 frac_from = 0.3720
 frac_to = 0.7580
 side = 0
-lat_min = 55.0
+lat_min = 60.0
 lat_max = 120.0
 
 [sub_resource type="Resource" id="MFZ_23"]
@@ -562,7 +562,7 @@ seed_value = 102
 frac_from = 0.7580
 frac_to = 0.9050
 side = 0
-lat_min = 55.0
+lat_min = 60.0
 lat_max = 120.0
 
 [sub_resource type="Resource" id="MFZ_24"]
@@ -583,7 +583,7 @@ seed_value = 102
 frac_from = 0.9050
 frac_to = 1.0000
 side = 0
-lat_min = 55.0
+lat_min = 60.0
 lat_max = 120.0
 
 [sub_resource type="Resource" id="MFZ_25"]
@@ -758,337 +758,2965 @@ lat_max = 190.0
 script = ExtResource("mf_zone")
 label = "etaj mijloc 0.000"
 kind = 0
-species = PackedStringArray("sugar_palm", "tropical_shrub", "bamboo_clump")
-weights = PackedFloat32Array(0.3, 0.45, 0.25)
-spacing = 4.8
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 8.0
 edge_clear_m = 4.0
 shadow_m = 0.0
 view_m = 330.0
 max_below_road_m = 0.8
 claim = false
-scale_min = 0.6
-scale_max = 1.0
+scale_min = 0.75
+scale_max = 1.25
 seed_value = 105
 frac_from = 0.0000
 frac_to = 0.0700
 side = 0
-lat_min = 9.0
-lat_max = 45.0
+lat_min = 10.0
+lat_max = 34.0
 
 [sub_resource type="Resource" id="MFZ_34"]
 script = ExtResource("mf_zone")
 label = "etaj mijloc 0.070"
 kind = 0
-species = PackedStringArray("sugar_palm", "tropical_shrub", "bamboo_clump")
-weights = PackedFloat32Array(0.3, 0.45, 0.25)
-spacing = 4.8
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 8.0
 edge_clear_m = 4.0
 shadow_m = 0.0
 view_m = 330.0
 max_below_road_m = 200.0
 claim = false
-scale_min = 0.6
-scale_max = 1.0
+scale_min = 0.75
+scale_max = 1.25
 seed_value = 105
 frac_from = 0.0700
 frac_to = 0.0880
 side = 0
-lat_min = 9.0
-lat_max = 45.0
+lat_min = 10.0
+lat_max = 34.0
 
 [sub_resource type="Resource" id="MFZ_35"]
 script = ExtResource("mf_zone")
 label = "etaj mijloc 0.088"
 kind = 0
-species = PackedStringArray("sugar_palm", "tropical_shrub", "bamboo_clump")
-weights = PackedFloat32Array(0.3, 0.45, 0.25)
-spacing = 4.8
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 8.0
 edge_clear_m = 4.0
 shadow_m = 0.0
 view_m = 330.0
 max_below_road_m = 0.8
 claim = false
-scale_min = 0.6
-scale_max = 1.0
+scale_min = 0.75
+scale_max = 1.25
 seed_value = 105
 frac_from = 0.0880
 frac_to = 0.1220
 side = 0
-lat_min = 9.0
-lat_max = 45.0
+lat_min = 10.0
+lat_max = 34.0
 
 [sub_resource type="Resource" id="MFZ_36"]
 script = ExtResource("mf_zone")
 label = "etaj mijloc 0.122"
 kind = 0
-species = PackedStringArray("sugar_palm", "tropical_shrub", "bamboo_clump")
-weights = PackedFloat32Array(0.3, 0.45, 0.25)
-spacing = 4.8
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 8.0
 edge_clear_m = 4.0
 shadow_m = 0.0
 view_m = 330.0
 max_below_road_m = 200.0
 claim = false
-scale_min = 0.6
-scale_max = 1.0
+scale_min = 0.75
+scale_max = 1.25
 seed_value = 105
 frac_from = 0.1220
 frac_to = 0.3080
 side = 0
-lat_min = 9.0
-lat_max = 45.0
+lat_min = 10.0
+lat_max = 34.0
 
 [sub_resource type="Resource" id="MFZ_37"]
 script = ExtResource("mf_zone")
 label = "etaj mijloc 0.308"
 kind = 0
-species = PackedStringArray("sugar_palm", "tropical_shrub", "bamboo_clump")
-weights = PackedFloat32Array(0.3, 0.45, 0.25)
-spacing = 4.8
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 8.0
 edge_clear_m = 4.0
 shadow_m = 0.0
 view_m = 330.0
 max_below_road_m = 0.8
 claim = false
-scale_min = 0.6
-scale_max = 1.0
+scale_min = 0.75
+scale_max = 1.25
 seed_value = 105
 frac_from = 0.3080
 frac_to = 0.3720
 side = 0
-lat_min = 9.0
-lat_max = 45.0
+lat_min = 10.0
+lat_max = 34.0
 
 [sub_resource type="Resource" id="MFZ_38"]
 script = ExtResource("mf_zone")
 label = "etaj mijloc 0.372"
 kind = 0
-species = PackedStringArray("sugar_palm", "tropical_shrub", "bamboo_clump")
-weights = PackedFloat32Array(0.3, 0.45, 0.25)
-spacing = 4.8
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 8.0
 edge_clear_m = 4.0
 shadow_m = 0.0
 view_m = 330.0
 max_below_road_m = 200.0
 claim = false
-scale_min = 0.6
-scale_max = 1.0
+scale_min = 0.75
+scale_max = 1.25
 seed_value = 105
 frac_from = 0.3720
 frac_to = 0.7580
 side = 0
-lat_min = 9.0
-lat_max = 45.0
+lat_min = 10.0
+lat_max = 34.0
 
 [sub_resource type="Resource" id="MFZ_39"]
 script = ExtResource("mf_zone")
 label = "etaj mijloc 0.758"
 kind = 0
-species = PackedStringArray("sugar_palm", "tropical_shrub", "bamboo_clump")
-weights = PackedFloat32Array(0.3, 0.45, 0.25)
-spacing = 4.8
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 8.0
 edge_clear_m = 4.0
 shadow_m = 0.0
 view_m = 330.0
 max_below_road_m = 0.8
 claim = false
-scale_min = 0.6
-scale_max = 1.0
+scale_min = 0.75
+scale_max = 1.25
 seed_value = 105
 frac_from = 0.7580
 frac_to = 0.9050
 side = 0
-lat_min = 9.0
-lat_max = 45.0
+lat_min = 10.0
+lat_max = 34.0
 
 [sub_resource type="Resource" id="MFZ_40"]
 script = ExtResource("mf_zone")
 label = "etaj mijloc 0.905"
 kind = 0
-species = PackedStringArray("sugar_palm", "tropical_shrub", "bamboo_clump")
-weights = PackedFloat32Array(0.3, 0.45, 0.25)
-spacing = 4.8
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 8.0
 edge_clear_m = 4.0
 shadow_m = 0.0
 view_m = 330.0
 max_below_road_m = 200.0
 claim = false
-scale_min = 0.6
-scale_max = 1.0
+scale_min = 0.75
+scale_max = 1.25
 seed_value = 105
 frac_from = 0.9050
 frac_to = 1.0000
 side = 0
-lat_min = 9.0
-lat_max = 45.0
+lat_min = 10.0
+lat_max = 34.0
 
 [sub_resource type="Resource" id="MFZ_41"]
 script = ExtResource("mf_zone")
+label = "ciorchine 1"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.4388267002951025
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 201
+center = Vector3(-68.38, 0, -191.84)
+radius = 9.215292025840135
+
+[sub_resource type="Resource" id="MFZ_42"]
+script = ExtResource("mf_zone")
+label = "ciorchine 6"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.699596285352489
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 206
+center = Vector3(-128.05, 0, -466.00)
+radius = 9.783755494390423
+
+[sub_resource type="Resource" id="MFZ_43"]
+script = ExtResource("mf_zone")
+label = "ciorchine 9"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.141350685694042
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 209
+center = Vector3(128.50, 0, -320.37)
+radius = 6.865530500144625
+
+[sub_resource type="Resource" id="MFZ_44"]
+script = ExtResource("mf_zone")
+label = "ciorchine 12"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.0753467699679877
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 212
+center = Vector3(-80.24, 0, -233.97)
+radius = 9.286466794257347
+
+[sub_resource type="Resource" id="MFZ_45"]
+script = ExtResource("mf_zone")
+label = "ciorchine 14"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.108129660366634
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 214
+center = Vector3(162.24, 0, -26.69)
+radius = 8.793611195038043
+
+[sub_resource type="Resource" id="MFZ_46"]
+script = ExtResource("mf_zone")
+label = "ciorchine 16"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.689308452310405
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 216
+center = Vector3(-160.73, 0, -137.76)
+radius = 7.464579064332917
+
+[sub_resource type="Resource" id="MFZ_47"]
+script = ExtResource("mf_zone")
+label = "ciorchine 17"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.176209816991099
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 217
+center = Vector3(79.30, 0, -374.54)
+radius = 7.727626589341119
+
+[sub_resource type="Resource" id="MFZ_48"]
+script = ExtResource("mf_zone")
+label = "ciorchine 19"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.0470487084569253
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 219
+center = Vector3(-143.55, 0, -423.11)
+radius = 8.933778602854833
+
+[sub_resource type="Resource" id="MFZ_49"]
+script = ExtResource("mf_zone")
+label = "ciorchine 20"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.5960097543587852
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 220
+center = Vector3(138.72, 0, -48.52)
+radius = 8.10107032631501
+
+[sub_resource type="Resource" id="MFZ_50"]
+script = ExtResource("mf_zone")
+label = "ciorchine 24"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.7765546254332025
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 224
+center = Vector3(-218.32, 0, -153.31)
+radius = 10.208952127826542
+
+[sub_resource type="Resource" id="MFZ_51"]
+script = ExtResource("mf_zone")
+label = "ciorchine 25"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.802383259061026
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 225
+center = Vector3(-256.47, 0, 16.41)
+radius = 8.314748654680265
+
+[sub_resource type="Resource" id="MFZ_52"]
+script = ExtResource("mf_zone")
+label = "ciorchine 27"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.3449183117986343
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 227
+center = Vector3(-77.61, 0, -231.73)
+radius = 7.3092466489180765
+
+[sub_resource type="Resource" id="MFZ_53"]
+script = ExtResource("mf_zone")
+label = "ciorchine 28"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.096697561440166
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 228
+center = Vector3(110.02, 0, 43.39)
+radius = 11.228531844757796
+
+[sub_resource type="Resource" id="MFZ_54"]
+script = ExtResource("mf_zone")
+label = "ciorchine 29"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.036781363638219
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 229
+center = Vector3(-68.05, 0, -409.22)
+radius = 10.915679027014448
+
+[sub_resource type="Resource" id="MFZ_55"]
+script = ExtResource("mf_zone")
+label = "ciorchine 30"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.4565295603072452
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 230
+center = Vector3(-203.48, 0, -194.87)
+radius = 10.09633835632471
+
+[sub_resource type="Resource" id="MFZ_56"]
+script = ExtResource("mf_zone")
+label = "ciorchine 31"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.2800033004170333
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 231
+center = Vector3(-123.65, 0, -189.80)
+radius = 7.391741200917215
+
+[sub_resource type="Resource" id="MFZ_57"]
+script = ExtResource("mf_zone")
+label = "ciorchine 32"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.5027358013503935
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 232
+center = Vector3(17.95, 0, -452.99)
+radius = 6.024561620310384
+
+[sub_resource type="Resource" id="MFZ_58"]
+script = ExtResource("mf_zone")
+label = "ciorchine 34"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.7411112992909534
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 234
+center = Vector3(136.12, 0, -296.37)
+radius = 9.09294859842467
+
+[sub_resource type="Resource" id="MFZ_59"]
+script = ExtResource("mf_zone")
+label = "ciorchine 35"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.142263464997827
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 235
+center = Vector3(172.43, 0, -72.70)
+radius = 11.22587700694663
+
+[sub_resource type="Resource" id="MFZ_60"]
+script = ExtResource("mf_zone")
+label = "ciorchine 36"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.577827381798234
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 236
+center = Vector3(165.61, 0, -33.06)
+radius = 8.364720095852185
+
+[sub_resource type="Resource" id="MFZ_61"]
+script = ExtResource("mf_zone")
+label = "ciorchine 37"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.194763825326517
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 237
+center = Vector3(-186.05, 0, -449.28)
+radius = 7.252579112676987
+
+[sub_resource type="Resource" id="MFZ_62"]
+script = ExtResource("mf_zone")
+label = "ciorchine 40"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.0843786913841877
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 240
+center = Vector3(-85.03, 0, -191.84)
+radius = 9.682423577852585
+
+[sub_resource type="Resource" id="MFZ_63"]
+script = ExtResource("mf_zone")
+label = "ciorchine 41"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.416867455264442
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 241
+center = Vector3(-149.89, 0, -248.29)
+radius = 7.513546539342464
+
+[sub_resource type="Resource" id="MFZ_64"]
+script = ExtResource("mf_zone")
+label = "ciorchine 43"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.5806015876995234
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 243
+center = Vector3(-26.13, 0, -124.34)
+radius = 8.795936754959602
+
+[sub_resource type="Resource" id="MFZ_65"]
+script = ExtResource("mf_zone")
+label = "ciorchine 44"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.5743463322119897
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 244
+center = Vector3(-81.24, 0, -35.84)
+radius = 10.442107346568564
+
+[sub_resource type="Resource" id="MFZ_66"]
+script = ExtResource("mf_zone")
+label = "ciorchine 45"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.4341029508108125
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 245
+center = Vector3(207.16, 0, -32.98)
+radius = 11.712125682603897
+
+[sub_resource type="Resource" id="MFZ_67"]
+script = ExtResource("mf_zone")
+label = "ciorchine 46"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.7715004968344426
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 246
+center = Vector3(211.06, 0, -49.18)
+radius = 7.78853814207768
+
+[sub_resource type="Resource" id="MFZ_68"]
+script = ExtResource("mf_zone")
+label = "ciorchine 49"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.6498805473362346
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 249
+center = Vector3(98.12, 0, -415.99)
+radius = 7.336756536331432
+
+[sub_resource type="Resource" id="MFZ_69"]
+script = ExtResource("mf_zone")
+label = "ciorchine 50"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.90998690890636
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 250
+center = Vector3(70.09, 0, -449.36)
+radius = 10.73039558462468
+
+[sub_resource type="Resource" id="MFZ_70"]
+script = ExtResource("mf_zone")
+label = "ciorchine 51"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.272087388037902
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 251
+center = Vector3(-114.42, 0, -229.00)
+radius = 10.439238122254284
+
+[sub_resource type="Resource" id="MFZ_71"]
+script = ExtResource("mf_zone")
+label = "ciorchine 52"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.94813696395831
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 252
+center = Vector3(66.91, 0, -386.89)
+radius = 11.937621520218421
+
+[sub_resource type="Resource" id="MFZ_72"]
+script = ExtResource("mf_zone")
+label = "ciorchine 53"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.5366732133200682
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 253
+center = Vector3(-11.55, 0, -461.16)
+radius = 11.739090458048027
+
+[sub_resource type="Resource" id="MFZ_73"]
+script = ExtResource("mf_zone")
+label = "ciorchine 54"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.2645547875954852
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 254
+center = Vector3(-272.81, 0, 82.78)
+radius = 8.187815312171196
+
+[sub_resource type="Resource" id="MFZ_74"]
+script = ExtResource("mf_zone")
+label = "ciorchine 55"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.18229879647769
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 255
+center = Vector3(-120.58, 0, -197.30)
+radius = 8.895919812801468
+
+[sub_resource type="Resource" id="MFZ_75"]
+script = ExtResource("mf_zone")
+label = "ciorchine 56"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.9595724938195924
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 256
+center = Vector3(132.11, 0, -190.37)
+radius = 9.917868257046054
+
+[sub_resource type="Resource" id="MFZ_76"]
+script = ExtResource("mf_zone")
+label = "ciorchine 57"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.90016855179655
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 257
+center = Vector3(-84.14, 0, -35.94)
+radius = 10.69381730458854
+
+[sub_resource type="Resource" id="MFZ_77"]
+script = ExtResource("mf_zone")
+label = "ciorchine 58"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.104099829204293
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 258
+center = Vector3(2.45, 0, -456.24)
+radius = 9.815053328835242
+
+[sub_resource type="Resource" id="MFZ_78"]
+script = ExtResource("mf_zone")
+label = "ciorchine 59"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.1019030993413805
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 259
+center = Vector3(-285.02, 0, 78.51)
+radius = 10.460116264825924
+
+[sub_resource type="Resource" id="MFZ_79"]
+script = ExtResource("mf_zone")
+label = "ciorchine 60"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.558424658833462
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 260
+center = Vector3(-67.52, 0, -212.34)
+radius = 9.544873814501706
+
+[sub_resource type="Resource" id="MFZ_80"]
+script = ExtResource("mf_zone")
+label = "ciorchine 61"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.658392052784135
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 261
+center = Vector3(103.24, 0, -73.81)
+radius = 8.102445072945017
+
+[sub_resource type="Resource" id="MFZ_81"]
+script = ExtResource("mf_zone")
+label = "ciorchine 62"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.123326464235017
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 262
+center = Vector3(-82.19, 0, -143.84)
+radius = 10.358220338061809
+
+[sub_resource type="Resource" id="MFZ_82"]
+script = ExtResource("mf_zone")
+label = "ciorchine 63"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.9913863021782654
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 263
+center = Vector3(146.94, 0, 74.67)
+radius = 11.230457567936424
+
+[sub_resource type="Resource" id="MFZ_83"]
+script = ExtResource("mf_zone")
+label = "ciorchine 64"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.916415741322373
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 264
+center = Vector3(-153.04, 0, -235.80)
+radius = 9.00697151901749
+
+[sub_resource type="Resource" id="MFZ_84"]
+script = ExtResource("mf_zone")
+label = "ciorchine 66"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.0772448014452545
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 266
+center = Vector3(124.16, 0, -351.37)
+radius = 10.43953229578364
+
+[sub_resource type="Resource" id="MFZ_85"]
+script = ExtResource("mf_zone")
+label = "ciorchine 67"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.1569159108265485
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 267
+center = Vector3(121.76, 0, -47.50)
+radius = 11.269012682213587
+
+[sub_resource type="Resource" id="MFZ_86"]
+script = ExtResource("mf_zone")
+label = "ciorchine 68"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.7302655667418168
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 268
+center = Vector3(-83.58, 0, -193.84)
+radius = 10.659036942561324
+
+[sub_resource type="Resource" id="MFZ_87"]
+script = ExtResource("mf_zone")
+label = "ciorchine 70"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.667770749882656
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 270
+center = Vector3(-76.00, 0, -190.34)
+radius = 10.351159622684268
+
+[sub_resource type="Resource" id="MFZ_88"]
+script = ExtResource("mf_zone")
+label = "ciorchine 72"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.6723553603007426
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 272
+center = Vector3(67.25, 0, -385.12)
+radius = 6.636656502629569
+
+[sub_resource type="Resource" id="MFZ_89"]
+script = ExtResource("mf_zone")
+label = "ciorchine 73"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.5426111122524384
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 273
+center = Vector3(-162.14, 0, -173.81)
+radius = 6.586471639918416
+
+[sub_resource type="Resource" id="MFZ_90"]
+script = ExtResource("mf_zone")
+label = "ciorchine 77"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.6399425250950053
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 277
+center = Vector3(-319.97, 0, 1.17)
+radius = 8.714074753589458
+
+[sub_resource type="Resource" id="MFZ_91"]
+script = ExtResource("mf_zone")
+label = "ciorchine 78"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.130616705964291
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 278
+center = Vector3(2.45, 0, -461.29)
+radius = 11.25921289068356
+
+[sub_resource type="Resource" id="MFZ_92"]
+script = ExtResource("mf_zone")
+label = "ciorchine 79"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.145946345261017
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 279
+center = Vector3(-187.18, 0, -135.04)
+radius = 6.822806615381109
+
+[sub_resource type="Resource" id="MFZ_93"]
+script = ExtResource("mf_zone")
+label = "ciorchine 80"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.2552277595055594
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 280
+center = Vector3(-85.05, 0, -460.75)
+radius = 8.570032063415084
+
+[sub_resource type="Resource" id="MFZ_94"]
+script = ExtResource("mf_zone")
+label = "ciorchine 81"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.8593438593458353
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 281
+center = Vector3(-258.04, 0, -234.77)
+radius = 6.926679742612153
+
+[sub_resource type="Resource" id="MFZ_95"]
+script = ExtResource("mf_zone")
+label = "ciorchine 82"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.5612829943262443
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 282
+center = Vector3(142.58, 0, -85.33)
+radius = 6.8235276177918065
+
+[sub_resource type="Resource" id="MFZ_96"]
+script = ExtResource("mf_zone")
+label = "ciorchine 83"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.187845745693144
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 283
+center = Vector3(146.17, 0, 65.30)
+radius = 8.92356464994528
+
+[sub_resource type="Resource" id="MFZ_97"]
+script = ExtResource("mf_zone")
+label = "ciorchine 85"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.5055317687607825
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 285
+center = Vector3(-26.11, 0, -217.84)
+radius = 8.422858506699628
+
+[sub_resource type="Resource" id="MFZ_98"]
+script = ExtResource("mf_zone")
+label = "ciorchine 90"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.3545449332499113
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 290
+center = Vector3(-45.55, 0, -455.30)
+radius = 9.10460313963564
+
+[sub_resource type="Resource" id="MFZ_99"]
+script = ExtResource("mf_zone")
+label = "ciorchine 91"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.166035150376489
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 291
+center = Vector3(-334.72, 0, 42.84)
+radius = 10.730178336585485
+
+[sub_resource type="Resource" id="MFZ_100"]
+script = ExtResource("mf_zone")
+label = "ciorchine 93"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.9069318574329217
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 293
+center = Vector3(-202.94, 0, -134.03)
+radius = 7.089308348467027
+
+[sub_resource type="Resource" id="MFZ_101"]
+script = ExtResource("mf_zone")
+label = "ciorchine 96"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.6177391431086803
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 296
+center = Vector3(154.49, 0, -38.77)
+radius = 9.219593342505611
+
+[sub_resource type="Resource" id="MFZ_102"]
+script = ExtResource("mf_zone")
+label = "ciorchine 97"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.8258466856182576
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 297
+center = Vector3(40.14, 0, -423.76)
+radius = 6.345159074645678
+
+[sub_resource type="Resource" id="MFZ_103"]
+script = ExtResource("mf_zone")
+label = "ciorchine 98"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.1062791061546973
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 298
+center = Vector3(-126.05, 0, -453.11)
+radius = 6.100990338672974
+
+[sub_resource type="Resource" id="MFZ_104"]
+script = ExtResource("mf_zone")
+label = "ciorchine 99"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.54452822516751
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 299
+center = Vector3(-189.18, 0, -149.73)
+radius = 11.176649814323078
+
+[sub_resource type="Resource" id="MFZ_105"]
+script = ExtResource("mf_zone")
+label = "ciorchine 101"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.8514440617421526
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 301
+center = Vector3(89.19, 0, -328.87)
+radius = 6.259234139036313
+
+[sub_resource type="Resource" id="MFZ_106"]
+script = ExtResource("mf_zone")
+label = "ciorchine 102"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.118696266221932
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 302
+center = Vector3(-311.42, 0, 106.21)
+radius = 7.086875805337797
+
+[sub_resource type="Resource" id="MFZ_107"]
+script = ExtResource("mf_zone")
+label = "ciorchine 103"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.2134798610555144
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 303
+center = Vector3(128.51, 0, -147.37)
+radius = 9.000531599171037
+
+[sub_resource type="Resource" id="MFZ_108"]
+script = ExtResource("mf_zone")
+label = "ciorchine 107"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.536466659065616
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 307
+center = Vector3(132.77, 0, -332.37)
+radius = 7.474077117501624
+
+[sub_resource type="Resource" id="MFZ_109"]
+script = ExtResource("mf_zone")
+label = "ciorchine 108"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.066471162972624
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 308
+center = Vector3(110.41, 0, -62.35)
+radius = 9.275437511560943
+
+[sub_resource type="Resource" id="MFZ_110"]
+script = ExtResource("mf_zone")
+label = "ciorchine 109"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.4112455505009693
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 309
+center = Vector3(-279.48, 0, 24.74)
+radius = 11.894643242488783
+
+[sub_resource type="Resource" id="MFZ_111"]
+script = ExtResource("mf_zone")
+label = "ciorchine 111"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.0652662441461236
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 311
+center = Vector3(201.27, 0, 11.71)
+radius = 8.085313080931392
+
+[sub_resource type="Resource" id="MFZ_112"]
+script = ExtResource("mf_zone")
+label = "ciorchine 112"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.516888849406658
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 312
+center = Vector3(-78.88, 0, -142.34)
+radius = 11.279125627380335
+
+[sub_resource type="Resource" id="MFZ_113"]
+script = ExtResource("mf_zone")
+label = "ciorchine 114"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.054284990961429
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 314
+center = Vector3(-207.15, 0, -411.86)
+radius = 10.156113101231686
+
+[sub_resource type="Resource" id="MFZ_114"]
+script = ExtResource("mf_zone")
+label = "ciorchine 115"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.154143840035136
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 315
+center = Vector3(-88.04, 0, -272.69)
+radius = 7.5794584019843345
+
+[sub_resource type="Resource" id="MFZ_115"]
+script = ExtResource("mf_zone")
+label = "ciorchine 116"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.3714575012135435
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 316
+center = Vector3(-287.08, 0, 23.73)
+radius = 11.79400062035271
+
+[sub_resource type="Resource" id="MFZ_116"]
+script = ExtResource("mf_zone")
+label = "ciorchine 119"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.1090220355764213
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 319
+center = Vector3(-8.05, 0, -452.72)
+radius = 10.657428458554321
+
+[sub_resource type="Resource" id="MFZ_117"]
+script = ExtResource("mf_zone")
+label = "ciorchine 121"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.7556038519693278
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 321
+center = Vector3(-74.49, 0, -176.34)
+radius = 7.797876356731857
+
+[sub_resource type="Resource" id="MFZ_118"]
+script = ExtResource("mf_zone")
+label = "ciorchine 122"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.054908832280868
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 322
+center = Vector3(-79.38, 0, -35.33)
+radius = 10.295960640193869
+
+[sub_resource type="Resource" id="MFZ_119"]
+script = ExtResource("mf_zone")
+label = "ciorchine 123"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.3410118942632296
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 323
+center = Vector3(-207.71, 0, -411.10)
+radius = 8.96514452171906
+
+[sub_resource type="Resource" id="MFZ_120"]
+script = ExtResource("mf_zone")
+label = "ciorchine 124"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.070330827054214
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 324
+center = Vector3(123.83, 0, -171.37)
+radius = 11.011737259403361
+
+[sub_resource type="Resource" id="MFZ_121"]
+script = ExtResource("mf_zone")
+label = "ciorchine 125"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.682175399377384
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 325
+center = Vector3(140.29, 0, -148.87)
+radius = 10.517202951209443
+
+[sub_resource type="Resource" id="MFZ_122"]
+script = ExtResource("mf_zone")
+label = "ciorchine 129"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.7645438524547887
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 329
+center = Vector3(183.49, 0, 18.66)
+radius = 6.251172608126396
+
+[sub_resource type="Resource" id="MFZ_123"]
+script = ExtResource("mf_zone")
+label = "ciorchine 130"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.7533205302254022
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 330
+center = Vector3(-278.12, 0, 46.34)
+radius = 9.351163478975607
+
+[sub_resource type="Resource" id="MFZ_124"]
+script = ExtResource("mf_zone")
+label = "ciorchine 131"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.9572370624850235
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 331
+center = Vector3(132.30, 0, -152.37)
+radius = 6.019885962767088
+
+[sub_resource type="Resource" id="MFZ_125"]
+script = ExtResource("mf_zone")
+label = "ciorchine 132"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.8841459942507006
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 332
+center = Vector3(151.20, 0, 69.64)
+radius = 6.396302137332912
+
+[sub_resource type="Resource" id="MFZ_126"]
+script = ExtResource("mf_zone")
+label = "ciorchine 133"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.9077296811808724
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 333
+center = Vector3(-169.68, 0, -134.92)
+radius = 7.4087137309909625
+
+[sub_resource type="Resource" id="MFZ_127"]
+script = ExtResource("mf_zone")
+label = "ciorchine 134"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.5748121968847513
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 334
+center = Vector3(-158.39, 0, -189.80)
+radius = 8.29536286339491
+
+[sub_resource type="Resource" id="MFZ_128"]
+script = ExtResource("mf_zone")
+label = "ciorchine 135"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.092966183421361
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 335
+center = Vector3(193.55, 0, -63.89)
+radius = 9.856577852291917
+
+[sub_resource type="Resource" id="MFZ_129"]
+script = ExtResource("mf_zone")
+label = "ciorchine 136"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.745380901406065
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 336
+center = Vector3(-32.62, 0, -184.34)
+radius = 10.157320945162347
+
+[sub_resource type="Resource" id="MFZ_130"]
+script = ExtResource("mf_zone")
+label = "ciorchine 137"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.8064018943862834
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 337
+center = Vector3(-43.85, 0, -150.84)
+radius = 7.612636594735488
+
+[sub_resource type="Resource" id="MFZ_131"]
+script = ExtResource("mf_zone")
+label = "ciorchine 138"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.557595424049177
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 338
+center = Vector3(176.20, 0, -27.60)
+radius = 9.099214164266446
+
+[sub_resource type="Resource" id="MFZ_132"]
+script = ExtResource("mf_zone")
+label = "ciorchine 139"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.37400959412568
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 339
+center = Vector3(-27.05, 0, -466.87)
+radius = 9.294459038939328
+
+[sub_resource type="Resource" id="MFZ_133"]
+script = ExtResource("mf_zone")
+label = "ciorchine 140"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.983877231239842
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 340
+center = Vector3(-44.67, 0, -35.84)
+radius = 8.753824937781584
+
+[sub_resource type="Resource" id="MFZ_134"]
+script = ExtResource("mf_zone")
+label = "ciorchine 141"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.099865734090692
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 341
+center = Vector3(-274.31, 0, 29.21)
+radius = 8.321090081773871
+
+[sub_resource type="Resource" id="MFZ_135"]
+script = ExtResource("mf_zone")
+label = "ciorchine 142"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.628878855065784
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 342
+center = Vector3(-290.97, 0, 129.98)
+radius = 6.850444067157187
+
+[sub_resource type="Resource" id="MFZ_136"]
+script = ExtResource("mf_zone")
+label = "ciorchine 143"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.3354814757722213
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 343
+center = Vector3(-327.46, 0, 62.84)
+radius = 9.790009193513288
+
+[sub_resource type="Resource" id="MFZ_137"]
+script = ExtResource("mf_zone")
+label = "ciorchine 146"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.139951486811305
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 346
+center = Vector3(45.78, 0, -417.13)
+radius = 6.9543916137631445
+
+[sub_resource type="Resource" id="MFZ_138"]
+script = ExtResource("mf_zone")
+label = "ciorchine 147"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.4127521757135346
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 347
+center = Vector3(167.79, 0, -33.97)
+radius = 6.844243321546071
+
+[sub_resource type="Resource" id="MFZ_139"]
+script = ExtResource("mf_zone")
+label = "ciorchine 153"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.44666639922539
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 353
+center = Vector3(-282.91, 0, 138.47)
+radius = 7.738997753853152
+
+[sub_resource type="Resource" id="MFZ_140"]
+script = ExtResource("mf_zone")
+label = "ciorchine 154"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.3301863031469754
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 354
+center = Vector3(-206.58, 0, -454.47)
+radius = 8.568316508337396
+
+[sub_resource type="Resource" id="MFZ_141"]
+script = ExtResource("mf_zone")
+label = "ciorchine 157"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.613155585368884
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 357
+center = Vector3(-245.74, 0, -192.27)
+radius = 7.594368089865479
+
+[sub_resource type="Resource" id="MFZ_142"]
+script = ExtResource("mf_zone")
+label = "ciorchine 158"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.0348135782357657
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 358
+center = Vector3(-97.87, 0, -280.13)
+radius = 8.566485817027086
+
+[sub_resource type="Resource" id="MFZ_143"]
+script = ExtResource("mf_zone")
+label = "ciorchine 160"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.878822962142998
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 360
+center = Vector3(-188.05, 0, -461.67)
+radius = 6.2968562066614036
+
+[sub_resource type="Resource" id="MFZ_144"]
+script = ExtResource("mf_zone")
+label = "ciorchine 161"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.0587722859850994
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 361
+center = Vector3(-63.05, 0, -460.25)
+radius = 7.717249921809513
+
+[sub_resource type="Resource" id="MFZ_145"]
+script = ExtResource("mf_zone")
+label = "ciorchine 162"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.3380952474275696
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 362
+center = Vector3(-280.73, 0, 124.67)
+radius = 8.489199907049365
+
+[sub_resource type="Resource" id="MFZ_146"]
+script = ExtResource("mf_zone")
+label = "ciorchine 163"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.579818429565326
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 363
+center = Vector3(-177.18, 0, -180.72)
+radius = 7.431990145184232
+
+[sub_resource type="Resource" id="MFZ_147"]
+script = ExtResource("mf_zone")
+label = "ciorchine 164"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.249447025364084
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 364
+center = Vector3(155.28, 0, -75.56)
+radius = 6.969941768430349
+
+[sub_resource type="Resource" id="MFZ_148"]
+script = ExtResource("mf_zone")
+label = "ciorchine 165"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.3994011103791753
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 365
+center = Vector3(-227.60, 0, 90.54)
+radius = 8.717916454654606
+
+[sub_resource type="Resource" id="MFZ_149"]
+script = ExtResource("mf_zone")
+label = "ciorchine 167"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.667048905114183
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 367
+center = Vector3(-121.05, 0, -452.64)
+radius = 7.048170552043105
+
+[sub_resource type="Resource" id="MFZ_150"]
+script = ExtResource("mf_zone")
+label = "ciorchine 171"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.4966602868959953
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 371
+center = Vector3(-119.61, 0, -230.22)
+radius = 8.476689951844715
+
+[sub_resource type="Resource" id="MFZ_151"]
+script = ExtResource("mf_zone")
+label = "ciorchine 172"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.597775074340549
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 372
+center = Vector3(84.06, 0, -382.12)
+radius = 10.512666019591368
+
+[sub_resource type="Resource" id="MFZ_152"]
+script = ExtResource("mf_zone")
+label = "ciorchine 173"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.755552287015127
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 373
+center = Vector3(98.61, 0, -276.87)
+radius = 9.020374485666707
+
+[sub_resource type="Resource" id="MFZ_153"]
+script = ExtResource("mf_zone")
+label = "ciorchine 175"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.7749500552939628
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 375
+center = Vector3(-166.04, 0, -225.80)
+radius = 8.307364556182495
+
+[sub_resource type="Resource" id="MFZ_154"]
+script = ExtResource("mf_zone")
+label = "ciorchine 176"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.02617261225504
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 376
+center = Vector3(-109.05, 0, -409.88)
+radius = 11.237345917584317
+
+[sub_resource type="Resource" id="MFZ_155"]
+script = ExtResource("mf_zone")
+label = "ciorchine 179"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.112192728473193
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 379
+center = Vector3(-9.55, 0, -426.00)
+radius = 8.349126574258737
+
+[sub_resource type="Resource" id="MFZ_156"]
+script = ExtResource("mf_zone")
+label = "ciorchine 182"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.18248188664644
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 382
+center = Vector3(-322.72, 0, 2.43)
+radius = 7.342802486764418
+
+[sub_resource type="Resource" id="MFZ_157"]
+script = ExtResource("mf_zone")
+label = "ciorchine 183"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.776817743598001
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 383
+center = Vector3(-326.33, 0, 2.60)
+radius = 10.330411733731793
+
+[sub_resource type="Resource" id="MFZ_158"]
+script = ExtResource("mf_zone")
+label = "ciorchine 185"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.683258744358302
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 385
+center = Vector3(-47.55, 0, -448.03)
+radius = 6.753910626437223
+
+[sub_resource type="Resource" id="MFZ_159"]
+script = ExtResource("mf_zone")
+label = "ciorchine 187"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.9166128615629616
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 387
+center = Vector3(-283.96, 0, 38.84)
+radius = 8.624583171244646
+
+[sub_resource type="Resource" id="MFZ_160"]
+script = ExtResource("mf_zone")
+label = "ciorchine 189"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.721273076544571
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 389
+center = Vector3(-248.37, 0, -228.27)
+radius = 7.341498201660239
+
+[sub_resource type="Resource" id="MFZ_161"]
+script = ExtResource("mf_zone")
+label = "ciorchine 191"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.5703650640810523
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 391
+center = Vector3(-39.05, 0, -413.75)
+radius = 11.30264417420436
+
+[sub_resource type="Resource" id="MFZ_162"]
+script = ExtResource("mf_zone")
+label = "ciorchine 192"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.779579975969176
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 392
+center = Vector3(-126.97, 0, -177.21)
+radius = 8.470860900192871
+
+[sub_resource type="Resource" id="MFZ_163"]
+script = ExtResource("mf_zone")
+label = "ciorchine 195"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.110192993613047
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 395
+center = Vector3(133.79, 0, -107.70)
+radius = 10.004130293026078
+
+[sub_resource type="Resource" id="MFZ_164"]
+script = ExtResource("mf_zone")
+label = "ciorchine 196"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.434783870123923
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 396
+center = Vector3(-113.78, 0, -197.30)
+radius = 10.309993449772456
+
+[sub_resource type="Resource" id="MFZ_165"]
+script = ExtResource("mf_zone")
+label = "ciorchine 197"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.605854064829044
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 397
+center = Vector3(-195.05, 0, -463.14)
+radius = 10.434775330654519
+
+[sub_resource type="Resource" id="MFZ_166"]
+script = ExtResource("mf_zone")
+label = "ciorchine 198"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.2769705754379697
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 398
+center = Vector3(-118.38, 0, -244.20)
+radius = 10.92002696665823
+
+[sub_resource type="Resource" id="MFZ_167"]
+script = ExtResource("mf_zone")
+label = "ciorchine 199"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.7321179734526266
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 399
+center = Vector3(-151.07, 0, -211.80)
+radius = 9.741582087983105
+
+[sub_resource type="Resource" id="MFZ_168"]
+script = ExtResource("mf_zone")
+label = "ciorchine 201"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.4721519713493443
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 401
+center = Vector3(17.95, 0, -466.03)
+radius = 6.878298323836485
+
+[sub_resource type="Resource" id="MFZ_169"]
+script = ExtResource("mf_zone")
+label = "ciorchine 202"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.2209257906078252
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 402
+center = Vector3(-119.11, 0, -231.30)
+radius = 10.259151535934295
+
+[sub_resource type="Resource" id="MFZ_170"]
+script = ExtResource("mf_zone")
+label = "ciorchine 203"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.117914597680871
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 403
+center = Vector3(-68.05, 0, -412.08)
+radius = 11.985178831787163
+
+[sub_resource type="Resource" id="MFZ_171"]
+script = ExtResource("mf_zone")
+label = "ciorchine 205"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.4543432996194987
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 405
+center = Vector3(-88.81, 0, -264.86)
+radius = 9.986579182388365
+
+[sub_resource type="Resource" id="MFZ_172"]
+script = ExtResource("mf_zone")
+label = "ciorchine 206"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.093890416143594
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 406
+center = Vector3(-210.57, 0, -405.30)
+radius = 6.65374580038506
+
+[sub_resource type="Resource" id="MFZ_173"]
+script = ExtResource("mf_zone")
+label = "ciorchine 207"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.157125458945081
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 407
+center = Vector3(-28.43, 0, -18.72)
+radius = 6.742249692728917
+
+[sub_resource type="Resource" id="MFZ_174"]
+script = ExtResource("mf_zone")
+label = "ciorchine 208"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.9647234955350994
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 408
+center = Vector3(-160.07, 0, -254.56)
+radius = 7.852195269853233
+
+[sub_resource type="Resource" id="MFZ_175"]
+script = ExtResource("mf_zone")
+label = "ciorchine 209"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.5356169986101347
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 409
+center = Vector3(-41.28, 0, -40.34)
+radius = 9.249174218751776
+
+[sub_resource type="Resource" id="MFZ_176"]
+script = ExtResource("mf_zone")
+label = "ciorchine 211"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.974189433086589
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 411
+center = Vector3(117.01, 0, 42.82)
+radius = 8.46481097853242
+
+[sub_resource type="Resource" id="MFZ_177"]
+script = ExtResource("mf_zone")
+label = "ciorchine 215"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.7267395467078943
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 415
+center = Vector3(-261.60, 0, 97.30)
+radius = 6.377110446924796
+
+[sub_resource type="Resource" id="MFZ_178"]
+script = ExtResource("mf_zone")
+label = "ciorchine 218"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.3797803573986416
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 418
+center = Vector3(-320.98, 0, 60.34)
+radius = 10.299814478587091
+
+[sub_resource type="Resource" id="MFZ_179"]
+script = ExtResource("mf_zone")
+label = "ciorchine 219"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.966790023153842
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 419
+center = Vector3(-242.11, 0, -155.55)
+radius = 9.573408942660373
+
+[sub_resource type="Resource" id="MFZ_180"]
+script = ExtResource("mf_zone")
+label = "ciorchine 220"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.570226869424324
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 420
+center = Vector3(-316.27, 0, 79.03)
+radius = 7.4031975615290415
+
+[sub_resource type="Resource" id="MFZ_181"]
+script = ExtResource("mf_zone")
+label = "ciorchine 221"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.977760301472013
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 421
+center = Vector3(-278.99, 0, 52.84)
+radius = 11.481263790872905
+
+[sub_resource type="Resource" id="MFZ_182"]
+script = ExtResource("mf_zone")
+label = "ciorchine 222"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.88618561598642
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 422
+center = Vector3(-41.52, 0, -148.34)
+radius = 10.815409940379391
+
+[sub_resource type="Resource" id="MFZ_183"]
+script = ExtResource("mf_zone")
+label = "ciorchine 225"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.9405996392570315
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 425
+center = Vector3(84.64, 0, -198.87)
+radius = 8.764687181794276
+
+[sub_resource type="Resource" id="MFZ_184"]
+script = ExtResource("mf_zone")
+label = "ciorchine 226"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.489308122379181
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 426
+center = Vector3(130.44, 0, -226.37)
+radius = 6.959624301521815
+
+[sub_resource type="Resource" id="MFZ_185"]
+script = ExtResource("mf_zone")
+label = "ciorchine 227"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 4.17630692505736
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 427
+center = Vector3(99.05, 0, -92.84)
+radius = 7.954550124437766
+
+[sub_resource type="Resource" id="MFZ_186"]
+script = ExtResource("mf_zone")
+label = "ciorchine 229"
+kind = 1
+species = PackedStringArray("sugar_palm", "bamboo_clump", "tropical_shrub")
+weights = PackedFloat32Array(0.45, 0.3, 0.25)
+spacing = 3.505272330330091
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.75
+scale_max = 1.25
+seed_value = 429
+center = Vector3(-270.80, 0, 22.92)
+radius = 7.250046242613609
+
+[sub_resource type="Resource" id="MFZ_187"]
+script = ExtResource("mf_zone")
 label = "subarboret margine 0.000"
 kind = 0
-species = PackedStringArray("fern_cluster", "tropical_shrub", "bamboo_clump")
-weights = PackedFloat32Array(0.55, 0.35, 0.1)
-spacing = 3.4
+species = PackedStringArray("tropical_shrub", "fern_cluster", "bamboo_clump")
+weights = PackedFloat32Array(0.4, 0.45, 0.15)
+spacing = 2.9
 edge_clear_m = 2.0
 shadow_m = 0.0
 view_m = 330.0
 max_below_road_m = 0.8
 claim = false
-scale_min = 1.3
-scale_max = 2.2
+scale_min = 0.9
+scale_max = 1.5
 seed_value = 104
 frac_from = 0.0000
 frac_to = 0.0700
 side = 0
 lat_min = 6.0
-lat_max = 30.0
+lat_max = 26.0
 
-[sub_resource type="Resource" id="MFZ_42"]
+[sub_resource type="Resource" id="MFZ_188"]
 script = ExtResource("mf_zone")
 label = "subarboret margine 0.070"
 kind = 0
-species = PackedStringArray("fern_cluster", "tropical_shrub", "bamboo_clump")
-weights = PackedFloat32Array(0.55, 0.35, 0.1)
-spacing = 3.4
+species = PackedStringArray("tropical_shrub", "fern_cluster", "bamboo_clump")
+weights = PackedFloat32Array(0.4, 0.45, 0.15)
+spacing = 2.9
 edge_clear_m = 2.0
 shadow_m = 0.0
 view_m = 330.0
 max_below_road_m = 200.0
 claim = false
-scale_min = 1.3
-scale_max = 2.2
+scale_min = 0.9
+scale_max = 1.5
 seed_value = 104
 frac_from = 0.0700
 frac_to = 0.0880
 side = 0
 lat_min = 6.0
-lat_max = 30.0
+lat_max = 26.0
 
-[sub_resource type="Resource" id="MFZ_43"]
+[sub_resource type="Resource" id="MFZ_189"]
 script = ExtResource("mf_zone")
 label = "subarboret margine 0.088"
 kind = 0
-species = PackedStringArray("fern_cluster", "tropical_shrub", "bamboo_clump")
-weights = PackedFloat32Array(0.55, 0.35, 0.1)
-spacing = 3.4
+species = PackedStringArray("tropical_shrub", "fern_cluster", "bamboo_clump")
+weights = PackedFloat32Array(0.4, 0.45, 0.15)
+spacing = 2.9
 edge_clear_m = 2.0
 shadow_m = 0.0
 view_m = 330.0
 max_below_road_m = 0.8
 claim = false
-scale_min = 1.3
-scale_max = 2.2
+scale_min = 0.9
+scale_max = 1.5
 seed_value = 104
 frac_from = 0.0880
 frac_to = 0.1220
 side = 0
 lat_min = 6.0
-lat_max = 30.0
+lat_max = 26.0
 
-[sub_resource type="Resource" id="MFZ_44"]
+[sub_resource type="Resource" id="MFZ_190"]
 script = ExtResource("mf_zone")
 label = "subarboret margine 0.122"
 kind = 0
-species = PackedStringArray("fern_cluster", "tropical_shrub", "bamboo_clump")
-weights = PackedFloat32Array(0.55, 0.35, 0.1)
-spacing = 3.4
+species = PackedStringArray("tropical_shrub", "fern_cluster", "bamboo_clump")
+weights = PackedFloat32Array(0.4, 0.45, 0.15)
+spacing = 2.9
 edge_clear_m = 2.0
 shadow_m = 0.0
 view_m = 330.0
 max_below_road_m = 200.0
 claim = false
-scale_min = 1.3
-scale_max = 2.2
+scale_min = 0.9
+scale_max = 1.5
 seed_value = 104
 frac_from = 0.1220
 frac_to = 0.3080
 side = 0
 lat_min = 6.0
-lat_max = 30.0
+lat_max = 26.0
 
-[sub_resource type="Resource" id="MFZ_45"]
+[sub_resource type="Resource" id="MFZ_191"]
 script = ExtResource("mf_zone")
 label = "subarboret margine 0.308"
 kind = 0
-species = PackedStringArray("fern_cluster", "tropical_shrub", "bamboo_clump")
-weights = PackedFloat32Array(0.55, 0.35, 0.1)
-spacing = 3.4
+species = PackedStringArray("tropical_shrub", "fern_cluster", "bamboo_clump")
+weights = PackedFloat32Array(0.4, 0.45, 0.15)
+spacing = 2.9
 edge_clear_m = 2.0
 shadow_m = 0.0
 view_m = 330.0
 max_below_road_m = 0.8
 claim = false
-scale_min = 1.3
-scale_max = 2.2
+scale_min = 0.9
+scale_max = 1.5
 seed_value = 104
 frac_from = 0.3080
 frac_to = 0.3720
 side = 0
 lat_min = 6.0
-lat_max = 30.0
+lat_max = 26.0
 
-[sub_resource type="Resource" id="MFZ_46"]
+[sub_resource type="Resource" id="MFZ_192"]
 script = ExtResource("mf_zone")
 label = "subarboret margine 0.372"
 kind = 0
-species = PackedStringArray("fern_cluster", "tropical_shrub", "bamboo_clump")
-weights = PackedFloat32Array(0.55, 0.35, 0.1)
-spacing = 3.4
+species = PackedStringArray("tropical_shrub", "fern_cluster", "bamboo_clump")
+weights = PackedFloat32Array(0.4, 0.45, 0.15)
+spacing = 2.9
 edge_clear_m = 2.0
 shadow_m = 0.0
 view_m = 330.0
 max_below_road_m = 200.0
 claim = false
-scale_min = 1.3
-scale_max = 2.2
+scale_min = 0.9
+scale_max = 1.5
 seed_value = 104
 frac_from = 0.3720
 frac_to = 0.7580
 side = 0
 lat_min = 6.0
-lat_max = 30.0
+lat_max = 26.0
 
-[sub_resource type="Resource" id="MFZ_47"]
+[sub_resource type="Resource" id="MFZ_193"]
 script = ExtResource("mf_zone")
 label = "subarboret margine 0.758"
 kind = 0
-species = PackedStringArray("fern_cluster", "tropical_shrub", "bamboo_clump")
-weights = PackedFloat32Array(0.55, 0.35, 0.1)
-spacing = 3.4
+species = PackedStringArray("tropical_shrub", "fern_cluster", "bamboo_clump")
+weights = PackedFloat32Array(0.4, 0.45, 0.15)
+spacing = 2.9
 edge_clear_m = 2.0
 shadow_m = 0.0
 view_m = 330.0
 max_below_road_m = 0.8
 claim = false
-scale_min = 1.3
-scale_max = 2.2
+scale_min = 0.9
+scale_max = 1.5
 seed_value = 104
 frac_from = 0.7580
 frac_to = 0.9050
 side = 0
 lat_min = 6.0
-lat_max = 30.0
+lat_max = 26.0
 
-[sub_resource type="Resource" id="MFZ_48"]
+[sub_resource type="Resource" id="MFZ_194"]
 script = ExtResource("mf_zone")
 label = "subarboret margine 0.905"
 kind = 0
-species = PackedStringArray("fern_cluster", "tropical_shrub", "bamboo_clump")
-weights = PackedFloat32Array(0.55, 0.35, 0.1)
-spacing = 3.4
+species = PackedStringArray("tropical_shrub", "fern_cluster", "bamboo_clump")
+weights = PackedFloat32Array(0.4, 0.45, 0.15)
+spacing = 2.9
 edge_clear_m = 2.0
 shadow_m = 0.0
 view_m = 330.0
 max_below_road_m = 200.0
 claim = false
-scale_min = 1.3
-scale_max = 2.2
+scale_min = 0.9
+scale_max = 1.5
 seed_value = 104
 frac_from = 0.9050
 frac_to = 1.0000
 side = 0
 lat_min = 6.0
-lat_max = 30.0
+lat_max = 26.0
 
 [node name="Track24" type="Node3D"]
 script = ExtResource("1_track")
@@ -2965,7 +5593,7 @@ metadata/coliziune = "none"
 [node name="PadureMasa" type="Node3D" parent="."]
 script = ExtResource("mf_script")
 scenes = Array[PackedScene]([ExtResource("mf_tetrameles_a"), ExtResource("mf_tetrameles_b"), ExtResource("mf_dipterocarp"), ExtResource("mf_strangler_fig"), ExtResource("mf_sugar_palm"), ExtResource("mf_fern_cluster"), ExtResource("mf_tropical_shrub"), ExtResource("mf_bamboo_clump")])
-zones = Array[ExtResource("mf_zone")]([SubResource("MFZ_0"), SubResource("MFZ_1"), SubResource("MFZ_2"), SubResource("MFZ_3"), SubResource("MFZ_4"), SubResource("MFZ_5"), SubResource("MFZ_6"), SubResource("MFZ_7"), SubResource("MFZ_8"), SubResource("MFZ_9"), SubResource("MFZ_10"), SubResource("MFZ_11"), SubResource("MFZ_12"), SubResource("MFZ_13"), SubResource("MFZ_14"), SubResource("MFZ_15"), SubResource("MFZ_16"), SubResource("MFZ_17"), SubResource("MFZ_18"), SubResource("MFZ_19"), SubResource("MFZ_20"), SubResource("MFZ_21"), SubResource("MFZ_22"), SubResource("MFZ_23"), SubResource("MFZ_24"), SubResource("MFZ_25"), SubResource("MFZ_26"), SubResource("MFZ_27"), SubResource("MFZ_28"), SubResource("MFZ_29"), SubResource("MFZ_30"), SubResource("MFZ_31"), SubResource("MFZ_32"), SubResource("MFZ_33"), SubResource("MFZ_34"), SubResource("MFZ_35"), SubResource("MFZ_36"), SubResource("MFZ_37"), SubResource("MFZ_38"), SubResource("MFZ_39"), SubResource("MFZ_40"), SubResource("MFZ_41"), SubResource("MFZ_42"), SubResource("MFZ_43"), SubResource("MFZ_44"), SubResource("MFZ_45"), SubResource("MFZ_46"), SubResource("MFZ_47"), SubResource("MFZ_48")])
+zones = Array[ExtResource("mf_zone")]([SubResource("MFZ_0"), SubResource("MFZ_1"), SubResource("MFZ_2"), SubResource("MFZ_3"), SubResource("MFZ_4"), SubResource("MFZ_5"), SubResource("MFZ_6"), SubResource("MFZ_7"), SubResource("MFZ_8"), SubResource("MFZ_9"), SubResource("MFZ_10"), SubResource("MFZ_11"), SubResource("MFZ_12"), SubResource("MFZ_13"), SubResource("MFZ_14"), SubResource("MFZ_15"), SubResource("MFZ_16"), SubResource("MFZ_17"), SubResource("MFZ_18"), SubResource("MFZ_19"), SubResource("MFZ_20"), SubResource("MFZ_21"), SubResource("MFZ_22"), SubResource("MFZ_23"), SubResource("MFZ_24"), SubResource("MFZ_25"), SubResource("MFZ_26"), SubResource("MFZ_27"), SubResource("MFZ_28"), SubResource("MFZ_29"), SubResource("MFZ_30"), SubResource("MFZ_31"), SubResource("MFZ_32"), SubResource("MFZ_33"), SubResource("MFZ_34"), SubResource("MFZ_35"), SubResource("MFZ_36"), SubResource("MFZ_37"), SubResource("MFZ_38"), SubResource("MFZ_39"), SubResource("MFZ_40"), SubResource("MFZ_41"), SubResource("MFZ_42"), SubResource("MFZ_43"), SubResource("MFZ_44"), SubResource("MFZ_45"), SubResource("MFZ_46"), SubResource("MFZ_47"), SubResource("MFZ_48"), SubResource("MFZ_49"), SubResource("MFZ_50"), SubResource("MFZ_51"), SubResource("MFZ_52"), SubResource("MFZ_53"), SubResource("MFZ_54"), SubResource("MFZ_55"), SubResource("MFZ_56"), SubResource("MFZ_57"), SubResource("MFZ_58"), SubResource("MFZ_59"), SubResource("MFZ_60"), SubResource("MFZ_61"), SubResource("MFZ_62"), SubResource("MFZ_63"), SubResource("MFZ_64"), SubResource("MFZ_65"), SubResource("MFZ_66"), SubResource("MFZ_67"), SubResource("MFZ_68"), SubResource("MFZ_69"), SubResource("MFZ_70"), SubResource("MFZ_71"), SubResource("MFZ_72"), SubResource("MFZ_73"), SubResource("MFZ_74"), SubResource("MFZ_75"), SubResource("MFZ_76"), SubResource("MFZ_77"), SubResource("MFZ_78"), SubResource("MFZ_79"), SubResource("MFZ_80"), SubResource("MFZ_81"), SubResource("MFZ_82"), SubResource("MFZ_83"), SubResource("MFZ_84"), SubResource("MFZ_85"), SubResource("MFZ_86"), SubResource("MFZ_87"), SubResource("MFZ_88"), SubResource("MFZ_89"), SubResource("MFZ_90"), SubResource("MFZ_91"), SubResource("MFZ_92"), SubResource("MFZ_93"), SubResource("MFZ_94"), SubResource("MFZ_95"), SubResource("MFZ_96"), SubResource("MFZ_97"), SubResource("MFZ_98"), SubResource("MFZ_99"), SubResource("MFZ_100"), SubResource("MFZ_101"), SubResource("MFZ_102"), SubResource("MFZ_103"), SubResource("MFZ_104"), SubResource("MFZ_105"), SubResource("MFZ_106"), SubResource("MFZ_107"), SubResource("MFZ_108"), SubResource("MFZ_109"), SubResource("MFZ_110"), SubResource("MFZ_111"), SubResource("MFZ_112"), SubResource("MFZ_113"), SubResource("MFZ_114"), SubResource("MFZ_115"), SubResource("MFZ_116"), SubResource("MFZ_117"), SubResource("MFZ_118"), SubResource("MFZ_119"), SubResource("MFZ_120"), SubResource("MFZ_121"), SubResource("MFZ_122"), SubResource("MFZ_123"), SubResource("MFZ_124"), SubResource("MFZ_125"), SubResource("MFZ_126"), SubResource("MFZ_127"), SubResource("MFZ_128"), SubResource("MFZ_129"), SubResource("MFZ_130"), SubResource("MFZ_131"), SubResource("MFZ_132"), SubResource("MFZ_133"), SubResource("MFZ_134"), SubResource("MFZ_135"), SubResource("MFZ_136"), SubResource("MFZ_137"), SubResource("MFZ_138"), SubResource("MFZ_139"), SubResource("MFZ_140"), SubResource("MFZ_141"), SubResource("MFZ_142"), SubResource("MFZ_143"), SubResource("MFZ_144"), SubResource("MFZ_145"), SubResource("MFZ_146"), SubResource("MFZ_147"), SubResource("MFZ_148"), SubResource("MFZ_149"), SubResource("MFZ_150"), SubResource("MFZ_151"), SubResource("MFZ_152"), SubResource("MFZ_153"), SubResource("MFZ_154"), SubResource("MFZ_155"), SubResource("MFZ_156"), SubResource("MFZ_157"), SubResource("MFZ_158"), SubResource("MFZ_159"), SubResource("MFZ_160"), SubResource("MFZ_161"), SubResource("MFZ_162"), SubResource("MFZ_163"), SubResource("MFZ_164"), SubResource("MFZ_165"), SubResource("MFZ_166"), SubResource("MFZ_167"), SubResource("MFZ_168"), SubResource("MFZ_169"), SubResource("MFZ_170"), SubResource("MFZ_171"), SubResource("MFZ_172"), SubResource("MFZ_173"), SubResource("MFZ_174"), SubResource("MFZ_175"), SubResource("MFZ_176"), SubResource("MFZ_177"), SubResource("MFZ_178"), SubResource("MFZ_179"), SubResource("MFZ_180"), SubResource("MFZ_181"), SubResource("MFZ_182"), SubResource("MFZ_183"), SubResource("MFZ_184"), SubResource("MFZ_185"), SubResource("MFZ_186"), SubResource("MFZ_187"), SubResource("MFZ_188"), SubResource("MFZ_189"), SubResource("MFZ_190"), SubResource("MFZ_191"), SubResource("MFZ_192"), SubResource("MFZ_193"), SubResource("MFZ_194")])
 
 [node name="CameraPoartaDeSud" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -230.0, 14.0, -381.36)

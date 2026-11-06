@@ -49,6 +49,16 @@
 [ext_resource type="PackedScene" path="res://assets/models/angkor/plants/sugar_palm.glb" id="47_palm"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/plants/lotus_cluster.glb" id="48_lotus"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/plants/water_lily_pads.glb" id="49_lily"]
+[ext_resource type="Script" path="res://scenes/props/mesh_forest.gd" id="mf_script"]
+[ext_resource type="Script" path="res://scenes/props/mesh_forest_zone.gd" id="mf_zone"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/tetrameles_a.glb" id="mf_tetrameles_a"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/tetrameles_b.glb" id="mf_tetrameles_b"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/dipterocarp.glb" id="mf_dipterocarp"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/strangler_fig.glb" id="mf_strangler_fig"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/plants/sugar_palm.glb" id="mf_sugar_palm"]
+[ext_resource type="PackedScene" path="res://assets/models/plants/fern_cluster.glb" id="mf_fern_cluster"]
+[ext_resource type="PackedScene" path="res://assets/models/plants/tropical_shrub.glb" id="mf_tropical_shrub"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/plants/bamboo_clump.glb" id="mf_bamboo_clump"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_macheta"]
 albedo_color = Color(0.72, 0.64, 0.52, 1)
@@ -70,6 +80,273 @@ _data = {
 "tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
 point_count = 9
+
+[sub_resource type="Resource" id="MFZ_0"]
+script = ExtResource("mf_zone")
+label = "incinta Angkor Wat"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(0.00, 0, 0.00)
+radius = 78.0
+
+[sub_resource type="Resource" id="MFZ_1"]
+script = ExtResource("mf_zone")
+label = "platforma Bakheng"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 2
+center = Vector3(-138.00, 0, -210.00)
+radius = 38.0
+
+[sub_resource type="Resource" id="MFZ_2"]
+script = ExtResource("mf_zone")
+label = "piata regala 1"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 3
+center = Vector3(72.00, 0, -400.00)
+radius = 40.0
+
+[sub_resource type="Resource" id="MFZ_3"]
+script = ExtResource("mf_zone")
+label = "piata regala 2"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 4
+center = Vector3(72.00, 0, -330.00)
+radius = 42.0
+
+[sub_resource type="Resource" id="MFZ_4"]
+script = ExtResource("mf_zone")
+label = "piata regala 3"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 5
+center = Vector3(72.00, 0, -260.00)
+radius = 42.0
+
+[sub_resource type="Resource" id="MFZ_5"]
+script = ExtResource("mf_zone")
+label = "piata regala 4"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 6
+center = Vector3(72.00, 0, -195.00)
+radius = 40.0
+
+[sub_resource type="Resource" id="MFZ_6"]
+script = ExtResource("mf_zone")
+label = "terasa Bayon 1"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 7
+center = Vector3(-120.00, 0, -437.00)
+radius = 30.0
+
+[sub_resource type="Resource" id="MFZ_7"]
+script = ExtResource("mf_zone")
+label = "terasa Bayon 2"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 8
+center = Vector3(-75.00, 0, -437.00)
+radius = 30.0
+
+[sub_resource type="Resource" id="MFZ_8"]
+script = ExtResource("mf_zone")
+label = "terasa Bayon 3"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 8.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 9
+center = Vector3(-30.00, 0, -437.00)
+radius = 30.0
+
+[sub_resource type="Resource" id="MFZ_9"]
+script = ExtResource("mf_zone")
+label = "coronament aproape"
+kind = 0
+species = PackedStringArray("tetrameles_a", "tetrameles_b", "dipterocarp", "strangler_fig")
+weights = PackedFloat32Array(0.26, 0.26, 0.46, 0.02)
+spacing = 8.0
+edge_clear_m = 10.0
+shadow_m = 20.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.55
+scale_max = 0.85
+seed_value = 101
+frac_from = 0.0000
+frac_to = 1.0000
+side = 0
+lat_min = 16.0
+lat_max = 55.0
+
+[sub_resource type="Resource" id="MFZ_10"]
+script = ExtResource("mf_zone")
+label = "coronament mediu"
+kind = 0
+species = PackedStringArray("tetrameles_a", "tetrameles_b", "dipterocarp", "strangler_fig")
+weights = PackedFloat32Array(0.26, 0.26, 0.46, 0.02)
+spacing = 10.0
+edge_clear_m = 10.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.7
+scale_max = 1.0
+seed_value = 102
+frac_from = 0.0000
+frac_to = 1.0000
+side = 0
+lat_min = 55.0
+lat_max = 120.0
+
+[sub_resource type="Resource" id="MFZ_11"]
+script = ExtResource("mf_zone")
+label = "coronament departe"
+kind = 0
+species = PackedStringArray("tetrameles_a", "tetrameles_b", "dipterocarp", "strangler_fig")
+weights = PackedFloat32Array(0.26, 0.26, 0.46, 0.02)
+spacing = 13.0
+edge_clear_m = 10.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.8
+scale_max = 1.1
+seed_value = 103
+frac_from = 0.0000
+frac_to = 1.0000
+side = 0
+lat_min = 120.0
+lat_max = 190.0
+
+[sub_resource type="Resource" id="MFZ_12"]
+script = ExtResource("mf_zone")
+label = "etaj mijloc"
+kind = 0
+species = PackedStringArray("sugar_palm", "tropical_shrub", "bamboo_clump", "strangler_fig")
+weights = PackedFloat32Array(0.45, 0.3, 0.2, 0.05)
+spacing = 6.5
+edge_clear_m = 4.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 1.0
+scale_max = 1.6
+seed_value = 105
+frac_from = 0.0000
+frac_to = 1.0000
+side = 0
+lat_min = 9.0
+lat_max = 45.0
+
+[sub_resource type="Resource" id="MFZ_13"]
+script = ExtResource("mf_zone")
+label = "subarboret margine"
+kind = 0
+species = PackedStringArray("fern_cluster", "tropical_shrub", "sugar_palm", "bamboo_clump")
+weights = PackedFloat32Array(0.45, 0.35, 0.12, 0.08)
+spacing = 3.8
+edge_clear_m = 2.0
+shadow_m = 0.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 1.3
+scale_max = 2.2
+seed_value = 104
+frac_from = 0.0000
+frac_to = 1.0000
+side = 0
+lat_min = 6.0
+lat_max = 22.0
 
 [node name="Track24" type="Node3D"]
 script = ExtResource("1_track")
@@ -1542,6 +1819,11 @@ metadata/coliziune = "none"
 [node name="Lotus5" parent="DecorManual" instance=ExtResource("49_lily")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 65.0, 0.5, 140.0)
 metadata/coliziune = "none"
+
+[node name="PadureMasa" type="Node3D" parent="."]
+script = ExtResource("mf_script")
+scenes = Array[PackedScene]([ExtResource("mf_tetrameles_a"), ExtResource("mf_tetrameles_b"), ExtResource("mf_dipterocarp"), ExtResource("mf_strangler_fig"), ExtResource("mf_sugar_palm"), ExtResource("mf_fern_cluster"), ExtResource("mf_tropical_shrub"), ExtResource("mf_bamboo_clump")])
+zones = Array[ExtResource("mf_zone")]([SubResource("MFZ_0"), SubResource("MFZ_1"), SubResource("MFZ_2"), SubResource("MFZ_3"), SubResource("MFZ_4"), SubResource("MFZ_5"), SubResource("MFZ_6"), SubResource("MFZ_7"), SubResource("MFZ_8"), SubResource("MFZ_9"), SubResource("MFZ_10"), SubResource("MFZ_11"), SubResource("MFZ_12"), SubResource("MFZ_13")])
 
 [node name="CameraPoartaDeSud" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -230.0, 14.0, -381.36)

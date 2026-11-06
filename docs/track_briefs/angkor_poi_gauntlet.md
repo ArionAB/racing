@@ -286,3 +286,56 @@ produsă de coordonator.
 | ProbeLaneClear | **41** (7 Bayon + 34 rampa-rădăcină INAINTE) |
 | ProbeBuried / ProbeLayout / ProbeAngkorPas6 | OK |
 | ProbeRace (16 seed-uri × 8 mașini × 250 s) | log-urile în `D:/GameDev/_angkor_race/baza` (din valul 3b al kitului): **repuneri 7 / ejectări 6 / blocaje 19** pe 16 seed-uri, tur mediu 81,5 s, domino 9,7% striviri, airtime 0,66 s. Ejectările: turnul Bayon b ×2 (0,615), creasta (0,441 ×2), coridorul scurtăturii ×3 (0,676–0,732). Avertismentul „6 siluete de orizont n-au încăput” e preexistent |
+
+## Valul 2: contractele D și G (A e mai sus)
+
+**Ce s-a închis în valul 1** (verdictele: `D:/GameDev/_angkor_race/critic/verdicte.md`):
+J și S au ieșit pe (c) după două runde orbe (4/4 REF de fiecare dată). Pădurea
+citește „plantație de trunchiuri goale în rânduri” (r1 mesteacăn → r2 eucalipt):
+cauza e **forma asset-ului** (coroana sus și plată), nu culoarea. Lumina: r1 prea
+dură → r2 murdară, ambele „cer roz-mov plat” față de „lumină aurie caldă + nori
+violeți”: decizia cerului/furtunii. **Ambele sunt la dezvoltator.** În valul 2 se
+filtrează ca globale: copacii, lumina, cerul, fețele sculptate, materialul gresiei.
+
+### D — Calea uriașilor și Poarta de Sud (frac 0,318–0,403, `zona_d.py`)
+
+**Din decupaj:** calea dreaptă cu **șirurile de uriași care țin naga** pe ambele
+părți (există: deva/asura pe balustrada din cod), **bazinele cu lotuși** pe
+laturile căii, Poarta de Sud cu fețe la capăt (există), elefantul în piață
+(hazardul, există), jungla închisă în jurul porții.
+
+**Din brief:** coborâre rapidă pe flancul de nord al dealului, apoi dreapta de
+120 m peste șanțul Angkor Thom; piața de 9 m după poartă, unde traversează elefantul.
+
+**Capcana:**
+- **elefantul**: nimic în piață pe traseul lui (`SlidingHazard` TRAVERSARE) și nimic
+  care să-l ascundă în deschiderea porții (e citit prin poartă, brief §2 D);
+- dreapta e de drafting și îmbrânceli: nimic cu corp pe ea; lotușii pe cota apei,
+  `coliziune: none`;
+- blocajele de bază sunt **la poarta elefantului (0,367–0,371)**, 10–20 pe 16
+  seed-uri: zero în plus (citește-le pe frac);
+- zidul de incintă Angkor Thom (laterită, `LARCH_RUST` 27) de o parte și de alta a
+  porții e decor, dar e și rama pâlniei: nu-l aduce la mai puțin de 3 m de asfalt.
+
+### G — Ta Prohm (frac 0,649–0,761, `zona_g.py`; scurtătura e `--route=1`)
+
+**Din decupaj și din ambele runde oarbe** (criticul a numit-o de două ori ca
+decor G): **ruinele** — galerii de gresie cu mușchi prăbușite, buiandrugi, uși,
+blocuri căzute, ziduri de incintă din laterită **înghițite de rădăcini**; ficusul
+uriaș cu rădăcini argintii peste ziduri; perdele de liane verzi; ferigi.
+
+**Din brief:** drumul principal ocolește incinta pe ~150 m (arc larg, rapid);
+perdeaua de liane la 0,70 (există, `VineCurtain`); scurtătura prin galeria
+prăbușită (există: bolți, dominoul, rampa-rădăcină, poarta-copac). Kitul:
+`kit/vault_intact`, `vault_broken`, `gallery_*`, `props/rubble_pile`,
+`fallen_block`, `laterite_block`, `numbered_block`, `restoration_prop`,
+`plants/strangler_fig`, `vine_strands`, `structures/ta_prohm_tree_gate`.
+
+**Capcana:**
+- **scurtătura**: coridorul are deja 3 ejectări de bază (0,676–0,732, pereți solizi):
+  nimic cu corp nou în coridor sau la ieșirea peste rădăcină; dominoul și rampa
+  nu se mută;
+- perdeaua (fără coliziune) trebuie să rămână „zid verde” la 40–60 m: nu pune
+  ruine solide în fața ei pe bandă;
+- ruinele de lângă drumul principal: arc rapid, mașinile ies larg — corp la ≥ 4 m
+  de margine, ProbeRace citit pe 0,65–0,76.

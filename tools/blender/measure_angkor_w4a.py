@@ -30,7 +30,7 @@ from verify_glb import load_glb  # noqa: E402
 from measure_angkor import _write_glb  # noqa: E402
 from measure_angkor_w1a import world_tris, _edit_positions  # noqa: E402
 
-TRI_CAP = 3500
+TRI_CAP = 2500
 RANGES = {"tetrameles": (22.0, 28.0), "dipterocarp": (30.0, 38.0), "palm": (12.0, 16.0)}
 
 

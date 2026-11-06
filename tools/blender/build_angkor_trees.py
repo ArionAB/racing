@@ -48,7 +48,7 @@ def pol(a, d, t, z):
     return Vector((math.cos(a) * d - math.sin(a) * t, math.sin(a) * d + math.cos(a) * t, z))
 
 
-def fin(b, a, R, H, L, th0, bend, slot, n=6, p=1.9, th_tip=0.10):
+def fin(b, a, R, H, L, th0, bend, slot, n=5, p=1.9, th_tip=0.10):
     """Contrafort-PLACA: aripa verticala la unghiul `a`, inalta de `H` la trunchi (raza R), care
     coboara pe o curba concava si se intinde pana la `L` pe sol, grosime th0 -> th_tip.
     `bend` curbeaza aripa lateral (m la varf). n trapeze consecutive, fiecare o invelitoare
@@ -82,7 +82,7 @@ def limb(b, base, tip, r0, r1, slot, sag=0.0, segments=6):
 
 def lump(b, c, rx, rz, slot, seed):
     """Masa de frunzis turtita: elipsoid cu zgomot (boulder: inchis, fara capac plat)."""
-    b.boulder(c, (rx, rx * 0.92, rz), slot, seed=seed, segments=8, rings=4, deviation=0.20)
+    b.boulder(c, (rx, rx * 0.92, rz), slot, seed=seed, segments=7, rings=3, deviation=0.20)
 
 
 def cluster(b, rnd, cx, cy, cz, rad, n, rx0, rz0, light_from, seed):
@@ -133,7 +133,7 @@ def tetrameles(variant):
     path = [Vector((0.15 * math.sin(z * 0.23), 0.12 * math.cos(z * 0.19), z)) for z in ztk]
     bt.taper_sweep(path, r_trunk, BARK, segments=9)
     for (ad, L, Hf, th, bend) in fins:
-        fin(bt, math.radians(ad), r_trunk[1], Hf + 1.3, L + 0.25, th, bend, BARK)
+        fin(bt, math.radians(ad), r_trunk[1], Hf + 1.7, L + 0.25, th, bend, BARK)
     bc = Builder()
     tips = []
     for (ad, rr, zb, zt) in limbs:
@@ -175,38 +175,45 @@ def dipterocarp():
     return H, bt.to_object("Tree_Trunk"), bc.to_object("Tree_Leaves")
 
 
-def fan(b, d, roll_deg, L, slot, rnd, fingers=7, spread_deg=140.0, droop=0.0):
-    """Evantai palmat: `fingers` degete, fiecare o lama ascutita (apex gros -> burta la 60% ->
-    varf), toate pornind din acelasi punct, desfacute in planul (d, tangenta); varfurile pica
-    usor (`droop`). Golul dintre degete (30%) citeste ca frunza taiata, nu ca placa."""
+def fan(b, c, d, Lp, R, slot, pet_slot, rnd, segs=8, spread_deg=170.0, droop=0.35, roll_deg=0.0, shingle=False):
+    """Frunza de Borassus: un PETIOL de `Lp` m din `c` pe directia `d`, apoi un EVANTAI palmat
+    (~semicerc de raza `R`) din `segs` pene de acordeon: fiecare pana e o invelitoare inchisa
+    (apex + doua colturi + creasta ridicata la mijloc) si intre pene ramane o fanta, iar marginea
+    exterioara are lungimi neregulate (taieturi), deci se citeste ca evantai, nu ca ac."""
     d = d.normalized()
-    w = d.cross(Vector((0, 0, 1)))
+    tip = c + d * Lp
+    b.taper_sweep([c + d * 0.25, tip], [0.05, 0.035], pet_slot, segments=3)
+    f = (d + Vector((0, 0, -droop))).normalized()
+    if shingle:
+        # evantaiul se culca PE SFERA coroanei (tangent), cu varful spre jos: ca solzii unei bile
+        dn = Vector((0, 0, -1)) - d * d.dot(Vector((0, 0, -1)))
+        if dn.length < 0.25:
+            dn = Vector((d.y, -d.x, 0.0)) if (d.x or d.y) else Vector((1, 0, 0))
+        f = (d * 0.35 + dn.normalized() * 0.94).normalized()
+    w = f.cross(Vector((0, 0, 1)))
     if w.length < 1e-3:
         w = Vector((1, 0, 0))
     w.normalize()
-    n = d.cross(w).normalized()
-    rr = Matrix.Rotation(math.radians(roll_deg), 3, d)
+    n = f.cross(w).normalized()
+    rr = Matrix.Rotation(math.radians(roll_deg), 3, f)
     w, n = rr @ w, rr @ n
-    apex = d * 0.6
-    th = 0.03
     half = math.radians(spread_deg) / 2.0
-    for j in range(fingers):
-        f = (j + 0.5) / fingers * 2.0 - 1.0
-        ang = f * half
-        ang_w = half * 2.0 / fingers * 0.46
-        dirv = d * math.cos(ang) + w * math.sin(ang)
-        ll = L * (1.0 - 0.22 * abs(f) ** 1.5) * (0.92 + 0.16 * rnd())
-        mid = apex + dirv * ll * 0.6 + n * 0.12
-        tip = apex + dirv * ll + Vector((0, 0, -droop * (0.35 + abs(f)))) + n * 0.05
-        tdir = n.cross(dirv).normalized()
-        mw = ll * 0.62 * math.tan(ang_w) * 1.25
-        pts = []
-        for s_ in (-1, 1):
-            pts.append(apex + n * s_ * th + tdir * 0.025)
-            pts.append(apex + n * s_ * th - tdir * 0.025)
-            pts.append(mid + tdir * mw + n * s_ * th * 0.7)
-            pts.append(mid - tdir * mw + n * s_ * th * 0.7)
-        pts.append(tip)
+    step = 2.0 * half / segs
+    th = 0.025
+
+    def P(ang, r, h):
+        return tip + f * (math.cos(ang) * r) + w * (math.sin(ang) * r) + n * h
+
+    for j in range(segs):
+        a0 = -half + j * step + step * 0.05
+        a1 = -half + (j + 1) * step - step * 0.05
+        am = (a0 + a1) * 0.5
+        lr = R * (0.80 + 0.2 * rnd())
+        rr_ = R * (0.80 + 0.2 * rnd())
+        mr = R * (0.95 + 0.1 * rnd())
+        pts = [tip + n * th, tip - n * th,
+               P(a0, lr, th), P(a0, lr, -th), P(a1, rr_, th), P(a1, rr_, -th),
+               P(am, mr, 0.07)]
         hull(b, pts, slot)
 
 
@@ -216,31 +223,33 @@ def sugar_palm():
     bt = Builder()
     ztk = [0.0, 1.2, 4.0, 8.0, H_TRUNK]
     path = [Vector((0.10 * math.sin(z * 0.31), 0.08 * math.cos(z * 0.27), z)) for z in ztk]
-    bt.taper_sweep(path, [0.50, 0.40, 0.34, 0.31, 0.29], WOODS, segments=8)
-    # inele de cicatrici de frunze: cateva toruri subtiri (Borassus are trunchi rugos)
-    for z in (2.6, 5.0, 7.2, 9.4, 11.3):
+    bt.taper_sweep(path, [0.56, 0.42, 0.35, 0.31, 0.29], WOODS, segments=8)
+    for z in (3.0, 6.5, 10.0):
         r = 0.34 - 0.0085 * z + 0.04
-        bt.torus((path[0].x, path[0].y, z), r, 0.055, WOODS, major_seg=8, minor_seg=4)
+        bt.torus((path[0].x, path[0].y, z), r, 0.055, WOODS, major_seg=8, minor_seg=3)
     bf = Builder()
-    cz = H_TRUNK + 0.9
-    n_fans = 20
+    c = Vector((path[-1].x, path[-1].y, H_TRUNK + 0.5))
+    n_fans = 22
     ga = math.pi * (3.0 - math.sqrt(5.0))
     for i in range(n_fans):
-        # Fibonacci pe sfera, de la +1 (varf) la ~-0,35 (sub orizont): coroana sferica
-        zc = 0.95 - (i + 0.5) / n_fans * 1.5
+        # Fibonacci pe sfera: sus, in lateral SI in jos (cele de jos atarna sub centru)
+        zc = 0.92 - (i + 0.5) / n_fans * 1.72
         r = math.sqrt(max(0.0, 1.0 - zc * zc))
         ph = i * ga
         d = Vector((math.cos(ph) * r, math.sin(ph) * r, zc))
-        slot = G_LIGHT if (i % 3 != 1) else G_DARK
-        c = Vector((path[-1].x, path[-1].y, cz))
-        tmp = Builder()
-        fan(tmp, d, rnd() * 30.0 - 15.0, 2.3 + 0.25 * rnd(), slot, rnd, droop=0.35)
-        #)
-        # translatam evantaiul in centrul coroanei
-        for v in tmp.bm.verts:
-            v.co += c
-        _merge(bf, tmp)
-    return cz + 2.5, bt.to_object("Tree_Trunk"), bf.to_object("Tree_Leaves")
+        sunlit = zc > -0.05 or i % 4 == 0
+        slot = G_LIGHT if sunlit else G_DARK
+        if i % 5 == 2:
+            slot = G_DARK if sunlit else G_LIGHT
+        fan(bf, c, d, 1.9 + 0.3 * rnd(), 1.5 + 0.15 * rnd(), slot, G_DARK, rnd,
+            droop=0.0, roll_deg=rnd() * 20.0 - 10.0, shingle=True)
+    # cateva frunze uscate atarna pe trunchi (WOOD_WEATHERED)
+    for k in range(3):
+        ph = k * 2.1 + 0.4
+        d = Vector((math.cos(ph) * 0.32, math.sin(ph) * 0.32, -1.0))
+        fan(bf, c + Vector((0, 0, -0.3)), d, 0.8, 0.9, WOODS, WOODS, rnd, segs=5,
+            spread_deg=120.0, droop=0.0, roll_deg=ph * 57.0)
+    return c.z + 2.4, bt.to_object("Tree_Trunk"), bf.to_object("Tree_Leaves")
 
 
 def _merge(dst, src):

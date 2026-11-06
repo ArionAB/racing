@@ -4444,25 +4444,31 @@ static func themes() -> Dictionary:
 	# Azimutul: rotatia Y = -67.5 trimite lumina spre ENE, deci soarele sta in VSV (conventia
 	# din `carrara`: Y 30 = soare din SE).
 	_themes_cache["angkor"] = {
-		"sun_color": Color.html("FFB475"),
-		"sun_energy": 1.25,
+		"sun_color": Color.html("FFC078"),
+		"sun_energy": 1.75,
 		"exposure": 1.0,
-		"sun_rotation_deg": Vector3(-17, -67.5, 0),
+		"sun_rotation_deg": Vector3(-24, -67.5, 0),
 		# Ambient rece-violet din cerul de furtuna, mic: raport soare/ambient ~3.4 (memoria
 		# `geometria-fara-lumina-e-invizibila`).
-		"ambient_color": Color.html("A39EC0"),
-		"ambient_energy": 0.34,
+		"ambient_color": Color.html("9C97BC"),
+		"ambient_energy": 0.30,
 		"sky_top": Color.html("2D2740"),
 		"sky_horizon": Color.html("A6788A"),
 		"sky_cover_alpha": 0.55,
-		"fog": Color.html("7B6C76"),
-		"fog_sky_affect": 0.20,
+		# Cer pe azimut (brief §4: piersica spre vest, vanat-violet spre est): vezi `_azimuth_sky_texture`.
+		"sky_azimuth": {
+			"sun_color": Color(1.0, 0.72, 0.46), "sun_alpha": 0.80, "sun_height": 0.50,
+			"away_color": Color(0.15, 0.09, 0.26), "away_alpha": 0.90, "away_height": 1.2,
+			"mottle": 0.25,
+		},
+		"fog": Color.html("86727A"),
+		"fog_sky_affect": 0.10,
 		"fog_aerial": 0.30,
 		"fog_depth": true,
 		"fog_begin": 120.0,
 		"fog_end": 280.0,
 		"fog_curve": 1.5,
-		"fog_max": 0.70,
+		"fog_max": 0.60,
 		"shadows": true,
 		"shadow_opacity": 0.62,
 		"shadow_distance": 150.0,
@@ -6062,6 +6068,48 @@ func _build_center_line() -> void:
 	_add_visual_mesh(st.commit(), Palette.color(Palette.CAR_YELLOW) if dbl
 		else Color(0.92, 0.9, 0.78))
 
+
+## Textura equirectangulara a cerului pe azimut (vezi `sky_azimuth` in `_build_environment`).
+##
+## Cheile: `sun_color` (piersica langa soare), `away_color` (furtuna in partea opusa), `sun_alpha` /
+## `away_alpha` (cat acopera fiecare), `sun_height` / `away_height` (inaltimea in radiani unde
+## amestecul scade la ~1/e), `mottle` (variatia de nor, 0..1). Soarele vine din rotatia temei, deci
+## piersica sta mereu sub lumina reala. Rotatia: u = atan2(x, -z) / TAU + 0.5, v = acos(y) / PI.
+func _azimuth_sky_texture(cfg: Dictionary) -> ImageTexture:
+	var w := 256
+	var h := 128
+	var rot := _sun_rotation_deg()
+	var to_sun := -(Basis.from_euler(Vector3(deg_to_rad(rot.x), deg_to_rad(rot.y),
+		deg_to_rad(rot.z))) * Vector3.FORWARD)
+	var sun_az := atan2(to_sun.x, -to_sun.z)
+	var warm: Color = cfg.get("sun_color", Color(1.0, 0.72, 0.5))
+	var away: Color = cfg.get("away_color", Color(0.2, 0.14, 0.3))
+	var a_warm := float(cfg.get("sun_alpha", 0.7))
+	var a_away := float(cfg.get("away_alpha", 0.85))
+	var h_warm := float(cfg.get("sun_height", 0.45))
+	var h_away := float(cfg.get("away_height", 1.1))
+	var mottle := float(cfg.get("mottle", 0.25))
+	var noise := FastNoiseLite.new()
+	noise.seed = 24
+	noise.frequency = 0.9
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	for y in h:
+		var elev := (0.5 - (float(y) + 0.5) / float(h)) * PI   # +PI/2 zenit, 0 orizont
+		var e := maxf(elev, 0.0)
+		for x in w:
+			var az := ((float(x) + 0.5) / float(w) - 0.5) * TAU
+			var away_t := smoothstep(0.15, 0.85, (1.0 - cos(az - sun_az + PI)) * 0.5)
+			var kw := exp(-e / h_warm) * (1.0 - away_t)
+			var ka := (0.35 + 0.65 * exp(-e / h_away)) * away_t
+			var col := warm.lerp(away, away_t)
+			var a := clampf(a_warm * kw + a_away * ka, 0.0, 1.0)
+			var n := noise.get_noise_2d(cos(az) * 3.0 + elev * 2.0, sin(az) * 3.0 + elev * 2.0)
+			a = clampf(a * (1.0 + n * mottle), 0.0, 1.0)
+			if elev < 0.0:
+				a = 0.0
+			img.set_pixel(x, y, Color(col.r, col.g, col.b, a))
+	return ImageTexture.create_from_image(img)
+
 ## Lumea pistei: cer, soare, teren si dealuri/dune de fundal — tematice.
 func _build_environment() -> void:
 	var sky_mat := ProceduralSkyMaterial.new()
@@ -6083,6 +6131,15 @@ func _build_environment() -> void:
 		# stratul ADUNAT peste un gradient intunecat iesea o pata alburie.
 		sky_mat.sky_cover_modulate = Color(1.0, 0.97, 0.92,
 			float(theme_flag("sky_cover_alpha", 0.35)))
+	# CER PE AZIMUT (opt-in, cheia de tema `sky_azimuth`): ProceduralSkyMaterial n-are gradient pe
+	# azimut, dar are `sky_cover` (textura equirectangulara cu alfa, amestecata peste gradient si
+	# deja dimata de RainCycle prin `sky_cover_modulate`). O textura generata la incarcare, nu un
+	# asset, tine deci piersica spre soare si furtuna violet spre partea opusa, fara shader nou si
+	# fara sa rupa ploaia. Tema fara cheie ramane pe codul de mai sus, bit-identic.
+	var az_cfg: Variant = theme_flag("sky_azimuth", null)
+	if az_cfg is Dictionary:
+		sky_mat.sky_cover = _azimuth_sky_texture(az_cfg as Dictionary)
+		sky_mat.sky_cover_modulate = Color(1.0, 1.0, 1.0, 1.0)
 	# Discul soarelui + haloul lui (sun_angle_max, 30 grade implicit) se
 	# deseneaza din DirectionalLight. Pe o tema de noapte cu "luna" aproape
 	# verticala iesea o pata luminoasa la zenit, in cadru la fiecare urcare.

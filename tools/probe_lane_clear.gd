@@ -60,6 +60,8 @@ const DRIVABLE := [
 	# pe feat/capp-poi-b. Aceeasi poveste ca `ChannelDeckSides` de mai sus.
 	"BranchDeck", "BranchDirt", "BranchSand", "BranchRails", "TunnelShell",
 	"Ramp", "ChannelKicker", "FlyoffRamp", "HummockBody",
+	# Angkor (kit §1.4): radacina-rampa de la iesirea scurtaturii — suprafata de rulare (un plan).
+	"RadacinaRampa_col",
 	"IceSheet",
 	# TERENUL. E podeaua de sub tot, deci contactul cu el nu e blocaj — dar
 	# aparea la aproape fiecare proba si de aceea sonda iesea rosie pe TOATE
@@ -369,7 +371,10 @@ const BASELINE := {
 	# 0,62 — `tools/probe_angkor_pas6.gd`), deci exceptie NUMITA, ca oalele de pe Cappadocia.
 	# Balustradele de gresie de pe caile peste sant (stil 3) si perdeaua de liane nu apar. Baza =
 	# cifra masurata, fara marja (memoria `garda-fara-linie-de-baza-iese-zero`).
-	"Angkor (Track24)": 7,
+	# Kitul Angkor (val 2, 6 nov 2026): +34 pe radacina-rampa de la iesirea scurtaturii
+	# (`RadacinaRampa_col`, suprafata de rulare, scuzata pe nume ca podea): toate pe testul INAINTE la
+	# h 0,4/1,0 — raza orizontala loveste panta de 17% in fata, ca la `FlyoffRamp`. 7 + 34 = 41.
+	"Angkor (Track24)": 41,
 }
 
 

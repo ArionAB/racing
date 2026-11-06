@@ -74,6 +74,13 @@ var force_clock: float = -1.0
 ## Inverseaza directia pe durata strivirii. Stins doar pentru sonde (sabotaj).
 @export var invert_steer: bool = true
 
+@export_group("Model")
+## Modelul vizual al blocului. Gol = `DEFAULT_MODEL` (bolovanul), adica exact ce era inainte.
+## Angkor: `fallen_block.glb` (kit §1.5), la aceeasi anvelopa ca bolovanul x 0,5.
+@export var model: PackedScene = null
+## Scara modelului. Se ignora cand `model` e gol (atunci ramane `DEFAULT_MODEL_SCALE`).
+@export var model_scale: float = DEFAULT_MODEL_SCALE
+
 var _rock: Node3D
 var _pivot: Node3D
 var _shadow: MeshInstance3D
@@ -351,6 +358,15 @@ func _build() -> void:
 
 
 func _rock_model() -> Node3D:
+	if model != null:
+		var own := model.instantiate() as Node3D
+		own.scale = Vector3.ONE * model_scale
+		var tri_own := _world_rock_class()
+		if tri_own.is_empty():
+			Palette.apply_object_class_materials(own, WorldProp.prop_classes(), model_scale)
+		else:
+			Palette.apply_object_triplanar_class(own, tri_own, model_scale)
+		return own
 	if not ResourceLoader.exists(DEFAULT_MODEL):
 		var fallback := MeshInstance3D.new()
 		var mesh := SphereMesh.new()

@@ -181,7 +181,7 @@ Verificare specifică: critic orb pe capturi `--gamecam` de pe terasa E, cu
 
 | fișier | cote | h/l | contract |
 |---|---|---:|---|
-| `structures/south_gate_face_tower.glb` | lățime **~19 m** (X), adâncime **~8 m** (Y), vârful **20–23 m**; **golul la nivelul drumului ≥ 7,2 m** lățime (măsurat ca gol, la 0–2,5 m înălțime; banda e 7,0), înălțimea liberă **≥ 8 m** | ~1,1 | turnul cu **patru fețe** (câte una pe fiecare latură) peste o **singură** deschidere îngustă, cu arc în trepte; elefanți în relief cu trompele până la pământ pe ambele aripi, **pe fața exterioară, nu în gol**. Originea: baza, la mijlocul golului; drumul trece pe Y. Machetele `Poarta_*` arată anvelopa. `coliziune="mesh"`. **`CameraZone` cu `ceiling` = înălțimea liberă**, declarată de coordonator. Elefantul (§1.3) trebuie să se vadă **încadrat de gol** de la capătul căii (pasul 4) |
+| `structures/south_gate_face_tower.glb` | lățime **~19 m** (X), adâncime **~8 m** (Y), vârful **17–19 m** (corectura coordonatorului, runda 4: vârful 17–19 m); **golul la nivelul drumului ≥ 7,2 m** lățime (măsurat ca gol, la 0–2,5 m înălțime; banda e 7,0), înălțimea liberă **≥ 8 m** | ~1,1 | turnul cu **patru fețe** (câte una pe fiecare latură) peste o **singură** deschidere îngustă, cu arc în trepte; elefanți în relief cu trompele până la pământ pe ambele aripi, **pe fața exterioară, nu în gol**. Originea: baza, la mijlocul golului; drumul trece pe Y. Machetele `Poarta_*` arată anvelopa. `coliziune="mesh"`. **`CameraZone` cu `ceiling` = înălțimea liberă**, declarată de coordonator. Elefantul (§1.3) trebuie să se vadă **încadrat de gol** de la capătul căii (pasul 4) |
 | `structures/aw_west_gopura.glb` | lungime **50–70 m** (X, de-a curmezișul drumului), adâncime ~10 m, turnul central **14–16 m**; **golul central ≥ 10,0 m** (drum de 9 m), înălțime liberă **≥ 8 m** | ~0,25 | galerie lungă cu trei turnuri, colonade pe ambele părți ale trecerii centrale. Drumul trece prin mijloc, pe Y. `coliziune="mesh"`, `CameraZone` cu tavan. Fără vegetație lipită |
 | `structures/ta_prohm_tree_gate.glb` | ~14 m lățime, 7–9 m până la ramura cea mai înaltă (copacul întreg 18–22 m); **golul ≥ 6,6 m** (ramura are 6 m), înălțime liberă **≥ 5,5 m**, **nicio rădăcină în gol sub 5,5 m** | ~1,0 | turnul-poartă mic strâns de un ficus uriaș: rădăcinile argintii se revarsă **peste acoperiș și pe laturi**, nu prin trecere. Intrarea scurtăturii cu dominoul (`TrackBranch` în G). Noduri: `Gate_Stone`, `Gate_Lichen`, `Gate_Root` (`CORAL_SAND`), `Gate_Canopy` (`TROPICAL_GREEN`). `coliziune="mesh"` |
 | `structures/angkor_wat_temple.glb` | **în anvelopa machetelor `Machete/AW_*`** din `Track24.tscn`: soclul **64 × 64 m** în trepte până la +8, al doilea soclu 44 × 44; turnul central **la ±0, vârful la +36**; turnurile de colț în **(±17, ±17)**, vârful **la +30** (cotele sunt față de baza modelului) | ~0,55 | **planșa c**: cinci turnuri-boboc **în quincunx** (nu pe un rând: de pe grilă se văd cinci, cu centralul în spate), terasele în trepte cu galerii și colonade, scara axială spre vest (+Y). **Fără fețe.** Verificarea din brief §2.0 (turnurile întregi în cadru de pe grilă, dezvăluirea de pe Bakheng) s-a făcut pe machete, deci vârfurile **nu urcă**. E fundal: coliziune doar pe soclu; LOD obligatoriu |
@@ -190,7 +190,7 @@ Verificare specifică: critic orb pe capturi `--gamecam` de pe terasa E, cu
 
 | fișier | cote | contract |
 |---|---|---|
-| `animals/asian_elephant.glb` | **2,8–3,0 m** la umăr, **5,4–5,8 m** lung (cu trompa); elefantul din Serengeti are 3,4 / 6,4 m | **Același schelet ca `serengeti/animals/elephant.glb`**: 11 oase (`Body`, `Head`, `Trunk1/2`, `EarL/R`, `LegFL/FR/RL/RR`, `Tail`), acțiunile **`Walk`** (1,5 s) și **`Trumpet`**. `StrideDriver` conduce picioarele și `Body` după nume; clipul păstrează trompa, urechile, coada. Mesh-ul se cheamă **`Elephant_Mesh`** (toată mecanica de ruptură și clasa `elephant_hide` e legată de nume). Forma (planșa b): urechi **mici și rotunjite**, cap cu **două boltiri**, spatele cel mai înalt **la mijloc**, fildeși scurți sau lipsă, **fără șa și fără călăreț**. Greutățile pe vertex cu **fereastră pe Y**, nu prag pe X (memoria `elefant-mesh-importat-rig-per-vertex`: piciorul din față rupt de trompă la `Trumpet`). **La integrare** (coordonatorul): cheia `asian_elephant` în `SPLIT_MODELS`, `SLOT_REMAP_BY_MODEL`, `WALK_CYCLE_SPEED_BY_MODEL` (ritmul se măsoară cu `tools/probe_foot_slide.gd`), apoi ProbeRace pe `[blocaj]` în piață (pasul 5: 6–8 s oprite pe seed) |
+| `animals/asian_elephant.glb` | **2,8–3,0 m** la umăr, **5,4–5,8 m** lung (cu trompa); elefantul din Serengeti are 3,4 / 6,4 m **(greșit: măsurat pe fișier, `serengeti/animals/elephant.glb` are 4,62 m la umăr și 6,20 m lungime; cotele asiatice rămân 2,8–3,0 / 5,4–5,8)** | **Același schelet ca `serengeti/animals/elephant.glb`**: 11 oase (`Body`, `Head`, `Trunk1/2`, `EarL/R`, `LegFL/FR/RL/RR`, `Tail`), acțiunile **`Walk`** (1,5 s) și **`Trumpet`**. `StrideDriver` conduce picioarele și `Body` după nume; clipul păstrează trompa, urechile, coada. Mesh-ul se cheamă **`Elephant_Mesh`** (toată mecanica de ruptură și clasa `elephant_hide` e legată de nume). Forma (planșa b): urechi **mici și rotunjite**, cap cu **două boltiri**, spatele cel mai înalt **la mijloc**, fildeși scurți sau lipsă, **fără șa și fără călăreț**. Greutățile pe vertex cu **fereastră pe Y**, nu prag pe X (memoria `elefant-mesh-importat-rig-per-vertex`: piciorul din față rupt de trompă la `Trumpet`). **La integrare** (coordonatorul): cheia `asian_elephant` în `SPLIT_MODELS`, `SLOT_REMAP_BY_MODEL`, `WALK_CYCLE_SPEED_BY_MODEL` (ritmul se măsoară cu `tools/probe_foot_slide.gd`), apoi ProbeRace pe `[blocaj]` în piață (pasul 5: 6–8 s oprite pe seed) |
 
 ### 1.4 Terasa, Regele Lepros, rădăcina, debarcaderul — `build_angkor_terrace.py`
 
@@ -296,3 +296,45 @@ Trei constructori pe val, nu mai mulți (memoria `valuri-de-trei-nu-opt-agenti`)
 
 După valul 4, brief §7 pasul 8: `probe_decor`, testul de loc repetat pe pista
 reală, **verdict la volan** (al dezvoltatorului).
+
+## 3. Starea kitului după valurile 1–3 (coordonator, 6 nov 2026)
+
+Toate piesele valurilor 1–3 sunt acceptate (inventarele `angkor_inventory_w1a..w3c.md`) și
+integrate pe `angkor/kit-val1`. Abaterile acceptate, pe categorii:
+
+**Datoria de sculptură** (decizia dezvoltatorului, §1.1): fețele Bayonului și ale Porții de Sud
+(cutia cu fețe pe portal: de la 80 m citește poartă cu față, de aproape nu), uriașii deva/asura,
+Regele Lepros, stâlpul-trompă, capul naga. **Datoria organică** (aceeași cauză: formele din
+primitive în cod): rădăcinile porții-copac (țevi netede, „picioare”) și rădăcina-rampă (se
+citește placă, nu rădăcină — contractul de rulare, un singur plan, e respectat). Ambele se
+rezolvă cu sculptură reală, nu cu încă o rundă de parametri.
+
+**Corecturi de contract ale coordonatorului, pe parcurs:** Poarta de Sud cu vârful 17–19 m (era
+20–23; machetele și verificarea din brief §2.0 erau la 18 m); bolta prăbușită deschisă doar pe
+latura de unde cade dominoul; balustrada naga cu bază plină (zidul de coliziune din cod e plin);
+elefantul din Serengeti măsoară 4,62 / 6,20 m, nu 3,4 / 6,4.
+
+**Integrare pe Track24 (generatorul):** porțile cu coliziune `mesh` și câte un `CameraZone` cu
+tavan; malul de est al șanțului de vest mutat la −104 (gopura nu avea loc); poarta-copac la 26 m
+pe ramură, lățită de 1,2 ori (golul 8,2 m), corp doar pe gresie (`HULL_SKIP_PARTS`); balustradele
+de stil 3 doar coliziune (`balustrade_skin` în temă), cu naga, capete naga și uriași pe linia
+zidului; terasa din module cu stâlpi-trompă; galeria scurtăturii din bolți, prăbușite unde cade
+dominoul; dominoul pe `fallen_block` (`RimBoulderHazard.model`, cod mic, implicitul neschimbat);
+rădăcina-rampă cu coliziune în locul cocoașei din profil.
+
+**Valurile 3–4 pe Track24 (aceeași zi):** templul în locul machetelor (aceleași cote; soclul îngropat
+~4 m ca și machetele), galeria de vest a incintei pe stânga lui B (stâlpi, acoperiș, zid cu
+basorelief), altarele și scările Bakhengului pe platformă, debarcaderul Srah Srang, tuk-tuk-uri
+parcate și călugări lângă gopura (decor; împingerea rămâne decizie), moloz / restaurare / bloc
+numerotat lângă galeria scurtăturii, ficuși, tetrameles și dipterocarpi în jurul Ta Prohm, palmieri
+de zahăr pe malul de vest și pe H, lotuși și nuferi pe șanțuri. Fundalul: coronament, creasta Kulen
+și orezăriile (`horizon_class` gol = atlasul). **Benzile de furtună NU intră:** sub camera de joc baza
+lor iese din cadru, iar coborâte citesc platouri cenușii (riscul „Monument Valley în junglă”).
+**Furtuna spre est e decizie deschisă** (gradient de cer pe azimut = cod nou). Jungla în masă
+(scatter) și perdeaua de liane pe `vine_strands` sunt pasul 8.
+
+**ProbeRace, 16 seed-uri, starea finală față de pasul 6:** repuneri 7 (2), ejectări 6 (2): 2 pe
+turnul Bayon b și 1 la creastă (tipuri preexistente), 3 în coridorul scurtăturii (aripa porții-copac,
+exteriorul unei bolți, aterizarea după rampă) — mașinile care ies de pe ramură lovesc acum ziduri
+solide. Domino 9,7%, creasta 0,66 s, elefantul 10,9 s/seed (main: 10). **Decizie la volan:** zidurile
+galeriei rămân solide sau devin decor.

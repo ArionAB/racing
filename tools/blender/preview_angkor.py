@@ -24,6 +24,7 @@ Moduri (rulate prin run_build.py, argumentele dupa al doilea `--`):
                      in dreapta (se vad doua fete). Fiecare cadru e 1920x1080
                      si apare alaturi de decuparea lui la pixeli nativi, de 3x.
                      -> <nume>_gamecam.png
+  --gamecam-far <nume>  la fel, dar piesa la 80 m, un cadru -> <nume>_gamecam_far.png
   --face <nume>      close-up pe o fata (+Y), de ~1000 px inaltime: din fata si
                      3/4, ca fata sa poata fi judecata singura
                      -> <nume>_face.png
@@ -78,6 +79,98 @@ CLASS_BY_SUFFIX = {"_Stone": STONE_HEX}
 
 SPECS = {
     "bayon_face_tower_a": {"camera": {"azimuth": 62.0, "elevation": 9.0, "lens": 70.0, "margin": 1.06}},
+    # elefantul: capul pe +Y, vazut din dreapta-fata ca pe desen (cap la dreapta)
+    "asian_elephant": {"camera": {"azimuth": 38.0, "elevation": 6.0, "lens": 60.0, "margin": 1.08}},
+    # val 2, grupul C: kitul naga. Fata drumului e -X (azimut ~200); capul priveste spre +Y
+    "naga_balustrade": {"camera": {"azimuth": 205.0, "elevation": 14.0, "lens": 60.0, "margin": 1.06},
+                        "views_aspect": 2.4},
+    "naga_balustrade_gap": {"camera": {"azimuth": 335.0, "elevation": 16.0, "lens": 60.0, "margin": 1.06},
+                            "views_aspect": 2.0},
+    "naga_head": {"camera": {"azimuth": 70.0, "elevation": 10.0, "lens": 60.0, "margin": 1.08}},
+    "deva_giant": {"camera": {"azimuth": 205.0, "elevation": 8.0, "lens": 60.0, "margin": 1.06}},
+    "asura_giant": {"camera": {"azimuth": 205.0, "elevation": 8.0, "lens": 60.0, "margin": 1.06}},
+    "bayon_face_tower_b": {"camera": {"azimuth": 62.0, "elevation": 9.0, "lens": 70.0, "margin": 1.06}},
+    "bayon_face_tower_c": {"camera": {"azimuth": 62.0, "elevation": 9.0, "lens": 70.0, "margin": 1.06}},
+    # poarta de sud (val 1): drumul merge pe Y prin ea; fara ingropare in gamecam
+    # (baza la cota drumului); fata de close-up e cea de pe +Y, centrul la ~14 m
+    "south_gate_face_tower": {"camera": {"azimuth": 62.0, "elevation": 8.0, "lens": 60.0, "margin": 1.06},
+                              "views_aspect": 1.2, "bury": 0.0,
+                              "face_center": (0.0, 3.0, 12.6), "face_dist": 22.0},
+    # val 2, grupul B: bolta (modul de 4 m, drumul pe Y), bloc, sprijin
+    "vault_intact": {"camera": {"azimuth": 38.0, "elevation": 12.0, "lens": 55.0, "margin": 1.08},
+                     "views_aspect": 1.1, "bury": 0.0},
+    "vault_broken": {"camera": {"azimuth": 38.0, "elevation": 14.0, "lens": 55.0, "margin": 1.08},
+                     "views_aspect": 1.1, "bury": 0.0},
+    "fallen_block": {"camera": {"azimuth": 62.0, "elevation": 16.0, "lens": 60.0, "margin": 1.12}},
+    "restoration_prop": {"camera": {"azimuth": 35.0, "elevation": 14.0, "lens": 60.0, "margin": 1.1}},
+    # val 2, grupul A: terasa elefantilor (fata pe +X, procesiunea priveste spre +Y), stalpul,
+    # statuia, radacina-rampa (capatul de jos la -Y: camera din sud-est). Terasa NU are baza
+    # ingropata in gamecam: coama e la cota drumului (kit 1.4); `gc_yaw` o intoarce cu fata
+    # spre camera de joc (+X devine -Y), ca sa se vada din drum.
+    "elephant_terrace_module": {"camera": {"azimuth": 28.0, "elevation": 12.0, "lens": 60.0, "margin": 1.06},
+                                "views_aspect": 1.5, "bury": 0.0, "gc_yaw": -90.0},
+    "elephant_terrace_end": {"camera": {"azimuth": 28.0, "elevation": 12.0, "lens": 60.0, "margin": 1.06},
+                             "views_aspect": 1.5, "bury": 0.0, "gc_yaw": -90.0},
+    "elephant_trunk_pillar": {"camera": {"azimuth": 62.0, "elevation": 9.0, "lens": 70.0, "margin": 1.06},
+                              "bury": 0.0},
+    "leper_king_statue": {"camera": {"azimuth": 62.0, "elevation": 10.0, "lens": 70.0, "margin": 1.06},
+                          "bury": 0.0},
+    "giant_root_ramp": {"camera": {"azimuth": -58.0, "elevation": 20.0, "lens": 55.0, "margin": 1.06},
+                        "views_aspect": 1.4, "bury": 0.0},
+    # val 3, grupul A: templul Angkor Wat, scara pe +Y; gc_yaw 180 il intoarce cu fata spre camera de joc
+    "angkor_wat_temple": {"camera": {"azimuth": 78.0, "elevation": 9.0, "lens": 45.0, "margin": 1.06},
+                          "views_aspect": 1.2, "bury": 0.0, "gc_yaw": 180.0},
+    # val 3, grupul C: debarcaderul (treptele coboara spre -Y: camera din sud-est), tuk-tuk-ul
+    # (motocicleta pe +Y trage remorca: vazut din -X, motocicleta ramane in stanga ca pe desen),
+    # calugarul, blocurile mici
+    "srah_srang_landing": {"camera": {"azimuth": -68.0, "elevation": 22.0, "lens": 55.0, "margin": 1.06},
+                           "views_aspect": 1.7, "bury": 0.0},
+    "tuk_tuk": {"camera": {"azimuth": 205.0, "elevation": 12.0, "lens": 60.0, "margin": 1.06},
+                "views_aspect": 1.8, "bury": 0.0},
+    "monk_standing": {"camera": {"azimuth": 62.0, "elevation": 4.0, "lens": 70.0, "margin": 1.08},
+                      "views_aspect": 0.6, "bury": 0.0},
+    "laterite_block": {"camera": {"azimuth": 38.0, "elevation": 20.0, "lens": 60.0, "margin": 1.12}},
+    "rubble_pile": {"camera": {"azimuth": 40.0, "elevation": 22.0, "lens": 60.0, "margin": 1.12}},
+    "numbered_block": {"camera": {"azimuth": 68.0, "elevation": 16.0, "lens": 60.0, "margin": 1.12}},
+    # val 3, grupul B: kitul galeriei (lant pe Y la acoperis, pe X la zid) si Bakheng (fata pe +Y)
+    "gallery_column": {"camera": {"azimuth": 50.0, "elevation": 8.0, "lens": 70.0, "margin": 1.08},
+                       "views_aspect": 0.4, "bury": 0.0},
+    "gallery_roof": {"camera": {"azimuth": 35.0, "elevation": 22.0, "lens": 55.0, "margin": 1.08},
+                     "views_aspect": 1.3, "bury": 0.0},
+    "gallery_relief_wall": {"camera": {"azimuth": 78.0, "elevation": 10.0, "lens": 60.0, "margin": 1.06},
+                            "views_aspect": 1.6, "bury": 0.0},
+    "gallery_corner": {"camera": {"azimuth": 235.0, "elevation": 22.0, "lens": 55.0, "margin": 1.06},
+                       "views_aspect": 1.2, "bury": 0.0},
+    "bakheng_terrace_tier": {"camera": {"azimuth": 72.0, "elevation": 22.0, "lens": 55.0, "margin": 1.06},
+                             "views_aspect": 1.8, "bury": 0.0},
+    "bakheng_shrine_tower": {"camera": {"azimuth": 68.0, "elevation": 12.0, "lens": 65.0, "margin": 1.08},
+                             "views_aspect": 0.8, "bury": 0.0},
+    "bakheng_side_stair": {"camera": {"azimuth": 58.0, "elevation": 18.0, "lens": 60.0, "margin": 1.08},
+                           "views_aspect": 0.9, "bury": 0.0},
+    # val 4, grupul A: copacii (originea la baza trunchiului; vazuti din lateral, aproape de orizont)
+    "tetrameles_a": {"camera": {"azimuth": 62.0, "elevation": 4.0, "lens": 60.0, "margin": 1.06},
+                     "views_aspect": 0.9, "bury": 0.0},
+    "tetrameles_b": {"camera": {"azimuth": 62.0, "elevation": 4.0, "lens": 60.0, "margin": 1.06},
+                     "views_aspect": 0.9, "bury": 0.0},
+    "dipterocarp": {"camera": {"azimuth": 62.0, "elevation": 4.0, "lens": 60.0, "margin": 1.06},
+                    "views_aspect": 0.7, "bury": 0.0},
+    "sugar_palm": {"camera": {"azimuth": 62.0, "elevation": 4.0, "lens": 60.0, "margin": 1.06},
+                   "views_aspect": 0.6, "bury": 0.0},
+    # val 4, grupul C: fundalul are 7 noduri-piesa de inel, toate centrate in origine: se randeaza cu
+    # `preview_angkor_horizon.py` (--row, --ring), nu cu --compare; intrarea e pentru --views/--gamecam
+    "angkor_horizon": {"camera": {"azimuth": -90.0, "elevation": 3.0, "lens": 35.0, "margin": 1.04},
+                       "views_aspect": 3.0, "bury": 0.0},
+    # val 4, grupul B: vegetatia mica. Ficusul: zidul pe X, fetele pe +-Y (camera din +Y, usor lateral);
+    # suvitele au toate originea in (0,0,0) -- `preview_angkor_w4b.py` le desface pe X inainte de randare;
+    # lotusul si nuferii se vad de sus-lateral, de pe apa
+    "strangler_fig": {"camera": {"azimuth": 72.0, "elevation": 8.0, "lens": 60.0, "margin": 1.06},
+                      "views_aspect": 1.1, "bury": 0.0},
+    "vine_strands": {"camera": {"azimuth": 90.0, "elevation": 0.0, "lens": 70.0, "margin": 1.1},
+                     "views_aspect": 1.2, "bury": 0.0},
+    "lotus_cluster": {"camera": {"azimuth": 62.0, "elevation": 34.0, "lens": 60.0, "margin": 1.1},
+                      "views_aspect": 1.5, "bury": 0.0},
+    "water_lily_pads": {"camera": {"azimuth": 62.0, "elevation": 38.0, "lens": 60.0, "margin": 1.1},
+                        "views_aspect": 1.7, "bury": 0.0},
 }
 
 # camera de joc (scenes/race/chase_camera.gd: DEFAULT_HEIGHT/DISTANCE/BASE_FOV/
@@ -398,14 +491,14 @@ def views(name, res_height=800):
         cam = _camera_for(name)
         cam["azimuth"] = az
         p = os.path.join(FID_DIR, "_view_%s_%d.png" % (name, int(az)))
-        _render(meshes, p, res_height=res_height, aspect=0.6, **cam)
+        _render(meshes, p, res_height=res_height, aspect=SPECS.get(name, {}).get("views_aspect", 0.6), **cam)
         outs.append(p)
     _compose(["--montage", ",".join(outs), "--out",
               os.path.join(FID_DIR, name + "_views.png")])
     _rm(*outs)
 
 
-def gamecam(name):
+def gamecam(name, ahead=None, suffix="_gamecam", cars=(("a", 0.0), ("b", -4.0))):
     """Camera de joc: vezi antetul. Doua cadre, apoi compunere cu decupari."""
     os.makedirs(FID_DIR, exist_ok=True)
     _clear()
@@ -414,7 +507,10 @@ def gamecam(name):
         return
     scene = bpy.context.scene
     for o in meshes:
-        o.location = o.location + Vector((0.0, 0.0, -GC_BURY))
+        gy = SPECS.get(name, {}).get("gc_yaw", 0.0)
+        if gy:
+            o.rotation_euler = (0.0, 0.0, math.radians(gy))
+        o.location = o.location + Vector((0.0, 0.0, -SPECS.get(name, {}).get("bury", GC_BURY)))
         o.hide_render = False
     bpy.context.view_layer.update()
 
@@ -458,8 +554,9 @@ def gamecam(name):
     cam.data.clip_end = 380.0
 
     frames, boxes = [], []
-    for tag, car_x in (("a", 0.0), ("b", -4.0)):
-        car = Vector((car_x, -GC_PIECE_AHEAD, 0.0))
+    ahead = GC_PIECE_AHEAD if ahead is None else ahead
+    for tag, car_x in cars:
+        car = Vector((car_x, -ahead, 0.0))
         cam.location = car + Vector((0.0, -GC_DIST, GC_HEIGHT))
         target = car + Vector((0.0, GC_LOOK_AHEAD, GC_LOOK_HEIGHT))
         cam.rotation_euler = (target - cam.location).normalized().to_track_quat("-Z", "Y").to_euler()
@@ -478,7 +575,7 @@ def gamecam(name):
         frames.append(p)
         boxes.append("%.1f,%.1f,%.1f,%.1f" % box)
     _compose(["--gamecam", ",".join(frames), "--boxes", ";".join(boxes), "--out",
-              os.path.join(FID_DIR, name + "_gamecam.png")])
+              os.path.join(FID_DIR, name + suffix + ".png")])
     _rm(*frames)
 
 
@@ -492,7 +589,8 @@ def face(name, res_height=1000):
     scene = bpy.context.scene
     for o in meshes:
         o.hide_render = False
-    center = Vector((0.0, 1.0, 4.65))
+    center = Vector(SPECS.get(name, {}).get("face_center", (0.0, 1.0, 4.65)))
+    fdist = SPECS.get(name, {}).get("face_dist", 7.5)
     outs = []
     for tag, az in (("front", 90.0), ("q3", 58.0)):
         for o in list(bpy.data.objects):
@@ -508,7 +606,7 @@ def face(name, res_height=1000):
         cam.data.clip_start = 0.1
         cam.data.clip_end = 200.0
         a = math.radians(az)
-        cam.location = center + Vector((math.cos(a), math.sin(a), 0.0)) * 7.5
+        cam.location = center + Vector((math.cos(a), math.sin(a), 0.0)) * fdist
         cam.rotation_euler = (center - cam.location).normalized().to_track_quat("-Z", "Y").to_euler()
         scene.render.resolution_x, scene.render.resolution_y = int(res_height * 0.85), res_height
         # soarele jos (24 grade) din spatele camerei, putin lateral: relieful arunca umbra
@@ -536,6 +634,109 @@ def face(name, res_height=1000):
     _rm(*outs)
 
 
+
+# --- animale cu schelet (val 1, grupul C: asian_elephant) --------------------
+# Mesh-ul skinuit se randeaza in poza de repaus; cadrele de Walk/Trumpet se pun
+# pe armatura importata. Chenarul (`bound_box`) ramane cel de repaus, de unde
+# marja `margin` mai larga.
+
+def _armatures():
+    return [o for o in bpy.data.objects if o.type == "ARMATURE"]
+
+
+def _set_pose(prefix, frame):
+    """Actiunea al carei nume incepe cu `prefix` ("Walk", "Trumpet") pe
+    armatura, la cadrul `frame` (relativ la inceputul ei). prefix=None: repaus."""
+    scene = bpy.context.scene
+    for arm in _armatures():
+        ad = arm.animation_data
+        if ad is None:
+            continue
+        for tr in ad.nla_tracks:
+            tr.mute = True
+        ad.action = None
+        if prefix is None:
+            continue
+        act = next((a for a in bpy.data.actions if a.name.startswith(prefix)), None)
+        if act is None:
+            print("LIPSA actiunea:", prefix)
+            continue
+        ad.action = act
+        scene.frame_set(int(act.frame_range[0]) + int(frame))
+    if prefix is None:
+        scene.frame_set(1)
+    bpy.context.view_layer.update()
+
+
+def _move_group(objs, offset):
+    """Muta un grup de obiecte radacina (mesh + armatura) cu `offset`."""
+    for o in objs:
+        if o.parent is None:
+            o.location = o.location + Vector(offset)
+    bpy.context.view_layer.update()
+
+
+def _import_group(path, offset=(0.0, 0.0, 0.0)):
+    before = set(bpy.data.objects)
+    meshes = _import_path(path)
+    new = [o for o in bpy.data.objects if o not in before]
+    _move_group(new, offset)
+    return meshes, [o for o in new if o.type == "ARMATURE"]
+
+
+def pose_sheet(name, res_height=700):
+    """Repaus din 3 parti + Walk la 1/4 si 1/2 din ciclu + Trumpet la capat:
+    ce se rupe la schelet se vede aici, nu in rest."""
+    os.makedirs(FID_DIR, exist_ok=True)
+    _clear()
+    meshes = _import(name)
+    if not meshes:
+        return
+    cam = _camera_for(name)
+    groups = {
+        "pose": [("rest_side", None, 0, 0.0), ("walk_a", "Walk", 9, 0.0),
+                 ("walk_b", "Walk", 18, 0.0), ("walk_c", "Walk", 27, 0.0)],
+        "pose34": [("rest_a", None, 0, 62.0), ("walk_a", "Walk", 9, 62.0),
+                   ("walk_b", "Walk", 18, 62.0), ("walk_c", "Walk", 27, 62.0)],
+        "trumpet": [("t_a", "Trumpet", 20, 62.0), ("t_side", "Trumpet", 20, 0.0),
+                    ("t_front", "Trumpet", 20, 110.0)],
+    }
+    for gname, shots in groups.items():
+        outs = []
+        for tag, prefix, frame, az in shots:
+            _set_pose(prefix, frame)
+            c = dict(cam)
+            c["azimuth"] = az
+            c["margin"] = 1.25
+            p = os.path.join(FID_DIR, "_pose_%s_%s.png" % (name, tag))
+            _render(meshes, p, res_height=res_height, aspect=1.2, **c)
+            outs.append(p)
+        _compose(["--montage", ",".join(outs), "--out",
+                  os.path.join(FID_DIR, "%s_%s.png" % (name, gname))])
+        _rm(*outs)
+    _set_pose(None, 0)
+
+
+def versus(name, other, res_height=800):
+    """`name` (assets/models/angkor/...) lang `other` (cale sub assets/models/),
+    aceeasi scara, doua vederi (3/4 si profil) -> <name>_vs.png."""
+    os.makedirs(FID_DIR, exist_ok=True)
+    outs = []
+    for az in (62.0, 0.0):
+        _clear()
+        right = Vector((-math.sin(math.radians(az)), math.cos(math.radians(az)), 0.0))
+        ma, _a = _import_group(_find_glb(name), right * 3.6)
+        mb, _b = _import_group(os.path.join(ALL_MODELS, other), right * -3.6)
+        c = _camera_for(name)
+        c["azimuth"] = az
+        c["margin"] = 1.1
+        p = os.path.join(FID_DIR, "_vs_%s_%d.png" % (name, int(az)))
+        _render(ma + mb, p, res_height=res_height, aspect=1.9, **c)
+        outs.append(p)
+    _compose(["--montage", ",".join(outs), "--out", os.path.join(FID_DIR, name + "_vs.png")])
+    _rm(*outs)
+
+
 argv = sys.argv
 args = argv[argv.index("--") + 1:] if "--" in argv else []
 if "--compare" in args:
@@ -544,7 +745,15 @@ elif "--views" in args:
     views(args[args.index("--views") + 1])
 elif "--face" in args:
     face(args[args.index("--face") + 1])
+elif "--gamecam-far" in args:
+    # vedere de la 80 m (calea de 110 m a Portii de Sud): un singur cadru
+    gamecam(args[args.index("--gamecam-far") + 1], ahead=80.0, suffix="_gamecam_far", cars=(("a", 0.0),))
 elif "--gamecam" in args:
     gamecam(args[args.index("--gamecam") + 1])
+elif "--pose" in args:
+    pose_sheet(args[args.index("--pose") + 1])
+elif "--vs" in args:
+    i = args.index("--vs")
+    versus(args[i + 1], args[i + 2])
 else:
     print(__doc__)

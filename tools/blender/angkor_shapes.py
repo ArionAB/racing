@@ -94,7 +94,7 @@ def stepped_base(b, steps, cx=0.0, cy=0.0, slot=ANK_STONE, proud=0.04, block_w=0
 
 
 def block_courses(b, half, z0, z1, courses, block_w, proud=0.04, gap=0.035,
-                  slot=ANK_STONE, seed=0, cx=0.0, cy=0.0):
+                  slot=ANK_STONE, seed=0, cx=0.0, cy=0.0, skip=None):
     """Randuri de blocuri in relief pe cei patru pereti ai unui corp patrat de
     jumatate-latime `half - proud` (suprafata blocurilor e la `half`). Fiecare
     rand are blocuri de latime ~`block_w` (cu variatie), decalate de la un rand
@@ -116,37 +116,45 @@ def block_courses(b, half, z0, z1, courses, block_w, proud=0.04, gap=0.035,
             for ua, ub in zip(edges[:-1], edges[1:]):
                 if ub - ua < 0.1:
                     continue
+                if skip is not None and skip(k, c, ua, ub):
+                    continue
                 ua, ub = ua + gap * 0.5, ub - gap * 0.5
                 ctr = fr.p((ua + ub) * 0.5, half - proud * 0.5 - 0.005, (za + zb) * 0.5)
                 b.box(ctr, (ub - ua, proud + 0.01, zb - za), slot, rotation=rot)
 
 
-def oct_prism(b, cx, cy, z0, z1, half, cham, slot=ANK_STONE):
+def oct_prism(b, cx, cy, z0, z1, half, cham, slot=ANK_STONE, warp=None):
     """Prisma octogonala (patrat cu colturile taiate cu `cham`): colturi
-    chanfrenate, nu ascutite."""
+    chanfrenate, nu ascutite. `warp(Vector)->Vector` (optional, val 1) muta
+    punctele inainte de invelitoare: colturi prabusite in ruine."""
     pts = []
     for sx in (-1, 1):
         for sy in (-1, 1):
             for (dx, dy) in ((half, half - cham), (half - cham, half)):
                 for z in (z0, z1):
                     pts.append(Vector((cx + sx * dx, cy + sy * dy, z)))
+    if warp is not None:
+        pts = [warp(p) for p in pts]
     hull(b, pts, slot)
 
 
-def tier(b, z0, z1, half, cornice_h, slot=ANK_STONE, cx=0.0, cy=0.0, finials=True):
+def tier(b, z0, z1, half, cornice_h, slot=ANK_STONE, cx=0.0, cy=0.0, finials=True,
+         warp=None, finial_skip=None):
     """Un etaj = doua randuri de blocuri suprapuse (al doilea cu 4% mai ingust),
     octogonale (colturi chanfrenate), sub o cornisa subtire; la colturile
     cornisei, bucati mici rotunjite (finialuri). FARA frontoane triunghiulare si
     fara tepi de colt (runda 4: citeau „brad de Craciun”). Intoarce cota de sus."""
     zm = (z0 + z1) * 0.5
-    oct_prism(b, cx, cy, z0, zm, half, half * 0.16, slot)
-    oct_prism(b, cx, cy, zm, z1, half * 0.96, half * 0.16, slot)
+    oct_prism(b, cx, cy, z0, zm, half, half * 0.16, slot, warp)
+    oct_prism(b, cx, cy, zm, z1, half * 0.96, half * 0.16, slot, warp)
     ch = half + 0.05
-    oct_prism(b, cx, cy, z1, z1 + cornice_h, ch, ch * 0.16, slot)
+    oct_prism(b, cx, cy, z1, z1 + cornice_h, ch, ch * 0.16, slot, warp)
     z_top = z1 + cornice_h
     if finials:
         for sx in (-1, 1):
             for sy in (-1, 1):
+                if finial_skip is not None and finial_skip(sx, sy):
+                    continue
                 c = Vector((cx + sx * (ch - 0.09), cy + sy * (ch - 0.09), z_top))
                 pts = [c + Vector((dx * 0.06, dy * 0.06, 0.0)) for dx in (-1, 1) for dy in (-1, 1)]
                 pts += [c + Vector((dx * 0.045, dy * 0.045, 0.085)) for dx in (-1, 1) for dy in (-1, 1)]
@@ -208,7 +216,7 @@ def ellipsoid(b, center, radii, slot, rot, seg=10, rings=6, roll_deg=0.0):
     b._tag(res["verts"], slot)
 
 
-def face_relief(b, origin, yaw_deg, H, slot=ANK_STONE, smile=0.9):
+def face_relief(b, origin, yaw_deg, H, slot=ANK_STONE, smile=0.9, us=1.0):
     """Fata Bayon SIMPLIFICATA (runda 6, decizia dezvoltatorului din 6 nov 2026,
     dupa cinci runde de fete construite din cod: masca in cadru -> Moai -> clovn).
     Cateva forme MARI si PUTIN ADANCI, in limbajul de piatra fatetata din runda 4;
@@ -217,6 +225,8 @@ def face_relief(b, origin, yaw_deg, H, slot=ANK_STONE, smile=0.9):
     origin   punctul (x, y, z) de pe PLANUL NUCLEULUI, sub barbie, pe axa fetei
     yaw_deg  0 = fata priveste spre +Y; 90 spre -X; 180 spre -Y; 270 spre +X
     H        inaltimea sprancene-barbie in metri (3,0 pentru turn)
+    us       intinderea pe orizontala (u) a fetei: 1,0 = proportiile turnului; poarta de
+             sud o largeste (1,4) ca fata sa umple blocul de 10 m
 
     Elemente: placa ovala; doua sprancene separate (arcuri joase, ~7 cm); doi ochi
     separati (semiluna convexa in jos: creasta pleoapei + creasta de jos, cu jgheabul
@@ -229,10 +239,10 @@ def face_relief(b, origin, yaw_deg, H, slot=ANK_STONE, smile=0.9):
     rot = fr.rot
 
     def P(u, t, w):
-        return fr.p(u * h, w * h, t * h)
+        return fr.p(u * h * us, w * h, t * h)
 
     def E(u, t, w, ru, rt, rw, seg=10, rings=6, roll=0.0):
-        ellipsoid(b, P(u, t, w), (ru * h, rw * h, rt * h), slot, rot, seg, rings, roll)
+        ellipsoid(b, P(u, t, w), (ru * h * us, rw * h, rt * h), slot, rot, seg, rings, roll)
 
     pl = FACE_PLATE
     D = FACE_DEPTH
@@ -308,7 +318,7 @@ def face_relief(b, origin, yaw_deg, H, slot=ANK_STONE, smile=0.9):
                  P(sgn * 0.42, 0.14, 0.032), P(sgn * 0.395, 0.26, 0.012), P(sgn * 0.40, 0.20, 0.0)], slot)
 
     def E(u, t, w, ru, rt, rw, seg=10, rings=6):
-        ellipsoid(b, P(u, t, w), (ru * h, rw * h, rt * h), slot, rot, seg, rings)
+        ellipsoid(b, P(u, t, w), (ru * h * us, rw * h, rt * h), slot, rot, seg, rings)
 
     # --- diadema: banda PLATA (~0,3 m), lipita de frunte, fara surplomb, cu 3 rozete -----
     bl, bh = 1.075, 1.175
@@ -359,14 +369,19 @@ def streak(b, wall_pt, outward_yaw_deg, width, length, thick, slot):
 # --- emit --------------------------------------------------------------------
 
 def emit_angkor(objs, path, ao, bevels=None, bevel=0.02, smooth_angle=40.0,
-                bevel_angle=30.0, center_y=True):
+                bevel_angle=30.0, center_y=True, anchor=None, ao_tint=None):
     """Finish pe fiecare nod + export in assets/models/angkor/<path>.
 
     Offsetul de origine se calculeaza O DATA pe ansamblu (memoria finish-
     recentreaza-fiecare-nod-separat): amprenta centrata pe X si Y (bbox-ul
     tuturor nodurilor), talpa ansamblului la Z = 0. `bevels` = {sufix: latime}
     suprascrie `bevel` pe nodurile cu acel sufix (petele si darele: 0, sunt
-    prea subtiri pentru bevel)."""
+    prea subtiri pentru bevel).
+
+    `anchor=(x, y)` (val 1) pune originea EXACT pe acel punct al constructiei,
+    in loc de centrul bbox-ului (poarta cu radacini nu e simetrica pe bbox, dar
+    axa trecerii trebuie sa fie x=0). `ao_tint={sufix: (r, g, b)}`: umbrele AO ale
+    nodului primesc o tenta calda (exponent pe canal), nu gri neutru."""
     objs = [o for o in objs if o is not None and len(o.data.vertices) > 0]
     xs = [v.co.x for o in objs for v in o.data.vertices]
     ys = [v.co.y for o in objs for v in o.data.vertices]
@@ -374,6 +389,8 @@ def emit_angkor(objs, path, ao, bevels=None, bevel=0.02, smooth_angle=40.0,
     place = Vector((-(min(xs) + max(xs)) * 0.5,
                     -(min(ys) + max(ys)) * 0.5 if center_y else 0.0,
                     -min(zs)))
+    if anchor is not None:
+        place.x, place.y = -anchor[0], -anchor[1]
     total, per_node = 0, {}
     for o in objs:
         for v in o.data.vertices:
@@ -384,6 +401,12 @@ def emit_angkor(objs, path, ao, bevels=None, bevel=0.02, smooth_angle=40.0,
                 bw = w
         st = finish(o, bevel=bw, bevel_angle=bevel_angle, ao=ao, origin=None,
                     smooth_angle=smooth_angle)
+        for suf, tint in (ao_tint or {}).items():
+            if o.name.endswith(suf):
+                ca = o.data.color_attributes["AO"]
+                for d in ca.data:
+                    v = d.color[0]
+                    d.color = (v ** tint[0], v ** tint[1], v ** tint[2], 1.0)
         total += st["tris"]
         per_node[o.name] = st["tris"]
     xs = [v.co.x for o in objs for v in o.data.vertices]

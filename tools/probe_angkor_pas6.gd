@@ -140,13 +140,13 @@ func _check_towers(track: Track) -> void:
 
 func _check_balustrades(track: Track) -> void:
 	var space := track.get_world_3d().direct_space_state
-	# Calea de vest: de la x=-190 la x=-74 (harta), pe axa y=0 (Godot z=0), spre +X.
+	# Calea de vest: de la x=-190 la x=-108 (malul de est mutat la -104 la val 1) (harta), pe axa y=0 (Godot z=0), spre +X.
 	for side in [1.0, -1.0]:
 		var closed := 0
 		var gaps: Array[Vector2] = []
 		var gap_start := INF
 		var x := -190.0   # capatul de vest al balustradei cade la ~-198..-194 (rezolutia hartii de fractii)
-		while x <= -74.0:
+		while x <= -108.0:
 			var i := track.closest_index_global(Vector3(x, 0.0, 0.0))
 			var c := track.baked[i]
 			var s: Vector3 = track._side_at(i) * float(side)

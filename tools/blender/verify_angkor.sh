@@ -169,6 +169,20 @@ if [ -f "$KB/naga_balustrade.glb" ] && [ -f "$KB/deva_giant.glb" ]; then
 fi
 # --- sfarsit val 2, grupul C ---
 
+# --- val 3, grupul A ---
+echo
+echo "== val 3, grupul A: templul Angkor Wat (kit 1.2) =="
+W3="tools/blender/measure_angkor_w3a.py"
+check "structures/angkor_wat_temple.glb" --origin=assembly
+if [ -f "$ROOT/structures/angkor_wat_temple.glb" ]; then
+  python $W3 temple "$ROOT/structures/angkor_wat_temple.glb" || fail=1
+  st=$(python $W3 --selftest "$ROOT/structures/angkor_wat_temple.glb" 2>&1); rc=$?
+  printf '%s
+' "$st" | grep -E "^-- sabotaj|garda a|SELFTEST"
+  [ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei grupului A (val 3) a esuat"; fail=1; }
+fi
+# --- sfarsit val 3, grupul A ---
+
 echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then

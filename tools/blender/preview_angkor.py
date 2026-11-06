@@ -117,6 +117,9 @@ SPECS = {
                           "bury": 0.0},
     "giant_root_ramp": {"camera": {"azimuth": -58.0, "elevation": 20.0, "lens": 55.0, "margin": 1.06},
                         "views_aspect": 1.4, "bury": 0.0},
+    # val 3, grupul A: templul Angkor Wat, scara pe +Y; gc_yaw 180 il intoarce cu fata spre camera de joc
+    "angkor_wat_temple": {"camera": {"azimuth": 78.0, "elevation": 9.0, "lens": 45.0, "margin": 1.06},
+                          "views_aspect": 1.2, "bury": 0.0, "gc_yaw": 180.0},
 }
 
 # camera de joc (scenes/race/chase_camera.gd: DEFAULT_HEIGHT/DISTANCE/BASE_FOV/

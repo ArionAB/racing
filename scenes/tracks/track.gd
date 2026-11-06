@@ -4499,11 +4499,11 @@ static func themes() -> Dictionary:
 		# Atlasul (coronament verde, orezarii), nu clasa implicita "rock" (iesea maro-portocaliu).
 		"horizon_class": "",
 		"horizon_rings": [
-			{"count": 1, "angle_deg": -52.0, "yaw_deg": 142.0, "near": 200.0, "far": 260.0, "clear": 60.0,
+			{"count": 1, "angle_deg": -52.0, "yaw_deg": 142.0, "near": 200.0, "far": 260.0, "clear": 120.0,
 				"scale": 1.0, "picks": ["KulenRidge"]},
-			{"count": 1, "angle_deg": 180.0, "yaw_deg": -90.0, "near": 200.0, "far": 260.0, "clear": 60.0,
+			{"count": 1, "angle_deg": 180.0, "yaw_deg": -90.0, "near": 200.0, "far": 260.0, "clear": 120.0,
 				"scale": 1.0, "picks": ["Paddies_W"]},
-			{"count": 10, "near": 200.0, "far": 260.0, "clear": 60.0, "scale": 1.0,
+			{"count": 10, "near": 200.0, "far": 260.0, "clear": 120.0, "scale": 1.0,
 				"picks": ["Canopy_A", "Canopy_B", "Canopy_C"]},
 		],
 		"water": false,

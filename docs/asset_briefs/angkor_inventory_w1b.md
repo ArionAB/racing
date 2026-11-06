@@ -17,49 +17,57 @@ trecerii, nu pe centrul bbox) și `ao_tint` (umbre calde pe rădăcini); compati
 | adâncime (Z, cu scările porticelor) | ~10 | **11,00** |
 | gol la 0–2,5 m (proiecție pe secțiune) | ≥ 10,0 | **10,10** (5,05 + 5,05) |
 | înălțime liberă în |x|<5,0 | ≥ 8,0 | **9,00** |
-| `ta_prohm_tree_gate` gresie lat | ~14 | **14,20** |
-| vârful gresiei | 7–9 | **7,85** |
-| arborele întreg | 18–22 | **21,53** (lat 17,77 cu rădăcini, adânc 12,69 cu bolovanii) |
+| `ta_prohm_tree_gate` gresie lat | ~14 | **14,10** |
+| vârful gresiei | 7–9 | **7,80** |
+| arborele întreg | 18–22 | **21,30** (lat 20,18 cu rădăcini, adânc 12,13) |
 | gol | ≥ 6,6 | **6,80** (3,40 + 3,40) |
-| înălțime liberă în |x|<3,3 (toate nodurile) | ≥ 5,5 | **5,65** (buiandrugul); cea mai joasă rădăcină în fâșie: **5,92** |
+| înălțime liberă în |x|<3,3 (toate nodurile) | ≥ 5,5 | **5,60** (buiandrugul); cea mai joasă rădăcină în fâșie: **5,96** |
 
 Originea: baza, pe axa trecerii (x = 0, y = 0). Scala 1 / rotația identitate pe rădăcini
 (verificat). Golul e măsurat din triunghiurile fișierului, tăiate pe banda de înălțime.
 
 ## Triunghiuri, materiale, sloturi
 
-- `aw_west_gopura`: **17.302** tri (`Gopura_Stone` 13.398, `Gopura_Lichen` 3.088, `Gopura_Streak` 816).
+- `aw_west_gopura`: **21.950** tri (`Gopura_Stone` 18.046, `Gopura_Lichen` 3.088, `Gopura_Streak` 816).
   3 materiale/noduri: gresie `ROCK_LIGHT` 3; lichen `LAVA_ORANGE` 30 (0,21% din arie) + `CACTUS_GREEN` 12; dâre `VOLCANIC_BLACK` 20.
-- `ta_prohm_tree_gate`: **18.904** tri (`TreeGate_Stone` 4.432, `_Lichen` 1.692, `_Streak` 288,
-  `_Root` 8.592, `_Canopy` 3.900). 5 materiale: + rădăcini `CORAL_SAND` 19 (AO cald, exponent
-  per canal 1,0/1,3/1,7) și coronament `TROPICAL_GREEN` 21 (mase de elipsoizi, fără alpha).
+- `ta_prohm_tree_gate`: **19.828** tri (`TreeGate_Stone` 6.016, `_Lichen` 1.692, `_Streak` 288,
+  `_Root` 8.232, `_Canopy` 3.600). 5 materiale: + rădăcini `CORAL_SAND` 19 (AO cald, exponent
+  per canal 1,0/1,3/1,7) și coronament `TROPICAL_GREEN` 21 + ciorchini `CACTUS_GREEN` 12 (mase de elipsoizi, fără alpha).
 - Fără alb, fără `ROCK_DARK`, fără texturi proprii. Bevel 0 pe toate nodurile. Fără fețe.
 - Primitive rotunde: bobocuri 14 laturi, rădăcini 8, trunchi 10–12, coroană 10×6.
 
-## Fidelitate (după runda finală)
+## Fidelitate (după runda de formă cerută de coordonator)
 
 | element | pe desen | în GLB | verdict |
 |---|---|---|---|
-| gopura: siluetă | 3 turnuri, galerii joase, poarta înaltă | 3 turnuri (15,9 / 11,3 m), galerii de 7,3 m, gol de 10 × 9 m | citește ca poartă-galerie; **mai blocată și mai „în trepte”** decât desenul |
-| gopura: turnul central | fronton în arc ornat, vârf de boboc | cornișă + soclu în trepte + 3 etaje + boboc, frontoane de placi pe ambele fețe | **abatere:** frontonul e o stivă de plăci, nu arc ornat; bobocul e mic |
-| gopura: galerii | acoperiș înclinat cu țigle, colonadă | acoperiș în 5 trepte cu antefixe, colonadă pe fiecare parte, zid cu blocuri | acoperișul e în trepte, nu pantă; stâlpii citesc bine |
-| gopura: turnuri de capăt | înalte, cu fronton | 11,3 m, portic cu fronton de plăci pe fiecare parte | citesc; mai scunde decât pe desen |
-| gopura: lichen/dâre | lichen verde-galben peste tot | pete mici (0,21% portocaliu), dâre scurte | **abatere voită** (contract) |
-| tree gate: poarta | arc scund de blocuri, ruină | picioare cu blocuri, buiandrug, cornișă ruinată (jumătate mai joasă), aripi și stâlpi rupți, bolovani | citește ca poartă ruinată, dar **mică** sub arbore |
-| tree gate: rădăcini | cascadă deasă peste tot zidul | 10 mari + 4 secundare + 6 contraforturi pe trunchi, groase, spline | **cea mai slabă piesă:** puține și netede față de desen; citesc ca „copac peste ruină”, dar încă puțin ca „lighioane” din unele unghiuri |
-| tree gate: coroană | frunziș în plasă | ~13 mase rotunde | **abatere:** ciupercă/brocoli, nu coroană de ficus |
+| gopura: acoperișuri | pantă cu țigle, creastă | **înveliș convex pantat** (streașină 4,8 m, creastă 7,75 m) cu nervuri de țiglă de la creastă la streașină, antefixe pe streașină | citește ca acoperiș pantat; mai bombat (butoi) decât panta dreaptă a desenului |
+| gopura: turnuri | boboc de lotus din etaje rotunde | central și de capăt: bază pătrată cu blocuri, **etaje rotunde bombate** (4 / 3) sub cornișe evazate, boboc de lotus | citesc ca turnuri-boboc; **mai scunde și mai simple** decât desenul (central 15,9 m, capăt 12,5 m) |
+| gopura: trecerea | frontonul ascuțit ridică turnul | turnul urcă direct din blocul trecerii (bază pătrată peste cornișă); **fronton ascuțit cu cadru ridicat** (două prisme, apex la 12 m) pe ambele fețe, deasupra cotei 9,0 | citește; fără ornamente de flacără |
+| gopura: porticuri | fronton mic + portic | fronton ascuțit cu cadru, 2 stâlpi, trepte, pe fiecare galerie, față/spate | OK |
+| gopura: lichen/dâre | lichen verde-galben peste tot | pete mici, 0,29% portocaliu, dâre scurte | **abatere voită** (contract) |
+| tree gate: piatra | galerie ruinată pe ambele părți ale golului | picioare cu blocuri + **aripi pe ambele părți** (3 tronsoane cu vârfuri inegale, 2,4–6,0 m), stâlpi rupți, blocuri de acoperiș prăbușite, bolovani pe cornișă și la bază (doar la \|x\| ≥ 4,5), cornișă ruinată (7,8 / 7,45 m) | gresia are 14,1 m și o siluetă inegală, dar **rămâne joasă** sub rădăcini; din cameră stâlpii aripilor aproape nu se văd |
+| tree gate: copacul | pe ruină, decalat | trunchi la x = 3,4 (decalat de axă), 7,3 → 14 m, evazat gros în acoperiș (R 3,0), 6 contraforturi, 4 ramuri | decalarea citește; trunchiul rămâne un con cu fațete |
+| tree gate: rădăcini | peste piatră, lipite | 4 mari (peste placă → fața cornișei și a piciorului; cascadă peste buiandrug spre piciorul stâng; peste aripi) × față/spate + 8 subțiri, raze 0,95 → 0,1 de-a lungul fiecăreia | **lipite de suprafețe**, nu mai atârnă în aer; dar **netede și drepte ca țevile**, citesc ca „picioare” în unele unghiuri; mult mai puține decât în desen |
+| tree gate: coroană | masă neregulată | 12 mase late la înălțimi diferite, 4 din ele `CACTUS_GREEN` mai deschise | mai plată și neregulată, încă „nori rotunzi” |
 
 ## Runde
 
-Gopura: **runda 1** (primul build): turn central prea plat, soclu lat de 17,8 m care domina;
-**runda 2:** soclu în trepte sub turn, TOP 15,9, bobocul mai înalt. Garda a prins un defect
-real: umflăturile pilaștrilor de la gol intrau la 4,98 m de axă (golul 9,96 < 10,0, înălțime
-liberă 1,0 din treapta pilastrului) — fixat, umflătura nu mai iese spre axă (gol 10,10).
-Tree gate: **runda 1:** rădăcini subțiri ca picioare de păianjen, trunchi conic subțire, poarta
-pierdută sub coroană; **runda 2:** trunchi 1,8–3,0 m, rădăcini ×1,5 (cascada R2 exceptată, ca să
-rămână ≥ 5,5), a doua cascadă R3, capetele rădăcinilor mai aproape de zid; **runda 3:** raza
-×1,25, contraforturi pe trunchi (nu mai e con neted), bolovani pe cornișă, R5 lipit de aripi.
-Nu am mai iterat după a treia.
+**Runda 1–3 (gopura 2, tree gate 3).** Vezi istoricul din commit-ul anterior: soclu în trepte sub turn,
+defectul prins de gardă (pilaștrii la 4,98 m de axă) la gopura; la poarta-copac rădăcini subțiri →
+mai groase → contraforturi.
+
+**Runda 4 (corectura de formă a coordonatorului).**
+- *Gopura:* acoperișul în trepte a devenit înveliș pantat (`PROF` 6 puncte, hull convex) cu nervuri de
+  țiglă generate pe segmente; turnurile din prisme octogonale → `round_tier`/`lotus_tower` (etaje de
+  revoluție bombate + cornișă evazată + `lotus_bud`); blocul trecerii urcă direct în turn (boltă în 2
+  trepte, cornișă, bază pătrată de 8 × 7,4 m în loc de soclul lat), frontoane ascuțite cu cadru ridicat
+  (`gable`); turnurile de capăt mai înalte (12,5 m), cu bază patrată și porticuri cu fronton ascuțit.
+  Golul (10,10), înălțimea liberă (9,00) și lungimea (52,00) neschimbate; garda verde.
+- *Poarta-copac:* piatra rescrisă ca galerie pe ambele părți (aripi cu 3 tronsoane, stâlpi, blocuri
+  prăbușite); copacul mutat pe ruină (x = 3,4); rădăcinile scrise cu puncte de-a lungul suprafețelor
+  reale (placă → cornișă → fața piciorului → sol; aripi), 4 mari + 8 subțiri cu raza variind pe
+  lungime; coroană lată, neregulată, cu ciorchini de `CACTUS_GREEN`. Golul (6,80) și înălțimea liberă
+  (5,60 piatră / 5,96 rădăcină) rămân; garda verde. Nu am iterat mai departe.
 
 ## Abateri și deschise
 
@@ -73,8 +81,9 @@ Nu am mai iterat după a treia.
 
 ## Camera de joc (`--gamecam`) — citire onestă, nu acceptare
 
-Gopura: la 30 m în față, cu camera de joc, citește clar ca **poartă lată cu trei turnuri**, golul
+Gopura: la 30 m în față, cu camera de joc, citește ca **poartă lată cu trei turnuri și acoperișuri pantate**, golul
 de 10 m se vede ca dreptunghi curat, colonadele și zidul cu blocuri se disting; trăsăturile mici
-(antefixe, pete) se pierd. Poarta-copac: din cameră se vede un **trunchi ca un con neted** peste o
-masă de rădăcini groase și o poartă mică și întunecată; coroana iese din cadru (camera la 10 m).
-Citește „copac peste ruină”, dar fără detaliul rădăcinilor din desen; verdictul îl dă criticul orb.
+(antefixe, pete) se pierd. Poarta-copac: golul e încadrat de picioare și aripi, iar rădăcinile curg peste cornișă și pe
+fața piciorelor (lipite), dar de la distanță masa rădăcinilor domină piatra și citește ca un
+copac-„păianjen” așezat pe o bancă joasă; trunchiul e un con. Coroana iese din cadru.
+Verdictul îl dă criticul orb.

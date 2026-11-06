@@ -37,7 +37,7 @@ GOPURA_NODES = ["Gopura_Lichen", "Gopura_Stone", "Gopura_Streak"]
 TREE_NODES = ["TreeGate_Canopy", "TreeGate_Lichen", "TreeGate_Root", "TreeGate_Stone", "TreeGate_Streak"]
 GOPURA_SLOTS = {("Gopura_Stone", 3), ("Gopura_Lichen", 30), ("Gopura_Lichen", 12), ("Gopura_Streak", 20)}
 TREE_SLOTS = {("TreeGate_Stone", 3), ("TreeGate_Lichen", 30), ("TreeGate_Lichen", 12),
-              ("TreeGate_Streak", 20), ("TreeGate_Root", 19), ("TreeGate_Canopy", 21)}
+              ("TreeGate_Streak", 20), ("TreeGate_Root", 19), ("TreeGate_Canopy", 21), ("TreeGate_Canopy", 12)}
 
 
 def world_tris(path):

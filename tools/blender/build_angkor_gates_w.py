@@ -176,6 +176,33 @@ def spline(pts, radii, sub=3):
     return out, rr
 
 
+def round_tier(b, cx, cy, z0, h, r, slot=ANK_STONE, segments=12):
+    """Etaj ROTUND de turn-boboc: corp bombat (revolutie, 12 laturi) sub o cornisa
+    evazata. Intoarce cota de sus. (Vocabularul lotus al desenului, fara fete.)"""
+    prof = [(0.94 * r, 0.0), (1.0 * r, 0.15 * h), (0.98 * r, 0.55 * h), (0.86 * r, 0.92 * h),
+            (0.80 * r, h), (0.0, h)]
+    b.revolve(prof, slot, segments=segments, origin=(cx, cy, z0), cap_bottom=True)
+    b.frustum((cx, cy, z0 + h + 0.03), 0.84 * r, 1.07 * r, 0.12, slot, segments=segments)
+    return z0 + h + 0.09
+
+
+def lotus_tower(b, cx, cy, z0, tiers, top, bud_r, slot=ANK_STONE):
+    """Etaje rotunde care se ingusteaza (r, h), apoi bobocul de lotus pana la `top`."""
+    z = z0
+    for (r, h) in tiers:
+        z = round_tier(b, cx, cy, z, h, r, slot)
+    lotus_bud(b, cx, cy, z, top - z, bud_r, slot, petals=8, segments=14)
+    return z
+
+
+def gable(b, cx, y0, y1, z0, hw, zapex, slot=ANK_STONE):
+    """Fronton ascutit (prisma triunghiulara) pe planul y0..y1, baza z0, latime 2*hw."""
+    pts = []
+    for y in (y0, y1):
+        pts += [Vector((cx - hw, y, z0)), Vector((cx + hw, y, z0)), Vector((cx, y, zapex))]
+    hull(b, pts, slot)
+
+
 # =============================================================================
 # 1. aw_west_gopura
 # =============================================================================
@@ -197,6 +224,9 @@ def build_gopura():
 
     def X(a, b, sx):
         return min(sx * a, sx * b), max(sx * a, sx * b)
+
+    Z_COR = LINTEL_Z + 1.2          # cornisa-capac: 10,2 .. 10,6
+    Z_TB = Z_COR + 0.4              # baza patrata a turnului
 
     # --- 1. blocul central: picioare, bolta in consola ------------------------
     for sx in (-1, 1):
@@ -223,44 +253,37 @@ def build_gopura():
                     if a == PH:
                         lo, hi = (px0, px1 + pd) if sx > 0 else (px0 - pd, px1)
                     bx(S, lo, hi, sy * 4.5, sy * (4.5 + pw), pz0, pz1)
-        # bolta in consola, DEASUPRA golului
-        for (za, zb, opening) in ((LINTEL_Z, LINTEL_Z + 0.6, 4.5), (LINTEL_Z + 0.6, LINTEL_Z + 1.2, 3.7),
-                                  (LINTEL_Z + 1.2, LINTEL_Z + 1.8, 2.8)):
+        # bolta in consola, DEASUPRA golului (2 trepte), apoi cornisa-capac
+        for (za, zb, opening) in ((LINTEL_Z, LINTEL_Z + 0.6, 4.5), (LINTEL_Z + 0.6, Z_COR, 3.6)):
             cx0, cx1 = X(opening, BLK_X, sx)
             bx(S, cx0, cx1, -4.5, 4.5, za, zb)
             wall_faces(S, cx0, cx1, -4.5, 4.5, za, zb, ["+y", "-y"], ch=0.6, bw=1.3, seed=9 + int(za))
         for sy in (-1, 1):
             streak_sites.append((X(6.2, 7.3, sx)[0], X(6.2, 7.3, sx)[1], sy * 4.5,
-                                 0.0 if sy > 0 else 180.0, LINTEL_Z + 1.78, 3, 0.4, 1.0))
-    z_cor = LINTEL_Z + 1.8
-    bx(S, -8.9, 8.9, -4.9, 4.9, z_cor, z_cor + 0.5)       # cornisa-capac
-    z = z_cor + 0.5
+                                 0.0 if sy > 0 else 180.0, Z_COR - 0.02, 3, 0.4, 1.0))
+    bx(S, -8.9, 8.9, -4.9, 4.9, Z_COR, Z_COR + 0.4)       # cornisa-capac (inchide bolta)
     for sx in (-1, 1):
         for sy in (-1, 1):
-            c = Vector((sx * 8.7, sy * 4.7, z))
+            c = Vector((sx * 8.7, sy * 4.7, Z_TB))
             pts = [c + Vector((dx * 0.11, dy * 0.11, 0.0)) for dx in (-1, 1) for dy in (-1, 1)]
             pts += [c + Vector((dx * 0.07, dy * 0.07, 0.3)) for dx in (-1, 1) for dy in (-1, 1)]
             hull(S, pts, ANK_STONE)
-    # frontoane de placi suprapuse, pe ambele fete (toate peste cota 9,0)
+    # baza patrata a turnului, direct din blocul trecerii, cu blocuri; apoi etaje ROTUNDE
+    bx(S, -4.0, 4.0, -3.7, 3.7, Z_TB, Z_TB + 0.5)
+    wall_faces(S, -4.0, 4.0, -3.7, 3.7, Z_TB, Z_TB + 0.5, ["+y", "-y", "+x", "-x"], ch=0.5, bw=1.3, seed=57)
+    lotus_tower(S, 0, 0, Z_TB + 0.5, [(3.0, 0.9), (2.5, 0.8), (2.0, 0.75), (1.5, 0.6)], TOP_G, 0.95)
+    # fronton ascutit cu cadru ridicat pe ambele fete (toata geometria peste cota 9,0)
     for sy in (-1, 1):
-        for (za, zb, hw) in ((LINTEL_Z, LINTEL_Z + 0.6, 5.3), (LINTEL_Z + 0.6, LINTEL_Z + 1.2, 4.4),
-                             (LINTEL_Z + 1.2, LINTEL_Z + 1.8, 3.4)):
-            bx(S, -hw, hw, sy * 4.5, sy * 4.95, za, zb)
-    # ledge-uri pentru lichen pe cornisa-capac (in jurul etajului 1, 3,9 + 0,05)
-    sites += [(-8.9, -4.05, -4.9, 4.9, z), (4.05, 8.9, -4.9, 4.9, z),
-              (-4.05, 4.05, 4.1, 4.9, z), (-4.05, 4.05, -4.9, -4.1, z)]
+        y0, y1 = (4.5, 4.95) if sy > 0 else (-4.95, -4.5)
+        gable(S, 0.0, y0, y1, LINTEL_Z, 5.4, 12.0)
+        y0, y1 = (4.95, 5.2) if sy > 0 else (-5.2, -4.95)
+        gable(S, 0.0, y0, y1, LINTEL_Z, 4.3, 11.3)
+        bx(S, -0.25, 0.25, y0, y1, 11.2, 12.4)             # fleuron pe varf
+    sites += [(-8.9, -4.1, -4.9, 4.9, Z_COR + 0.4), (4.1, 8.9, -4.9, 4.9, Z_COR + 0.4)]
 
-    # --- 2. turnul central: 3 etaje + boboc -----------------------------------
-    bx(S, -7.0, 7.0, -4.3, 4.3, z, z + 0.6)           # soclu in trepte sub turn
-    bx(S, -5.6, 5.6, -4.1, 4.1, z + 0.6, z + 1.2)
-    z += 1.2
-    z = tier(S, z, z + 0.8, 3.7, 0.1)
-    z = tier(S, z, z + 0.6, 2.9, 0.1)
-    z = tier(S, z, z + 0.5, 2.2, 0.1)
-    lotus_bud(S, 0, 0, z, TOP_G - z, 0.95, petals=8, segments=14)
-
-    # --- 3. galeriile (x 8,4 .. 26), simetrice fata/spate ------------------------
-    ROOF_N = 5
+    # --- 2. galeriile (x 8,4 .. 26): acoperis PANTAT cu nervuri de tigla --------
+    PROF = [(4.60, 4.80), (4.68, 5.10), (3.80, 6.00), (2.70, 6.85), (1.50, 7.50), (0.70, 7.75)]
+    SHRINK = [0.0, 0.1, 0.9, 1.7, 2.4, 2.8]
     for sx in (-1, 1):
         x0, x1 = X(BLK_X, GP_L, sx)
         bx(S, x0, x1, -5.0, 5.0, 0.0, 0.5)
@@ -268,15 +291,12 @@ def build_gopura():
         sites.append((x0 if sx > 0 else x0 + 0.4, x1 if sx < 0 else x1 - 0.4, -5.0, -4.65, 0.5))
         x0, x1 = X(BLK_X, GP_L - 0.3, sx)
         bx(S, x0, x1, -4.65, 4.65, 0.5, 1.0)
-        # zidul interior
         x0, x1 = X(BLK_X, GP_L - 1.0, sx)
         bx(S, x0, x1, -1.3, 1.3, 1.0, 4.8)
         wall_faces(S, x0, x1, -1.3, 1.3, 1.0, 4.8, ["+y", "-y"], ch=0.95, bw=1.4, seed=21 + sx)
-        # capatul inchis
         x0, x1 = X(GP_L - 1.0, GP_L - 0.4, sx)
         bx(S, x0, x1, -4.3, 4.3, 1.0, 4.8)
         wall_faces(S, x0, x1, -4.3, 4.3, 1.0, 4.8, ["+x" if sx > 0 else "-x"], ch=0.95, bw=1.4, seed=33 + sx)
-        # colonade pe ambele parti, cu arhitrava
         for sy in (-1, 1):
             for cxp in (10.2, 12.9, 22.1, 24.4):
                 column(S, sx * cxp, sy * 3.6, 1.0, 4.4)
@@ -284,47 +304,60 @@ def build_gopura():
                 column(S, sx * cxp, sy * 4.3, 1.0, 4.4, w=0.65)
             ax0, ax1 = X(BLK_X, GP_L - 0.5, sx)
             bx(S, ax0, ax1, sy * 3.2, sy * 4.0, 4.4, 4.8)
-            streak_sites.append((ax0 + 0.4 if sx > 0 else ax0 + 0.4, ax1 - 0.4, sy * 4.0,
-                                 0.0 if sy > 0 else 180.0, 4.78, 5, 0.2, 0.4))
+            streak_sites.append((ax0 + 0.4, ax1 - 0.4, sy * 4.0, 0.0 if sy > 0 else 180.0, 4.78, 5, 0.2, 0.4))
             streak_sites.append((min(sx * 9.5, sx * 24.0), max(sx * 9.5, sx * 24.0), sy * 1.3,
                                  0.0 if sy > 0 else 180.0, 4.78, 9, 0.5, 1.3))
-            # portic: trepte, buiandrug, fronton de placi
+            # portic: trepte, buiandrug, fronton ascutit cu cadru
             px0, px1 = X(14.4, 20.2, sx)
             bx(S, px0, px1, sy * 4.9, sy * 5.5, 0.0, 0.5)
             bx(S, px0, px1, sy * 4.65, sy * 5.1, 0.5, 1.0)
             bx(S, *X(14.7, 19.9, sx), sy * 4.0, sy * 4.85, 4.4, 4.8)
-            for (za, zb, hw) in ((4.8, 5.4, 2.6), (5.4, 6.0, 2.0), (6.0, 6.6, 1.4), (6.6, 7.0, 0.7)):
-                bx(S, *X(17.3 - hw, 17.3 + hw, sx), sy * 4.3, sy * 4.8, za, zb)
+            ya, yb = (4.3, 4.8) if sy > 0 else (-4.8, -4.3)
+            gable(S, sx * 17.3, ya, yb, 4.8, 2.7, 7.6)
+            ya, yb = (4.8, 5.0) if sy > 0 else (-5.0, -4.8)
+            gable(S, sx * 17.3, ya, yb, 4.8, 1.9, 6.7)
             sites.append((px0 + 0.1, px1 - 0.1, min(sy * 5.1, sy * 5.5), max(sy * 5.1, sy * 5.5), 0.5))
-        # acoperisul: 5 trepte in consola, capete in pas (se strang spre exterior)
-        for i in range(ROOF_N):
-            hy = 4.6 - 0.55 * i
-            xe = GP_L - 0.2 - 0.55 * i
-            z0 = 4.8 + 0.5 * i
-            x0, x1 = X(BLK_X, xe, sx)
-            bx(S, x0, x1, -hy, hy, z0, z0 + 0.5)
-            if i + 1 < ROOF_N:
-                hn = 4.6 - 0.55 * (i + 1)
-                sx0, sx1 = X(BLK_X + 0.3, xe - 0.3, sx)
-                sites.append((sx0, sx1, hn + 0.02, hy - 0.02, z0 + 0.5))
-                sites.append((sx0, sx1, -hy + 0.02, -hn - 0.02, z0 + 0.5))
-        # antefixe pe streasina: rand de piese mici pe prima treapta
-        k = 0
+        # acoperisul: invelitoare convexa (boltita, cu creasta), capete in pas
+        pts = []
+        for (hy, zz), sh in zip(PROF, SHRINK):
+            xe = GP_L - 0.2 - sh
+            for sy in (-1, 1):
+                for xv in (BLK_X, xe):
+                    pts.append(Vector((sx * xv, sy * hy, zz)))
+        hull(S, pts, ANK_STONE)
+        # nervuri de tigla pe pante (curg de la creasta la streasina)
+        xv = BLK_X + 0.7
+        while xv < GP_L - 1.2:
+            for sy in (-1, 1):
+                for k in range(len(PROF) - 1):
+                    if xv > GP_L - 0.2 - max(SHRINK[k], SHRINK[k + 1]) - 0.25:
+                        continue
+                    (ya_, za_), (yb_, zb_) = PROF[k], PROF[k + 1]
+                    dy, dz = yb_ - ya_, zb_ - za_
+                    ln = math.hypot(dy, dz)
+                    ny, nz = dz / ln, -dy / ln                 # normala exterioara (y>0)
+                    seg = []
+                    for (yy, zz) in ((ya_, za_), (yb_, zb_)):
+                        for dx in (-0.09, 0.09):
+                            seg.append(Vector((sx * xv + dx, sy * yy, zz)))
+                            seg.append(Vector((sx * xv + dx, sy * (yy + ny * 0.075), zz + nz * 0.075)))
+                    hull(S, seg, ANK_STONE)
+            xv += 1.15
+        # antefixe pe streasina
         xv = BLK_X + 0.7
         while xv < GP_L - 0.9:
             for sy in (-1, 1):
                 if abs(xv - 17.3) < 2.9:
                     continue
-                c = (sx * xv, sy * 4.48, 5.3 + 0.16)
-                S.box(c, (0.26, 0.16, 0.32), ANK_STONE)
+                S.box((sx * xv, sy * 4.55, 5.18), (0.26, 0.16, 0.32), ANK_STONE)
             xv += 0.9
-            k += 1
-        # turnul de capat: 3 etaje + boboc, la x = 17,3, pe creasta (z 7,3)
+        sites.append((min(sx * 9.0, sx * 14.8), max(sx * 9.0, sx * 14.8), -0.6, 0.6, 7.75))
+        sites.append((min(sx * 19.8, sx * 22.5), max(sx * 19.8, sx * 22.5), -0.6, 0.6, 7.75))
+        # turnul de capat: baza patrata + etaje rotunde + boboc (12,5 m)
         cx = sx * 17.3
-        zt = tier(S, 7.3, 8.3, 2.5, 0.1, cx=cx, cy=0.0)
-        zt = tier(S, zt, zt + 0.8, 2.0, 0.1, cx=cx, cy=0.0)
-        zt = tier(S, zt, zt + 0.6, 1.5, 0.1, cx=cx, cy=0.0)
-        lotus_bud(S, cx, 0.0, zt, 11.3 - zt, 0.75, petals=8, segments=14)
+        bx(S, cx - 2.1, cx + 2.1, -2.1, 2.1, 6.6, 8.6)
+        wall_faces(S, cx - 2.1, cx + 2.1, -2.1, 2.1, 6.6, 8.6, ["+y", "-y", "+x", "-x"], ch=0.7, bw=1.2, seed=61 + sx)
+        lotus_tower(S, cx, 0.0, 8.6, [(1.7, 0.9), (1.4, 0.8), (1.1, 0.7)], 12.5, 0.75)
 
     scatter_lichen(L, sites, 70, 28, seed=17)
     scatter_streaks(G, streak_sites, seed=29)
@@ -343,7 +376,7 @@ AO_TREEGATE = dict(samples=16, dist=1.6, gradient="vertical", low=0.52, high=1.0
                    power=0.9, floor=0.28, strength=1.3, z_range=(0.0, TG_TOP))
 
 
-RF = 1.25                 # radacinile sunt GROASE
+TRUNK_X = 3.4             # trunchiul sta PE ruina, decalat de axa trecerii
 
 
 def build_treegate():
@@ -355,11 +388,14 @@ def build_treegate():
     def X(a, b, sx):
         return min(sx * a, sx * b), max(sx * a, sx * b)
 
-    # --- 1. poarta de gresie ----------------------------------------------------
+    # --- 1. galeria ruinata, pe AMBELE parti ale trecerii -----------------------
+    wing_tops = {-1: (3.6, 5.2, 2.4), 1: (2.4, 6.0, 4.0)}       # y: [-2.6,-0.9], [-0.9,0.9], [0.9,2.6]
+    wing_ys = ((-2.6, -0.9), (-0.9, 0.9), (0.9, 2.6))
+    col_h = {-1: (4.2, 2.2), 1: (2.8, 4.6)}                      # stalpi la y = +3,3 / -3,3 (indexul 0 = -3,3)
     for sx in (-1, 1):
         x0, x1 = X(TG_PH, 7.0, sx)
         bx(S, x0, x1, -3.6, 3.6, 0.0, 0.35)
-        sites.append((x0 + (0.0 if sx > 0 else 0.0), x1, 3.2, 3.6, 0.35))
+        sites.append((x0, x1, 3.2, 3.6, 0.35))
         sites.append((x0, x1, -3.6, -3.2, 0.35))
         px0, px1 = X(TG_PH, 5.6, sx)
         bx(S, px0, px1, -3.2, 3.2, 0.35, TG_LINTEL)
@@ -367,121 +403,133 @@ def build_treegate():
         outer = "+x" if sx > 0 else "-x"
         wall_faces(S, px0, px1, -3.2, 3.2, 0.35, TG_LINTEL, ["+y", "-y", inner, outer],
                    ch=0.75, bw=1.1, seed=5 + sx)
-        # aripa de zid, ruinata: o jumatate mai inalta
+        # aripa: trei tronsoane cu varfuri neregulate
         wx0, wx1 = X(5.6, 7.0, sx)
-        bx(S, wx0, wx1, -2.2, 0.3, 0.35, 3.2)
-        bx(S, wx0, wx1, 0.3, 2.2, 0.35, 2.2)
-        wall_faces(S, wx0, wx1, -2.2, 0.3, 0.35, 3.2, [outer, "-y"], ch=0.75, bw=1.0, seed=13 + sx)
-        wall_faces(S, wx0, wx1, 0.3, 2.2, 0.35, 2.2, [outer, "+y"], ch=0.75, bw=1.0, seed=17 + sx)
-        sites.append((wx0 + 0.05, wx1 - 0.05, -2.1, 0.2, 3.2))
-        sites.append((wx0 + 0.05, wx1 - 0.05, 0.4, 2.1, 2.2))
-        # stalpi rupti pe lateral (in fata si in spate)
-        column(S, sx * 6.3, -3.0, 0.35, 3.0 if sx < 0 else 2.4, w=0.62)
-        column(S, sx * 6.3, 3.0, 0.35, 2.1 if sx < 0 else 3.2, w=0.62)
+        for (ya, yb), h in zip(wing_ys, wing_tops[sx]):
+            bx(S, wx0, wx1, ya, yb, 0.35, h)
+            wall_faces(S, wx0, wx1, ya, yb, 0.35, h, [outer, "+y", "-y"], ch=0.7, bw=1.0, seed=13 + int(h * 10) + sx)
+            sites.append((wx0 + 0.05, wx1 - 0.05, ya + 0.05, yb - 0.05, h))
+            # bloc de acoperis prabusit pe varful tronsonului, inclinat
+            rot = Matrix.Rotation(math.radians(rnd() * 70 - 35), 3, "Z")
+            S.box(((wx0 + wx1) * 0.5, (ya + yb) * 0.5, h + 0.22), (0.95, min(1.1, yb - ya - 0.2), 0.44), ANK_STONE,
+                  rotation=rot)
+        # stalpi rupti in fata si in spate
+        for iy, yy in enumerate((-3.3, 3.3)):
+            column(S, sx * 6.3, yy, 0.35, col_h[sx][iy], w=0.62)
         for sy in (-1, 1):
             streak_sites.append((px0 + 0.3, px1 - 0.3, sy * 3.2, 0.0 if sy > 0 else 180.0, 5.55, 3, 0.4, 0.9))
     bx(S, -5.6, 5.6, -3.2, 3.2, TG_LINTEL, 6.5)
     wall_faces(S, -5.6, 5.6, -3.2, 3.2, TG_LINTEL, 6.5, ["+y", "-y"], ch=0.9, bw=1.5, seed=41)
     bx(S, -6.0, 6.0, -3.6, 3.6, 6.5, 7.1)
     bx(S, -4.6, 1.8, -2.6, 2.6, 7.1, 7.8)       # placa de sus, ruinata: stanga inalta,
-    bx(S, 1.8, 4.6, -2.6, 2.6, 7.1, 7.45)       # dreapta mai joasa
+    bx(S, 1.8, 4.6, -2.6, 2.6, 7.1, 7.45)       # dreapta mai joasa (aici sta trunchiul)
     sites += [(-5.9, -4.7, -3.5, 3.5, 7.1), (4.7, 5.9, -3.5, 3.5, 7.1),
-              (-4.6, 4.6, 2.7, 3.5, 7.1), (-4.6, 4.6, -3.5, -2.7, 7.1), (1.9, 4.5, -2.5, 2.5, 7.45)]
+              (-4.6, 4.6, 2.7, 3.5, 7.1), (-4.6, 4.6, -3.5, -2.7, 7.1), (-4.5, 1.7, -2.5, 2.5, 7.8)]
     for sy in (-1, 1):
         streak_sites.append((-5.0, 5.0, sy * 3.2, 0.0 if sy > 0 else 180.0, 6.48, 6, 0.4, 0.8))
-    # blocuri cazute, doar la |x| >= 4,4, pe fasiile din fata si din spate
+    # blocuri cazute la baza, doar la |x| in [4,5 .. 6,3] (in afara golului), fata/spate
     for sx in (-1, 1):
         for sy in (-1, 1):
-            for k in range(3):
-                bxs = 0.55 + 0.55 * rnd()
-                bys = 0.50 + 0.40 * rnd()
-                bzs = 0.35 + 0.30 * rnd()
-                cxp = 4.6 + 2.2 * rnd() + k * 0.15
-                cyp = 3.95 + 0.7 * rnd()
+            for k in range(4):
+                bxs, bys, bzs = 0.6 + 0.6 * rnd(), 0.5 + 0.4 * rnd(), 0.35 + 0.35 * rnd()
+                cxp = 4.6 + 1.7 * rnd()
+                cyp = 3.95 + 0.9 * rnd()
                 rot = Matrix.Rotation(math.radians(rnd() * 80 - 40), 3, "Z")
                 S.box((sx * cxp, sy * cyp, bzs * 0.5), (bxs, bys, bzs), ANK_STONE, rotation=rot)
-                sites.append((sx * cxp - bxs * 0.3 if sx > 0 else sx * cxp - bxs * 0.3, sx * cxp + bxs * 0.3,
-                              sy * cyp - bys * 0.3, sy * cyp + bys * 0.3, bzs))
+                sites.append((sx * cxp - bxs * 0.3, sx * cxp + bxs * 0.3, sy * cyp - bys * 0.3, sy * cyp + bys * 0.3, bzs))
+    # bolovani pe cornisa (ruina de sus)
+    for k in range(7):
+        sxk = -1 if k % 2 else 1
+        bxs, bys, bzs = 0.6 + 0.5 * rnd(), 0.5 + 0.4 * rnd(), 0.4 + 0.3 * rnd()
+        cxp, cyp = 4.8 + 1.0 * rnd(), (rnd() * 2 - 1) * 2.8
+        rot = Matrix.Rotation(math.radians(rnd() * 90 - 45), 3, "Z")
+        S.box((sxk * cxp, cyp, 7.1 + bzs * 0.5), (bxs, bys, bzs), ANK_STONE, rotation=rot)
 
-    # --- 2. trunchiul si ramurile --------------------------------------------------
-    R.frustum((0.0, 0.0, 8.7), 3.0, 1.8, 2.2, ANK_ROOT, segments=12)
-    trunk, tr = spline([(0.0, 0.0, 9.5), (0.1, 0.05, 10.9), (0.2, 0.1, 12.4), (0.3, 0.2, 14.2)],
-                       [1.8, 1.55, 1.3, 1.05], sub=3)
+    # --- 2. trunchiul: scurt, gros la baza, evazat in acoperis ----------------------
+    tx = TRUNK_X
+    R.frustum((tx, 0.2, 8.45), 3.0, 1.8, 2.3, ANK_ROOT, segments=12)
+    trunk, tr = spline([(tx, 0.2, 9.4), (tx + 0.1, 0.3, 11.0), (tx - 0.1, 0.2, 12.6), (tx - 0.4, 0.3, 14.0)],
+                       [1.9, 1.6, 1.3, 1.1], sub=3)
     R.taper_sweep([tuple(p) for p in trunk], tr, ANK_ROOT, segments=10)
+    ft = (tx - 0.4, 0.3, 13.8)
     limbs = [
-        ([(0.3, 0.2, 13.9), (-1.0, 0.3, 15.4), (-2.6, 0.2, 16.8), (-3.8, 0.1, 18.0)], [1.0, 0.75, 0.5, 0.28]),
-        ([(0.3, 0.2, 13.9), (1.4, -0.2, 15.2), (2.9, -0.5, 16.4), (4.4, -0.6, 17.5)], [1.0, 0.75, 0.5, 0.28]),
-        ([(0.3, 0.2, 13.9), (0.3, 1.0, 15.6), (0.9, 1.6, 17.2), (1.2, 1.8, 18.8)], [0.95, 0.7, 0.48, 0.27]),
-        ([(0.3, 0.2, 13.9), (0.0, -1.0, 15.5), (-0.9, -1.8, 17.0), (-1.2, -2.0, 18.3)], [0.9, 0.68, 0.46, 0.26]),
+        ([ft, (1.6, 0.4, 15.6), (-0.4, 0.4, 17.0), (-2.6, 0.3, 18.2)], [0.95, 0.7, 0.48, 0.28]),
+        ([ft, (4.4, -0.2, 15.4), (6.4, -0.5, 16.6), (8.0, -0.6, 17.6)], [0.95, 0.7, 0.48, 0.28]),
+        ([ft, (3.2, 1.4, 16.0), (3.7, 2.0, 17.6), (3.9, 2.2, 19.0)], [0.8, 0.6, 0.42, 0.26]),
+        ([ft, (2.4, -1.4, 15.8), (1.6, -2.2, 17.0), (1.2, -2.6, 18.2)], [0.8, 0.6, 0.42, 0.26]),
     ]
     for pts, rr_ in limbs:
         pp, rr2 = spline(pts, rr_, sub=3)
         R.taper_sweep([tuple(p) for p in pp], rr2, ANK_ROOT, segments=8)
-
-    # --- 3. radacinile: putine, groase ---------------------------------------------
-    def root(pts, radii, sx, sy, sub=3, rf=None):
-        pp, rr2 = spline([(sx * p[0], sy * p[1], p[2]) for p in pts], [r * (RF if rf is None else rf) if r > 0.15 else r for r in radii], sub=sub)
-        R.taper_sweep([tuple(p) for p in pp], rr2, ANK_ROOT, segments=8)
-
-    for sy in (-1, 1):
-        for sx in (-1, 1):
-            # R1: din trunchi peste acoperis, pe fata cornisei si a piciorului, la sol
-            root([(0.6, 0.5, 9.0), (1.6, 1.1, 8.55), (2.6, 2.0, 8.2), (3.3, 3.0, 7.7), (3.9, 3.7, 6.8),
-                  (4.4, 3.65, 5.2), (4.9, 3.85, 3.2), (5.4, 4.5, 1.3), (6.1, 4.9, 0.35), (7.0, 5.2, 0.12)],
-                 [0.75, 0.66, 0.6, 0.54, 0.5, 0.46, 0.42, 0.38, 0.28, 0.12], sx, sy)
-            # R2: cascada peste buiandrug, care se duce SPRE picior (sub 5,5 m doar la |x| >= 3,8)
-            root([(0.4, 0.7, 9.0), (0.5, 1.9, 8.3), (0.7, 3.1, 7.55),
-                  (0.9, 3.85, 6.9), (1.5, 3.8, 6.4), (2.6, 3.78, 6.3), (3.6, 3.78, 6.2),
-                  (4.2, 3.8, 5.3), (4.6, 3.95, 3.7), (5.0, 4.2, 1.8), (5.5, 4.7, 0.45), (6.6, 5.2, 0.12)],
-                 [0.55, 0.5, 0.46, 0.42, 0.4, 0.38, 0.36, 0.34, 0.32, 0.28, 0.2, 0.1], sx, sy, rf=1.15)
-            # R3: a doua cascada, mai subtire, intre R1 si R2 (acopera fata cornisei)
-            root([(1.2, 0.9, 8.9), (1.6, 2.2, 8.1), (1.9, 3.3, 7.4), (2.3, 3.95, 6.85), (3.0, 3.9, 6.5),
-                  (3.8, 3.85, 6.3), (4.4, 3.8, 5.4), (4.8, 3.75, 4.0), (5.2, 3.95, 2.3), (5.9, 4.4, 0.6),
-                  (6.8, 4.9, 0.12)],
-                 [0.4, 0.38, 0.36, 0.34, 0.33, 0.32, 0.3, 0.28, 0.26, 0.2, 0.1], sx, sy, rf=1.1)
-    for sx in (-1, 1):
-        # R5: pe lateral, peste cornisa, pe fata exterioara a piciorului si a aripii, la sol
-        root([(0.9, 0.2, 9.0), (2.2, 0.4, 8.5), (3.6, 0.5, 8.0), (5.0, 0.5, 7.6), (6.3, 0.7, 6.9),
-              (6.4, 0.8, 5.0), (6.6, 1.0, 3.7), (7.0, 1.3, 1.9), (7.7, 1.8, 0.5), (8.6, 2.2, 0.12)],
-             [0.62, 0.56, 0.5, 0.48, 0.46, 0.42, 0.4, 0.36, 0.26, 0.1], sx, 1)
-
-    # contraforturi pe trunchi: radacini care coboara pe fusul trunchiului (nu mai e con neted)
+    # contraforturi pe trunchi (nu mai e con neted)
     for k in range(6):
         a = 2.0 * math.pi * (k + 0.3) / 6.0
         ca, sa = math.cos(a), math.sin(a)
-        pts = [(ca * 0.5, sa * 0.5, 13.4), (ca * 1.15, sa * 1.15, 11.6), (ca * 1.95, sa * 1.95, 9.8),
-               (ca * 2.7, sa * 2.7, 8.5)]
-        pp, rr2 = spline(pts, [0.42, 0.55, 0.6, 0.4], sub=3)
+        pts = [(tx + ca * 0.6, 0.2 + sa * 0.6, 13.2), (tx + ca * 1.25, 0.2 + sa * 1.25, 11.5),
+               (tx + ca * 2.05, 0.2 + sa * 2.05, 9.7), (tx + ca * 2.8, 0.2 + sa * 2.8, 8.4)]
+        pp, rr2 = spline(pts, [0.4, 0.55, 0.6, 0.4], sub=3)
         R.taper_sweep([tuple(p) for p in pp], rr2, ANK_ROOT, segments=8)
-    # bolovani pe cornisa (ruina de sus)
-    for k in range(9):
-        sxk = -1 if k % 2 else 1
-        bxs, bys, bzs = 0.6 + 0.5 * rnd(), 0.5 + 0.4 * rnd(), 0.4 + 0.3 * rnd()
-        cxp, cyp = 3.2 + 2.4 * rnd(), (rnd() * 2 - 1) * 3.0
-        rot = Matrix.Rotation(math.radians(rnd() * 90 - 45), 3, "Z")
-        S.box((sxk * cxp, cyp, 7.1 + bzs * 0.5), (bxs, bys, bzs), ANK_STONE, rotation=rot)
 
-    # --- 4. coronamentul: mase de elipsoizi ----------------------------------------
+    # --- 3. radacinile: curg PESTE piatra, lipite de suprafete ----------------------
+    def root(pts, radii, sy=1, off=(0.0, 0.0, 0.0), start=0, sub=3):
+        P = [(p[0] + off[0], sy * (p[1] + off[1]), p[2] + off[2]) for p in pts[start:]]
+        pp, rr2 = spline(P, radii[start:], sub=sub)
+        R.taper_sweep([tuple(p) for p in pp], rr2, ANK_ROOT, segments=8)
+
+    # RA: din trunchi peste placa, pe fata cornisei si a piciorului drept, pana la sol
+    RA = ([(3.2, 0.8, 9.0), (3.9, 1.9, 7.95), (4.4, 3.0, 7.45), (4.7, 3.85, 6.8), (4.95, 3.7, 6.0), (5.1, 3.6, 4.0),
+           (5.4, 3.7, 2.0), (5.9, 4.3, 0.6), (6.9, 4.9, 0.12)],
+          [0.95, 0.85, 0.75, 0.68, 0.6, 0.52, 0.45, 0.32, 0.12])
+    # RB: cascada peste buiandrug, spre piciorul STANG (sub 5,5 m doar la |x| >= 3,9)
+    RB = ([(2.4, 0.9, 8.7), (1.8, 1.9, 7.95), (1.4, 3.0, 7.5), (1.2, 3.8, 6.95), (0.6, 3.75, 6.55), (-0.8, 3.7, 6.4),
+           (-2.4, 3.7, 6.35), (-3.5, 3.72, 6.3), (-4.1, 3.75, 5.3), (-4.4, 3.75, 3.5), (-4.8, 3.9, 1.6),
+           (-5.4, 4.4, 0.4), (-6.4, 4.9, 0.12)],
+          [0.7, 0.62, 0.56, 0.5, 0.45, 0.42, 0.4, 0.38, 0.36, 0.32, 0.28, 0.2, 0.1])
+    # RC: peste placa din stanga, pe aripa stanga, pe fata ei exterioara
+    RC = ([(1.5, 0.7, 9.0), (0.2, 0.7, 8.55), (-1.6, 0.7, 8.25), (-3.6, 0.7, 8.25), (-4.9, 0.75, 7.7), (-5.8, 0.8, 7.45),
+           (-6.3, 0.8, 6.3), (-6.5, 0.8, 5.55), (-7.3, 0.9, 4.0), (-7.4, 1.1, 2.0), (-7.9, 1.6, 0.6), (-8.9, 2.1, 0.12)],
+          [0.8, 0.72, 0.64, 0.58, 0.52, 0.48, 0.45, 0.42, 0.36, 0.3, 0.2, 0.1])
+    # RD: peste cornisa dreapta, pe aripa dreapta, pe fata ei exterioara
+    RD = ([(4.6, 0.7, 9.0), (5.4, 0.8, 8.0), (6.0, 0.8, 7.5), (6.5, 0.8, 7.0), (6.55, 0.8, 6.5), (7.2, 0.9, 5.3),
+           (7.35, 1.1, 3.2), (7.6, 1.4, 1.3), (8.2, 2.0, 0.3), (9.0, 2.4, 0.12)],
+          [0.8, 0.72, 0.62, 0.54, 0.5, 0.46, 0.4, 0.3, 0.2, 0.1])
+    RL = ([(-4.4, 3.55, 6.1), (-4.9, 3.6, 4.5), (-5.15, 3.7, 2.5), (-5.6, 4.3, 0.8), (-6.4, 4.8, 0.12)],
+          [0.3, 0.28, 0.26, 0.2, 0.1])
+    for sy in (-1, 1):
+        root(RA[0], RA[1], sy)
+        root(RB[0], RB[1], sy)
+        root(RC[0], RC[1], sy)
+        root(RD[0], RD[1], sy)
+        # subtiri, pe langa cele groase (jumatate din lungime, raza 0,25-0,3)
+        root(RA[0], [r * 0.38 if r > 0.15 else r for r in RA[1]], sy, off=(0.75, 0.0, 0.05), start=2)
+        root(RC[0], [r * 0.38 if r > 0.15 else r for r in RC[1]], sy, off=(0.0, 0.9, 0.1), start=3)
+        root(RD[0], [r * 0.38 if r > 0.15 else r for r in RD[1]], sy, off=(0.0, 0.9, 0.1), start=2)
+        root(RL[0], RL[1], sy)
+
+    # --- 4. coronamentul: mase late, la inaltimi diferite, cu ciorchini mai deschisi ---
     ident = Matrix.Identity(3)
-    masses = [(-3.8, 0.1, 18.4, 3.1, 2.9, 1.7), (4.4, -0.6, 17.9, 3.3, 3.0, 1.8), (1.2, 1.8, 19.3, 3.0, 2.8, 1.8),
-              (-1.2, -2.0, 18.2, 2.8, 2.6, 1.6), (0.0, 0.3, 19.6, 3.3, 3.0, 1.7),
-              (-2.0, 2.6, 17.4, 2.5, 2.3, 1.5), (3.0, 2.4, 17.6, 2.5, 2.3, 1.5),
-              (-5.7, -1.0, 16.7, 2.3, 2.1, 1.3), (6.0, 0.6, 16.6, 2.4, 2.2, 1.3),
-              (0.2, -3.8, 17.2, 2.4, 2.2, 1.3), (-1.0, 4.0, 17.3, 2.2, 2.0, 1.2),
-              (3.4, -3.2, 17.0, 2.3, 2.1, 1.3), (-3.2, -3.4, 17.3, 2.2, 2.0, 1.2)]
-    for (mx, my, mz, ru, rv, rz) in masses:
+    masses = [(-1.5, 0.2, 17.2, 4.2, 3.2, 1.2, 0), (7.0, -0.4, 16.6, 3.4, 2.8, 1.1, 0),
+              (3.6, 0.0, 18.6, 4.4, 3.8, 1.5, 0), (1.0, 2.6, 17.4, 3.0, 2.4, 1.1, 0),
+              (5.8, 2.4, 17.6, 3.0, 2.4, 1.1, 0), (3.0, -3.0, 17.1, 3.4, 2.6, 1.1, 0),
+              (-3.6, -0.8, 16.5, 2.6, 2.2, 1.0, 0), (9.0, 1.0, 16.2, 2.0, 1.8, 0.9, 0),
+              (2.4, 0.6, 19.9, 2.6, 2.4, 1.1, 1), (6.0, -1.0, 19.0, 2.2, 2.0, 1.0, 1),
+              (-0.4, 1.6, 18.6, 2.0, 1.8, 0.9, 1), (4.6, 3.2, 18.4, 1.8, 1.6, 0.9, 1)]
+    for (mx, my, mz, ru, rv, rz, light) in masses:
         for j in range(3):
             ox = (rnd() - 0.5) * ru * 0.9
             oy = (rnd() - 0.5) * rv * 0.9
             oz = (rnd() - 0.4) * rz * 0.8
             s = 0.62 + 0.22 * rnd()
-            ellipsoid(C, (mx + ox, my + oy, mz + oz), (ru * s * 1.25, rv * s * 1.25, rz * s * 1.1),
-                      ANK_CANOPY, ident, 10, 6)
+            ellipsoid(C, (mx + ox, my + oy, mz + oz), (ru * s * 1.2, rv * s * 1.2, rz * s * 1.2),
+                      ANK_CANOPY_LIGHT if light else ANK_CANOPY, ident, 10, 6)
 
     scatter_lichen(L, sites, 14, 40, seed=23)
     scatter_streaks(G, streak_sites, seed=31)
     return [S.to_object("TreeGate_Stone"), L.to_object("TreeGate_Lichen"), G.to_object("TreeGate_Streak"),
             R.to_object("TreeGate_Root"), C.to_object("TreeGate_Canopy")]
+
+
+ANK_CANOPY_LIGHT = CACTUS_GREEN   # 12: ciorchini mai deschisi in coronament
 
 
 ANK_ROOT = CORAL_SAND         # 19: radacini si trunchi, AO cald

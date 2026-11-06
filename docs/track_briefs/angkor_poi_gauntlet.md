@@ -422,3 +422,28 @@ spre vest, colțul de SV și virajul de 90° pe calea de vest, sprintul final sp
 - linia de start/sosire e la frac 0: nimic cu corp la < 3 m de asfalt pe 0,95–1,00
   (plutonul strâns la sprint);
 - capturi: 0,780 · 0,820 · 0,870 · 0,930 · 0,975.
+
+### B — Prin Angkor Wat (frac 0,058–0,114, `zona_b.py`)
+
+**Din decupaj:** gopura de vest cu deschiderea, **colonada galeriei** (stâlpi în ritm,
+acoperiș), terasele în trepte ale templului, **călugări în șofran** pe scară, piatră
+cu licheni, apa șanțului.
+
+**Ce există** (nu se mută): `GopuraVest` (+ `CameraGopura`), galeria pe stânga
+(`GalStalp*`, `GalAcoperis*`, `GalZid*` la x −62…−66, y 26…62 pe hartă), templul
+`AngkorWat` (în origine, hull), cei doi călugări de lângă calea de vest, palmierii.
+
+**Din brief:** prin gopura de vest (tavan scurt, 1 s de întuneric), un singur arc
+(R 30) după gopura, apoi drept spre N la ~55 m de turnuri; colonada pe stânga trece
+ca un gard (senzația de viteză); pe dreapta terasele și turnurile prea aproape ca să
+încapă: doar socluri și etaje; **macaci pe balustrade** (teatru, `FlockProp` cu
+`macaque.glb` din Ha Long, de verificat dacă e folosibil din fișierul zonei; altfel
+cerere), câțiva călugări la scara templului, departe de bandă. Ieșire prin gopura de
+nord, pe **calea de nord** (de pământ, mai joasă, bazine pe ambele părți).
+
+**Capcana:**
+- **arcul R 30 de după gopura**: regula de 18 m pe interior;
+- peluza incintei e luminișul junglei (J): umple-o cu decor jos (dale, blocuri, mici
+  bazine, călugări), nu cu ziduri pe interiorul arcului;
+- `CameraGopura` (tavan 9) nu se mută; nimic nou sub/în gopura;
+- capturi: 0,065 · 0,075 · 0,090 · 0,100 · 0,110.

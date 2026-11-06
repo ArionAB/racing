@@ -2751,6 +2751,19 @@ const SLOT_REMAP_BY_THEME := {
 		"beech_tree_a": {29: Palette.VOLCANIC_BLACK},
 		"beech_tree_b": {29: Palette.VOLCANIC_BLACK},
 	},
+	# Angkor (Track24), jungla in masa (J, runda 2): trunchiurile copacilor-kit stau pe slotul 19 CORAL_SAND
+	# (crem-alb) si citeau ca mesteceni / padure moarta (4/4 critici orbi). Trec pe LOG_DARK 28 (brun
+	# inchis, sub soarele cald iese brun); palmierul de zahar (trunchi + tulpinile fructelor, slot 9 WOOD_WEATHERED,
+	# portocaliu) la fel. `strangler_fig` NU e aici: radacinile lui argintii raman accent. Frunzisul tufelor
+	# (21 TROPICAL_GREEN, verde varza) trece pe 12 CACTUS_GREEN (oliv). Zero materiale noi (remap de slot).
+	"angkor": {
+		"tetrameles_a": {19: Palette.LOG_DARK},
+		"tetrameles_b": {19: Palette.LOG_DARK},
+		"dipterocarp": {19: Palette.LOG_DARK},
+		"sugar_palm": {9: Palette.LOG_DARK},
+		"fern_cluster": {21: Palette.CACTUS_GREEN},
+		"tropical_shrub": {21: Palette.CACTUS_GREEN},
+	},
 	"fiordland": {
 		# `moss_boulder_a/b/c`: masurat pe .glb (probe ad-hoc), un SINGUR
 		# material/mesh cu trei sloturi — corpul pe 3 ROCK_LIGHT (bej-tan

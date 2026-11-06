@@ -24,23 +24,29 @@ FOREST_GLBS = {
     'bamboo_clump': 'res://assets/models/halong/plants/bamboo_clump.glb',
 }
 
-_CANOPY = ('tetrameles_a', 'tetrameles_b', 'dipterocarp', 'strangler_fig')
-_CANOPY_W = (0.17, 0.17, 0.64, 0.02)   # aproape: trunchiurile argintii se vad
-_CANOPY_FAR_W = (0.06, 0.06, 0.87, 0.01)   # departe tetrameles = bete albe fara coroana vizibila: dipterocarp (coroana verde)
-# Etajul de mijloc: palmieri de zahar (14 m la scara 1), tufe, bambus.
-_MID = ('sugar_palm', 'tropical_shrub', 'bamboo_clump')
-_MID_W = (0.30, 0.45, 0.25)
-_UNDER = ('fern_cluster', 'tropical_shrub', 'bamboo_clump')
-_UNDER_W = (0.55, 0.35, 0.10)
+import random
 
-# Copacii kitului au 26-35 m inaltime si coroane de 19 m (AABB masurat): la scara 1 si pas 7 m, camera de joc
-# (10 m sus) vedea doar trunchiuri si nicio coroana. Scara 0,55-1,0 si pas 8-13 m lasa lumina si monumentele.
-# Bananul (4 m) iese cu radacini in curcubeu pe sloturile Angkor: scos. Palmierul de zahar la scara 1-1,6 era
-# o morcov de 23 m: etajul de mijloc il tine la 0,55-0,9.
+_CANOPY = ('tetrameles_a', 'tetrameles_b', 'dipterocarp', 'strangler_fig')
+_CANOPY_W = (0.20, 0.20, 0.57, 0.03)
+_CANOPY_FAR_W = (0.06, 0.06, 0.87, 0.01)   # departe tetrameles = bete fara coroana vizibila: dipterocarp
+# Etajul de mijloc (coroana la 2-12 m, in cadrul camerei de joc): palmieri de zahar, bambus, tufe.
+_MID = ('sugar_palm', 'bamboo_clump', 'tropical_shrub')
+_MID_W = (0.45, 0.30, 0.25)
+_UNDER = ('tropical_shrub', 'fern_cluster', 'bamboo_clump')
+_UNDER_W = (0.40, 0.45, 0.15)
+
+# RUNDA 2 (4/4 critici orbi: „mesteceni albi in grila pe gazon”, coroane prea sus, liane = bete maro, tufe-varza).
+#   - trunchiul (slot 19 CORAL_SAND, crem) e remapat pe gri-brun inchis in `world_prop.gd` (SLOT_REMAP_BY_THEME angkor);
+#   - banda apropiata (lat < ~30 m) NU mai are copaci inalti: coroana lor (20-30 m) iesea din cadru si ramaneau doar
+#     coloane. Coroanele inalte incep la 30 m (se vad in partea de sus a cadrului), iar langa drum sta etajul de 2-12 m;
+#   - banda apropiata nu mai e grila: un inel rar + ciorchini (discuri) de palmieri/bambus/tufe, cu goluri intre ei;
+#   - subarboretul: scara 0,8-1,3 (era 1,3-2,2), amestec de specii, frunzis oliv (slot 21 -> 12).
+# Banianul (4 m) iese cu radacini in curcubeu pe sloturile Angkor: scos.
 #
 # APA: ferestrele de mai jos (fractii pe index) sunt rapele cu apa si santurile de langa ele. Acolo padurea are
-# voie doar pe sol la cel mult 0,8 m sub cota soselei (malul), nu in albia santului (captura r1: palmieri in apa).
+# voie doar pe sol la cel mult 0,8 m sub cota soselei (malul), nu in albia santului.
 _WATER = [(0.000, 0.070), (0.088, 0.122), (0.308, 0.372), (0.758, 0.905)]
+_OPEN_SIGHT = (0.000, 0.062)   # calea de vest A: culoarul spre templu ramane deschis (vezi _clumps)
 
 
 def _segments():
@@ -60,6 +66,25 @@ def _ring(label, **kw):
                  max_below_road_m=mb, **kw) for a, b, mb in _segments()]
 
 
+def _clumps(n=230, seed=7):
+    """Ciorchini de etaj mijloc la 10-30 m de ax, pe o parte sau pe cealalta, cu goluri intre ei."""
+    rnd = random.Random(seed)
+    out = []
+    for k in range(n):
+        f = rnd.uniform(0.0, 1.0)
+        if _OPEN_SIGHT[0] <= f <= _OPEN_SIGHT[1] and rnd.random() < 0.6:
+            continue   # pe A, doar putine, ca templul sa se vada
+        if any(a <= f <= b for a, b in _WATER):
+            lat_ok = 1   # pe mal, max_below nu se poate pune pe disc: ramane prudent, doar spre exterior
+            continue
+        side = rnd.choice((-1.0, 1.0))
+        lat = side * rnd.uniform(11.0, 30.0)
+        out.append(dict(label='ciorchine %d' % k, kind='disc', at=(f, lat), radius=rnd.uniform(6.0, 12.0),
+                        spacing=rnd.uniform(3.0, 4.2), edge_clear_m=4.0, shadow_m=0.0,
+                        species=_MID, weights=_MID_W, scale_min=0.75, scale_max=1.25, seed=200 + k))
+    return out
+
+
 FOREST = (
     [
         # ---- luminisuri (claim, fara specii): primele, ca padurea sa le ocoleasca
@@ -73,17 +98,18 @@ FOREST = (
         dict(label='terasa Bayon 2', kind='disc', center=(-75.0, -437.0), radius=22.0, claim=True),
         dict(label='terasa Bayon 3', kind='disc', center=(-30.0, -437.0), radius=22.0, claim=True),
     ]
-    # ---- coronamentul: pe toata pista, ambele parti, si in interiorul buclei
-    + _ring('coronament aproape', lat_min=16.0, lat_max=55.0, spacing=6.5, edge_clear_m=10.0, shadow_m=20.0,
+    # ---- coronamentul: copaci inalti de la 30 m inapoi, ca sa-si arate coroana in partea de sus a cadrului
+    + _ring('coronament aproape', lat_min=30.0, lat_max=60.0, spacing=9.0, edge_clear_m=10.0, shadow_m=20.0,
             species=_CANOPY, weights=_CANOPY_W, scale_min=0.55, scale_max=0.85, seed=101)
-    + _ring('coronament mediu', lat_min=55.0, lat_max=120.0, spacing=10.0, edge_clear_m=10.0, shadow_m=0.0,
+    + _ring('coronament mediu', lat_min=60.0, lat_max=120.0, spacing=10.0, edge_clear_m=10.0, shadow_m=0.0,
             species=_CANOPY, weights=_CANOPY_FAR_W, scale_min=0.7, scale_max=1.0, seed=102)
     + _ring('coronament departe', lat_min=120.0, lat_max=190.0, spacing=13.0, edge_clear_m=10.0, shadow_m=0.0,
             species=_CANOPY, weights=_CANOPY_FAR_W, scale_min=0.8, scale_max=1.1, seed=103)
-    # ---- etajul de mijloc
-    + _ring('etaj mijloc', lat_min=9.0, lat_max=45.0, spacing=4.8, edge_clear_m=4.0, shadow_m=0.0,
-            species=_MID, weights=_MID_W, scale_min=0.6, scale_max=1.0, seed=105)
-    # ---- subarboret la marginea drumului
-    + _ring('subarboret margine', lat_min=6.0, lat_max=30.0, spacing=3.4, edge_clear_m=2.0, shadow_m=0.0,
-            species=_UNDER, weights=_UNDER_W, scale_min=1.3, scale_max=2.2, seed=104)
+    # ---- etajul de mijloc: inel rar + ciorchini
+    + _ring('etaj mijloc', lat_min=10.0, lat_max=34.0, spacing=8.0, edge_clear_m=4.0, shadow_m=0.0,
+            species=_MID, weights=_MID_W, scale_min=0.75, scale_max=1.25, seed=105)
+    + _clumps()
+    # ---- subarboret care ascunde baza trunchiurilor
+    + _ring('subarboret margine', lat_min=6.0, lat_max=26.0, spacing=2.9, edge_clear_m=2.0, shadow_m=0.0,
+            species=_UNDER, weights=_UNDER_W, scale_min=0.9, scale_max=1.5, seed=104)
 )

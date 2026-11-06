@@ -24,6 +24,7 @@ Moduri (rulate prin run_build.py, argumentele dupa al doilea `--`):
                      in dreapta (se vad doua fete). Fiecare cadru e 1920x1080
                      si apare alaturi de decuparea lui la pixeli nativi, de 3x.
                      -> <nume>_gamecam.png
+  --gamecam-far <nume>  la fel, dar piesa la 80 m, un cadru -> <nume>_gamecam_far.png
   --face <nume>      close-up pe o fata (+Y), de ~1000 px inaltime: din fata si
                      3/4, ca fata sa poata fi judecata singura
                      -> <nume>_face.png
@@ -80,6 +81,13 @@ SPECS = {
     "bayon_face_tower_a": {"camera": {"azimuth": 62.0, "elevation": 9.0, "lens": 70.0, "margin": 1.06}},
     # elefantul: capul pe +Y, vazut din dreapta-fata ca pe desen (cap la dreapta)
     "asian_elephant": {"camera": {"azimuth": 38.0, "elevation": 6.0, "lens": 60.0, "margin": 1.08}},
+    "bayon_face_tower_b": {"camera": {"azimuth": 62.0, "elevation": 9.0, "lens": 70.0, "margin": 1.06}},
+    "bayon_face_tower_c": {"camera": {"azimuth": 62.0, "elevation": 9.0, "lens": 70.0, "margin": 1.06}},
+    # poarta de sud (val 1): drumul merge pe Y prin ea; fara ingropare in gamecam
+    # (baza la cota drumului); fata de close-up e cea de pe +Y, centrul la ~14 m
+    "south_gate_face_tower": {"camera": {"azimuth": 62.0, "elevation": 8.0, "lens": 60.0, "margin": 1.06},
+                              "views_aspect": 1.2, "bury": 0.0,
+                              "face_center": (0.0, 3.0, 12.6), "face_dist": 22.0},
 }
 
 # camera de joc (scenes/race/chase_camera.gd: DEFAULT_HEIGHT/DISTANCE/BASE_FOV/
@@ -400,14 +408,14 @@ def views(name, res_height=800):
         cam = _camera_for(name)
         cam["azimuth"] = az
         p = os.path.join(FID_DIR, "_view_%s_%d.png" % (name, int(az)))
-        _render(meshes, p, res_height=res_height, aspect=0.6, **cam)
+        _render(meshes, p, res_height=res_height, aspect=SPECS.get(name, {}).get("views_aspect", 0.6), **cam)
         outs.append(p)
     _compose(["--montage", ",".join(outs), "--out",
               os.path.join(FID_DIR, name + "_views.png")])
     _rm(*outs)
 
 
-def gamecam(name):
+def gamecam(name, ahead=None, suffix="_gamecam", cars=(("a", 0.0), ("b", -4.0))):
     """Camera de joc: vezi antetul. Doua cadre, apoi compunere cu decupari."""
     os.makedirs(FID_DIR, exist_ok=True)
     _clear()
@@ -416,7 +424,7 @@ def gamecam(name):
         return
     scene = bpy.context.scene
     for o in meshes:
-        o.location = o.location + Vector((0.0, 0.0, -GC_BURY))
+        o.location = o.location + Vector((0.0, 0.0, -SPECS.get(name, {}).get("bury", GC_BURY)))
         o.hide_render = False
     bpy.context.view_layer.update()
 
@@ -460,8 +468,9 @@ def gamecam(name):
     cam.data.clip_end = 380.0
 
     frames, boxes = [], []
-    for tag, car_x in (("a", 0.0), ("b", -4.0)):
-        car = Vector((car_x, -GC_PIECE_AHEAD, 0.0))
+    ahead = GC_PIECE_AHEAD if ahead is None else ahead
+    for tag, car_x in cars:
+        car = Vector((car_x, -ahead, 0.0))
         cam.location = car + Vector((0.0, -GC_DIST, GC_HEIGHT))
         target = car + Vector((0.0, GC_LOOK_AHEAD, GC_LOOK_HEIGHT))
         cam.rotation_euler = (target - cam.location).normalized().to_track_quat("-Z", "Y").to_euler()
@@ -480,7 +489,7 @@ def gamecam(name):
         frames.append(p)
         boxes.append("%.1f,%.1f,%.1f,%.1f" % box)
     _compose(["--gamecam", ",".join(frames), "--boxes", ";".join(boxes), "--out",
-              os.path.join(FID_DIR, name + "_gamecam.png")])
+              os.path.join(FID_DIR, name + suffix + ".png")])
     _rm(*frames)
 
 
@@ -494,7 +503,8 @@ def face(name, res_height=1000):
     scene = bpy.context.scene
     for o in meshes:
         o.hide_render = False
-    center = Vector((0.0, 1.0, 4.65))
+    center = Vector(SPECS.get(name, {}).get("face_center", (0.0, 1.0, 4.65)))
+    fdist = SPECS.get(name, {}).get("face_dist", 7.5)
     outs = []
     for tag, az in (("front", 90.0), ("q3", 58.0)):
         for o in list(bpy.data.objects):
@@ -510,7 +520,7 @@ def face(name, res_height=1000):
         cam.data.clip_start = 0.1
         cam.data.clip_end = 200.0
         a = math.radians(az)
-        cam.location = center + Vector((math.cos(a), math.sin(a), 0.0)) * 7.5
+        cam.location = center + Vector((math.cos(a), math.sin(a), 0.0)) * fdist
         cam.rotation_euler = (center - cam.location).normalized().to_track_quat("-Z", "Y").to_euler()
         scene.render.resolution_x, scene.render.resolution_y = int(res_height * 0.85), res_height
         # soarele jos (24 grade) din spatele camerei, putin lateral: relieful arunca umbra
@@ -649,6 +659,9 @@ elif "--views" in args:
     views(args[args.index("--views") + 1])
 elif "--face" in args:
     face(args[args.index("--face") + 1])
+elif "--gamecam-far" in args:
+    # vedere de la 80 m (calea de 110 m a Portii de Sud): un singur cadru
+    gamecam(args[args.index("--gamecam-far") + 1], ahead=80.0, suffix="_gamecam_far", cars=(("a", 0.0),))
 elif "--gamecam" in args:
     gamecam(args[args.index("--gamecam") + 1])
 elif "--pose" in args:

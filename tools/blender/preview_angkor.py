@@ -24,6 +24,7 @@ Moduri (rulate prin run_build.py, argumentele dupa al doilea `--`):
                      in dreapta (se vad doua fete). Fiecare cadru e 1920x1080
                      si apare alaturi de decuparea lui la pixeli nativi, de 3x.
                      -> <nume>_gamecam.png
+  --gamecam-far <nume>  la fel, dar piesa la 80 m, un cadru -> <nume>_gamecam_far.png
   --face <nume>      close-up pe o fata (+Y), de ~1000 px inaltime: din fata si
                      3/4, ca fata sa poata fi judecata singura
                      -> <nume>_face.png
@@ -84,7 +85,7 @@ SPECS = {
     # (baza la cota drumului); fata de close-up e cea de pe +Y, centrul la ~14 m
     "south_gate_face_tower": {"camera": {"azimuth": 62.0, "elevation": 8.0, "lens": 60.0, "margin": 1.06},
                               "views_aspect": 1.2, "bury": 0.0,
-                              "face_center": (0.0, 2.0, 14.2), "face_dist": 22.0},
+                              "face_center": (0.0, 3.0, 15.2), "face_dist": 24.0},
 }
 
 # camera de joc (scenes/race/chase_camera.gd: DEFAULT_HEIGHT/DISTANCE/BASE_FOV/
@@ -412,7 +413,7 @@ def views(name, res_height=800):
     _rm(*outs)
 
 
-def gamecam(name):
+def gamecam(name, ahead=None, suffix="_gamecam", cars=(("a", 0.0), ("b", -4.0))):
     """Camera de joc: vezi antetul. Doua cadre, apoi compunere cu decupari."""
     os.makedirs(FID_DIR, exist_ok=True)
     _clear()
@@ -465,8 +466,9 @@ def gamecam(name):
     cam.data.clip_end = 380.0
 
     frames, boxes = [], []
-    for tag, car_x in (("a", 0.0), ("b", -4.0)):
-        car = Vector((car_x, -GC_PIECE_AHEAD, 0.0))
+    ahead = GC_PIECE_AHEAD if ahead is None else ahead
+    for tag, car_x in cars:
+        car = Vector((car_x, -ahead, 0.0))
         cam.location = car + Vector((0.0, -GC_DIST, GC_HEIGHT))
         target = car + Vector((0.0, GC_LOOK_AHEAD, GC_LOOK_HEIGHT))
         cam.rotation_euler = (target - cam.location).normalized().to_track_quat("-Z", "Y").to_euler()
@@ -485,7 +487,7 @@ def gamecam(name):
         frames.append(p)
         boxes.append("%.1f,%.1f,%.1f,%.1f" % box)
     _compose(["--gamecam", ",".join(frames), "--boxes", ";".join(boxes), "--out",
-              os.path.join(FID_DIR, name + "_gamecam.png")])
+              os.path.join(FID_DIR, name + suffix + ".png")])
     _rm(*frames)
 
 
@@ -552,6 +554,9 @@ elif "--views" in args:
     views(args[args.index("--views") + 1])
 elif "--face" in args:
     face(args[args.index("--face") + 1])
+elif "--gamecam-far" in args:
+    # vedere de la 80 m (calea de 110 m a Portii de Sud): un singur cadru
+    gamecam(args[args.index("--gamecam-far") + 1], ahead=80.0, suffix="_gamecam_far", cars=(("a", 0.0),))
 elif "--gamecam" in args:
     gamecam(args[args.index("--gamecam") + 1])
 else:

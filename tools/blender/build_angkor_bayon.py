@@ -43,6 +43,7 @@ din kit §1.1: TURN, nu cap -- scrisa INAINTE de geometrie):
 
 import math
 import os
+import bmesh
 from mathutils import Vector, Matrix
 
 _here = os.path.dirname(os.path.abspath(__file__))
@@ -74,7 +75,7 @@ VARIANTE = {
     # in fus (fata +Y), baza cu coltul (-X,+Y) darimat si blocuri cazute IN patrat
     "c": dict(tiers=[(0.36, 1.12, 0.05), (0.33, 0.92, 0.05), (0.31, 0.72, 0.05), (0.27, 0.54, 0.05)],
               lotus_r=0.36, petals=8, seed=37,
-              ruin=dict(top_corner=(1, 1), base_corner=(-1, 1), niche_face=0,
+              ruin=dict(top_corner=(1, 1), base_corner=(-1, 1), base_cut=1.45, niche_face=0,
                         niche_u=(0.05, 0.70), niche_z=(1.90, 2.30))),
 }
 
@@ -117,15 +118,15 @@ def rubble(b, corner, d_cut, rnd):
     sx, sy = corner
     placed = []
     tries = 0
-    while len(placed) < 11 and tries < 900:
+    while len(placed) < 8 and tries < 3000:
         tries += 1
-        s = d_cut + 0.15 + rnd() * 1.1               # departare pe diagonala, de la planul taierii
-        a = (rnd() * 2 - 1) * (3.0 - s - 0.28)       # pozitia de-a lungul muchiei
+        s = d_cut - 0.05 + rnd() * 0.9              # departare pe diagonala, de la planul taierii
+        a = (rnd() * 2 - 1) * (3.0 - s + 0.1)        # pozitia de-a lungul muchiei
         if abs(a) < 0.0 and False:
             continue
         x = sx * (s + a) * 0.5
         y = sy * (s - a) * 0.5
-        sz = (0.42 + 0.26 * rnd(), 0.42 + 0.26 * rnd(), 0.32 + 0.20 * rnd())
+        sz = (0.36 + 0.22 * rnd(), 0.36 + 0.22 * rnd(), 0.28 + 0.18 * rnd())
         rot = (Matrix.Rotation(math.radians(rnd() * 90), 3, "Z")
                @ Matrix.Rotation(math.radians((rnd() - 0.5) * 24), 3, "X")
                @ Matrix.Rotation(math.radians((rnd() - 0.5) * 24), 3, "Y"))
@@ -133,20 +134,47 @@ def rubble(b, corner, d_cut, rnd):
                    for cx in (-1, 1) for cy in (-1, 1) for cz in (-1, 1)]
         zmin = min(c.z for c in corners)
         c0 = Vector((x, y, -zmin))
-        stacked = len(placed) >= 7
+        stacked = len(placed) >= 3
         if stacked:
-            c0.z += 0.38
+            c0.z += 0.42
         pts = [c0 + c for c in corners]
         if any(abs(p.x) > 1.485 or abs(p.y) > 1.485 for p in pts):
             continue
         # nu intra in treapta 0 (taiata) nici in baza de sus: dincolo de planul taierii
-        if any(sx * p.x + sy * p.y < d_cut + 0.04 for p in pts):
+        if any(sx * p.x + sy * p.y < d_cut - 0.30 for p in pts):
             continue
-        if any((c0 - q).length < 0.62 for (q, st) in placed if st == stacked):
+        if any((c0 - q).length < 0.45 for (q, st) in placed if st == stacked):
             continue
         placed.append((c0, stacked))
         b.box(c0, sz, ANK_STONE, rotation=rot)
     return len(placed)
+
+
+def notched_tier(b, z0, z1, half, ch, corner, c):
+    """Etaj cu o BUCATA lipsa: toata zona {sx*x > c si sy*y > c} lipseste (doua invelitori
+    in L: una taiata la sx*x <= c, alta la sy*y <= c), pe toate cele trei randuri;
+    finialurile raman doar pe celelalte trei colturi. Intoarce cota de sus."""
+    sx, sy = corner
+
+    def wx(p):
+        return Vector((sx * min(sx * p.x, c), p.y, p.z))
+
+    def wy(p):
+        return Vector((p.x, sy * min(sy * p.y, c), p.z))
+    zm = (z0 + z1) * 0.5
+    for (za, zb, h) in ((z0, zm, half), (zm, z1, half * 0.96), (z1, z1 + ch, half + 0.05)):
+        for w in (wx, wy):
+            oct_prism(b, 0.0, 0.0, za, zb, h, h * 0.16, ANK_STONE, w)
+    chh = half + 0.05
+    for fx in (-1, 1):
+        for fy in (-1, 1):
+            if (fx, fy) == (sx, sy):
+                continue
+            cc = Vector((fx * (chh - 0.09), fy * (chh - 0.09), z1 + ch))
+            pts = [cc + Vector((dx * 0.06, dy * 0.06, 0.0)) for dx in (-1, 1) for dy in (-1, 1)]
+            pts += [cc + Vector((dx * 0.045, dy * 0.045, 0.085)) for dx in (-1, 1) for dy in (-1, 1)]
+            hull(b, pts, ANK_STONE)
+    return z1 + ch
 
 
 def _base_skip(k, ua, ub, half, corner, cut):
@@ -173,10 +201,12 @@ def shaft_with_niche(b, ruin):
     nz0, nz1 = ruin["niche_z"]
     fr = Frame((0, 0, 0), 90.0 * nk)
 
+    bc, dcut = ruin["base_corner"], ruin["base_cut"]
+
     def rect(ua, wa, ub, wb, za, zb):
         pa, pb = fr.p(ua, wa, 0.0), fr.p(ub, wb, 0.0)
-        b.box(((pa.x + pb.x) * 0.5, (pa.y + pb.y) * 0.5, (za + zb) * 0.5),
-              (abs(pb.x - pa.x), abs(pb.y - pa.y), zb - za), ANK_STONE)
+        pts = [Vector((x, y, z)) for x in (pa.x, pb.x) for y in (pa.y, pb.y) for z in (za, zb)]
+        hull(b, [_clip_corner(q, bc, dcut - 0.04) for q in pts], ANK_STONE)
     rect(-h, -h, h, h - dep, z0, z1)                 # miez retras pe fata nisei
     rect(-h, h - dep, u0, h, z0, z1)                 # cadru: stanga
     rect(u1, h - dep, h, h, z0, z1)                  # dreapta
@@ -184,6 +214,8 @@ def shaft_with_niche(b, ruin):
     rect(u0, h - dep, u1, h, nz1, z1)                # sus
 
     def skip(k, c, ua, ub):
+        if _base_skip(k, ua, ub, SHAFT_HALF, bc, dcut):
+            return True
         return k == nk and c == 1 and ub > u0 and ua < u1
     block_courses(b, SHAFT_HALF, z0, z1, 3, 0.8, proud=0.04, seed=5, skip=skip)
 
@@ -191,7 +223,7 @@ def shaft_with_niche(b, ruin):
 def _in_ruin(pt, ruin):
     """Pete de lichen nu stau in aer: nu in coltul de baza darimat, nu in coltul de sus."""
     sx, sy = ruin["base_corner"]
-    if pt.z < 1.6 and sx * pt.x + sy * pt.y > 1.15:
+    if pt.z < 3.0 and sx * pt.x + sy * pt.y > 1.55:
         return True
     tx, ty = ruin["top_corner"]
     return pt.z > 7.1 and pt.x * tx > 0.2 and pt.y * ty > 0.2
@@ -208,17 +240,13 @@ def build_tower(name, spec):
     if ruin:
         # baza ruinata: coltul (-X,+Y) darimat pe treptele 0 si 1, blocuri cazute in golul lasat
         bc = ruin["base_corner"]
-        cuts = [0.95, 1.70, None]
+        dcut = ruin["base_cut"]
         for i, (z0, z1, half) in enumerate(BASE_STEPS):
-            if cuts[i] is None:
-                stone_box(stone, 0, 0, z0, z1, half - 0.04)
-                skip = None
-            else:
-                broken_step(stone, z0, z1, half - 0.04, bc, cuts[i] - 0.04)
-                # blocurile din fata nu urca pe colt: sar cele din ultima treime spre colt
-                skip = (lambda cut: lambda k, c, ua, ub: _base_skip(k, ua, ub, half, bc, cut))(cuts[i])
+            # ACELASI plan de taiere pe toate treptele si pe fus: nimic nu atarna peste golul de jos
+            broken_step(stone, z0, z1, half - 0.04, bc, dcut - 0.04)
+            skip = (lambda cut: lambda k, c, ua, ub: _base_skip(k, ua, ub, half, bc, cut))(dcut)
             block_courses(stone, half, z0, z1, 1, 0.95, proud=0.04, seed=i, skip=skip)
-        rubble(stone, bc, cuts[0], lcg(spec["seed"] + 3))
+        rubble(stone, bc, dcut, lcg(spec["seed"] + 3))
     else:
         stepped_base(stone, BASE_STEPS)
     for (z0, z1, half), nxt in zip(BASE_STEPS, BASE_STEPS[1:] + [(1.5, 1.5, SHAFT_HALF)]):
@@ -249,15 +277,15 @@ def build_tower(name, spec):
 
     # --- 6. etajele: un con din randuri ---------------------------------------------------
     n_t = len(spec["tiers"])
+    tier_tops = []
     for i, (th, half, ch) in enumerate(spec["tiers"]):
         z0 = z
-        warp = fskip = None
         if ruin and i >= n_t - 2:
-            tc = ruin["top_corner"]
-            # etajul 3: colt rupt la jumatate; etajul 4: rupt de la baza lui
-            warp = make_warp(tc, half, z0, 0.85 * half, keep=0.0)
-            fskip = (lambda tc_: lambda sx, sy: (sx, sy) == tc_)(tc)
-        z = tier(stone, z0, z0 + th, half, ch, warp=warp, finial_skip=fskip)
+            # etajele 3 si 4: o bucata in trepte lipsa din colt (3: mica, 4: mai mare)
+            z = notched_tier(stone, z0, z0 + th, half, ch, ruin["top_corner"], 0.17 * half if i == n_t - 2 else 0.0)
+        else:
+            z = tier(stone, z0, z0 + th, half, ch)
+        tier_tops.append(z)
         if i < 2:
             streak_sites.append((z0 + th, half * 0.96, 4))
         nxt = spec["tiers"][i + 1][1] if i + 1 < len(spec["tiers"]) else 0.42
@@ -266,7 +294,21 @@ def build_tower(name, spec):
     # --- 7. bobocul de lotus ----------------------------------------------------------------
     height = TOP_Z - z
     assert height > 0.45, "etajele lasa prea putin pentru boboc: %.2f" % height
+    before = set(stone.bm.verts)
     lotus_bud(stone, 0, 0, z, height, spec["lotus_r"], petals=spec["petals"], segments=14)
+    if ruin:
+        # bobocul se apleaca spre bucata lipsa (are jumatate din baza in aer) cu ~16 grade
+        tcx, tcy = ruin["top_corner"]
+        axis = Vector((-tcx, tcy, 0.0))
+        new = [v for v in stone.bm.verts if v not in before]
+        bmesh.ops.rotate(stone.bm, verts=new, cent=(0.0, 0.0, z),
+                         matrix=Matrix.Rotation(math.radians(16.0), 3, axis))
+        # blocurile cazute din colt: pe pervazul etajului intact de dedesubt (nr. 2)
+        zl = tier_tops[n_t - 3]
+        for (bx, by, ang, sz) in ((0.86, 0.80, 25.0, (0.22, 0.20, 0.16)), (0.84, 0.50, -15.0, (0.18, 0.22, 0.14)),
+                                  (0.58, 0.86, 40.0, (0.20, 0.16, 0.14))):
+            stone.box((tcx * bx, tcy * by, zl + sz[2] * 0.5 - 0.01), sz, ANK_STONE,
+                      rotation=Matrix.Rotation(math.radians(ang), 3, "Z"))
 
     # --- 8. lichen: pete mici pe orizontale ----------------------------------------------------
     tot_len = sum(l[1] for l in ledges)

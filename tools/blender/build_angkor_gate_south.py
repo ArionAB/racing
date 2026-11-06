@@ -45,26 +45,26 @@ exec(open(os.path.join(_here, "angkor_shapes.py"), encoding="utf-8").read())
 JAMB = 3.75             # |x| al jugii: golul liber = 2 * JAMB = 7,5 m
 X_OUT = 9.5             # capatul aripii: latime totala 19,0
 WALL_Y = 3.5            # fata peretilor aripii (jumatate-adancime)
-PLINTH_Y = 4.0          # soclul: adancime totala 8,0
+PLINTH_Y = 3.6         # soclul iese 0,1 m din perete (nu e prag pentru masini)          # soclul: adancime totala 8,0
 Z_PLINTH = 0.4
 Z_UNDER = 8.4           # fata de jos a buiandrugului = inaltimea libera
 Z_WALL = 9.6
 Z_BODY = 10.0           # sus pe cornisa
 PROUD = 0.04
-ELE_H = 1.2             # elefantul: ~3,6 m la crestet
+ELE_H = 1.1             # elefantul: ~4,1 m lung, ~3,3 m la crestet
 # aripile in trepte: (x interior, x exterior, cota de sus a cornisei)
-SECTIONS = [(JAMB, 5.75, 10.0), (5.75, 7.75, 7.4), (7.75, X_OUT, 5.0)]
+SECTIONS = [(JAMB, 5.25, 10.0), (5.25, 7.4, 7.6), (7.4, X_OUT, 5.0)]
 
 # turnul (scalat din cel al Bayonului: H 3,0 -> 4,6)
-FACE_H = 4.6
-CORE_HALF = 1.96
-SHAFT_HALF = 1.84
-Z_SHAFT = (Z_BODY, 11.4)
-Z_CHIN = 11.8
-Z_FACE_TOP = Z_CHIN + 1.2 * FACE_H            # 17,32
-TIERS = [(0.68, 1.80, 0.08), (0.63, 1.48, 0.08), (0.58, 1.16, 0.08), (0.53, 0.84, 0.08)]
-LOTUS_R = 0.64
-TOP_Z = 22.0
+FACE_H = 6.0
+HX_FACE, HY_FACE = 3.9, 3.0          # blocul fetelor: 7,8 x 6,0 m in plan (fetele +-Y pe latura de 7,8)
+BASE1 = (Z_BODY, 10.8, 5.25, 3.4)    # baza turnului: (z0, z1, jum. X, jum. Y), pe juge si aripa interioara
+BASE2 = (10.8, 11.4, 4.55, 3.2)
+Z_CHIN = 11.4
+Z_FACE_TOP = Z_CHIN + 1.2 * FACE_H            # 18,6
+TIERS = [(0.60, 2.70, 0.08), (0.56, 2.20, 0.08), (0.52, 1.70, 0.08), (0.46, 1.20, 0.08)]
+LOTUS_R = 0.70
+TOP_Z = 22.7
 
 AO_GATE = dict(samples=28, dist=1.1, gradient="vertical", low=0.60, high=1.0,
                power=0.85, floor=0.30, strength=1.35, z_range=(0.0, TOP_Z))
@@ -96,6 +96,15 @@ def wall_blocks(b, fr, u0, u1, z0, z1, courses, bw, proud=PROUD, gap=0.035, seed
 
 def rect_box(b, x0, x1, y0, y1, z0, z1):
     b.box(((x0 + x1) * 0.5, (y0 + y1) * 0.5, (z0 + z1) * 0.5), (x1 - x0, y1 - y0, z1 - z0), ANK_STONE)
+
+
+def rect_tower(b, z0, z1, hx, hy, courses, bw, seed=0):
+    """Corp dreptunghiular (hx x hy) cu blocuri in relief pe cele patru fete."""
+    rect_box(b, -hx + PROUD, hx - PROUD, -hy + PROUD, hy - PROUD, z0, z1)
+    wall_blocks(b, Frame((0, hy, 0), 0.0), -hx, hx, z0, z1, courses, bw, seed=seed)
+    wall_blocks(b, Frame((0, -hy, 0), 180.0), -hx, hx, z0, z1, courses, bw, seed=seed + 1)
+    wall_blocks(b, Frame((hx, 0, 0), 270.0), -hy, hy, z0, z1, courses, bw, seed=seed + 2)
+    wall_blocks(b, Frame((-hx, 0, 0), 90.0), -hy, hy, z0, z1, courses, bw, seed=seed + 3)
 
 
 # --- elefantul in relief ------------------------------------------------------------
@@ -187,9 +196,9 @@ def build_gate():
                 rot = Matrix.Rotation(math.radians((rnd() - 0.5) * 26), 3, "Z")
                 stone.box((x, y, zt + sz[2] * 0.5 - 0.02), sz, ANK_STONE, rotation=rot)
         # elefanti (x1,2): pe +Y si -Y, fata spre exterior; silueta s in [-1,62 .. 2,08] * ELE_H
-        x0 = sx * (7.05 - 0.28)
-        elephant(stone, Frame((x0, WALL_Y, Z_PLINTH), 0.0), sx, ELE_H)
-        elephant(stone, Frame((x0, -WALL_Y, Z_PLINTH), 180.0), -sx, ELE_H)
+        x0 = sx * (7.15 - 0.255)
+        elephant(stone, Frame((x0, WALL_Y, 0.0), 0.0), sx, ELE_H)
+        elephant(stone, Frame((x0, -WALL_Y, 0.0), 180.0), -sx, ELE_H)
 
     # --- 3. rama in trepte (relief), numai in afara golului ------------------------------
     for fy, outward in ((WALL_Y, 1), (-WALL_Y, -1)):
@@ -198,13 +207,19 @@ def build_gate():
                 rect_box(stone, x0, x1, fy - 0.02, fy + pr, z0, z1)
             else:
                 rect_box(stone, x0, x1, fy - pr, fy + 0.02, z0, z1)
+        # trei trepte de pilastri (relief 0,10 / 0,22 / 0,34 m), de la sol; toate la |x| >= JAMB
         for sx in (1, -1):
-            xa, xb = sorted((sx * JAMB, sx * (JAMB + 0.80)))
-            ybox(xa, xb, 0.12, Z_PLINTH, 8.8)                       # pilastru exterior
-            xa, xb = sorted((sx * JAMB, sx * (JAMB + 0.40)))
-            ybox(xa, xb, 0.24, Z_PLINTH, 8.6)                       # pilastru interior
-        ybox(-(JAMB + 0.80), JAMB + 0.80, 0.12, Z_UNDER, 8.8)     # grinda exterioara
-        ybox(-(JAMB + 0.40), JAMB + 0.40, 0.24, Z_UNDER, 8.6)     # grinda interioara
+            for wd, pr, zt in ((1.00, 0.10, 8.9), (0.65, 0.22, 8.7), (0.30, 0.34, 8.5)):
+                xa, xb = sorted((sx * JAMB, sx * (JAMB + wd)))
+                ybox(xa, xb, pr, 0.0, zt)
+        # grinzi in trepte deasupra golului, cu fata de jos la Z_UNDER sau mai sus
+        for wd, pr, zt in ((1.00, 0.10, 9.0), (0.65, 0.22, 8.8), (0.30, 0.34, 8.6)):
+            ybox(-(JAMB + wd), JAMB + wd, pr, Z_UNDER, zt)
+        # console: bucati in trepte pe cornisa, doar in afara golului
+        for sx in (1, -1):
+            for wd, pr, z0_, zt in ((1.15, 0.16, 9.0, 9.3), (0.80, 0.28, 9.0, 9.2)):
+                xa, xb = sorted((sx * JAMB, sx * (JAMB + wd)))
+                ybox(xa, xb, pr, z0_, zt)
 
     # --- buiandrugul + cornisa + parapet --------------------------------------------------
     rect_box(stone, -JAMB - 0.04, JAMB + 0.04, -WALL_Y + PROUD, WALL_Y - PROUD, Z_UNDER, Z_WALL - 0.02)
@@ -213,19 +228,18 @@ def build_gate():
     rect_box(stone, -JAMB, JAMB, -3.8, 3.8, Z_WALL, Z_BODY)
     sites.append((Z_BODY, 0.0, 0.0, JAMB, 3.5))
 
-    # --- 6. turnul ---------------------------------------------------------------------------
-    stone_box(stone, 0, 0, Z_SHAFT[0], Z_SHAFT[1], SHAFT_HALF - 0.04)
-    block_courses(stone, SHAFT_HALF, Z_SHAFT[0], Z_SHAFT[1], 2, 1.3, proud=0.04, seed=9)
-    streak_sites.append(("tower", Z_SHAFT[1], SHAFT_HALF, 10))
-    stone_box(stone, 0, 0, Z_SHAFT[1], Z_SHAFT[1] + 0.2, 2.02)
-    stone_box(stone, 0, 0, Z_SHAFT[1] + 0.2, Z_CHIN, 2.10)
-    stone_box(stone, 0, 0, Z_CHIN, Z_FACE_TOP, CORE_HALF)
+    # --- 6. turnul: baza larga (10,5 m) direct pe juge, blocul fetelor 7,8 x 6,0, etaje, boboc ----
+    tower_ledges = []
+    for (za, zb, hx, hy) in (BASE1, BASE2):
+        rect_tower(stone, za, zb, hx, hy, 1, 1.4, seed=int(za))
+        streak_sites.append(("rect", zb, hx, hy, 8))
+    rect_box(stone, -HX_FACE, HX_FACE, -HY_FACE, HY_FACE, Z_CHIN, Z_FACE_TOP)
     for k in range(4):
         fr = Frame((0.0, 0.0, 0.0), 90.0 * k)
-        face_relief(stone, fr.p(0.0, CORE_HALF, Z_CHIN), 90.0 * k, FACE_H)
-    stone_box(stone, 0, 0, Z_FACE_TOP, Z_FACE_TOP + 0.12, 2.02)
-    z = Z_FACE_TOP + 0.12
-    tower_ledges = [(Z_BODY, 2.2, 1.9), (Z_SHAFT[1] + 0.2, 2.02, 1.9), (z, 2.02, TIERS[0][1] + 0.08)]
+        face_relief(stone, fr.p(0.0, HY_FACE if k % 2 == 0 else HX_FACE, Z_CHIN), 90.0 * k, FACE_H)
+    rect_box(stone, -HX_FACE - 0.05, HX_FACE + 0.05, -HY_FACE - 0.05, HY_FACE + 0.05, Z_FACE_TOP, Z_FACE_TOP + 0.14)
+    z = Z_FACE_TOP + 0.14
+    tower_ledges.append((z, 2.95, TIERS[0][1] + 0.08))
     n_t = len(TIERS)
     for i, (th, half, ch) in enumerate(TIERS):
         z0 = z
@@ -291,16 +305,27 @@ def build_gate():
                     u = xu if yaw == 0.0 else -xu
                     streak(streaks, (fr.p(u, 0.0, 0.0).x, fy, zt_ - 0.42), yaw,
                            0.30 + 0.20 * rnd(), 0.8 + 0.9 * rnd(), 0.03, ANK_STREAK)
-    for (_, z_top, half, n) in streak_sites:
+    for site in streak_sites:
+        if site[0] == "rect":
+            _, z_top, hx, hy, n = site
+            for k in range(4):
+                fr = Frame((0, 0, 0), 90.0 * k)
+                hu, hw = (hx, hy) if k % 2 == 0 else (hy, hx)
+                for _ in range(n // 4):
+                    u = (rnd() * 2 - 1) * hu * 0.8
+                    p = fr.p(u, hw, 0.0)
+                    streak(streaks, (p.x, p.y, z_top - 0.02), 90.0 * k, 0.30 + 0.18 * rnd(),
+                           0.5 + 0.4 * rnd(), 0.03, ANK_STREAK)
+            continue
+        _, z_top, half, n = site
         for k in range(4):
             fr = Frame((0, 0, 0), 90.0 * k)
             cnt = n // 4 + (1 if k < n % 4 else 0)
             for _ in range(cnt):
                 u = (rnd() * 2 - 1) * half * 0.6
-                w = 0.30 + 0.16 * rnd()
-                ln = 0.55 + 0.55 * rnd()
                 p = fr.p(u, half, 0.0)
-                streak(streaks, (p.x, p.y, z_top - 0.02), 90.0 * k, w, ln, 0.03, ANK_STREAK)
+                streak(streaks, (p.x, p.y, z_top - 0.02), 90.0 * k, 0.30 + 0.16 * rnd(),
+                       0.55 + 0.55 * rnd(), 0.03, ANK_STREAK)
 
     return [stone.to_object("Gate_Stone"), lichen.to_object("Gate_Lichen"),
             streaks.to_object("Gate_Streak")]

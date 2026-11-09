@@ -1106,10 +1106,10 @@ blend_time = 0.35
     # coboara spre apa (-Y Blender = +Z model -> +Z lume = sud).
     decor_txt += put("SrahSrangDebarcader", "36_landing", RID, 50.0, 2.0, -(-112.0 - 10.5))
 
-    # Viata: tuk-tuk-uri parcate pe malul interior, langa gopura (fara corp: impingerea e decizie amanata,
-    # kit §1.6), calugari in fundal.
+    # Viata: tuk-tuk-uri parcate pe malul interior, langa gopura (remorca si motocicleta sunt BumpProp-uri cu
+    # masa proprie: `bump_parts`, vezi WorldProp.BUMP_PART_OPTS), calugari in fundal.
     for k_, (tx_, ty_) in enumerate(((-88.0, 14.0), (-84.0, 15.0), (-80.0, 14.5))):
-        decor_txt += put(f"TukTuk{k_}", "37_tuk", R90N, tx_, Y_CALE, -ty_)
+        decor_txt += put(f"TukTuk{k_}", "37_tuk", R90N, tx_, Y_CALE, -ty_, col="bump_parts")
         # cele doua radacini ale GLB-ului (kit §1.6) stau amandoua in origine: motocicleta se muta in
         # fata remorcii (-Z model = sensul de mers)
         decor_txt += (f'\n[node name="Moto" parent="DecorManual/TukTuk{k_}"]\n'
@@ -1195,6 +1195,7 @@ blend_time = 0.35
     flock_items = {}
     zone_files = [f"zona_{c_}" for c_ in "abcdefgh"] + ["jungla"]
     forest_zones, forest_glbs, forest_settings = [], {}, {}
+    smoke_pts, roost_pts = [], []
     print("\n  decorul per POI (tools/angkor_decor/):")
     for zf_ in zone_files:
         if not os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), "angkor_decor", zf_ + ".py")):
@@ -1206,6 +1207,16 @@ blend_time = 0.35
             forest_zones.append(dict(d_, label=d_.get("label", zf_)))
         forest_glbs.update(getattr(zm_, "FOREST_GLBS", {}))
         forest_settings.update(getattr(zm_, "FOREST_SETTINGS", {}))
+        # Teatrul (brief §3): SMOKE = [(frac, lateral, dy[, along])] surse de fum de tamaie, ROOSTS =
+        # [(frac, lateral, dy)] cuiburi de pasari (coronament); dy = metri peste cota drumului. Iese
+        # in COORDONATE DE LUME, ca emitatorul/stolul sa stea la origine (un singur nod pentru toate).
+        for it_ in getattr(zm_, "SMOKE", []):
+            along_ = float(it_[3]) if len(it_) > 3 else 0.0
+            gx_, gy0_, gz_, _tx, _ty, _sv = road_frame(it_[0], it_[1], along_)
+            smoke_pts.append((gx_, gy0_ + float(it_[2]), gz_))
+        for it_ in getattr(zm_, "ROOSTS", []):
+            gx_, gy0_, gz_, _tx, _ty, _sv = road_frame(it_[0], it_[1])
+            roost_pts.append((gx_, gy0_ + float(it_[2]), gz_))
         if not items_:
             continue
         zn_ = "Zona" + zf_.split("_")[-1].upper() if zf_.startswith("zona_") else "Jungla"
@@ -1312,6 +1323,21 @@ scenes = Array[PackedScene]([{scenes_txt}])
 zones = Array[ExtResource("mf_zone")]([{zones_txt}])
 {settings_txt}"""
         print(f"  padurea in masa: {len(forest_zones)} zone, specii {list(forest_glbs)}")
+    if smoke_pts:
+        zone_ext += '[ext_resource type="Script" path="res://scenes/props/incense_smoke.gd" id="smoke_script"]\n'
+        pts_ = ", ".join(f"{x_:.2f}, {y_:.2f}, {z_:.2f}" for x_, y_, z_ in smoke_pts)
+        zone_nodes += (f'\n[node name="FumTamaie" type="CPUParticles3D" parent="."]\n'
+                       f'script = ExtResource("smoke_script")\nsources = PackedVector3Array({pts_})\n')
+        print(f"  fum de tamaie: {len(smoke_pts)} surse")
+    if roost_pts:
+        zone_ext += ('[ext_resource type="Script" path="res://scenes/props/thunder_birds.gd" id="birds_script"]\n'
+                     '[ext_resource type="PackedScene" path="res://assets/models/okinawa/animals/egret.glb" id="birds_crow"]\n')
+        pts_ = ", ".join(f"{x_:.2f}, {y_:.2f}, {z_:.2f}" for x_, y_, z_ in roost_pts)
+        zone_nodes += (f'\n[node name="PasariTunet" type="MultiMeshInstance3D" parent="."]\n'
+                       f'script = ExtResource("birds_script")\nmodel = ExtResource("birds_crow")\nmesh_name = "Pose_Fly"\n'
+                       f'flash_path = NodePath("../Hazarduri/Fulger")\n'
+                       f'roosts = PackedVector3Array({pts_})\n')
+        print(f"  pasari la tunet: {len(roost_pts)} cuiburi")
     zone_ext += "".join(f'[ext_resource type="PackedScene" path="{p_}" id="{r_}"]\n' for p_, r_ in zone_glb.items())
     # ==== sfarsit DECORUL PER POI ========================================================================
     bias = [(IDX("E terasa V", BAYON_TOWERS[0][0] - 45.0),

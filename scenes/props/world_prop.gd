@@ -4073,19 +4073,34 @@ const HULL_SKIP_PARTS := {
 ## numelor de noduri. Restul modelului ramane hull static.
 const BUMP_PARTS := {"road_works": ["Works_Cone_"]}
 
+## Modul "bump_parts": ca BUMP_PARTS, dar cerut de piesa (metadata `coliziune`), nu de modelul
+## in sine, si cu optiuni per parte (`BumpProp.wrap(part, opts)`): masa si `home`. Cheia e stem-ul
+## .glb-ului, apoi prefixul numelui nodului. Tuk-tuk-ul Angkorului (brief §3): remorca si
+## motocicleta sunt radacini separate (fiecare sub 2 m), cu masa de masina de joc, nu de jucarie.
+const BUMP_PART_OPTS := {
+	"tuk_tuk": {
+		"Remorca": {"mass": 50.0, "home": true},
+		"Moto": {"mass": 25.0, "home": true},
+	},
+}
+
 
 ## Muta fiecare nod-parte sub un BumpProp si intoarce numele mesh-urilor mutate
 ## (hull-ul modelului le sare). Piesa pe care BumpProp refuza sa o ia (prea mare,
 ## plafon) ramane in hull.
-func _wrap_bump_parts(model: Node3D, prefixes: Array) -> Array:
+func _wrap_bump_parts(model: Node3D, prefixes: Array, opts_by_prefix: Dictionary = {}) -> Array:
 	var parts: Array[Node3D] = []
 	_find_parts(model, prefixes, parts)
 	var names: Array = []
 	for part in parts:
+		var opts := {}
+		for pre in opts_by_prefix:
+			if String(part.name).begins_with(String(pre)):
+				opts = opts_by_prefix[pre]
 		var mesh_names: Array = []
 		for mi in TrackDecor.visible_meshes(part, Transform3D.IDENTITY):
 			mesh_names.append(String((mi[0] as MeshInstance3D).name))
-		if BumpProp.wrap(part) != null:
+		if BumpProp.wrap(part, opts) != null:
 			names.append_array(mesh_names)
 	return names
 
@@ -4118,6 +4133,12 @@ func _build_collision() -> void:
 		var stem_bp := model.scene_file_path.get_file().get_basename()
 		if mode == "hull" and BUMP_PARTS.has(stem_bp):
 			bumped_meshes = _wrap_bump_parts(model, BUMP_PARTS[stem_bp])
+		elif mode == "bump_parts" and BUMP_PART_OPTS.has(stem_bp):
+			var by_pre: Dictionary = BUMP_PART_OPTS[stem_bp]
+			bumped_meshes = _wrap_bump_parts(model, by_pre.keys(), by_pre)
+			mode = "hull"
+		elif mode == "bump_parts":
+			mode = "hull"
 		if mode == "bump":
 			if BumpProp.wrap(model) != null:
 				continue
@@ -4702,7 +4723,7 @@ func _collect_models(node: Node, out: Array[Node3D]) -> void:
 ## "bump" (#489): piesa devine `BumpProp` — corp rigid usor, adormit, pe care
 ## masina il imprastie. Doar pentru piese mici (pragul e in BumpProp); una prea
 ## mare, sau peste plafonul pistei, cade pe "hull".
-const COLLISION_MODES := ["hull", "trunk", "mesh", "none", "bump"]
+const COLLISION_MODES := ["hull", "trunk", "mesh", "none", "bump", "bump_parts"]
 
 func _collision_mode(model: Node3D) -> String:
 	if model.has_meta(COLLISION_META):

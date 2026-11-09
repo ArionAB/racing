@@ -45,13 +45,28 @@ const SPAWN_LIFT_M: float = 0.03
 
 const PropDebris := preload("res://scenes/props/prop_debris.gd")
 
+## Cat sta o piesa „cu masa" (`opts.home`) neatinsa, oprita, inainte sa se intoarca la locul ei, si
+## de la ce distanta de orice masina (m) are voie sa o faca, ca sa nu se mute sub ochii cuiva.
+const HOME_DELAY_S: float = 5.0
+const HOME_CLEAR_M: float = 30.0
+
 var _spawn_y: float = 0.0
+var _home: Transform3D = Transform3D.IDENTITY
+var _home_back: bool = false
+var _home_pending: bool = false
 
 
 ## Muta `model` (deja in arbore, deja asezat) sub un BumpProp nou si il
 ## intoarce. Null daca piesa e prea mare, daca pista si-a atins plafonul sau
 ## daca modelul n-are geometrie — apelantul pastreaza atunci calea statica.
-static func wrap(model: Node3D) -> BumpProp:
+##
+## `opts` (toate optionale, implicitul = jucaria de 4 kg de mai sus):
+##   "mass"  masa in kg, ocolind densitatea de jucarie — pentru piese care trebuie sa
+##           cantareasca ca o masina (tuk-tuk-urile Angkorului: Buggy-ul (100 kg) le
+##           impinge greu, Autobuzul (260 kg) le arunca);
+##   "home"  true: dupa ce a fost lovita si s-a oprit, piesa se intoarce la locul ei
+##           (cand nicio masina nu e aproape), ca sa nu ramana blocaj pe drum.
+static func wrap(model: Node3D, opts: Dictionary = {}) -> BumpProp:
 	# In editor (Track e @tool) nu: fara simulare, corpul ar fi doar zgomot in
 	# arbore, iar scriptul asta nu ruleaza acolo.
 	if Engine.is_editor_hint() or model == null or not model.is_inside_tree():
@@ -79,11 +94,11 @@ static func wrap(model: Node3D) -> BumpProp:
 	var g := model.global_transform
 	body.global_transform = Transform3D(g.basis.orthonormalized(), g.origin)
 	model.reparent(body, true)
-	body._setup(model)
+	body._setup(model, opts)
 	return body
 
 
-func _setup(model: Node3D) -> void:
+func _setup(model: Node3D, opts: Dictionary = {}) -> void:
 	add_to_group(&"bump_props")
 	collision_layer = LAYER
 	# Lumea si masinile (stratul 1) + celelalte piese bump-abile.
@@ -107,6 +122,9 @@ func _setup(model: Node3D) -> void:
 	center_of_mass = shape.position
 	mass = clampf(aabb.size.x * aabb.size.y * aabb.size.z * 0.5 * DENSITY,
 		MIN_MASS, MAX_MASS)
+	if opts.has("mass"):
+		mass = float(opts["mass"])
+	_home_back = bool(opts.get("home", false))
 	var mat := PhysicsMaterial.new()
 	# 0,35, nu 0,7: un teanc inalt de 4 kg lovit jos se rastoarna peste capota
 	# si, cu frecare mare, se freca sub caroserie — masina cadea de la 13 la
@@ -122,13 +140,42 @@ func _setup(model: Node3D) -> void:
 	sleeping = true
 	set_physics_process(false)
 	sleeping_state_changed.connect(func() -> void:
-		set_physics_process(not sleeping))
+		set_physics_process(not sleeping)
+		if _home_back and sleeping:
+			_home_after_rest())
 	# Adormirea ceruta inainte ca corpul sa ajunga in spatiul fizic nu tine:
 	# masurat, la primul pas piesele erau TREZE — pe teren plat stateau, pe
 	# panta din piata Goreme alunecau pana la 1,7 m fara sa le atinga nimeni.
 	# Se reaplica dupa primul pas de fizica, cand corpul exista in Jolt.
 	get_tree().physics_frame.connect(func() -> void:
+		_home = global_transform
 		sleeping = true, CONNECT_ONE_SHOT)
+
+
+## Piesa cu `home`: la 5 s dupa ce a adormit, daca s-a mutat si nicio masina nu e la mai putin de
+## 30 m, se intoarce la locul ei (transformarea de la nastere), nemiscata. Altfel reincearca.
+func _home_after_rest() -> void:
+	if _home_pending or _home == Transform3D.IDENTITY:
+		return
+	if global_position.distance_to(_home.origin) < 0.4:
+		return
+	_home_pending = true
+	get_tree().create_timer(HOME_DELAY_S).timeout.connect(_try_home)
+
+
+func _try_home() -> void:
+	_home_pending = false
+	if not is_inside_tree() or not sleeping:
+		return # s-a trezit din nou: adormirea urmatoare reporneste numaratoarea
+	for c in get_tree().get_nodes_in_group(&"cars"):
+		if (c as Node3D).global_position.distance_to(global_position) < HOME_CLEAR_M:
+			_home_pending = true
+			get_tree().create_timer(HOME_DELAY_S).timeout.connect(_try_home)
+			return
+	linear_velocity = Vector3.ZERO
+	angular_velocity = Vector3.ZERO
+	global_transform = _home
+	sleeping = true
 
 
 ## Ruleaza doar cat corpul e treaz: piesa aruncata peste o faleza se sterge

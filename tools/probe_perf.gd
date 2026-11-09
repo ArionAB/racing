@@ -428,6 +428,7 @@ func _census(cam: Camera3D, track: Track, frac: float) -> void:
 	var planes := cam.get_frustum()
 	var cam_pos := cam.global_position
 	var by_class: Dictionary = {}
+	var by_species: Dictionary = {}
 	var total_mm := 0
 	for f in forests:
 		for c in f.get_children():
@@ -455,6 +456,12 @@ func _census(cam: Camera3D, track: Track, frac: float) -> void:
 			e[1] += (m.multimesh.mesh as Mesh).get_surface_count()
 			e[2] += m.multimesh.instance_count
 			by_class[cls] = e
+			# Triunghiuri (limita de sus: toate instantele MM-ului) pe specie x treapta.
+			var lod_i := {"full": 0, "mid": 1, "far": 2, "celula": 2, "bulgari": 3}[cls] as int
+			for stem: String in (f as MeshForest).tris_by_lod:
+				if nm.contains("_" + stem):
+					var key := "%s/%s" % [stem, cls]
+					by_species[key] = int(by_species.get(key, 0)) 						+ m.multimesh.instance_count * int((f as MeshForest).tris_by_lod[stem][lod_i])
 	var parts: PackedStringArray = []
 	var sm := 0
 	var ss := 0
@@ -464,6 +471,15 @@ func _census(cam: Camera3D, track: Track, frac: float) -> void:
 		sm += e[0]
 		ss += e[1]
 	print("  CENSUS frac %.2f: %d MM desenate din %d, %d suprafete | %s" % [frac, sm, total_mm, ss, " ".join(parts)])
+	var keys := by_species.keys()
+	keys.sort_custom(func(a, b): return by_species[a] > by_species[b])
+	var top: PackedStringArray = []
+	var tot := 0
+	for k in keys:
+		tot += int(by_species[k])
+	for k in keys.slice(0, 6):
+		top.append("%s %dk" % [k, int(by_species[k]) / 1000])
+	print("  CENSUS-TRI frac %.2f: ~%dk (limita de sus) | %s" % [frac, tot / 1000, ", ".join(top)])
 
 
 func _census_in_range(m: GeometryInstance3D, cam_pos: Vector3) -> bool:

@@ -125,6 +125,17 @@ extends Node3D
 ## triunghiuri; in sonda (profil telefon, frac 0,36-0,42) treapta intreaga
 ## dadea ~200k triunghiuri vizibile si INCA ~200k in umbra.
 @export var shadow_lod: bool = true
+## RARIREA FRUNZELOR (opt-in, Angkor, nov 2026). Specii (stem-uri) a caror coroana e un mic evantai
+## de fronde (palmierul: 50 de componente de ~40 de triunghiuri, 2110 in total) pe care generatorul de
+## LOD nu le poate simplifica (2330 -> 1502 si atat, de la 65 m la 330 m). Pentru ele, treptele
+## mediu si grosier pastreaza doar fiecare a `frond_*_every`-a frunza (ca la cardurile de bambus,
+## vezi `_every_nth_component`), iar trunchiul ramane pe nivelul generat. Gol = comportamentul vechi
+## (Kyoto, Carrara nu il folosesc).
+@export var frond_thin_species: PackedStringArray = PackedStringArray()
+## Pasul rarirei pe treapta grosiera / medie a speciilor din `frond_thin_species`
+## (1 = toate, 2 = fiecare a doua, 3 = fiecare a treia).
+@export_range(1, 6) var frond_far_every: int = 3
+@export_range(1, 6) var frond_mid_every: int = 1
 ## Cat intra trunchiul in pamant (m): relieful palpaie sub radacina.
 @export_range(0.0, 1.0, 0.01, "suffix:m") var sink_m: float = 0.25
 ## Cat de mult mai multa marja fata de o sosea obisnuita cere o scurtatura
@@ -465,7 +476,7 @@ const LOD_AABB_GROW_M: float = 0.5
 ##     fel cu o parte din carduri, deci se RARESC: mediu 1 din 2, departe 1 din 3.
 ## Coroanele de artar/ginkgo (9 componente de 280-320) raman pe generator.
 static func _lod_variants(src: Mesh, mid_ratio: float = MID_LOD_RATIO_DEFAULT,
-		far_min_ratio: float = 0.0) -> Dictionary:
+		far_min_ratio: float = 0.0, thin_far_every: int = 0, thin_mid_every: int = 2) -> Dictionary:
 	var im := ImporterMesh.new()
 	for si in src.get_surface_count():
 		im.add_surface(Mesh.PRIMITIVE_TRIANGLES, src.surface_get_arrays(si), [], {}, src.surface_get_material(si))
@@ -513,6 +524,11 @@ static func _lod_variants(src: Mesh, mid_ratio: float = MID_LOD_RATIO_DEFAULT,
 			if comps["cards"] == true:
 				arr_far = _every_nth_component(arr, comps, CARD_FAR_EVERY)
 				arr_mid = _every_nth_component(arr, comps, CARD_MID_EVERY)
+			elif thin_far_every > 0 and (comps["tris"] as PackedInt32Array).size() >= CARDS_MIN_COMPONENTS:
+				# Evantai de fronde cu mai mult de CARDS_MAX_TRIS triunghiuri pe componenta
+				# (`frond_thin_species`): aceeasi rarire ca la carduri, cu pasul cerut.
+				arr_far = _every_nth_component(arr, comps, thin_far_every)
+				arr_mid = _every_nth_component(arr, comps, thin_mid_every)
 			elif not stalks.is_empty():
 				arr_far = _with_prisms(arr, comps, far_idx)
 				arr_mid = _with_prisms(arr, comps, mid_idx)
@@ -972,7 +988,8 @@ func _species_meshes(ps: PackedScene, stem: String, theme: String) -> Dictionary
 			src = WorldProp._mesh_with_slots_moved(src, remap)
 		var levels := {"full": src, "mid": src, "far": src}
 		if lod_m > 0.0:
-			var lv := _lod_variants(src, mid_lod_ratio, far_lod_min_ratio)
+			var lv := _lod_variants(src, mid_lod_ratio, far_lod_min_ratio,
+				frond_far_every if frond_thin_species.has(stem) else 0, frond_mid_every)
 			levels["mid"] = lv.get("mid", src)
 			levels["far"] = lv.get("far", src)
 			any_lod = any_lod or levels["mid"] != src or levels["far"] != src

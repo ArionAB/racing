@@ -24,6 +24,14 @@ FOREST_GLBS = {
     'bamboo_clump': 'res://assets/models/halong/plants/bamboo_clump.glb',
 }
 
+# Reglaje MeshForest pentru PadureMasa (proprietati de export emise in .tscn; vezi scenes/props/mesh_forest.gd).
+# Valorile sunt literale GDScript. Palmierul de zahar are evantaiul de fronde pe care generatorul de LOD nu-l
+# simplifica (2330 -> 1502 triunghiuri si atat), iar etajul de mijloc e in cadru la orice distanta: i se rarasc
+# frunzele pe treptele mediu (fiecare a 2-a) si grosier (fiecare a 3-a). Vezi docs/track_briefs/angkor_padure_cost.md.
+FOREST_SETTINGS = {
+    'frond_thin_species': 'PackedStringArray("sugar_palm")',
+}
+
 import random
 
 _CANOPY = ('tetrameles_a', 'tetrameles_b', 'dipterocarp', 'strangler_fig')

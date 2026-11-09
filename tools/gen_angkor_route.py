@@ -1170,7 +1170,7 @@ blend_time = 0.35
     FLOCK_CELL_M = 100.0
     flock_items = {}
     zone_files = [f"zona_{c_}" for c_ in "abcdefgh"] + ["jungla"]
-    forest_zones, forest_glbs = [], {}
+    forest_zones, forest_glbs, forest_settings = [], {}, {}
     print("\n  decorul per POI (tools/angkor_decor/):")
     for zf_ in zone_files:
         if not os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), "angkor_decor", zf_ + ".py")):
@@ -1181,6 +1181,7 @@ blend_time = 0.35
         for d_ in getattr(zm_, "FOREST", []):
             forest_zones.append(dict(d_, label=d_.get("label", zf_)))
         forest_glbs.update(getattr(zm_, "FOREST_GLBS", {}))
+        forest_settings.update(getattr(zm_, "FOREST_SETTINGS", {}))
         if not items_:
             continue
         zn_ = "Zona" + zf_.split("_")[-1].upper() if zf_.startswith("zona_") else "Jungla"
@@ -1279,12 +1280,13 @@ seed_value = {int(d_.get('seed', k_ + 1))}
                              f"lat_min = {float(d_['lat_min'])}\nlat_max = {float(d_['lat_max'])}\n")
         scenes_txt = ", ".join(f'ExtResource("mf_{x_}")' for x_ in forest_glbs)
         zones_txt = ", ".join(f'SubResource("MFZ_{k_}")' for k_ in range(len(forest_zones)))
+        settings_txt = "".join(f"{k_} = {v_}\n" for k_, v_ in forest_settings.items())
         zone_nodes += f"""
 [node name="PadureMasa" type="Node3D" parent="."]
 script = ExtResource("mf_script")
 scenes = Array[PackedScene]([{scenes_txt}])
 zones = Array[ExtResource("mf_zone")]([{zones_txt}])
-"""
+{settings_txt}"""
         print(f"  padurea in masa: {len(forest_zones)} zone, specii {list(forest_glbs)}")
     zone_ext += "".join(f'[ext_resource type="PackedScene" path="{p_}" id="{r_}"]\n' for p_, r_ in zone_glb.items())
     # ==== sfarsit DECORUL PER POI ========================================================================

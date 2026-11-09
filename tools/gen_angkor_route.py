@@ -844,13 +844,14 @@ metadata/coliziune = "mesh"
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, {r2(gpx_)}, {r2(elev_at(gs_))}, {r2(-gpy_)})
 metadata/coliziune = "mesh"
 """
-    # Gopura de nord (B): aceeasi piesa ca la vest, nescalata (golul 10 m pentru drumul de 9 m, ca la vest). Soseaua
+    # Gopura de nord (B): aceeasi piesa ca la vest, LATA de 1,25 ori (golul 12,5 m; la 1,0 ProbeRace a dat o ejectare pe
+    # stalpul drept la 27,6 m/s: dupa arcul R30 masinile ajung la gopura cu doar ~30 m de dreapta). Soseaua
     # merge spre -Z Godot, adica exact pe -Z al modelului: rotatie identitate, lungimea (X, 52 m) de-a curmezisul.
     gns_ = s_near(-56.0, GOPURA_N_Y)
     gnx_, gny_ = pos_at(gns_)
     decor_txt += f"""
 [node name="GopuraNord" parent="DecorManual" instance=ExtResource("15_gopura")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {r2(gnx_)}, {r2(elev_at(gns_))}, {r2(-gny_)})
+transform = Transform3D(1.25, 0, 0, 0, 1, 0, 0, 0, 1, {r2(gnx_)}, {r2(elev_at(gns_))}, {r2(-gny_)})
 metadata/coliziune = "mesh"
 """
     # Poarta-copac: la intrarea ramurii, care merge spre S (+Z Godot) -> rotatie de 180 de grade, LATA de

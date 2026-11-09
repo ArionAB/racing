@@ -4184,7 +4184,7 @@ transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -97.5, 3.82, -0.0)
 metadata/coliziune = "mesh"
 
 [node name="GopuraNord" parent="DecorManual" instance=ExtResource("15_gopura")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -56.0, 4.0, -68.0)
+transform = Transform3D(1.25, 0, 0, 0, 1, 0, 0, 0, 1, -56.0, 4.0, -68.0)
 metadata/coliziune = "mesh"
 
 [node name="PoartaCopac" parent="DecorManual" instance=ExtResource("16_treegate")]

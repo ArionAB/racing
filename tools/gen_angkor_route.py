@@ -1159,6 +1159,10 @@ blend_time = 0.35
         return X, Y, Z
 
     # Zonele INAINTEA junglei: luminisurile lor (disc cu `claim`, fara specii) scot padurea din piete/temple.
+    FLOCK_GLBS = {"lotus_cluster.glb": (("Lotus_Flowers", "LotusFlori"), ("Lotus_Leaves", "LotusFrunze")),
+                  "water_lily_pads.glb": (("Lily_Pads", "Nuferi"),)}
+    FLOCK_CELL_M = 100.0
+    flock_items = {}
     zone_files = [f"zona_{c_}" for c_ in "abcdefgh"] + ["jungla"]
     forest_zones, forest_glbs = [], {}
     print("\n  decorul per POI (tools/angkor_decor/):")
@@ -1190,6 +1194,15 @@ blend_time = 0.35
                 fx_, fz_ = tx_, -ty_
             gy_ = opt_.get("y", kit_y_.get(nm_, gy0_ + float(opt_.get("dy", -0.3))))
             X_, Y_, Z_ = yaw_basis(fx_, fz_, float(yaw_), k_)
+            if (os.path.basename(path_) in FLOCK_GLBS and opt_.get("coliziune") == "none"
+                    and not any(x_ in opt_ for x_ in ("child", "anchor", "scufundat"))):
+                # Lotusi/nuferi: sute de piese identice, fara corp -> stol MultiMesh pe celule (FlockProp), nu noduri.
+                # Aceeasi transformare ca nodul: Basis(UP, yaw) * scala, yaw din coloana X (cos, 0, -sin).
+                yawf_ = math.atan2(-X_[2] / k_, X_[0] / k_)
+                flock_items.setdefault((os.path.basename(path_), int(math.floor(gx_ / FLOCK_CELL_M)),
+                                        int(math.floor(gz_ / FLOCK_CELL_M))), []).append(
+                    (r2(gx_), r2(gy_), r2(gz_), round(yawf_, 4), k_))
+                continue
             zone_nodes += (f'\n[node name="{nm_}" parent="DecorManual/{zn_}" instance=ExtResource("{zone_rid(path_)}")]\n'
                            f"transform = Transform3D({_rows(X_, Y_, Z_)}, {r2(gx_)}, {r2(gy_)}, {r2(gz_)})\n")
             if "coliziune" in opt_:
@@ -1204,6 +1217,20 @@ blend_time = 0.35
                 zone_nodes += (f'\n[node name="{cn_}" parent="DecorManual/{zn_}/{nm_}"]\n'
                                f"transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {cp_[0]}, {cp_[1]}, {cp_[2]})\n")
             print(f"    {zn_}/{nm_:22s} frac {F_s(sv_)[0]:.4f} lat {lat_:+6.1f} y {gy_:7.2f} (drum {elev_at(sv_):6.2f})")
+
+    if flock_items:
+        zone_ext += '[ext_resource type="Script" path="res://scenes/props/flock.gd" id="flock_script"]\n'
+        zone_nodes += '\n[node name="Lotusi" type="Node3D" parent="DecorManual"]\n'
+        for (g_, cx_, cz_), its_ in sorted(flock_items.items()):
+            rid_ = zone_rid("plants/" + g_)
+            for mn_, tag_ in FLOCK_GLBS[g_]:
+                zone_nodes += (f'\n[node name="{tag_}_{cx_}_{cz_}" type="MultiMeshInstance3D" parent="DecorManual/Lotusi"]\n'
+                               f'script = ExtResource("flock_script")\nmodel = ExtResource("{rid_}")\nmesh_name = "{mn_}"\n'
+                               "positions = PackedVector3Array(%s)\n" % ", ".join(f"{a_}, {b_}, {c_}" for a_, b_, c_, _y, _k in its_) +
+                               "yaws = PackedFloat32Array(%s)\n" % ", ".join(str(y_) for _a, _b, _c, y_, _k in its_) +
+                               "scale3_list = Array[Vector3]([%s])\n" % ", ".join(f"Vector3({k_}, {k_}, {k_})" for *_x, k_ in its_) +
+                               "snap_to_ground = false\n")
+        print(f"  lotusi in stoluri: {sum(len(v_) for v_ in flock_items.values())} piese, {len(flock_items)} celule")
 
     if forest_zones:
         zone_ext += ('[ext_resource type="Script" path="res://scenes/props/mesh_forest.gd" id="mf_script"]\n'

@@ -1108,8 +1108,8 @@ const CLASS_TINT := {
 	# ~(1, 0.53, 0.19)) lasa B aproape de zero, si piatra iesea H 29 S 0.85. Tinta NU e un multiplicator <= 1:
 	# valorile > 1 sunt voite (compenseaza soarele; Godot nu le taie). Masurat pe fata la soare a turnului
 	# Bayon: H 29 S 0.85 V 0.65 -> H 36 S 0.65 V 0.56 (diorama: H 31-33 S 0.65-0.70 V 0.6). Mai mult albastru
-	# (B 1.30) lasa fetele din umbra (ambient violet dinspre est) albastru-regal; 1.04 le tine gri-neutru.
-	"angkor_sandstone": Color(0.96, 1.01, 1.04),
+	# Final (0.98, 0.97, 0.93): B 1.04 dadea umbre gri-albastru (H 180-250, 'Machu Picchu 2'); la (1.0, 0.94, 0.84) lumina iesea S 0.75-0.80.
+	"angkor_sandstone": Color(0.98, 0.97, 0.93),
 	# Granitul Serengeti — valoare de INTEGRARE, nu a unui singur POI.
 	# Sase bucati au masurat aceeasi clasa independent, pe capturi diferite:
 	# A (0.50,0.56,0.68), B (0.56,0.60,0.68), C (0.520,0.578,0.723),

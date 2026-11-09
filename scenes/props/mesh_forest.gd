@@ -161,6 +161,8 @@ var tris_by_species: Dictionary = {}
 var tris_by_lod: Dictionary = {}
 var total_tris: int = 0
 var build_ms: int = 0
+## Cat a durat fiecare faza a constructiei (ms): prepare, species, fill, emit.
+var phase_ms: Dictionary = {}
 ## Cate candidate au picat si de ce (diagnostic).
 var rejected: Dictionary = {}
 
@@ -182,6 +184,7 @@ var _species_mid: Dictionary = {}    # stem -> ArrayMesh la nivelul MEDIU (sau a
 var _species_far: Dictionary = {}    # stem -> ArrayMesh la cel mai grosier (sau acelasi)
 var _species_xfar: Dictionary = {}   # stem -> ArrayMesh cu bulgari (sau acelasi cu far)
 var _species_tris: Dictionary = {}   # stem -> int
+var _check_edge: float = 0.0         # distanta la margine a ultimului candidat din `_check`
 var _claims: Array[Vector3] = []     # (x, z, raza) ale zonelor cu claim
 var _bounds: Rect2 = Rect2()
 var _terrain_bounds: Rect2 = Rect2()
@@ -236,6 +239,8 @@ func _build() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--forest-far-cell="):
 			far_cell_m = float(a.trim_prefix("--forest-far-cell="))
+		elif a.begins_with("--forest-slice="):
+			slice_m = float(a.trim_prefix("--forest-slice="))
 		elif a.begins_with("--forest-xfar="):
 			xfar_m = float(a.trim_prefix("--forest-xfar="))
 		elif a.begins_with("--forest-far-shadow="):
@@ -254,18 +259,22 @@ func _build() -> void:
 			shadow_lod = a.trim_prefix("--forest-shadow-lod=") == "1"
 	_sampler = track.get("_sampler") as TrackSideSampler
 	_prepare(track)
+	var t1 := Time.get_ticks_msec()
 	var theme := String(track.theme_decor)
 	_build_species(theme)
+	var t2 := Time.get_ticks_msec()
 	var groups: Dictionary = {}
 	var main := track.route_at(0)
 	for zi in zones.size():
 		_fill_zone(zi, zones[zi], track, main, groups)
+	var t3 := Time.get_ticks_msec()
 	_emit(groups)
 	build_ms = Time.get_ticks_msec() - t0
+	phase_ms = {"prepare": t1 - t0, "species": t2 - t1, "fill": t3 - t2, "emit": t0 + build_ms - t3}
 	done = true
 	if verbose:
-		print("MeshForest %s: %d instante, %d felii, %d MultiMesh de celule, %d triunghiuri totale, %d ms | specii %s | LOD tri/instanta (intreg, mediu, grosier, bulgari) %s | zone %s | respinse %s" % [
-			name, instance_count, slice_count, hlod_count, total_tris, build_ms,
+		print("MeshForest %s: %d instante, %d felii, %d MultiMesh de celule, %d triunghiuri totale, %d ms %s | specii %s | LOD tri/instanta (intreg, mediu, grosier, bulgari) %s | zone %s | respinse %s" % [
+			name, instance_count, slice_count, hlod_count, total_tris, build_ms, phase_ms,
 			counts_by_species, tris_by_lod, counts_by_zone, rejected])
 	built.emit()
 
@@ -1101,10 +1110,12 @@ func _fill_zone(zi: int, z: MeshForestZone, track: Track, main: TrackRoute,
 		if gy < _sea_y + 1.0:
 			_reject("sub_mare")
 			continue
-		var edge := _edge_dist(c)
+		# `_check` a calculat deja distanta pana la margine (ultimul candidat trecut de el).
+		var edge := _check_edge
 		if z.max_below_road_m < 199.0:
-			# Cota soselei in dreptul punctului: cel mai apropiat punct copt.
-			var ri := main.closest_index_global(Vector3(c.x, 0.0, c.y))
+			# Cota soselei in dreptul punctului: cel mai apropiat punct copt
+			# (acelasi rezultat ca `closest_index_global`, vezi `_nearest_baked`).
+			var ri := _nearest_baked(main, Vector3(c.x, 0.0, c.y))
 			if gy < main.baked[ri].y - z.max_below_road_m:
 				_reject("sub_drum")
 				continue
@@ -1148,6 +1159,61 @@ func _fill_zone(zi: int, z: MeshForestZone, track: Track, main: TrackRoute,
 	counts_by_zone[z.label] = placed
 	if z.claim and z.kind == MeshForestZone.Kind.DISC:
 		_claims.append(Vector3(z.center.x, z.center.z, z.radius))
+
+
+## Cel mai apropiat punct copt al rutei: ACELASI index ca `TrackRoute.closest_index_global`
+## (distanta 3D la patrat calculata cu aceeasi expresie, egalitatile le castiga indexul mai
+## mic), dar printr-o grila XZ in loc de scanarea intreaga — 5.300 de apeluri pe Angkor
+## costau 0,22 s. Inelele de celule se largesc pana cand nicio celula neatinsa nu mai
+## poate avea un punct mai aproape decat cel mai bun gasit (distanta 3D >= distanta XZ).
+const _NEAR_CELL: float = 32.0
+var _near_route: TrackRoute = null
+var _near_grid: Dictionary = {}
+var _near_lo: Vector2i = Vector2i.ZERO
+var _near_hi: Vector2i = Vector2i.ZERO
+
+
+func _nearest_baked(route: TrackRoute, pos: Vector3) -> int:
+	if route.baked.is_empty():
+		return 0
+	if _near_route != route:
+		_near_route = route
+		_near_grid.clear()
+		_near_lo = Vector2i(1 << 30, 1 << 30)
+		_near_hi = Vector2i(-(1 << 30), -(1 << 30))
+		for i in route.baked.size():
+			var b := route.baked[i]
+			var k := Vector2i(floori(b.x / _NEAR_CELL), floori(b.z / _NEAR_CELL))
+			_near_lo = Vector2i(mini(_near_lo.x, k.x), mini(_near_lo.y, k.y))
+			_near_hi = Vector2i(maxi(_near_hi.x, k.x), maxi(_near_hi.y, k.y))
+			var ids: PackedInt32Array = _near_grid.get(k, PackedInt32Array())
+			ids.append(i)
+			_near_grid[k] = ids
+	var cx := floori(pos.x / _NEAR_CELL)
+	var cy := floori(pos.z / _NEAR_CELL)
+	var best := -1
+	var best_d := INF
+	# Razele pana la acoperirea intregii grile, cel mult.
+	var max_r := maxi(maxi(absi(cx - _near_lo.x), absi(cx - _near_hi.x)),
+		maxi(absi(cy - _near_lo.y), absi(cy - _near_hi.y)))
+	for r in max_r + 1:
+		# Orice punct din inelul r (sau mai departe) e la >= (r - 1) celule in XZ.
+		var floor_d := float(r - 1) * _NEAR_CELL
+		if best >= 0 and floor_d > 0.0 and floor_d * floor_d > best_d:
+			break
+		for dx in range(-r, r + 1):
+			for dy in range(-r, r + 1):
+				if maxi(absi(dx), absi(dy)) != r:
+					continue
+				var ids: Variant = _near_grid.get(Vector2i(cx + dx, cy + dy))
+				if ids == null:
+					continue
+				for i: int in (ids as PackedInt32Array):
+					var d := pos.distance_squared_to(route.baked[i])
+					if d < best_d or (d == best_d and i < best):
+						best_d = d
+						best = i
+	return maxi(best, 0)
 
 
 ## Puncte candidate (XZ) cu zgomot, in zona ceruta.
@@ -1223,7 +1289,8 @@ func _check(c: Vector2, z: MeshForestZone, min_sep: float) -> String:
 		return "zidul_lumii"
 	if not _terrain_bounds.has_point(c):
 		return "peste_panza"
-	if _edge_dist(c) < z.edge_clear_m:
+	_check_edge = _edge_dist(c)
+	if _check_edge < z.edge_clear_m:
 		return "pe_drum"
 	for cl in _claims:
 		if c.distance_squared_to(Vector2(cl.x, cl.y)) < cl.z * cl.z:

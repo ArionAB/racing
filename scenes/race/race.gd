@@ -123,6 +123,10 @@ func _ready() -> void:
 ## abia la urma pornesc numaratoarea si fizica de cursa. Vezi LoadingScreen.
 func _load_behind_screen() -> void:
 	state = State.LOADING
+	GameState.load_trace_begin("%s | houses %s, forest %s" % [
+		GameState.TRACK_SCENES[GameState.selected_track].get_file(),
+		GameState.DBG_BUILD_NAMES[GameState.dbg_build_houses],
+		GameState.DBG_BUILD_NAMES[GameState.dbg_build_forest]])
 	var screen := LoadingScreen.new()
 	screen.track_index = GameState.selected_track
 	add_child(screen)
@@ -135,12 +139,15 @@ func _load_behind_screen() -> void:
 		GameState.go_to_menu()
 		return
 	screen.watch_build(t)
+	GameState.load_trace("track _ready (build)...")
 	_mount_track(t)
+	GameState.load_trace("cars, HUD...")
 	_setup_race()
 	screen.end_phase(&"masini")
 	# Numaratoarea porneste cand ecranul incepe sa se ridice, nu inainte:
 	# cadrele de incalzire nu au voie sa manance din READY?/3/2/1.
 	await screen.finish()
+	GameState.load_trace("countdown")
 	state = State.COUNTDOWN
 
 
@@ -432,6 +439,8 @@ func _tick_countdown(delta: float) -> void:
 
 func _go() -> void:
 	state = State.RUNNING
+	# Cursa a pornit: casele/padurea (construite amanat) au avut tot numaratul.
+	GameState.load_trace_end()
 	if _ghost_recorder != null:
 		_ghost_recorder.start()
 	if _ghost_car != null:

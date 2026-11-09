@@ -121,3 +121,12 @@ FOREST = (
     + _ring('subarboret margine', lat_min=6.0, lat_max=26.0, spacing=2.9, edge_clear_m=2.0, shadow_m=0.0,
             species=_UNDER, weights=_UNDER_W, scale_min=0.9, scale_max=1.5, seed=104)
 )
+
+
+# Teatrul (brief §3): cuiburile stolului de egrete care se ridica la tunet (`ThunderBirds`). Doar unde
+# jungla inconjoara drumul (A, D, G, H): pe terasa Bayonului, la Bakheng si in piata nu exista coronament
+# de ridicat pasari. Alternat stanga/dreapta, 25-29 m de axa, 15 m peste cota drumului (coronamentul).
+ROOSTS = []
+for _k, _f in enumerate([0.012, 0.030, 0.048, 0.335, 0.355, 0.375, 0.392, 0.665, 0.690, 0.715, 0.740,
+                         0.775, 0.800, 0.825, 0.850, 0.875, 0.900, 0.925, 0.950, 0.975]):
+    ROOSTS.append((_f, (-27.0 if _k % 2 == 0 else 27.0) + (_k % 3) * 1.5, 15.0))

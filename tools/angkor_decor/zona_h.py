@@ -141,7 +141,7 @@ for k, (x, z) in enumerate(_basin_palms):
 
 # 6) Tuk-tuk-uri pe debarcader, intre cei doi lei (originea platformei y = 2,0; x 43..57, z 118,5..126,6).
 for k, x in enumerate((46.2, 50.0, 53.8)):
-    ITEMS.append(_wplace(f"H_TukL{k}", "vehicles/tuk_tuk.glb", x, 122.0, 90.0, y=2.0, coliziune="none", child={"Moto": (0, 0, -1.95)}))
+    ITEMS.append(_wplace(f"H_TukL{k}", "vehicles/tuk_tuk.glb", x, 122.0, 90.0, y=2.0, coliziune="bump_parts", child={"Moto": (0, 0, -1.95)}))
 
 KIT_Y = {
     "H_BPalm0": 1.06,

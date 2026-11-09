@@ -1103,8 +1103,13 @@ const CLASS_TINT := {
 	# (H 196, S 0.25 — "gheata albastra" la criticii orbi ai mostrei). Acum tenta e aproape
 	# NEUTRA (usor mai putin albastra decat verdele), iar ambientul mai putin saturat.
 	"carrara_marble": Color(0.76, 0.765, 0.75),
-	# Gresia Angkor: gri-ocru cald (testul de loc). Provizoriu, se calibreaza pe captura pistei.
-	"angkor_sandstone": Color(1.0, 0.86, 0.66),
+	# Gresia Angkor, calibrata pe captura (9 nov 2026, decizia dezvoltatorului: piatra veche, nu teracota).
+	# Culoarea NU vine din tinta veche (1.0, 0.86, 0.66) peste dala: soarele temei (FFC078 x 1.75, in liniar
+	# ~(1, 0.53, 0.19)) lasa B aproape de zero, si piatra iesea H 29 S 0.85. Tinta NU e un multiplicator <= 1:
+	# valorile > 1 sunt voite (compenseaza soarele; Godot nu le taie). Masurat pe fata la soare a turnului
+	# Bayon: H 29 S 0.85 V 0.65 -> H 36 S 0.65 V 0.56 (diorama: H 31-33 S 0.65-0.70 V 0.6). Mai mult albastru
+	# (B 1.30) lasa fetele din umbra (ambient violet dinspre est) albastru-regal; 1.04 le tine gri-neutru.
+	"angkor_sandstone": Color(0.96, 1.01, 1.04),
 	# Granitul Serengeti — valoare de INTEGRARE, nu a unui singur POI.
 	# Sase bucati au masurat aceeasi clasa independent, pe capturi diferite:
 	# A (0.50,0.56,0.68), B (0.56,0.60,0.68), C (0.520,0.578,0.723),

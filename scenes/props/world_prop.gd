@@ -2365,7 +2365,15 @@ const CLASSES_ANGKOR := {
 	"gallery_column": {"GalleryColumn_Stone": _ANK_SANDSTONE},
 	"gallery_roof": {"GalleryRoof_Stone": _ANK_SANDSTONE},
 	"gallery_relief_wall": {"GalleryRelief_Stone": _ANK_SANDSTONE},
-	"bakheng_shrine_tower": {"BakhengShrine_Stone": _ANK_SANDSTONE},
+	# Brick-ul turnulețelor (rânduri cioplite în mesh, slot teracotă) iese cărămiziu-închis; critica
+	# de POI: "citesc teracotă / maya". Ia aceeași gresie (zero material nou).
+	"bakheng_shrine_tower": {"BakhengShrine_Stone": _ANK_SANDSTONE,
+		"BakhengShrine_Brick": _ANK_SANDSTONE},
+	# Etajele templului-munte, colțul de galerie și piatra rampei de rădăcini rămăseseră pe atlas
+	# (slot portocaliu, fără asize): terasa "cherestea" și piramida portocalie din capturi.
+	"bakheng_terrace_tier": {"BakhengTier_Stone": _ANK_SANDSTONE},
+	"gallery_corner": {"GalleryCorner_Stone": _ANK_SANDSTONE},
+	"giant_root_ramp": {"Root_Stone": _ANK_SANDSTONE},
 	"bakheng_side_stair": {"BakhengStair_Stone": _ANK_SANDSTONE},
 	"srah_srang_landing": {"Landing_Stone": _ANK_SANDSTONE},
 	"rubble_pile": {"Rubble_Stone": _ANK_SANDSTONE},
@@ -3675,6 +3683,76 @@ func _apply_theme_classes() -> void:
 	if not CLASSES_BY_THEME.has(theme):
 		return
 	_apply_classes_mapping(CLASSES_BY_THEME[theme])
+	if theme == "angkor":
+		_moss_angkor_stone()
+
+
+## MUSCHIUL gresiei Angkor (decizia dezvoltatorului, 9 nov 2026: "piatra veche, nu teracota").
+##
+## Mecanism: culoarea de vertex a nodurilor `*_Stone` (clasa triplanara o inmulteste peste albedo,
+## deci doar INTUNECA: se coboara R si B, G ramane, iar piatra devine verde-masliniu) cu o greutate
+## din doua surse: INALTIMEA locala (randurile de jos, unde sta apa) si AO-ul copt in vertecsi
+## (rosturile si cutele, unde adunarea de umezeala e reala). Zero materiale si zero texturi:
+## aceeasi clasa partajata, doar culoarea de vertex; LOD-urile sursei se poarta (`surface_lods`).
+## Nodurile `*_Lichen` raman pe atlas (pete mici portocalii / verzui pe orizontale).
+const _MOSS_STONE_COLOR := Color(0.58, 0.80, 0.48)
+const _MOSS_HEIGHT_LO_M := 0.35
+const _MOSS_HEIGHT_HI_M := 2.6
+const _MOSS_HEIGHT_W := 0.65
+const _MOSS_AO_FROM := 0.62
+const _MOSS_AO_TO := 0.32
+const _MOSS_AO_W := 0.55
+static var _moss_cache: Dictionary = {}
+
+
+func _moss_angkor_stone() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var stem := model.scene_file_path.get_file().get_basename()
+		if not CLASSES_ANGKOR.has(stem):
+			continue
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null or mi.mesh == null:
+				continue
+			var nm := String(mi.name)
+			if not nm.contains("_Stone") or mi.material_override == null:
+				continue
+			mi.mesh = _mesh_with_moss(mi.mesh)
+
+
+static func _mesh_with_moss(src: Mesh) -> Mesh:
+	if _moss_cache.has(src):
+		return _moss_cache[src]
+	var out := ArrayMesh.new()
+	for s in src.get_surface_count():
+		var arr := MeshCpu.surface_arrays(src, s)
+		var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var cols: PackedColorArray = arr[Mesh.ARRAY_COLOR]
+		if cols.is_empty():
+			cols = PackedColorArray()
+			cols.resize(verts.size())
+			cols.fill(Color.WHITE)
+		for i in cols.size():
+			var c := cols[i]
+			var wh := (1.0 - smoothstep(_MOSS_HEIGHT_LO_M, _MOSS_HEIGHT_HI_M, verts[i].y)) * _MOSS_HEIGHT_W
+			var wa := smoothstep(_MOSS_AO_FROM, _MOSS_AO_TO, c.r) * _MOSS_AO_W
+			var w := clampf(wh + wa, 0.0, 1.0)
+			cols[i] = Color(c.r * lerpf(1.0, _MOSS_STONE_COLOR.r, w),
+				c.g * lerpf(1.0, _MOSS_STONE_COLOR.g, w),
+				c.b * lerpf(1.0, _MOSS_STONE_COLOR.b, w), c.a)
+		arr[Mesh.ARRAY_COLOR] = cols
+		MeshCpu.add_surface(out, arr, MeshCpu.surface_lods(src, s))
+		var m := src.surface_get_material(s)
+		if m != null:
+			out.surface_set_material(s, m)
+	_moss_cache[src] = out
+	return out
 
 
 ## Motorul comun: aplica o mapare stem -> (nume-de-parte -> clasa) pe modelele

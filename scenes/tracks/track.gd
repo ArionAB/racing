@@ -4492,6 +4492,9 @@ static func themes() -> Dictionary:
 		# cu dune (prima captura a mostrei citea desert).
 		"savanna_grass_w": 1.0,
 		"savanna_grass_tint": Color(0.12, 0.16, 0.07),
+		# Perechea de NISIP a terenului poarta dala gresiei: o vad doar fetele abrupte (scarp) si
+		# pavajul platourilor de banc (`paving` in `custom_bench_patches`: piata regala, POI F).
+		"terrain_sand_class": "angkor_sandstone",
 		"dust_color": Palette.color(Palette.TILE_TERRACOTTA),
 		# Blocurile dominoului din galeria Ta Prohm (RimBoulderHazard) iau gresia templului.
 		"rockfall_class": "angkor_sandstone",
@@ -5255,6 +5258,19 @@ func _tight_ravines() -> Array[int]:
 ## (lume), `lvl` (PackedVector2Array de (x, cota soselei)) si `soft` (Vector4).
 func _bench_patches() -> Array:
 	return []
+
+## PAVAJUL platourilor de banc: elementele din [method _bench_patches] care au cheia `paving`
+## (Color: tenta dalelor; `paving_fade` = metri de stingere in afara dreptunghiului, implicit 4).
+## Intoarce doar ce trebuie terenului: `x0/x1/z0/z1`, `tint`, `fade`. Gol fara cheie.
+func _paving_patches() -> Array:
+	var out: Array = []
+	for bp: Dictionary in _bench_patches():
+		if not bp.has("paving"):
+			continue
+		out.append({"x0": bp["x0"], "x1": bp["x1"], "z0": bp["z0"], "z1": bp["z1"],
+			"tint": bp["paving"], "fade": float(bp.get("paving_fade", 4.0))})
+	return out
+
 
 ## Care dintre rapele de mai sus sunt CORNISE: buza lipita de asfalt, in loc de
 ## valea lina de sub o creasta de fly-off. Indici in lista intoarsa de
@@ -7614,6 +7630,9 @@ func _build_terrain() -> void:
 	# treptele suprapuse se citesc ca benzi, nu ca un singur perete. Vertex color poate doar
 	# INTUNECA (memoria `surfacetool-clamp-vertex-color`), de aceea gradientul coboara spre picior.
 	var face_ao: float = float(theme_flag("face_ao", 1.0))
+	# PAVAJUL PLATOURILOR DE BANC (cheia `paving` in elementul din `custom_bench_patches`, Angkor:
+	# piata regala). Gol pe orice pista fara cheie = bucla de mai jos nu se intampla, bit-identic.
+	var paving: Array = _paving_patches()
 	# PETICE DE ZAPADA VECHE PE VERSANT (cheia `snow_patches`, Dictionary).
 	# Trei critici orbi au numit aceeasi lipsa: in referinta zapada de iulie sta
 	# in PETICE albe cu margini taiate, nu intr-o tenta. Tenta pe vertex nu poate:
@@ -7920,6 +7939,17 @@ func _build_terrain() -> void:
 									var mp := smoothstep(0.05, 0.3, moss_noise.get_noise_2d(
 										v.x, v.z)) * (1.0 - zt.a) * zw
 									tint = tint.lerp(GROUND_MOSS_TINT, mp)
+						# PAVAJ (vezi `_paving_patches`): dalele de piatra pe platoul de banc, cu greutatea
+						# iarbii stinsa spre perechea de NISIP, care in tema poarta dala clasei de piatra
+						# (`terrain_sand_class`). Si pe fata dura a treptei: e perete de piatra, nu pamant.
+						if not paving.is_empty():
+							for pv: Dictionary in paving:
+								var dx := maxf(maxf(float(pv["x0"]) - v.x, v.x - float(pv["x1"])), 0.0)
+								var dz := maxf(maxf(float(pv["z0"]) - v.z, v.z - float(pv["z1"])), 0.0)
+								var pw := 1.0 - smoothstep(0.0, float(pv["fade"]), sqrt(dx * dx + dz * dz))
+								if pw > 0.0:
+									tint = tint.lerp(pv["tint"] as Color, pw)
+									grass_w *= 1.0 - pw
 						if snow_tint != null:
 							var snow_w := clampf(
 								(v.y - snow_line) / snow_fade, 0.0, 1.0)
@@ -8013,6 +8043,8 @@ func _build_terrain() -> void:
 		var tri_pow: Variant = theme_flag("terrain_tri_power", null)
 		if tri_pow != null:
 			mat.set_shader_parameter("tri_power", float(tri_pow))
+		if not paving.is_empty():
+			mat.set_shader_parameter("paving_on", 1.0)
 		if snow_cfg != null:
 			var sc: Dictionary = snow_cfg
 			mat.set_shader_parameter("snow_on", 1.0)

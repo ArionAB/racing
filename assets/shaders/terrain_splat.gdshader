@@ -123,6 +123,15 @@ uniform float face_stripe_period = 0.7;
 // Scara proiectiei laterale (micro) pe fetele abrupte; 1.0 = cea din `tiling_micro`. Pe Carrara fetele de
 // marmura au nevoie de vene mai mari decat granulatia pietrisului din plan.
 uniform float side_tiling_k = 1.0;
+// PAVAJ DE DALE (track.gd, cheia `paving` din `custom_bench_patches`: piata regala Angkor). Pe terenul PLAT cu
+// greutatea de iarba stinsa (perechea de nisip poarta dala clasei de piatra) shaderul scoate dungile de
+// ondulatie ale macro-ului si traseaza rosturi de dale in lume (rand cu rand, decalate la jumatate de dala),
+// cu o mica variatie de ton pe dala. `paving_on` = 0 pe orice tema fara cheie: nimic din ce urmeaza nu
+// se executa, randarea ramane bit-identica.
+uniform float paving_on = 0.0;
+uniform vec2 paving_slab = vec2(3.2, 2.0);
+uniform float paving_joint = 0.13;
+uniform float paving_joint_amp = 0.6;
 varying float v_wy;
 varying float v_snow_elig;
 varying vec3 v_wpos;
@@ -165,6 +174,9 @@ void vertex() {
 	v_uv_side = side * tiling_micro * side_tiling_k;
 	v_uv_side_macro = side * tiling_macro;
 	v_wy = VERTEX.y;
+	if (paving_on > 0.5) {
+		v_wpos = VERTEX;
+	}
 	if (snow_on > 0.5) {
 		v_snow_elig = CUSTOM0.r;
 		v_wpos = VERTEX;
@@ -201,7 +213,25 @@ void fragment() {
 			0.0, 1.0));
 	micro = mix(vec3(detail_mean), micro, k);
 	macro = mix(vec3(detail_mean), macro, k);
+	float pav = 0.0;
+	if (paving_on > 0.5) {
+		pav = (1.0 - w) * smoothstep(0.9, 0.99, v_tri_w);
+		macro = mix(macro, vec3(detail_mean), pav * 0.85);
+	}
 	ALBEDO = COLOR.rgb * micro * macro;
+	if (pav > 0.01) {
+		vec2 q = v_wpos.xz / paving_slab;
+		float row = floor(q.y);
+		q.x += 0.5 * mod(row, 2.0);
+		vec2 id = vec2(floor(q.x), row);
+		vec2 f = fract(q);
+		float dj = min(min(f.x, 1.0 - f.x) * paving_slab.x, min(f.y, 1.0 - f.y) * paving_slab.y);
+		float aa = max(fwidth(dj), 0.005);
+		float line = 1.0 - smoothstep(paving_joint * 0.5 - aa, paving_joint * 0.5 + aa, dj);
+		line *= clamp(paving_joint / (2.0 * aa), 0.0, 1.0);
+		float hs = snow_hash(id * 1.37 + 5.1);
+		ALBEDO *= (1.0 - paving_joint_amp * line * pav) * (1.0 + (hs - 0.5) * 0.18 * pav);
+	}
 	if (face_stripe_amp > 0.0) {
 		// Doua frecvente, ca dungile sa nu fie o scara regulata: 0.7 m (firul) si ~1.9 m (reprize).
 		float sy = 0.62 * sin(v_wy * 6.2831853 / face_stripe_period)

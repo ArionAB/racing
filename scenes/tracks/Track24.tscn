@@ -49,6 +49,11 @@
 [ext_resource type="PackedScene" path="res://assets/models/angkor/plants/sugar_palm.glb" id="47_palm"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/plants/lotus_cluster.glb" id="48_lotus"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/plants/water_lily_pads.glb" id="49_lily"]
+[ext_resource type="AudioStream" path="res://assets/audio/thunder_roll.wav" id="50_thunder"]
+[ext_resource type="AudioStream" path="res://assets/audio/thunder_crack.wav" id="51_crack"]
+[ext_resource type="Script" path="res://scenes/hazards/ambience_bed.gd" id="52_ambience"]
+[ext_resource type="AudioStream" path="res://assets/audio/jungle_bed.wav" id="53_jungle"]
+[ext_resource type="AudioStream" path="res://assets/audio/rain_leaves.wav" id="54_rainleaves"]
 [ext_resource type="Script" path="res://scenes/props/flock.gd" id="flock_script"]
 [ext_resource type="Script" path="res://scenes/props/mesh_forest.gd" id="mf_script"]
 [ext_resource type="Script" path="res://scenes/props/mesh_forest_zone.gd" id="mf_zone"]
@@ -4076,6 +4081,7 @@ rim_offset = 2.0
 rim_height = 6.0
 crush_seconds = 3.0
 invert_steer = false
+warn_sfx = &"root_creak"
 model = ExtResource("22_block")
 model_scale = 1.0
 
@@ -4088,6 +4094,7 @@ rim_offset = 2.0
 rim_height = 6.0
 crush_seconds = 3.0
 invert_steer = false
+warn_sfx = &"root_creak"
 model = ExtResource("22_block")
 model_scale = 1.0
 
@@ -4100,6 +4107,7 @@ rim_offset = 2.0
 rim_height = 6.0
 crush_seconds = 3.0
 invert_steer = false
+warn_sfx = &"root_creak"
 model = ExtResource("22_block")
 model_scale = 1.0
 
@@ -4115,6 +4123,7 @@ follow_ground = true
 motion = 1
 sweep_speed = 3.0
 ai_yields = true
+contact_sfx = &"elephant_trumpet"
 sweep_phase = 0.75
 
 [node name="Muson" type="Node" parent="Hazarduri"]
@@ -4132,6 +4141,14 @@ sky_horizon_rain = Color(0.36, 0.32, 0.4, 1)
 
 [node name="Fulger" type="Node" parent="Hazarduri"]
 script = ExtResource("8_flash")
+thunder_stream = ExtResource("50_thunder")
+thunder_close_stream = ExtResource("51_crack")
+thunder_db = -7.0
+
+[node name="Ambianta" type="Node" parent="Hazarduri"]
+script = ExtResource("52_ambience")
+bed_stream = ExtResource("53_jungle")
+rain_stream = ExtResource("54_rainleaves")
 
 [node name="PerdeaLiane" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(-0.467, 0, -0.884, 0, 1, 0, 0.884, 0, -0.467, 158.57, 8.3, -57.78)

@@ -86,6 +86,9 @@ func _init() -> void:
 	# hazarde, decor lovit). Au `rng_ev` PROPRIU: nu consuma din `rng`, deci cele 29
 	# de fisiere de mai sus raman identice bit-pentru-bit. Vezi blocul de la sfarsit.
 	_save_event_sounds()
+	# Sunetul Angkorului (Track24). Generator PROPRIU (`rng_an`), apelat dupa toate
+	# celelalte: nu consuma din `rng` / `rng_ev`, deci nicio alta intrare nu se rescrie.
+	_save_angkor_sounds()
 	print("SFX generate in res://assets/audio/")
 	quit()
 
@@ -1048,3 +1051,219 @@ func _prop_knock(variant: int) -> PackedFloat32Array:
 				+ hp * exp(-tt * 500.0) * 0.5)
 		out[i] = v
 	return _peak_norm(out, 0.8)
+
+
+# ======================================================================
+# SUNETUL ANGKORULUI (Track24): tunet, trambita elefantului, scartaitul
+# radacinilor, jungla de fundal. Generator de zgomot PROPRIU, ca sa nu atinga
+# sirurile `rng` / `rng_ev` ale sunetelor vechi.
+# ======================================================================
+
+var rng_an := RandomNumberGenerator.new()
+
+
+func _save_angkor_sounds() -> void:
+	rng_an.seed = 20261109
+	_save("thunder_roll", _thunder_roll())
+	_save("thunder_crack", _thunder_crack())
+	_save("elephant_trumpet", _elephant_trumpet())
+	_save("root_creak", _root_creak())
+	_save("jungle_bed", _jungle_bed())
+	_save("rain_leaves", _rain_leaves())
+
+
+func _an_noise() -> float:
+	return rng_an.randf() * 2.0 - 1.0
+
+
+## Huruitul tunetului, 3 s: zgomot maro (trece-jos), cu taietura care COBOARA
+## (900 -> 160 Hz) si o infasuratoare de cateva „valuri" care se rostogolesc si
+## se sting, plus un bas de ~48 Hz. Telefonul nu reda basul, deci miezul e in
+## jur de 150-600 Hz, unde se aude.
+func _thunder_roll() -> PackedFloat32Array:
+	var n := int(RATE * 3.0)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var bumps: Array = []
+	for k in 5:
+		bumps.append([0.25 + float(k) * 0.42 + rng_an.randf() * 0.25,
+			0.5 + rng_an.randf() * 0.5, 2.4 + rng_an.randf() * 2.0])
+	var lp1 := 0.0
+	var lp2 := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		var cutoff := lerpf(900.0, 160.0, minf(t / 2.6, 1.0))
+		var a := 1.0 - exp(-TAU * cutoff / float(RATE))
+		lp1 += a * (_an_noise() - lp1)
+		lp2 += a * (lp1 - lp2)
+		var env := 0.0
+		for b in bumps:
+			var tb: float = t - float(b[0])
+			if tb > 0.0:
+				env += float(b[1]) * (1.0 - exp(-tb * 18.0)) * exp(-tb * float(b[2]))
+		var sub := sin(TAU * 48.0 * t) * 0.25 * exp(-t * 1.1)
+		var fade_out := clampf((3.0 - t) / 0.5, 0.0, 1.0)
+		out[i] = (lp2 * 5.0 + sub) * env * fade_out
+	return _peak_norm(out, 0.85)
+
+
+## Trasnetul apropiat, 1.7 s: pocnet ascutit (zgomot trece-sus, ~8 ms atac) peste
+## cateva trosnituri, apoi un huruit mai scurt decat `thunder_roll`.
+func _thunder_crack() -> PackedFloat32Array:
+	var n := int(RATE * 1.7)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var prev := 0.0
+	var lp1 := 0.0
+	var lp2 := 0.0
+	var crackle := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		var nz := _an_noise()
+		var hp := nz - prev
+		prev = nz
+		var snap := hp * exp(-t * 28.0) * minf(t / 0.008, 1.0)
+		if i % 260 == 0:
+			crackle = rng_an.randf() * exp(-t * 3.5)
+		var crack := _an_noise() * crackle * exp(-t * 6.0) * 0.5
+		var cutoff := lerpf(700.0, 140.0, minf(t / 1.5, 1.0))
+		var a := 1.0 - exp(-TAU * cutoff / float(RATE))
+		lp1 += a * (nz - lp1)
+		lp2 += a * (lp1 - lp2)
+		var rumble := lp2 * 5.0 * (1.0 - exp(-t * 40.0)) * exp(-t * 2.2) \
+			* (0.75 + 0.25 * sin(TAU * 3.1 * t))
+		out[i] = snap * 1.2 + crack + rumble * 0.9
+	return _peak_norm(out, 0.9)
+
+
+## Trambita elefantului, 1.2 s: o nota bogata in armonice al carei pitch urca
+## repede (360 -> 640 Hz), se tine cu vibrato si coboara, peste zgomot de suflu
+## si un mormait amplitudine-modulat la 26 Hz la inceput si la sfarsit.
+func _elephant_trumpet() -> PackedFloat32Array:
+	var dur := 1.2
+	var n := int(RATE * dur)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var phase := 0.0
+	var lp := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		var f: float
+		if t < 0.18:
+			f = lerpf(360.0, 640.0, t / 0.18)
+		else:
+			f = lerpf(640.0, 470.0, (t - 0.18) / (dur - 0.18))
+		f *= 1.0 + 0.018 * sin(TAU * 7.0 * t) * clampf((t - 0.15) * 4.0, 0.0, 1.0)
+		phase += f / float(RATE)
+		var v := 0.0
+		for h in range(1, 9):
+			if f * float(h) < 9000.0:
+				v += sin(TAU * phase * float(h) + float(h) * 0.7) / pow(float(h), 1.15)
+		lp += 0.5 * (_an_noise() - lp)
+		var growl := 0.5 + 0.5 * sin(TAU * 26.0 * t)
+		var ends := clampf(1.0 - minf(t, dur - t) / 0.25, 0.0, 1.0)
+		var env := minf(t / 0.03, 1.0) * clampf((dur - t) / 0.3, 0.0, 1.0)
+		var body := v * (1.0 - 0.45 * ends * growl)
+		out[i] = (body * 0.5 + lp * 0.28) * env
+	return _peak_norm(out, 0.85)
+
+
+## Scartaitul radacinii / pietrei, 1.1 s: frecare cu „priza si alunecare" (un tren
+## de impulsuri a carui rata pluteste intre 22 si 55 Hz, cu tremur), trecut printr-o
+## rezonanta de lemn (~320 Hz), cu un chiauit subtire deasupra. Urca usor si se
+## stinge: o sarcina care cedeaza, nu o usa.
+func _root_creak() -> PackedFloat32Array:
+	var dur := 1.1
+	var n := int(RATE * dur)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var ph := 0.0
+	var y1 := 0.0
+	var y2 := 0.0
+	var squeak_ph := 0.0
+	var w := TAU * 320.0 / float(RATE)
+	var r := 0.985
+	for i in n:
+		var t := float(i) / float(RATE)
+		var rate := lerpf(22.0, 55.0, t / dur) * (1.0 + 0.35 * sin(TAU * 2.3 * t)) \
+			* (0.9 + 0.2 * rng_an.randf())
+		ph += rate / float(RATE)
+		var saw := fposmod(ph, 1.0)
+		var pulse := pow(1.0 - saw, 4.0) * 2.0 - 0.4
+		var x := pulse + _an_noise() * 0.18
+		var y := x + 2.0 * r * cos(w) * y1 - r * r * y2
+		y2 = y1
+		y1 = y
+		squeak_ph += (1150.0 + 260.0 * t / dur + 40.0 * sin(TAU * 9.0 * t)) / float(RATE)
+		var squeak := sin(TAU * squeak_ph) * 0.12 * clampf(sin(PI * t / dur), 0.0, 1.0)
+		var env := minf(t / 0.08, 1.0) * clampf((dur - t) / 0.35, 0.0, 1.0)
+		out[i] = (y * 0.045 + squeak) * env
+	return _peak_norm(out, 0.8)
+
+
+## Jungla de fundal, 8 s IN BUCLA, discreta: trei voci de greieri/cicade
+## (purtatoare 3.6 / 4.4 / 5.2 kHz, modulate la 38-52 Hz, cu umflari lente cu un
+## numar INTREG de cicluri in 8 s, deci bucla se inchide fara click), cateva
+## ciripituri de pasari (zvacniri 2.2 -> 3.4 kHz) si un „hu" indepartat, jos.
+## Varful la 0.5: stratul nu trebuie sa acopere motorul.
+func _jungle_bed() -> PackedFloat32Array:
+	var dur := 8.0
+	var n := int(RATE * dur)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var carriers := [3600.0, 4400.0, 5200.0]
+	var mods := [38.0, 45.0, 52.0]
+	var swells := [3.0, 5.0, 4.0]
+	for i in n:
+		var t := float(i) / float(RATE)
+		var v := 0.0
+		for k in 3:
+			var swell := 0.5 + 0.5 * sin(TAU * float(swells[k]) * t / dur + float(k) * 2.1)
+			swell = swell * swell
+			var chirp := maxf(sin(TAU * float(mods[k]) * t), 0.0)
+			v += sin(TAU * float(carriers[k]) * t) * chirp * swell * 0.33
+		out[i] = v
+	# pasari: [moment, f0, f1, durata silaba, cate silabe]
+	var birds := [[0.9, 2200.0, 3400.0, 0.11, 3], [2.7, 2800.0, 2300.0, 0.16, 2],
+		[4.6, 2400.0, 3600.0, 0.09, 4], [6.2, 3000.0, 2500.0, 0.13, 2]]
+	for b in birds:
+		for s in int(b[4]):
+			var t0: float = float(b[0]) + float(s) * (float(b[3]) + 0.07)
+			var m0 := int(t0 * RATE)
+			var ml := int(float(b[3]) * RATE)
+			for j in ml:
+				if m0 + j >= n:
+					break
+				var u := float(j) / float(ml)
+				var f: float = lerpf(float(b[1]), float(b[2]), u)
+				out[m0 + j] += sin(TAU * f * (float(j) / float(RATE))) * sin(PI * u) * 0.5
+	var h0 := int(3.6 * RATE)
+	var hl := int(0.5 * RATE)
+	for j in hl:
+		var u := float(j) / float(hl)
+		var tt := float(j) / float(RATE)
+		out[h0 + j] += sin(TAU * (420.0 - 60.0 * u) * tt) * sin(PI * u) * 0.35
+	return _peak_norm(out, 0.5)
+
+
+## Ploaie pe frunze, 4 s IN BUCLA: zgomot trece-banda (picurul mare de pe frunza)
+## cu picaturi ascutite aruncate la intamplare. Se inchide prin suprapunerea
+## capetelor, ca celelalte bucle de zgomot.
+func _rain_leaves() -> PackedFloat32Array:
+	var n := int(RATE * 4.0)
+	var fade := int(n * 0.2)
+	var raw := PackedFloat32Array()
+	raw.resize(n + fade)
+	var lp1 := 0.0
+	var lp2 := 0.0
+	var drop := 0.0
+	for i in n + fade:
+		var nz := _an_noise()
+		lp1 += 0.55 * (nz - lp1)
+		lp2 += 0.06 * (nz - lp2)
+		var band := lp1 - lp2
+		if rng_an.randf() < 0.004:
+			drop = 0.5 + rng_an.randf() * 0.7
+		drop *= 0.985
+		raw[i] = band * 0.8 + _an_noise() * drop * 0.5
+	return _peak_norm(_loop_crossfade(raw, n, fade), 0.6)

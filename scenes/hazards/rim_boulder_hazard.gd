@@ -74,6 +74,11 @@ var force_clock: float = -1.0
 ## Inverseaza directia pe durata strivirii. Stins doar pentru sonde (sabotaj).
 @export var invert_steer: bool = true
 
+@export_group("Sunet")
+## Sunetul telegrafului (cand praful incepe sa curga de pe creasta). Implicit
+## `rock_warn`, deci Monument Valley ramane neatins; Angkor: `root_creak`.
+@export var warn_sfx: StringName = &"rock_warn"
+
 @export_group("Model")
 ## Modelul vizual al blocului. Gol = `DEFAULT_MODEL` (bolovanul), adica exact ce era inainte.
 ## Angkor: `fallen_block.glb` (kit §1.5), la aceeasi anvelopa ca bolovanul x 0,5.
@@ -228,7 +233,7 @@ func _on_phase_enter(ph: int) -> void:
 		return
 	match ph:
 		Phase.TELEGRAPH:
-			_play(&"rock_warn")
+			_play(warn_sfx)
 		Phase.HOLD:
 			_play(&"rock_impact")
 			_puff.restart()

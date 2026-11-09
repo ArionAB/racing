@@ -659,7 +659,11 @@ if OUT_PATH:
     bench = [(face_x - 47.0, face_x, face_y0, face_y1, Y_PIATA + 0.3, 25.0, 0.0, 15.0, 30.0)]
     floors = [(0, -2.0), (1, -2.0), (2, -2.0), (3, -1.5), (4, 8.5)]
     widths = [(0, 70.0), (1, 40.0), (2, 36.0), (3, 45.0), (4, 40.0)]
-    water = [(0, WATER_AW, 16.0), (1, WATER_AW, 16.0), (2, WATER_AW, 16.0),
+    # Rapa 2 (bratul de S) NU are intrare: apa ei vine din umplerea rapei 0 (inelul santului e o singura
+    # albie sub 0,5, iar umplerea nu are side_lock), deci o intrare proprie n-are nicio celula libera si
+    # tipareste „rapa 2 n-are nicio celula sub 0.5” desi santul de sud are apa si plasa de repunere
+    # (RavineWater_0 acopera x -197..94, z 66..104; masurat). Fara intrare, avertismentul dispare.
+    water = [(0, WATER_AW, 16.0), (1, WATER_AW, 16.0),
              (3, WATER_SRAH, 16.0), (4, WATER_THOM, 16.0)]
 
     # ---- sol (idx): laterita (praf) pe tot turul MINUS caile si terasele de piatra (brief §7 pasul 2).
@@ -1190,6 +1194,8 @@ blend_time = 0.35
                 fx_, fz_ = tx_, -ty_
             gy_ = opt_.get("y", kit_y_.get(nm_, gy0_ + float(opt_.get("dy", -0.3))))
             X_, Y_, Z_ = yaw_basis(fx_, fz_, float(yaw_), k_)
+            if "sy" in opt_:   # scara pe verticala (pervaz plat din placi): Y * sy, X/Z neatinse
+                Y_ = (Y_[0], Y_[1] * float(opt_["sy"]), Y_[2])
             zone_nodes += (f'\n[node name="{nm_}" parent="DecorManual/{zn_}" instance=ExtResource("{zone_rid(path_)}")]\n'
                            f"transform = Transform3D({_rows(X_, Y_, Z_)}, {r2(gx_)}, {r2(gy_)}, {r2(gz_)})\n")
             if "coliziune" in opt_:

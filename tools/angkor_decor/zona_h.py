@@ -63,28 +63,49 @@ for ci, c in enumerate(_basin_centers):
                                        lambda a, b: (a, b) if 21 <= a <= 78 and 132 <= b <= 169 else None):
         ITEMS.append(_wplace(nm, glb, pos[0], pos[1], yaw, scale=sc, y=WATER_Y))
 
-# 2) Pervaz de laterita pe linia malului bazinului: bazin ZIDIT, nu lac. Blocuri scufundate pe jumatate,
-#    cu goluri rare (blocuri cazute in apa); doar fara corp. Debarcaderul (x 41..59) taie malul de nord.
+# 2) Pervaz de gresie pe linia malului bazinului: bazin ZIDIT, nu lac. Placi `kit/gallery_relief_wall` (4 m)
+#    turtite pe verticala (`sy`) si puse cap la cap — cordon continuu de piatra, nu caramizi de laterita
+#    cu goluri (criticii A si H: „caramizi rosii”). Scufundate pe jumatate, fara corp. Debarcaderul
+#    (x 41..59) taie malul de nord.
 _BX0, _BX1, _BZ0, _BZ1 = 14.0, 84.5, 127.0, 173.0
+_KL = 4.0
+_KSY = 0.15
+# Fluxul aleatoriu al vechiului pervaz (pas 2,2 m, ~8% goluri, jitter de yaw) se consuma EXACT ca inainte:
+# piesele de dupa (lotusi, palmieri, cotele lor masurate) sunt trase din acelasi `_rng` si nu trebuie sa se mute.
 _KS = 2.2
-_kn = 0
 for edge in ("N", "W", "E"):
     if edge in ("N", "S"):
-        pts = [(x, _BZ0 if edge == "N" else _BZ1) for x in [_BX0 + 1 + i * _KS for i in range(int((_BX1 - _BX0) / _KS))]]
-        yaw = 0.0
+        _n_old = int((_BX1 - _BX0) / _KS)
+        _pts_old = [(_BX0 + 1 + i * _KS, _BZ0 if edge == "N" else _BZ1) for i in range(_n_old)]
     else:
-        pts = [(_BX0 if edge == "W" else _BX1, z) for z in [_BZ0 + 1 + i * _KS for i in range(int((_BZ1 - _BZ0) / _KS))]]
-        yaw = 90.0
-    for (x, z) in pts:
+        _pts_old = [(_BX0 if edge == "W" else _BX1, _BZ0 + 1 + i * _KS) for i in range(int((_BZ1 - _BZ0) / _KS))]
+    for (x, z) in _pts_old:
         if edge == "N" and 40.0 <= x <= 60.0:
             continue
         if edge == "S" and x > 76.0:
-            continue            # malul de SE urca (teren +1,3): blocul ar fi ingropat
+            continue
         if _rng.random() < 0.08:
             continue
-        ITEMS.append(_wplace(f"H_BKerb{_kn}", "props/laterite_block.glb", x, z, yaw + (_rng.random() - 0.5) * 4.0,
-                             y=WATER_Y + 0.02, scale=1.5, scufundat=True))
-        _kn += 1
+        _rng.random()
+_kn = 0
+for edge in ("N", "W", "E"):
+    if edge == "N":
+        spans = [(_BX0, 40.0), (60.0, _BX1)]       # fara debarcader (x 40..60)
+    elif edge == "S":
+        spans = [(_BX0, 76.0)]
+    else:
+        spans = [(_BZ0, _BZ1)]
+    for (c0, c1) in spans:
+        c = c0 + _KL / 2
+        while c + _KL / 2 <= c1 + 0.5:
+            if edge in ("N", "S"):
+                x, z, yaw = c, (_BZ0 if edge == "N" else _BZ1), 0.0
+            else:
+                x, z, yaw = (_BX0 if edge == "W" else _BX1), c, 90.0
+            ITEMS.append(_wplace(f"H_BKerb{_kn}", "kit/gallery_relief_wall.glb", x, z, yaw,
+                                 y=WATER_Y + 0.02, sy=_KSY, scufundat=True))
+            _kn += 1
+            c += _KL
 
 # 3) Lotusi pe santul de sud (dreapta drumului): petice pe frac 0,785..0,888, lat +17..+46.
 for k in range(14):

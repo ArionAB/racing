@@ -562,6 +562,7 @@ MOAT_W_OUT = 200.0      # malul de vest al bratului de V
 # galeriile, cu gopura pe dreapta (x -103..-92), inaintea arcului.
 MOAT_IN_W = 104.0
 GOPURA_X = -97.5
+GOPURA_N_Y = 68.0        # gopura de nord (B): peste calea de nord, imediat dupa capatul galeriei (y 62), inaintea santului
 TREE_GATE_S = 26.0      # poarta-copac pe ramura. 14 m: ramura inca se racorda la bucla (ProbeLaneClear pe banda
                         # -1,5). 22 m: aripa de est la ~4 m de virajul buclei (ProbeRace val 1: 1 ejectare + 1 blocaj
                         # langa ea). 26 m: primul bloc al dominoului se muta de la 30 la 33 m (in spatele portii).
@@ -704,6 +705,9 @@ if OUT_PATH:
         # latura -1, golul mai departe
         # golul de pe -1 era la -95: cu malul mutat la -104 cadea pe uscat (val 1) -> -140
         (lenx(-198.0), lenx(-140.0 - GAP / 2), -1, 3), (lenx(-140.0 + GAP / 2), lenx(-MOAT_IN_W - 2.0), -1, 3),
+        # calea de nord (B), ambele laturi, de la gopura de nord (fata ei de N la y ~74) pana la capatul caii:
+        # balustrada naga peste sant, ca la A si D. Desfacuta spre masinile care ies din gopura.
+        (LENp(-56.0, GOPURA_N_Y + 6.5), LENp(-56.0, 103.0), 0, 3),
         # calea uriasilor, ambele laturi, pana inaintea pilonilor portii
         (LEN("D cale inceput", 2.0), LEN("D poarta", -10.0), 0, 3),
         # Srah Srang, STANGA (spre bazin), de la iesirea din coltul de SE pana dupa bazin. Prima
@@ -842,6 +846,16 @@ metadata/coliziune = "mesh"
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, {r2(gpx_)}, {r2(elev_at(gs_))}, {r2(-gpy_)})
 metadata/coliziune = "mesh"
 """
+    # Gopura de nord (B): aceeasi piesa ca la vest, LATA de 1,25 ori (golul 12,5 m; la 1,0 ProbeRace a dat o ejectare pe
+    # stalpul drept la 27,6 m/s: dupa arcul R30 masinile ajung la gopura cu doar ~30 m de dreapta). Soseaua
+    # merge spre -Z Godot, adica exact pe -Z al modelului: rotatie identitate, lungimea (X, 52 m) de-a curmezisul.
+    gns_ = s_near(-56.0, GOPURA_N_Y)
+    gnx_, gny_ = pos_at(gns_)
+    decor_txt += f"""
+[node name="GopuraNord" parent="DecorManual" instance=ExtResource("15_gopura")]
+transform = Transform3D(1.25, 0, 0, 0, 1, 0, 0, 0, 1, {r2(gnx_)}, {r2(elev_at(gns_))}, {r2(-gny_)})
+metadata/coliziune = "mesh"
+"""
     # Poarta-copac: la intrarea ramurii, care merge spre S (+Z Godot) -> rotatie de 180 de grade, LATA de
     # 1,45 ori (golul 9,9 m; la 1,2 ProbeRace val 3 mai gasea 2 ejectari pe stalpi). Istoric:
     # 1,2 ori de-a curmezisul (golul 6,8 -> 8,2 m): ProbeRace val 2, masinile care intra in ramura pe
@@ -876,6 +890,16 @@ script = ExtResource("17_camzone")
 frac_from = {r3(F_s(gs_ - 16.0)[0])}
 frac_to = {r3(F_s(gs_ + 12.0)[0])}
 size = Vector3(28.0, 10.0, 14.0)
+ceiling = 9.0
+ceiling_dist = 22.0
+blend_time = 0.35
+
+[node name="CameraGopuraNord" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {r2(gnx_)}, {r2(elev_at(gns_))}, {r2(-gny_)})
+script = ExtResource("17_camzone")
+frac_from = {r3(F_s(gns_ - 16.0)[0])}
+frac_to = {r3(F_s(gns_ + 12.0)[0])}
+size = Vector3(14.0, 10.0, 28.0)
 ceiling = 9.0
 ceiling_dist = 22.0
 blend_time = 0.35
@@ -1488,7 +1512,7 @@ custom_parapets = Array[Vector4]([{", ".join(V4(*p_) for p_ in parapets)}])
 custom_lane_bias = Array[Vector3]([{", ".join(V3(*b_) for b_ in bias)}])
 custom_bench_patches = Array[Dictionary]([{", ".join(
     "{ \"lvl\": PackedVector2Array(-1000.0, %s, 1000.0, %s), \"soft\": Vector4(%s, %s, %s, %s), "
-    "\"x0\": %s, \"x1\": %s, \"z0\": %s, \"z1\": %s }" % (lv_, lv_, sw_, se_, sn_, ss_, r2(x0_), r2(x1_), r2(-y1_), r2(-y0_))
+    "\"x0\": %s, \"x1\": %s, \"z0\": %s, \"z1\": %s, \"paving\": Color(0.80, 0.67, 0.50, 1), \"paving_fade\": 5.0 }" % (lv_, lv_, sw_, se_, sn_, ss_, r2(x0_), r2(x1_), r2(-y1_), r2(-y0_))
     for (x0_, x1_, y0_, y1_, lv_, sw_, se_, sn_, ss_) in bench)}])
 terrain_pad_m = 120.0
 {zones_meta}

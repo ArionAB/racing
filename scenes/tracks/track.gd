@@ -13243,6 +13243,10 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 		# #503). Doar la cerere — vezi SlidingHazard.follow_ground.
 		ball.follow_ground = bool(kind.get("follow_ground", false))
 		ball.ai_yields = bool(kind.get("ai_yields", false))
+		# Sunet de contact propriu (HazardMarker.contact_sfx); fara cheie ramane
+		# implicitul clasei.
+		if kind.has("contact_sfx"):
+			ball.contact_sfx = StringName(kind["contact_sfx"])
 		# Cu ce se uita obiectul spre directia in care matura. Fara steag ramane
 		# pe axele LUMII, ceea ce e o nepasare acceptabila la o barca targ ita
 		# (n-are un "inainte" al ei) si vizibil gresit la un animal: o testoasa

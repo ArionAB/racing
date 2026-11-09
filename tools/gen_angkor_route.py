@@ -768,6 +768,7 @@ rim_offset = 2.0
 rim_height = 6.0
 crush_seconds = 3.0
 invert_steer = false
+warn_sfx = &"root_creak"
 model = ExtResource("22_block")
 model_scale = 1.0
 """
@@ -789,6 +790,7 @@ follow_ground = true
 motion = 1
 sweep_speed = 3.0
 ai_yields = true
+contact_sfx = &"elephant_trumpet"
 """ + (f"sweep_phase = {ELEPHANT_PHASE}\n" if ELEPHANT_PHASE >= 0.0 else "")
     # ---- PASUL 6: turnurile Bayonului (corpuri statice cu nume, ca ProbeLaneClear sa le raporteze
     # pe nume). Corpul ramane si dupa hero-asset: `bayon_face_tower_a` (pasul 7) e doar vizualul,
@@ -1274,6 +1276,14 @@ sky_horizon_rain = Color(0.36, 0.32, 0.4, 1)
 
 [node name="Fulger" type="Node" parent="Hazarduri"]
 script = ExtResource("8_flash")
+thunder_stream = ExtResource("50_thunder")
+thunder_close_stream = ExtResource("51_crack")
+thunder_db = -7.0
+
+[node name="Ambianta" type="Node" parent="Hazarduri"]
+script = ExtResource("52_ambience")
+bed_stream = ExtResource("53_jungle")
+rain_stream = ExtResource("54_rainleaves")
 """
     # ---- PASUL 6: perdeaua de liane. Baza scrisa pe RANDURI (memoria `tscn-transform-e-pe-randuri`):
     # -Z local = sensul de mers. Orientarea se verifica in sonda (tools/probe_angkor_pas6.gd).
@@ -1395,6 +1405,11 @@ material = SubResource("Mat_macheta")
 [ext_resource type="PackedScene" path="res://assets/models/angkor/plants/sugar_palm.glb" id="47_palm"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/plants/lotus_cluster.glb" id="48_lotus"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/plants/water_lily_pads.glb" id="49_lily"]
+[ext_resource type="AudioStream" path="res://assets/audio/thunder_roll.wav" id="50_thunder"]
+[ext_resource type="AudioStream" path="res://assets/audio/thunder_crack.wav" id="51_crack"]
+[ext_resource type="Script" path="res://scenes/hazards/ambience_bed.gd" id="52_ambience"]
+[ext_resource type="AudioStream" path="res://assets/audio/jungle_bed.wav" id="53_jungle"]
+[ext_resource type="AudioStream" path="res://assets/audio/rain_leaves.wav" id="54_rainleaves"]
 {zone_ext}
 [sub_resource type="StandardMaterial3D" id="Mat_macheta"]
 albedo_color = Color(0.72, 0.64, 0.52, 1)

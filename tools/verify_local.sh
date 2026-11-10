@@ -224,6 +224,13 @@ run_step "Cariera: config, persistenta, gating, raft" career.log 'VERDICT:' -- \
 # baremul 6-5-4-3-2-1 si o cursa reala in cupa (grila, titlu, departajare).
 run_step "World Cup: cupe, adversari unici, puncte, cursa" world_cup.log 'VERDICT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeWorldCup.tscn
+# Nivelurile AI (#682), partea ieftina: profilul implicit = AI-ul de dinainte
+# camp cu camp (pe el stau liniile de baza ale ProbeRace si ale carierei),
+# firul GameState -> Race -> fiecare AIController (cariera ramane implicita),
+# nivelurile ordonate sub referinta si selectorul in ecran. Ecartul pe tur e
+# pasul urmator (cursa reala) si unealta lunga tools/ai_skill_gap.sh.
+run_step "Niveluri AI: profil implicit, fir, ordine, selector" ai_skill_wiring.log 'VERDICT:' -- \
+	--headless --fixed-fps 60 --path . res://tools/ProbeAiSkillWiring.tscn
 
 # Decorul asezat pe solul de la generare ramane sub teren cand terenul creste
 # dupa aceea: padurea Lerai ajunsese la 20-30 m sub peretele craterului.

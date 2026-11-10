@@ -33,7 +33,6 @@ S1 208 m, plus intrarea si iesirea), adica tramvaiul e pe strada ~38 s din 41.
 Variabile: GRADE (0.115), CLIMB (290), LEAD (96), HW (7.0), TRAM_SPEED (4.5),
 PERIOD (41), PHASE (0.0), TRAM_S0 (70), TRAM_S1 (220), AI (1 = ai_reads_lane +
 ai_same_direction), SOFT (1 = soft_contact), PITCH (1 = pitch_to_ground),
-TAIL (0 = coada plata; grade = `tail_angle_deg`, coada oblica),
 BODY (latime,inaltime,lungime: 2.5,3.0,8.5), SUFIX.
 """
 import math
@@ -267,7 +266,6 @@ def main():
         "body_size = Vector3(%.2f, %.2f, %.2f)" % BODY,
         "nose_side = 1",
         "nose_angle_deg = 20.0",
-        "tail_angle_deg = %s" % os.environ.get("TAIL", "0"),
         "apex_outer_m = 0.0",
         "shove = 3.0",
         "side_accel = 8.0",

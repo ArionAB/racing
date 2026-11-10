@@ -364,6 +364,12 @@ var _bus_tline: Dictionary = {}
 ## Partea aleasa pentru un corp care merge in sensul cursei (`ai_same_direction`),
 ## fixata la prima citire: +1 dreapta, -1 stanga.
 var _bus_side: Dictionary = {}
+## Lateralul tramvaiului la tick-ul trecut (cheie = instance id), ca sa se vada
+## INCOTRO se muta pe latime (intra pe ax dintr-o strada laterala).
+var _bus_prev_tl: Dictionary = {}
+## Pe cate secunde inainte se rezerva drumul lateral al unui corp care intra
+## pe ax sau iese de pe el (doar `ai_same_direction`).
+const BUS_LAT_LOOKAHEAD_S: float = 1.5
 var _bus_speed_scale: float = 1.0
 var _bus_trace: bool = OS.get_environment("BUS_TRACE") == "1"
 var _exc_trace: bool = OS.get_environment("EXC_TRACE") == "1"
@@ -1155,7 +1161,9 @@ func _bus_line(idx: int, speed: float, line: float, severity: float) -> float:
 		var key := bus.get_instance_id()
 		var target_blend := 0.0
 		var tline: float = _bus_tline.get(key, 0.0)
-		if not bus.is_hidden():
+		if bus.is_hidden():
+			_bus_prev_tl.erase(key)
+		else:
 			var tp := bus.body_position()
 			var bi: int
 			if _bus_idx.has(key) and track.is_on_road(int(_bus_idx[key]), tp, car.route):
@@ -1182,6 +1190,18 @@ func _bus_line(idx: int, speed: float, line: float, severity: float) -> float:
 			var tl := r.side_at(bi).dot(tp - r.baked[r.wrap_index(bi)])
 			var hw_t: float = maxf(track.width_at_index(bi) if car.route == 0 				else r.half_width, 0.001)
 			var on_road := absf(tl) < hw_t + 1.5
+			# Banda ocupata pe latime: corpul acum si unde va fi peste
+			# BUS_LAT_LOOKAHEAD_S. Doar in sensul cursei (tramvaiul care intra pe
+			# ax din strada laterala ii taie calea masinii care trece pe langa el,
+			# masurat: toate contactele erau la intrare); altfel tl_lo = tl_hi = tl.
+			var tl_lo := tl
+			var tl_hi := tl
+			if bus.ai_same_direction:
+				var prev_tl: float = _bus_prev_tl.get(key, tl)
+				_bus_prev_tl[key] = tl
+				var tl_fut := tl + clampf((tl - prev_tl) / maxf(dt, 1e-3), -8.0, 8.0) 					* BUS_LAT_LOOKAHEAD_S
+				tl_lo = minf(tl, tl_fut)
+				tl_hi = maxf(tl, tl_fut)
 			# Vazut: pe axa pana la `bus_reach_m`, SAU in linie dreapta pana la `bus_sight_m` cand mai e de
 			# mers pana la el cel mult BUS_FAR_ALONG_M — de pe terasa de sus se vede camionul de pe cea de
 			# jos peste gol (brief §2: "il vezi de pe terasa de sus, alegi interiorul acului").
@@ -1197,8 +1217,8 @@ func _bus_line(idx: int, speed: float, line: float, severity: float) -> float:
 				var ext := bus.body_half_width() + bus_margin_m
 				# lateral cu semn, + = dreapta. Banda libera e de partea unde
 				# ramane mai mult loc intre camion si marginea asfaltului.
-				var room_right := hw_t - 0.2 - (tl + ext)
-				var room_left := (tl - ext) - (-hw_t + 0.2)
+				var room_right := hw_t - 0.2 - (tl_hi + ext)
+				var room_left := (tl_lo - ext) - (-hw_t + 0.2)
 				var side := 1.0 if room_right >= room_left else -1.0
 				if bus.ai_same_direction and dir_dot > 0.2:
 					# Pe ax locul e egal: fiecare trece pe partea pe care e deja
@@ -1226,10 +1246,10 @@ func _bus_line(idx: int, speed: float, line: float, severity: float) -> float:
 				var lo: float
 				var hi: float
 				if side > 0.0:
-					lo = tl + ext + BUS_CAR_HALF_M
+					lo = tl_hi + ext + BUS_CAR_HALF_M
 					hi = hw_t - 0.2 - BUS_CAR_HALF_M
 				else:
-					hi = tl - ext - BUS_CAR_HALF_M
+					hi = tl_lo - ext - BUS_CAR_HALF_M
 					lo = -hw_t + 0.2 + BUS_CAR_HALF_M
 				var lat := (lo + hi) * 0.5 if lo < hi else (hi if side > 0.0 else lo)
 				# In viraj masina aluneca spre exterior (ProbeCarrara pe Track23: tinta +1.9 m, ajunge la

@@ -141,12 +141,6 @@ extends "res://scenes/props/path_mover.gd"
 ## coada). Fara el corpul sta orizontal: pe 11,5% un vagon de 8,5 m are coada
 ## ~0,5 m deasupra drumului si botul ~0,5 m in el.
 @export var pitch_to_ground: bool = false
-## Coada OBLICA (grade; 0 = coada plata, ca pana acum): oglinda botului, la
-## spate. Un corp care merge in sensul cursei e lovit din SPATE, iar o coada
-## plata e „un zid care pleaca" — masina care intra in ea isi pierde toata
-## viteza (masurat pe urcarea de 11,5%: 2,2-2,7 s). Oblica, lovitura devine
-## alunecare spre `nose_side`, ca la bot. Bara e invizibila pe model.
-@export_range(0.0, 45.0, 1.0) var tail_angle_deg: float = 0.0
 
 ## Grupul pe care il citeste AI-ul (doar daca `ai_reads_lane`).
 const AI_GROUP: StringName = &"ai_bus_lane"
@@ -243,21 +237,15 @@ func _build_body() -> void:
 ## partea deflectarii (la fata cutiei). Normala ei arata inainte si spre
 ## `nose_side`, deci orice contact frontal e impins intr-acolo.
 func _build_nose() -> void:
-	if nose_angle_deg > 0.0:
-		_build_wedge(nose_angle_deg, -1.0)
-	if tail_angle_deg > 0.0:
-		_build_wedge(tail_angle_deg, 1.0)
-
-
-## O fata oblica + flancul ei. `dir` = -1 botul (-Z), +1 coada (+Z).
-func _build_wedge(angle_deg: float, dir: float) -> void:
+	if nose_angle_deg <= 0.0:
+		return
 	var w := _box_size.x
 	var h := _box_size.y
-	var front_z := _box_center.z + dir * _box_size.z * 0.5
-	var depth := w * tan(deg_to_rad(angle_deg))
+	var front_z := _box_center.z - _box_size.z * 0.5
+	var depth := w * tan(deg_to_rad(nose_angle_deg))
 	var s := float(nose_side)
-	var a := Vector3(-s * w * 0.5, _box_center.y, front_z + dir * depth) # varful
-	var b := Vector3(s * w * 0.5, _box_center.y, front_z)                # coltul
+	var a := Vector3(-s * w * 0.5, _box_center.y, front_z - depth) # varful
+	var b := Vector3(s * w * 0.5, _box_center.y, front_z)          # coltul
 	var along := b - a
 	var length := along.length()
 	var basis := Basis.looking_at(along.normalized(), Vector3.UP)
@@ -268,7 +256,7 @@ func _build_wedge(angle_deg: float, dir: float) -> void:
 	_add_box(Vector3(NOSE_THICKNESS, h, depth + NOSE_THICKNESS),
 		Transform3D(Basis.IDENTITY,
 			Vector3(-s * (w * 0.5 - NOSE_THICKNESS * 0.5), _box_center.y,
-				front_z + dir * depth * 0.5)))
+				front_z - depth * 0.5)))
 
 
 func _add_box(size: Vector3, xform: Transform3D) -> void:
@@ -299,12 +287,11 @@ func _build_shove_area() -> void:
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()
 	var depth := _box_size.x * tan(deg_to_rad(maxf(nose_angle_deg, 0.0)))
-	var tail := _box_size.x * tan(deg_to_rad(maxf(tail_angle_deg, 0.0)))
 	box.size = Vector3(_box_size.x + SHOVE_MARGIN_SIDE * 2.0,
 		_box_size.y + 0.4,
-		_box_size.z + depth + tail + SHOVE_MARGIN_FRONT * 2.0)
+		_box_size.z + depth + SHOVE_MARGIN_FRONT * 2.0)
 	shape.shape = box
-	shape.position = _box_center + Vector3(0.0, 0.0, (tail - depth) * 0.5)
+	shape.position = _box_center + Vector3(0.0, 0.0, -depth * 0.5)
 	_shove_area.add_child(shape)
 	_body.add_child(_shove_area)
 
@@ -479,7 +466,6 @@ func _shove_cars(delta: float) -> void:
 	ahead.y = 0.0
 	ahead = ahead.normalized()
 	var front := _box_center.z - _box_size.z * 0.5
-	var back := _box_center.z + _box_size.z * 0.5
 	for b in _shove_area.get_overlapping_bodies():
 		var car := b as Car
 		if car == null:
@@ -496,10 +482,6 @@ func _shove_cars(delta: float) -> void:
 		# 40 de cadre de contact, 2.9 s sub 5 m/s).
 		var side := signf(rel.dot(right))
 		if rel.dot(ahead) > -front - 0.5 				and absf(rel.dot(right)) < _box_size.x * 0.5 - 0.6:
-			side = float(nose_side)
-		elif tail_angle_deg > 0.0 and rel.dot(ahead) < -back + 0.5 and absf(rel.dot(right)) < _box_size.x * 0.5 - 0.6:
-			# IN SPATELE cozii oblice, in banda ei: tot spre `nose_side`, ca
-			# ghiontul sa nu anuleze alunecarea pe coada (vezi botul, mai sus).
 			side = float(nose_side)
 		elif side == 0.0:
 			side = float(nose_side)

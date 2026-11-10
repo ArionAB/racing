@@ -45,7 +45,6 @@ period = 41.0
 body_size = Vector3(2.50, 3.00, 8.50)
 nose_side = 1
 nose_angle_deg = 20.0
-tail_angle_deg = 0
 apex_outer_m = 0.0
 shove = 3.0
 side_accel = 8.0

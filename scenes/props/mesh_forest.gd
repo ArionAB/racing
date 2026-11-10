@@ -193,10 +193,29 @@ func _ready() -> void:
 	# MESHFOREST_OFF=1 stinge padurea fara sa atinga scena.
 	if OS.get_environment("MESHFOREST_OFF") != "":
 		enabled = false
+	# Comutatorul de test „Test: build forest" (GameState.dbg_build_forest):
+	# 1 scoate ce a adus #654 (umbra din treapta urmatoare + artarii medii pe
+	# mesh-ul grosier), 2 nu construieste deloc. Diagnosticul Kyoto/iPhone.
+	var gs := get_node_or_null(^"/root/GameState")
+	if gs != null and not Engine.is_editor_hint():
+		match int(gs.get("dbg_build_forest")):
+			1:
+				shadow_lod = false
+				mid_from_far_species = PackedStringArray()
+			2:
+				enabled = false
+				_trace("MeshForest %s: SKIP (test)" % name)
 	if enabled:
 		top_level = true
 		global_transform = Transform3D.IDENTITY
 		_build.call_deferred()
+
+
+## Pas in urma incarcarii (GameState.load_trace): unde moare telefonul.
+func _trace(msg: String) -> void:
+	var gs := get_node_or_null(^"/root/GameState")
+	if gs != null and gs.has_method(&"load_trace"):
+		gs.call(&"load_trace", msg)
 
 
 func _find_track() -> Track:
@@ -253,15 +272,21 @@ func _build() -> void:
 		elif a.begins_with("--forest-shadow-lod="):
 			shadow_lod = a.trim_prefix("--forest-shadow-lod=") == "1"
 	_sampler = track.get("_sampler") as TrackSideSampler
+	_trace("MeshForest %s: start (shadow_lod %s, mid_from_far %d)" % [
+		name, shadow_lod, mid_from_far_species.size()])
 	_prepare(track)
 	var theme := String(track.theme_decor)
+	_trace("MeshForest %s: species (LODs)..." % name)
 	_build_species(theme)
 	var groups: Dictionary = {}
 	var main := track.route_at(0)
+	_trace("MeshForest %s: zones..." % name)
 	for zi in zones.size():
 		_fill_zone(zi, zones[zi], track, main, groups)
+	_trace("MeshForest %s: emit MultiMesh..." % name)
 	_emit(groups)
 	build_ms = Time.get_ticks_msec() - t0
+	_trace("MeshForest %s: done, %d slices, %d ms" % [name, slice_count, build_ms])
 	done = true
 	if verbose:
 		print("MeshForest %s: %d instante, %d felii, %d MultiMesh de celule, %d triunghiuri totale, %d ms | specii %s | LOD tri/instanta (intreg, mediu, grosier, bulgari) %s | zone %s | respinse %s" % [

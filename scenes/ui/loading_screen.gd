@@ -130,6 +130,7 @@ func end_phase(phase: StringName) -> void:
 		return
 	var now := Time.get_ticks_usec()
 	_measured[phase] = float(now - _phase_t0) / 1000000.0
+	GameState.load_trace("phase %s done" % phase)
 	_phase = idx + 1
 	_phase_t0 = now
 	_set_fraction(_fraction(0.0))
@@ -140,6 +141,7 @@ func end_phase(phase: StringName) -> void:
 ## nodul se elibereaza.
 func finish() -> void:
 	for i in WARMUP_FRAMES:
+		GameState.load_trace("warm-up frame %d" % i)
 		await get_tree().process_frame
 	end_phase(&"incalzire")
 	_save_measurements()

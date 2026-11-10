@@ -338,9 +338,68 @@ var records: Dictionary = {}
 var race_records: Dictionary = {}
 
 func _ready() -> void:
+	_read_last_load_trace()
 	load_settings()
 	load_records()
 	apply_gfx_tier()
+
+
+## URMA INCARCARII (nov 2026). Kyoto se inchidea pe iPhone cu bara la ~40% si
+## iOS nu lasa nici JetsamEvent, nici raport de crash. Fiecare pas al
+## incarcarii se scrie aici (deschis + inchis pe fiecare linie, deci ajunge pe
+## disc chiar daca procesul moare in pasul urmator); la pornirea urmatoare,
+## SETARI arata unde s-a oprit ultima incarcare neterminata.
+const LOAD_TRACE_PATH := "user://load_trace.txt"
+const LOAD_TRACE_DONE := "== OK"
+## Ultima incarcare NETERMINATA, citita la pornire ("" daca s-a terminat).
+var last_load_trace: String = ""
+var _load_trace_t0: int = 0
+
+
+func load_trace_begin(label: String) -> void:
+	_load_trace_t0 = Time.get_ticks_msec()
+	var f := FileAccess.open(LOAD_TRACE_PATH, FileAccess.WRITE)
+	if f != null:
+		f.store_line("%s | %s" % [label, Time.get_datetime_string_from_system()])
+		f.close()
+
+
+func load_trace(step: String) -> void:
+	var f := FileAccess.open(LOAD_TRACE_PATH, FileAccess.READ_WRITE)
+	if f == null:
+		return
+	f.seek_end()
+	f.store_line("%6.1f s  %s  (mem %d MB)" % [
+		(Time.get_ticks_msec() - _load_trace_t0) / 1000.0, step,
+		OS.get_static_memory_usage() / 1048576])
+	f.close()
+
+
+## Linia de final e SIMPLA (fara timp/memorie), ca `_read_last_load_trace` sa
+## o recunoasca dupa sfarsitul fisierului.
+func load_trace_end() -> void:
+	var f := FileAccess.open(LOAD_TRACE_PATH, FileAccess.READ_WRITE)
+	if f == null:
+		return
+	f.seek_end()
+	f.store_line(LOAD_TRACE_DONE)
+	f.close()
+
+
+func _read_last_load_trace() -> void:
+	if not FileAccess.file_exists(LOAD_TRACE_PATH):
+		return
+	var text := FileAccess.get_file_as_string(LOAD_TRACE_PATH).strip_edges()
+	if text == "" or text.ends_with(LOAD_TRACE_DONE):
+		return
+	# Antetul + ultimele pasi: destul ca sa vezi unde a murit, fara sa umple ecranul.
+	var lines := text.split("\n")
+	var keep: PackedStringArray = [lines[0]]
+	if lines.size() > 9:
+		keep.append("…")
+	for i in range(maxi(1, lines.size() - 8), lines.size()):
+		keep.append(lines[i])
+	last_load_trace = "\n".join(keep)
 
 
 ## Aplica nivelul grafic pe ce se poate schimba PE LOC: scala de randare 3D
@@ -430,6 +489,14 @@ const DBG_FAR_NAMES: Array[String] = ["Tier", "120 m", "180 m", "250 m"]
 const DBG_FAR_M: Array[float] = [0.0, 120.0, 180.0, 250.0]
 var dbg_hide_houses: int = 0
 var dbg_hide_forest: int = 0
+## CONSTRUCTIA (nu doar vizibilitatea) caselor si a padurii — diagnosticul de
+## crash Kyoto pe iPhone, nov 2026. "No shadow mesh" scoate exact ce au adus
+## #652 (CityFill.shadow_proxy) si #654 (MeshForest.shadow_lod +
+## mid_from_far_species); "Skip" nu construieste deloc. Se citeste la
+## construirea pistei, deci se alege INAINTE de a intra in cursa.
+const DBG_BUILD_NAMES: Array[String] = ["Full", "No shadow mesh", "Skip"]
+var dbg_build_houses: int = 0
+var dbg_build_forest: int = 0
 var dbg_hide_decor: int = 0
 var dbg_far: int = 0
 var dbg_msaa: int = 0

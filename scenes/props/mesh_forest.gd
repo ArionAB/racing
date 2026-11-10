@@ -136,6 +136,12 @@ extends Node3D
 ## (1 = toate, 2 = fiecare a doua, 3 = fiecare a treia).
 @export_range(1, 6) var frond_far_every: int = 3
 @export_range(1, 6) var frond_mid_every: int = 1
+## Copia de umbra si pe treapta MEDIE (prin mesh-ul grosier). Oprita implicit
+## (nov 2026, crash-ul iPhone): costa un MultiMesh pe felie, iar pe Kyoto
+## castiga ~1% din umbra. Pe Carrara castanii mediu -> grosier conteaza (varful
+## de umbra 271k -> 365k fara ea, ProbePerf --mobile --phone-shadow) si padurea
+## are loc sub plafon, deci acolo e pornita.
+@export var shadow_lod_mid: bool = false
 ## Cat intra trunchiul in pamant (m): relieful palpaie sub radacina.
 @export_range(0.0, 1.0, 0.01, "suffix:m") var sink_m: float = 0.25
 ## Cat de mult mai multa marja fata de o sosea obisnuita cere o scurtatura
@@ -165,6 +171,17 @@ var instance_count: int = 0
 var slice_count: int = 0
 ## MultiMesh-urile celulelor de departe (toate treptele, toate speciile).
 var hlod_count: int = 0
+## Toate MultiMesh-urile padurii (copiii nodului). Pe iPhone fiecare costa
+## memorie si obiecte GPU chiar ascuns: Kyoto se incarca la 3.333 si murea
+## la 4.407 (nov 2026). Vezi [constant PHONE_MULTIMESH_BUDGET].
+var mmi_count: int = 0
+## Plafonul de MultiMesh-uri pe padure. Masurat pe iPhone 12 Pro (nov 2026):
+## Kyoto cu 3.333 se incarca, cu 4.407 aplicatia murea la primul cadru dupa
+## padure — si la fel cu padurea ascunsa, deci costul e pe obiect, nu pe desen.
+## 2.500 lasa ~25% marja sub ce s-a vazut mergand. Peste el: felii apropiate
+## mai late (`slice_near_m`), `lod_m` mai mic, `mid_from_far_species` pentru
+## plantele mici — vezi reglajul Angkor (Track24), masurat cu ProbePerf.
+const PHONE_MULTIMESH_BUDGET: int = 2500
 var counts_by_species: Dictionary = {}
 var counts_by_zone: Dictionary = {}
 var tris_by_species: Dictionary = {}
@@ -197,6 +214,8 @@ var _species_xfar: Dictionary = {}   # stem -> ArrayMesh cu bulgari (sau acelasi
 var _species_tris: Dictionary = {}   # stem -> int
 var _check_edge: float = 0.0         # distanta la margine a ultimului candidat din `_check`
 var _claims: Array[Vector3] = []     # (x, z, raza) ale zonelor cu claim
+## Zona -> prima zona cu acelasi `view_m`: cheia feliilor (vezi `_view_groups`).
+var _zone_group: PackedInt32Array = PackedInt32Array()
 var _bounds: Rect2 = Rect2()
 var _terrain_bounds: Rect2 = Rect2()
 var _sea_y: float = -1e9
@@ -207,10 +226,29 @@ func _ready() -> void:
 	# MESHFOREST_OFF=1 stinge padurea fara sa atinga scena.
 	if OS.get_environment("MESHFOREST_OFF") != "":
 		enabled = false
+	# Comutatorul de test „Test: build forest" (GameState.dbg_build_forest):
+	# 1 scoate ce a adus #654 (umbra din treapta urmatoare + artarii medii pe
+	# mesh-ul grosier), 2 nu construieste deloc. Diagnosticul Kyoto/iPhone.
+	var gs := get_node_or_null(^"/root/GameState")
+	if gs != null and not Engine.is_editor_hint():
+		match int(gs.get("dbg_build_forest")):
+			1:
+				shadow_lod = false
+				mid_from_far_species = PackedStringArray()
+			2:
+				enabled = false
+				_trace("MeshForest %s: SKIP (test)" % name)
 	if enabled:
 		top_level = true
 		global_transform = Transform3D.IDENTITY
 		_build.call_deferred()
+
+
+## Pas in urma incarcarii (GameState.load_trace): unde moare telefonul.
+func _trace(msg: String) -> void:
+	var gs := get_node_or_null(^"/root/GameState")
+	if gs != null and gs.has_method(&"load_trace"):
+		gs.call(&"load_trace", msg)
 
 
 func _find_track() -> Track:
@@ -250,8 +288,6 @@ func _build() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--forest-far-cell="):
 			far_cell_m = float(a.trim_prefix("--forest-far-cell="))
-		elif a.begins_with("--forest-slice="):
-			slice_m = float(a.trim_prefix("--forest-slice="))
 		elif a.begins_with("--forest-xfar="):
 			xfar_m = float(a.trim_prefix("--forest-xfar="))
 		elif a.begins_with("--forest-far-shadow="):
@@ -260,6 +296,8 @@ func _build() -> void:
 			lod_near_m = float(a.trim_prefix("--forest-near="))
 		elif a.begins_with("--forest-far="):
 			lod_m = float(a.trim_prefix("--forest-far="))
+		elif a.begins_with("--forest-slice="):
+			slice_m = float(a.trim_prefix("--forest-slice="))
 		elif a.begins_with("--forest-slice-near="):
 			slice_near_m = float(a.trim_prefix("--forest-slice-near="))
 		elif a.begins_with("--forest-mid-ratio="):
@@ -269,23 +307,34 @@ func _build() -> void:
 		elif a.begins_with("--forest-shadow-lod="):
 			shadow_lod = a.trim_prefix("--forest-shadow-lod=") == "1"
 	_sampler = track.get("_sampler") as TrackSideSampler
+	_trace("MeshForest %s: start (shadow_lod %s, mid_from_far %d)" % [
+		name, shadow_lod, mid_from_far_species.size()])
 	_prepare(track)
 	var t1 := Time.get_ticks_msec()
 	var theme := String(track.theme_decor)
+	_trace("MeshForest %s: species (LODs)..." % name)
 	_build_species(theme)
 	var t2 := Time.get_ticks_msec()
 	var groups: Dictionary = {}
 	var main := track.route_at(0)
+	_trace("MeshForest %s: zones..." % name)
+	_view_groups()
 	for zi in zones.size():
 		_fill_zone(zi, zones[zi], track, main, groups)
 	var t3 := Time.get_ticks_msec()
+	_trace("MeshForest %s: emit MultiMesh..." % name)
 	_emit(groups)
 	build_ms = Time.get_ticks_msec() - t0
 	phase_ms = {"prepare": t1 - t0, "species": t2 - t1, "fill": t3 - t2, "emit": t0 + build_ms - t3}
+	mmi_count = get_child_count()
+	if mmi_count > PHONE_MULTIMESH_BUDGET:
+		push_error("MeshForest %s: %d MultiMesh-uri, peste plafonul de telefon %d — pe iPhone pista moare la incarcare (vezi PHONE_MULTIMESH_BUDGET)" % [
+			name, mmi_count, PHONE_MULTIMESH_BUDGET])
+	_trace("MeshForest %s: done, %d slices, %d MultiMesh, %d ms" % [name, slice_count, mmi_count, build_ms])
 	done = true
 	if verbose:
-		print("MeshForest %s: %d instante, %d felii, %d MultiMesh de celule, %d triunghiuri totale, %d ms %s | specii %s | LOD tri/instanta (intreg, mediu, grosier, bulgari) %s | zone %s | respinse %s" % [
-			name, instance_count, slice_count, hlod_count, total_tris, build_ms, phase_ms,
+		print("MeshForest %s: %d MultiMesh in total, %d instante, %d felii, %d MultiMesh de celule, %d triunghiuri totale, %d ms %s | specii %s | LOD tri/instanta (intreg, mediu, grosier, bulgari) %s | zone %s | respinse %s" % [
+			name, mmi_count, instance_count, slice_count, hlod_count, total_tris, build_ms, phase_ms,
 			counts_by_species, tris_by_lod, counts_by_zone, rejected])
 	built.emit()
 
@@ -352,12 +401,12 @@ func _add_segment(a: Vector2, b: Vector2, hw_a: float, hw_b: float) -> void:
 ## Distanta de la `p` la cea mai apropiata MARGINE de sosea (negativa = pe ea),
 ## cautata doar in celula si vecinele ei (48 m): suficient cat marja ceruta +
 ## latimea soselei raman sub 48 m. Fara nicio sosea in jur = INF.
-func _edge_dist(p: Vector2) -> float:
+func _edge_dist(p: Vector2, rings: int = 1) -> float:
 	var cx := floori(p.x / _SEG_CELL)
 	var cy := floori(p.y / _SEG_CELL)
 	var best := INF
-	for dx in range(-1, 2):
-		for dy in range(-1, 2):
+	for dx in range(-rings, rings + 1):
+		for dy in range(-rings, rings + 1):
 			var key := Vector2i(cx + dx, cy + dy)
 			if not _seg_grid.has(key):
 				continue
@@ -1094,6 +1143,23 @@ func _reject(why: String) -> void:
 	rejected[why] = int(rejected.get(why, 0)) + 1
 
 
+## Felia NU se mai cheie pe zona, ci pe `view_m` (singurul camp al zonei pe
+## care il citesc `_emit`/`_emit_cell`). Cu cheia pe zona, zonele vecine din
+## aceeasi celula de 60 m dadeau fiecare MultiMesh-ul ei: Angkor (210 zone)
+## avea 12.224 de MultiMesh-uri cu ~5 arbori fiecare, Kyoto 4.407 — iar pe
+## iPhone fiecare MultiMesh costa memorie si obiecte GPU chiar ascuns, si
+## jocul murea la primul cadru dupa padure (nov 2026, crash-ul Kyoto/Angkor).
+## Celula ramane aceeasi, deci pragurile de LOD (centru + intindere) nu cresc.
+func _view_groups() -> void:
+	_zone_group.resize(zones.size())
+	var first: Dictionary = {}
+	for zi in zones.size():
+		var v := zones[zi].view_m
+		if not first.has(v):
+			first[v] = zi
+		_zone_group[zi] = int(first[v])
+
+
 func _fill_zone(zi: int, z: MeshForestZone, track: Track, main: TrackRoute,
 		groups: Dictionary) -> void:
 	# LUMINISUL: un disc cu `claim` si FARA specii nu pune nimic, doar isi
@@ -1156,14 +1222,25 @@ func _fill_zone(zi: int, z: MeshForestZone, track: Track, main: TrackRoute,
 		# Banda apropiata (camera poate ajunge la `lod_near_m` de arbore) se
 		# felieaza mai fin — vezi `slice_near_m` / `lod_near_m`.
 		var near := lod_m > 0.0 and edge < lod_near_m
-		var sm := slice_near_m if near else slice_m
+		# ADANCUL: arborii la >= `lod_m` de orice sosea nu ajung niciodata mai
+		# aproape de camera decat pragul treptei grosiere, deci nu au nevoie de
+		# treapta intreaga sau medie. Merg intr-o singura felie de marimea
+		# celulei, pe mesh-ul grosier, care se preda celulei ca orice felie
+		# `_far`. Inainte fiecare avea felia lui de 60 m cu 2-3 trepte: Angkor
+		# ajunsese la mii de MultiMesh-uri cu ~5 arbori, iar iPhone-ul murea la
+		# primul cadru dupa padure (nov 2026). `_edge_dist` cauta pe un inel
+		# (~48 m) si da INF dincolo; aici se cere distanta adevarata, pe doua.
+		var deep := lod_m > 0.0 and far_cell_m > 0.0 and edge >= lod_m 			and _edge_dist(c, 2) >= lod_m
+		var sm := far_cell_m if deep else (slice_near_m if near else slice_m)
 		var cell := Vector2i(floori(c.x / sm), floori(c.y / sm))
-		var key := "%d|%d|%d|%s|%d|%d" % [zi, cell.x, cell.y, stem, 1 if shadow else 0, 1 if near else 0]
+		var zg := _zone_group[zi]
+		var band := 2 if deep else (1 if near else 0)
+		var key := "%d|%d|%d|%s|%d|%d" % [zg, cell.x, cell.y, stem, 1 if shadow else 0, band]
 		if not groups.has(key):
 			# Array tipizat, nu Packed*Array: un Packed citit din Dictionary e o
 			# COPIE, iar append-ul pe ea nu ajunge in grup (memoria
 			# `append-pe-copie-in-array-netipizat`; vezi si `_add_segment`).
-			groups[key] = {"zone": zi, "stem": stem, "shadow": shadow,
+			groups[key] = {"zone": zg, "stem": stem, "shadow": shadow, "deep": deep,
 				"xf": [] as Array[Transform3D], "edge": [] as Array[float]}
 		(groups[key]["xf"] as Array[Transform3D]).append(xf)
 		(groups[key]["edge"] as Array[float]).append(edge)
@@ -1383,15 +1460,42 @@ func _emit(groups: Dictionary) -> void:
 			if edges[i] < lod_m:
 				ext_far = maxf(ext_far, d)
 		var steps: Array = [[full, 0.0, 0.0, ""]]
-		if lod_m > 0.0:
+		# Felie FARA niciun arbore in banda apropiata (toti la >= `lod_near_m` de
+		# marginea soselei): treapta intreaga ar tine doar pana la `lod_near_m`
+		# de CENTRU, adica s-ar vedea numai din padure. Incepe direct cu cea
+		# medie — e exact treapta ceruta la distanta aia — si e un MultiMesh mai
+		# putin (Angkor: 1.910 din 6.612; crash-ul de pe iPhone, nov 2026).
+		var any_near := false
+		for e in edges:
+			if e < lod_near_m:
+				any_near = true
+				break
+		var to_cell := false
+		if bool(g.get("deep", false)):
+			steps = [[_species_far.get(stem, full), 0.0, 0.0, "_far"]]
+		elif lod_m > 0.0:
 			var mid: ArrayMesh = _species_mid.get(stem, full)
 			if mid != full and lod_near_m > 0.0 and lod_near_m < lod_m:
-				steps[-1][2] = lod_near_m + ext_near
-				steps.append([mid, lod_near_m + ext_near, 0.0, "_mid"])
+				if any_near:
+					steps[-1][2] = lod_near_m + ext_near
+					steps.append([mid, lod_near_m + ext_near, 0.0, "_mid"])
+				else:
+					steps = [[mid, 0.0, 0.0, "_mid"]]
 			var far: ArrayMesh = _species_far.get(stem, full)
 			if far != steps[-1][0]:
-				steps[-1][2] = lod_m + ext_far
-				steps.append([far, lod_m + ext_far, 0.0, "_far"])
+				if far_cell_m > 0.0:
+					# FARA treapta `_far` pe felie (nov 2026, crash-ul iPhone):
+					# ultima treapta ramane deschisa si o inlocuieste direct
+					# celula, care are aceiasi arbori pe mesh-ul grosier. Felia
+					# `_far` acoperea doar fasia dintre `lod_m` + intinderea feliei
+					# si pragul celulei — un MultiMesh pe fiecare felie (Angkor
+					# 2.076, Kyoto 911) pentru cativa zeci de metri. Pe artarii
+					# Kyoto (`mid_from_far_species`) treapta medie E cea grosiera,
+					# deci acolo nu costa nimic.
+					to_cell = true
+				else:
+					steps[-1][2] = lod_m + ext_far
+					steps.append([far, lod_m + ext_far, 0.0, "_far"])
 		var kids: Array[MultiMeshInstance3D] = []
 		for k in steps.size():
 			var begin := float(steps[k][1])
@@ -1401,8 +1505,17 @@ func _emit(groups: Dictionary) -> void:
 				if begin >= end:
 					continue
 			var shadow := bool(g["shadow"]) and (far_shadow or String(steps[k][3]) != "_far")
-			var cheap: ArrayMesh = steps[k + 1][0] \
-				if shadow and shadow_lod and k + 1 < steps.size() else null
+			# Umbra din treapta urmatoare pe treapta INTREAGA (artar 2696 ->
+			# 212-348 de triunghiuri); pe cea medie doar cu `shadow_lod_mid`.
+			# Treapta urmatoare a ultimei trepte, cand felia se preda celulei,
+			# e mesh-ul grosier al celulei (felia nu mai are `_far`).
+			var next: ArrayMesh = steps[k + 1][0] if k + 1 < steps.size() \
+				else (_species_far.get(stem, null) as ArrayMesh if to_cell else null)
+			if next == steps[k][0]:
+				next = null
+			var cheap: ArrayMesh = next \
+				if shadow and shadow_lod \
+					and (shadow_lod_mid or String(steps[k][3]) == "") else null
 			var nm := String(key).replace("|", "_") + String(steps[k][3])
 			var mmi := _slice_mmi(nm, steps[k][0], xfs, union, begin, end,
 				shadow and cheap == null)
@@ -1417,8 +1530,7 @@ func _emit(groups: Dictionary) -> void:
 		slice_count += 1
 		# Doar feliile care ajung pe treapta grosiera intra in celula: una fara
 		# LOD s-ar vedea intreaga pana la `view_m` si in celula ar fi grosiera.
-		if far_cell_m > 0.0 and steps.size() > 1 and String(steps[-1][3]) == "_far" \
-				and not kids.is_empty() and kids[-1].name.ends_with("_far"):
+		if to_cell and not kids.is_empty():
 			var ck := "%d|%d|%d" % [int(g["zone"]), floori(cen.x / far_cell_m), floori(cen.z / far_cell_m)]
 			if not cells.has(ck):
 				cells[ck] = {"zone": int(g["zone"]), "xf": {}, "edge": {},

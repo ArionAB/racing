@@ -28,7 +28,14 @@ FOREST_GLBS = {
 # Valorile sunt literale GDScript. Palmierul de zahar are evantaiul de fronde pe care generatorul de LOD nu-l
 # simplifica (2330 -> 1502 triunghiuri si atat), iar etajul de mijloc e in cadru la orice distanta: i se rarasc
 # frunzele pe treptele mediu (fiecare a 2-a) si grosier (fiecare a 3-a). Vezi docs/track_briefs/angkor_padure_cost.md.
+# Plafonul de MultiMesh al telefonului (PR #667, nov 2026): Angkor avea 12.224 de MultiMesh-uri si murea la
+# incarcare pe iPhone (plafon MeshForest.PHONE_MULTIMESH_BUDGET = 2.500). Felii apropiate mai late, treapta
+# grosiera mai devreme si plantele mici direct pe mesh-ul grosier au adus-o la ~2.200. #667 le scrisese de mana
+# in Track24.tscn; stau aici ca regenerarea sa nu le stearga.
 FOREST_SETTINGS = {
+    'lod_m': '50.0',
+    'slice_near_m': '40.0',
+    'mid_from_far_species': 'PackedStringArray("tropical_shrub", "fern_cluster", "bamboo_clump")',
     'frond_thin_species': 'PackedStringArray("sugar_palm")',
 }
 

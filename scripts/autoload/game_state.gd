@@ -268,6 +268,11 @@ var cam_follow_scale: float = 1.0
 ## particulele. Persistat ca sa nu-l repornesti la fiecare build.
 var show_perf: bool = false
 
+## Telemetria de pozitie (LocationTelemetry): unde e masina pe pista, in
+## coordonatele uneltelor (`--frac`, index, metri, lateral). F3 in cursa sau
+## din SETARI pe telefon. Persistata, ca si contorul.
+var show_location: bool = false
+
 ## TEST (optiunea D din oct 2026): un SpotLight3D adevarat pe farurile
 ## masinii jucatorului, pe pistele de noapte, in locul baltii de lumina false.
 ## Setare ca sa se poata compara la volan, din pauza; prima de stins daca
@@ -338,9 +343,73 @@ var records: Dictionary = {}
 var race_records: Dictionary = {}
 
 func _ready() -> void:
+	_read_last_load_trace()
 	load_settings()
 	load_records()
 	apply_gfx_tier()
+
+
+## URMA INCARCARII (nov 2026). Kyoto se inchidea pe iPhone cu bara la ~40% si
+## iOS nu lasa nici JetsamEvent, nici raport de crash. Fiecare pas al
+## incarcarii se scrie aici (deschis + inchis pe fiecare linie, deci ajunge pe
+## disc chiar daca procesul moare in pasul urmator); la pornirea urmatoare,
+## SETARI arata unde s-a oprit ultima incarcare neterminata.
+const LOAD_TRACE_PATH := "user://load_trace.txt"
+const LOAD_TRACE_DONE := "== OK"
+## Ultima incarcare NETERMINATA, citita la pornire ("" daca s-a terminat).
+var last_load_trace: String = ""
+var _load_trace_t0: int = 0
+
+
+func load_trace_begin(label: String) -> void:
+	_load_trace_t0 = Time.get_ticks_msec()
+	var f := FileAccess.open(LOAD_TRACE_PATH, FileAccess.WRITE)
+	if f != null:
+		f.store_line("%s | %s" % [label, Time.get_datetime_string_from_system()])
+		f.close()
+
+
+func load_trace(step: String) -> void:
+	var f := FileAccess.open(LOAD_TRACE_PATH, FileAccess.READ_WRITE)
+	if f == null:
+		return
+	f.seek_end()
+	# `get_static_memory_usage` da 0 in build-ul de release (telefon); memoria
+	# video si memoria libera a sistemului merg si in release.
+	var info := OS.get_memory_info()
+	f.store_line("%6.1f s  %s  (vram %d MB, free %d MB)" % [
+		(Time.get_ticks_msec() - _load_trace_t0) / 1000.0, step,
+		int(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED)) / 1048576,
+		int(info.get("available", -1)) / 1048576])
+	f.close()
+
+
+## Linia de final e SIMPLA (fara timp/memorie), ca `_read_last_load_trace` sa
+## o recunoasca dupa sfarsitul fisierului.
+func load_trace_end() -> void:
+	var f := FileAccess.open(LOAD_TRACE_PATH, FileAccess.READ_WRITE)
+	if f == null:
+		return
+	f.seek_end()
+	f.store_line(LOAD_TRACE_DONE)
+	f.close()
+
+
+func _read_last_load_trace() -> void:
+	if not FileAccess.file_exists(LOAD_TRACE_PATH):
+		return
+	var text := FileAccess.get_file_as_string(LOAD_TRACE_PATH).strip_edges()
+	if text == "" or text.ends_with(LOAD_TRACE_DONE):
+		return
+	# Toata urma (panoul deruleaza): ultimele 8 linii nu aratau unde erau
+	# celelalte constructii cand a murit padurea.
+	var lines := text.split("\n")
+	var keep: PackedStringArray = [lines[0]]
+	if lines.size() > 61:
+		keep.append("…")
+	for i in range(maxi(1, lines.size() - 60), lines.size()):
+		keep.append(lines[i])
+	last_load_trace = "\n".join(keep)
 
 
 ## Aplica nivelul grafic pe ce se poate schimba PE LOC: scala de randare 3D
@@ -430,6 +499,14 @@ const DBG_FAR_NAMES: Array[String] = ["Tier", "120 m", "180 m", "250 m"]
 const DBG_FAR_M: Array[float] = [0.0, 120.0, 180.0, 250.0]
 var dbg_hide_houses: int = 0
 var dbg_hide_forest: int = 0
+## CONSTRUCTIA (nu doar vizibilitatea) caselor si a padurii — diagnosticul de
+## crash Kyoto pe iPhone, nov 2026. "No shadow mesh" scoate exact ce au adus
+## #652 (CityFill.shadow_proxy) si #654 (MeshForest.shadow_lod +
+## mid_from_far_species); "Skip" nu construieste deloc. Se citeste la
+## construirea pistei, deci se alege INAINTE de a intra in cursa.
+const DBG_BUILD_NAMES: Array[String] = ["Full", "No shadow mesh", "Skip"]
+var dbg_build_houses: int = 0
+var dbg_build_forest: int = 0
 var dbg_hide_decor: int = 0
 var dbg_far: int = 0
 var dbg_msaa: int = 0
@@ -725,6 +802,7 @@ func load_settings() -> void:
 	cam_follow_scale = clampf(
 		float(cfg.get_value("camera", "follow_scale", 1.0)), 0.4, 2.5)
 	show_perf = bool(cfg.get_value("debug", "show_perf", false))
+	show_location = bool(cfg.get_value("debug", "show_location", false))
 	real_headlight = bool(cfg.get_value("debug", "real_headlight", true))
 	gfx_tier = clampi(int(cfg.get_value("video", "gfx_tier", 1)), 0, 2)
 	haptics_enabled = bool(cfg.get_value("input", "haptics", true))
@@ -742,6 +820,7 @@ func save_settings() -> void:
 	cfg.set_value("camera", "fov_scale", cam_fov_scale)
 	cfg.set_value("camera", "follow_scale", cam_follow_scale)
 	cfg.set_value("debug", "show_perf", show_perf)
+	cfg.set_value("debug", "show_location", show_location)
 	cfg.set_value("debug", "real_headlight", real_headlight)
 	cfg.set_value("video", "gfx_tier", gfx_tier)
 	cfg.set_value("input", "haptics", haptics_enabled)

@@ -107,6 +107,20 @@ func _build() -> void:
 			GameState.save_settings()
 			# Sectiunea de test apare/dispare odata cu contorul.
 			_rebuild.call_deferred())
+	# Unde esti pe pista (F3 pe desktop). Atinge panoul ca sa copiezi locul.
+	_add_toggle(box, "Location telemetry (tap it to copy)", GameState.show_location,
+		func(on: bool) -> void:
+			GameState.show_location = on
+			GameState.save_settings())
+	# Urma ultimei incarcari care n-a ajuns la START (crash Kyoto pe iPhone,
+	# nov 2026): apare doar daca exista, indiferent de contor.
+	if GameState.last_load_trace != "":
+		var trace := Label.new()
+		trace.text = "LAST LOAD STOPPED AT:\n" + GameState.last_load_trace
+		trace.add_theme_font_size_override("font_size", 16)
+		trace.modulate = Color(1.0, 0.6, 0.5)
+		trace.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		box.add_child(trace)
 	if GameState.show_perf:
 		_add_perf_tests(box)
 	_add_toggle(box, "Real headlight at night (test)", GameState.real_headlight,
@@ -205,6 +219,16 @@ func _add_perf_tests(box: VBoxContainer) -> void:
 		func(i: int) -> void:
 			GameState.dbg_hide_forest = i
 			GameState.apply_gfx_tier())
+	# Constructia, nu vizibilitatea (crash Kyoto, nov 2026): se aplica la
+	# urmatoarea pista incarcata.
+	_add_choice(box, "Test: build houses", GameState.DBG_BUILD_NAMES,
+		GameState.dbg_build_houses,
+		func(i: int) -> void:
+			GameState.dbg_build_houses = i)
+	_add_choice(box, "Test: build forest", GameState.DBG_BUILD_NAMES,
+		GameState.dbg_build_forest,
+		func(i: int) -> void:
+			GameState.dbg_build_forest = i)
 	_add_choice(box, "Test: placed decor", GameState.DBG_HIDE_NAMES,
 		GameState.dbg_hide_decor,
 		func(i: int) -> void:

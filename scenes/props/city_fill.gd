@@ -169,7 +169,24 @@ func _ready() -> void:
 			shadow_proxy = false
 	if Engine.is_editor_hint() or models.is_empty():
 		return
+	# Comutatorul de test „Test: build houses" (GameState.dbg_build_houses).
+	# Prin cale, nu prin numele autoload-ului: scriptul se incarca si fara el.
+	var gs := get_node_or_null(^"/root/GameState")
+	if gs != null:
+		match int(gs.get("dbg_build_houses")):
+			1:
+				shadow_proxy = false
+			2:
+				_trace("CityFill %s: SKIP (test)" % name)
+				return
 	_build.call_deferred()
+
+
+## Pas in urma incarcarii (GameState.load_trace): unde moare telefonul.
+func _trace(msg: String) -> void:
+	var gs := get_node_or_null(^"/root/GameState")
+	if gs != null and gs.has_method(&"load_trace"):
+		gs.call(&"load_trace", msg)
 
 
 func _build() -> void:
@@ -181,12 +198,15 @@ func _build() -> void:
 	await get_tree().physics_frame
 	var space := get_world_3d().direct_space_state
 	var t0 := Time.get_ticks_msec()
+	_trace("CityFill %s: start (shadow_proxy %s)" % [name, shadow_proxy])
 	var places: Array
 	if not explicit_xforms.is_empty():
 		places = _explicit()
 	else:
 		places = _generate_rows(track, space) if row_mode else _generate(track, space)
+	_trace("CityFill %s: %d places, templates..." % [name, places.size()])
 	var parts := await _templates()
+	_trace("CityFill %s: templates done, batching" % name)
 	var groups := {}
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value + 7
@@ -260,6 +280,7 @@ func _build() -> void:
 	print("CityFill %s: %d case (%d indigo, raport %.2f), %d buffere, %d tri, %d ms, centroid (%.0f, %.1f, %.0f), respinse %s" % [
 		name, places.size(), indigo_n, indigo_ratio, batches, tris, stats["ms"],
 		cen.x, cen.y, cen.z, str(stats.get("rejected", {}))])
+	_trace("CityFill %s: done, %d buffers, %d ms" % [name, batches, int(stats["ms"])])
 
 
 ## Instantele date de generator (vezi `explicit_xforms`).

@@ -25,6 +25,10 @@ extends Node
 ##                    compilarea shaderelor, din project.godot)
 ##   --shadow-size=N  harta de umbra directionala (implicit cea din proiect)
 ##   --no-shadows     stinge umbrele (theme_shadows) — cat costa cascada
+##   --phone-shadow   PROFILUL IEFTIN de umbra al telefonului (nivelul Normal):
+##                    plafon GameState.SHADOW_DISTANCE_MOBILE (55 m) si o
+##                    singura cascada — `--mobile` singur pastreaza distanta
+##                    temei, deci umbra de dincolo de 55 m nu exista pe telefon
 ##   --no-glow        stinge glow-ul — cat costa post-procesarea
 ##   --scale=0.75     factorul de rezolutie 3D (1.0 = nativ)
 ##   --msaa=4         MSAA 3D: 0, 2, 4, 8
@@ -62,6 +66,7 @@ func _ready() -> void:
 	var samples := 10
 	var frames := 6
 	var mobile := false
+	var phone_shadow := false
 	var shadow_size := 0
 	var no_shadows := false
 	var no_glow := false
@@ -82,6 +87,8 @@ func _ready() -> void:
 			frames = maxi(1, int(arg.trim_prefix("--frames=")))
 		elif arg == "--mobile":
 			mobile = true
+		elif arg == "--phone-shadow":
+			phone_shadow = true
 		elif arg.begins_with("--shadow-size="):
 			shadow_size = int(arg.trim_prefix("--shadow-size="))
 		elif arg == "--no-shadows":
@@ -143,6 +150,10 @@ func _ready() -> void:
 	RenderingServer.viewport_set_measure_render_time(vp_rid, true)
 
 	print("ProbePerf: pista %s" % GameState.track_label(track_index))
+	# Ca GameState.apply_gfx_tier pe telefon: Track le citeste la constructia soarelui.
+	if phone_shadow:
+		Track.shadow_distance_cap = GameState.SHADOW_DISTANCE_MOBILE
+		Track.shadow_single_split = true
 	var track := (load(GameState.TRACK_SCENES[track_index]) as PackedScene) \
 		.instantiate() as Track
 	add_child(track)
@@ -232,6 +243,8 @@ func _ready() -> void:
 	var sum_d := 0
 	var sum_s := 0
 	var sum_p := 0
+	var sum_sp := 0
+	var max_sp := 0
 	var sum_c := 0.0
 	var sum_g := 0.0
 	for r in rows:
@@ -243,12 +256,15 @@ func _ready() -> void:
 		sum_d += int(r["draw"])
 		sum_s += int(r["shadow"])
 		sum_p += int(r["prim"])
+		sum_sp += int(r["shadow_prim"])
+		max_sp = maxi(max_sp, int(r["shadow_prim"]))
 		sum_c += float(r["cpu"])
 		sum_g += float(r["gpu"])
 	var cnt := float(rows.size())
 	print("  --- desene:  medie %d, varf %d (umbra: medie %d)"
 		% [sum_d / rows.size(), max_d, sum_s / rows.size()])
 	print("  --- tri:     medie %dk" % [(sum_p / rows.size()) / 1000])
+	print("  --- tri umbra: medie %dk, varf %dk" % [(sum_sp / rows.size()) / 1000, max_sp / 1000])
 	print("  --- cpu ms:  medie %.2f" % [sum_c / cnt])
 	var gpus: Array[float] = []
 	for r in rows:
@@ -349,6 +365,7 @@ func _measure(cam: Camera3D, track: Track, vp_rid: RID, samples: int, frames: in
 		var draw_sum := 0
 		var shadow_sum := 0
 		var prim_sum := 0
+		var shadow_prim_sum := 0
 		var obj_sum := 0
 		var cpu_sum := 0.0
 		# Timpul GPU se ia ca MEDIANA a cadrelor, nu media: un singur cadru cu
@@ -367,6 +384,12 @@ func _measure(cam: Camera3D, track: Track, vp_rid: RID, samples: int, frames: in
 				RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME)
 			prim_sum += RenderingServer.viewport_get_render_info(vp_rid, t,
 				RenderingServer.VIEWPORT_RENDER_INFO_PRIMITIVES_IN_FRAME)
+			# Si triunghiurile pasei de umbra: „tri" de mai sus e doar pasa
+			# vizibila, deci o schimbare care muta costul in umbra (felii
+			# `_umbra` ale padurii) iesea identica la bit.
+			shadow_prim_sum += RenderingServer.viewport_get_render_info(vp_rid,
+				RenderingServer.VIEWPORT_RENDER_INFO_TYPE_SHADOW,
+				RenderingServer.VIEWPORT_RENDER_INFO_PRIMITIVES_IN_FRAME)
 			obj_sum += RenderingServer.viewport_get_render_info(vp_rid, t,
 				RenderingServer.VIEWPORT_RENDER_INFO_OBJECTS_IN_FRAME)
 			cpu_sum += RenderingServer.viewport_get_measured_render_time_cpu(vp_rid)
@@ -380,6 +403,7 @@ func _measure(cam: Camera3D, track: Track, vp_rid: RID, samples: int, frames: in
 			"draw": draw_sum / frames,
 			"shadow": shadow_sum / frames,
 			"prim": prim_sum / frames,
+			"shadow_prim": shadow_prim_sum / frames,
 			"obj": obj_sum / frames,
 			"cpu": cpu_sum / float(frames),
 			"gpu": gpu_frames[gpu_frames.size() / 2],

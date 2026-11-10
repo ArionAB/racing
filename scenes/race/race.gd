@@ -123,6 +123,10 @@ func _ready() -> void:
 ## abia la urma pornesc numaratoarea si fizica de cursa. Vezi LoadingScreen.
 func _load_behind_screen() -> void:
 	state = State.LOADING
+	GameState.load_trace_begin("%s | houses %s, forest %s" % [
+		GameState.TRACK_SCENES[GameState.selected_track].get_file(),
+		GameState.DBG_BUILD_NAMES[GameState.dbg_build_houses],
+		GameState.DBG_BUILD_NAMES[GameState.dbg_build_forest]])
 	var screen := LoadingScreen.new()
 	screen.track_index = GameState.selected_track
 	add_child(screen)
@@ -135,12 +139,15 @@ func _load_behind_screen() -> void:
 		GameState.go_to_menu()
 		return
 	screen.watch_build(t)
+	GameState.load_trace("track _ready (build)...")
 	_mount_track(t)
+	GameState.load_trace("cars, HUD...")
 	_setup_race()
 	screen.end_phase(&"masini")
 	# Numaratoarea porneste cand ecranul incepe sa se ridice, nu inainte:
 	# cadrele de incalzire nu au voie sa manance din READY?/3/2/1.
 	await screen.finish()
+	GameState.load_trace("countdown")
 	state = State.COUNTDOWN
 
 
@@ -194,6 +201,14 @@ func _setup_race() -> void:
 	hud.results_primary.connect(_on_results_primary)
 	hud.setup_minimap(track, cars)
 	hud.set_sealed_turbo(Career.is_time_trial())
+	# Telemetria de pozitie: ascunsa pana la F3 / setare, deci cost zero
+	# (`_process` iese imediat cand e stinsa).
+	var loc := LocationTelemetry.new()
+	loc.car = player
+	loc.track = track
+	loc.track_index = GameState.selected_track
+	loc.race_clock = _clock_ms
+	add_child(loc)
 	if _ghost_car != null:
 		hud.set_ghost_time(_ghost_car.data.total_ms)
 	_setup_challenge()
@@ -432,6 +447,8 @@ func _tick_countdown(delta: float) -> void:
 
 func _go() -> void:
 	state = State.RUNNING
+	# Cursa a pornit: casele/padurea (construite amanat) au avut tot numaratul.
+	GameState.load_trace_end()
 	if _ghost_recorder != null:
 		_ghost_recorder.start()
 	if _ghost_car != null:
@@ -1097,7 +1114,7 @@ func _update_hud() -> void:
 	var record_text := _fmt_ms(record_ms) if record_ms > 0 else "--:--.-"
 	# Indiciul de camera apare doar unde exista si reglajul (build de debug),
 	# altfel ar promite jucatorului o tasta care nu face nimic.
-	var cam_hint := "  [F2] camera" if OS.is_debug_build() else ""
+	var cam_hint := "  [F2] camera  [F3] location" if OS.is_debug_build() else ""
 	# Timpul total al cursei langa recordul pe cursa (#498): pe ultimul tur
 	# vezi direct daca il mai bati.
 	var race_ms := _player_race_ms if _player_race_ms >= 0 else _clock_ms()

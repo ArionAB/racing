@@ -108,14 +108,18 @@ def main(paths):
         out_rp = sum(1 for r in rs for e in r["respawns"] if not e["in_seg"])
         print("  restul buclei: [blocaj] %d, repuneri %d" % (out_st, out_rp))
         seg_events = [e for r in rs for e in r["stuck"] if e["in_seg"]]
-        for e in seg_events[:12]:
+        for e in seg_events[:6]:
             print("    [blocaj] seg t=%.1f %s ruta %d poz %s v %.1f atinge %s" % (
                 e["t"], e["car"], e["route"], e["pos"], e["v"], e["touch"] or "-"))
+        # repunerile din segment, pe destinatie (memoria repunerea-logata-e-destinatia)
+        dest = defaultdict(int)
         for r in rs:
             for e in r["respawns"]:
                 if e["in_seg"]:
-                    print("    [repunere] seg seed %d t=%.1f %s ruta %d -> %s" % (
-                        r["seed"], e["t"], e["car"], e["route"], e["pos"]))
+                    dest["r%d (%d,%d)" % (e["route"], round(e["pos"][0] / 4) * 4, round(e["pos"][2] / 4) * 4)] += 1
+        if dest:
+            print("    repuneri in segment pe destinatie: " + ", ".join(
+                "%s x%d" % kv for kv in sorted(dest.items(), key=lambda kv: -kv[1])[:8]))
 
 
 if __name__ == "__main__":

@@ -291,6 +291,9 @@ var _ai_cars: Array[int] = []
 ## fatada / zid de gradina). Lipsesc unde banda e la < hw+3 m de bucla (furca,
 ## gura). Strada reala are case si borduri; pe sonda goala AI-ul iese pe iarba.
 var _walls: Vector2 = Vector2(-1.0, 0.0)
+## A treia valoare din `--walls=off,h,0`: fara zid pe INTERIORUL acelor (acolo
+## brief-ul pune straturile de hortensii, moi, fara coliziune).
+var _walls_inner: bool = true
 var _wall_body: StaticBody3D = null
 
 var _track: Track
@@ -327,6 +330,7 @@ func _ready() -> void:
 		elif arg.begins_with("--walls="):
 			var wv := arg.trim_prefix("--walls=").split(",")
 			_walls = Vector2(float(wv[0]), float(wv[1]) if wv.size() > 1 else 1.5)
+			_walls_inner = wv.size() < 3 or wv[2] != "0"
 		elif arg.begins_with("--rneed="):
 			_r_need = float(arg.trim_prefix("--rneed="))
 		elif arg.begins_with("--lead="):
@@ -412,6 +416,12 @@ func _build_walls() -> void:
 				if Vector2(q.x - w.x, q.z - w.z).length() < main.half_width + 3.0:
 					ok = false
 					break
+			# interiorul acului (hortensiile din brief), daca s-a cerut
+			if ok and not _walls_inner:
+				for h in _hairpins:
+					if Vector2(w.x - h.x, w.z - h.y).length() < _hp_r:
+						ok = false
+						break
 			# peste alt tronson al benzii (interiorul acului): fara zid
 			if ok:
 				for k in b.baked.size():
@@ -438,7 +448,8 @@ func _build_walls() -> void:
 					body.add_child(cs)
 					made += 1
 			prev = w
-	print("  ziduri pe scurtatura: %d segmente, la %.1f m de margine, %.2f m peste drum" % [made, _walls.x, _walls.y])
+	print("  ziduri pe scurtatura: %d segmente, la %.1f m de margine, %.2f m peste drum%s" % [
+		made, _walls.x, _walls.y, "" if _walls_inner else ", fara zid in interiorul acelor"])
 
 
 # ------------------------------------------------------------------ dump

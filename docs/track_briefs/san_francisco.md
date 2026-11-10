@@ -346,8 +346,9 @@ din lumină.
   (`fog_end` ~360, sub `FAR_PLANE` 380), caldă și subțire, în familia solului
   (memoria `ceata-in-familia-solului`). Fără ea, inelele de fundal (podul,
   dealurile, orașul) s-ar tăia la planul îndepărtat: inel < `fog_end` <
-  `FAR_PLANE` (memoria `efecte-de-fundal-cote-legate`). **De confirmat de
-  dezvoltator** că asta înțelege prin „fără ceață”.
+  `FAR_PLANE` (memoria `efecte-de-fundal-cote-legate`). **Confirmat de
+  dezvoltator (10 nov 2026):** „fără ceață” = fără ceață ca vreme și fără
+  hazard de ceață.
 - **Azimutul soarelui se remăsoară** după fiecare redesenare de traseu (memoria
   `azimutul-soarelui-fata-de-drum`); umbrele pe siluetele de fundal, stinse
   (memoria `caster-departat-fura-umbra`).

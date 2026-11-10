@@ -22,7 +22,8 @@ const CAR_DATA: Array[Resource] = [
 	preload("res://scenes/cars/data/firetruck.tres"),
 	preload("res://scenes/cars/data/buggy.tres"),
 	# Garajul v2 (oct 2026): masinile noi stau la COADA, ca indicii de mai sus
-	# (Race.AI_CARS, fantomele din cariera, selected_car salvat) sa nu se mute.
+	# (Race.AI_CARS) sa nu se mute. Ce e pe disc (masina aleasa, fantomele) e pe
+	# `CarData.id` din #690 si nu mai depinde de ordinea de aici.
 	preload("res://scenes/cars/data/ambulance.tres"),
 	preload("res://scenes/cars/data/hotrod.tres"),
 	preload("res://scenes/cars/data/tow_truck.tres"),

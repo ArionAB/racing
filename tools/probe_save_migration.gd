@@ -106,6 +106,15 @@ func _cfg(path: String) -> ConfigFile:
 	return cfg
 
 
+## Cate copii `<fisier>.bak-*` exista langa `path`.
+func _backups(path: String) -> int:
+	var n := 0
+	for f in DirAccess.get_files_at(path.get_base_dir()):
+		if f.begins_with(path.get_file() + ".bak"):
+			n += 1
+	return n
+
+
 func _rm(path: String) -> void:
 	if FileAccess.file_exists(path):
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
@@ -230,6 +239,7 @@ func _check_settings_migration() -> void:
 		GameState.load_settings()
 	_expect(_bytes(path) == after_first, "a doua migrare a rescris settings.cfg")
 	_expect(_bytes(bak) == bak_first, "a doua migrare a atins copia .bak-v0")
+	_expect(_backups(path) == 1, "a doua incarcare a facut alta copie (%d copii)" % _backups(path))
 	_expect(_car_id() == V0_CARS[V0_CARS.size() - 1], "a doua incarcare a schimbat masina")
 	var cfg2 := ConfigFile.new()
 	_expect(SaveSchema.open(path, &"settings", cfg2) == SaveSchema.Status.CURRENT,
@@ -307,6 +317,7 @@ func _check_records_migration() -> void:
 	GameState.load_records()
 	_expect(_bytes(path) == after_first, "a doua migrare a rescris records.cfg")
 	_expect(_bytes(bak) == fixture.to_utf8_buffer(), "a doua migrare a atins records.bak-v0")
+	_expect(_backups(path) == 1, "a doua incarcare a facut alta copie (%d copii)" % _backups(path))
 	_expect(GameState.best_lap(mv) == 41013, "a doua incarcare a schimbat recordul")
 	# Un record nou se salveaza langa cele vechi, fara sa le stearga.
 	_expect(GameState.try_record(dunes, 40000), "try_record nu bate 41001 cu 40000")

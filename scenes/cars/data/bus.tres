@@ -6,6 +6,7 @@
 
 [resource]
 script = ExtResource("1")
+id = &"bus"
 display_name = "Autobuzul"
 color = Color(0.4, 0.7, 0.3, 1)
 max_speed = 35.0

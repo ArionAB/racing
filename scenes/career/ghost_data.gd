@@ -7,17 +7,27 @@ extends RefCounted
 ## `store_var` fiindcă are antet fix: se poate citi versiunea ÎNAINTE de orice
 ## altceva și se poate verifica lungimea exactă a șirului de eșantioane
 ## (un fișier trunchiat se respinge, nu se redă pe jumătate):
-##   i32 version | utf8 string track_id | i32 car_index | i32 laps |
+##   i32 version | utf8 string track_id | utf8 string car_id | i32 laps |
 ##   i32 rate_hz | i32 total_ms | i32 sample_count | sample_count * 7 * f32
 ## Un eșantion = origin.xyz + quaternion.xyzw.
+##
+## v2 (#690): mașina e pe `CarData.id`, nu pe indexul din CAR_DATA. v1 ținea
+## `i32 car_index` în locul șirului și se citește în continuare, prin ordinea
+## înghețată `SaveSchema.V0_CAR_ORDER`; fișierul v1 nu se rescrie (se înlocuiește
+## singur la următorul best).
 
-const VERSION: int = 1
+const VERSION: int = 2
 const FLOATS_PER_SAMPLE: int = 7
 
 var version: int = VERSION
 var track_id: StringName = &""
-## Indexul în GameState.CAR_DATA: redarea folosește modelul acelei mașini.
+## Indexul în GameState.CAR_DATA: redarea folosește modelul acelei mașini. Doar
+## în memorie; pe disc se scrie id-ul mașinii de pe indexul ăsta. -1 = mașina
+## din fișier nu mai e în garaj (GhostCar cade pe prima).
 var car_index: int = 0
+## Id-ul citit din fișier; se scrie înapoi neatins când `car_index` nu e valid
+## (mașină scoasă din joc), ca fantoma să nu-și piardă mașina.
+var car_id: StringName = &""
 var laps: int = 1
 var rate_hz: int = 20
 var total_ms: int = 0
@@ -32,7 +42,8 @@ func to_bytes() -> PackedByteArray:
 	var buf := StreamPeerBuffer.new()
 	buf.put_32(version)
 	buf.put_utf8_string(String(track_id))
-	buf.put_32(car_index)
+	var id := SaveSchema.id_at(GameState.CAR_DATA, car_index)
+	buf.put_utf8_string(String(id if id != &"" else car_id))
 	buf.put_32(laps)
 	buf.put_32(rate_hz)
 	buf.put_32(total_ms)
@@ -52,7 +63,8 @@ static func file_version(bytes: PackedByteArray) -> int:
 
 ## Null daca versiunea nu e cea cunoscuta sau fisierul e corupt/trunchiat.
 static func from_bytes(bytes: PackedByteArray) -> GhostData:
-	if file_version(bytes) != VERSION:
+	var file_ver := file_version(bytes)
+	if file_ver != VERSION and file_ver != 1:
 		return null
 	var buf := StreamPeerBuffer.new()
 	buf.data_array = bytes
@@ -60,9 +72,19 @@ static func from_bytes(bytes: PackedByteArray) -> GhostData:
 	var data := GhostData.new()
 	var id_res := buf.get_utf8_string()
 	data.track_id = StringName(id_res)
-	if buf.get_available_bytes() < 5 * 4:
+	if file_ver == 1:
+		if buf.get_available_bytes() < 5 * 4:
+			return null
+		var old_index := buf.get_32()
+		if old_index >= 0 and old_index < SaveSchema.V0_CAR_ORDER.size():
+			data.car_id = SaveSchema.V0_CAR_ORDER[old_index]
+	else:
+		if buf.get_available_bytes() < 4:
+			return null
+		data.car_id = StringName(buf.get_utf8_string())
+	if buf.get_available_bytes() < 4 * 4:
 		return null
-	data.car_index = buf.get_32()
+	data.car_index = SaveSchema.index_of(GameState.CAR_DATA, data.car_id)
 	data.laps = buf.get_32()
 	data.rate_hz = buf.get_32()
 	data.total_ms = buf.get_32()

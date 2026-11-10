@@ -6,6 +6,11 @@ const RACE_SCENE: String = "res://scenes/race/Race.tscn"
 const MENU_SCENE: String = "res://scenes/main_menu/MainMenu.tscn"
 const SETTINGS_PATH: String = "user://settings.cfg"
 const RECORDS_PATH: String = "user://records.cfg"
+## Caile efective ale save-urilor (schema si migrarea: SaveSchema). Sondele le
+## redirectioneaza ca sa nu atinga save-ul real; `TOY_RACER_SAVE_DIR` le muta
+## inca dinainte de `_ready` (vezi `SaveSchema.dir_override`).
+var settings_path: String = SETTINGS_PATH
+var records_path: String = RECORDS_PATH
 
 ## Garajul: toate masinile jucabile. O masina noua = un .tres nou aici.
 ## Modele: Free Low Poly Vehicles Pack de RgsDev (CC0).
@@ -333,17 +338,31 @@ var touch_brake: bool = false
 ## scos in oct 2026) — a ramas doar informativ, pentru sonde.
 var touch_active: bool = false
 
-# Best lap per pista (nume pista -> milisecunde), persistat. Cheia e numele,
-# nu indexul: la stergerea sau reordonarea unei piste, indexul ramas liber era
-# mostenit de alta pista si-i afisa recordul altcuiva.
+# Best lap per pista (`TrackInfo.id` -> milisecunde), persistat. Cheia e id-ul
+# (#690), nici indexul (la stergerea sau reordonarea unei piste, indexul ramas
+# liber era mostenit de alta pista), nici numele de afis (redenumirea lui
+# Monument Valley, #673, ar fi pierdut recordul). Un id necunoscut ramane in
+# dictionar, dormant, si se salveaza inapoi.
 var records: Dictionary = {}
 ## Recordul pe toata cursa (#498), separat de cel pe tur: cheie
 ## `race_record_key` (pista + numarul de ture — un record pe 3 ture nu se
 ## compara cu unul pe 5), valoare in ms.
 var race_records: Dictionary = {}
+## Masina / soferul din settings.cfg cu un id care nu mai e in garaj: selectia a
+## cazut pe 0, dar id-ul se scrie inapoi pana alege jucatorul altceva.
+var _dormant_car: StringName = &""
+var _dormant_driver: StringName = &""
+## Fisierul e de la un build mai nou (sau migrarea n-a putut fi scrisa): nu se
+## salveaza peste el.
+var _settings_read_only: bool = false
+var _records_read_only: bool = false
 
 func _ready() -> void:
 	_read_last_load_trace()
+	var save_dir := SaveSchema.dir_override()
+	if save_dir != "":
+		settings_path = save_dir + SETTINGS_PATH.get_file()
+		records_path = save_dir + RECORDS_PATH.get_file()
 	load_settings()
 	load_records()
 	apply_gfx_tier()
@@ -627,7 +646,7 @@ func _project_shadow_size() -> int:
 
 ## Returneaza true daca timpul e record nou pe pista respectiva.
 func try_record(track_index: int, lap_ms: int) -> bool:
-	var key := TRACK_NAMES[track_index]
+	var key := track_key(track_index)
 	var best := int(records.get(key, 0))
 	if best > 0 and lap_ms >= best:
 		return false
@@ -636,11 +655,18 @@ func try_record(track_index: int, lap_ms: int) -> bool:
 	return true
 
 func best_lap(track_index: int) -> int:
-	return int(records.get(TRACK_NAMES[track_index], 0)) # 0 = niciun record inca
+	return int(records.get(track_key(track_index), 0)) # 0 = niciun record inca
+
+## Cheia de save a pistei: `TrackInfo.id`, niciodata `TRACK_NAMES` (vezi `records`).
+static func track_key(track_index: int) -> String:
+	return String(TrackInfo.for_track(track_index).id)
 
 ## Cheia recordului de cursa: aceeasi pista pe alt numar de ture e alta proba.
+## Recordurile per masina (#685) NU schimba cheile astea: vin in sectiuni noi
+## (de ex. `[lap_records_by_car] <pista>/<masina>`), langa cele de azi, care
+## raman „cel mai bun pe orice masina" — o schema v2 aditiva, fara migrare.
 static func race_record_key(track_index: int, laps: int) -> String:
-	return "%s@%d" % [TRACK_NAMES[track_index], laps]
+	return "%s@%d" % [track_key(track_index), laps]
 
 ## Ca `try_record`, pentru timpul TOTAL al cursei, pe numarul curent de ture.
 func try_race_record(track_index: int, race_ms: int) -> bool:
@@ -656,27 +682,40 @@ func try_race_record(track_index: int, race_ms: int) -> bool:
 func best_race(track_index: int) -> int:
 	return int(race_records.get(race_record_key(track_index, total_laps), 0))
 
+## Migreaza intai un fisier vechi (SaveSchema.open: copie .bak-v0, nume -> id),
+## apoi incarca TOATE cheile — si pe cele ale pistelor scoase din joc, dormante.
 func load_records() -> void:
+	records.clear()
+	race_records.clear()
 	var cfg := ConfigFile.new()
-	if cfg.load(RECORDS_PATH) != OK:
-		return
-	for track_name in TRACK_NAMES:
-		var ms := int(cfg.get_value("records", track_name, 0))
-		if ms > 0:
-			records[track_name] = ms
-	if cfg.has_section("race_records"):
-		for key in cfg.get_section_keys("race_records"):
-			var ms := int(cfg.get_value("race_records", key, 0))
+	var status := SaveSchema.open(records_path, &"records", cfg)
+	_records_read_only = status == SaveSchema.Status.READ_ONLY
+	for section in ["records", "race_records"]:
+		if not cfg.has_section(section):
+			continue
+		var into: Dictionary = records if section == "records" else race_records
+		for key in cfg.get_section_keys(section):
+			var ms := int(cfg.get_value(section, key, 0))
 			if ms > 0:
-				race_records[key] = ms
+				into[key] = ms
 
+## Rescrie doar sectiunile de recorduri: restul fisierului (recordurile v0 fara
+## pista, `legacy_*`) ramane cum e.
 func save_records() -> void:
+	if _records_read_only:
+		return
 	var cfg := ConfigFile.new()
-	for track_name in records:
-		cfg.set_value("records", track_name, records[track_name])
+	if cfg.load(records_path) != OK: # lipsa sau stricat: pornim de la gol
+		cfg.clear()
+	for section in ["records", "race_records"]:
+		if cfg.has_section(section):
+			cfg.erase_section(section)
+	cfg.set_value(SaveSchema.META_SECTION, SaveSchema.VERSION_KEY, SaveSchema.RECORDS_VERSION)
+	for key in records:
+		cfg.set_value("records", key, records[key])
 	for key in race_records:
 		cfg.set_value("race_records", key, race_records[key])
-	cfg.save(RECORDS_PATH)
+	cfg.save(records_path)
 
 # ------------------------------------------------------------------ flux
 
@@ -782,15 +821,23 @@ func reset_touch() -> void:
 
 func load_settings() -> void:
 	var cfg := ConfigFile.new()
-	if cfg.load(SETTINGS_PATH) != OK:
-		return
+	var status := SaveSchema.open(settings_path, &"settings", cfg)
+	_settings_read_only = status == SaveSchema.Status.READ_ONLY
+	if cfg.get_sections().is_empty():
+		return # lipsa, stricat sau de la un build mai nou: raman implicitele
 	steer_sensitivity = float(cfg.get_value("input", "steer_sensitivity", 1.0))
 	sfx_volume = float(cfg.get_value("audio", "sfx_volume", 1.0))
 	engine_volume = float(cfg.get_value("audio", "engine_volume", 1.0))
-	selected_car = clampi(int(cfg.get_value("game", "selected_car", 0)),
-		0, CAR_DATA.size() - 1)
-	selected_driver = clampi(int(cfg.get_value("game", "selected_driver", 0)),
-		0, DRIVER_DATA.size() - 1)
+	# Masina si soferul pe id (#690): o reordonare a garajului nu le muta. Un id
+	# necunoscut cade pe 0 si ramane dormant (vezi SaveSchema.selection_id).
+	var car_id := StringName(cfg.get_value("game", "car", ""))
+	selected_car = SaveSchema.index_of(CAR_DATA, car_id)
+	_dormant_car = car_id if selected_car < 0 else &""
+	selected_car = maxi(0, selected_car)
+	var driver_id := StringName(cfg.get_value("game", "driver", ""))
+	selected_driver = SaveSchema.index_of(DRIVER_DATA, driver_id)
+	_dormant_driver = driver_id if selected_driver < 0 else &""
+	selected_driver = maxi(0, selected_driver)
 	# Limitele sunt cele ale sliderelor din SettingsPanel: un fisier de setari
 	# stricat de mana n-are voie sa scoata camera in alta galaxie.
 	cam_distance_scale = clampf(
@@ -809,12 +856,20 @@ func load_settings() -> void:
 	reduce_flashes = bool(cfg.get_value("video", "reduce_flashes", false))
 
 func save_settings() -> void:
+	if _settings_read_only:
+		return
 	var cfg := ConfigFile.new()
+	cfg.set_value(SaveSchema.META_SECTION, SaveSchema.VERSION_KEY, SaveSchema.SETTINGS_VERSION)
 	cfg.set_value("input", "steer_sensitivity", steer_sensitivity)
 	cfg.set_value("audio", "sfx_volume", sfx_volume)
 	cfg.set_value("audio", "engine_volume", engine_volume)
-	cfg.set_value("game", "selected_car", selected_car)
-	cfg.set_value("game", "selected_driver", selected_driver)
+	if selected_car != 0:
+		_dormant_car = &""
+	if selected_driver != 0:
+		_dormant_driver = &""
+	cfg.set_value("game", "car", String(SaveSchema.selection_id(CAR_DATA, selected_car, _dormant_car)))
+	cfg.set_value("game", "driver",
+		String(SaveSchema.selection_id(DRIVER_DATA, selected_driver, _dormant_driver)))
 	cfg.set_value("camera", "distance_scale", cam_distance_scale)
 	cfg.set_value("camera", "height_scale", cam_height_scale)
 	cfg.set_value("camera", "fov_scale", cam_fov_scale)
@@ -825,7 +880,7 @@ func save_settings() -> void:
 	cfg.set_value("video", "gfx_tier", gfx_tier)
 	cfg.set_value("input", "haptics", haptics_enabled)
 	cfg.set_value("video", "reduce_flashes", reduce_flashes)
-	cfg.save(SETTINGS_PATH)
+	cfg.save(settings_path)
 
 
 ## Readuce camera la valorile din cod (ChaseCamera), fara sa atinga restul

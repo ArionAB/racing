@@ -183,6 +183,8 @@ var _species_far: Dictionary = {}    # stem -> ArrayMesh la cel mai grosier (sau
 var _species_xfar: Dictionary = {}   # stem -> ArrayMesh cu bulgari (sau acelasi cu far)
 var _species_tris: Dictionary = {}   # stem -> int
 var _claims: Array[Vector3] = []     # (x, z, raza) ale zonelor cu claim
+## Zona -> prima zona cu acelasi `view_m`: cheia feliilor (vezi `_view_groups`).
+var _zone_group: PackedInt32Array = PackedInt32Array()
 var _bounds: Rect2 = Rect2()
 var _terrain_bounds: Rect2 = Rect2()
 var _sea_y: float = -1e9
@@ -263,6 +265,8 @@ func _build() -> void:
 			lod_near_m = float(a.trim_prefix("--forest-near="))
 		elif a.begins_with("--forest-far="):
 			lod_m = float(a.trim_prefix("--forest-far="))
+		elif a.begins_with("--forest-slice="):
+			slice_m = float(a.trim_prefix("--forest-slice="))
 		elif a.begins_with("--forest-slice-near="):
 			slice_near_m = float(a.trim_prefix("--forest-slice-near="))
 		elif a.begins_with("--forest-mid-ratio="):
@@ -281,6 +285,7 @@ func _build() -> void:
 	var groups: Dictionary = {}
 	var main := track.route_at(0)
 	_trace("MeshForest %s: zones..." % name)
+	_view_groups()
 	for zi in zones.size():
 		_fill_zone(zi, zones[zi], track, main, groups)
 	_trace("MeshForest %s: emit MultiMesh..." % name)
@@ -1093,6 +1098,23 @@ func _reject(why: String) -> void:
 	rejected[why] = int(rejected.get(why, 0)) + 1
 
 
+## Felia NU se mai cheie pe zona, ci pe `view_m` (singurul camp al zonei pe
+## care il citesc `_emit`/`_emit_cell`). Cu cheia pe zona, zonele vecine din
+## aceeasi celula de 60 m dadeau fiecare MultiMesh-ul ei: Angkor (210 zone)
+## avea 12.224 de MultiMesh-uri cu ~5 arbori fiecare, Kyoto 4.407 — iar pe
+## iPhone fiecare MultiMesh costa memorie si obiecte GPU chiar ascuns, si
+## jocul murea la primul cadru dupa padure (nov 2026, crash-ul Kyoto/Angkor).
+## Celula ramane aceeasi, deci pragurile de LOD (centru + intindere) nu cresc.
+func _view_groups() -> void:
+	_zone_group.resize(zones.size())
+	var first: Dictionary = {}
+	for zi in zones.size():
+		var v := zones[zi].view_m
+		if not first.has(v):
+			first[v] = zi
+		_zone_group[zi] = int(first[v])
+
+
 func _fill_zone(zi: int, z: MeshForestZone, track: Track, main: TrackRoute,
 		groups: Dictionary) -> void:
 	# LUMINISUL: un disc cu `claim` si FARA specii nu pune nimic, doar isi
@@ -1155,12 +1177,13 @@ func _fill_zone(zi: int, z: MeshForestZone, track: Track, main: TrackRoute,
 		var near := lod_m > 0.0 and edge < lod_near_m
 		var sm := slice_near_m if near else slice_m
 		var cell := Vector2i(floori(c.x / sm), floori(c.y / sm))
-		var key := "%d|%d|%d|%s|%d|%d" % [zi, cell.x, cell.y, stem, 1 if shadow else 0, 1 if near else 0]
+		var zg := _zone_group[zi]
+		var key := "%d|%d|%d|%s|%d|%d" % [zg, cell.x, cell.y, stem, 1 if shadow else 0, 1 if near else 0]
 		if not groups.has(key):
 			# Array tipizat, nu Packed*Array: un Packed citit din Dictionary e o
 			# COPIE, iar append-ul pe ea nu ajunge in grup (memoria
 			# `append-pe-copie-in-array-netipizat`; vezi si `_add_segment`).
-			groups[key] = {"zone": zi, "stem": stem, "shadow": shadow,
+			groups[key] = {"zone": zg, "stem": stem, "shadow": shadow,
 				"xf": [] as Array[Transform3D], "edge": [] as Array[float]}
 		(groups[key]["xf"] as Array[Transform3D]).append(xf)
 		(groups[key]["edge"] as Array[float]).append(edge)

@@ -27,6 +27,8 @@ extends Node
 ## Iese cu 1 daca un verdict pica sau daca un mod cerut n-a masurat nimic.
 
 const TRACK_INDEX: int = 15
+## `--track=N` (indexul GameState) muta sonda pe alta pista; --decor si --scan sunt generice (Angkor: 16).
+var _track_index: int = TRACK_INDEX
 
 var _track: Track = null
 var _space: PhysicsDirectSpaceState3D = null
@@ -38,13 +40,16 @@ var _skip_road: bool = false
 func _ready() -> void:
 	await get_tree().process_frame
 	var args := OS.get_cmdline_user_args()
-	var scene := load(GameState.TRACK_SCENES[TRACK_INDEX]) as PackedScene
+	for a in args:
+		if a.begins_with("--track="):
+			_track_index = int(a.trim_prefix("--track="))
+	var scene := load(GameState.TRACK_SCENES[_track_index]) as PackedScene
 	_track = scene.instantiate() as Track
 	get_tree().root.add_child(_track)
 	for i in 4:
 		await get_tree().physics_frame
 	_space = _track.get_world_3d().direct_space_state
-	print("=== %s ===" % GameState.track_label(TRACK_INDEX))
+	print("=== %s ===" % GameState.track_label(_track_index))
 	_skip_road = "--under" in args
 	for a in args:
 		if a.begins_with("--scan="):

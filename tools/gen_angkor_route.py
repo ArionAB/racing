@@ -566,6 +566,24 @@ TREE_GATE_S = 26.0      # poarta-copac pe ramura. 14 m: ramura inca se racorda l
                         # -1,5). 22 m: aripa de est la ~4 m de virajul buclei (ProbeRace val 1: 1 ejectare + 1 blocaj
                         # langa ea). 26 m: primul bloc al dominoului se muta de la 30 la 33 m (in spatele portii).
 WATER_AW = 0.5          # oglinda santului Angkor Wat (cale +3)
+
+# Apa de JAD (gauntlet POI, piesa S): bara = verde-albastrui saturat, opac, fara turcoazul luminos al
+# recifului si fara spuma alba (`water_foam` 0: malul nu mai e banda cian). Culorile merg prin
+# `water_tint` (calibrare pe CPU); scriem RGB direct, nu slot nou de paleta. Cota apei ramane cea din
+# `custom_ravine_water` (lotusii stau pe ea). Stil = scena, deci alte piste nu se misca.
+JADE_STYLE = chr(10).join([
+    "{",
+    '"ravines": Array[int]([0, 1, 2, 3, 4]),',
+    '"water_shallow_rgb": Color(0.27, 0.44, 0.34, 1),',
+    '"water_deep_rgb": Color(0.10, 0.30, 0.20, 1),',
+    '"water_shore_rgb": Color(0.20, 0.34, 0.18, 1),',
+    '"water_dim": 0.9,',
+    '"water_foam": 0.0,',
+    '"water_crest": 0.0,',
+    '"water_band": 0.0,',
+    '"water_wave_amp_k": 0.25,',
+    '"water_glint": 0.10',
+    "}"])
 WATER_SRAH = 0.5        # Srah Srang: aceeasi cota ca santul (umplerea rapei 0 ajunge si aici)
 WATER_THOM = 11.0       # santul Angkor Thom (calea uriasilor +14)
 DOMINO_PERIOD = 11.0    # ceasul dominoului (brief §2: nu imparte turul de ~79 s)
@@ -1094,6 +1112,147 @@ blend_time = 0.35
                                          (-180.0, -18.0, "49_lily"), (-120.0, 30.0, "49_lily"),
                                          (40.0, -150.0, "48_lotus"), (65.0, -140.0, "49_lily"))):
         decor_txt += put(f"Lotus{k_}", rid_, RID, lx_, WATER_AW, -ly_)
+
+    # ==== DECORUL PER POI (gauntlet, docs/track_briefs/angkor_poi_gauntlet.md) ===========================
+    # Un fisier per POI, `tools/angkor_decor/zona_<x>.py`, plus `jungla.py` (padurea in masa, globala), ca
+    # constructorii sa lucreze in paralel fara conflicte pe generator. Formatul e in antetul fiecarui
+    # fisier (tiparul Carrara). Cu toate fisierele goale, Track24.tscn iese identic la bit.
+    import importlib
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    ZONE_R = "res://assets/models/angkor/"
+    zone_ext, zone_sub, zone_nodes = "", "", ""
+    zone_glb = {}
+    _idx_tab = [(sv_, F_s(sv_)[0]) for sv_ in [k_ * 0.5 for k_ in range(int(total / 0.5))]]
+
+    def s_of_idx(fr):
+        fr = fr % 1.0
+        return min(_idx_tab, key=lambda t: min(abs(t[1] - fr), 1.0 - abs(t[1] - fr)))[0]
+
+    def road_frame(fr, lat, along=0.0):
+        """(gx, gy_drum, gz, tx, ty, s): punctul la (frac pe INDEX, lateral + dreapta, along m inainte)."""
+        sv = s_of_idx(fr) + along
+        px, py = pos_at(sv)
+        ax, ay = pos_at(sv + 0.5)
+        bx, by = pos_at(sv - 0.5)
+        tx, ty = ax - bx, ay - by
+        n = math.hypot(tx, ty)
+        tx, ty = tx / n, ty / n
+        # dreapta sensului pe harta: (ty, -tx); Godot = (x, cota, -y)
+        hx, hy = px + ty * lat, py - tx * lat
+        return hx, elev_at(sv), -hy, tx, ty, sv % total
+
+    def zone_rid(path):
+        if not path.startswith("res://"):
+            path = ZONE_R + path
+        if path not in zone_glb:
+            zone_glb[path] = f"z{len(zone_glb)}_{os.path.splitext(os.path.basename(path))[0]}"
+        return zone_glb[path]
+
+    def yaw_basis(fx, fz, yaw_deg, k):
+        """Baza cu -Z al piesei pe directia (fx, fz) rotita cu yaw (grade, + = spre STANGA), scara k."""
+        a = math.radians(yaw_deg)
+        rx = fx * math.cos(a) + fz * math.sin(a)
+        rz = -fx * math.sin(a) + fz * math.cos(a)
+        Z = (-rx * k, 0.0, -rz * k)
+        Y = (0.0, k, 0.0)
+        X = (-rz * k, 0.0, rx * k)   # Y x Z, la aceeasi scara
+        return X, Y, Z
+
+    # Zonele INAINTEA junglei: luminisurile lor (disc cu `claim`, fara specii) scot padurea din piete/temple.
+    zone_files = [f"zona_{c_}" for c_ in "abcdefgh"] + ["jungla"]
+    forest_zones, forest_glbs = [], {}
+    print("\n  decorul per POI (tools/angkor_decor/):")
+    for zf_ in zone_files:
+        if not os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), "angkor_decor", zf_ + ".py")):
+            continue
+        zm_ = importlib.import_module(f"angkor_decor.{zf_}")
+        items_ = list(getattr(zm_, "ITEMS", []))
+        kit_y_ = dict(getattr(zm_, "KIT_Y", {}))
+        for d_ in getattr(zm_, "FOREST", []):
+            forest_zones.append(dict(d_, label=d_.get("label", zf_)))
+        forest_glbs.update(getattr(zm_, "FOREST_GLBS", {}))
+        if not items_:
+            continue
+        zn_ = "Zona" + zf_.split("_")[-1].upper() if zf_.startswith("zona_") else "Jungla"
+        zone_nodes += f'\n[node name="{zn_}" type="Node3D" parent="DecorManual"]\n'
+        for it_ in items_:
+            nm_, path_, fr_, lat_, yaw_ = it_[:5]
+            opt_ = it_[5] if len(it_) > 5 else {}
+            k_ = float(opt_.get("scale", 1.0))
+            if "world" in opt_:
+                # pozitie absoluta in Godot (x, z); yaw absolut (0 = -Z al piesei spre -Z al lumii, nord)
+                gx_, gz_ = opt_["world"]
+                sv_ = s_near(gx_, -gz_)
+                gy0_ = elev_at(sv_)
+                fx_, fz_ = 0.0, -1.0
+            else:
+                gx_, gy0_, gz_, tx_, ty_, sv_ = road_frame(fr_, lat_, float(opt_.get("along", 0.0)))
+                fx_, fz_ = tx_, -ty_
+            gy_ = opt_.get("y", kit_y_.get(nm_, gy0_ + float(opt_.get("dy", -0.3))))
+            X_, Y_, Z_ = yaw_basis(fx_, fz_, float(yaw_), k_)
+            zone_nodes += (f'\n[node name="{nm_}" parent="DecorManual/{zn_}" instance=ExtResource("{zone_rid(path_)}")]\n'
+                           f"transform = Transform3D({_rows(X_, Y_, Z_)}, {r2(gx_)}, {r2(gy_)}, {r2(gz_)})\n")
+            if "coliziune" in opt_:
+                zone_nodes += f'metadata/coliziune = "{opt_["coliziune"]}"\n'
+            if "anchor" in opt_:
+                a_ = opt_["anchor"]
+                zone_nodes += f"metadata/ancora_sol = Vector3({a_[0]}, {a_[1]}, {a_[2]})\n"
+            if opt_.get("scufundat", False):
+                zone_nodes += "metadata/scufundat = true\n"
+            # "child": {"Nod": (x, y, z)} muta un nod-copil al GLB-ului (tuk_tuk: `Moto` la z -1,95, ca TukTuk0..2).
+            for cn_, cp_ in opt_.get("child", {}).items():
+                zone_nodes += (f'\n[node name="{cn_}" parent="DecorManual/{zn_}/{nm_}"]\n'
+                               f"transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {cp_[0]}, {cp_[1]}, {cp_[2]})\n")
+            print(f"    {zn_}/{nm_:22s} frac {F_s(sv_)[0]:.4f} lat {lat_:+6.1f} y {gy_:7.2f} (drum {elev_at(sv_):6.2f})")
+
+    if forest_zones:
+        zone_ext += ('[ext_resource type="Script" path="res://scenes/props/mesh_forest.gd" id="mf_script"]\n'
+                     '[ext_resource type="Script" path="res://scenes/props/mesh_forest_zone.gd" id="mf_zone"]\n')
+        for st_, pth_ in forest_glbs.items():
+            if not pth_.startswith("res://"):
+                pth_ = ZONE_R + pth_
+            zone_ext += f'[ext_resource type="PackedScene" path="{pth_}" id="mf_{st_}"]\n'
+        for k_, d_ in enumerate(forest_zones):
+            sp_txt = ", ".join('"%s"' % x_ for x_ in d_.get("species", ()))
+            zw_txt = ", ".join(str(float(w_)) for w_ in d_.get("weights", ()))
+            zone_sub += f"""
+[sub_resource type="Resource" id="MFZ_{k_}"]
+script = ExtResource("mf_zone")
+label = "{d_['label']}"
+kind = {1 if d_.get('kind') == 'disc' else 0}
+species = PackedStringArray({sp_txt})
+weights = PackedFloat32Array({zw_txt})
+spacing = {float(d_.get('spacing', 8.0))}
+edge_clear_m = {float(d_.get('edge_clear_m', 9.0))}
+shadow_m = {float(d_.get('shadow_m', 25.0))}
+view_m = {float(d_.get('view_m', 330.0))}
+max_below_road_m = {float(d_.get('max_below_road_m', 200.0))}
+claim = {"true" if d_.get('claim') else "false"}
+scale_min = {float(d_.get('scale_min', 0.85))}
+scale_max = {float(d_.get('scale_max', 1.2))}
+seed_value = {int(d_.get('seed', k_ + 1))}
+"""
+            if d_.get("kind") == "disc":
+                if "at" in d_:   # (frac pe INDEX, lateral + dreapta)
+                    cx_, _cy, cz_, _a, _b, _s = road_frame(d_["at"][0], d_["at"][1])
+                else:
+                    cx_, cz_ = d_["center"]
+                zone_sub += f"center = Vector3({cx_:.2f}, 0, {cz_:.2f})\nradius = {float(d_['radius'])}\n"
+            else:
+                zone_sub += (f"frac_from = {d_['frac_from']:.4f}\nfrac_to = {d_['frac_to']:.4f}\n"
+                             f"side = {int(d_.get('side', 0))}\n"
+                             f"lat_min = {float(d_['lat_min'])}\nlat_max = {float(d_['lat_max'])}\n")
+        scenes_txt = ", ".join(f'ExtResource("mf_{x_}")' for x_ in forest_glbs)
+        zones_txt = ", ".join(f'SubResource("MFZ_{k_}")' for k_ in range(len(forest_zones)))
+        zone_nodes += f"""
+[node name="PadureMasa" type="Node3D" parent="."]
+script = ExtResource("mf_script")
+scenes = Array[PackedScene]([{scenes_txt}])
+zones = Array[ExtResource("mf_zone")]([{zones_txt}])
+"""
+        print(f"  padurea in masa: {len(forest_zones)} zone, specii {list(forest_glbs)}")
+    zone_ext += "".join(f'[ext_resource type="PackedScene" path="{p_}" id="{r_}"]\n' for p_, r_ in zone_glb.items())
+    # ==== sfarsit DECORUL PER POI ========================================================================
     bias = [(IDX("E terasa V", BAYON_TOWERS[0][0] - 45.0),
              IDX("E terasa V", BAYON_TOWERS[-1][0] + 8.0), BAYON_BIAS)]
 
@@ -1236,7 +1395,7 @@ material = SubResource("Mat_macheta")
 [ext_resource type="PackedScene" path="res://assets/models/angkor/plants/sugar_palm.glb" id="47_palm"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/plants/lotus_cluster.glb" id="48_lotus"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/plants/water_lily_pads.glb" id="49_lily"]
-
+{zone_ext}
 [sub_resource type="StandardMaterial3D" id="Mat_macheta"]
 albedo_color = Color(0.72, 0.64, 0.52, 1)
 
@@ -1257,7 +1416,7 @@ _data = {{
 "tilts": PackedFloat32Array({", ".join("0" for _ in br_godot)})
 }}
 point_count = {len(br_godot)}
-
+{zone_sub}
 [node name="Track24" type="Node3D"]
 script = ExtResource("1_track")
 custom_name = "Angkor"
@@ -1272,6 +1431,7 @@ custom_ravines = Array[Vector4]([{", ".join(V4(*r_) for r_ in ravines)}])
 custom_ravine_floors = Array[Vector2]([{", ".join(V2(a, b) for a, b in floors)}])
 custom_ravine_widths = Array[Vector2]([{", ".join(V2(a, b) for a, b in widths)}])
 custom_ravine_water = Array[Vector3]([{", ".join(V3(*w_) for w_ in water)}])
+custom_water_styles = Array[Dictionary]([{JADE_STYLE}])
 custom_width_segments = Array[Vector3]([{", ".join(V3(*w_) for w_ in width_segments)}])
 custom_width_pinches = Array[Vector3]([{", ".join(V3(*w_) for w_ in pinches)}])
 custom_parapets = Array[Vector4]([{", ".join(V4(*p_) for p_ in parapets)}])
@@ -1293,7 +1453,7 @@ curve = SubResource("Curve3D_angkor")
 {towers_txt}
 [node name="DecorManual" type="Node3D" parent="."]
 script = ExtResource("11_prop")
-{decor_txt}{cam_txt}
+{decor_txt}{zone_nodes}{cam_txt}
 [node name="Machete" type="Node3D" parent="."]
 {mach}"""
     with open(OUT_PATH, "w", encoding="utf-8", newline="\n") as f:

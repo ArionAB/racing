@@ -4444,41 +4444,54 @@ static func themes() -> Dictionary:
 	# Azimutul: rotatia Y = -67.5 trimite lumina spre ENE, deci soarele sta in VSV (conventia
 	# din `carrara`: Y 30 = soare din SE).
 	_themes_cache["angkor"] = {
-		"sun_color": Color.html("FFC48A"),
-		"sun_energy": 1.35,
+		"sun_color": Color.html("FFC078"),
+		"sun_energy": 1.75,
 		"exposure": 1.0,
 		"sun_rotation_deg": Vector3(-24, -67.5, 0),
 		# Ambient rece-violet din cerul de furtuna, mic: raport soare/ambient ~3.4 (memoria
 		# `geometria-fara-lumina-e-invizibila`).
-		"ambient_color": Color.html("A9A4C6"),
-		"ambient_energy": 0.40,
-		"sky_top": Color.html("3B3550"),
-		"sky_horizon": Color.html("9C8296"),
-		"sky_cover_alpha": 0.45,
-		"fog": Color.html("857A88"),
-		"fog_sky_affect": 0.20,
+		"ambient_color": Color.html("9C97BC"),
+		"ambient_energy": 0.30,
+		"sky_top": Color.html("2D2740"),
+		"sky_horizon": Color.html("A6788A"),
+		"sky_cover_alpha": 0.55,
+		# Cer pe azimut (brief §4: piersica spre vest, vanat-violet spre est): vezi `_azimuth_sky_texture`.
+		"sky_azimuth": {
+			"sun_color": Color(1.0, 0.72, 0.46), "sun_alpha": 0.80, "sun_height": 0.50,
+			"away_color": Color(0.15, 0.09, 0.26), "away_alpha": 0.90, "away_height": 1.2,
+			"mottle": 0.25,
+		},
+		"fog": Color.html("86727A"),
+		"fog_sky_affect": 0.10,
 		"fog_aerial": 0.30,
 		"fog_depth": true,
 		"fog_begin": 120.0,
 		"fog_end": 280.0,
 		"fog_curve": 1.5,
-		"fog_max": 0.70,
+		"fog_max": 0.60,
 		"shadows": true,
-		"shadow_opacity": 0.70,
+		"shadow_opacity": 0.62,
 		"shadow_distance": 150.0,
-		"shadow_blur": 1.0,
+		"shadow_blur": 2.5,
 		"dune_scale": 0.0,
 		# Solul de jungla: frunze moarte + verde inchis. Drumul: laterita (TILE_TERRACOTTA ca familie).
-		"ground_tint": Color(0.36, 0.40, 0.22),
+		"ground_tint": Color(0.21, 0.25, 0.11),
 		"hill_color": Color(0.16, 0.24, 0.14),
-		"scarp_tint": Color(0.62, 0.34, 0.24),
+		"scarp_tint": Color(0.34, 0.26, 0.17),
 		"scarp_slope_deg": 30.0,
 		"scarp_fade_deg": 10.0,
-		"dirt_road_tint": Color(0.60, 0.42, 0.38),
+		"dirt_road_tint": Color(0.62, 0.45, 0.42),
+		# Pavajul de gresie al cailor de piatra (A, B, D, E, F: soseaua "asfalt" dintre intervalele
+		# de laterita) e tot materialul de asfalt, doar cu alt albedo: fizica neatinsa. Fara marcaje.
+		"road_tint": Color(0.66, 0.53, 0.38),
+		"center_line": false,
+		# Umarul de langa drum (_build_shoulders) lua `dust_color` (terracotta saturat) si iesea
+		# banda portocalie vie pe ambele laturi; bara n-are chenar, doar pamant care se pierde in sol.
+		"shoulder_color": Color(0.40, 0.31, 0.23),
 		# Solul de jungla: covorul de iarba (perechea a doua a shaderului) pe tot terenul, nu nisipul
 		# cu dune (prima captura a mostrei citea desert).
 		"savanna_grass_w": 1.0,
-		"savanna_grass_tint": Color(0.16, 0.22, 0.10),
+		"savanna_grass_tint": Color(0.12, 0.16, 0.07),
 		"dust_color": Palette.color(Palette.TILE_TERRACOTTA),
 		# Blocurile dominoului din galeria Ta Prohm (RimBoulderHazard) iau gresia templului.
 		"rockfall_class": "angkor_sandstone",
@@ -4496,14 +4509,19 @@ static func themes() -> Dictionary:
 		# ~31 m peste sol la 240 m) baza lor de 46-54 m iese din cadru, iar coborate citesc platouri
 		# cenusii (Monument Valley in jungla). Furtuna spre est ramane decizie deschisa (kit §3).
 		"horizon_model": "res://assets/models/angkor/effects/angkor_horizon.glb",
+		# Degajarea pe TOATA amprenta (tiparul Ha Long): Canopy_A are 196 x 126 m, iar degajarea masurata
+		# in pivot l-a lasat peste calea uriasilor (D, frac 0,345-0,358): o cupola verde pe drum.
+		# Cu amprenta, `clear` e de la MARGINEA piesei, nu din pivot: 120 nu mai lasa nicio silueta (0/12);
+		# 40 lasa 5/12, cea mai apropiata la >= 5 m de drum pe AABB (sonda temporara, 6 nov 2026).
+		"horizon_footprint": true,
 		# Atlasul (coronament verde, orezarii), nu clasa implicita "rock" (iesea maro-portocaliu).
 		"horizon_class": "",
 		"horizon_rings": [
-			{"count": 1, "angle_deg": -52.0, "yaw_deg": 142.0, "near": 200.0, "far": 260.0, "clear": 120.0,
+			{"count": 1, "angle_deg": -52.0, "yaw_deg": 142.0, "near": 200.0, "far": 260.0, "clear": 40.0,
 				"scale": 1.0, "picks": ["KulenRidge"]},
-			{"count": 1, "angle_deg": 180.0, "yaw_deg": -90.0, "near": 200.0, "far": 260.0, "clear": 120.0,
+			{"count": 1, "angle_deg": 180.0, "yaw_deg": -90.0, "near": 200.0, "far": 260.0, "clear": 40.0,
 				"scale": 1.0, "picks": ["Paddies_W"]},
-			{"count": 10, "near": 200.0, "far": 260.0, "clear": 120.0, "scale": 1.0,
+			{"count": 10, "near": 200.0, "far": 260.0, "clear": 40.0, "scale": 1.0,
 				"picks": ["Canopy_A", "Canopy_B", "Canopy_C"]},
 		],
 		"water": false,
@@ -6008,6 +6026,10 @@ func _build_center_line() -> void:
 	# asfalt, doar vopsit in nisipiu".
 	if road_is_loose():
 		return
+	# Cheie de tema `center_line` (implicit true): Angkor are pavaj de gresie
+	# si laterita, fara vopsea (bara: nicio marcare pe drum).
+	if not bool(theme_flag("center_line", true)):
+		return
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var n := baked.size()
@@ -6051,6 +6073,48 @@ func _build_center_line() -> void:
 	_add_visual_mesh(st.commit(), Palette.color(Palette.CAR_YELLOW) if dbl
 		else Color(0.92, 0.9, 0.78))
 
+
+## Textura equirectangulara a cerului pe azimut (vezi `sky_azimuth` in `_build_environment`).
+##
+## Cheile: `sun_color` (piersica langa soare), `away_color` (furtuna in partea opusa), `sun_alpha` /
+## `away_alpha` (cat acopera fiecare), `sun_height` / `away_height` (inaltimea in radiani unde
+## amestecul scade la ~1/e), `mottle` (variatia de nor, 0..1). Soarele vine din rotatia temei, deci
+## piersica sta mereu sub lumina reala. Rotatia: u = atan2(x, -z) / TAU + 0.5, v = acos(y) / PI.
+func _azimuth_sky_texture(cfg: Dictionary) -> ImageTexture:
+	var w := 256
+	var h := 128
+	var rot := _sun_rotation_deg()
+	var to_sun := -(Basis.from_euler(Vector3(deg_to_rad(rot.x), deg_to_rad(rot.y),
+		deg_to_rad(rot.z))) * Vector3.FORWARD)
+	var sun_az := atan2(to_sun.x, -to_sun.z)
+	var warm: Color = cfg.get("sun_color", Color(1.0, 0.72, 0.5))
+	var away: Color = cfg.get("away_color", Color(0.2, 0.14, 0.3))
+	var a_warm := float(cfg.get("sun_alpha", 0.7))
+	var a_away := float(cfg.get("away_alpha", 0.85))
+	var h_warm := float(cfg.get("sun_height", 0.45))
+	var h_away := float(cfg.get("away_height", 1.1))
+	var mottle := float(cfg.get("mottle", 0.25))
+	var noise := FastNoiseLite.new()
+	noise.seed = 24
+	noise.frequency = 0.9
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	for y in h:
+		var elev := (0.5 - (float(y) + 0.5) / float(h)) * PI   # +PI/2 zenit, 0 orizont
+		var e := maxf(elev, 0.0)
+		for x in w:
+			var az := ((float(x) + 0.5) / float(w) - 0.5) * TAU
+			var away_t := smoothstep(0.15, 0.85, (1.0 - cos(az - sun_az + PI)) * 0.5)
+			var kw := exp(-e / h_warm) * (1.0 - away_t)
+			var ka := (0.35 + 0.65 * exp(-e / h_away)) * away_t
+			var col := warm.lerp(away, away_t)
+			var a := clampf(a_warm * kw + a_away * ka, 0.0, 1.0)
+			var n := noise.get_noise_2d(cos(az) * 3.0 + elev * 2.0, sin(az) * 3.0 + elev * 2.0)
+			a = clampf(a * (1.0 + n * mottle), 0.0, 1.0)
+			if elev < 0.0:
+				a = 0.0
+			img.set_pixel(x, y, Color(col.r, col.g, col.b, a))
+	return ImageTexture.create_from_image(img)
+
 ## Lumea pistei: cer, soare, teren si dealuri/dune de fundal — tematice.
 func _build_environment() -> void:
 	var sky_mat := ProceduralSkyMaterial.new()
@@ -6072,6 +6136,15 @@ func _build_environment() -> void:
 		# stratul ADUNAT peste un gradient intunecat iesea o pata alburie.
 		sky_mat.sky_cover_modulate = Color(1.0, 0.97, 0.92,
 			float(theme_flag("sky_cover_alpha", 0.35)))
+	# CER PE AZIMUT (opt-in, cheia de tema `sky_azimuth`): ProceduralSkyMaterial n-are gradient pe
+	# azimut, dar are `sky_cover` (textura equirectangulara cu alfa, amestecata peste gradient si
+	# deja dimata de RainCycle prin `sky_cover_modulate`). O textura generata la incarcare, nu un
+	# asset, tine deci piersica spre soare si furtuna violet spre partea opusa, fara shader nou si
+	# fara sa rupa ploaia. Tema fara cheie ramane pe codul de mai sus, bit-identic.
+	var az_cfg: Variant = theme_flag("sky_azimuth", null)
+	if az_cfg is Dictionary:
+		sky_mat.sky_cover = _azimuth_sky_texture(az_cfg as Dictionary)
+		sky_mat.sky_cover_modulate = Color(1.0, 1.0, 1.0, 1.0)
 	# Discul soarelui + haloul lui (sun_angle_max, 30 grade implicit) se
 	# deseneaza din DirectionalLight. Pe o tema de noapte cu "luna" aproape
 	# verticala iesea o pata luminoasa la zenit, in cadru la fiecare urcare.

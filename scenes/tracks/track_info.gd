@@ -16,8 +16,8 @@ static var _id_cache: Dictionary = {}
 ## Cheia STABILA a pistei: cariera, abtibildurile, `career.cfg` si recordurile
 ## din `records.cfg` (#690) se leaga de ea, nu de `display_name`, care e text de
 ## afis si poate fi redenumit. NU SE MAI SCHIMBA dupa lansare. Goala => se
-## deduce din numele scenei (Track23 -> track23): cine scrie mai tarziu .tres-ul
-## unei piste fara el trebuie sa pastreze exact id-ul dedus.
+## deduce din numele scenei (TrackNN -> tracknn): cine scrie mai tarziu .tres-ul
+## unei piste ajunse deja la jucatori trebuie sa pastreze exact id-ul dedus.
 @export var id: StringName = &""
 @export var display_name: String = ""
 ## Tara / regiunea, afisata sub nume ("JAPONIA", "EUROPA").

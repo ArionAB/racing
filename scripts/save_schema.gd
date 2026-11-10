@@ -75,10 +75,7 @@ const V0_CAR_ORDER: Array[StringName] = [
 const V0_DRIVER_ORDER: Array[StringName] = [&"blue", &"red", &"yellow", &"green"]
 ## Numele din `TRACK_NAMES` sub care v0 tinea recordurile -> `TrackInfo.id`.
 ## INGHETATA: o redenumire de acum incolo (#673) NU se adauga aici, fiindcă
-## recordurile noi stau deja pe id. Carrara si Angkor n-au .tres in
-## `scenes/tracks/info/`, deci id-ul lor e cel dedus din scena (`TrackInfo.
-## for_track`): cine le scrie .tres-ul trebuie sa pastreze `track23`/`track24`.
-## "Alpii" (Track09) a iesit din joc in oct 2026: recordul ramane dormant pe id.
+## recordurile noi stau deja pe id. "Alpii" (Track09) a iesit din joc in oct 2026: recordul ramane dormant pe id.
 const V0_TRACK_IDS: Dictionary = {
 	"Dunele": "dunele",
 	"Okinawa manual": "okinawa_manual",
@@ -95,8 +92,8 @@ const V0_TRACK_IDS: Dictionary = {
 	"Monument Valley": "monument_valley",
 	"Okinawa": "okinawa",
 	"Ha Long": "halong",
-	"Carrara": "track23",
-	"Angkor": "track24",
+	"Carrara": "carrara",
+	"Angkor": "angkor",
 	"Alpii": "alpi",
 }
 

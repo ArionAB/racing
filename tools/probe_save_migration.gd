@@ -34,8 +34,8 @@ const V0_LAPS: Array = [
 	["Machu Picchu", "machu_picchu", 41009], ["Fiordland", "fiordland", 41010],
 	["Jodhpur", "jodhpur", 41011], ["Kyoto", "kyoto", 41012],
 	["Monument Valley", "monument_valley", 41013], ["Okinawa", "okinawa", 41014],
-	["Ha Long", "halong", 41015], ["Carrara", "track23", 41016],
-	["Angkor", "track24", 41017],
+	["Ha Long", "halong", 41015], ["Carrara", "carrara", 41016],
+	["Angkor", "angkor", 41017],
 ]
 const ID_FORMAT := "^[a-z][a-z0-9_]*$"
 

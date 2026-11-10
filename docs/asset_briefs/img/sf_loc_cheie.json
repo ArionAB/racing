@@ -1,0 +1,152 @@
+{
+  "loc_01.png": {
+    "sursa": "jodhpur",
+    "captura": 1,
+    "scena": "--track=10 Jodhpur",
+    "frac": 0.08
+  },
+  "loc_02.png": {
+    "sursa": "kyoto",
+    "captura": 5,
+    "scena": "--track=11 Kyoto",
+    "frac": 0.83
+  },
+  "loc_03.png": {
+    "sursa": "okinawa",
+    "captura": 3,
+    "scena": "--track=13 Okinawa",
+    "frac": 0.46
+  },
+  "loc_04.png": {
+    "sursa": "sf",
+    "captura": 3,
+    "scena": "tools/SfLoc.tscn (strada sintetica)",
+    "frac": 0.1149
+  },
+  "loc_05.png": {
+    "sursa": "sf",
+    "captura": 2,
+    "scena": "tools/SfLoc.tscn (strada sintetica)",
+    "frac": 0.0856
+  },
+  "loc_06.png": {
+    "sursa": "chongqing",
+    "captura": 2,
+    "scena": "--track=5 Chongqing",
+    "frac": 0.27
+  },
+  "loc_07.png": {
+    "sursa": "kyoto",
+    "captura": 3,
+    "scena": "--track=11 Kyoto",
+    "frac": 0.5
+  },
+  "loc_08.png": {
+    "sursa": "jodhpur",
+    "captura": 4,
+    "scena": "--track=10 Jodhpur",
+    "frac": 0.64
+  },
+  "loc_09.png": {
+    "sursa": "chongqing",
+    "captura": 1,
+    "scena": "--track=5 Chongqing",
+    "frac": 0.08
+  },
+  "loc_10.png": {
+    "sursa": "jodhpur",
+    "captura": 3,
+    "scena": "--track=10 Jodhpur",
+    "frac": 0.46
+  },
+  "loc_11.png": {
+    "sursa": "chongqing",
+    "captura": 5,
+    "scena": "--track=5 Chongqing",
+    "frac": 0.83
+  },
+  "loc_12.png": {
+    "sursa": "sf",
+    "captura": 4,
+    "scena": "tools/SfLoc.tscn (strada sintetica)",
+    "frac": 0.1734
+  },
+  "loc_13.png": {
+    "sursa": "okinawa",
+    "captura": 1,
+    "scena": "--track=13 Okinawa",
+    "frac": 0.08
+  },
+  "loc_14.png": {
+    "sursa": "chongqing",
+    "captura": 3,
+    "scena": "--track=5 Chongqing",
+    "frac": 0.46
+  },
+  "loc_15.png": {
+    "sursa": "sf",
+    "captura": 1,
+    "scena": "tools/SfLoc.tscn (strada sintetica)",
+    "frac": 0.0586
+  },
+  "loc_16.png": {
+    "sursa": "kyoto",
+    "captura": 2,
+    "scena": "--track=11 Kyoto",
+    "frac": 0.27
+  },
+  "loc_17.png": {
+    "sursa": "okinawa",
+    "captura": 4,
+    "scena": "--track=13 Okinawa",
+    "frac": 0.64
+  },
+  "loc_18.png": {
+    "sursa": "okinawa",
+    "captura": 2,
+    "scena": "--track=13 Okinawa",
+    "frac": 0.27
+  },
+  "loc_19.png": {
+    "sursa": "okinawa",
+    "captura": 5,
+    "scena": "--track=13 Okinawa",
+    "frac": 0.83
+  },
+  "loc_20.png": {
+    "sursa": "jodhpur",
+    "captura": 5,
+    "scena": "--track=10 Jodhpur",
+    "frac": 0.83
+  },
+  "loc_21.png": {
+    "sursa": "chongqing",
+    "captura": 4,
+    "scena": "--track=5 Chongqing",
+    "frac": 0.64
+  },
+  "loc_22.png": {
+    "sursa": "kyoto",
+    "captura": 1,
+    "scena": "--track=11 Kyoto",
+    "frac": 0.08
+  },
+  "loc_23.png": {
+    "sursa": "sf",
+    "captura": 5,
+    "scena": "tools/SfLoc.tscn (strada sintetica)",
+    "frac": 0.2252
+  },
+  "loc_24.png": {
+    "sursa": "kyoto",
+    "captura": 4,
+    "scena": "--track=11 Kyoto",
+    "frac": 0.64
+  },
+  "loc_25.png": {
+    "sursa": "jodhpur",
+    "captura": 2,
+    "scena": "--track=10 Jodhpur",
+    "frac": 0.27
+  }
+}

@@ -15,8 +15,8 @@ extends Node3D
 ##   - fundalul: podul rosu (KERB_RED 7) peste golf, in stanga; insula cu far; dealurile
 ##     aurii din Marin (`macchia_dry`) pe tarmul de dincolo. Apa e a temei (laguna).
 ##
-## O casa = doua noduri: `Clap_<n>` (peretii de scandura: suprafata 0 = fetele cu fata
-## spre soare, 1 = cele cu spatele, `meta sf_orient`; `meta sf_pastel` = indexul tentei) si
+## O casa = doua noduri: `Clap_<n>` (peretii de scandura, cate o suprafata pe orientare fata
+## de soare — "lit"/"graze"/"shade", in `meta sf_orient`; `meta sf_pastel` = indexul tentei) si
 ## `Atlas_<n>` (tot restul, pe `Palette.world_material()`). Asa sonda de loc
 ## (`tools/probe_sf_loc.gd`) poate atribui pixelii pe pastel si pe orientare fara caseta.
 ## Orientarea se socoteste fata de soarele TEMEI (`sun_rotation_deg`), nu e scrisa de mana.
@@ -35,6 +35,8 @@ const HOUSE_D: float = 12.0
 const LEVEL_H: float = 3.2
 const LEVELS: int = 3
 const CURB_H: float = 0.15
+## Pragul N.L sub care o fata cu fata spre soare e doar RAZANTA (vezi `_clap_st`).
+const GRAZE_NL: float = 0.25
 
 ## Randurile de case: (latura, z-ul capatului de SUS, numar de case).
 const ROWS: Array = [
@@ -58,6 +60,7 @@ var _ao_span: float = 4.0
 # SurfaceTool-urile casei curente
 var _st_lit: SurfaceTool
 var _st_shade: SurfaceTool
+var _st_graze: SurfaceTool
 var _st_atlas: SurfaceTool
 var _cur_pastel: int = 0
 ## Transformarea casei curente: casele se construiesc intr-un cadru LOCAL (strada pe z, fatada
@@ -211,19 +214,45 @@ func _build_street_furniture() -> void:
 	for c: Array in CROSS:
 		var zc: float = c[0]
 		var hw: float = c[1]
-		var y := road_y(zc) + 0.01
+		# Cota urmeaza soseaua pe z (la muchie spline-ul urca ~0,3 m inainte sa cada, iar umarul
+		# pistei iesea prin asfaltul plat ca pete de pamant), +6 cm peste umar.
 		for s: int in [1, -1]:
 			var x0 := float(s) * ROAD_HALF
 			var x1 := float(s) * 70.0
-			_aquad(Vector3(x0, y, zc + hw), Vector3(x1, y, zc + hw),
-				Vector3(x1, y, zc - hw), Vector3(x0, y, zc - hw), Vector3.UP, Palette.ASPHALT)
+			var steps := 14
+			for j in steps:
+				var z0 := lerpf(zc + hw, zc - hw, float(j) / steps)
+				var z1 := lerpf(zc + hw, zc - hw, float(j + 1) / steps)
+				var y0 := road_y(z0) + 0.06
+				var y1 := road_y(z1) + 0.06
+				_aquad(Vector3(x0, y0, z0), Vector3(x1, y0, z0), Vector3(x1, y1, z1),
+					Vector3(x0, y1, z1), Vector3.UP, Palette.ASPHALT)
 			# trotuarele strazii transversale
 			for e: float in [1.0, -1.0]:
 				var za := zc + e * hw
 				var zb := zc + e * (hw + 3.5)
-				_aquad(Vector3(x0 + float(s) * 3.5, y + CURB_H, za), Vector3(x1, y + CURB_H, za),
-					Vector3(x1, y + CURB_H, zb), Vector3(x0 + float(s) * 3.5, y + CURB_H, zb),
+				var ya := road_y(za) + 0.06 + CURB_H
+				var yb := road_y(zb) + 0.06 + CURB_H
+				_aquad(Vector3(x0 + float(s) * 3.5, ya, za), Vector3(x1, ya, za),
+					Vector3(x1, yb, zb), Vector3(x0 + float(s) * 3.5, yb, zb),
 					Vector3.UP, Palette.CONCRETE)
+	# COLTURILE intersectiilor: placa de beton intre trotuarul strazii, al strazii transversale
+	# si capetele randurilor de case (altfel acolo se vedea pamantul terenului).
+	for c: Array in CROSS:
+		var zc: float = c[0]
+		for s: int in [1, -1]:
+			for e: float in [1.0, -1.0]:
+				var za := zc + e * 10.5
+				var zb := zc + e * 18.0
+				var steps := 8
+				for j in steps:
+					var z0 := lerpf(za, zb, float(j) / steps)
+					var z1 := lerpf(za, zb, float(j + 1) / steps)
+					var x0 := float(s) * ROAD_HALF
+					var x1 := float(s) * 24.0
+					_aquad(Vector3(x0, road_y(z0) + CURB_H, z0), Vector3(x1, road_y(z0) + CURB_H, z0),
+						Vector3(x1, road_y(z1) + CURB_H, z1), Vector3(x0, road_y(z1) + CURB_H, z1),
+						Vector3.UP, Palette.CONCRETE)
 	# ZEBRELE (decal FOAM_WHITE): bare de 0,5 m in lungul strazii, pe platul dinaintea muchiei.
 	for zb: Array in ZEBRAS:
 		var za: float = zb[1]
@@ -256,6 +285,8 @@ func _build_house(s: int, za: float, pastel: int, roof: String, flat_y: float = 
 	_st_lit.begin(Mesh.PRIMITIVE_TRIANGLES)
 	_st_shade = SurfaceTool.new()
 	_st_shade.begin(Mesh.PRIMITIVE_TRIANGLES)
+	_st_graze = SurfaceTool.new()
+	_st_graze.begin(Mesh.PRIMITIVE_TRIANGLES)
 	_st_atlas = SurfaceTool.new()
 	_st_atlas.begin(Mesh.PRIMITIVE_TRIANGLES)
 
@@ -392,7 +423,7 @@ func _build_gable(fs: float, xf: float, xb: float, za: float, zb: float, ytop: f
 func _commit_house(s: int, za: float) -> void:
 	var clap := ArrayMesh.new()
 	var orient: Array[String] = []
-	for pair: Array in [[_st_lit, "lit"], [_st_shade, "shade"]]:
+	for pair: Array in [[_st_lit, "lit"], [_st_graze, "graze"], [_st_shade, "shade"]]:
 		var st: SurfaceTool = pair[0]
 		var arrays := st.commit_to_arrays()
 		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
@@ -459,7 +490,13 @@ func _aquad(a: Vector3, b: Vector3, c: Vector3, d: Vector3, n: Vector3, slot: in
 
 
 func _clap_st(n: Vector3) -> SurfaceTool:
-	return _st_lit if n.dot(_to_sun) > 0.0 else _st_shade
+	# Trei clase fata de soarele temei: SPRE soare (N.L >= GRAZE_NL: diagonalele bovindoului,
+	# peretii cu fata spre sud), RAZANT (0 < N.L < GRAZE_NL: fatadele in lungul strazii, pe
+	# care soarele aliniat cu strada abia le atinge) si CU SPATELE (N.L <= 0).
+	var nl := n.dot(_to_sun)
+	if nl >= GRAZE_NL:
+		return _st_lit
+	return _st_graze if nl > 0.0 else _st_shade
 
 
 func _cquad(a: Vector3, b: Vector3, c: Vector3, d: Vector3, n: Vector3) -> void:
@@ -587,6 +624,18 @@ func _build_parked_car() -> void:
 	var basis := Basis(side, up, fwd)
 	car.transform = Transform3D(basis, Vector3(4.6, road_y(z) + 0.02, z))
 	wp.add_child(car)
+	# si cateva parcate PARALEL pe strazile transversale (plate), la bordura
+	var packed := load("res://assets/models/chongqing/vehicles/mini_car_b.glb") as PackedScene
+	for spec: Array in [[36.0, -1.0, -30.0], [36.0, 1.0, 44.0], [-36.0, -1.0, 52.0],
+			[-36.0, 1.0, -40.0]]:
+		var zc: float = spec[0]
+		var sgn: float = spec[1]
+		var x: float = spec[2]
+		var c2 := packed.instantiate() as Node3D
+		var f2 := Vector3(1, 0, 0) if sgn > 0.0 else Vector3(-1, 0, 0)
+		c2.transform = Transform3D(Basis(Vector3.UP.cross(f2), Vector3.UP, f2),
+			Vector3(x, road_y(zc) + 0.02, zc + sgn * 5.6))
+		wp.add_child(c2)
 	add_child(wp)
 
 
@@ -621,8 +670,12 @@ func _sea_y() -> float:
 func _build_bridge() -> void:
 	_new_atlas_st()
 	var sea := _sea_y()
-	var center := Vector3(-150.0, 0.0, -230.0)
-	var d := Vector3(0.5, 0.0, -0.866).normalized()
+	# Pozitia e MASURATA pe capturi, nu aleasa pe harta: in diagonala, la (-150, -230), podul
+	# cadea in spatele randului de case din stanga pe toate cele cinci vederi (de pe strada se
+	# vede doar culoarul dintre randuri, +-4..8 grade). Asa traverseaza golful aproape frontal,
+	# putin la stanga axului, cu turnul de est in culoar.
+	var center := Vector3(-45.0, 0.0, -250.0)
+	var d := Vector3(0.94, 0.0, -0.342).normalized()
 	var w := d.cross(Vector3.UP).normalized() # de-a latul tablierului
 	var half_len := 125.0
 	var deck_y := sea + 18.0
@@ -673,7 +726,7 @@ func _build_bridge() -> void:
 func _build_island() -> void:
 	_new_atlas_st()
 	var sea := _sea_y()
-	var c := Vector3(70.0, 0.0, -245.0)
+	var c := Vector3(95.0, 0.0, -215.0)
 	var seg := 10
 	var rings: Array = [[24.0, sea - 1.0], [20.0, sea + 4.0], [13.0, sea + 8.0], [0.0, sea + 9.0]]
 	for r in rings.size() - 1:

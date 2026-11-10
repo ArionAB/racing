@@ -9,7 +9,7 @@ extends Node
 ##   2. MATERIALELE scenei: unice, pe tot ce se deseneaza (material_override, suprafete).
 ##   3. (doar CU FEREASTRA) CADRE DE MASURA: pentru fiecare vedere, cadrul normal si un cadru
 ##      de IDENTITATE (fetele de scandura in culori de cod: R = pastelul, G = orientarea fata
-##      de soare, B = 128; restul negru, fara ceata/tonemap). `tools/sf_loc_stats.py` scoate
+##      de soare — 250 spre soare, 125 razant, 0 cu spatele —, B = 128; restul negru, fara ceata/tonemap). `tools/sf_loc_stats.py` scoate
 ##      din perechi ΔV soare/umbra pe fatade si distanta dintre pasteluri DUPA remap.
 ##
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeSfLoc.tscn
@@ -22,7 +22,7 @@ extends Node
 
 const SCENE := "res://tools/SfLoc.tscn"
 ## Vederile de masura = vederile capturilor (z-ul masinii pe strada, cu camera de joc).
-const VIEWS: Array[float] = [44.0, 20.0, -30.0, -58.0, -104.0]
+const VIEWS: Array[float] = [44.0, 20.0, -6.0, -58.0, -104.0]
 const LIP1_Z: float = 24.0
 const CHAIN_END_Z: float = -96.0
 
@@ -46,6 +46,10 @@ func _ready() -> void:
 		await get_tree().process_frame
 		await get_tree().physics_frame
 	var decor := _track.get_node("SfDecor")
+	if not decor.has_method("road_y"):
+		push_error("ProbeSfLoc: scriptul decorului nu s-a incarcat (vezi eroarea de parsare de mai sus)")
+		get_tree().quit(1)
+		return
 	var sun_rot: Vector3 = _track._sun_rotation_deg()
 	var b := Basis.from_euler(Vector3(deg_to_rad(sun_rot.x), deg_to_rad(sun_rot.y),
 		deg_to_rad(sun_rot.z)))
@@ -221,7 +225,7 @@ func _frames() -> void:
 			var p: int = mi.get_meta("sf_pastel")
 			var orient: Array = mi.get_meta("sf_orient")
 			for s in orient.size():
-				var g := 250 if orient[s] == "lit" else 0
+				var g := 250 if orient[s] == "lit" else (125 if orient[s] == "graze" else 0)
 				mi.set_surface_override_material(s, _unshaded(Color8(30 + 45 * p, g, 128)))
 		else:
 			gi.material_override = black

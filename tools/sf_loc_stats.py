@@ -5,15 +5,18 @@
     python tools/sf_loc_stats.py
 
 Citeste snapshots/sf_loc_meas.json si perechile snapshots/sf_loc_meas_<k>_{cadru,id}.png.
-In cadrul de identitate fetele de scandura au R = 30 + 45*pastel, G = 250 (cu fata spre
-soare) / 0 (cu spatele), B = 128; restul e negru. Scoate:
+In cadrul de identitate fetele de scandura au R = 30 + 45*pastel, G = 250 (spre soare,
+N.L >= 0,25) / 125 (razant) / 0 (cu spatele), B = 128; restul e negru. Scoate:
 
-  1. dV soare/umbra pe fatade: V (HSV, max(r,g,b)) median pe pixelii fetelor cu fata spre
-     soare minus cel al fetelor cu spatele, pe toate cadrele (si per pastel). Tinta >= 0,28.
+  1. dV soare/umbra pe fatade: V (HSV, max(r,g,b)) median pe pixelii fetelor SPRE soare
+     minus cel al fetelor CU SPATELE, pe toate cadrele (si per pastel). Tinta >= 0,28.
+     Fetele RAZANTE (fatadele in lungul strazii, cu soarele aliniat cu ea) se raporteaza
+     separat, plus definitia inclusiva (spre soare + razant), pentru comparatie.
      Pixelii "spre soare" aflati in umbra aruncata raman in grupa lor (asa ii vede jocul).
   2. distanta dintre pasteluri DUPA remap (memoria `monocromia-se-masoara-dupa-remap`):
      (a) pe ALBEDO, adica dala reala x tenta clasei (ce pune jocul pe material);
-     (b) pe CADRU, media Lab a pixelilor fetelor spre soare ale fiecarui pastel.
+     (b) pe CADRU, mediana pixelilor fetelor luminate (spre soare + razante) ale fiecarui
+         pastel, in Lab.
      dE2000 minim intre perechi; tinta >= 10 (perechea cea mai apropiata se distinge
      ca alta culoare, nu ca alta lumina pe aceeasi culoare).
   3. soarele pe carosabil si materialele, copiate din json.
@@ -144,10 +147,11 @@ def main():
     w_alb = pair_table(names, alb_face, "dE2000 pe albedo:")
     out["de_albedo_min"] = w_alb[0]
 
-    # ---- 1 + 2b. cadrele
+    # ---- 1 + 2b. cadrele. G: 250 = spre soare (N.L >= 0,25), 125 = razant (0 < N.L < 0,25),
+    # 0 = cu spatele (N.L <= 0). Vezi sf_loc_decor.gd `_clap_st`.
     k = 0
-    lit_v, shade_v = [], []
-    per = {i: {"lit": [], "shade": [], "rgb": []} for i in range(len(names))}
+    acc = {"lit": [], "graze": [], "shade": []}
+    per = {i: {"lit": [], "graze": [], "shade": [], "rgb": []} for i in range(len(names))}
     while True:
         fc = os.path.join(SNAP, "sf_loc_meas_%d_cadru.png" % k)
         fi = os.path.join(SNAP, "sf_loc_meas_%d_id.png" % k)
@@ -157,39 +161,46 @@ def main():
         idm = np.asarray(Image.open(fi).convert("RGB")).astype(np.int32)
         clap = (np.abs(idm[..., 2] - 128) < 14)
         pidx = np.clip(np.round((idm[..., 0] - 30) / 45.0), 0, len(names) - 1).astype(int)
-        islit = idm[..., 1] > 125
+        g = idm[..., 1]
+        cls = {"lit": clap & (g > 190), "graze": clap & (g > 60) & (g <= 190), "shade": clap & (g <= 60)}
         v = img.max(2)
         for i in range(len(names)):
-            m_l = clap & islit & (pidx == i)
-            m_s = clap & (~islit) & (pidx == i)
-            per[i]["lit"].append(v[m_l])
-            per[i]["shade"].append(v[m_s])
-            per[i]["rgb"].append(img[m_l])
-        lit_v.append(v[clap & islit])
-        shade_v.append(v[clap & ~islit])
-        print("    cadrul %d: %d px fatada spre soare, %d px cu spatele" % (
-            k, int((clap & islit).sum()), int((clap & ~islit).sum())))
+            for c, m in cls.items():
+                per[i][c].append(v[m & (pidx == i)])
+            per[i]["rgb"].append(img[(cls["lit"] | cls["graze"]) & (pidx == i)])
+        for c, m in cls.items():
+            acc[c].append(v[m])
+        print("    cadrul %d: px spre soare %d, razant %d, cu spatele %d" % (
+            k, int(cls["lit"].sum()), int(cls["graze"].sum()), int(cls["shade"].sum())))
         k += 1
     if k == 0:
         print("\n(fara cadre: ruleaza sonda CU fereastra si --frames)")
         return
-    lv = np.concatenate(lit_v)
-    sv = np.concatenate(shade_v)
+    lv = np.concatenate(acc["lit"])
+    gv = np.concatenate(acc["graze"])
+    sv = np.concatenate(acc["shade"])
     dv = float(np.median(lv) - np.median(sv))
-    print("\n1b. dV soare/umbra pe fatade (tinta >= 0,28), %d cadre" % k)
-    print("    toate: V spre soare %.3f (p25 %.3f), cu spatele %.3f (p75 %.3f)  -> dV %.3f"
-          % (np.median(lv), np.percentile(lv, 25), np.median(sv), np.percentile(sv, 75), dv))
+    lg = np.concatenate([lv, gv])
+    dv_all = float(np.median(lg) - np.median(sv))
+    print("\n1b. dV soare/umbra pe fatade (tinta >= 0,28), %d cadre, V = max(r,g,b) median" % k)
+    print("    spre soare (N.L >= 0,25)   V %.3f  (p25 %.3f, %d px)" % (np.median(lv), np.percentile(lv, 25), len(lv)))
+    print("    razant (0 < N.L < 0,25)    V %.3f  (%d px)" % (np.median(gv), len(gv)))
+    print("    cu spatele (N.L <= 0)      V %.3f  (p75 %.3f, %d px)" % (np.median(sv), np.percentile(sv, 75), len(sv)))
+    print("    dV spre soare - cu spatele          %.3f   <- contractul" % dv)
+    print("    dV (spre soare + razant) - spatele  %.3f   (definitia inclusiva, pentru comparatie)" % dv_all)
     out["dV"] = dv
+    out["dV_inclusive"] = dv_all
     labs = []
+    md = lambda a: float(np.median(a)) if len(a) else float("nan")
     for i, n in enumerate(names):
         l = np.concatenate(per[i]["lit"])
-        s = np.concatenate(per[i]["shade"])
+        gz = np.concatenate(per[i]["graze"])
+        s_ = np.concatenate(per[i]["shade"])
         rgb = np.concatenate(per[i]["rgb"])
         mrgb = np.median(rgb, 0) if len(rgb) else np.zeros(3)
         labs.append(lab(mrgb))
-        print("    %-9s V %.3f / %.3f -> dV %.3f   (%d / %d px)  lumina #%02X%02X%02X" % (
-            n, np.median(l) if len(l) else 0, np.median(s) if len(s) else 0,
-            (np.median(l) - np.median(s)) if len(l) and len(s) else 0, len(l), len(s),
+        print("    %-9s V %.3f / razant %.3f / spate %.3f -> dV %.3f  (%d/%d/%d px)  luminat #%02X%02X%02X" % (
+            n, md(l), md(gz), md(s_), md(l) - md(s_), len(l), len(gz), len(s_),
             *[int(round(x * 255)) for x in mrgb]))
     print("\n2b. Pastelurile pe CADRU (mediana fetelor spre soare, dupa lumina)")
     w_fr = pair_table(names, labs, "dE2000 pe cadru:")
@@ -198,6 +209,7 @@ def main():
     print("\nREZUMAT")
     print("    soare pe lant            %5.1f%%   tinta >= 80%%   %s" % (chain * 100, "PASS" if chain >= 0.8 else "FAIL"))
     print("    dV soare/umbra fatade    %5.3f    tinta >= 0,28  %s" % (dv, "PASS" if dv >= 0.28 else "FAIL"))
+    print("      (inclusiv razante      %5.3f    informativ)" % dv_all)
     print("    dE2000 min albedo        %5.1f    tinta >= 10    %s" % (w_alb[0], "PASS" if w_alb[0] >= 10 else "FAIL"))
     print("    dE2000 min cadru         %5.1f    tinta >= 10    %s" % (w_fr[0], "PASS" if w_fr[0] >= 10 else "FAIL"))
     print("    materiale                %5d    plafon 38      %s" % (meas["materials"], "PASS" if meas["materials"] <= 38 else "FAIL"))

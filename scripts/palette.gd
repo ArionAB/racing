@@ -1325,20 +1325,21 @@ const CLASS_TINT := {
 	# tinta / fata, in spatiu liniar, trecuta inapoi in sRGB. Toate canalele sub 1: dala e
 	# deschisa tocmai ca tenta sa poata doar intuneca. Ancorele din brief §4:
 	#   crem        ECE2CC ~ CORAL_SAND 19 (E9DCC0), un pas mai palid
-	#   roz         DCA5B4 ~ FLAMINGO_PINK 31 (D2A0BE), putin mai cald, ca sa nu vireze mov
+	#   roz         D69CAC ~ FLAMINGO_PINK 31 (D2A0BE), putin mai cald, ca sa nu vireze mov
 	#   albastru    98B2D8 = familia PAINTED_METAL 11 (7692A8), deschisa la pastel
 	#   menta       A8D8BC = ICE_TURQUOISE 24 (7FC4C9) tras spre verde si deschis
-	#   galben-unt  E8CC80 = SAND_LIGHT 0 (E8C074) deschis, NU CAR_YELLOW
+	#   galben-unt  DFC278 = SAND_LIGHT 0 (E8C074), NU CAR_YELLOW
 	# Runda 1 (crem E9DCC0, albastru A8BED2, galben EED696) a iesit MASURAT prea aproape pe doua
 	# perechi: crem-galben dE2000 9,2 pe albedo si crem-albastru 11,4 pe cadru (soarele cald
 	# FFD2A0 face albastrul pal gri, #D3D0CA pe fata luminata). Albastrul s-a saturat, cremul s-a
-	# deschis, galbenul s-a saturat (si coborat un pas: la F2D486 fata luminata se taia la V 0,99,
-	# deci disparea scandura). Minimul pe albedo e in tools/sf_loc_stats.py.
+	# deschis, galbenul s-a saturat. Runda 3: rozul si galbenul
+	# coborate un pas (DCA5B4 -> D69CAC, F2D486 -> DFC278): pe diagonalele bovindoului spre soare
+	# se taiau la V 1,00 (mediana!), deci scandura disparea in alb. Minimul pe albedo e in tools/sf_loc_stats.py.
 	"sf_clapboard": Color(0.9785, 0.9465, 0.8724),
-	"sf_clapboard_pink": Color(0.9123, 0.6920, 0.7703),
+	"sf_clapboard_pink": Color(0.8875, 0.6545, 0.7363),
 	"sf_clapboard_blue": Color(0.6313, 0.7463, 0.9235),
 	"sf_clapboard_mint": Color(0.6974, 0.9048, 0.8044),
-	"sf_clapboard_butter": Color(0.9619, 0.8548, 0.5491),
+	"sf_clapboard_butter": Color(0.9247, 0.8130, 0.5151),
 	# Caramida A54E3C pe dala `roof_tiles` (media liniara 0.352, 0.178, 0.092). R ar cere 1.07,
 	# deci se taie la 1.0: caramida iese cu ~4% mai inchisa pe rosu decat tinta.
 	"sf_brick": Color(1.0, 0.6854, 0.7311),

@@ -11,6 +11,7 @@ offroad mediu pe trecere, cate treceri au avut contrasens > 0,5 s, marsarier,
 de pe restul buclei.
 """
 import json
+import os
 import sys
 from collections import defaultdict
 
@@ -23,14 +24,65 @@ def pct(a, q):
     return a[k]
 
 
+def med(a):
+    return pct(a, 0.5)
+
+
+def solo_table(solo):
+    """SFSOLO_JSON: o linie pe (scena, ziduri); fiecare rezultat = o trecere a
+    unei masini din garaj (pentru pro / wide: cea mai buna din baleiaj)."""
+    print("\nSOLO (garajul, o trecere pe masina; delta = scurtatura - ocolul AI, aceeasi masina)")
+    print("  scena            ziduri   | pilot | treceri ok/tot | t med [min-max]      | delta med [min..max] | off med | perete | resp | blocaj | contrasens")
+    for (scene, walls) in sorted(solo):
+        res = solo[(scene, walls)]
+        ocol = {r["ci"]: r["t"] for r in res if r["pilot"] == "ai" and r["route"] == 0 and r["done"]}
+        if ocol:
+            ts = list(ocol.values())
+            print("  %-16s %-8s | ocol  | %3d/%-3d        | %5.2f [%5.2f-%5.2f]  |" % (
+                scene, walls, len(ts), len(ts), med(ts), min(ts), max(ts)))
+        for pilot in ("ai", "pro", "wide", "line"):
+            rs = [r for r in res if r["pilot"] == pilot and r["route"] == 1]
+            if not rs:
+                continue
+            ok = [r for r in rs if r["done"] and r["route_used"] == 1]
+            ts = [r["t"] for r in ok]
+            ds = [r["t"] - ocol[r["ci"]] for r in ok if r["ci"] in ocol]
+            print("  %-16s %-8s | %-5s | %3d/%-3d        | %5.2f [%5.2f-%5.2f]  | %+5.2f [%+5.2f..%+5.2f] | %5.2f   | %6d | %4d | %6d | %5.2f s" % (
+                scene, walls, pilot, len(ok), len(rs), med(ts), min(ts) if ts else 0, max(ts) if ts else 0,
+                med(ds), min(ds) if ds else 0, max(ds) if ds else 0,
+                med([r["off"] for r in rs]), sum(r["walls"] for r in rs), sum(r["resp"] for r in rs),
+                sum(r["stuck"] for r in rs), sum(r["wrong"] for r in rs)))
+            if pilot == "pro":
+                print("  %-16s %-8s |       | viteza in ace aleasa (m/s): %s" % (
+                    "", "", " ".join("%s:%g" % (r["car"].split()[0], r["alat"]) for r in rs)))
+
+
 def main(paths):
+    solo = {}
+    for p in paths:
+        with open(p, encoding="utf-8", errors="replace") as f:
+            for line in f:
+                if line.startswith("SFSOLO_JSON "):
+                    d = json.loads(line[len("SFSOLO_JSON "):])
+                    w = "fara" if d["walls"][0] < 0 else "%g/%g" % (d["walls"][0], d["walls"][1])
+                    solo[(d["scene"].replace("SondaSfSerp", "").replace(".tscn", ""), w)] = d["results"]
+    if solo:
+        solo_table(solo)
     runs = defaultdict(list)
     for p in paths:
         with open(p, encoding="utf-8", errors="replace") as f:
             for line in f:
                 if line.startswith("SFSERP_JSON "):
                     d = json.loads(line[len("SFSERP_JSON "):])
-                    runs[d["scene"]].append(d)
+                    # eticheta din numele logului (race_<scena>_<ziduri>_sN.log) daca
+                    # exista: primele rulari n-aveau cheia "walls" in JSON
+                    base = os.path.basename(p)
+                    if base.startswith("race_") and "_s" in base:
+                        tag = base[len("race_"):base.rindex("_s")]
+                    else:
+                        w = d.get("walls", [-1, 0])
+                        tag = d["scene"] + ("" if w[0] < 0 else " ziduri %g/%g" % (w[0], w[1]))
+                    runs[tag].append(d)
     for scene in sorted(runs):
         rs = runs[scene]
         seeds = sorted({r["seed"] for r in rs})

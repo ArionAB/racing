@@ -902,7 +902,8 @@ func _seg_tick(car: Car, st: Dictionary, dt: float, _idx: int) -> void:
 		var lp: Vector3 = st["last"]
 		st["dist"] = float(st["dist"]) + Vector2(p.x - lp.x, p.z - lp.z).length()
 	st["last"] = p
-	if not _track.is_on_road(car.road_index, p, car.route):
+	var on_road := _track.is_on_road(car.road_index, p, car.route)
+	if not on_road:
 		st["off"] = float(st["off"]) + dt
 	if v < SLOW_SPEED:
 		st["slow"] = float(st["slow"]) + dt
@@ -913,9 +914,11 @@ func _seg_tick(car: Car, st: Dictionary, dt: float, _idx: int) -> void:
 		st["brake"] = float(st["brake"]) + dt
 	if fwd_speed < -0.5:
 		st["rev"] = float(st["rev"]) + dt
-	# contrasens: viteza contra directiei rutei pe care sta masina
+	# contrasens: viteza contra directiei rutei pe care sta masina, numarata
+	# doar PE carosabil (pe iarba, langa un ac, indexul cel mai apropiat poate
+	# sari pe tronsonul vecin, care merge in sens opus — fals pozitiv)
 	var r: TrackRoute = _track.route_at(car.route)
-	if r != null and r.baked.size() > 2:
+	if on_road and r != null and r.baked.size() > 2:
 		var i := clampi(car.road_index, 0, r.baked.size() - 2)
 		var tan := r.baked[i + 1] - r.baked[i]
 		tan.y = 0.0
@@ -1209,7 +1212,7 @@ func _race_report() -> void:
 			outside += 1
 	print("  [blocaj] total %d (%d in segment, %d pe restul buclei); repuneri %d" % [
 		_stuck_events.size(), _stuck_events.size() - outside, outside, _respawn_events.size()])
-	var out := {"scene": _scene.get_file(), "seed": _seed, "seconds": _t,
+	var out := {"scene": _scene.get_file(), "seed": _seed, "seconds": _t, "walls": [_walls.x, _walls.y],
 		"chance": _track.ai_shortcut_chance, "passes": _passes, "stuck": _stuck_events,
 		"respawns": _respawn_events}
 	print("SFSERP_JSON " + JSON.stringify(out))

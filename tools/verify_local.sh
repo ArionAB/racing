@@ -224,6 +224,11 @@ run_step "Cariera: config, persistenta, gating, raft" career.log 'VERDICT:' -- \
 # baremul 6-5-4-3-2-1 si o cursa reala in cupa (grila, titlu, departajare).
 run_step "World Cup: cupe, adversari unici, puncte, cursa" world_cup.log 'VERDICT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeWorldCup.tscn
+# CREDITS (#691): assets/CREDITS.md ajunge in export (include_filter), fiecare
+# addon / LICENSE_*.txt / font are intrare, fiecare intrare apare pe ecran cu
+# autor si licenta, motorul din API, layout la 1280x720 si pe telefon.
+run_step "Credite: sursa in export, inventar, ecran, layout" credits.log 'VERDICT:' -- \
+	--headless --path . res://tools/ProbeCredits.tscn
 
 # Decorul asezat pe solul de la generare ramane sub teren cand terenul creste
 # dupa aceea: padurea Lerai ajunsese la 20-30 m sub peretele craterului.

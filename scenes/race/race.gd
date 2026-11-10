@@ -201,6 +201,14 @@ func _setup_race() -> void:
 	hud.results_primary.connect(_on_results_primary)
 	hud.setup_minimap(track, cars)
 	hud.set_sealed_turbo(Career.is_time_trial())
+	# Telemetria de pozitie: ascunsa pana la F3 / setare, deci cost zero
+	# (`_process` iese imediat cand e stinsa).
+	var loc := LocationTelemetry.new()
+	loc.car = player
+	loc.track = track
+	loc.track_index = GameState.selected_track
+	loc.race_clock = _clock_ms
+	add_child(loc)
 	if _ghost_car != null:
 		hud.set_ghost_time(_ghost_car.data.total_ms)
 	_setup_challenge()
@@ -1106,7 +1114,7 @@ func _update_hud() -> void:
 	var record_text := _fmt_ms(record_ms) if record_ms > 0 else "--:--.-"
 	# Indiciul de camera apare doar unde exista si reglajul (build de debug),
 	# altfel ar promite jucatorului o tasta care nu face nimic.
-	var cam_hint := "  [F2] camera" if OS.is_debug_build() else ""
+	var cam_hint := "  [F2] camera  [F3] location" if OS.is_debug_build() else ""
 	# Timpul total al cursei langa recordul pe cursa (#498): pe ultimul tur
 	# vezi direct daca il mai bati.
 	var race_ms := _player_race_ms if _player_race_ms >= 0 else _clock_ms()

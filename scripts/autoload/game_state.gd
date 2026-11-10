@@ -268,6 +268,11 @@ var cam_follow_scale: float = 1.0
 ## particulele. Persistat ca sa nu-l repornesti la fiecare build.
 var show_perf: bool = false
 
+## Telemetria de pozitie (LocationTelemetry): unde e masina pe pista, in
+## coordonatele uneltelor (`--frac`, index, metri, lateral). F3 in cursa sau
+## din SETARI pe telefon. Persistata, ca si contorul.
+var show_location: bool = false
+
 ## TEST (optiunea D din oct 2026): un SpotLight3D adevarat pe farurile
 ## masinii jucatorului, pe pistele de noapte, in locul baltii de lumina false.
 ## Setare ca sa se poata compara la volan, din pauza; prima de stins daca
@@ -792,6 +797,7 @@ func load_settings() -> void:
 	cam_follow_scale = clampf(
 		float(cfg.get_value("camera", "follow_scale", 1.0)), 0.4, 2.5)
 	show_perf = bool(cfg.get_value("debug", "show_perf", false))
+	show_location = bool(cfg.get_value("debug", "show_location", false))
 	real_headlight = bool(cfg.get_value("debug", "real_headlight", true))
 	gfx_tier = clampi(int(cfg.get_value("video", "gfx_tier", 1)), 0, 2)
 	haptics_enabled = bool(cfg.get_value("input", "haptics", true))
@@ -809,6 +815,7 @@ func save_settings() -> void:
 	cfg.set_value("camera", "fov_scale", cam_fov_scale)
 	cfg.set_value("camera", "follow_scale", cam_follow_scale)
 	cfg.set_value("debug", "show_perf", show_perf)
+	cfg.set_value("debug", "show_location", show_location)
 	cfg.set_value("debug", "real_headlight", real_headlight)
 	cfg.set_value("video", "gfx_tier", gfx_tier)
 	cfg.set_value("input", "haptics", haptics_enabled)

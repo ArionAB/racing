@@ -341,6 +341,8 @@ func _spawn_cars() -> void:
 			car.apply_data(GameState.CAR_DATA[data_idx] as CarData,
 				AI_COLORS[(i - 1) % AI_COLORS.size()])
 			var ai := AIController.new()
+			# Nivelul ales in QUICK RACE / WORLD CUP (#682); implicit altfel.
+			ai.skill = AiSkill.for_race()
 			car.set_controller(ai)
 			# `_ai_visible` e aceeasi lista in care se adauga toate masinile (si,
 			# mai jos, tuk-tuk-urile) — fiecare pilot o vede crescand.
@@ -473,7 +475,7 @@ func _go() -> void:
 			elif hold > rocket_audio.window_s:
 				hud.flash_message("Too early...")
 				car.hold_turbo_until_release()
-		elif _rng.randf() < 0.45:
+		elif _rng.randf() < AIController.rocket_chance_of(car):
 			car.force_boost(0.8)
 
 # ------------------------------------------------------------------ cursa

@@ -26,13 +26,10 @@ const LOOKAHEAD_FAR_FACTOR: float = 1.7
 const LOOKAHEAD_FAR_MIN: float = 26.0
 const LOOKAHEAD_FAR_MAX: float = 62.0
 
-## Sub unghiul asta drumul e "drept" si se merge cu tot; peste el, viraj plin.
-const CORNER_SOFT: float = 0.25
+## Peste unghiul asta, viraj plin. Unde INCEPE virajul (`AiSkill.corner_soft`),
+## cat din viteza ramane in el (`corner_speed_floor`) si cat trage linia spre
+## interior (`inside_bias`) sunt ale pilotului: vezi `skill`.
 const CORNER_HARD: float = 1.10
-## Cat de mult din viteza maxima ramane intr-un viraj plin.
-const CORNER_SPEED_FLOOR: float = 0.44
-## Cat de mult trage spre interiorul virajului (in half_width).
-const INSIDE_BIAS: float = 0.55
 const LINE_MAX: float = 0.8
 ## Cat se poate abate linia de la culoarul impus (`lane_forced_at`), in aceleasi
 ## unitati ca `line`: fractie din semilatime. 0.06 pe semilatimea de 9 m a
@@ -47,6 +44,7 @@ const FORCED_SLACK: float = 0.06
 ## ~2.1 m, deci 2.6 lasa ~jumatate de metru intre caroserii.
 const AVOID_CLEARANCE_M: float = 2.6
 ## Fereastra de detectie in fata, ca fractie din viteza (m la m/s), cu limite.
+## Toate trei se inmultesc cu `AiSkill.overtake_reach` (1.0 = exact acestea).
 const AVOID_WINDOW_FACTOR: float = 1.1
 const AVOID_WINDOW_MIN: float = 14.0
 const AVOID_WINDOW_MAX: float = 34.0
@@ -59,14 +57,13 @@ const AVOID_MIN_CLOSING: float = 0.5
 ## viteze, altfel doua masini cu aceeasi tinta de viteza merg bara la bara.
 const AVOID_TAIL_M: float = 9.0
 
-## Cati dintre AI iau scurtatura, cand pista are una.
+## Cati dintre AI iau scurtatura, cand pista are una: `AiSkill.shortcut_chance`.
 ##
 ## Nici 0%, nici 100%. La zero, bifurcatia n-ar exista pentru jucator ca decizie
 ## — n-ar avea cu cine sa se compare. La suta la suta, plutonul ar merge tot pe
-## acolo si linia principala ar ramane goala. Cu ~40%, la fiecare tur vezi
-## masini alegand diferit, ceea ce e chiar informatia de care ai nevoie ca sa
-## decizi tu.
-const SHORTCUT_CHANCE: float = 0.4
+## acolo si linia principala ar ramane goala. Cu ~40% (profilul implicit), la
+## fiecare tur vezi masini alegand diferit, ceea ce e chiar informatia de care
+## ai nevoie ca sa decizi tu.
 ## Cat de mult incetineste AI-ul pe o banda uda.
 const WET_SPEED_FACTOR: float = 0.78
 
@@ -284,6 +281,23 @@ const SIGNAL_LANE_EASE_M: float = 12.0
 const SIGNAL_RIGHT_LANE_M: float = 2.0
 
 var track: Track
+## Cat de bine conduce (issue #682): marja in viraj, linia, turbo, drift,
+## scurtatura, depasirea, greselile. Implicit = AI-ul de dinainte de niveluri,
+## bit cu bit. `Race._spawn_cars` il pune din `AiSkill.for_race()`.
+var skill: AiSkill = AiSkill.implicit()
+## Greselile vizibile (`AiSkill.mistake_chance`): zarul lor e PROPRIU, separat
+## de rng-ul cursei, ca un nivel cu greseli sa nu mute zarurile celorlalti
+## (linia, scurtatura, rocket start-ul, `speed_scale`) — aceeasi grila pe
+## acelasi seed la orice nivel. Nul cand nivelul nu greseste.
+var _mistake_rng: RandomNumberGenerator = null
+## Virajul curent a fost deja „judecat" (zarul de greseala s-a dat).
+var _corner_armed: bool = true
+## Greseala in curs: 0 niciuna, 1 franare tarzie, 2 linie ratata.
+var _mistake_kind: int = 0
+## Cat mai tine franarea tarzie (s).
+var _mistake_left: float = 0.0
+## Doar pentru sonde: cate greseli a facut, pe tipuri [tarzie, linie].
+var mistakes_done: Array[int] = [0, 0]
 ## Linia "de personalitate" a pilotului: fiecare are alt culoar preferat pe
 ## portiunile drepte. Peste ea se adauga tragerea spre interiorul virajului.
 var line_offset: float = 0.0
@@ -473,10 +487,16 @@ func configure(race_track: Track, rng: RandomNumberGenerator,
 	track = race_track
 	traffic = cars
 	line_offset = rng.randf_range(-0.28, 0.28)
-	var chance := SHORTCUT_CHANCE
+	var chance := skill.shortcut_chance
 	if race_track != null and race_track.ai_shortcut_chance >= 0.0:
 		chance = race_track.ai_shortcut_chance
 	prefers_shortcut = rng.randf() < chance
+	# Zarul greselilor: din STAREA rng-ului cursei (citirea nu-l avanseaza), deci
+	# determinist pe seed, fara sa consume nimic din el.
+	_mistake_rng = null
+	if skill.mistake_chance > 0.0:
+		_mistake_rng = RandomNumberGenerator.new()
+		_mistake_rng.seed = hash([rng.state, line_offset])
 	# A/B pentru ProbeRace: AI_REACTS=0 stinge reactia la lovituri (nu consuma rng).
 	var react_mode := OS.get_environment("AI_REACTS")
 	reacts = react_mode != "0"
@@ -506,12 +526,13 @@ func update(delta: float) -> void:
 	var a_far := _angle_to(fwd, far)
 	# 0 pe drept, 1 in virajul cel mai stramt.
 	var severity := clampf(
-		(absf(a_far) - CORNER_SOFT) / (CORNER_HARD - CORNER_SOFT), 0.0, 1.0)
+		(absf(a_far) - skill.corner_soft) / (CORNER_HARD - skill.corner_soft), 0.0, 1.0)
+	_mistake_tick(severity, delta)
 
 	# --- linia: pe interiorul virajului care vine ---
 	# _side_at (deci si lateral_frac) e pozitiv spre DREAPTA soselei, iar un
 	# a_far pozitiv inseamna viraj la stanga: interiorul e in sens invers.
-	var line := clampf(line_offset - signf(a_far) * severity * INSIDE_BIAS,
+	var line := clampf(line_offset - signf(a_far) * severity * _inside_bias(),
 		-LINE_MAX, LINE_MAX)
 	# Muchie fara parapet (apa fantanii, Jodhpur): linia nu mai merge cu roata
 	# pe buza. No-op cand pista nu declara nimic aici (limitele raman ±LINE_MAX).
@@ -653,7 +674,7 @@ func update(delta: float) -> void:
 	_steer = clampf(base_steer + wobble_now, -1.0, 1.0)
 
 	# --- pedale: viteza-tinta din cat de stramt e ce urmeaza ---
-	var target := car.max_speed * lerpf(1.0, CORNER_SPEED_FLOOR, severity)
+	var target := car.max_speed * lerpf(1.0, skill.corner_speed_floor, _brake_severity(severity))
 	# Muchie fara parapet pe EXTERIORUL virajului (iesirea din virajul de
 	# intrare in fantana, apa pe stanga unui viraj la dreapta): iesirea larga
 	# duce spre apa, deci pilotul intra mai incet. Fals peste tot unde nu e
@@ -724,6 +745,11 @@ func update(delta: float) -> void:
 		_throttle = clampf(-(speed - target) / 6.0, -1.0, -0.15)
 	else:
 		_throttle = 1.0
+	# Cat de tare apasa pe drept (`AiSkill.straight_speed`): peste o parte din
+	# viteza de varf a masinii lui, ridica piciorul. Nu pe turbo (fara gaz,
+	# turbo-ul nu impinge) si nu pe profilul implicit (1.0).
+	if skill.straight_speed < 1.0 and _throttle > 0.0 and not car.is_boosting 			and speed > car.max_speed * car.speed_scale * skill.straight_speed:
+		_throttle = 0.0
 	# Oprit in fata usii: nici gaz, nici marsarier. Fara ramura asta, tinta
 	# zero ar da `_throttle = -0.15` la nesfarsit si masina ar da inapoi pana
 	# in pluton.
@@ -750,16 +776,20 @@ func update(delta: float) -> void:
 		# axa (masurat in ProbeCarrara, T3 start).
 		_drift = false
 	elif not _drift:
-		if severity > 0.34 and speed > car.drift_min_speed * 1.2:
+		if severity > skill.drift_severity and speed > car.drift_min_speed * 1.2:
 			_drift = true
 	elif severity < 0.12 or speed < car.drift_min_speed * 0.7 			or (car.is_drifting and _steer * car.drift_dir < -0.15):
 		_drift = false
 
 	# --- turbo: pe drept, si oprit inainte de viraj, ca sa nu-l irosim in perete
 	if not _turbo:
-		if car.turbo_charge > 0.6 and severity <= 0.0 and _throttle > 0.0 				and not (bus_no_drift and _bus_best_blend > 0.3):
+		# Aprinderea: pe drept (`turbo_corner_cut` 0.25 -> severitate 0). Un pilot
+		# care il tine si in viraj il si aprinde in curba — vezi AiSkill.
+		if car.turbo_charge > skill.turbo_min_charge \
+				and severity <= maxf(skill.turbo_corner_cut - 0.25, 0.0) and _throttle > 0.0 \
+				and not (bus_no_drift and _bus_best_blend > 0.3):
 			_turbo = true
-	elif car.turbo_charge < 0.05 or severity > 0.25:
+	elif car.turbo_charge < 0.05 or severity > skill.turbo_corner_cut:
 		_turbo = false
 	# Un sofer prudent in zid nu arde turbo: altfel tinta redusa nu s-ar vedea in
 	# viteza reala (turbo-ul depaseste plafonul).
@@ -1544,8 +1574,9 @@ func _avoid_line(idx: int, speed: float, line: float, keep_off: float) -> float:
 	if r == null or r.count() == 0:
 		return line
 	var n := r.count()
-	var window := clampf(speed * AVOID_WINDOW_FACTOR,
-		AVOID_WINDOW_MIN, AVOID_WINDOW_MAX)
+	var reach := skill.overtake_reach
+	var window := clampf(speed * AVOID_WINDOW_FACTOR * reach,
+		AVOID_WINDOW_MIN * reach, AVOID_WINDOW_MAX * reach)
 
 	# Cel mai apropiat blocaj DIN FATA, pe aceeasi ruta. O masina de pe
 	# scurtatura traieste in alt spatiu de indecsi — comparatia n-ar avea sens.
@@ -2076,6 +2107,72 @@ func _signal_queue_gap(idx: int) -> float:
 	if best == INF:
 		return INF
 	return maxf(best - SIGNAL_QUEUE_GAP_M, 0.0)
+
+# ------------------------------------------------------ greselile vizibile
+#
+# `AiSkill.mistake_chance`: la intrarea in fiecare viraj, un zar. Doua feluri de
+# greseala, amandoua de VAZUT de pe grila si amandoua doar prin comenzile
+# obisnuite (principiul 5): franarea tarzie (cateva zecimi de secunda nu vede
+# virajul, apoi franeaza tare in el si iese larg) si linia ratata (intra pe
+# exterior in loc de apex). Pe profilul implicit zarul nu exista
+# (`_mistake_rng` nul), deci nimic de aici nu se executa.
+
+## Severitatea de la care virajul „a inceput" (se da zarul) si sub care s-a
+## terminat (se rearmeaza zarul pentru urmatorul).
+const MISTAKE_ENTRY_SEV: float = 0.3
+const MISTAKE_REARM_SEV: float = 0.1
+## Cat tine franarea tarzie (s) si cat de mult din viraj „vede" in timpul ei.
+## Punctul departat de tintire e la 1.5-2 s de viraj, deci 0.8 s de neatentie
+## muta franarea cu ~jumatate din distanta ei, nu o sterge.
+const MISTAKE_LATE_S: float = 0.8
+const MISTAKE_LATE_SCALE: float = 0.35
+## Linia ratata: tragerea spre interior devine tragere spre EXTERIOR, cu
+## jumatate din forta (intra larg, nu in parapet).
+const MISTAKE_WIDE_BIAS: float = -0.5
+
+func _mistake_tick(severity: float, delta: float) -> void:
+	if _mistake_rng == null:
+		return
+	if _mistake_left > 0.0:
+		_mistake_left -= delta
+	if _mistake_kind == 1 and _mistake_left <= 0.0:
+		_mistake_kind = 0
+	if severity < MISTAKE_REARM_SEV:
+		_corner_armed = true
+		_mistake_kind = 0
+		return
+	if not _corner_armed or severity < MISTAKE_ENTRY_SEV:
+		return
+	_corner_armed = false
+	if _mistake_rng.randf() >= skill.mistake_chance:
+		return
+	if _mistake_rng.randf() < 0.5:
+		_mistake_kind = 1
+		_mistake_left = MISTAKE_LATE_S
+	else:
+		_mistake_kind = 2
+	mistakes_done[_mistake_kind - 1] += 1
+
+## Severitatea dupa care se franeaza: cea reala, sau mult mai mica in timpul
+## unei franari tarzii.
+func _brake_severity(severity: float) -> float:
+	if _mistake_kind == 1:
+		return severity * MISTAKE_LATE_SCALE
+	return severity
+
+## Tragerea spre interior a pilotului, sau spre exterior cand rateaza linia.
+func _inside_bias() -> float:
+	if _mistake_kind == 2:
+		return skill.inside_bias * MISTAKE_WIDE_BIAS
+	return skill.inside_bias
+
+## Sansa de rocket start a pilotului de pe masina asta (`Race._go`). Masinile
+## fara creier AI (jucatorul) au sansa implicita — dar Race nu le-o cere.
+static func rocket_chance_of(c: Car) -> float:
+	var ai := c.controller as AIController
+	if ai == null:
+		return AiSkill.implicit().rocket_start_chance
+	return ai.skill.rocket_start_chance
 
 func _lookahead_near(speed: float) -> float:
 	return clampf(speed * LOOKAHEAD_NEAR_FACTOR,

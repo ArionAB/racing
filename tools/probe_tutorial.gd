@@ -29,7 +29,8 @@ extends Node
 ## (Nu MD5 pe fisierul real: user:// e comun tuturor worktree-urilor, iar alte
 ## sonde, de ex. ProbeHaptics, il rescriu si il restaureaza in paralel.)
 
-const TMP_DIR := "user://probe_tmp/"
+## Subdosar PROPRIU: user://probe_tmp/ e folosit si de alte sonde.
+const TMP_DIR := "user://probe_tmp/tutorial/"
 const TMP_SETTINGS := TMP_DIR + "tutorial_settings.cfg"
 const RACE_SCENE := "res://scenes/race/Race.tscn"
 const BENCH := "res://scenes/tracks/Track01.tscn"
@@ -378,7 +379,7 @@ func _check_flow() -> void:
 	await _frames(2)
 	_check(d.step == &"steer", "dupa GO: primul indiciu e VIRAJUL (%s)" % d.step)
 	_check(car.turbo_charge < 0.05,
-		"bara pleaca de la start_bar=%.2f, nu plina (%.3f)" % [_cfg.start_bar, car.turbo_charge])
+		"bara pleaca de la start_bar=%.2f, nu cu ce a strans in numaratoare (%.3f)" % [_cfg.start_bar, car.turbo_charge])
 
 	# --- VIRAJ
 	_check(ov.pulsing_zones().is_empty(), "viraj: la inceput butoanele nu pulseaza inca")

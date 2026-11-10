@@ -127,8 +127,8 @@ func tick(delta: float) -> void:
 	if race == null or race.state != Race.State.RUNNING:
 		return
 	if not _went:
-		# Primul tick dupa GO (Race._go tocmai a umplut bara): pornim de la
-		# `start_bar`, ca umplerea din mers sa se vada.
+		# Primul tick dupa GO (bara a strans ~0.36 in numaratoare): pornim de
+		# la `start_bar`, ca umplerea din mers sa se vada.
 		_went = true
 		if config.start_bar >= 0.0 and car.turbo_recharge:
 			car.turbo_charge = config.start_bar

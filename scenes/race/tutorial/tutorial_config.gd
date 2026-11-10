@@ -18,8 +18,9 @@ extends Resource
 @export var steps: Array[StringName] = [&"steer", &"gas", &"drift", &"turbo"]
 
 @export_group("Praguri")
-## Bara de turbo la GO. In cursa normala pleci cu ea plina; in tur pleci cu
-## ea goala, ca jucatorul sa vada ca se umple din mers.
+## Bara de turbo la GO. In cursa normala pleci cu ce s-a strans in
+## numaratoare (~0.36); in tur pleci cu ea goala, ca jucatorul sa vada ca se
+## umple din mers. Negativ = bara nu se atinge.
 @export var start_bar: float = 0.0
 ## Cat de mult trebuie tinut volanul (comanda netezita a PlayerController,
 ## 0..1) ca sa conteze drept viraj.

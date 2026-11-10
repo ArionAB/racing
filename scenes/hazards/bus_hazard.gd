@@ -128,6 +128,26 @@ extends "res://scenes/props/path_mover.gd"
 @export var soft_contact: bool = false
 @export_range(0.2, 3.0, 0.1) var soft_crush_s: float = 1.2
 
+## TRAMVAIUL MERGE IN SENSUL CURSEI (San Francisco, brief §3, sonda 1c): doua
+## flaguri, AMBELE implicit stinse, deci Carrara si Machu Picchu raman neatinse.
+##
+## `ai_same_direction` (cere si `ai_reads_lane`): AI-ul citeste corpul si cand
+## merge in ACELASI sens cu masina (camioanele din Carrara vin doar din fata).
+## Partea pe care il depaseste o alege masina dupa unde e ea cand il vede
+## (stanga sau dreapta lui), nu dupa locul ramas — pe ax locul e egal si tot
+## plutonul ar trece pe aceeasi parte. Vezi `AIController._bus_line`.
+@export var ai_same_direction: bool = false
+## `pitch_to_ground`: corpul se inclina dupa panta (cota terenului la bot si la
+## coada). Fara el corpul sta orizontal: pe 11,5% un vagon de 8,5 m are coada
+## ~0,5 m deasupra drumului si botul ~0,5 m in el.
+@export var pitch_to_ground: bool = false
+## Coada OBLICA (grade; 0 = coada plata, ca pana acum): oglinda botului, la
+## spate. Un corp care merge in sensul cursei e lovit din SPATE, iar o coada
+## plata e „un zid care pleaca" — masina care intra in ea isi pierde toata
+## viteza (masurat pe urcarea de 11,5%: 2,2-2,7 s). Oblica, lovitura devine
+## alunecare spre `nose_side`, ca la bot. Bara e invizibila pe model.
+@export_range(0.0, 45.0, 1.0) var tail_angle_deg: float = 0.0
+
 ## Grupul pe care il citeste AI-ul (doar daca `ai_reads_lane`).
 const AI_GROUP: StringName = &"ai_bus_lane"
 
@@ -166,6 +186,7 @@ var _apex: Vector3 = Vector3.ZERO
 var _prev_pos: Vector3 = Vector3.ZERO
 var _has_prev: bool = false
 var _box_center: Vector3 = Vector3.ZERO
+var _pitch: float = 0.0
 
 
 ## Cutia autobuzului, nu tractorul din PathMover.
@@ -222,15 +243,21 @@ func _build_body() -> void:
 ## partea deflectarii (la fata cutiei). Normala ei arata inainte si spre
 ## `nose_side`, deci orice contact frontal e impins intr-acolo.
 func _build_nose() -> void:
-	if nose_angle_deg <= 0.0:
-		return
+	if nose_angle_deg > 0.0:
+		_build_wedge(nose_angle_deg, -1.0)
+	if tail_angle_deg > 0.0:
+		_build_wedge(tail_angle_deg, 1.0)
+
+
+## O fata oblica + flancul ei. `dir` = -1 botul (-Z), +1 coada (+Z).
+func _build_wedge(angle_deg: float, dir: float) -> void:
 	var w := _box_size.x
 	var h := _box_size.y
-	var front_z := _box_center.z - _box_size.z * 0.5
-	var depth := w * tan(deg_to_rad(nose_angle_deg))
+	var front_z := _box_center.z + dir * _box_size.z * 0.5
+	var depth := w * tan(deg_to_rad(angle_deg))
 	var s := float(nose_side)
-	var a := Vector3(-s * w * 0.5, _box_center.y, front_z - depth) # varful
-	var b := Vector3(s * w * 0.5, _box_center.y, front_z)          # coltul
+	var a := Vector3(-s * w * 0.5, _box_center.y, front_z + dir * depth) # varful
+	var b := Vector3(s * w * 0.5, _box_center.y, front_z)                # coltul
 	var along := b - a
 	var length := along.length()
 	var basis := Basis.looking_at(along.normalized(), Vector3.UP)
@@ -241,7 +268,7 @@ func _build_nose() -> void:
 	_add_box(Vector3(NOSE_THICKNESS, h, depth + NOSE_THICKNESS),
 		Transform3D(Basis.IDENTITY,
 			Vector3(-s * (w * 0.5 - NOSE_THICKNESS * 0.5), _box_center.y,
-				front_z - depth * 0.5)))
+				front_z + dir * depth * 0.5)))
 
 
 func _add_box(size: Vector3, xform: Transform3D) -> void:
@@ -272,11 +299,12 @@ func _build_shove_area() -> void:
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()
 	var depth := _box_size.x * tan(deg_to_rad(maxf(nose_angle_deg, 0.0)))
+	var tail := _box_size.x * tan(deg_to_rad(maxf(tail_angle_deg, 0.0)))
 	box.size = Vector3(_box_size.x + SHOVE_MARGIN_SIDE * 2.0,
 		_box_size.y + 0.4,
-		_box_size.z + depth + SHOVE_MARGIN_FRONT * 2.0)
+		_box_size.z + depth + tail + SHOVE_MARGIN_FRONT * 2.0)
 	shape.shape = box
-	shape.position = _box_center + Vector3(0.0, 0.0, -depth * 0.5)
+	shape.position = _box_center + Vector3(0.0, 0.0, (tail - depth) * 0.5)
 	_shove_area.add_child(shape)
 	_body.add_child(_shove_area)
 
@@ -315,12 +343,36 @@ func _physics_process(delta: float) -> void:
 	_yaw = lerp_angle(_yaw, target_yaw, minf(TURN_RATE * delta, 1.0))
 	if stick_to_ground:
 		pos.y = _ground_y(pos)
+	var rot := Basis(Vector3.UP, _yaw)
+	if pitch_to_ground and stick_to_ground:
+		_pitch = lerpf(_pitch, _ground_pitch(pos), minf(TURN_RATE * delta, 1.0))
+		rot = rot * Basis(Vector3.RIGHT, _pitch)
 	# O SINGURA scriere de transform (memoria jolt-sync-transform).
-	_body.global_transform = Transform3D(Basis(Vector3.UP, _yaw), pos)
+	_body.global_transform = Transform3D(rot, pos)
 	_apply_sway()
 	if not Engine.is_editor_hint():
 		_shove_cars(delta)
 	last_tick_usec = int(Time.get_ticks_usec() - t0)
+
+
+## Panta sub corp (rad, + = botul sus): cota la bot si la coada, cu
+## raycast-ul lui PathMover. O masina sub bot sau sub coada nu e teren: atunci
+## ramane panta de acum.
+func _ground_pitch(pos: Vector3) -> float:
+	var half := body_half_length()
+	var fwd := Vector3(-sin(_yaw), 0.0, -cos(_yaw))
+	var space := get_world_3d().direct_space_state
+	if space == null or half <= 0.1:
+		return _pitch
+	var ys: Array[float] = []
+	for p: Vector3 in [pos + fwd * half, pos - fwd * half]:
+		var q := PhysicsRayQueryParameters3D.create(p + Vector3.UP * GROUND_PROBE_UP,
+			p - Vector3.UP * GROUND_PROBE_DOWN, 0xFFFFFFFF, [_body.get_rid()])
+		var hit := space.intersect_ray(q)
+		if hit.is_empty() or hit["collider"] is Car:
+			return _pitch
+		ys.append((hit["position"] as Vector3).y)
+	return atan2(ys[0] - ys[1], half * 2.0)
 
 
 ## Ofsetul spre exteriorul virajului in punctul curent: curbura din unghiul
@@ -427,6 +479,7 @@ func _shove_cars(delta: float) -> void:
 	ahead.y = 0.0
 	ahead = ahead.normalized()
 	var front := _box_center.z - _box_size.z * 0.5
+	var back := _box_center.z + _box_size.z * 0.5
 	for b in _shove_area.get_overlapping_bodies():
 		var car := b as Car
 		if car == null:
@@ -443,6 +496,10 @@ func _shove_cars(delta: float) -> void:
 		# 40 de cadre de contact, 2.9 s sub 5 m/s).
 		var side := signf(rel.dot(right))
 		if rel.dot(ahead) > -front - 0.5 				and absf(rel.dot(right)) < _box_size.x * 0.5 - 0.6:
+			side = float(nose_side)
+		elif tail_angle_deg > 0.0 and rel.dot(ahead) < -back + 0.5 and absf(rel.dot(right)) < _box_size.x * 0.5 - 0.6:
+			# IN SPATELE cozii oblice, in banda ei: tot spre `nose_side`, ca
+			# ghiontul sa nu anuleze alunecarea pe coada (vezi botul, mai sus).
 			side = float(nose_side)
 		elif side == 0.0:
 			side = float(nose_side)

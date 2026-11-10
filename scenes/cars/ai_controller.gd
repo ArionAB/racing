@@ -361,6 +361,9 @@ var _bus_idx: Dictionary = {}
 var _bus_blend: Dictionary = {}
 var _bus_latched: Dictionary = {}
 var _bus_tline: Dictionary = {}
+## Partea aleasa pentru un corp care merge in sensul cursei (`ai_same_direction`),
+## fixata la prima citire: +1 dreapta, -1 stanga.
+var _bus_side: Dictionary = {}
 var _bus_speed_scale: float = 1.0
 var _bus_trace: bool = OS.get_environment("BUS_TRACE") == "1"
 var _exc_trace: bool = OS.get_environment("EXC_TRACE") == "1"
@@ -1170,7 +1173,12 @@ func _bus_line(idx: int, speed: float, line: float, severity: float) -> float:
 			rd.y = 0.0
 			var fwd := bus.body_forward()
 			fwd.y = 0.0
-			var oncoming := rd.length_squared() > 1e-6 and fwd.length_squared() > 1e-6 				and rd.normalized().dot(fwd.normalized()) < -0.2
+			var dir_dot := rd.normalized().dot(fwd.normalized()) 				if rd.length_squared() > 1e-6 and fwd.length_squared() > 1e-6 else 0.0
+			var oncoming := dir_dot < -0.2
+			# Tramvaiul SF merge in SENSUL cursei: il citeste doar daca e in fata
+			# (pana trece de el cu BUS_PASSED_M), niciodata un corp ramas in urma.
+			if bus.ai_same_direction and dir_dot > 0.2:
+				oncoming = true
 			var tl := r.side_at(bi).dot(tp - r.baked[r.wrap_index(bi)])
 			var hw_t: float = maxf(track.width_at_index(bi) if car.route == 0 				else r.half_width, 0.001)
 			var on_road := absf(tl) < hw_t + 1.5
@@ -1183,6 +1191,7 @@ func _bus_line(idx: int, speed: float, line: float, severity: float) -> float:
 				_bus_latched[key] = true
 			else:
 				_bus_latched.erase(key)
+				_bus_side.erase(key)
 			if _bus_latched.has(key):
 				target_blend = 1.0
 				var ext := bus.body_half_width() + bus_margin_m
@@ -1191,6 +1200,29 @@ func _bus_line(idx: int, speed: float, line: float, severity: float) -> float:
 				var room_right := hw_t - 0.2 - (tl + ext)
 				var room_left := (tl - ext) - (-hw_t + 0.2)
 				var side := 1.0 if room_right >= room_left else -1.0
+				if bus.ai_same_direction and dir_dot > 0.2:
+					# Pe ax locul e egal: fiecare trece pe partea pe care e deja
+					# (fata de corp), ca plutonul sa se desparta in doua. Daca acolo
+					# nu incape o masina, pe cealalta.
+					if not _bus_side.has(key):
+						var ci := r.closest_index(idx, car.global_position)
+						var car_lat := r.side_at(ci).dot(car.global_position - r.baked[ci])
+						var want := 1.0 if car_lat >= tl else -1.0
+						var room := room_right if want > 0.0 else room_left
+						if room < BUS_CAR_HALF_M * 2.0:
+							want = -want
+						_bus_side[key] = want
+					# Cat e inca IN SPATELE cozii, schimba partea daca tramvaiul i-o
+					# inchide (iese spre marginea aceea). Alaturi de el nu: acolo
+					# schimbarea ar insemna sa vireze in el.
+					var keep := float(_bus_side[key])
+					var room_keep := room_right if keep > 0.0 else room_left
+					var room_other := room_left if keep > 0.0 else room_right
+					if room_keep < BUS_CAR_HALF_M * 2.0 + 0.4 and room_other > room_keep \
+							and along > bus.body_half_length() + 4.0:
+						keep = -keep
+						_bus_side[key] = keep
+					side = keep
 				var lo: float
 				var hi: float
 				if side > 0.0:

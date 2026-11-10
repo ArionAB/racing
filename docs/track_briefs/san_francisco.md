@@ -548,6 +548,11 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
      scurtătură, tramvai sau viraj înaintea lanțului — verdictul de pluton se
      dă pe pista reală.
 
+   **Decizia dezvoltatorului (10 nov 2026): patru blocuri scurte.** Întrebarea
+   „patru sărituri pe bloc de 48 m sau trei pe bloc de 72 m” e închisă; varianta
+   cu trei rămâne doar rezerva descrisă mai jos (strada de comparație:
+   `tools/SondaSfPlan28lX3.tscn`, nerulată prin sondă în forma cu trei blocuri).
+
    **De ce blocul scurt**, deși cel lung aterizează turbo-ul pe plan: bugetul
    de înălțime (§2). Patru blocuri scurte cad 38,4 m; patru lungi, 65,6 m. Cu
    turbo, zborul de 35–38 m aterizează pe racordul blocului scurt, la 17 m/s pe

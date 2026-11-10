@@ -107,6 +107,11 @@ func _build() -> void:
 			GameState.save_settings()
 			# Sectiunea de test apare/dispare odata cu contorul.
 			_rebuild.call_deferred())
+	# Unde esti pe pista (F3 pe desktop). Atinge panoul ca sa copiezi locul.
+	_add_toggle(box, "Location telemetry (tap it to copy)", GameState.show_location,
+		func(on: bool) -> void:
+			GameState.show_location = on
+			GameState.save_settings())
 	# Urma ultimei incarcari care n-a ajuns la START (crash Kyoto pe iPhone,
 	# nov 2026): apare doar daca exista, indiferent de contor.
 	if GameState.last_load_trace != "":

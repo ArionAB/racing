@@ -107,24 +107,31 @@ func _ready() -> void:
 	await get_tree().process_frame
 	var only := -1
 	var sabotage := false
+	# `--scene=res://tools/Sonda*.tscn`: o strada sintetica care nu e in
+	# TRACK_SCENES (sonda SF 1b, serpentinele). Fara linie de baza: raporteaza.
+	var scene_path := ""
 	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--track="):
+		if arg.begins_with("--scene="):
+			scene_path = arg.trim_prefix("--scene=")
+		elif arg.begins_with("--track="):
 			only = GameState.resolve_track_index(
 				int(arg.trim_prefix("--track=")))
 		elif arg == "--sabotaj":
 			sabotage = true
-	if only < 0:
-		push_error("ProbeLaneClear: cere --track=N")
+	if only < 0 and scene_path.is_empty():
+		push_error("ProbeLaneClear: cere --track=N sau --scene=res://...")
 		get_tree().quit(1)
 		return
+	if scene_path.is_empty():
+		scene_path = GameState.TRACK_SCENES[only]
 
-	var scene := load(GameState.TRACK_SCENES[only]) as PackedScene
+	var scene := load(scene_path) as PackedScene
 	var track := scene.instantiate() as Track
 	get_tree().root.add_child(track)
 	await get_tree().process_frame
 	await get_tree().process_frame
 
-	print("=== %s%s ===" % [GameState.track_label(only),
+	print("=== %s%s ===" % [GameState.track_label(only) if only >= 0 else scene_path.get_file(),
 		" [SABOTAJ]" if sabotage else ""])
 	if sabotage:
 		_plant_wall(track)
@@ -146,7 +153,7 @@ func _ready() -> void:
 	# ceva s-a mutat in banda. Cifrele de mai jos sunt masurate pe main la
 	# 2 sep 2026, dupa ce suprafetele de rulare au fost scoase din raportare.
 	# Cand cobori una legitim, actualizeaz-o AICI, in acelasi commit.
-	var base: int = BASELINE.get(GameState.track_label(only), -1)
+	var base: int = BASELINE.get(GameState.track_label(only), -1) if only >= 0 else -1
 	if base < 0:
 		print("VERDICT: %d probe blocate (pista fara linie de baza)" % hits)
 		get_tree().quit(0)

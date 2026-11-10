@@ -34,6 +34,19 @@ Variabile: GRADE (0.115), CLIMB (290), LEAD (96), HW (7.0), TRAM_SPEED (4.5),
 PERIOD (41), PHASE (0.0), TRAM_S0 (70), TRAM_S1 (220), AI (1 = ai_reads_lane +
 ai_same_direction), SOFT (1 = soft_contact), PITCH (1 = pitch_to_ground),
 BODY (latime,inaltime,lungime: 2.5,3.0,8.5), SUFIX.
+
+CE A IESIT (10 nov 2026; ProbeCarrara, 8 masini, 16 seed-uri x 200 s; raport
+tools/sf_tramvai_report.py, baza = aceeasi strada fara tramvai: 0 [blocaj]):
+  EXIT=side (v1), faza 0.74: 2 [blocaj], 50 contacte, 23% din intalniri cu
+    contact — TOATE la iesirea laterala (tramvaiul taie banda din dreapta).
+  EXIT=front (Fwd), faza 0.66, cu banda laterala rezervata 1,5 s in AI:
+    0 [blocaj], 0 repuneri, 10 contacte (2,2% din 359 intalniri, toate la
+    intrarea din strada laterala), pierdere mediana 0,05 s / intalnire, max 2,9.
+  Fwd faza 0 (plutonul strans il prinde pe ax in turul 1, 8 seed-uri): 0
+    [blocaj], 0,9% contact, 64 intalniri in turul 1 fara contact.
+  SABOTAJ (ai_reads_lane stins, Fwd): 169 [blocaj], 429 contacte, 73,5% din
+    intalniri cu contact, pierdere mediana 1,9 s, p90 10,5 s — garda masoara.
+  SOLO (ProbeSfTramvai, contact intentionat): 2,1-2,7 s pierdute, 0 ejectari.
 """
 import math
 import os

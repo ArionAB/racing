@@ -125,6 +125,12 @@ extends Node3D
 ## triunghiuri; in sonda (profil telefon, frac 0,36-0,42) treapta intreaga
 ## dadea ~200k triunghiuri vizibile si INCA ~200k in umbra.
 @export var shadow_lod: bool = true
+## Copia de umbra si pe treapta MEDIE (prin mesh-ul grosier). Oprita implicit
+## (nov 2026, crash-ul iPhone): costa un MultiMesh pe felie, iar pe Kyoto
+## castiga ~1% din umbra. Pe Carrara castanii mediu -> grosier conteaza (varful
+## de umbra 271k -> 365k fara ea, ProbePerf --mobile --phone-shadow) si padurea
+## are loc sub plafon, deci acolo e pornita.
+@export var shadow_lod_mid: bool = false
 ## Cat intra trunchiul in pamant (m): relieful palpaie sub radacina.
 @export_range(0.0, 1.0, 0.01, "suffix:m") var sink_m: float = 0.25
 ## Cat de mult mai multa marja fata de o sosea obisnuita cere o scurtatura
@@ -154,6 +160,17 @@ var instance_count: int = 0
 var slice_count: int = 0
 ## MultiMesh-urile celulelor de departe (toate treptele, toate speciile).
 var hlod_count: int = 0
+## Toate MultiMesh-urile padurii (copiii nodului). Pe iPhone fiecare costa
+## memorie si obiecte GPU chiar ascuns: Kyoto se incarca la 3.333 si murea
+## la 4.407 (nov 2026). Vezi [constant PHONE_MULTIMESH_BUDGET].
+var mmi_count: int = 0
+## Plafonul de MultiMesh-uri pe padure. Masurat pe iPhone 12 Pro (nov 2026):
+## Kyoto cu 3.333 se incarca, cu 4.407 aplicatia murea la primul cadru dupa
+## padure — si la fel cu padurea ascunsa, deci costul e pe obiect, nu pe desen.
+## 2.500 lasa ~25% marja sub ce s-a vazut mergand. Peste el: felii apropiate
+## mai late (`slice_near_m`), `lod_m` mai mic, `mid_from_far_species` pentru
+## plantele mici — vezi reglajul Angkor (Track24), masurat cu ProbePerf.
+const PHONE_MULTIMESH_BUDGET: int = 2500
 var counts_by_species: Dictionary = {}
 var counts_by_zone: Dictionary = {}
 var tris_by_species: Dictionary = {}
@@ -291,11 +308,15 @@ func _build() -> void:
 	_trace("MeshForest %s: emit MultiMesh..." % name)
 	_emit(groups)
 	build_ms = Time.get_ticks_msec() - t0
-	_trace("MeshForest %s: done, %d slices, %d ms" % [name, slice_count, build_ms])
+	mmi_count = get_child_count()
+	if mmi_count > PHONE_MULTIMESH_BUDGET:
+		push_error("MeshForest %s: %d MultiMesh-uri, peste plafonul de telefon %d — pe iPhone pista moare la incarcare (vezi PHONE_MULTIMESH_BUDGET)" % [
+			name, mmi_count, PHONE_MULTIMESH_BUDGET])
+	_trace("MeshForest %s: done, %d slices, %d MultiMesh, %d ms" % [name, slice_count, mmi_count, build_ms])
 	done = true
 	if verbose:
-		print("MeshForest %s: %d instante, %d felii, %d MultiMesh de celule, %d triunghiuri totale, %d ms | specii %s | LOD tri/instanta (intreg, mediu, grosier, bulgari) %s | zone %s | respinse %s" % [
-			name, instance_count, slice_count, hlod_count, total_tris, build_ms,
+		print("MeshForest %s: %d MultiMesh in total, %d instante, %d felii, %d MultiMesh de celule, %d triunghiuri totale, %d ms | specii %s | LOD tri/instanta (intreg, mediu, grosier, bulgari) %s | zone %s | respinse %s" % [
+			name, mmi_count, instance_count, slice_count, hlod_count, total_tris, build_ms,
 			counts_by_species, tris_by_lod, counts_by_zone, rejected])
 	built.emit()
 
@@ -1367,6 +1388,7 @@ func _emit(groups: Dictionary) -> void:
 			if e < lod_near_m:
 				any_near = true
 				break
+		var to_cell := false
 		if bool(g.get("deep", false)):
 			steps = [[_species_far.get(stem, full), 0.0, 0.0, "_far"]]
 		elif lod_m > 0.0:
@@ -1379,8 +1401,19 @@ func _emit(groups: Dictionary) -> void:
 					steps = [[mid, 0.0, 0.0, "_mid"]]
 			var far: ArrayMesh = _species_far.get(stem, full)
 			if far != steps[-1][0]:
-				steps[-1][2] = lod_m + ext_far
-				steps.append([far, lod_m + ext_far, 0.0, "_far"])
+				if far_cell_m > 0.0:
+					# FARA treapta `_far` pe felie (nov 2026, crash-ul iPhone):
+					# ultima treapta ramane deschisa si o inlocuieste direct
+					# celula, care are aceiasi arbori pe mesh-ul grosier. Felia
+					# `_far` acoperea doar fasia dintre `lod_m` + intinderea feliei
+					# si pragul celulei — un MultiMesh pe fiecare felie (Angkor
+					# 2.076, Kyoto 911) pentru cativa zeci de metri. Pe artarii
+					# Kyoto (`mid_from_far_species`) treapta medie E cea grosiera,
+					# deci acolo nu costa nimic.
+					to_cell = true
+				else:
+					steps[-1][2] = lod_m + ext_far
+					steps.append([far, lod_m + ext_far, 0.0, "_far"])
 		var kids: Array[MultiMeshInstance3D] = []
 		for k in steps.size():
 			var begin := float(steps[k][1])
@@ -1390,8 +1423,17 @@ func _emit(groups: Dictionary) -> void:
 				if begin >= end:
 					continue
 			var shadow := bool(g["shadow"]) and (far_shadow or String(steps[k][3]) != "_far")
-			var cheap: ArrayMesh = steps[k + 1][0] \
-				if shadow and shadow_lod and k + 1 < steps.size() else null
+			# Umbra din treapta urmatoare pe treapta INTREAGA (artar 2696 ->
+			# 212-348 de triunghiuri); pe cea medie doar cu `shadow_lod_mid`.
+			# Treapta urmatoare a ultimei trepte, cand felia se preda celulei,
+			# e mesh-ul grosier al celulei (felia nu mai are `_far`).
+			var next: ArrayMesh = steps[k + 1][0] if k + 1 < steps.size() \
+				else (_species_far.get(stem, null) as ArrayMesh if to_cell else null)
+			if next == steps[k][0]:
+				next = null
+			var cheap: ArrayMesh = next \
+				if shadow and shadow_lod \
+					and (shadow_lod_mid or String(steps[k][3]) == "") else null
 			var nm := String(key).replace("|", "_") + String(steps[k][3])
 			var mmi := _slice_mmi(nm, steps[k][0], xfs, union, begin, end,
 				shadow and cheap == null)
@@ -1406,8 +1448,7 @@ func _emit(groups: Dictionary) -> void:
 		slice_count += 1
 		# Doar feliile care ajung pe treapta grosiera intra in celula: una fara
 		# LOD s-ar vedea intreaga pana la `view_m` si in celula ar fi grosiera.
-		if far_cell_m > 0.0 and steps.size() > 1 and String(steps[-1][3]) == "_far" \
-				and not kids.is_empty() and kids[-1].name.ends_with("_far"):
+		if to_cell and not kids.is_empty():
 			var ck := "%d|%d|%d" % [int(g["zone"]), floori(cen.x / far_cell_m), floori(cen.z / far_cell_m)]
 			if not cells.has(ck):
 				cells[ck] = {"zone": int(g["zone"]), "xf": {}, "edge": {},

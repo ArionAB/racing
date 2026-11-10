@@ -1,7 +1,7 @@
 extends Node
 ## TREPTELE DE DEPARTE ALE PADURII (MeshForest, Kyoto/Track18), doua contracte:
 ##
-##   godot --path . res://tools/ProbeForestFar.tscn
+##   godot --path . res://tools/ProbeForestFar.tscn [-- --scene=Track24]
 ##
 ## Ruleaza CU FEREASTRA (numara pixeli randati si citeste transformarile din
 ## MultiMesh, care in --headless ies (0,0,0)). Iese cu 0 daca trece, 1 daca
@@ -48,10 +48,15 @@ func _ready() -> void:
 		push_error("ProbeForestFar: ruleaza CU FEREASTRA — in --headless nu se deseneaza nimic.")
 		get_tree().quit(2)
 		return
-	var track := (load("res://scenes/tracks/Track18.tscn") as PackedScene).instantiate() as Track
+	# --scene=Track24 (Angkor), Track23 (Carrara): orice pista cu PadureMasa.
+	var scene := "Track18"
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--scene="):
+			scene = arg.trim_prefix("--scene=")
+	var track := (load("res://scenes/tracks/%s.tscn" % scene) as PackedScene).instantiate() as Track
 	var forest := track.get_node_or_null("PadureMasa") as MeshForest
 	if forest == null:
-		print("PROBA: nu exista PadureMasa pe Track18")
+		print("PROBA: nu exista PadureMasa pe %s" % scene)
 		get_tree().quit(2)
 		return
 	var r1 := await _blobs(forest, String(track.theme_decor))
@@ -165,7 +170,11 @@ func _coverage(mesh: Mesh) -> int:
 func _cells(track: Track, forest: MeshForest) -> int:
 	var mmis: Array[MultiMeshInstance3D] = []
 	for c in forest.get_children():
-		if c is MultiMeshInstance3D:
+		# Copiile `_umbra` (SHADOWS_ONLY, #654) nu se vad: aceeasi felie pe
+		# mesh-ul treptei urmatoare, doar pentru pasa de umbra. Numarate ca
+		# reprezentari dadeau 2.800 de „dubluri" pe Kyoto.
+		if c is MultiMeshInstance3D and (c as GeometryInstance3D).cast_shadow \
+				!= GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY:
 			mmis.append(c as MultiMeshInstance3D)
 	var n_cells := 0
 	for m in mmis:

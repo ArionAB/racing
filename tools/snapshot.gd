@@ -7,6 +7,9 @@ extends Node
 ##               scenei (--track=11 = Track11); un numar care nu e nici una,
 ##               nici alta opreste cu eroare, nu se retează tăcut.
 ##
+##   --scene=res://tools/SfLoc.tscn
+##               o scena de pista care NU e in lista (strada sintetica a unui test de
+##               loc); inlocuieste --track, fisierul iese pe numele scenei (sfloc_joc.png).
 ##   --track=0                 ansamblu, de sus (ortografic)
 ##   --track=0 --frac=0.2      prim-plan inclinat la o fractie din traseu
 ##   --track=0 --frac=0.2 --driver
@@ -375,6 +378,7 @@ func _vec3(text: String) -> Vector3:
 
 func _ready() -> void:
 	var track_index := 0
+	var scene_path := ""
 	var zoom_frac := -1.0 # >= 0: prim-plan la fractia respectiva din traseu
 	var span_at := -1.0   # >= 0: faza pasajului rotativ (0 = deschis)
 	var zoom_size := 60.0
@@ -523,6 +527,8 @@ func _ready() -> void:
 			continue
 		if arg.begins_with("--track="):
 			track_index = int(arg.trim_prefix("--track="))
+		elif arg.begins_with("--scene="):
+			scene_path = arg.trim_prefix("--scene=")
 		elif arg.begins_with("--span-at="):
 			span_at = float(arg.trim_prefix("--span-at="))
 		elif arg.begins_with("--frac="):
@@ -675,17 +681,24 @@ func _ready() -> void:
 	# scenei (Track11 = 11) — vezi GameState.resolve_track_index. Inainte era
 	# un clampi() tacut, care transforma un numar gresit in alta pista si o
 	# captura de "verificare" intr-un fals pozitiv.
-	var resolved := GameState.resolve_track_index(track_index)
-	if resolved < 0:
-		push_error("snapshot: --track=%d nu e nici pozitie in lista (0..%d), nici numar de pista din lista. Vezi GameState.TRACK_SCENES."
-			% [track_index, GameState.TRACK_SCENES.size() - 1])
-		get_tree().quit(1)
-		return
-	track_index = resolved
-	print("snapshot: pista %s" % GameState.track_label(track_index))
+	# `--scene=res://...`: o scena de pista care NU e in GameState.TRACK_SCENES (strada
+	# sintetica a unui test de loc, tools/SfLoc.tscn). Fara el, exact ca inainte.
+	if scene_path == "":
+		var resolved := GameState.resolve_track_index(track_index)
+		if resolved < 0:
+			push_error("snapshot: --track=%d nu e nici pozitie in lista (0..%d), nici numar de pista din lista. Vezi GameState.TRACK_SCENES."
+				% [track_index, GameState.TRACK_SCENES.size() - 1])
+			get_tree().quit(1)
+			return
+		track_index = resolved
+		print("snapshot: pista %s" % GameState.track_label(track_index))
+	else:
+		print("snapshot: scena %s" % scene_path)
+	var out_stem := scene_path.get_file().get_basename().to_lower() if scene_path != "" \
+		else GameState.TRACK_NAMES[track_index].to_lower()
 
-	var track := (load(GameState.TRACK_SCENES[track_index]) as PackedScene) \
-		.instantiate() as Track
+	var track := (load(scene_path if scene_path != "" else GameState.TRACK_SCENES[track_index]) \
+		as PackedScene).instantiate() as Track
 	if not dirt_ranges.is_empty():
 		# Inainte de add_child: rebuild() ruleaza in _ready si citeste intervalele.
 		if "custom_dirt_ranges" in track:
@@ -1023,7 +1036,7 @@ func _ready() -> void:
 		var fimg := get_viewport().get_texture().get_image()
 		var fdir := ProjectSettings.globalize_path("res://snapshots")
 		DirAccess.make_dir_recursive_absolute(fdir)
-		var fout := "%s/%s_liber.png" % [fdir, GameState.TRACK_NAMES[track_index].to_lower()]
+		var fout := "%s/%s_liber.png" % [fdir, out_stem]
 		fimg.save_png(fout)
 		print("SNAPSHOT: ", fout)
 		get_tree().quit()
@@ -1169,7 +1182,7 @@ func _ready() -> void:
 		var dout := "%s/vitrina_%s%s.png" % [ddir, vitrina_stem, vitrina_suffix] \
 			if vitrina_stem != "" \
 			else "%s/%s_%s%s%s.png" % [ddir,
-				GameState.TRACK_NAMES[track_index].to_lower(),
+				out_stem,
 				"joc" if game_cam else "sofer",
 				"" if route_idx == 0 else "_ruta%d" % route_idx,
 				"_overdraw" if overdraw else ""]
@@ -1202,7 +1215,7 @@ func _ready() -> void:
 	var img := get_viewport().get_texture().get_image()
 	var dir := ProjectSettings.globalize_path("res://snapshots")
 	DirAccess.make_dir_recursive_absolute(dir)
-	var out := "%s/%s.png" % [dir, GameState.TRACK_NAMES[track_index].to_lower()]
+	var out := "%s/%s.png" % [dir, out_stem]
 	img.save_png(out)
 	print("SNAPSHOT: ", out)
 	get_tree().quit()

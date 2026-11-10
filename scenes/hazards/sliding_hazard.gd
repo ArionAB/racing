@@ -170,6 +170,9 @@ var phase: float = 0.0
 ## verticalei), in loc sa mearga cu spatele. Pus de pista odata cu
 ## `face_travel`. Pendularea si usa nu-l folosesc.
 var turn_around: bool = false
+## Modelul e intors cu fata spre capatul -1 al cursei (dupa o intoarcere).
+## Doar VIZUAL: corpul fizic nu se roteste niciodata (vezi `_physics_process`).
+var _flipped: bool = false
 ## Corpul calca pe SOL pe toata cursa, nu pe linia dreapta prin asfalt.
 ##
 ## Fara el, cota e cea a centrului (axa drumului) pana la capatul de parcare —
@@ -543,15 +546,26 @@ func _physics_process(delta: float) -> void:
 		_measure_ground()
 	var next_pos := _pos_at(_offset_now())
 	var moved := next_pos - _last_pos
-	# Intoarcerea la capat de cursa: O SINGURA scriere de transform (baza +
-	# pozitie) — cu sync_to_physics, pozitia si rotatia scrise separat in
-	# acelasi pas ingheata corpul tacut (memoria jolt-sync-transform).
+	# Intoarcerea la capat de cursa se face DOAR pe model (pivotul), niciodata
+	# pe corp. Corpul era rotit cu PI intr-un singur pas: sub sync_to_physics,
+	# Jolt deriva viteza corpului cinematic din diferenta de transform, deci
+	# o jumatate de tura intr-un cadru = ~188 rad/s, adica ~500 m/s la
+	# marginea cutiei de 2,7 m. Masinile oprite langa elefant (ai_yields le
+	# tine pe loc exact acolo) erau azvarlite cu 200-500 m/s (Angkor, poarta
+	# de sud, ProbeRace seed 10; aceeasi familie ca memoria
+	# `corp-cinematic-aparut-in-masina`). Forma (cutie centrata, sfera sau
+	# cilindru) e simetrica la o rotatie de PI in jurul verticalei, deci
+	# coliziunea nu pierde nimic; scrierea ramane una singura (memoria
+	# jolt-sync-transform).
 	var flat_move := Vector3(moved.x, 0.0, moved.z)
-	if turn_around and flat_move.length() > 0.01 			and (-global_transform.basis.z).dot(flat_move) < 0.0:
-		global_transform = Transform3D(
-			global_transform.basis.rotated(Vector3.UP, PI), next_pos)
-	else:
-		global_position = next_pos
+	if turn_around and _pivot != null and flat_move.length() > 0.01:
+		var facing := -global_transform.basis.z
+		if _flipped:
+			facing = -facing
+		if facing.dot(flat_move) < 0.0:
+			_flipped = not _flipped
+			_pivot.global_rotate(Vector3.UP, PI)
+	global_position = next_pos
 	_speed = moved.length() / delta if delta > 0.0 else 0.0
 	if _pivot != null and roll_radius > 0.0:
 		# Rostogolire: rotatie in jurul axei perpendiculare pe miscare.

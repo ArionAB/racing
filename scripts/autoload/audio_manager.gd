@@ -76,6 +76,16 @@ const SFX: Dictionary = {
 	# telegraf (taiko + kane) si scartaitul rotilor la traversare.
 	&"gion_bayashi": preload("res://assets/audio/gion_bayashi.wav"),
 	&"gion_wheels": preload("res://assets/audio/gion_wheels.wav"),
+	# Angkor (Track24, tools/generate_sfx.gd `_save_angkor_sounds`): tunetul (huruit
+	# lung + varianta cu pocnet pentru fulgerul apropiat), scartaitul radacinilor
+	# (telegraful dominoului) si cele doua bucle de ambianta (jungla, ploaia pe
+	# frunze — AmbienceBed). Trambita elefantului sta in EVENT_SFX, fiindca
+	# `hazard_contact` cauta acolo.
+	&"thunder_roll": preload("res://assets/audio/thunder_roll.wav"),
+	&"thunder_crack": preload("res://assets/audio/thunder_crack.wav"),
+	&"root_creak": preload("res://assets/audio/root_creak.wav"),
+	&"jungle_bed": preload("res://assets/audio/jungle_bed.wav"),
+	&"rain_leaves": preload("res://assets/audio/rain_leaves.wav"),
 }
 
 ## Fluxul brut al unui sunet, pentru cine si-l reda singur.
@@ -111,7 +121,7 @@ func _ready() -> void:
 	# ramuri care adauga bucle sa nu se calce pe aceleasi randuri.
 	for car_loop: StringName in [&"engine_whine", &"engine_whirr", &"skid_gravel",
 			&"roll_grass", &"roll_gravel", &"roll_water", &"kerb_rattle",
-			&"wind_loop", &"turbo_whoosh"]:
+			&"wind_loop", &"turbo_whoosh", &"jungle_bed", &"rain_leaves"]:
 		var cwav := SFX[car_loop] as AudioStreamWAV
 		if cwav != null:
 			cwav.loop_mode = AudioStreamWAV.LOOP_FORWARD
@@ -191,6 +201,8 @@ const EVENT_SFX: Dictionary = {
 	&"stinger_down": preload("res://assets/audio/stinger_down.wav"),
 	&"hazard_barrier_hit": preload("res://assets/audio/hazard_barrier_hit.wav"),
 	&"hazard_bus_hit": preload("res://assets/audio/hazard_bus_hit.wav"),
+	# Trambita elefantului la contact (HazardMarker.contact_sfx, Angkor).
+	&"elephant_trumpet": preload("res://assets/audio/elephant_trumpet.wav"),
 	&"prop_knock_a": preload("res://assets/audio/prop_knock_a.wav"),
 	&"prop_knock_b": preload("res://assets/audio/prop_knock_b.wav"),
 }

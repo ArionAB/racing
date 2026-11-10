@@ -157,6 +157,9 @@ extends Node
 ##                             fractie din ciclul ei: 0 = abia deschisa (in
 ##                             nisa), ~0.53 = la jumatatea rostogolirii spre
 ##                             axa, 0.60-0.84 = INCHISA pe banda.
+##   --birds-at=1.5[,N]        (Angkor) STOLUL DE EGRETE de la tunet (`ThunderBirds`): ridica stolul din
+##                             cuibul N (implicit cel mai apropiat de camera) si il opreste la 1,5 s
+##                             de zbor. Tipareste cuiburile ca sa alegi --eye/--look.
 ##   --salute-at=5.0           TUNURILE DE SALUT (BastionTheatre, Jodhpur POI F)
 ##                             la N secunde in ciclul de 31 s (salvele trag la
 ##                             4,0 / 4,8 / 5,6 / 6,4 / 7,2 s). Ceas inghetat.
@@ -442,6 +445,8 @@ func _ready() -> void:
 	var burner_at := -1.0
 	# Teatrul bastionului (Jodhpur, POI F): ceasurile BastionTheatre, inghetate.
 	var salute_at := -1.0
+	var birds_at := -1.0
+	var birds_idx := -1
 	var zip_at := -1.0
 	var fireworks_at := -1.0
 	var balloon_at := -1.0
@@ -645,6 +650,10 @@ func _ready() -> void:
 			rain_clock = float(arg.trim_prefix("--rain-clock="))
 		elif arg.begins_with("--dusk="):
 			dusk_force = float(arg.trim_prefix("--dusk="))
+		elif arg.begins_with("--birds-at="):
+			var bparts := arg.trim_prefix("--birds-at=").split(",")
+			birds_at = float(bparts[0])
+			birds_idx = int(bparts[1]) if bparts.size() > 1 else -1
 		elif arg.begins_with("--salute-at="):
 			salute_at = float(arg.trim_prefix("--salute-at="))
 		elif arg.begins_with("--zip-at="):
@@ -824,6 +833,28 @@ func _ready() -> void:
 			if node.has_method("force_value"):
 				node.call("force_value", dusk_force)
 		print("--dusk=%.2f: %d DuskCycle fortate" % [dusk_force, dusk_cycles.size()])
+	# Stolul de egrete al Angkorului: lift + timp inghetat (fara simulare de cadre).
+	if birds_at >= 0.0:
+		await get_tree().process_frame
+		await get_tree().process_frame
+		var flocks := get_tree().root.find_children("PasariTunet", "MultiMeshInstance3D", true, false)
+		for fl in flocks:
+			var tb := fl as ThunderBirds
+			var best_r := -1
+			var best_d := INF
+			for ri in tb.roosts.size():
+				print("--birds-at: cuib %d la %s" % [ri, tb.roosts[ri]])
+				var dd := (tb.roosts[ri] - eye_pos).length()
+				if best_r < 0 or dd < best_d:
+					best_r = ri
+					best_d = dd
+			var pick := birds_idx if birds_idx >= 0 else best_r
+			var rp: Vector3 = tb.roosts[pick]
+			tb.lift(rp, rp + Vector3(0, 0, -30))
+			tb.set_process(false)
+			tb._t = birds_at
+			tb._write()
+			print("--birds-at=%.2f: stol ridicat din cuibul %d" % [birds_at, pick])
 	# Teatrul bastionului (Jodhpur, POI F). Opt-in: fara flag nu se atinge
 	# nimic. Ceasul e o functie pura de timp (BastionTheatre), deci se pune
 	# direct si se ingheata — fara simulare de cadre.

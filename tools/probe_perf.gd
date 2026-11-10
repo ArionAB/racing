@@ -59,6 +59,7 @@ extends Node
 ## RenderingDevice (D3D12/Vulkan/Metal); pe Compatibility citeste 0.
 
 const WARMUP_FRAMES: int = 4
+var _census_on: bool = false
 
 func _ready() -> void:
 	var track_arg := 0
@@ -76,6 +77,7 @@ func _ready() -> void:
 	var hide: PackedStringArray = []
 	var lod_bias := 0.0
 	var attrib: PackedStringArray = []
+	var census := false
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			track_arg = int(arg.trim_prefix("--track="))
@@ -105,6 +107,8 @@ func _ready() -> void:
 			hide = arg.trim_prefix("--hide=").split(",", false)
 		elif arg.begins_with("--lod-bias="):
 			lod_bias = float(arg.trim_prefix("--lod-bias="))
+		elif arg == "--forest-census":
+			census = true
 		elif arg.begins_with("--attrib="):
 			attrib = arg.trim_prefix("--attrib=").split(",", false)
 	if DisplayServer.get_name() == "headless":
@@ -207,6 +211,7 @@ func _ready() -> void:
 	cam.current = true
 
 	var n := track.baked.size()
+	_census_on = census
 	var rows: Array[Dictionary] = await _measure(cam, track, vp_rid, samples, frames, n, true)
 
 	# Garda de "n-am masurat nimic": zero desene pe TOATE punctele nu e o pista
@@ -391,6 +396,8 @@ func _measure(cam: Camera3D, track: Track, vp_rid: RID, samples: int, frames: in
 			gpu_frames.append(
 				RenderingServer.viewport_get_measured_render_time_gpu(vp_rid))
 		gpu_frames.sort()
+		if _census_on:
+			_census(cam, track, frac)
 		rows.append({
 			"frac": frac,
 			"draw": draw_sum / frames,
@@ -431,3 +438,88 @@ func _msaa_label(m: Viewport.MSAA) -> String:
 		Viewport.MSAA_4X: return "4x"
 		Viewport.MSAA_8X: return "8x"
 	return "off"
+
+
+## CENSUL PADURII (--forest-census): cate MultiMesh-uri ale lui MeshForest ajung in cadru, pe clase
+## (treapta de LOD dupa sufixul numelui), cu cate suprafete = desene. Reface la mana ce face Godot:
+## prag de vizibilitate pe distanta pana la centrul AABB-ului (cu `visibility_parent`: un copil se
+## vede doar cat parintele e ascuns) si test de frustum pe `custom_aabb`. Corelat cu desenele din
+## ProbePerf (aceeasi ordine de marime), dar e o aproximatie; hysteresis-ul de 1 m nu e modelat.
+func _census(cam: Camera3D, track: Track, frac: float) -> void:
+	var forests := track.find_children("*", "MeshForest", true, false)
+	if forests.is_empty():
+		return
+	var planes := cam.get_frustum()
+	var cam_pos := cam.global_position
+	var by_class: Dictionary = {}
+	var by_species: Dictionary = {}
+	var total_mm := 0
+	for f in forests:
+		for c in f.get_children():
+			var m := c as MultiMeshInstance3D
+			if m == null or m.multimesh == null or m.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY:
+				continue
+			total_mm += 1
+			if not _census_visible(m, cam_pos):
+				continue
+			var box := m.custom_aabb
+			var outside := false
+			for pl: Plane in planes:
+				if pl.distance_to(box.get_support(-pl.normal)) > 0.0:
+					outside = true
+					break
+			if outside:
+				continue
+			var nm := String(m.name)
+			var cls := "full"
+			for suf in ["_mid", "_far", "_celula", "_bulgari"]:
+				if nm.ends_with(suf):
+					cls = suf.trim_prefix("_")
+			var e: Array = by_class.get(cls, [0, 0, 0])
+			e[0] += 1
+			e[1] += (m.multimesh.mesh as Mesh).get_surface_count()
+			e[2] += m.multimesh.instance_count
+			by_class[cls] = e
+			# Triunghiuri (limita de sus: toate instantele MM-ului) pe specie x treapta.
+			var lod_i := {"full": 0, "mid": 1, "far": 2, "celula": 2, "bulgari": 3}[cls] as int
+			for stem: String in (f as MeshForest).tris_by_lod:
+				if nm.contains("_" + stem):
+					var key := "%s/%s" % [stem, cls]
+					by_species[key] = int(by_species.get(key, 0)) 						+ m.multimesh.instance_count * int((f as MeshForest).tris_by_lod[stem][lod_i])
+	var parts: PackedStringArray = []
+	var sm := 0
+	var ss := 0
+	for cls in ["full", "mid", "far", "celula", "bulgari"]:
+		var e: Array = by_class.get(cls, [0, 0, 0])
+		parts.append("%s %d/%ds/%di" % [cls, e[0], e[1], e[2]])
+		sm += e[0]
+		ss += e[1]
+	print("  CENSUS frac %.2f: %d MM desenate din %d, %d suprafete | %s" % [frac, sm, total_mm, ss, " ".join(parts)])
+	var keys := by_species.keys()
+	keys.sort_custom(func(a, b): return by_species[a] > by_species[b])
+	var top: PackedStringArray = []
+	var tot := 0
+	for k in keys:
+		tot += int(by_species[k])
+	for k in keys.slice(0, 6):
+		top.append("%s %dk" % [k, int(by_species[k]) / 1000])
+	print("  CENSUS-TRI frac %.2f: ~%dk (limita de sus) | %s" % [frac, tot / 1000, ", ".join(top)])
+
+
+func _census_in_range(m: GeometryInstance3D, cam_pos: Vector3) -> bool:
+	var d := cam_pos.distance_to(m.custom_aabb.get_center())
+	if m.visibility_range_begin > 0.0 and d < m.visibility_range_begin:
+		return false
+	if m.visibility_range_end > 0.0 and d >= m.visibility_range_end:
+		return false
+	return true
+
+
+func _census_visible(m: GeometryInstance3D, cam_pos: Vector3) -> bool:
+	if not _census_in_range(m, cam_pos):
+		return false
+	if m.visibility_parent != NodePath():
+		var par := m.get_node_or_null(m.visibility_parent) as GeometryInstance3D
+		if par != null and _census_visible(par, cam_pos):
+			return false
+	return true

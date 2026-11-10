@@ -12,6 +12,7 @@
 #   optiuni  dict, toate optionale:
 #     "along"      m inainte pe axa fata de frac (negativ = inapoi)
 #     "scale"      uniform
+#     "sy"         scara in plus pe verticala (Y * sy), pentru pervaze plate
 #     "y"          cota ABSOLUTA; altfel KIT_Y[nume]; altfel cota drumului + "dy" (implicit -0,3)
 #     "dy"         decalaj fata de cota drumului in punctul de pe axa
 #     "world"      (x, z) in Godot, absolut: ignora frac/lateral; yaw devine absolut (0 = -Z al piesei spre nord, -Z)
@@ -51,7 +52,8 @@ def _place(name, glb, f, lat, yaw, **opt):
     return (name, glb, f, lat, yaw, dict({"coliziune": "none"}, **opt))
 
 
-SKIP_KERB = {("R", 35)}      # pe dreapta, la ~0,036 malul se strange la 9 m si taluzul ingroapta blocul (probe_manual)
+SKIP_KERB_OLD = {("R", 35)}      # indicii vechiului pervaz (pas 1,58), doar pentru fluxul aleatoriu
+SKIP_KERB = set()      # pe dreapta, la ~0,036 malul se strange la 9 m si taluzul ingroapta blocul (probe_manual)
 ITEMS = []
 _rng = random.Random(2406)
 
@@ -79,18 +81,31 @@ for side, tab, tag in ((-1, BANK_L, "L"), (1, BANK_R, "R")):
                                 f, lat, _rng.random() * 360.0, scale=round(sc, 2), y=WATER_Y))
             n += 1
 
-# 2) Pervaz de piatra pe linia malului (laterita, un rand, intrerupt): santul citeste ca bazin cu margine
-#    zidita. `scufundat`: jumatate din bloc intra in mal; fara corp (coliziune none).
+# 2) Pervaz de gresie pe linia malului: placi `kit/gallery_relief_wall` (4 m, grosime 0,6) turtite pe verticala
+#    (`sy`) si puse cap la cap, ca un cordon continuu de piatra, nu un rand de caramizi cu goluri (criticii A
+#    si H: laterita_block citea „caramizi rosii”). `scufundat`: jumatate intra in mal; fara corp (coliziune none).
+KERB_L = 4.0
+KERB_SY = 0.15
 for side, tab, tag in ((-1, BANK_L, "L"), (1, BANK_R, "R")):
     m = F0 * M_PER_FRAC
     n = 0
     while m < F1 * M_PER_FRAC:
-        f = m / M_PER_FRAC
-        if _rng.random() > 0.07 and (tag, n) not in SKIP_KERB:                              # ~7% goluri (blocuri cazute in apa)
-            ITEMS.append(_place(f"A_Kerb{tag}{n}", "props/laterite_block.glb", f, side * (_bank(tab, f) + 0.35),
-                                90.0 + (_rng.random() - 0.5) * 5.0, y=WATER_Y + 0.02, scale=1.5, scufundat=True))
+        f = (m + KERB_L / 2) / M_PER_FRAC
+        if (tag, n) not in SKIP_KERB:
+            ITEMS.append(_place(f"A_Kerb{tag}{n}", "kit/gallery_relief_wall.glb", f, side * (_bank(tab, f) + 0.35),
+                                90.0, y=WATER_Y + 0.02, sy=KERB_SY, scufundat=True))
         n += 1
-        m += 1.58
+        m += KERB_L
+
+# Consuma EXACT aceleasi numere aleatoare ca vechiul rand de blocuri de laterita (pas 1,58 m, ~7% goluri):
+# piesele de dupa (moloz, cotele din KIT_Y masurate) sunt trase din acelasi `_rng` si nu trebuie sa se mute.
+for _side in (-1, 1):
+    _m, _n = F0 * M_PER_FRAC, 0
+    while _m < F1 * M_PER_FRAC:
+        if _rng.random() > 0.07 and (("L" if _side < 0 else "R"), _n) not in SKIP_KERB_OLD:
+            _rng.random()
+        _n += 1
+        _m += 1.58
 
 KIT_Y = {
     "A_RubL0": 2.06,

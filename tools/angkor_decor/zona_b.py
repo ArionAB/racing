@@ -94,7 +94,8 @@ for k, y in enumerate((40.0, 48.0, 56.0)):
     ITEMS.append(("B_TerasaJos%d" % k, "kit/bakheng_terrace_tier.glb", 0.0, 0.0, 90.0,
                   {"world": (-38.0, -y), "y": G_LAWN, "scufundat": True}))
     ITEMS.append(_w(f"B_TerasaSus{k}", "kit/bakheng_terrace_tier.glb", -38.0, y, 90.0, gy=G_LAWN + 1.45, scale=0.7))
-ITEMS.append(_w("B_Restaurare0", "props/restoration_prop.glb", -41.5, 62.0, 20.0, coliziune="hull"))
+# (gopura de nord ocupa x -82..-30, y 62..74: restaurarea si blocul cazut stau la sud de ea)
+ITEMS.append(_w("B_Restaurare0", "props/restoration_prop.glb", -46.0, 58.0, 20.0, coliziune="hull"))
 
 # 5) Blocuri, moloz si blocuri numerotate pe gazon (jos, fara coliziune), in afara arcului si pe dreapta
 _lawn_spots = [(-47.0, 10.0), (-44.0, 18.0), (-49.5, 26.0), (-46.0, 33.0), (-43.0, -9.0), (-50.0, -6.0),
@@ -104,7 +105,7 @@ for k, (x, y) in enumerate(_lawn_spots):
     glb = ("props/rubble_pile.glb", "props/laterite_block.glb", "props/numbered_block.glb")[k % 3]
     ITEMS.append(_w(f"B_Gazon{k}", glb, x, y, _rng.random() * 360.0, scale=round(1.0 + _rng.random() * 0.5, 2),
                     scufundat=True))
-for k, (x, y) in enumerate(((-37.0, 65.0), (-44.0, 40.0), (-35.0, -26.0))):
+for k, (x, y) in enumerate(((-31.0, 56.0), (-44.0, 40.0), (-35.0, -26.0))):
     ITEMS.append(_w(f"B_BlocCazut{k}", "props/fallen_block.glb", x, y, _rng.random() * 360.0, scale=0.8,
                     coliziune="hull", scufundat=True))
 
@@ -113,19 +114,10 @@ for k, y in enumerate((30.0, 38.0, 45.0, 53.0, 60.0)):
     ITEMS.append(_w(f"B_GalMoloz{k}", "props/rubble_pile.glb" if k % 2 == 0 else "props/numbered_block.glb",
                     -64.0 + _rng.random() * 0.8, y, _rng.random() * 360.0, gy=G_GAL, scale=1.1, scufundat=True))
 
-# 7) Calea de nord: balustrade naga (vizuale, fara coliziune) pe ambele laturi de la intrarea in sant pana la capat,
-#    si lotusi pe apa ambelor bazine (tiparul lui A)
+# 7) Calea de nord: balustrada naga (cu coliziune, stil 3) si gopura de nord sunt in GENERATOR (`parapets`,
+#    `GopuraNord`); aici raman doar lotusii pe apa ambelor bazine (tiparul lui A). Cota bazei dupa terenul medru
+#    de sub umarul caii era 3,50 la intrare, 3,12 pe sant, 3,75 la iesire (masurat).
 _f_bal0, _f_bal1 = 0.0995, 0.1148
-# cota bazei dupa terenul medru de sub umarul caii (masurat: 3,57 la intrare, 3,15 pe sant, 3,8 la iesire)
-_NBAL_Y = [3.50, 3.28, 3.12, 3.12, 3.12, 3.12, 3.12, 3.12, 3.30, 3.75]
-_n = 0
-_f = _f_bal0
-while _f < _f_bal1:
-    for side, tag in ((-1, "L"), (1, "R")):
-        ITEMS.append(_none(f"B_NBal{tag}{_n}", "kit/naga_balustrade.glb", _f, side * 4.9, 0.0,
-                           y=_NBAL_Y[min(_n, len(_NBAL_Y) - 1)], scufundat=True))
-    _n += 1
-    _f += 4.0 / M_PER_FRAC
 
 for side, tag in ((-1, "L"), (1, "R")):
     n = 0

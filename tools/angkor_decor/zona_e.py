@@ -72,5 +72,18 @@ EXTRA = [
 for nm, g, s_, lat, yw, o in EXTRA:
     ITEMS.append((nm, g, fr(s_), lat, yw, o))
 
+# Teatrul (brief §3): altare cu fum de tamaie intre turnurile cu fete. Un bloc de gresie (fallen_block la
+# 0,32 = 0,8 m) cu o lespede de laterita deasupra (rosul ei citeste ca jar), la 8,5-9 m de axa (asfaltul ia
+# 3,5; coliziunea e `none`: sunt mici si la nivelul solului, nu tin loc de zid). Fumul iese dintr-UN singur
+# emitator (`IncenseSmoke`, scris de generator din SMOKE): sursele sunt la 1,1 m peste cota drumului.
+SMOKE = []
+for k, (s_, lat) in enumerate([(14, -8.5), (40, 9.0), (56, -9.0), (86, 8.5), (110, -8.5), (126, 9.0)]):
+    yw_ = 90 if lat < 0 else -90
+    ITEMS.append((f"E_Altar{k}", "props/fallen_block.glb", fr(s_), lat, yw_,
+                  {"scale": 0.32, "dy": -0.05, "coliziune": "none"}))
+    ITEMS.append((f"E_AltarJar{k}", "props/laterite_block.glb", fr(s_), lat, yw_,
+                  {"scale": 0.55, "dy": 0.74, "coliziune": "none"}))
+    SMOKE.append((fr(s_), lat, 1.1))
+
 # @@KITY (scris din ProbeCarraraMontaj: teren minim - 0,03)
 KIT_Y.update({'E_Turn0': 17.37, 'E_Turn1': 19.43, 'E_Turn2': 19.63, 'E_Turn3': 19.64, 'E_Turn4': 19.1, 'E_Turn5': 16.95, 'E_Turn6': 18.51, 'E_Turn7': 19.62, 'E_Turn8': 19.64, 'E_Turn9': 19.58, 'E_Turn10': 18.23, 'E_Turn11': 15.54, 'E_Turn12': 18.5, 'E_Turn13': 19.39, 'E_Turn14': 19.61, 'E_Turn15': 19.16, 'E_Turn16': 17.68, 'E_Turn17': 14.94, 'E_Turn18': 14.09, 'E_Turn19': 13.88, 'E_Turn20': 14.25, 'E_Turn21': 18.99, 'E_Turn22': 19.59, 'E_Turn23': 19.49, 'E_Turn24': 18.68, 'E_Turn25': 16.37, 'E_ZidL0': 17.2, 'E_ZidL1': 17.51, 'E_ZidL2': 17.81, 'E_ZidL3': 18.21, 'E_ZidL4': 18.47, 'E_ZidL5': 18.7, 'E_ZidL6': 18.98, 'E_ZidL7': 19.12, 'E_ZidL8': 19.26, 'E_ZidL9': 19.38, 'E_ZidL10': 19.46, 'E_ZidL11': 19.5, 'E_ZidL12': 19.56, 'E_ZidL13': 19.58, 'E_ZidL14': 19.61, 'E_ZidL15': 19.62, 'E_ZidL16': 19.63, 'E_ZidL17': 19.63, 'E_ZidL18': 19.63, 'E_ZidL19': 19.62, 'E_ZidL20': 19.61, 'E_ZidL21': 19.58, 'E_ZidL22': 19.54, 'E_ZidL23': 19.51, 'E_ZidL24': 19.42, 'E_ZidL25': 19.36, 'E_ZidL26': 19.25, 'E_ZidL27': 19.09, 'E_ZidL28': 18.91, 'E_ZidL29': 18.73, 'E_ZidL30': 18.38, 'E_ZidL31': 18.13, 'E_ZidL32': 17.83, 'E_ZidL33': 17.38, 'E_ZidL34': 17.05, 'E_ZidL35': 16.72, 'E_ZidL36': 16.25, 'E_ZidL37': 15.91, 'E_ZidL38': 15.61, 'E_ZidL39': 15.19, 'E_ZidL40': 14.94, 'E_ZidL41': 14.68, 'E_ZidL42': 14.43, 'E_ZidL43': 14.26, 'E_ZidL44': 14.16, 'E_ZidL45': 14.05, 'E_ZidL46': 13.96, 'E_ZidL47': 13.95, 'E_ZidR0': 17.2, 'E_ZidR1': 17.53, 'E_ZidR2': 17.83, 'E_ZidR3': 18.24, 'E_ZidR4': 18.5, 'E_ZidR5': 18.72, 'E_ZidR6': 19.0, 'E_ZidR7': 19.13, 'E_ZidR8': 19.26, 'E_ZidR9': 19.37, 'E_ZidR10': 19.46, 'E_ZidR11': 19.5, 'E_ZidR12': 19.56, 'E_ZidR13': 19.58, 'E_ZidR14': 19.61, 'E_ZidR15': 19.62, 'E_ZidR16': 19.63, 'E_ZidR17': 19.63, 'E_ZidR18': 19.63, 'E_ZidR19': 19.62, 'E_ZidR20': 19.61, 'E_ZidR21': 19.58, 'E_ZidR22': 19.56, 'E_ZidR23': 19.52, 'E_ZidR24': 19.45, 'E_ZidR25': 19.38, 'E_ZidR26': 19.29, 'E_ZidR27': 19.11, 'E_ZidR28': 18.93, 'E_ZidR29': 18.75, 'E_ZidR30': 18.38, 'E_ZidR31': 18.13, 'E_ZidR32': 17.8, 'E_ZidR33': 17.37, 'E_ZidR34': 17.03, 'E_ZidR35': 16.7, 'E_ZidR36': 16.22, 'E_ZidR37': 15.89, 'E_ZidR38': 15.58, 'E_ZidR39': 15.16, 'E_ZidR40': 14.91, 'E_ZidR41': 14.67, 'E_ZidR42': 14.44, 'E_ZidR43': 14.3, 'E_ZidR44': 14.23, 'E_ZidR45': 14.16, 'E_ZidR46': 14.15, 'E_ZidR47': 14.17, 'E_Moloz0': 19.61, 'E_Moloz1': 19.65, 'E_Bloc0': 19.66, 'E_Bloc1': 19.12, 'E_Calugar0': 19.66, 'E_Calugar1': 19.64})

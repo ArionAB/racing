@@ -1,0 +1,44 @@
+  CENSUS frac 0.00: 850 MM desenate din 12198, 1494 suprafete | full 34/56s/148i mid 62/110s/200i far 542/944s/1901i celula 16/27s/344i bulgari 196/357s/2594i
+  CENSUS frac 0.05: 995 MM desenate din 12198, 1637 suprafete | full 19/38s/33i mid 76/120s/252i far 658/1057s/2334i celula 19/33s/320i bulgari 223/389s/2579i
+  CENSUS frac 0.10: 900 MM desenate din 12198, 1581 suprafete | full 13/21s/58i mid 38/65s/179i far 605/1049s/2073i celula 39/72s/841i bulgari 205/374s/2208i
+  CENSUS frac 0.15: 1189 MM desenate din 12198, 2030 suprafete | full 37/60s/161i mid 43/69s/171i far 851/1439s/2842i celula 42/78s/350i bulgari 216/384s/2581i
+  CENSUS frac 0.20: 1033 MM desenate din 12198, 1821 suprafete | full 27/43s/127i mid 32/56s/112i far 711/1240s/2307i celula 30/51s/267i bulgari 233/431s/1583i
+  CENSUS frac 0.25: 586 MM desenate din 12198, 1022 suprafete | full 52/90s/182i mid 106/175s/407i far 296/512s/1015i celula 35/67s/265i bulgari 97/178s/1212i
+  CENSUS frac 0.30: 824 MM desenate din 12198, 1422 suprafete | full 41/68s/215i mid 80/136s/297i far 538/913s/1694i celula 13/28s/145i bulgari 152/277s/1737i
+  CENSUS frac 0.35: 354 MM desenate din 12198, 606 suprafete | full 6/12s/15i mid 45/74s/224i far 236/395s/876i celula 23/41s/127i bulgari 44/84s/566i
+  CENSUS frac 0.40: 664 MM desenate din 12198, 1171 suprafete | full 38/64s/184i mid 65/102s/254i far 388/680s/1396i celula 41/79s/577i bulgari 132/246s/1880i
+  CENSUS frac 0.45: 463 MM desenate din 12198, 805 suprafete | full 30/55s/93i mid 67/111s/181i far 253/435s/1009i celula 35/64s/617i bulgari 78/140s/833i
+  CENSUS frac 0.50: 432 MM desenate din 12198, 755 suprafete | full 36/59s/138i mid 31/50s/133i far 255/446s/1066i celula 25/44s/400i bulgari 85/156s/979i
+  CENSUS frac 0.55: 895 MM desenate din 12198, 1547 suprafete | full 26/42s/121i mid 20/30s/122i far 623/1066s/2151i celula 26/49s/585i bulgari 200/360s/2347i
+  CENSUS frac 0.60: 839 MM desenate din 12198, 1390 suprafete | full 32/51s/165i mid 40/63s/211i far 535/870s/1837i celula 35/63s/676i bulgari 197/343s/1714i
+  CENSUS frac 0.65: 572 MM desenate din 12198, 973 suprafete | full 48/86s/188i mid 67/108s/261i far 317/534s/951i celula 26/39s/474i bulgari 114/206s/855i
+  CENSUS frac 0.70: 481 MM desenate din 12198, 801 suprafete | full 29/43s/105i mid 59/75s/244i far 265/449s/998i celula 39/68s/257i bulgari 89/166s/779i
+  CENSUS frac 0.75: 222 MM desenate din 12198, 392 suprafete | full 32/49s/111i mid 48/68s/184i far 96/182s/440i celula 11/24s/93i bulgari 35/69s/550i
+  CENSUS frac 0.80: 857 MM desenate din 12198, 1523 suprafete | full 4/8s/8i mid 26/45s/136i far 599/1052s/2129i celula 11/23s/102i bulgari 217/395s/1646i
+  CENSUS frac 0.85: 913 MM desenate din 12198, 1584 suprafete | full 15/25s/93i mid 25/41s/149i far 649/1113s/2207i celula 11/23s/116i bulgari 213/382s/1998i
+  CENSUS frac 0.90: 486 MM desenate din 12198, 838 suprafete | full 38/63s/157i mid 81/139s/350i far 262/449s/893i celula 43/73s/285i bulgari 62/114s/339i
+  CENSUS frac 0.95: 918 MM desenate din 12198, 1619 suprafete | full 61/109s/231i mid 87/142s/317i far 571/1001s/1875i celula 42/71s/293i bulgari 157/296s/1466i
+  0.00      915     105       915      1151     1.17     1.28
+  0.05      868     199       868      1080     1.08     1.42
+  0.10      958     109       958      1075     1.36     1.17
+  0.15      855      86       855      1297     0.93     1.21
+  0.20     1031      64      1032       967     1.36     1.06
+  0.25      685      19       685       946     0.74     0.98
+  0.30      621      35       621      1115     0.75     1.10
+  0.35      501      52       501       656     0.84     0.95
+  0.40      667      64       667      1171     0.94     1.13
+  0.45      600     132       600       821     0.99     1.08
+  0.50      546     130       546       689     0.99     0.98
+  0.55      770     117       772      1118     1.17     1.18
+  0.60      896     113       896      1163     1.50     1.23
+  0.65      687     194       687       856     1.09     1.06
+  0.70      660     245       661       712     1.31     1.04
+  0.75      311      93       311       465     0.72     0.82
+  0.80      674     143       674       766     0.83     1.05
+  0.85      657      83       657       917     0.78     1.10
+  0.90      651      17       651       846     0.98     0.94
+  0.95      868      32       869      1120     0.93     1.06
+  --- desene:  medie 721, varf 1031 (umbra: medie 101)
+  --- tri:     medie 947k
+  --- cpu ms:  medie 1.02
+  --- gpu ms:  medie 1.09, mediana 1.08, varf 1.42

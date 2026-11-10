@@ -1,8 +1,9 @@
 class_name TrackSelectPanel
 extends Control
 ## "CURSA RAPIDA": grila de cartonase, cate unul per pista din
-## GameState.TRACK_SCENES. Un tap pe cartonas porneste cursa. Pe ecran intreg,
-## cu antet fix (INAPOI + titlu); doar grila deruleaza.
+## `QuickRaceTracks.indices()` — NU tot GameState.TRACK_SCENES, care tine si
+## bancurile de test ale uneltelor (#680). Un tap pe cartonas porneste cursa.
+## Pe ecran intreg, cu antet fix (INAPOI + titlu); doar grila deruleaza.
 
 signal back_pressed
 
@@ -53,7 +54,7 @@ func _ready() -> void:
 	_grid.add_theme_constant_override("v_separation", 20)
 	pad.add_child(_grid)
 
-	for i in GameState.TRACK_SCENES.size():
+	for i in QuickRaceTracks.indices():
 		var card := TrackCard.new().setup(i)
 		var track_index := i
 		card.pressed.connect(func() -> void:
@@ -91,8 +92,23 @@ static func fit_cards(grid: GridContainer, cards: Array[TrackCard], area: Vector
 ## si punctul de plecare pentru navigarea cu sageti/gamepad.
 func _on_visibility_changed() -> void:
 	if visible and not _cards.is_empty():
-		var index := clampi(GameState.selected_track, 0, _cards.size() - 1)
-		_cards[index].grab_focus.call_deferred()
+		focus_card().grab_focus.call_deferred()
+
+
+## Cartonasul pistei jucate ultima; primul cartonas daca ea nu e in grila (la
+## prima pornire `selected_track` e 0 = Dunele, banc de test). Inainte se lua
+## `selected_track` direct ca pozitie in grila, ceea ce merge doar cat grila e
+## identica cu TRACK_SCENES.
+func focus_card() -> TrackCard:
+	for card in _cards:
+		if card.track_index == GameState.selected_track:
+			return card
+	return _cards[0]
+
+
+## Cartonasele, in ordinea din grila (pentru sonde).
+func cards() -> Array[TrackCard]:
+	return _cards
 
 
 func _unhandled_input(event: InputEvent) -> void:

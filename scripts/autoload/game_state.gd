@@ -374,9 +374,13 @@ func load_trace(step: String) -> void:
 	if f == null:
 		return
 	f.seek_end()
-	f.store_line("%6.1f s  %s  (mem %d MB)" % [
+	# `get_static_memory_usage` da 0 in build-ul de release (telefon); memoria
+	# video si memoria libera a sistemului merg si in release.
+	var info := OS.get_memory_info()
+	f.store_line("%6.1f s  %s  (vram %d MB, free %d MB)" % [
 		(Time.get_ticks_msec() - _load_trace_t0) / 1000.0, step,
-		OS.get_static_memory_usage() / 1048576])
+		int(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED)) / 1048576,
+		int(info.get("available", -1)) / 1048576])
 	f.close()
 
 
@@ -397,12 +401,13 @@ func _read_last_load_trace() -> void:
 	var text := FileAccess.get_file_as_string(LOAD_TRACE_PATH).strip_edges()
 	if text == "" or text.ends_with(LOAD_TRACE_DONE):
 		return
-	# Antetul + ultimele pasi: destul ca sa vezi unde a murit, fara sa umple ecranul.
+	# Toata urma (panoul deruleaza): ultimele 8 linii nu aratau unde erau
+	# celelalte constructii cand a murit padurea.
 	var lines := text.split("\n")
 	var keep: PackedStringArray = [lines[0]]
-	if lines.size() > 9:
+	if lines.size() > 61:
 		keep.append("…")
-	for i in range(maxi(1, lines.size() - 8), lines.size()):
+	for i in range(maxi(1, lines.size() - 60), lines.size()):
 		keep.append(lines[i])
 	last_load_trace = "\n".join(keep)
 

@@ -142,6 +142,10 @@ func end_phase(phase: StringName) -> void:
 func finish() -> void:
 	for i in WARMUP_FRAMES:
 		GameState.load_trace("warm-up frame %d" % i)
+		# Si cand cadrul chiar s-a desenat: deosebeste un crash in constructie
+		# (CPU) de unul in randarea primului cadru cu padurea (GPU).
+		RenderingServer.frame_post_draw.connect(
+			GameState.load_trace.bind("warm-up frame %d drawn" % i), CONNECT_ONE_SHOT)
 		await get_tree().process_frame
 	end_phase(&"incalzire")
 	_save_measurements()

@@ -65,6 +65,7 @@ func _ready() -> void:
 	_check_ids()
 	_check_settings_migration()
 	_check_records_migration()
+	_check_backup_keeps_original()
 	_check_dormant()
 	_check_broken_files()
 	_check_newer_version()
@@ -330,6 +331,53 @@ func _check_records_migration() -> void:
 	_expect(int(cfg2.get_value("legacy_records", "Stramtoarea", 0)) == 38888,
 		"save_records a pierdut legacy_records")
 	_rm(bak)
+
+
+# ------------------------- C2. prima copie nu se pierde niciodata
+
+## Scenariul de pe masina dezvoltatorului: v0 bogat -> migrare; un build vechi
+## (worktree fara #690) citeste 0 recorduri din v1 si rescrie fisierul ca v0
+## cu un singur record; codul nou il migreaza din nou. Prima copie trebuie sa
+## fie tot originalul bogat, byte cu byte; copiile raman doua, oricate runde.
+func _check_backup_keeps_original() -> void:
+	print("=== C2. PRIMA COPIE RAMANE ORIGINALUL ===")
+	for kind in ["records", "settings"]:
+		var path: String = GameState.records_path if kind == "records" 			else GameState.settings_path
+		var bak := path + ".bak-v0"
+		var last := bak + ".last"
+		_rm(bak)
+		_rm(last)
+		var rich := _v0_records() if kind == "records" else _v0_settings(3, 2)
+		var poor := ["[records]
+
+Dunele=99999
+", "[records]
+
+Kyoto=88888
+"] 			if kind == "records" else [_v0_settings(0, 0), _v0_settings(1, 1)]
+		_write(path, rich)
+		_load(kind)
+		_expect(_bytes(bak) == rich.to_utf8_buffer(), "%s: prima copie nu e originalul" % kind)
+		for r in poor.size():
+			_write(path, poor[r]) # build-ul vechi a rescris un v0 sarac
+			_load(kind)
+			_expect(_bytes(bak) == rich.to_utf8_buffer(),
+				"%s runda %d: migrarea v0-ului sarac a calcat prima copie" % [kind, r + 1])
+			_expect(_bytes(last) == poor[r].to_utf8_buffer(),
+				"%s runda %d: .last nu tine ultimul v0 migrat" % [kind, r + 1])
+			_expect(_backups(path) == 2, "%s runda %d: %d copii, nu 2"
+				% [kind, r + 1, _backups(path)])
+		_expect(int(_cfg(path).get_value("meta", "version", 0)) == SaveSchema.current_version(
+			StringName(kind)), "%s: v0-ul sarac nu a fost migrat" % kind)
+		_rm(bak)
+		_rm(last)
+
+
+func _load(kind: String) -> void:
+	if kind == "records":
+		GameState.load_records()
+	else:
+		GameState.load_settings()
 
 
 # --------------------------------------------------- D. id-uri dormante

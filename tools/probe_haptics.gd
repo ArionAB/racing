@@ -189,7 +189,7 @@ func _part_d() -> int:
 	GameState.haptics_enabled = false
 	GameState.load_settings()
 	_check(GameState.haptics_enabled, "fisier fara cheie => implicit pornita")
-	for f in [path, path + ".bak-v0"]:
+	for f in [path, path + ".bak-v0", path + ".bak-v0.last"]:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(f))
 	GameState.settings_path = real_path
 	GameState.load_settings()

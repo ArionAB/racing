@@ -10,9 +10,15 @@ extends RefCounted
 ##
 ## Fiecare fisier are `[meta] version=N`. Un fisier fara cheie e v0 (formatul
 ## de dinainte de #690). La incarcare (`open`):
-##   - v0 -> se face INTAI o copie neatinsa (`<fisier>.bak-v0`), apoi se
-##     traduce (index -> id, nume -> id) si se rescrie cu versiunea curenta.
-##     A doua rulare gaseste versiunea curenta si nu mai scrie nimic.
+##   - v0 -> se face INTAI o copie neatinsa, apoi se traduce (index -> id,
+##     nume -> id) si se rescrie cu versiunea curenta. A doua rulare gaseste
+##     versiunea curenta si nu mai scrie nimic.
+##     Copiile, cel mult DOUA per versiune de plecare:
+##       `<fisier>.bak-v0`       PRIMA migrare de la v0 — nu se mai scrie NICIODATA
+##       `<fisier>.bak-v0.last`  orice migrare ulterioara de la v0 — se suprascrie
+##     De ce: un build vechi (worktree fara #690) citeste 0 recorduri din v1 si,
+##     la primul record nou, rescrie fisierul ca v0 cu un singur record. Migrarea
+##     acelui v0 sarac nu are voie sa calce copia cu recordurile adevarate.
 ##   - versiune MAI MARE decat stim (un build mai nou a scris-o) -> nu se
 ##     incarca si nu se suprascrie: aceeasi regula ca `career.cfg`.
 ##   - fisier care nu se parseaza -> copie in `<fisier>.corrupt`, jocul porneste
@@ -38,10 +44,13 @@ const SETTINGS_VERSION := 1
 const RECORDS_VERSION := 1
 const META_SECTION := "meta"
 const VERSION_KEY := "version"
-## Copia fisierului dinaintea migrarii de la versiunea %d. Se SUPRASCRIE la o
-## noua migrare de la aceeasi versiune: ea pastreaza exact fisierul migrat
-## ultima oara (un build vechi pornit intre timp poate rescrie un v0 proaspat).
+## Copia fisierului dinaintea PRIMEI migrari de la versiunea %d. Odata scrisa,
+## nu se mai atinge: e originalul, oricate migrari ar urma.
 const BACKUP_SUFFIX := ".bak-v%d"
+## Copia dinaintea unei migrari ULTERIOARE de la aceeasi versiune (adaugat dupa
+## BACKUP_SUFFIX). Se suprascrie: tine doar ultimul fisier migrat, ca numarul de
+## copii sa ramana doua.
+const BACKUP_LAST_SUFFIX := ".last"
 const CORRUPT_SUFFIX := ".corrupt"
 
 ## Recordurile v0 sub un nume care nu mai e in nicio tabela (piste sterse
@@ -140,7 +149,7 @@ static func open(path: String, kind: StringName, cfg: ConfigFile) -> Status:
 	if version == current:
 		return Status.CURRENT
 	# Copia INAINTE de orice schimbare: o migrare gresita nu distruge nimic.
-	if not _copy(path, path + BACKUP_SUFFIX % version):
+	if not _copy(path, backup_path(path, version)):
 		push_warning("SaveSchema: nu pot face copia lui %s; migrez doar in memorie" % path)
 		migrate(cfg, kind)
 		return Status.READ_ONLY
@@ -149,6 +158,13 @@ static func open(path: String, kind: StringName, cfg: ConfigFile) -> Status:
 		push_warning("SaveSchema: nu pot rescrie %s dupa migrare" % path)
 		return Status.READ_ONLY
 	return Status.MIGRATED
+
+
+## Unde merge copia dinaintea migrarii de la `version`: prima copie daca nu
+## exista inca, altfel `.last` (prima nu se suprascrie niciodata).
+static func backup_path(path: String, version: int) -> String:
+	var first := path + BACKUP_SUFFIX % version
+	return first + BACKUP_LAST_SUFFIX if FileAccess.file_exists(first) else first
 
 
 static func current_version(kind: StringName) -> int:

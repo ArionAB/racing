@@ -43,7 +43,7 @@ extends Node
 ## Sabotaje (`--sabotaj=`), fiecare trebuie sa pice contractul lui:
 ##   viteza   +10% `max_speed` pe toate masinile dupa GO (un nivel „trisat")
 ##   ordine   Bronz primeste profilul de Aur
-##   repuneri Bronz intra in viraje aproape fara sa franeze
+##   repuneri Bronz nu mai vede virajele (nu franeaza, tinteste exteriorul)
 
 const RACE_SCENE: String = "res://scenes/race/Race.tscn"
 const SKILL_SCRIPT: String = "res://scenes/cars/ai_skill/ai_skill.gd"
@@ -56,8 +56,12 @@ const LEVELS: Array[String] = ["bronz", "argint", "aur"]
 ## profilul implicit — vezi raportul de sondaj din PR.
 const SPEED_SLACK: float = 1.06
 ## Cat din timp (fractie din esantioane) are voie o masina sa stea peste plafon
-## * SPEED_SLACK (coborari lungi, aterizari).
-const SPEED_OVER_MAX: float = 0.01
+## * SPEED_SLACK (coborari lungi, aterizari). Masurat pe 240 de curse (3 piste x
+## 16 seed-uri x 5 profiluri, nov 2026): maximum 1,1% (referinta, Monument
+## Valley seed 12; implicitul pana la 0,7%), cu fizica masinii neatinsa. Sabotajul
+## de +10% pe `max_speed` da 4,3%, deci pragul de 2% il prinde cu marja; garda
+## principala ramane oricum egalitatea exacta a parametrilor masinii.
+const SPEED_OVER_MAX: float = 0.02
 ## Repuneri: Bronz are voie la atatea ori repunerile implicitului pe aceeasi
 ## pista, plus o repunere pe seed (zgomotul de pe pistele cu caderi).
 const RESPAWN_FACTOR: float = 1.5
@@ -247,9 +251,17 @@ func _skill_for_run(level: int, cars: Array[Car]) -> Resource:
 	if _sabotage == "ordine" and _skill_name == "bronz":
 		skill = load(SKILL_DIR + "aur.tres")
 	elif _sabotage == "repuneri" and _skill_name == "bronz":
+		# Un pilot STRICAT, nu unul prudent: nu vede virajele (nu franeaza
+		# deloc), tinteste exteriorul si greseste la fiecare al doilea viraj.
+		# Prima varianta (doar podeaua 0.8) nu misca repunerile — Bronz isi
+		# tine oricum viteza jos pe drept; asta da 20 de repuneri pe o cursa
+		# pe Kyoto si 8 pe Monument Valley (implicit: 3).
 		skill = skill.duplicate()
-		skill.set("corner_speed_floor", 0.8)
-		skill.set("corner_soft", 0.6)
+		skill.set("corner_speed_floor", 1.0)
+		skill.set("corner_soft", 1.0)
+		skill.set("inside_bias", -0.8)
+		skill.set("straight_speed", 1.0)
+		skill.set("mistake_chance", 0.6)
 	return skill
 
 

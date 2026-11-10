@@ -52,7 +52,7 @@ for a in "$@"; do
 		--fresh) FRESH=1 ;;
 		--short)
 			TRACKS="12"; SEEDS="1 2 3"; SKILLS="referinta implicit bronz argint aur"
-			FRESH=1 ;;
+			JOBS=5; FRESH=1 ;;
 		*) echo "argument necunoscut: $a"; exit 2 ;;
 	esac
 done

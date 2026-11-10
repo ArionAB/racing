@@ -249,6 +249,23 @@ run_step "Transfagarasan: oi si urs (hazarde animale)" tf_hazards.log 'VERDICT:'
 # Conurile din tunel (road_works) se imprastie, nu sunt zid (#602).
 run_step "Transfagarasan: conurile din tunel se imprastie" tf_cones.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeBumpProps.tscn -- --track=21
 
+# Nivelurile AI (#682), partea scumpa, varianta scurta: o pista de drepte
+# (Monument Valley) x 3 seed-uri x 5 profiluri = 15 curse reale, 5 in paralel
+# (~5 min). Ordinea Bronz > Argint > Aur, fizica masinii neatinsa, repunerile
+# lui Bronz sub plafon. Matricea lunga (3 piste x 16 seed-uri, ~75 min) e
+# unealta: bash tools/ai_skill_gap.sh.
+printf '%-58s ' "Niveluri AI: ecartul pe tur (Monument Valley, 3 seed-uri)"
+t0=$SECONDS
+AISKILL_DIR="$LOGS/ai_skill_gap" bash tools/ai_skill_gap.sh --short > "$LOGS/ai_skill_gap.log" 2>&1
+gap_status=$?
+if [ $gap_status -eq 0 ]; then
+	echo "OK   ($((SECONDS - t0))s)"
+	PASSED+=("Niveluri AI: ecartul pe tur")
+else
+	echo "PICA ($((SECONDS - t0))s) — vezi $LOGS/ai_skill_gap.log"
+	FAILED+=("Niveluri AI: ecartul pe tur")
+fi
+
 echo
 if [ ${#FAILED[@]} -eq 0 ]; then
 	echo "VERIFICARE LOCALA: OK (${#PASSED[@]} pasi). Log-uri in $LOGS"

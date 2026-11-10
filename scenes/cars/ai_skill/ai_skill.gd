@@ -56,6 +56,12 @@ extends Resource
 ## departe si iese curat pe langa; sub 1 = observa tarziu si sta mai mult in
 ## spatele ei. Nu schimba nicio viteza, doar culoarul.
 @export_range(0.3, 2.0, 0.05) var overtake_reach: float = 1.0
+## Cedeaza la ORICE animal care traverseaza (ridica piciorul si trece pe langa,
+## ca la ursul de pe Transfagarasan), nu doar la cele care o cer
+## (`SlidingHazard.ai_yields`). Pilotul care nu tine talpa pe podea sta mai mult
+## in fereastra de traversare: fara asta, Bronz lua caii din Monument Valley de
+## doua ori mai des si iesea la repunere (masurat, frac 0.16 si 0.77).
+@export var yields_to_animals: bool = false
 ## Sansa, la intrarea intr-un viraj, sa faca o greseala VIZIBILA: ori franeaza
 ## tarziu (intra fierbinte, franeaza in viraj si iese larg), ori rateaza linia
 ## (intra pe exterior). Onest: e condus prost, fizica e aceeasi. 0 = nu greseste.

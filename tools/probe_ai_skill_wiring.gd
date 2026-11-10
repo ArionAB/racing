@@ -25,13 +25,14 @@ const IMPLICIT_EXPECTED := {
 	"corner_speed_floor": 0.44, "corner_soft": 0.25, "straight_speed": 1.0, "inside_bias": 0.55,
 	"drift_severity": 0.34, "turbo_min_charge": 0.6, "turbo_corner_cut": 0.25,
 	"rocket_start_chance": 0.45, "shortcut_chance": 0.4, "overtake_reach": 1.0,
-	"mistake_chance": 0.0,
+	"mistake_chance": 0.0, "yields_to_animals": 0.0,
 }
 ## Sensul in care un camp face pilotul MAI BUN (+1 = mai mare e mai rapid).
 const FASTER_SIGN := {
 	"corner_speed_floor": 1.0, "corner_soft": 1.0, "straight_speed": 1.0, "inside_bias": 1.0,
 	"drift_severity": -1.0, "turbo_min_charge": -1.0, "turbo_corner_cut": -1.0,
 	"rocket_start_chance": 1.0, "overtake_reach": 1.0, "mistake_chance": -1.0,
+	"yields_to_animals": -1.0,
 }
 const RACE_SCENE: String = "res://scenes/race/Race.tscn"
 ## Pista usoara pentru fir: Dunele (index 0) se construieste repede.

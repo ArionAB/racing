@@ -18413,6 +18413,17 @@ func _clamp_respawn_past_gap(index: int, backoff_m: float) -> int:
 		return posmod(far + clear, n)
 	return -1
 
+## Indicii (pe bucla) ai buzei de decolare a fiecarei sarituri peste canal.
+## Ii citeste pilotul AI care nu tine talpa pe podea (`AiSkill.straight_speed`):
+## la o saritura apasa tot, ca un om — altfel nu trece golul si ajunge la
+## repunere (masurat pe Monument Valley, albia G2: Bronz 7 din 10 repuneri acolo).
+func jump_takeoff_indices() -> Array[int]:
+	var out: Array[int] = []
+	for ch: Dictionary in _channels:
+		if bool(ch.get("jump", false)) and not bool(ch.get("ford", false)):
+			out.append(int(ch["near"]))
+	return out
+
 ## E indexul (pe bucla) in elanul unei sarituri care cere AI-ului sa nu
 ## traverseze pe langa vecin? Vezi [member TrackChannel.ai_keep_side_run_m].
 ## Fals pe orice pista fara canal care declara elanul (toate, in afara de

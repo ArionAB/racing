@@ -747,8 +747,11 @@ func update(delta: float) -> void:
 		_throttle = 1.0
 	# Cat de tare apasa pe drept (`AiSkill.straight_speed`): peste o parte din
 	# viteza de varf a masinii lui, ridica piciorul. Nu pe turbo (fara gaz,
-	# turbo-ul nu impinge) si nu pe profilul implicit (1.0).
-	if skill.straight_speed < 1.0 and _throttle > 0.0 and not car.is_boosting 			and speed > car.max_speed * car.speed_scale * skill.straight_speed:
+	# turbo-ul nu impinge) si nu pe profilul implicit (1.0). Nici in elanul unei
+	# sarituri: acolo apasa tot, ca sa treaca golul (vezi `_jump_run_up`).
+	if skill.straight_speed < 1.0 and _throttle > 0.0 and not car.is_boosting \
+			and speed > car.max_speed * car.speed_scale * skill.straight_speed \
+			and not _jump_run_up(idx):
 		_throttle = 0.0
 	# Oprit in fata usii: nici gaz, nici marsarier. Fara ramura asta, tinta
 	# zero ar da `_throttle = -0.15` la nesfarsit si masina ar da inapoi pana
@@ -1796,7 +1799,10 @@ func _door_closed_ahead(speed: float) -> float:
 func _crossing_ahead(speed: float) -> float:
 	if car.route != 0:
 		return INF
-	var list := get_tree().get_nodes_in_group(SlidingHazard.CROSSING_GROUP)
+	# Pilotul prudent (`AiSkill.yields_to_animals`) cedeaza la ORICE animal care
+	# traverseaza, nu doar la cele care o cer.
+	var list := get_tree().get_nodes_in_group(SlidingHazard.TRAVERSE_GROUP
+		if skill.yields_to_animals else SlidingHazard.CROSSING_GROUP)
 	if list.is_empty():
 		return INF
 	var n_pts: int = track.route_at(0).count()
@@ -2165,6 +2171,29 @@ func _inside_bias() -> float:
 	if _mistake_kind == 2:
 		return skill.inside_bias * MISTAKE_WIDE_BIAS
 	return skill.inside_bias
+
+## Cati metri inainte de buza unei sarituri apasa tot pilotul care altfel nu
+## tine talpa pe podea. 150 m la ~28 m/s = 5 s: destul cat sa ajunga la viteza
+## de varf chiar si dupa virajul dinaintea elanului.
+const JUMP_RUN_UP_M: float = 150.0
+## Buzele de decolare ale pistei (`Track.jump_takeoff_indices`), citite o data.
+var _jump_takeoffs: Array[int] = []
+var _jump_takeoffs_read: bool = false
+
+## E masina (pe bucla principala) in elanul unei sarituri peste canal?
+func _jump_run_up(idx: int) -> bool:
+	if not _jump_takeoffs_read:
+		_jump_takeoffs_read = true
+		_jump_takeoffs = track.jump_takeoff_indices()
+	if _jump_takeoffs.is_empty() or car.route != 0:
+		return false
+	var n := track.baked.size()
+	var bake: float = track.curve.bake_interval
+	for near in _jump_takeoffs:
+		var before := posmod(near - idx, n)
+		if float(before) * bake <= JUMP_RUN_UP_M:
+			return true
+	return false
 
 ## Sansa de rocket start a pilotului de pe masina asta (`Race._go`). Masinile
 ## fara creier AI (jucatorul) au sansa implicita — dar Race nu le-o cere.

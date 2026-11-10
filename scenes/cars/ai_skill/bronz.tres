@@ -4,13 +4,15 @@
 
 [resource]
 script = ExtResource("1")
-corner_speed_floor = 0.36
+corner_speed_floor = 0.34
 corner_soft = 0.18
-inside_bias = 0.3
-drift_severity = 0.5
+straight_speed = 0.86
+inside_bias = 0.4
+drift_severity = 0.45
 turbo_min_charge = 0.95
 turbo_corner_cut = 0.9
 rocket_start_chance = 0.1
 shortcut_chance = 0.15
 overtake_reach = 0.6
 mistake_chance = 0.25
+yields_to_animals = true

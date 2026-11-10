@@ -4,10 +4,8 @@
 
 [resource]
 script = ExtResource("1")
-corner_speed_floor = 0.52
-corner_soft = 0.32
-inside_bias = 0.7
-drift_severity = 0.25
-turbo_min_charge = 0.3
+inside_bias = 0.8
+drift_severity = 0.18
+turbo_min_charge = 0.4
 rocket_start_chance = 1.0
 overtake_reach = 1.3

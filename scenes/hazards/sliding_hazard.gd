@@ -92,6 +92,10 @@ const DOOR_GROUP: StringName = &"door_hazards"
 ## animal la 40 m/s (masurat: 3 ejectari din 3 curse la ursul de la 0.199) — un
 ## AI care nu vede ce vede jucatorul nu e „AI onest".
 const CROSSING_GROUP: StringName = &"crossing_hazards"
+## TOATE traversarile (si cele fara `ai_yields`, ca caii din Monument Valley):
+## le citeste doar pilotul prudent (`AiSkill.yields_to_animals`, Bronz/Argint),
+## care ridica piciorul la orice animal de pe asfalt. AI-ul implicit nu-l citeste.
+const TRAVERSE_GROUP: StringName = &"traverse_hazards"
 ## Banda lasata libera langa perete. 0 = fara limitare (cursa exact cat cere
 ## pista). Exista pentru piste inguste, unde maturarea pana in perete ar lasa
 ## banda plina fara iesire.
@@ -262,6 +266,8 @@ func _configure() -> void:
 		add_to_group(DOOR_GROUP)
 	if motion == Motion.TRAVERSARE and ai_yields and not is_in_group(CROSSING_GROUP):
 		add_to_group(CROSSING_GROUP)
+	if motion == Motion.TRAVERSARE and not is_in_group(TRAVERSE_GROUP):
+		add_to_group(TRAVERSE_GROUP)
 	# Pozitia de start a defazajului, nu centrul: altfel primul cadru "vede" o
 	# deplasare de toata amplitudinea si roteste mingea brusc.
 	_last_pos = _pos_at(_offset_now())

@@ -49,12 +49,23 @@ const REDUCED_SCALE: float = 0.4
 @export var thunder_delay: Vector2 = Vector2(0.4, 2.0)
 ## Sunetul tunetului (optional; fara el se emite doar semnalul).
 @export var thunder_stream: AudioStream = null
+## Varianta cu pocnet, pentru fulgerul APROPIAT (intarziere sub `close_delay`).
+## Fara ea, orice tunet foloseste `thunder_stream`.
+@export var thunder_close_stream: AudioStream = null
+## Sub cate secunde de intarziere un fulger conteaza „aproape" (lumina si sunetul
+## aproape deodata). Din intervalul 0,4-2,0 s al lui `thunder_delay` iese ~1/4 din tunete.
+@export var close_delay: float = 0.8
+## Volumul tunetului (dB) la taria 1; se scade cu taria fulgerului. Tunetul e un
+## strat de fundal: sub motor si sub ghionturi.
+@export var thunder_db: float = 0.0
 ## Sare in seed, ca doua piste cu acelasi RainCycle sa nu aiba aceleasi fulgere.
 @export var seed_salt: int = 24
 
 ## Pentru sonde: momentele fulgerelor (s de la pornire) si albirea maxima atinsa.
 var flash_log: PackedFloat64Array = PackedFloat64Array()
 var max_overlay_alpha: float = 0.0
+## Pentru sonde: streamul fiecarui tunet redat (in ordine).
+var play_log: Array[AudioStream] = []
 
 var _rain: RainCycle = null
 var _env: Environment = null
@@ -63,7 +74,7 @@ var _time: float = 0.0
 var _shower: int = 0
 var _plan: PackedFloat64Array = PackedFloat64Array()   # momente absolute planificate
 var _strength: PackedFloat64Array = PackedFloat64Array()
-var _thunders: Array = []                               # [moment, tarie]
+var _thunders: Array = []                               # [moment, tarie, apropiat]
 var _last_flash: float = -1e9
 var _last_strength: float = 0.0
 var _layer: CanvasLayer = null
@@ -159,11 +170,15 @@ func _process(delta: float) -> void:
 	while i < _thunders.size():
 		if float(_thunders[i][0]) <= _time:
 			var ts := float(_thunders[i][1])
+			var close := bool(_thunders[i][2])
 			_thunders.remove_at(i)
 			thunder.emit(ts)
 			if _player != null:
-				_player.volume_db = linear_to_db(clampf(ts, 0.05, 1.0))
+				_player.stream = (thunder_close_stream if close and thunder_close_stream != null
+					else thunder_stream)
+				_player.volume_db = thunder_db + linear_to_db(clampf(ts, 0.05, 1.0))
 				_player.play()
+				play_log.append(_player.stream)
 		else:
 			i += 1
 	_apply(_intensity())
@@ -176,7 +191,8 @@ func _fire(strength: float) -> void:
 	flashed.emit(strength)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(Vector2i(seed_salt * 7 + _shower, flash_log.size()))
-	_thunders.append([_time + rng.randf_range(thunder_delay.x, thunder_delay.y), strength])
+	var delay := rng.randf_range(thunder_delay.x, thunder_delay.y)
+	_thunders.append([_time + delay, strength, delay < close_delay])
 
 
 ## Taria curenta a fulgerului (0..1): platou scurt, apoi stingere patratica. In modul redus,

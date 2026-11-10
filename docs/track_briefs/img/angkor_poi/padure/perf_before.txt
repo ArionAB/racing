@@ -1,0 +1,45 @@
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+Vulkan 1.4.329 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 3070
+ProbePerf: pista Angkor (Track24)
+Angkor: 5/12 siluete de orizont (1 cu degajare relaxata)
+WARNING: Angkor: 7 siluete de orizont n-au incaput (degajare fata de sosea)
+   at: push_warning (core/variant/variant_utility.cpp:1033)
+   GDScript backtrace (most recent call first):
+       [0] _build_horizon (res://scenes/tracks/track.gd:6834)
+       [1] _build_environment (res://scenes/tracks/track.gd:6459)
+       [2] rebuild (res://scenes/tracks/track.gd:5892)
+       [3] _ready (res://scenes/tracks/track.gd:5755)
+       [4] _ready (res://scenes/tracks/track_from_path.gd:323)
+       [5] _ready (res://tools/probe_perf.gd:144)
+MeshForest PadureMasa: 12214 instante, 3499 felii, 2238 MultiMesh de celule, 16068272 triunghiuri totale, 2232 ms { "prepare": 12, "species": 320, "fill": 1703, "emit": 197 } | specii { "tropical_shrub": 2859, "fern_cluster": 2699, "tetrameles_a": 417, "dipterocarp": 2951, "tetrameles_b": 390, "strangler_fig": 50, "sugar_palm": 1186, "bamboo_clump": 1662 } | LOD tri/instanta (intreg, mediu, grosier, bulgari) { "tetrameles_a": [2348, 1214, 754, 754], "tetrameles_b": [2084, 1202, 450, 450], "dipterocarp": [1808, 562, 94, 94], "strangler_fig": [20226, 5474, 584, 584], "sugar_palm": [2330, 2330, 1502, 1502], "fern_cluster": [784, 392, 60, 60], "tropical_shrub": [896, 448, 28, 28], "bamboo_clump": [294, 114, 26, 26] } | zone { "templul-munte Bakheng nord": 0, "templul-munte Bakheng sud": 0, "templul-munte Bakheng sus": 0, "vedere Bakheng urcare 1": 0, "vedere Bakheng urcare 2": 0, "vedere Bakheng bucla 1": 0, "vedere Bakheng bucla 2": 0, "curtea Phimeanakas": 0, "curtea Phimeanakas subarboret": 0, "Ta Prohm incinta 0": 68, "Ta Prohm incinta 1": 32, "Ta Prohm incinta 2": 9, "Ta Prohm incinta 3": 2, "Ta Prohm incinta 4": 72, "Ta Prohm incinta 5": 36, "incinta Angkor Wat": 0, "platforma Bakheng": 0, "piata regala 1": 0, "piata regala 2": 0, "piata regala 3": 0, "piata regala 4": 0, "terasa Bayon 1": 0, "terasa Bayon 2": 0, "terasa Bayon 3": 0, "coronament aproape 0.000": 64, "coronament aproape 0.070": 9, "coronament aproape 0.088": 33, "coronament aproape 0.122": 256, "coronament aproape 0.308": 58, "coronament aproape 0.372": 529, "coronament aproape 0.758": 137, "coronament aproape 0.905": 162, "coronament mediu 0.000": 54, "coronament mediu 0.070": 33, "coronament mediu 0.088": 49, "coronament mediu 0.122": 328, "coronament mediu 0.308": 62, "coronament mediu 0.372": 806, "coronament mediu 0.758": 259, "coronament mediu 0.905": 199, "coronament departe 0.000": 38, "coronament departe 0.070": 16, "coronament departe 0.088": 17, "coronament departe 0.122": 139, "coronament departe 0.308": 15, "coronament departe 0.372": 328, "coronament departe 0.758": 102, "coronament departe 0.905": 115, "etaj mijloc 0.000": 44, "etaj mijloc 0.070": 6, "etaj mijloc 0.088": 32, "etaj mijloc 0.122": 217, "etaj mijloc 0.308": 45, "etaj mijloc 0.372": 455, "etaj mijloc 0.758": 116, "etaj mijloc 0.905": 146, "ciorchine 1": 6, "ciorchine 6": 21, "ciorchine 9": 1, "ciorchine 12": 0, "ciorchine 14": 0, "ciorchine 16": 9, "ciorchine 17": 2, "ciorchine 19": 16, "ciorchine 20": 6, "ciorchine 24": 15, "ciorchine 25": 13, "ciorchine 27": 0, "ciorchine 28": 15, "ciorchine 29": 18, "ciorchine 30": 22, "ciorchine 31": 0, "ciorchine 32": 9, "ciorchine 34": 0, "ciorchine 35": 19, "ciorchine 36": 0, "ciorchine 37": 11, "ciorchine 40": 1, "ciorchine 41": 10, "ciorchine 43": 16, "ciorchine 44": 23, "ciorchine 45": 26, "ciorchine 46": 12, "ciorchine 49": 5, "ciorchine 50": 20, "ciorchine 51": 2, "ciorchine 52": 0, "ciorchine 53": 30, "ciorchine 54": 14, "ciorchine 55": 0, "ciorchine 56": 15, "ciorchine 57": 9, "ciorchine 58": 27, "ciorchine 59": 25, "ciorchine 60": 2, "ciorchine 61": 16, "ciorchine 62": 31, "ciorchine 63": 23, "ciorchine 64": 0, "ciorchine 66": 13, "ciorchine 67": 5, "ciorchine 68": 1, "ciorchine 70": 5, "ciorchine 72": 0, "ciorchine 73": 7, "ciorchine 77": 15, "ciorchine 78": 9, "ciorchine 79": 13, "ciorchine 80": 14, "ciorchine 81": 10, "ciorchine 82": 6, "ciorchine 83": 10, "ciorchine 85": 15, "ciorchine 90": 13, "ciorchine 91": 18, "ciorchine 93": 9, "ciorchine 96": 0, "ciorchine 97": 6, "ciorchine 98": 0, "ciorchine 99": 19, "ciorchine 101": 0, "ciorchine 102": 8, "ciorchine 103": 21, "ciorchine 107": 5, "ciorchine 108": 15, "ciorchine 109": 26, "ciorchine 111": 20, "ciorchine 112": 18, "ciorchine 114": 29, "ciorchine 115": 9, "ciorchine 116": 20, "ciorchine 119": 15, "ciorchine 121": 10, "ciorchine 122": 7, "ciorchine 123": 10, "ciorchine 124": 10, "ciorchine 125": 23, "ciorchine 129": 7, "ciorchine 130": 16, "ciorchine 131": 1, "ciorchine 132": 3, "ciorchine 133": 7, "ciorchine 134": 0, "ciorchine 135": 31, "ciorchine 136": 22, "ciorchine 137": 7, "ciorchine 138": 0, "ciorchine 139": 20, "ciorchine 140": 0, "ciorchine 141": 7, "ciorchine 142": 9, "ciorchine 143": 22, "ciorchine 146": 3, "ciorchine 147": 0, "ciorchine 153": 14, "ciorchine 154": 23, "ciorchine 157": 11, "ciorchine 158": 20, "ciorchine 160": 9, "ciorchine 161": 14, "ciorchine 162": 16, "ciorchine 163": 7, "ciorchine 164": 13, "ciorchine 165": 18, "ciorchine 167": 0, "ciorchine 171": 0, "ciorchine 172": 0, "ciorchine 173": 8, "ciorchine 175": 2, "ciorchine 176": 34, "ciorchine 179": 7, "ciorchine 182": 9, "ciorchine 183": 15, "ciorchine 185": 1, "ciorchine 187": 9, "ciorchine 189": 9, "ciorchine 191": 16, "ciorchine 192": 1, "ciorchine 195": 11, "ciorchine 196": 0, "ciorchine 197": 21, "ciorchine 198": 12, "ciorchine 199": 0, "ciorchine 201": 9, "ciorchine 202": 0, "ciorchine 203": 12, "ciorchine 205": 16, "ciorchine 206": 7, "ciorchine 207": 0, "ciorchine 208": 4, "ciorchine 209": 0, "ciorchine 211": 2, "ciorchine 215": 9, "ciorchine 218": 17, "ciorchine 219": 14, "ciorchine 220": 11, "ciorchine 221": 16, "ciorchine 222": 17, "ciorchine 225": 0, "ciorchine 226": 11, "ciorchine 227": 9, "ciorchine 229": 4, "subarboret margine 0.000": 277, "subarboret margine 0.070": 29, "subarboret margine 0.088": 141, "subarboret margine 0.122": 1208, "subarboret margine 0.308": 254, "subarboret margine 0.372": 2270, "subarboret margine 0.758": 626, "subarboret margine 0.905": 784 } | respinse { "pe_drum": 2235, "revendicat": 4700, "ocupat": 3304, "sub_drum": 2890, "zidul_lumii": 270 }
+DecorManual coacere: 2504 noduri de mesh -> 328 buffere (2504 instante), 801 noduri triplanare unificate, 76 ms
+=== PERF: Angkor | 1280x720 x0.75 | msaa 4x | umbre da (2048) | glow da | lod 4px | 20 puncte x 6 cadre ===
+  frac   desene   umbra   obiecte    tri(k)   cpu ms   gpu ms
+  0.00      915     105       915      1151     0.91     1.30
+  0.05      868     199       868      1080     0.96     1.50
+  0.10      958     109       958      1075     1.00     1.31
+  0.15      855      86       855      1297     0.86     1.33
+  0.20     1031      64      1032       967     0.92     1.05
+  0.25      685      19       685       946     0.69     0.97
+  0.30      621      35       621      1115     0.66     1.09
+  0.35      501      52       501       656     0.58     0.95
+  0.40      667      66       667      1171     0.72     1.12
+  0.45      600     132       600       821     0.71     1.08
+  0.50      546     130       546       689     0.70     0.97
+  0.55      770     117       772      1118     0.81     1.17
+  0.60      896     113       896      1163     0.90     1.21
+  0.65      687     194       687       856     0.78     1.05
+  0.70      660     245       661       712     0.78     1.04
+  0.75      311      93       311       465     0.47     0.82
+  0.80      674     143       674       766     0.70     1.04
+  0.85      657      83       657       917     0.67     1.09
+  0.90      651      17       651       846     0.62     0.94
+  0.95      868      32       869      1120     0.83     1.06
+  --- desene:  medie 721, varf 1031 (umbra: medie 101)
+  --- tri:     medie 947k
+  --- cpu ms:  medie 0.76
+  --- gpu ms:  medie 1.10, mediana 1.08, varf 1.50
+=== ATRIBUIRE (baza: tri medie 947k, varf 1297k, desene medie 721) ===
+  grup                   noduri  tri med tri varf   desene   punctul cel mai greu al grupului
+  PadureMasa                  1     749k    1008k      588   -1131k la 0.15
+  --hide                      0       0k       0k        0   -0k la 0.00

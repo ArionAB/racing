@@ -562,6 +562,7 @@ MOAT_W_OUT = 200.0      # malul de vest al bratului de V
 # galeriile, cu gopura pe dreapta (x -103..-92), inaintea arcului.
 MOAT_IN_W = 104.0
 GOPURA_X = -97.5
+GOPURA_N_Y = 68.0        # gopura de nord (B): peste calea de nord, imediat dupa capatul galeriei (y 62), inaintea santului
 TREE_GATE_S = 26.0      # poarta-copac pe ramura. 14 m: ramura inca se racorda la bucla (ProbeLaneClear pe banda
                         # -1,5). 22 m: aripa de est la ~4 m de virajul buclei (ProbeRace val 1: 1 ejectare + 1 blocaj
                         # langa ea). 26 m: primul bloc al dominoului se muta de la 30 la 33 m (in spatele portii).
@@ -659,7 +660,11 @@ if OUT_PATH:
     bench = [(face_x - 47.0, face_x, face_y0, face_y1, Y_PIATA + 0.3, 25.0, 0.0, 15.0, 30.0)]
     floors = [(0, -2.0), (1, -2.0), (2, -2.0), (3, -1.5), (4, 8.5)]
     widths = [(0, 70.0), (1, 40.0), (2, 36.0), (3, 45.0), (4, 40.0)]
-    water = [(0, WATER_AW, 16.0), (1, WATER_AW, 16.0), (2, WATER_AW, 16.0),
+    # Rapa 2 (bratul de S) NU are intrare: apa ei vine din umplerea rapei 0 (inelul santului e o singura
+    # albie sub 0,5, iar umplerea nu are side_lock), deci o intrare proprie n-are nicio celula libera si
+    # tipareste „rapa 2 n-are nicio celula sub 0.5” desi santul de sud are apa si plasa de repunere
+    # (RavineWater_0 acopera x -197..94, z 66..104; masurat). Fara intrare, avertismentul dispare.
+    water = [(0, WATER_AW, 16.0), (1, WATER_AW, 16.0),
              (3, WATER_SRAH, 16.0), (4, WATER_THOM, 16.0)]
 
     # ---- sol (idx): laterita (praf) pe tot turul MINUS caile si terasele de piatra (brief §7 pasul 2).
@@ -700,6 +705,9 @@ if OUT_PATH:
         # latura -1, golul mai departe
         # golul de pe -1 era la -95: cu malul mutat la -104 cadea pe uscat (val 1) -> -140
         (lenx(-198.0), lenx(-140.0 - GAP / 2), -1, 3), (lenx(-140.0 + GAP / 2), lenx(-MOAT_IN_W - 2.0), -1, 3),
+        # calea de nord (B), ambele laturi, de la gopura de nord (fata ei de N la y ~74) pana la capatul caii:
+        # balustrada naga peste sant, ca la A si D. Desfacuta spre masinile care ies din gopura.
+        (LENp(-56.0, GOPURA_N_Y + 6.5), LENp(-56.0, 103.0), 0, 3),
         # calea uriasilor, ambele laturi, pana inaintea pilonilor portii
         (LEN("D cale inceput", 2.0), LEN("D poarta", -10.0), 0, 3),
         # Srah Srang, STANGA (spre bazin), de la iesirea din coltul de SE pana dupa bazin. Prima
@@ -768,6 +776,7 @@ rim_offset = 2.0
 rim_height = 6.0
 crush_seconds = 3.0
 invert_steer = false
+warn_sfx = &"root_creak"
 model = ExtResource("22_block")
 model_scale = 1.0
 """
@@ -789,6 +798,7 @@ follow_ground = true
 motion = 1
 sweep_speed = 3.0
 ai_yields = true
+contact_sfx = &"elephant_trumpet"
 """ + (f"sweep_phase = {ELEPHANT_PHASE}\n" if ELEPHANT_PHASE >= 0.0 else "")
     # ---- PASUL 6: turnurile Bayonului (corpuri statice cu nume, ca ProbeLaneClear sa le raporteze
     # pe nume). Corpul ramane si dupa hero-asset: `bayon_face_tower_a` (pasul 7) e doar vizualul,
@@ -836,6 +846,16 @@ metadata/coliziune = "mesh"
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, {r2(gpx_)}, {r2(elev_at(gs_))}, {r2(-gpy_)})
 metadata/coliziune = "mesh"
 """
+    # Gopura de nord (B): aceeasi piesa ca la vest, LATA de 1,25 ori (golul 12,5 m; la 1,0 ProbeRace a dat o ejectare pe
+    # stalpul drept la 27,6 m/s: dupa arcul R30 masinile ajung la gopura cu doar ~30 m de dreapta). Soseaua
+    # merge spre -Z Godot, adica exact pe -Z al modelului: rotatie identitate, lungimea (X, 52 m) de-a curmezisul.
+    gns_ = s_near(-56.0, GOPURA_N_Y)
+    gnx_, gny_ = pos_at(gns_)
+    decor_txt += f"""
+[node name="GopuraNord" parent="DecorManual" instance=ExtResource("15_gopura")]
+transform = Transform3D(1.25, 0, 0, 0, 1, 0, 0, 0, 1, {r2(gnx_)}, {r2(elev_at(gns_))}, {r2(-gny_)})
+metadata/coliziune = "mesh"
+"""
     # Poarta-copac: la intrarea ramurii, care merge spre S (+Z Godot) -> rotatie de 180 de grade, LATA de
     # 1,45 ori (golul 9,9 m; la 1,2 ProbeRace val 3 mai gasea 2 ejectari pe stalpi). Istoric:
     # 1,2 ori de-a curmezisul (golul 6,8 -> 8,2 m): ProbeRace val 2, masinile care intra in ramura pe
@@ -870,6 +890,16 @@ script = ExtResource("17_camzone")
 frac_from = {r3(F_s(gs_ - 16.0)[0])}
 frac_to = {r3(F_s(gs_ + 12.0)[0])}
 size = Vector3(28.0, 10.0, 14.0)
+ceiling = 9.0
+ceiling_dist = 22.0
+blend_time = 0.35
+
+[node name="CameraGopuraNord" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {r2(gnx_)}, {r2(elev_at(gns_))}, {r2(-gny_)})
+script = ExtResource("17_camzone")
+frac_from = {r3(F_s(gns_ - 16.0)[0])}
+frac_to = {r3(F_s(gns_ + 12.0)[0])}
+size = Vector3(14.0, 10.0, 28.0)
 ceiling = 9.0
 ceiling_dist = 22.0
 blend_time = 0.35
@@ -1076,10 +1106,10 @@ blend_time = 0.35
     # coboara spre apa (-Y Blender = +Z model -> +Z lume = sud).
     decor_txt += put("SrahSrangDebarcader", "36_landing", RID, 50.0, 2.0, -(-112.0 - 10.5))
 
-    # Viata: tuk-tuk-uri parcate pe malul interior, langa gopura (fara corp: impingerea e decizie amanata,
-    # kit §1.6), calugari in fundal.
+    # Viata: tuk-tuk-uri parcate pe malul interior, langa gopura (remorca si motocicleta sunt BumpProp-uri cu
+    # masa proprie: `bump_parts`, vezi WorldProp.BUMP_PART_OPTS), calugari in fundal.
     for k_, (tx_, ty_) in enumerate(((-88.0, 14.0), (-84.0, 15.0), (-80.0, 14.5))):
-        decor_txt += put(f"TukTuk{k_}", "37_tuk", R90N, tx_, Y_CALE, -ty_)
+        decor_txt += put(f"TukTuk{k_}", "37_tuk", R90N, tx_, Y_CALE, -ty_, col="bump_parts")
         # cele doua radacini ale GLB-ului (kit §1.6) stau amandoua in origine: motocicleta se muta in
         # fata remorcii (-Z model = sensul de mers)
         decor_txt += (f'\n[node name="Moto" parent="DecorManual/TukTuk{k_}"]\n'
@@ -1159,8 +1189,13 @@ blend_time = 0.35
         return X, Y, Z
 
     # Zonele INAINTEA junglei: luminisurile lor (disc cu `claim`, fara specii) scot padurea din piete/temple.
+    FLOCK_GLBS = {"lotus_cluster.glb": (("Lotus_Flowers", "LotusFlori"), ("Lotus_Leaves", "LotusFrunze")),
+                  "water_lily_pads.glb": (("Lily_Pads", "Nuferi"),)}
+    FLOCK_CELL_M = 100.0
+    flock_items = {}
     zone_files = [f"zona_{c_}" for c_ in "abcdefgh"] + ["jungla"]
-    forest_zones, forest_glbs = [], {}
+    forest_zones, forest_glbs, forest_settings = [], {}, {}
+    smoke_pts, roost_pts = [], []
     print("\n  decorul per POI (tools/angkor_decor/):")
     for zf_ in zone_files:
         if not os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), "angkor_decor", zf_ + ".py")):
@@ -1171,6 +1206,17 @@ blend_time = 0.35
         for d_ in getattr(zm_, "FOREST", []):
             forest_zones.append(dict(d_, label=d_.get("label", zf_)))
         forest_glbs.update(getattr(zm_, "FOREST_GLBS", {}))
+        forest_settings.update(getattr(zm_, "FOREST_SETTINGS", {}))
+        # Teatrul (brief §3): SMOKE = [(frac, lateral, dy[, along])] surse de fum de tamaie, ROOSTS =
+        # [(frac, lateral, dy)] cuiburi de pasari (coronament); dy = metri peste cota drumului. Iese
+        # in COORDONATE DE LUME, ca emitatorul/stolul sa stea la origine (un singur nod pentru toate).
+        for it_ in getattr(zm_, "SMOKE", []):
+            along_ = float(it_[3]) if len(it_) > 3 else 0.0
+            gx_, gy0_, gz_, _tx, _ty, _sv = road_frame(it_[0], it_[1], along_)
+            smoke_pts.append((gx_, gy0_ + float(it_[2]), gz_))
+        for it_ in getattr(zm_, "ROOSTS", []):
+            gx_, gy0_, gz_, _tx, _ty, _sv = road_frame(it_[0], it_[1])
+            roost_pts.append((gx_, gy0_ + float(it_[2]), gz_))
         if not items_:
             continue
         zn_ = "Zona" + zf_.split("_")[-1].upper() if zf_.startswith("zona_") else "Jungla"
@@ -1190,6 +1236,17 @@ blend_time = 0.35
                 fx_, fz_ = tx_, -ty_
             gy_ = opt_.get("y", kit_y_.get(nm_, gy0_ + float(opt_.get("dy", -0.3))))
             X_, Y_, Z_ = yaw_basis(fx_, fz_, float(yaw_), k_)
+            if "sy" in opt_:   # scara pe verticala (pervaz plat din placi): Y * sy, X/Z neatinse
+                Y_ = (Y_[0], Y_[1] * float(opt_["sy"]), Y_[2])
+            if (os.path.basename(path_) in FLOCK_GLBS and opt_.get("coliziune") == "none"
+                    and not any(x_ in opt_ for x_ in ("child", "anchor", "scufundat"))):
+                # Lotusi/nuferi: sute de piese identice, fara corp -> stol MultiMesh pe celule (FlockProp), nu noduri.
+                # Aceeasi transformare ca nodul: Basis(UP, yaw) * scala, yaw din coloana X (cos, 0, -sin).
+                yawf_ = math.atan2(-X_[2] / k_, X_[0] / k_)
+                flock_items.setdefault((os.path.basename(path_), int(math.floor(gx_ / FLOCK_CELL_M)),
+                                        int(math.floor(gz_ / FLOCK_CELL_M))), []).append(
+                    (r2(gx_), r2(gy_), r2(gz_), round(yawf_, 4), k_))
+                continue
             zone_nodes += (f'\n[node name="{nm_}" parent="DecorManual/{zn_}" instance=ExtResource("{zone_rid(path_)}")]\n'
                            f"transform = Transform3D({_rows(X_, Y_, Z_)}, {r2(gx_)}, {r2(gy_)}, {r2(gz_)})\n")
             if "coliziune" in opt_:
@@ -1204,6 +1261,20 @@ blend_time = 0.35
                 zone_nodes += (f'\n[node name="{cn_}" parent="DecorManual/{zn_}/{nm_}"]\n'
                                f"transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {cp_[0]}, {cp_[1]}, {cp_[2]})\n")
             print(f"    {zn_}/{nm_:22s} frac {F_s(sv_)[0]:.4f} lat {lat_:+6.1f} y {gy_:7.2f} (drum {elev_at(sv_):6.2f})")
+
+    if flock_items:
+        zone_ext += '[ext_resource type="Script" path="res://scenes/props/flock.gd" id="flock_script"]\n'
+        zone_nodes += '\n[node name="Lotusi" type="Node3D" parent="DecorManual"]\n'
+        for (g_, cx_, cz_), its_ in sorted(flock_items.items()):
+            rid_ = zone_rid("plants/" + g_)
+            for mn_, tag_ in FLOCK_GLBS[g_]:
+                zone_nodes += (f'\n[node name="{tag_}_{cx_}_{cz_}" type="MultiMeshInstance3D" parent="DecorManual/Lotusi"]\n'
+                               f'script = ExtResource("flock_script")\nmodel = ExtResource("{rid_}")\nmesh_name = "{mn_}"\n'
+                               "positions = PackedVector3Array(%s)\n" % ", ".join(f"{a_}, {b_}, {c_}" for a_, b_, c_, _y, _k in its_) +
+                               "yaws = PackedFloat32Array(%s)\n" % ", ".join(str(y_) for _a, _b, _c, y_, _k in its_) +
+                               "scale3_list = Array[Vector3]([%s])\n" % ", ".join(f"Vector3({k_}, {k_}, {k_})" for *_x, k_ in its_) +
+                               "snap_to_ground = false\n")
+        print(f"  lotusi in stoluri: {sum(len(v_) for v_ in flock_items.values())} piese, {len(flock_items)} celule")
 
     if forest_zones:
         zone_ext += ('[ext_resource type="Script" path="res://scenes/props/mesh_forest.gd" id="mf_script"]\n'
@@ -1244,13 +1315,29 @@ seed_value = {int(d_.get('seed', k_ + 1))}
                              f"lat_min = {float(d_['lat_min'])}\nlat_max = {float(d_['lat_max'])}\n")
         scenes_txt = ", ".join(f'ExtResource("mf_{x_}")' for x_ in forest_glbs)
         zones_txt = ", ".join(f'SubResource("MFZ_{k_}")' for k_ in range(len(forest_zones)))
+        settings_txt = "".join(f"{k_} = {v_}\n" for k_, v_ in forest_settings.items())
         zone_nodes += f"""
 [node name="PadureMasa" type="Node3D" parent="."]
 script = ExtResource("mf_script")
 scenes = Array[PackedScene]([{scenes_txt}])
 zones = Array[ExtResource("mf_zone")]([{zones_txt}])
-"""
+{settings_txt}"""
         print(f"  padurea in masa: {len(forest_zones)} zone, specii {list(forest_glbs)}")
+    if smoke_pts:
+        zone_ext += '[ext_resource type="Script" path="res://scenes/props/incense_smoke.gd" id="smoke_script"]\n'
+        pts_ = ", ".join(f"{x_:.2f}, {y_:.2f}, {z_:.2f}" for x_, y_, z_ in smoke_pts)
+        zone_nodes += (f'\n[node name="FumTamaie" type="CPUParticles3D" parent="."]\n'
+                       f'script = ExtResource("smoke_script")\nsources = PackedVector3Array({pts_})\n')
+        print(f"  fum de tamaie: {len(smoke_pts)} surse")
+    if roost_pts:
+        zone_ext += ('[ext_resource type="Script" path="res://scenes/props/thunder_birds.gd" id="birds_script"]\n'
+                     '[ext_resource type="PackedScene" path="res://assets/models/okinawa/animals/egret.glb" id="birds_crow"]\n')
+        pts_ = ", ".join(f"{x_:.2f}, {y_:.2f}, {z_:.2f}" for x_, y_, z_ in roost_pts)
+        zone_nodes += (f'\n[node name="PasariTunet" type="MultiMeshInstance3D" parent="."]\n'
+                       f'script = ExtResource("birds_script")\nmodel = ExtResource("birds_crow")\nmesh_name = "Pose_Fly"\n'
+                       f'flash_path = NodePath("../Hazarduri/Fulger")\n'
+                       f'roosts = PackedVector3Array({pts_})\n')
+        print(f"  pasari la tunet: {len(roost_pts)} cuiburi")
     zone_ext += "".join(f'[ext_resource type="PackedScene" path="{p_}" id="{r_}"]\n' for p_, r_ in zone_glb.items())
     # ==== sfarsit DECORUL PER POI ========================================================================
     bias = [(IDX("E terasa V", BAYON_TOWERS[0][0] - 45.0),
@@ -1274,6 +1361,14 @@ sky_horizon_rain = Color(0.36, 0.32, 0.4, 1)
 
 [node name="Fulger" type="Node" parent="Hazarduri"]
 script = ExtResource("8_flash")
+thunder_stream = ExtResource("50_thunder")
+thunder_close_stream = ExtResource("51_crack")
+thunder_db = -7.0
+
+[node name="Ambianta" type="Node" parent="Hazarduri"]
+script = ExtResource("52_ambience")
+bed_stream = ExtResource("53_jungle")
+rain_stream = ExtResource("54_rainleaves")
 """
     # ---- PASUL 6: perdeaua de liane. Baza scrisa pe RANDURI (memoria `tscn-transform-e-pe-randuri`):
     # -Z local = sensul de mers. Orientarea se verifica in sonda (tools/probe_angkor_pas6.gd).
@@ -1395,6 +1490,11 @@ material = SubResource("Mat_macheta")
 [ext_resource type="PackedScene" path="res://assets/models/angkor/plants/sugar_palm.glb" id="47_palm"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/plants/lotus_cluster.glb" id="48_lotus"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/plants/water_lily_pads.glb" id="49_lily"]
+[ext_resource type="AudioStream" path="res://assets/audio/thunder_roll.wav" id="50_thunder"]
+[ext_resource type="AudioStream" path="res://assets/audio/thunder_crack.wav" id="51_crack"]
+[ext_resource type="Script" path="res://scenes/hazards/ambience_bed.gd" id="52_ambience"]
+[ext_resource type="AudioStream" path="res://assets/audio/jungle_bed.wav" id="53_jungle"]
+[ext_resource type="AudioStream" path="res://assets/audio/rain_leaves.wav" id="54_rainleaves"]
 {zone_ext}
 [sub_resource type="StandardMaterial3D" id="Mat_macheta"]
 albedo_color = Color(0.72, 0.64, 0.52, 1)
@@ -1438,7 +1538,7 @@ custom_parapets = Array[Vector4]([{", ".join(V4(*p_) for p_ in parapets)}])
 custom_lane_bias = Array[Vector3]([{", ".join(V3(*b_) for b_ in bias)}])
 custom_bench_patches = Array[Dictionary]([{", ".join(
     "{ \"lvl\": PackedVector2Array(-1000.0, %s, 1000.0, %s), \"soft\": Vector4(%s, %s, %s, %s), "
-    "\"x0\": %s, \"x1\": %s, \"z0\": %s, \"z1\": %s }" % (lv_, lv_, sw_, se_, sn_, ss_, r2(x0_), r2(x1_), r2(-y1_), r2(-y0_))
+    "\"x0\": %s, \"x1\": %s, \"z0\": %s, \"z1\": %s, \"paving\": Color(0.80, 0.67, 0.50, 1), \"paving_fade\": 5.0 }" % (lv_, lv_, sw_, se_, sn_, ss_, r2(x0_), r2(x1_), r2(-y1_), r2(-y0_))
     for (x0_, x1_, y0_, y1_, lv_, sw_, se_, sn_, ss_) in bench)}])
 terrain_pad_m = 120.0
 {zones_meta}

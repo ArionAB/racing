@@ -211,6 +211,7 @@ run_step "Garajul: bare, masa si incadrarea vitrinei" garage.log 'probe_garage:'
 # in copaci sau stanci, nici cocotati pe ele (157 din 856 de gnu stateau asa).
 run_step "Serengeti: traversarile calca pe sol, cu fata inainte" hazard_ground.log 'VERDICT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeHazardGround.tscn -- --track=7
+run_step "Angkor: elefantul se intoarce doar vizual, cu fata inainte" hazard_ground_angkor.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeHazardGround.tscn -- --track=16
 run_step "Serengeti: animalele nu stau in copaci si stanci" animal_overlap.log 'VERDICT:|PICAT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeAnimalOverlap.tscn -- --track=7 --no-batch
 # Cariera pasul 1: config validat (cu sabotaj), persistenta pe pista, stampile

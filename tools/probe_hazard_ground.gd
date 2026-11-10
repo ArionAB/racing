@@ -17,7 +17,9 @@ extends Node
 ## --track e INDEXUL din GameState.TRACK_SCENES (Serengeti = 7) sau numarul
 ## scenei (14). --max-gap=M schimba pragul (implicit 0.35 m).
 
-const SIM_SECONDS := 40.0
+## 70 s: un dus-intors intreg al elefantului (asteptare 5 + telegraf 1,2 + trecere,
+## de doua ori), ca intoarcerea sa fie chiar masurata, nu presupusa.
+const SIM_SECONDS := 70.0
 ## Cat poate sta corpul peste sol fara sa se citeasca drept plutire. Copitele
 ## au o grosime si modelul nu e perfect plat dedesubt; 35 cm la o vaca de 1,4 m
 ## se vede ca "umbra sub copite", nu ca levitatie.
@@ -77,15 +79,40 @@ func _ready() -> void:
 	var worst_at: Dictionary = {} # hazard -> pozitia gap-ului maxim
 	var lowest: Dictionary = {}   # hazard -> gap minim (negativ = ingropat)
 	var samples: Dictionary = {}  # hazard -> masuratori reale
+	# SENSUL IN MERS: pe fiecare pas in care corpul se misca, modelul (pivotul)
+	# trebuie sa priveasca spre deplasare. Prinde o intoarcere ratata sau pusa
+	# gresit (din nov 2026 intoarcerea e pe pivot, nu pe corp).
+	var last_pos: Dictionary = {} # hazard -> pozitia de la pasul anterior
+	var backwards: Dictionary = {} # hazard -> pasi in miscare cu spatele
+	var moving: Dictionary = {}   # hazard -> pasi in miscare
+	var flips: Dictionary = {}    # hazard -> intoarceri vazute
+	var last_flip: Dictionary = {} # hazard -> `_flipped` la pasul anterior
 	for h in hazards:
 		worst[h] = -INF
 		lowest[h] = INF
 		samples[h] = 0
+		last_pos[h] = h.global_position
+		backwards[h] = 0
+		moving[h] = 0
+		flips[h] = 0
+		last_flip[h] = h._flipped
 	var space := t.get_world_3d().direct_space_state
 	var steps := int(SIM_SECONDS * Engine.physics_ticks_per_second)
 	for s in steps:
 		await get_tree().physics_frame
 		for h in hazards:
+			var mv: Vector3 = h.global_position - (last_pos[h] as Vector3)
+			mv.y = 0.0
+			last_pos[h] = h.global_position
+			if h.turn_around and h._pivot != null and mv.length() > 0.01: # pragul intoarcerii din hazard
+				moving[h] = int(moving[h]) + 1
+				var fwd := -h._pivot.global_basis.z
+				fwd.y = 0.0
+				if fwd.dot(mv) < 0.0:
+					backwards[h] = int(backwards[h]) + 1
+			if h._flipped != bool(last_flip[h]):
+				flips[h] = int(flips[h]) + 1
+				last_flip[h] = h._flipped
 			var g := _ground_under(space, h)
 			if is_nan(g):
 				continue
@@ -114,6 +141,17 @@ func _ready() -> void:
 		if facing == "SPATE":
 			verdict += " / PICAT (merge cu spatele)"
 			fails += 1
+		# Cu spatele in mers: un pas de intarziere per intoarcere e tolerat
+		# (pozitia de sync_to_physics vine cu un pas in urma).
+		if h.turn_around and int(backwards[h]) > 2 * (int(flips[h]) + 1):
+			verdict += " / PICAT (%d/%d pasi cu spatele in mers)" % [int(backwards[h]), int(moving[h])]
+			fails += 1
+		if h.turn_around and int(flips[h]) == 0:
+			verdict += " / PICAT (nicio intoarcere vazuta: sensul la intors nu e masurat)"
+			fails += 1
+		if h.turn_around:
+			facing += " mers %d pasi, %d cu spatele, %d intoarceri" % [
+				int(moving[h]), int(backwards[h]), int(flips[h])]
 		print("%-22s %-16s gap %+.2f..%+.2f m (max la %s)  sens %s  -> %s" % [
 			h.name, model, float(lowest[h]), float(worst[h]),
 			worst_at.get(h, Vector3.ZERO), facing, verdict])
@@ -151,11 +189,17 @@ func _ground_at(space: PhysicsDirectSpaceState3D, at: Vector3, h: SlidingHazard)
 func _facing(h: SlidingHazard) -> String:
 	if not String(h.model_scene.resource_path).ends_with("elephant.glb"):
 		return "n/a"
-	# Varfurile in spatiul CORPULUI (pozitia de repaus a scheletului).
+	# Varfurile in spatiul CORPULUI (pozitia de repaus a scheletului), cu
+	# intoarcerea scoasa: din nov 2026 corpul nu se mai roteste la capat de cursa,
+	# doar modelul (`SlidingHazard._flipped`, o jumatate de tura pe pivot) — deci
+	# "inainte" e -Z-ul corpului pe dus si +Z pe intors.
+	var body := h.global_transform
+	if h._flipped:
+		body = Transform3D(body.basis.rotated(Vector3.UP, PI), body.origin)
 	var pts := PackedVector3Array()
 	for mi in h.find_children("*", "MeshInstance3D", true, false):
 		var m := mi as MeshInstance3D
-		var xf := h.global_transform.affine_inverse() * m.global_transform
+		var xf := body.affine_inverse() * m.global_transform
 		for surf in m.mesh.get_surface_count():
 			var verts: PackedVector3Array = m.mesh.surface_get_arrays(surf)[Mesh.ARRAY_VERTEX]
 			for v in verts:

@@ -175,6 +175,22 @@ func _steer_right_center() -> Vector2:
 	return _steer_left_center() + Vector2(2.0 * STEER_RADIUS + STEER_GAP, 0.0)
 
 
+## Discul DESENAT al unui buton (centru, raza), in coordonatele controlului —
+## pentru inelele turului ghidat (#678). `zone` ca in `_zone_at`; necunoscut
+## = raza 0.
+func button_disc(zone: String) -> Rect2:
+	var c := Vector2.ZERO
+	var r := 0.0
+	match zone:
+		"left": c = _steer_left_center(); r = STEER_RADIUS
+		"right": c = _steer_right_center(); r = STEER_RADIUS
+		"gas": c = _gas_center(); r = GAS_RADIUS
+		"brake": c = _brake_center(); r = BRAKE_RADIUS
+		"turbo": c = _turbo_center(); r = BUTTON_RADIUS
+		"drift": c = _drift_center(); r = BUTTON_RADIUS * 0.9
+	return Rect2(c - Vector2(r, r), Vector2(2.0 * r, 2.0 * r))
+
+
 ## Un buton rotund de HUD: disc translucid, inel subtire, glifa in mijloc.
 ## `tint` coloreaza inelul si glifa cand butonul e activ.
 func _draw_round_button(center: Vector2, radius: float, pressed: bool,

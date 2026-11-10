@@ -196,6 +196,8 @@ run_step "Registrul MeshCpu (citiri GPU refolosite)" meshcpu.log 'MeshCpu:' -- \
 # simultan (gaz+drift, gaz+turbo) nu se ating.
 run_step "Controale touch: maparea si distantele" touch_zones.log 'VERDICT:' -- \
 	--headless --path . res://tools/ProbeTouchZones.tscn
+run_step "Turul ghidat: indicii la gest, SKIP, salvare, SETTINGS, layout" tutorial.log 'VERDICT:' -- \
+	--headless --fixed-fps 60 --path . res://tools/ProbeTutorial.tscn
 
 # Garajul: normalizarea barelor pe intervalul REAL al masinilor, masa ca axa
 # cu semn (nu bara care se umple), conturul-fantoma bidirectional si

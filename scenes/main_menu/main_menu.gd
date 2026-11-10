@@ -68,6 +68,9 @@ func _ready() -> void:
 		GameState.menu_open_panel = &""
 		_show_panel(cup_panel)
 
+	# Prima pornire: invitatia la turul ghidat (#678), o data pe sesiune.
+	TutorialInvite.offer_if_needed(self)
+
 # ------------------------------------------------------------------ panouri
 
 func _show_panel(panel: Control) -> void:

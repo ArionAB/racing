@@ -127,6 +127,14 @@ func _build() -> void:
 		func(on: bool) -> void:
 			GameState.real_headlight = on
 			GameState.save_settings())
+	# Turul ghidat (#678), reluat la cerere. In LISTA, nu langa BACK: un buton
+	# in plus sub ea scotea BACK din ecranul de 720.
+	var tutorial := Button.new()
+	tutorial.text = TutorialDirector.REPLAY_LABEL
+	tutorial.custom_minimum_size = Vector2(200, 48)
+	tutorial.add_theme_font_size_override("font_size", 20)
+	tutorial.pressed.connect(TutorialDirector.start)
+	box.add_child(tutorial)
 
 	var reset_cam := Button.new()
 	reset_cam.text = "RESET CAMERA"

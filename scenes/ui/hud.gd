@@ -882,6 +882,23 @@ func set_turbo(charge: float, boosting: bool, drifting: bool = false) -> void:
 		else Color(1, 1, 1, 0.45 + 0.55 * _charge_flash)
 
 
+## Turul ghidat (#678): stratul de indicii intra imediat DEASUPRA controalelor
+## touch (ca inelele sa se vada peste butoane), dar sub pauza si rezultate.
+func add_tutorial_overlay(overlay: Control) -> void:
+	var root := _touch.get_parent()
+	root.add_child(overlay)
+	root.move_child(overlay, _touch.get_index() + 1)
+
+
+func touch_controls() -> TouchControls:
+	return _touch
+
+
+## Jgheabul barii de turbo, in coordonatele ecranului (evidentierea din tur).
+func turbo_bar_rect() -> Rect2:
+	return _charge_bg.get_global_rect()
+
+
 ## Bara de turbo tresare o clipa: chemata la iesirea dintr-un drift (Race, pe
 ## semnalul Car.drift_ended), ca sa lege rasplata de gestul care a adus-o.
 func flash_turbo() -> void:

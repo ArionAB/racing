@@ -362,12 +362,12 @@ func _add_segment(a: Vector2, b: Vector2, hw_a: float, hw_b: float) -> void:
 ## Distanta de la `p` la cea mai apropiata MARGINE de sosea (negativa = pe ea),
 ## cautata doar in celula si vecinele ei (48 m): suficient cat marja ceruta +
 ## latimea soselei raman sub 48 m. Fara nicio sosea in jur = INF.
-func _edge_dist(p: Vector2) -> float:
+func _edge_dist(p: Vector2, rings: int = 1) -> float:
 	var cx := floori(p.x / _SEG_CELL)
 	var cy := floori(p.y / _SEG_CELL)
 	var best := INF
-	for dx in range(-1, 2):
-		for dy in range(-1, 2):
+	for dx in range(-rings, rings + 1):
+		for dy in range(-rings, rings + 1):
 			var key := Vector2i(cx + dx, cy + dy)
 			if not _seg_grid.has(key):
 				continue
@@ -1175,15 +1175,25 @@ func _fill_zone(zi: int, z: MeshForestZone, track: Track, main: TrackRoute,
 		# Banda apropiata (camera poate ajunge la `lod_near_m` de arbore) se
 		# felieaza mai fin — vezi `slice_near_m` / `lod_near_m`.
 		var near := lod_m > 0.0 and edge < lod_near_m
-		var sm := slice_near_m if near else slice_m
+		# ADANCUL: arborii la >= `lod_m` de orice sosea nu ajung niciodata mai
+		# aproape de camera decat pragul treptei grosiere, deci nu au nevoie de
+		# treapta intreaga sau medie. Merg intr-o singura felie de marimea
+		# celulei, pe mesh-ul grosier, care se preda celulei ca orice felie
+		# `_far`. Inainte fiecare avea felia lui de 60 m cu 2-3 trepte: Angkor
+		# ajunsese la mii de MultiMesh-uri cu ~5 arbori, iar iPhone-ul murea la
+		# primul cadru dupa padure (nov 2026). `_edge_dist` cauta pe un inel
+		# (~48 m) si da INF dincolo; aici se cere distanta adevarata, pe doua.
+		var deep := lod_m > 0.0 and far_cell_m > 0.0 and edge >= lod_m 			and _edge_dist(c, 2) >= lod_m
+		var sm := far_cell_m if deep else (slice_near_m if near else slice_m)
 		var cell := Vector2i(floori(c.x / sm), floori(c.y / sm))
 		var zg := _zone_group[zi]
-		var key := "%d|%d|%d|%s|%d|%d" % [zg, cell.x, cell.y, stem, 1 if shadow else 0, 1 if near else 0]
+		var band := 2 if deep else (1 if near else 0)
+		var key := "%d|%d|%d|%s|%d|%d" % [zg, cell.x, cell.y, stem, 1 if shadow else 0, band]
 		if not groups.has(key):
 			# Array tipizat, nu Packed*Array: un Packed citit din Dictionary e o
 			# COPIE, iar append-ul pe ea nu ajunge in grup (memoria
 			# `append-pe-copie-in-array-netipizat`; vezi si `_add_segment`).
-			groups[key] = {"zone": zg, "stem": stem, "shadow": shadow,
+			groups[key] = {"zone": zg, "stem": stem, "shadow": shadow, "deep": deep,
 				"xf": [] as Array[Transform3D], "edge": [] as Array[float]}
 		(groups[key]["xf"] as Array[Transform3D]).append(xf)
 		(groups[key]["edge"] as Array[float]).append(edge)
@@ -1347,11 +1357,26 @@ func _emit(groups: Dictionary) -> void:
 			if edges[i] < lod_m:
 				ext_far = maxf(ext_far, d)
 		var steps: Array = [[full, 0.0, 0.0, ""]]
-		if lod_m > 0.0:
+		# Felie FARA niciun arbore in banda apropiata (toti la >= `lod_near_m` de
+		# marginea soselei): treapta intreaga ar tine doar pana la `lod_near_m`
+		# de CENTRU, adica s-ar vedea numai din padure. Incepe direct cu cea
+		# medie — e exact treapta ceruta la distanta aia — si e un MultiMesh mai
+		# putin (Angkor: 1.910 din 6.612; crash-ul de pe iPhone, nov 2026).
+		var any_near := false
+		for e in edges:
+			if e < lod_near_m:
+				any_near = true
+				break
+		if bool(g.get("deep", false)):
+			steps = [[_species_far.get(stem, full), 0.0, 0.0, "_far"]]
+		elif lod_m > 0.0:
 			var mid: ArrayMesh = _species_mid.get(stem, full)
 			if mid != full and lod_near_m > 0.0 and lod_near_m < lod_m:
-				steps[-1][2] = lod_near_m + ext_near
-				steps.append([mid, lod_near_m + ext_near, 0.0, "_mid"])
+				if any_near:
+					steps[-1][2] = lod_near_m + ext_near
+					steps.append([mid, lod_near_m + ext_near, 0.0, "_mid"])
+				else:
+					steps = [[mid, 0.0, 0.0, "_mid"]]
 			var far: ArrayMesh = _species_far.get(stem, full)
 			if far != steps[-1][0]:
 				steps[-1][2] = lod_m + ext_far

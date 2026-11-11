@@ -45,7 +45,10 @@ const DRIVER_DATA: Array[Resource] = [
 	preload("res://scenes/cars/data/drivers/driver_green.tres"),
 ]
 
-## Pistele, in ordinea din cursa rapida.
+## Pistele: REGISTRUL uneltelor, nu ordinea din cursa rapida. Jucatorul vede
+## `QuickRaceTracks.indices()` — fara bancurile de test (`TrackInfo.test_bench`:
+## Dunele, Okinawa manual), ordonate pe cupe (#680). Ordinea de aici nu se
+## schimba: uneltele o indexeaza cu literal. O pista noua se ADAUGA la coada.
 ##
 ## Campionatul NU mai sta pe primele pozitii din lista (vechiul CHAMP_ROUNDS,
 ## care facea din indicii 0-2 campionatul): din oct 2026 cupele din WORLD CUP
@@ -85,18 +88,16 @@ const TRACK_SCENES: Array[String] = [
 	# vor 18 (memoria `probe-decor-numar-de-scena`).
 	"res://scenes/tracks/Track18.tscn", # Kyoto = INDEXUL 11
 	# Track19 = INDEXUL 12 (Monument Valley, brief monument_valley.md §7): la
-	# COADA listei; Dunele (Track01) ramane pe indexul 0 pana la swap — care
-	# N-A FOST FACUT inca, desi nota e aici de la inceputul lui oct 2026.
-	# Tiparul e swap-ul Transfagarasanului de mai sus: se scrie PE POZITIE,
-	# peste Track01, nu se sterge intrarea veche (lista nu are voie sa se
-	# taseze — vezi comentariul de pe indexul 2).
+	# COADA listei. Swap-ul peste Dunele (indexul 0) NU se mai face (#680, nov
+	# 2026): Dunele raman banc de test pe indexul 0, ascunse jucatorului prin
+	# `TrackInfo.test_bench`, iar ordinea din cursa rapida o da QuickRaceTracks.
 	# Uneltele o adreseaza cu --track=19 (resolve_track_index o gaseste dupa
 	# numarul scenei).
 	"res://scenes/tracks/Track19.tscn", # Monument Valley = INDEXUL 12
-	# Track20 = INDEXUL 13 (Okinawa, brief okinawa.md §7): la COADA listei;
-	# Okinawa manual (Track08) ramane pe indexul 1 pana la swap — care, ca la
-	# Monument Valley, N-A FOST FACUT inca. Acelasi tipar: PE POZITIE, peste
-	# Track08. Uneltele o
+	# Track20 = INDEXUL 13 (Okinawa, brief okinawa.md §7): la COADA listei.
+	# Ca la Monument Valley, swap-ul nu se mai face (#680): Okinawa manual
+	# (Track08) ramane banc de test pe indexul 1, ascunsa prin `test_bench`.
+	# Uneltele o
 	# adreseaza cu --track=20 (resolve_track_index o gaseste dupa numarul scenei;
 	# probe_decor/probe_manual vor 20, snapshot/probe_race/probe_layout vor 13 SAU 20).
 	"res://scenes/tracks/Track20.tscn", # Okinawa = INDEXUL 13

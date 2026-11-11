@@ -127,6 +127,14 @@ func _build() -> void:
 		func(on: bool) -> void:
 			GameState.real_headlight = on
 			GameState.save_settings())
+	# Credite si licente (#691): ultima intrare din lista, nu buton in meniul
+	# principal (acolo stiva e deja la limita ecranului de 720). Merge si din pauza.
+	var credits := Button.new()
+	credits.text = "CREDITS & LICENSES"
+	credits.custom_minimum_size = Vector2(0, 48)
+	credits.add_theme_font_size_override("font_size", 20)
+	credits.pressed.connect(_open_credits)
+	box.add_child(credits)
 
 	var reset_cam := Button.new()
 	reset_cam.text = "RESET CAMERA"
@@ -239,6 +247,15 @@ func _add_perf_tests(box: VBoxContainer) -> void:
 		func(i: int) -> void:
 			GameState.dbg_far = i
 			GameState.apply_gfx_tier())
+
+
+## Creditele se pun peste tot ecranul, langa panou (nu in el: panoul e o cutie
+## centrata, creditele au nevoie de tot ecranul), iar panoul revine la inchidere.
+func _open_credits() -> void:
+	var credits := CreditsPanel.new()
+	credits.closed.connect(func() -> void: visible = true)
+	get_parent().add_child(credits)
+	visible = false
 
 
 ## Camera vie afla imediat, prin grup. Salvarea merge in acelasi apel: sliderele

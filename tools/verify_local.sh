@@ -41,6 +41,10 @@ if [ ! -x "$GODOT" ] && [ ! -f "$GODOT" ]; then
 fi
 mkdir -p "$LOGS"
 rm -f "$LOGS"/*.log
+# Save-urile jocului (settings/records/career/fantome) merg intr-un director
+# propriu, nu in user:// real: orice sonda trece prin GameState._ready, care
+# incarca si — pe un save vechi — MIGREAZA fisierele (#690, SaveSchema).
+export TOY_RACER_SAVE_DIR="${TOY_RACER_SAVE_DIR:-user://verify_local_save/}"
 
 FAILED=()
 PASSED=()
@@ -224,6 +228,11 @@ run_step "Serengeti: animalele nu stau in copaci si stanci" animal_overlap.log '
 # regruparea fara pierderi, raftul numarat in scena si lacatul cursei.
 run_step "Cariera: config, persistenta, gating, raft" career.log 'VERDICT:' -- \
 	--headless --path . res://tools/ProbeCareer.tscn -- --check
+# Save-ul (#690): id-uri stabile, migrarea v0 -> v1 cu copie .bak-v0,
+# idempotenta, id-uri dormante, fisiere stricate / mai noi, garaj reordonat si
+# pista redenumita fara pierderi.
+run_step "Save: id-uri, migrare v0 -> v1, dormante, reordonare" save_migration.log 'VERDICT:' -- \
+	--headless --path . res://tools/ProbeSaveMigration.tscn
 # WORLD CUP: cupele (piste valide, fara dubluri, fara cele excluse), adversarii
 # trasi fara repetare (garda armata pe lineup-ul vechi cu doua autobuze),
 # baremul 6-5-4-3-2-1 si o cursa reala in cupa (grila, titlu, departajare).

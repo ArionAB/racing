@@ -5,6 +5,14 @@ extends Resource
 ## Parametrii de feel globali (drift, gravitate) raman pe Car — aici e
 ## doar ce DIFERENTIAZA masinile intre ele.
 
+## Cheia STABILA a masinii: tot ce ajunge pe disc (masina aleasa in
+## `settings.cfg`, fantomele carierei, garajul deblocat) se leaga de ea, nu de
+## pozitia din `GameState.CAR_DATA` si nici de `display_name`. In engleza,
+## snake_case (`police_sports`), unica in garaj — si NU SE MAI SCHIMBA NICIODATA
+## dupa ce masina a ajuns la jucatori: un id schimbat = save-uri care nu-si mai
+## gasesc masina (raman dormante, vezi SaveSchema). Redenumirea se face din
+## `display_name`. ProbeSaveMigration pica pe un id gol, dublat sau cu alt format.
+@export var id: StringName = &""
 @export var display_name: String = ""
 ## Culoarea de UI (swatch in rezultate/HUD); modelul isi are culorile lui.
 @export var color: Color = Color.WHITE

@@ -5,6 +5,10 @@ extends Resource
 ## legat de `CarData.driver_model` — acela ramane doar implicitul pentru AI.
 ## Un skin nou = un .tres nou in GameState.DRIVER_DATA, zero modificari in cod.
 
+## Cheia STABILA a skinului: soferul ales se salveaza in `settings.cfg` pe ea,
+## nu pe pozitia din `GameState.DRIVER_DATA`. In engleza, snake_case, unica —
+## si NU SE MAI SCHIMBA NICIODATA dupa lansare (aceeasi regula ca `CarData.id`).
+@export var id: StringName = &""
 @export var display_name: String = ""
 ## Culoarea de UI (swatch); figurina isi are culorile ei, din paleta.
 @export var color: Color = Color.WHITE

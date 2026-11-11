@@ -6,6 +6,7 @@
 
 [resource]
 script = ExtResource("1")
+id = &"buggy"
 display_name = "Buggy"
 color = Color(0.95, 0.75, 0.15, 1)
 max_speed = 35.0

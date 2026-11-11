@@ -25,13 +25,33 @@ Toate arcele mai mari de 45 de grade sunt desenate cu puncte PE arc (memoria
   R=10 BW=3.5 python tools/gen_sf_serpentine.py           # o singura varianta
   ... AI=1.0 SUFIX=F                                      # AI fortat pe scurtatura
 
-Variabile (toate optionale): R (raza acului, 8), BW (semi-latimea benzii,
-3.5), LEG (dreapta dintre ace, 8), RE (raza virajelor de 90 ale scurtaturii,
-10), BYPASS (lungimea-tinta a ocolului, 270), DROP (11.6), AI
-(ai_shortcut_chance; lipsa = implicitul 0.4 al AIController), SUFIX.
+Variabile (toate optionale; implicit = forma aleasa): R (raza acului, 16), BW
+(semi-latimea benzii, 4.5), LEG (dreapta dintre ace, 8), RE (raza virajelor de
+90 ale scurtaturii, 16), BYPASS (lungimea-tinta a ocolului, 400), DROP (11.6),
+AI (ai_shortcut_chance; lipsa = implicitul 0.4 al AIController), SUFIX, SURF.
 
 Metadatele scrise in scena le citeste tools/probe_sf_serp.gd: furca, punctul de
 reintalnire, portile de cronometru, centrele acelor, lungimile analitice.
+
+FORMA ALEASA (runda 2, 11 nov 2026, decizia coordonatorului pe cifrele sondei):
+  R = 16 (ace la raza 16), BW = 4.5 (carosabil de 9 m), RE = 16 (si virajele
+  de 90 ale scurtaturii la raza 16), BYPASS = 400 (ocolul lungit la 400 m, tot
+  cu trei viraje de 90 si aceeasi cadere), scenele SondaSfSerpR16W9B400E16{F,N,O}.
+  Interiorul acelor: bloc plin de 0,8 m RETRAS 2 m de la margine, fatade pe
+  exterior la 1 m — nu e in scena, il pune sonda:
+    ProbeSfSerp ... --walls=1.0,1.5,0 --inner=2.0,0.8,fill
+  De ce: la R8 AI-ul nu urmareste acele (raza minima de viraj fara drift e
+  17,5/1,9 = 9,2 m, iar AI-ul nu coboara sub ~15,5 m/s), scurtatura pierdea
+  +1,6..+3 s, iar dreapta peste straturi castiga 1-5 s. Cu forma de mai sus:
+  scurtatura curata castiga 1,5-1,6 s (solo), o bordura atinsa o face sa piarda
+  (+1,1 s), dreapta peste straturi nu mai merge. Virajele de 90 la R10 aruncau
+  AI-ul in stratul acului 1; stratul lipit de margine il prindea (repuneri la
+  50% din treceri in pluton). Ocolul de 450 m dadea 3 s (peste tinta).
+  Banda e pe pietris (SURF=3): "deck" (runda 1) nu sapa terenul, care intra in
+  drum la ace (ProbeLaneClear 38 -> 0).
+
+Scenele R8/R10/R12 (si R16W7, R8W7B400, R8W7C) sunt ale rundei 1, scrise cu
+banda pe "deck" si virajele de 90 la R10; raman pentru reproducerea rundei 1.
 """
 import math
 import os
@@ -394,18 +414,18 @@ def write(R, BW, LEG, RE, bypass, drop, ai, suffix):
 def main():
     env = os.environ
     if "R" in env or "BW" in env:
-        R = float(env.get("R", "8"))
-        BW = float(env.get("BW", "3.5"))
+        R = float(env.get("R", "16"))
+        BW = float(env.get("BW", "4.5"))
         ai = float(env["AI"]) if "AI" in env else None
-        write(R, BW, float(env.get("LEG", "8")), float(env.get("RE", "10")),
-              float(env.get("BYPASS", "270")), float(env.get("DROP", "11.6")),
+        write(R, BW, float(env.get("LEG", "8")), float(env.get("RE", "16")),
+              float(env.get("BYPASS", "400")), float(env.get("DROP", "11.6")),
               ai, env.get("SUFIX", ""))
         return 0
-    # setul implicit: fiecare forma, cu AI-ul fortat pe scurtatura (F), cu
-    # sansa normala (N, 0.4) si fara nimeni pe ea (O, linia de baza a ocolului)
-    for R, BW in [(8, 3.5), (10, 3.5), (12, 3.5), (8, 4.0), (8, 4.5)]:
-        for ai, suf in [(1.0, "F"), (None, "N"), (0.0, "O")]:
-            write(R, BW, 8.0, 10.0, 270.0, 11.6, ai, suf)
+    # setul implicit: FORMA ALEASA (vezi antetul), cu AI-ul fortat pe scurtatura
+    # (F), cu sansa normala (N, 0.4) si fara nimeni pe ea (O, linia de baza a
+    # ocolului). Treapta 2 cere dump-ul din tools/data/sf_serp (e comis).
+    for ai, suf in [(1.0, "F"), (None, "N"), (0.0, "O")]:
+        write(16.0, 4.5, 8.0, 16.0, 400.0, 11.6, ai, "B400E16" + suf)
     return 0
 
 

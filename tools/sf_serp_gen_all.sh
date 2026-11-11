@@ -13,11 +13,13 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 GODOT="${GODOT:-D:/GameDev/Godot_v4.7-stable_win64_console.exe}"
-SHAPES="${SHAPES:-8 10 12}"
-WIDTHS="${WIDTHS:-3.5 4 4.5}"
+# implicit: forma aleasa (runda 2) — R16, carosabil 9 m, ocol 400 m, RE 16.
+# Runda 1: SHAPES="8 10 12" WIDTHS="3.5 4 4.5" RE=10 SURF=4.
+SHAPES="${SHAPES:-16:400}"
+WIDTHS="${WIDTHS:-4.5}"
 # RE: raza virajelor de 90 ale scurtaturii (intrare, iesire, gura). Implicit 10;
 # runda 2 masoara si RE=16 (aceeasi raza ca acele) — sufix "E16" in nume.
-RE="${RE:-10}"
+RE="${RE:-16}"
 for shape in $SHAPES; do
   R="${shape%%:*}"
   B=270

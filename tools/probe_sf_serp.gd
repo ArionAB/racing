@@ -1326,6 +1326,12 @@ func _start_race() -> void:
 			"stuck_t": 0.0, "prefers": (car.controller as AIController).prefers_shortcut})
 		var idx := i
 		car.respawned.connect(func(cc: Car) -> void: _on_respawn(idx, cc))
+		# ejectarea soferului (perete / aterizare dura) se termina tot cu o
+		# repunere: o marcam, ca repunerile „din mers" sa aiba cauza
+		car.ejected.connect(func(cc: Car, _r: Node3D) -> void:
+			var ep := cc.global_position
+			_c[idx]["ejected"] = "ejectat %s %.0f la (%.0f,%.0f,%.0f)" % [
+				cc.last_eject_cause, cc.last_eject_value, ep.x, ep.y, ep.z])
 		car.wall_hit.connect(func(_cc: Car, imp: float) -> void:
 			var o: Dictionary = _c[idx]["open"]
 			if not o.is_empty():
@@ -1344,7 +1350,8 @@ func _on_respawn(i: int, car: Car) -> void:
 		"route": car.route, "pos": [snappedf(p.x, 1), snappedf(p.y, 1), snappedf(p.z, 1)],
 		"from": [snappedf(lp.x, 1), snappedf(lp.y, 1), snappedf(lp.z, 1)],
 		"up": snappedf(float(_c[i].get("lup", 1.0)), 0.01), "v": snappedf(float(_c[i].get("lv", 0.0)), 0.1),
-		"touch": String(_c[i].get("ltouch", ""))})
+		"touch": String(_c[i].get("ltouch", "")), "eject": String(_c[i].get("ejected", ""))})
+	_c[i]["ejected"] = ""
 	if not o.is_empty():
 		o["resp"] = int(o["resp"]) + 1
 

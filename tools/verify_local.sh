@@ -229,6 +229,11 @@ run_step "Cariera: config, persistenta, gating, raft" career.log 'VERDICT:' -- \
 # baremul 6-5-4-3-2-1 si o cursa reala in cupa (grila, titlu, departajare).
 run_step "World Cup: cupe, adversari unici, puncte, cursa" world_cup.log 'VERDICT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeWorldCup.tscn
+# QUICK RACE (#680): grila arata exact pistele de lansare, fara bancurile de
+# test (Dunele, Okinawa manual), fara doua cartonase "Okinawa"; cariera si
+# cupele nu trimit pe un banc de test; registrul TRACK_SCENES nu s-a tasat.
+run_step "Quick Race: piste de lansare, fara bancuri de test" quick_race.log 'VERDICT:' -- \
+	--headless --fixed-fps 60 --path . res://tools/ProbeQuickRace.tscn
 
 # Decorul asezat pe solul de la generare ramane sub teren cand terenul creste
 # dupa aceea: padurea Lerai ajunsese la 20-30 m sub peretele craterului.

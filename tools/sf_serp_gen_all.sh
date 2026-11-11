@@ -15,13 +15,16 @@ cd "$(dirname "$0")/.."
 GODOT="${GODOT:-D:/GameDev/Godot_v4.7-stable_win64_console.exe}"
 SHAPES="${SHAPES:-8 10 12}"
 WIDTHS="${WIDTHS:-3.5 4 4.5}"
+# RE: raza virajelor de 90 ale scurtaturii (intrare, iesire, gura). Implicit 10;
+# runda 2 masoara si RE=16 (aceeasi raza ca acele) — sufix "E16" in nume.
+RE="${RE:-10}"
 for shape in $SHAPES; do
   R="${shape%%:*}"
   B=270
   [[ "$shape" == *:* ]] && B="${shape##*:}"
-  csv="tools/data/sf_serp/main_R${R}_L8_E10_B${B}.csv"
+  csv="tools/data/sf_serp/main_R${R}_L8_E${RE}_B${B}.csv"
   if [[ ! -f "$csv" ]]; then
-    R=$R BW=3.5 BYPASS=$B AI=1.0 SUFIX=_tmp python tools/gen_sf_serpentine.py
+    R=$R BW=3.5 RE=$RE BYPASS=$B AI=1.0 SUFIX=_tmp python tools/gen_sf_serpentine.py
     tmp="res://tools/SondaSfSerpR${R}W7_tmp.tscn"
     [[ "$B" != 270 ]] && tmp="res://tools/SondaSfSerpR${R}W7_tmp.tscn"
     timeout 300 "$GODOT" --headless --fixed-fps 60 --path . res://tools/ProbeSfSerp.tscn -- \
@@ -31,8 +34,9 @@ for shape in $SHAPES; do
   for BW in $WIDTHS; do
     suffix=""
     [[ "$B" != 270 ]] && suffix="B${B}"
-    R=$R BW=$BW BYPASS=$B AI=1.0 SUFIX="${suffix}F" python tools/gen_sf_serpentine.py
-    R=$R BW=$BW BYPASS=$B SUFIX="${suffix}N" python tools/gen_sf_serpentine.py
-    R=$R BW=$BW BYPASS=$B AI=0.0 SUFIX="${suffix}O" python tools/gen_sf_serpentine.py
+    [[ "$RE" != 10 ]] && suffix="${suffix}E${RE}"
+    R=$R BW=$BW RE=$RE BYPASS=$B AI=1.0 SUFIX="${suffix}F" python tools/gen_sf_serpentine.py
+    R=$R BW=$BW RE=$RE BYPASS=$B SUFIX="${suffix}N" python tools/gen_sf_serpentine.py
+    R=$R BW=$BW RE=$RE BYPASS=$B AI=0.0 SUFIX="${suffix}O" python tools/gen_sf_serpentine.py
   done
 done

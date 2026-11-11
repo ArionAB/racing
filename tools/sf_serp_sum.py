@@ -38,8 +38,10 @@ def solo_table(solo):
         ocol = {r["ci"]: r["t"] for r in res if r["pilot"] == "ai" and r["route"] == 0 and r["done"]}
         if ocol:
             ts = list(ocol.values())
-            print("  %-16s %-8s | ocol  | %3d/%-3d        | %5.2f [%5.2f-%5.2f]  |" % (
-                scene, walls, len(ts), len(ts), med(ts), min(ts), max(ts)))
+            ob = [r.get("bar", 0) for r in res if r["pilot"] == "ai" and r["route"] == 0 and r["done"]]
+            otf = [r.get("t_full", -1) for r in res if r["pilot"] == "ai" and r["route"] == 0 and r["done"] and r.get("t_full", -1) >= 0]
+            print("  %-16s %-8s | ocol  | %3d/%-3d        | %5.2f [%5.2f-%5.2f]  | bara %.2f bare med, plina dupa %.1f s" % (
+                scene, walls, len(ts), len(ts), med(ts), min(ts), max(ts), med(ob), med(otf)))
         for pilot in ("ai", "pro", "wide", "line"):
             rs = [r for r in res if r["pilot"] == pilot and r["route"] == 1]
             if not rs:
@@ -52,6 +54,12 @@ def solo_table(solo):
                 med(ds), min(ds) if ds else 0, max(ds) if ds else 0,
                 med([r["off"] for r in rs]), sum(r["walls"] for r in rs), sum(r["resp"] for r in rs),
                 sum(r["stuck"] for r in rs), sum(r["wrong"] for r in rs)))
+            bars = [r.get("bar", 0) for r in ok]
+            tf = [r.get("t_full", -1) for r in ok if r.get("t_full", -1) >= 0]
+            print("  %-16s %-8s |       | bara: %.2f bare med [%.2f-%.2f], plina dupa %.1f s med | bordura atinsa %d ori (%d treceri), fatada %d" % (
+                "", "", med(bars), min(bars) if bars else 0, max(bars) if bars else 0, med(tf),
+                sum(r.get("curb_n", 0) for r in rs), sum(1 for r in rs if r.get("curb_n", 0) > 0),
+                sum(r.get("facade_n", 0) for r in rs)))
             if pilot == "pro":
                 print("  %-16s %-8s |       | viteza in ace aleasa (m/s): %s" % (
                     "", "", " ".join("%s:%g" % (r["car"].split()[0], r["alat"]) for r in rs)))
@@ -65,6 +73,12 @@ def main(paths):
                 if line.startswith("SFSOLO_JSON "):
                     d = json.loads(line[len("SFSOLO_JSON "):])
                     w = "fara" if d["walls"][0] < 0 else "%g/%g" % (d["walls"][0], d["walls"][1])
+                    inn = d.get("inner", [-1, 0])
+                    if inn[0] >= 0:
+                        w += " int%.2g" % inn[1]
+                    base = os.path.basename(p)
+                    if "fill" in base:
+                        w += "plin"
                     solo[(d["scene"].replace("SondaSfSerp", "").replace(".tscn", ""), w)] = d["results"]
     if solo:
         solo_table(solo)
@@ -102,8 +116,11 @@ def main(paths):
             st = sum(p["stuck"] for p in ps)
             rp = sum(p["resp"] for p in ps)
             wl = sum(p["walls"] for p in ps)
-            print("  %4d | %7d | %6d | %5.2f [%5.2f-%5.2f]      | %6.2f s    | %15d | %9d | %10d | %8d | %d" % (
-                route, len(ps), inc, pct(ts, 0.5), pct(ts, 0.1), pct(ts, 0.9), off, wrong, rev, st, rp, wl))
+            cb = sum(1 for p in ps if p.get("curb_n", 0) > 0)
+            pst = sum(1 for p in ps if p["stuck"] > 0)
+            prp = sum(1 for p in ps if p["resp"] > 0)
+            print("  %4d | %7d | %6d | %5.2f [%5.2f-%5.2f]      | %6.2f s    | %15d | %9d | %10d | %8d | %d | treceri cu blocaj %d, cu repunere %d, cu bordura %d" % (
+                route, len(ps), inc, pct(ts, 0.5), pct(ts, 0.1), pct(ts, 0.9), off, wrong, rev, st, rp, wl, pst, prp, cb))
         out_st = sum(1 for r in rs for e in r["stuck"] if not e["in_seg"])
         out_rp = sum(1 for r in rs for e in r["respawns"] if not e["in_seg"])
         print("  restul buclei: [blocaj] %d, repuneri %d" % (out_st, out_rp))

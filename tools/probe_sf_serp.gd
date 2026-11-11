@@ -220,8 +220,23 @@ class SkilledAI extends AIController:
 	var r_tight: float = 14.0
 	var rad: Dictionary = {}
 	var _cap: float = 99.0
+	## Runda 2: bara se masoara, deci turbo-ul nu se arde niciodata.
+	var no_turbo: bool = true
+	## Greseala „taiat la interior" in acul 2: linia AI-ului impinsa la maximum
+	## (LINE_MAX) spre centrul acului, ca sa atinga bordura interioara.
+	var cut_h2: bool = false
+
+	func is_turbo_pressed() -> bool:
+		return false if no_turbo else super.is_turbo_pressed()
 
 	func update(delta: float) -> void:
+		if cut_h2:
+			line_offset = 0.0
+			if car.route == 1 and Vector2(car.global_position.x - h2.x, car.global_position.z - h2.y).length() < h2_r:
+				var r1: TrackRoute = track.route_at(1)
+				var ii := clampi(car.road_index, 0, r1.baked.size() - 1)
+				var to_c := Vector3(h2.x, 0.0, h2.y) - r1.baked[ii]
+				line_offset = 0.8 * signf(r1.side_at(ii).dot(to_c))
 		super.update(delta)
 		_cap = 99.0
 		# doar pe scurtatura (ruta 1): pe ocol pilotul e AI-ul neschimbat
@@ -294,6 +309,14 @@ var _walls: Vector2 = Vector2(-1.0, 0.0)
 ## A treia valoare din `--walls=off,h,0`: fara zid pe INTERIORUL acelor (acolo
 ## brief-ul pune straturile de hortensii, moi, fara coliziune).
 var _walls_inner: bool = true
+## `--inner=off,h`: zid (bordura / strat solid) pe INTERIORUL acelor si intre
+## brate, la `off` m de margine, inalt de `h` m. Runda 2: (a) bordura 0,35 m,
+## (b) strat solid 0,8 m. Lipsa = interior moale (iarba, 45%).
+var _inner: Vector2 = Vector2(-1.0, 0.0)
+## A treia valoare din `--inner=off,h,fill`: stratul e un BLOC plin pana la bratul
+## opus / centrul acului, nu o bordura subtire (altfel o masina intra pe dupa
+## capatul liber al bordurii si ramane prinsa intre ea si strat — vazut pe trace).
+var _inner_fill: bool = false
 var _wall_body: StaticBody3D = null
 
 var _track: Track
@@ -331,6 +354,10 @@ func _ready() -> void:
 			var wv := arg.trim_prefix("--walls=").split(",")
 			_walls = Vector2(float(wv[0]), float(wv[1]) if wv.size() > 1 else 1.5)
 			_walls_inner = wv.size() < 3 or wv[2] != "0"
+		elif arg.begins_with("--inner="):
+			var iv := arg.trim_prefix("--inner=").split(",")
+			_inner = Vector2(float(iv[0]), float(iv[1]) if iv.size() > 1 else 0.35)
+			_inner_fill = iv.size() > 2 and iv[2] == "fill"
 		elif arg.begins_with("--rneed="):
 			_r_need = float(arg.trim_prefix("--rneed="))
 		elif arg.begins_with("--lead="):
@@ -391,38 +418,58 @@ func _load_track() -> bool:
 
 
 func _build_walls() -> void:
-	if _walls.x < 0.0 or _track.routes.size() < 2:
+	if (_walls.x < 0.0 and _inner.x < 0.0) or _track.routes.size() < 2:
 		return
 	var b: TrackRoute = _track.routes[1]
 	var main: TrackRoute = _track.routes[0]
 	var hw := b.half_width
-	var body := StaticBody3D.new()
-	body.name = "ZidSerp"
-	_track.add_child(body)
-	_wall_body = body
+	var outer_body := StaticBody3D.new()
+	outer_body.name = "ZidSerp"
+	_track.add_child(outer_body)
+	var inner_body := StaticBody3D.new()
+	inner_body.name = "BorduraInt"
+	_track.add_child(inner_body)
+	_wall_body = outer_body
 	var made := 0
+	var made_in := 0
 	for side: float in [-1.0, 1.0]:
 		var prev := Vector3.INF
+		var prev_kind := ""
 		for i in b.baked.size():
 			var p: Vector3 = b.baked[i]
 			var a: Vector3 = b.baked[maxi(i - 1, 0)]
 			var c: Vector3 = b.baked[mini(i + 1, b.baked.size() - 1)]
 			var d := Vector3(c.x - a.x, 0.0, c.z - a.z).normalized()
 			var right := d.cross(Vector3.UP).normalized()
-			var w := p + right * side * (hw + _walls.x + 0.2)
-			var ok := true
+			var dir := right * side
+			var inner := _is_inner(b, i, p, dir, hw)
+			var kind := ""
+			var off := 0.0
+			var h := 0.0
+			if inner and _inner.x >= 0.0:
+				kind = "in"
+				off = _inner.x
+				h = _inner.y
+			elif inner and _walls_inner and _walls.x >= 0.0:
+				kind = "out"
+				off = _walls.x
+				h = _walls.y
+			elif not inner and _walls.x >= 0.0:
+				kind = "out"
+				off = _walls.x
+				h = _walls.y
+			var w := p + dir * (hw + off + 0.2)
+			var depth := 0.4
+			if kind == "in" and _inner_fill:
+				depth = _fill_depth(b, i, p, dir, hw)
+			var ok := kind != ""
 			# langa bucla (furca, gura): fara zid
-			for q in main.baked:
-				if Vector2(q.x - w.x, q.z - w.z).length() < main.half_width + 3.0:
-					ok = false
-					break
-			# interiorul acului (hortensiile din brief), daca s-a cerut
-			if ok and not _walls_inner:
-				for h in _hairpins:
-					if Vector2(w.x - h.x, w.z - h.y).length() < _hp_r:
+			if ok:
+				for q in main.baked:
+					if Vector2(q.x - w.x, q.z - w.z).length() < main.half_width + 3.0:
 						ok = false
 						break
-			# peste alt tronson al benzii (interiorul acului): fara zid
+			# peste alt tronson al benzii: fara zid
 			if ok:
 				for k in b.baked.size():
 					if absi(k - i) < 3:
@@ -431,8 +478,10 @@ func _build_walls() -> void:
 					if Vector2(q.x - w.x, q.z - w.z).length() < hw + 0.3:
 						ok = false
 						break
-			if not ok:
+			if not ok or kind != prev_kind:
 				prev = Vector3.INF
+			if not ok:
+				prev_kind = ""
 				continue
 			if prev != Vector3.INF:
 				var seg := Vector3(w.x - prev.x, 0.0, w.z - prev.z)
@@ -440,16 +489,63 @@ func _build_walls() -> void:
 				if L > 0.05:
 					var cs := CollisionShape3D.new()
 					var box := BoxShape3D.new()
-					box.size = Vector3(0.4, _walls.y + 0.6, L + 0.15)
+					box.size = Vector3(depth, h + 0.6, L + 0.15)
 					cs.shape = box
-					var mid := (w + prev) * 0.5
-					mid.y = minf(w.y, prev.y) + (_walls.y + 0.6) * 0.5 - 0.6
+					var mid := (w + prev) * 0.5 + dir * (depth - 0.4) * 0.5
+					mid.y = minf(w.y, prev.y) + (h + 0.6) * 0.5 - 0.6
 					cs.transform = Transform3D(Basis.looking_at(seg.normalized(), Vector3.UP), mid)
-					body.add_child(cs)
-					made += 1
+					if kind == "in":
+						inner_body.add_child(cs)
+						made_in += 1
+					else:
+						outer_body.add_child(cs)
+						made += 1
 			prev = w
-	print("  ziduri pe scurtatura: %d segmente, la %.1f m de margine, %.2f m peste drum%s" % [
-		made, _walls.x, _walls.y, "" if _walls_inner else ", fara zid in interiorul acelor"])
+			prev_kind = kind
+	print("  ziduri pe scurtatura: %d segmente exterioare (%.1f m de margine, %.2f m)%s; interior: %s" % [
+		made, _walls.x, _walls.y, "" if _walls_inner else " doar pe exterior",
+		"moale (fara coliziune)" if _inner.x < 0.0 else "%d segmente la %.1f m de margine, %.2f m inalte" % [made_in, _inner.x, _inner.y]])
+
+
+## Cat de adanc umple stratul solid de pe partea `dir`: pana la jumatatea
+## distantei pana la bratul opus (care umple si el jumatatea lui), sau pana la
+## centrul acului. Plafonat la 2R.
+func _fill_depth(b: TrackRoute, i: int, p: Vector3, dir: Vector3, hw: float) -> float:
+	var t := hw + 1.0
+	while t < 2.0 * _hp_r + hw + 3.0:
+		var m := p + dir * t
+		for k in range(0, b.baked.size(), 2):
+			if absi(k - i) < 10:
+				continue
+			var q: Vector3 = b.baked[k]
+			if Vector2(q.x - m.x, q.z - m.z).length() < hw + 0.5:
+				return clampf((t - 2.0 * hw) * 0.5 + 0.5, 0.4, 2.0 * _hp_r)
+		t += 1.0
+	var best := 2.0 * _hp_r
+	for h in _hairpins:
+		best = minf(best, Vector2(p.x - h.x, p.z - h.y).length() - hw)
+	return clampf(best, 0.4, 2.0 * _hp_r)
+
+
+## Partea `dir` a punctului i e INTERIORUL unui ac: fie spre un alt tronson al
+## benzii (spatiul dintre doua brate, unde brief-ul pune straturile), fie in
+## cercul acului.
+func _is_inner(b: TrackRoute, i: int, p: Vector3, dir: Vector3, hw: float) -> bool:
+	for h in _hairpins:
+		var w := p + dir * (hw + 0.5)
+		if Vector2(w.x - h.x, w.z - h.y).length() < _hp_r:
+			return true
+	var t := hw + 1.0
+	while t < 2.0 * _hp_r + hw + 3.0:
+		var m := p + dir * t
+		for k in range(0, b.baked.size(), 2):
+			if absi(k - i) < 10:
+				continue
+			var q: Vector3 = b.baked[k]
+			if Vector2(q.x - m.x, q.z - m.z).length() < hw + 0.5:
+				return true
+		t += 1.5
+	return false
 
 
 # ------------------------------------------------------------------ dump
@@ -684,9 +780,9 @@ func _do_solo() -> void:
 	for ci in _cars:
 		for pilot in _pilots:
 			for route in _routes:
-				if pilot in ["wide", "line", "pro"] and route == 0:
+				if pilot in ["wide", "line", "pro", "cut"] and route == 0:
 					continue
-				if pilot in ["pro", "wide"]:
+				if pilot in ["pro", "wide", "cut"]:
 					var best: Dictionary = {}
 					var all_runs: Array[Dictionary] = []
 					for al in _alats:
@@ -701,7 +797,9 @@ func _do_solo() -> void:
 						# intre benzi); pentru wide: cea mai buna care CHIAR a gresit
 						var ok := bool(r["done"]) and int(r["resp"]) == 0
 						if pilot == "pro":
-							ok = ok and float(r["off"]) <= 1.5 and int(r["walls"]) == 0
+							ok = ok and float(r["off"]) <= 1.5 and int(r["walls"]) == 0 								and int(r["curb_n"]) == 0
+						elif pilot == "cut":
+							ok = ok and int(r["curb_n"]) > 0
 						else:
 							ok = ok and (float(r["off"]) > 1.5 or int(r["walls"]) > 0)
 						if ok and (best.is_empty() or float(r["t"]) < float(best["t"])):
@@ -718,6 +816,7 @@ func _do_solo() -> void:
 					_print_row(r)
 	_solo_summary(results)
 	print("SFSOLO_JSON " + JSON.stringify({"scene": _scene.get_file(), "walls": [_walls.x, _walls.y],
+		"inner": [_inner.x, _inner.y], "walls_inner": _walls_inner,
 		"results": results}))
 	get_tree().quit(0)
 
@@ -726,10 +825,10 @@ func _print_row(r: Dictionary) -> void:
 	var apex := ""
 	for v: float in r["apex"]:
 		apex += "%5.1f" % v
-	print("  %-11s %-5s ruta %d a_lat %4.1f | %s t %6.2f s | v_med %4.1f | apex%s | off %4.2f s | lent %4.2f | frana %4.2f | mars %4.2f | contra %4.2f | drift %4.2f | bara +%.2f | perete %d (%.0f) | resp %d | blocaj %d %s" % [
+	print("  %-11s %-5s ruta %d a_lat %4.1f | %s t %6.2f s | v_med %4.1f | apex%s | off %4.2f s | lent %4.2f | frana %4.2f | mars %4.2f | contra %4.2f | drift %4.2f | bara +%.2f | bordura %d (%.2f s) fatada %d | perete %d (%.0f) | resp %d | blocaj %d %s" % [
 		r["car"], r["pilot"], r["route_used"], r["alat"], "OK " if r["done"] else "NU ",
 		r["t"], r["vmed"], apex, r["off"], r["slow"], r["brake"], r["rev"], r["wrong"], r["drift"],
-		r["bar"], r["walls"], r["wall_max"], r["resp"], r["stuck"], String(r.get("note", ""))])
+		r["bar"], r["curb_n"], r["curb_s"], r["facade_n"], r["walls"], r["wall_max"], r["resp"], r["stuck"], String(r.get("note", ""))])
 
 
 func _run_solo(ci: int, pilot: String, route: int, alat: float) -> Dictionary:
@@ -753,12 +852,17 @@ func _run_solo(ci: int, pilot: String, route: int, alat: float) -> Dictionary:
 	car.last_safe_index = si
 	var ai: AIController = null
 	var pp: PathPilot = null
-	if pilot in ["ai", "pro", "wide"]:
-		if pilot == "ai":
-			ai = AIController.new()
-		else:
+	if pilot in ["ai", "pro", "wide", "cut"]:
+		if true:
+			# „ai" = AIController neschimbat (cap 99 m/s = fara punct de franare);
+			# toti pilotii AI au turbo-ul blocat, ca bara sa se poata masura
 			var sk := SkilledAI.new()
-			sk.v_hair = alat
+			sk.v_hair = 99.0 if pilot == "ai" else alat
+			sk.r_tight = maxf(14.0, _hp_r * 1.25)
+			if pilot == "cut" and _hairpins.size() >= 2:
+				sk.cut_h2 = true
+				sk.h2 = _hairpins[1]
+				sk.h2_r = _hp_r + 6.0
 			if pilot == "wide" and _hairpins.size() >= 2:
 				sk.v_h2 = alat + 5.0
 				sk.h2 = _hairpins[1]
@@ -808,16 +912,24 @@ func _run_solo(ci: int, pilot: String, route: int, alat: float) -> Dictionary:
 	var prev := car.global_position
 	var st := _new_seg_stats()
 	var bar0 := 0.0
+	var t_full := -1.0
 	var route_used := 0
 	while t < 60.0:
 		await get_tree().physics_frame
 		t += 1.0 / 60.0
-		if ai != null:
-			car.turbo_charge = 0.0
 		var p := car.global_position
+		# bara se numara NESATURATA: cand trece de 0,9 se muta in contor si se
+		# goleste (umplerea e liniara in timp, x2,5 in drift), deci rezultatul e
+		# in „bare" si poate trece de 1
+		if t_in >= 0.0 and t_out < 0.0 and t_full < 0.0 and car.turbo_charge - bar0 >= 1.0:
+			t_full = t - t_in
+		if t_in >= 0.0 and t_out < 0.0 and car.turbo_charge > 0.9:
+			bar0 -= car.turbo_charge
+			car.turbo_charge = 0.0
 		if t_in < 0.0 and _cross_in(prev, p):
 			t_in = t
-			bar0 = car.turbo_charge
+			car.turbo_charge = 0.0
+			bar0 = 0.0
 			ev["resp"] = 0
 			ev["walls"] = 0
 			ev["wall_max"] = 0.0
@@ -844,7 +956,8 @@ func _run_solo(ci: int, pilot: String, route: int, alat: float) -> Dictionary:
 		"vmed": float(st["dist"]) / maxf(t_out - t_in, 0.01) if t_out > 0.0 else 0.0,
 		"apex": apex, "off": st["off"], "slow": st["slow"], "brake": st["brake"],
 		"rev": st["rev"], "wrong": st["wrong"], "drift": st["drift_s"],
-		"bar": (car.turbo_charge - bar0) if ai == null else 0.0,
+		"bar": car.turbo_charge - bar0, "t_full": t_full, "curb_n": st["curb_n"], "curb_s": st["curb_s"],
+		"facade_n": st["facade_n"],
 		"walls": ev["walls"], "wall_max": ev["wall_max"], "resp": int(ev["resp"]) + int(ev["eject"]),
 		"stuck": st["stuck_n"],
 	}
@@ -902,7 +1015,8 @@ func _new_seg_stats() -> Dictionary:
 		ap.append(99.0)
 	return {"off": 0.0, "slow": 0.0, "brake": 0.0, "rev": 0.0, "wrong": 0.0,
 		"drift_s": 0.0, "dist": 0.0, "stuck_t": 0.0, "stuck_n": 0, "apex": ap,
-		"last": Vector3.INF, "stuck_where": []}
+		"last": Vector3.INF, "stuck_where": [], "curb_n": 0, "curb_s": 0.0, "in_curb": false,
+		"facade_n": 0, "in_facade": false}
 
 
 ## Un tick in segment: cronometrele de stare.
@@ -937,6 +1051,23 @@ func _seg_tick(car: Car, st: Dictionary, dt: float, _idx: int) -> void:
 			st["wrong"] = float(st["wrong"]) + dt
 	if car.is_drifting:
 		st["drift_s"] = float(st["drift_s"]) + dt
+	# contactul cu bordura / stratul interior si cu fatadele (atingeri = fronturi)
+	var curb := false
+	var facade := false
+	for body in car.get_colliding_bodies():
+		var nm := String((body as Node).name)
+		if nm == "BorduraInt":
+			curb = true
+		elif nm == "ZidSerp":
+			facade = true
+	if curb:
+		st["curb_s"] = float(st["curb_s"]) + dt
+		if not bool(st["in_curb"]):
+			st["curb_n"] = int(st["curb_n"]) + 1
+	st["in_curb"] = curb
+	if facade and not bool(st["in_facade"]):
+		st["facade_n"] = int(st["facade_n"]) + 1
+	st["in_facade"] = facade
 	var ap: Array = st["apex"]
 	for k in _hairpins.size():
 		var h := _hairpins[k]
@@ -1186,6 +1317,7 @@ func _close_pass(i: int, done: bool) -> void:
 		"rev": snappedf(float(o["rev"]), 0.01), "wrong": snappedf(float(o["wrong"]), 0.01),
 		"drift": snappedf(float(o["drift_s"]), 0.01), "stuck": int(o["stuck_n"]),
 		"resp": int(o["resp"]), "walls": int(o["walls"]), "wall_max": snappedf(float(o["wall_max"]), 0.1),
+		"curb_n": int(o["curb_n"]), "curb_s": snappedf(float(o["curb_s"]), 0.01), "facade_n": int(o["facade_n"]),
 		"apex": o["apex"]})
 	_c[i]["open"] = {}
 
@@ -1224,6 +1356,7 @@ func _race_report() -> void:
 	print("  [blocaj] total %d (%d in segment, %d pe restul buclei); repuneri %d" % [
 		_stuck_events.size(), _stuck_events.size() - outside, outside, _respawn_events.size()])
 	var out := {"scene": _scene.get_file(), "seed": _seed, "seconds": _t, "walls": [_walls.x, _walls.y],
+		"inner": [_inner.x, _inner.y],
 		"chance": _track.ai_shortcut_chance, "passes": _passes, "stuck": _stuck_events,
 		"respawns": _respawn_events}
 	print("SFSERP_JSON " + JSON.stringify(out))

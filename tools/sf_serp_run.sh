@@ -16,15 +16,23 @@ OUT="$2"
 mkdir -p "$OUT"
 JOBS="${JOBS:-4}"
 WALLS="${WALLS:-none 1.0,1.5}"
+# INNER: interiorul acelor (runda 2): "soft" sau valorile lui --inner (off,h[,fill])
+INNER="${INNER:-soft}"
+ALAT="${ALAT:-}"
+PILOTS="${PILOTS:-ai,pro,wide,line}"
 jobs_file="$OUT/jobs_$MODE.txt"
 : > "$jobs_file"
 if [[ "$MODE" == solo ]]; then
   SCENES="${SCENES:-R8W7F R8W9F R10W7F R10W9F R12W7F R12W9F}"
   for sc in $SCENES; do
     for w in $WALLS; do
-      wa=""; tag="${sc}_free"
-      [[ "$w" != none ]] && wa="--walls=$w" && tag="${sc}_walls${w/,/_}"
-      echo "timeout 3000 $GODOT --headless --fixed-fps 60 --path . res://tools/ProbeSfSerp.tscn -- --mode=solo --scene=res://tools/SondaSfSerp$sc.tscn --pilots=ai,pro,wide,line $wa > $OUT/solo_$tag.log 2>&1" >> "$jobs_file"
+      for inn in $INNER; do
+        wa=""; tag="${sc}_free"
+        [[ "$w" != none ]] && wa="--walls=$w" && tag="${sc}_walls${w//,/_}"
+        [[ "$inn" != soft ]] && wa="$wa --inner=$inn" && tag="${tag}_in${inn//,/_}"
+        [[ -n "$ALAT" ]] && wa="$wa --alat=$ALAT"
+        echo "timeout 3000 $GODOT --headless --fixed-fps 60 --path . res://tools/ProbeSfSerp.tscn -- --mode=solo --scene=res://tools/SondaSfSerp$sc.tscn --pilots=$PILOTS $wa > $OUT/solo_$tag.log 2>&1" >> "$jobs_file"
+      done
     done
   done
 else
@@ -32,11 +40,14 @@ else
   SEEDS="${SEEDS:-1 2 3 4 5 6 7 8}"
   for sc in $SCENES; do
     for w in $WALLS; do
+     for inn in $INNER; do
       wa=""; tag="${sc}_free"
-      [[ "$w" != none ]] && wa="--walls=$w" && tag="${sc}_walls${w/,/_}"
+      [[ "$w" != none ]] && wa="--walls=$w" && tag="${sc}_walls${w//,/_}"
+      [[ "$inn" != soft ]] && wa="$wa --inner=$inn" && tag="${tag}_in${inn//,/_}"
       for s in $SEEDS; do
         echo "timeout 900 $GODOT --headless --fixed-fps 60 --path . res://tools/ProbeSfSerp.tscn -- --mode=race --scene=res://tools/SondaSfSerp$sc.tscn --seed=$s --seconds=150 $wa > $OUT/race_${tag}_s$s.log 2>&1" >> "$jobs_file"
       done
+     done
     done
   done
 fi

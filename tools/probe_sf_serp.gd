@@ -641,6 +641,29 @@ func _do_dump() -> void:
 			f.store_line("%d,%.3f,%.3f,%.3f" % [i, p.x, p.y, p.z])
 		f.close()
 	print("dump: ruta 0 %d puncte copte, %.1f m -> %s" % [n, r.length(), _out])
+	# `--pts=x,z,x,z,...`: ce e sub fiecare punct (raycast vertical): corpul si
+	# cota, fata de cota benzii celei mai apropiate (diagnostic pentru pereti)
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--pts="):
+			await get_tree().physics_frame
+			var v := arg.trim_prefix("--pts=").split(",")
+			var space := _track.get_world_3d().direct_space_state
+			var b1: TrackRoute = _track.routes[1]
+			for k in range(0, v.size() - 1, 2):
+				var x := float(v[k])
+				var z := float(v[k + 1])
+				var q := PhysicsRayQueryParameters3D.create(Vector3(x, 80, z), Vector3(x, -40, z))
+				var hit := space.intersect_ray(q)
+				var by := 0.0
+				var bd := INF
+				for bp in b1.baked:
+					var dd := Vector2(bp.x - x, bp.z - z).length()
+					if dd < bd:
+						bd = dd
+						by = bp.y
+				print("  pct (%.0f,%.0f): %s y=%.2f | banda la %.1f m, cota %.2f, diferenta %+.2f" % [
+					x, z, String((hit["collider"] as Node).name) if hit else "-", float(hit["position"].y) if hit else 0.0,
+					bd, by, (float(hit["position"].y) - by) if hit else 0.0])
 	_print_geometry()
 	get_tree().quit(0)
 

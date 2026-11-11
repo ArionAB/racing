@@ -40,9 +40,12 @@ func _ready() -> void:
 	_main_box.add_child(garage_btn)
 	var settings_btn := _make_button("SETTINGS")
 	_main_box.add_child(settings_btn)
-	var quit := _make_button("QUIT")
-	quit.pressed.connect(func() -> void: get_tree().quit())
-	_main_box.add_child(quit)
+	# QUIT doar pe desktop (#692): Apple respinge aplicatiile cu buton de
+	# iesire, iar pe Android iesirea e gestul / butonul „inapoi” al sistemului.
+	if not _has_platform_feature("mobile"):
+		var quit := _make_button("QUIT")
+		quit.pressed.connect(func() -> void: get_tree().quit())
+		_main_box.add_child(quit)
 
 	var track_panel := _build_track_panel()
 	quick.pressed.connect(func() -> void: _show_panel(track_panel))
@@ -141,3 +144,9 @@ func _make_button(text: String) -> Button:
 	button.custom_minimum_size = Vector2(360, 66)
 	button.add_theme_font_size_override("font_size", 30)
 	return button
+
+## Eticheta de platforma (`mobile` = iOS + Android) intr-o functie separata:
+## `OS.has_feature` nu se poate falsifica, asa ca ProbeMainMenuQuit o
+## suprascrie ca sa vada meniul de pe telefon.
+func _has_platform_feature(tag: String) -> bool:
+	return OS.has_feature(tag)

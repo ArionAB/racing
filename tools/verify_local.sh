@@ -196,6 +196,11 @@ run_step "Registrul MeshCpu (citiri GPU refolosite)" meshcpu.log 'MeshCpu:' -- \
 # simultan (gaz+drift, gaz+turbo) nu se ating.
 run_step "Controale touch: maparea si distantele" touch_zones.log 'VERDICT:' -- \
 	--headless --path . res://tools/ProbeTouchZones.tscn
+# Fara QUIT pe mobil (#692): Apple respinge aplicatiile cu buton de iesire.
+# Meniul real, cu etichetele de platforma simulate; plus coloana fara gol si
+# nicio alta iesire (`quit(`) in scenes/ si scripts/.
+run_step "Meniul principal: fara QUIT pe iOS/Android, intreg" main_menu_quit.log 'VERDICT:' -- \
+	--headless --path . res://tools/ProbeMainMenuQuit.tscn
 
 # Garajul: normalizarea barelor pe intervalul REAL al masinilor, masa ca axa
 # cu semn (nu bara care se umple), conturul-fantoma bidirectional si
@@ -229,6 +234,11 @@ run_step "World Cup: cupe, adversari unici, puncte, cursa" world_cup.log 'VERDIC
 # autor si licenta, motorul din API, layout la 1280x720 si pe telefon.
 run_step "Credite: sursa in export, inventar, ecran, layout" credits.log 'VERDICT:' -- \
 	--headless --path . res://tools/ProbeCredits.tscn
+# QUICK RACE (#680): grila arata exact pistele de lansare, fara bancurile de
+# test (Dunele, Okinawa manual), fara doua cartonase "Okinawa"; cariera si
+# cupele nu trimit pe un banc de test; registrul TRACK_SCENES nu s-a tasat.
+run_step "Quick Race: piste de lansare, fara bancuri de test" quick_race.log 'VERDICT:' -- \
+	--headless --fixed-fps 60 --path . res://tools/ProbeQuickRace.tscn
 
 # Decorul asezat pe solul de la generare ramane sub teren cand terenul creste
 # dupa aceea: padurea Lerai ajunsese la 20-30 m sub peretele craterului.

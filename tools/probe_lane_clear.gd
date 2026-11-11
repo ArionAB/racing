@@ -382,6 +382,11 @@ const BASELINE := {
 	# (`RadacinaRampa_col`, suprafata de rulare, scuzata pe nume ca podea): toate pe testul INAINTE la
 	# h 0,4/1,0 — raza orizontala loveste panta de 17% in fata, ca la `FlyoffRamp`. 7 + 34 = 41.
 	"Angkor (Track24)": 41,
+	# San Francisco (Track25), armata la pasul 2 (brief san_francisco.md §7, 11 nov 2026): traseul
+	# gol, plus geometria gri a serpentinelor (straturile retrase 2 m, fatadele la 1 m, acostamentul
+	# la cota drumului — `SerpentineGri`). 0 raportari, masurate de 2 ori. Baza = 0, fara marja: orice
+	# corp in banda e acum o regresie. Sabotaj (`--sabotaj`) verificat la armare.
+	"San Francisco (Track25)": 0,
 }
 
 

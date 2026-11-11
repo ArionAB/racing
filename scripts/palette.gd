@@ -970,6 +970,19 @@ const CLASS_TEXTURES := {
 	"shu_vermilion": "res://assets/textures/classes/wood.png",
 	"shu_red": "res://assets/textures/classes/wood.png",
 	"bamboo_culm": "res://assets/textures/classes/wood.png",
+	# SAN FRANCISCO (docs/track_briefs/san_francisco.md §4, pasul 0): scandura orizontala
+	# suprapusa a caselor victoriene. Dala NOUA, generata (tools/gen_sf_clapboard.py), NEUTRA si
+	# deschisa: culoarea o dau cele cinci tente de mai jos, toate pe ACEEASI imagine (un singur
+	# PNG in memorie, cinci materiale = cinci pasteluri, ca varul Jodhpurului). Dala poarta
+	# muchii de FORMA (umbra de sub buza fiecarei scanduri), nu granulatie.
+	"sf_clapboard": "res://assets/textures/classes/sf_clapboard.png",
+	"sf_clapboard_pink": "res://assets/textures/classes/sf_clapboard.png",
+	"sf_clapboard_blue": "res://assets/textures/classes/sf_clapboard.png",
+	"sf_clapboard_mint": "res://assets/textures/classes/sf_clapboard.png",
+	"sf_clapboard_butter": "res://assets/textures/classes/sf_clapboard.png",
+	# Caramida strazii cu serpentine: dala `roof_tiles` (randuri de olane = asize), clasa
+	# SEPARATA ca `roof_tiles`/`kawara`/`ok_roof` sa ramana neatinse. Zero imagini noi.
+	"sf_brick": "res://assets/textures/classes/roof_tiles.png",
 }
 
 ## Tente de albedo per clasa, inmultite peste textura. Pentru clasele care
@@ -1312,6 +1325,29 @@ const CLASS_TINT := {
 	# CACTUS_GREEN 12 (91, 124, 52), aceeasi ridicare (imagine proprie, NErotita:
 	# rosturile orizontale sunt nodurile tulpinii): atinsa exact.
 	"bamboo_culm": Color(0.4630, 0.7804, 0.4797),
+	# San Francisco: cele cinci pasteluri pe dala `sf_clapboard`. Tinta = culoarea FETEI de
+	# scandura (pixelii fara dunga de umbra, media liniara (0.8814, 0.8616, 0.8227)), tenta =
+	# tinta / fata, in spatiu liniar, trecuta inapoi in sRGB. Toate canalele sub 1: dala e
+	# deschisa tocmai ca tenta sa poata doar intuneca. Ancorele din brief §4:
+	#   crem        ECE2CC ~ CORAL_SAND 19 (E9DCC0), un pas mai palid
+	#   roz         D69CAC ~ FLAMINGO_PINK 31 (D2A0BE), putin mai cald, ca sa nu vireze mov
+	#   albastru    98B2D8 = familia PAINTED_METAL 11 (7692A8), deschisa la pastel
+	#   menta       A8D8BC = ICE_TURQUOISE 24 (7FC4C9) tras spre verde si deschis
+	#   galben-unt  DFC278 = SAND_LIGHT 0 (E8C074), NU CAR_YELLOW
+	# Runda 1 (crem E9DCC0, albastru A8BED2, galben EED696) a iesit MASURAT prea aproape pe doua
+	# perechi: crem-galben dE2000 9,2 pe albedo si crem-albastru 11,4 pe cadru (soarele cald
+	# FFD2A0 face albastrul pal gri, #D3D0CA pe fata luminata). Albastrul s-a saturat, cremul s-a
+	# deschis, galbenul s-a saturat. Runda 3: rozul si galbenul
+	# coborate un pas (DCA5B4 -> D69CAC, F2D486 -> DFC278): pe diagonalele bovindoului spre soare
+	# se taiau la V 1,00 (mediana!), deci scandura disparea in alb. Minimul pe albedo e in tools/sf_loc_stats.py.
+	"sf_clapboard": Color(0.9785, 0.9465, 0.8724),
+	"sf_clapboard_pink": Color(0.8875, 0.6545, 0.7363),
+	"sf_clapboard_blue": Color(0.6313, 0.7463, 0.9235),
+	"sf_clapboard_mint": Color(0.6974, 0.9048, 0.8044),
+	"sf_clapboard_butter": Color(0.9247, 0.8130, 0.5151),
+	# Caramida A54E3C pe dala `roof_tiles` (media liniara 0.352, 0.178, 0.092). R ar cere 1.07,
+	# deci se taie la 1.0: caramida iese cu ~4% mai inchisa pe rosu decat tinta.
+	"sf_brick": Color(1.0, 0.6854, 0.7311),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -1758,6 +1794,15 @@ const CLASS_TRIPLANAR_SCALE := {
 	# cat distanta dintre nodurile unei tulpini moso — se citesc ca noduri.
 	"bamboo_culm": 0.5,
 	"moss": 1.4,
+	# San Francisco: 16 scanduri pe dala, 0.25 => o repetitie la 4 m, scandura de 25 cm
+	# (exagerata fata de cei ~12 cm reali: casa de jucarie, citita de la 10-40 m).
+	"sf_clapboard": 0.25,
+	"sf_clapboard_pink": 0.25,
+	"sf_clapboard_blue": 0.25,
+	"sf_clapboard_mint": 0.25,
+	"sf_clapboard_butter": 0.25,
+	# Caramida: scara `kawara` (0.15 => randul ~0.26 m).
+	"sf_brick": 0.15,
 }
 
 ## Ascutimea amestecului triplanar, pe clasele unde implicitul (1.0) strica

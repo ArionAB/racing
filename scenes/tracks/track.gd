@@ -4529,6 +4529,93 @@ static func themes() -> Dictionary:
 		],
 		"water": false,
 	}
+	# SAN FRANCISCO (Track25, docs/track_briefs/san_francisco.md §4; pasul 0 = testul de loc,
+	# scena sintetica tools/SfLoc.tscn). Ora aurie ASUMATA ca abatere: soare cald la 28 de grade,
+	# nu la 10-15, si ALINIAT cu strada lantului (din spate, +-20 de grade), ca o casa de 10 m
+	# sa-si arunce umbra in lungul trotuarului, nu peste carosabil (brief §4: la 20 de grade
+	# fata de ax doar ~6,5 m din cei ~19 cad pe drum). Ambient rece si mic, raport >= 3 (cifrele
+	# Carrarei dupa corectia de cyan). "Fara ceata" = fara ceata ca VREME si fara hazard de
+	# ceata (decizia dezvoltatorului, 10 nov 2026); pacla de distanta ramane, subtire, sub
+	# FAR_PLANE (inel < fog_end < 380, memoria `efecte-de-fundal-cote-legate`).
+	#
+	# Azimutul: conventia busolei din `carrara` (nord = -Z, Y 30 = soare din SE). Y -12 = soare
+	# din S-SV, la 12 grade de axul unei strazi care coboara spre NORD. MASURAT pe strada sintetica
+	# (tools/ProbeSfLoc.tscn --sun=28,AZ, raze spre soare din carosabil, casele de 10-13 m pe
+	# soclu): la -20 de grade (prima propunere) LANTUL statea la soare doar 67,6% — pe panta de
+	# 28% care coboara in sensul luminii umbra se LUNGESTE (~h / (tan 28 - 0,28 cos az)), deci
+	# socoteala de pe teren plat din brief (6,5 m pe carosabil) o subestima de doua ori. La -12:
+	# 85,1% (bloc 1 83,0, bloc 2 86,3), la -8: 93,3%. Elevatia ramane 28 (32 de grade la -12 da
+	# 89,2%). PROVIZORIU: se remasoara pe traseul real (memoria `azimutul-soarelui-fata-de-drum`)
+	# cu `custom_sun_rotation_deg`.
+	_themes_cache["sanfrancisco"] = {
+		"sun_color": Color.html("FFD2A0"),
+		"sun_energy": 1.25,
+		"exposure": 1.0,
+		"sun_rotation_deg": Vector3(-28, -12, 0),
+		"ambient_color": Color.html("BCCCE8"),
+		"ambient_energy": 0.32,
+		# Cer senin de dupa-amiaza: albastru curat sus, orizont alb-cald (caldura orei sta in
+		# lumina directa si in orizont, nu in ceata — memoria `ceata-in-familia-solului`).
+		"sky_top": Color.html("3C78C8"),
+		"sky_horizon": Color.html("EAE2D2"),
+		"sky_cover_alpha": 0.0,
+		# Pacla: SUBTIRE si aproape neutra (S 0,03), mai palida si mult mai putin saturata decat
+		# solul auriu si decat apa: departarea se spala spre alb-cald, nu spre bej (memoria
+		# `ceata-in-familia-solului` — o ceata saturata in familia solului nu face adancime).
+		"fog": Color(0.86, 0.855, 0.84),
+		"fog_sky_affect": 0.15,
+		"fog_depth": true,
+		"fog_begin": 170.0,
+		"fog_end": 360.0,
+		"fog_curve": 1.4,
+		"fog_max": 0.55,
+		"shadows": true,
+		"shadow_opacity": 0.70,
+		"shadow_distance": 120.0,
+		"shadow_blur": 1.0,
+		"dune_scale": 0.0,
+		# Solul dintre case si al dealurilor: iarba uscata aurie (DRY_VEGETATION 13), dealurile din
+		# Marin dincolo de golf (brief §4: auriu-pai).
+		"ground_tint": Color(0.80, 0.70, 0.45),
+		"hill_color": Color(0.70, 0.60, 0.38),
+		"scarp_tint": Color(0.62, 0.55, 0.42),
+		"scarp_slope_deg": 40.0,
+		"scarp_fade_deg": 10.0,
+		"dirt_road_tint": Color(0.70, 0.62, 0.50),
+		# Solul e IARBA uscata (perechea de texturi de iarba a terenului), nu nisipul cu dune
+		# implicit: prima captura a strazii sintetice citea "desert".
+		"savanna_grass_w": 1.0,
+		"savanna_grass_tint": Color.html("B9A45E"),
+		# Fara siluetele de orizont implicite (butte-uri de desert): fundalul il face scena
+		# (podul, insula, dealurile din Marin). Un model valid cu ZERO inele = nimic pus.
+		"horizon_model": "res://assets/models/carrara/effects/carrara_horizon.glb",
+		"horizon_rings": [],
+		"horizon_class": "",
+		# Umerii soselei = trotuarul de beton (CONCRETE 8), nu praf colorat.
+		"shoulder_color": Palette.color(Palette.CONCRETE),
+		"shoulder_texture": "res://assets/textures/classes/concrete.png",
+		"dust_color": Palette.color(Palette.CONCRETE),
+		"walls": false,
+		"kerbs": false,
+		"cliffs": false,
+		"decor": "none",
+		"props": "",
+		"prop_contact_flat": [],
+		"hazard_model": "",
+		# GOLFUL: apa rece si inchisa (SEA_DEEP 18, shaderul de apa), NU turcoaz de recif — ca sa
+		# nu citeasca "Okinawa" (brief §0.1, §4). Doar in poligonul `custom_lagoon` al pistei
+		# (`seabed_drop` 0: exteriorul buclei ramane uscat), cu cheiul de beton la mal.
+		"water": true,
+		"seabed_drop": 0.0,
+		"quay_wall": true,
+		"water_shallow_slot": Palette.SEA_DEEP,
+		"water_deep_slot": Palette.ICE_DEEP,
+		"water_shore_slot": Palette.CONCRETE,
+		"water_desat": 0.15,
+		"water_dim": 0.95,
+		"water_foam": 0.15,
+		"water_glint": 0.45,
+	}
 	return _themes_cache
 
 

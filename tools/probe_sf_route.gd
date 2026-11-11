@@ -26,6 +26,9 @@ const ARM: int = 6
 
 var _all := false
 var _sabotage := false
+## `--grid=x0,z0,x1,z1`: harta cotelor (primul corp lovit de sus) pe o grila de 1 m, cu numele
+## corpului — pentru o repunere care se repeta intr-un punct fix.
+var _grid := Vector4.ZERO
 
 
 func _ready() -> void:
@@ -38,6 +41,9 @@ func _ready() -> void:
 			_all = true
 		elif arg == "--sabotaj":
 			_sabotage = true
+		elif arg.begins_with("--grid="):
+			var g := arg.trim_prefix("--grid=").split(",")
+			_grid = Vector4(float(g[0]), float(g[1]), float(g[2]), float(g[3]))
 	var track := (load(path) as PackedScene).instantiate() as Track
 	if _sabotage:
 		var slab := track.get_node_or_null("SerpentineGri/SerpAcostament")
@@ -62,6 +68,18 @@ func _ready() -> void:
 		return
 	var main: TrackRoute = track.routes[0]
 	var b: TrackRoute = track.routes[1]
+	if _grid != Vector4.ZERO:
+		for zz in range(int(_grid.y), int(_grid.w) + 1):
+			var row := "z %4d:" % zz
+			for xx in range(int(_grid.x), int(_grid.z) + 1):
+				var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(
+					Vector3(xx, 80.0, zz), Vector3(xx, -20.0, zz)))
+				if h.is_empty():
+					row += "   ----"
+				else:
+					var nm := String((h["collider"] as Node).name) if h["collider"] is Node else "?"
+					row += " %5.2f%s" % [(h["position"] as Vector3).y, nm.substr(0, 1) if nm != "RoadTop" else "r"]
+			print(row)
 	var hw := b.half_width
 	var n := b.baked.size()
 	var tested := 0

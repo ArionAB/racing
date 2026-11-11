@@ -248,8 +248,10 @@ care o are jucătorul (poziția vizibilă, nu faza). Altfel nu se scrie nimic.
 
 ### Ceasuri care nu împart durata turului (lecția Stromboli)
 
-Tramvaiul de pe urcare **41 s**, cel de pe cheu **29 s**. Niciunul nu e
-multiplu de ~73. Fazele de start se aleg astfel încât plutonul să nu dea peste
+Tramvaiul de pe urcare **~66 s**, cel de pe cheu **29 s**. Niciunul nu e
+multiplu de ~73. (Urcarea avea inițial 41 s, dar 290 m la 4,5 m/s înseamnă 64 s
+de mers: în 41 s nu încape. Dezvoltatorul a ales pe 10 nov 2026 ciclul de ~66 s,
+cu tramvaiul pe toată urcarea. Vezi §7, pasul 1c.) Fazele de start se aleg astfel încât plutonul să nu dea peste
 tramvai în primul viraj al turului 1 (memoria `ceasul-porneste-in-prima-faza`).
 
 **Ritmul turului:** faleză (start, îmbrânceală) → urcare (tramvaiul, benzile de
@@ -276,14 +278,15 @@ Acoperirea claselor din `ref_notes/sisteme.md` §3:
 |---|---|---|
 | **Lanțul de muchii** (D) | patru blocuri: muchie, 28% pe 24 m, racord 17% → 7%, intersecție plată de 24 m | **zero cod** — geometrie de traseu, cu ferestrele declarate în `metadata/jump_crests` (excepția numită a ProbeLayout, ca la Angkor). **Contract măsurat** (§7 pasul 1a): airtime 0,58–0,70 s la plafon pentru toate cele 10 mașini, 0,77–0,85 s cu turbo; aterizare pe bloc, niciodată pe intersecție; **0 incidente în ~1.400 de zboruri** solo și în 1.020 în pluton. Profilul **nu** se schimbă fără sondă: forma lui, nu căderea, decide dacă aterizarea e sigură |
 | **Mașinile parcate** (D, B) | parcate perpendicular pe trotuar; aterizezi strâmb, intri în ele | **reuse** `BumpProp` (masă per piesă) + `PropDebris`. **Zero cod.** Masa aleasă ca Autobuzul să le arunce și Poliția să ricoșeze. **Niciuna pe carosabil și niciuna în zona de aterizare** (primii 45 m după muchie rămân liberi pe toată lățimea) |
-| **Tramvaiul de pe urcare** (B) | vagon greu, ~4,5 m/s, pe șinele din mijloc, **în sensul cursei**; ciclu 41 s | **reuse** `BusHazard` pe `Path3D`, cu `soft_contact` + `ai_reads_lane` (camioanele din Carrara, validate cu AI-ul). **Nu** `TRAIN_ALONG` (vine din față, letal pe ax, max 110 m de dreaptă). De verificat **în sensul cursei** la pasul 1c: Carrara le-a măsurat în sens invers. Model nou `cable_car.glb`, un singur corp |
+| **Tramvaiul de pe urcare** (B) | vagon greu, ~4,5 m/s, pe șinele din mijloc, **în sensul cursei**; ciclu ~66 s, pe toată urcarea | **reuse** `BusHazard` pe `Path3D`, cu `soft_contact` + `ai_reads_lane` **+ flagurile noi `ai_same_direction` și `pitch_to_ground`** (pasul 1c: fără ele AI-ul nu citește un corp care merge în sensul cursei, iar pe 11,5% vagonul stă orizontal, cu botul în drum). Intră pe ax dintr-o stradă laterală și **iese drept înainte** la colțul unde cursa cotește. Ieșirea laterală taie banda celor care depășesc, măsurat. **Nu** `TRAIN_ALONG` (vine din față, letal pe ax, max 110 m de dreaptă). Model nou `cable_car.glb`, un singur corp |
 | **Tramvaiul din gură** (E, E′) | același tip de vagon, pe strada de jos, trece prin fața gurii scurtăturii; ciclu 29 s | **reuse** `BusHazard` (al doilea nod); eventual grupul `branch_gate` (decis de ProbeRace). **Nu** `TrainHazard`: are viteza și timpii constante (26 m/s), cere trei noduri de tren în model, iar AI-ul nu îl citește deloc |
 | **Serpentinele** (E′) | §2 | `TrackBranch` pe ruta cu indexul 1 + suprafață de cărămidă (`road_tint` / suprafața ramurii) + `SoftVegetation` pe hortensii. **Zero cod**, dacă sonda 1b confirmă că AI-ul le trece |
 | **Pontonul** (F) | carosabil de scândură, stâlpi cu goluri, apă | **reuse** `RespawnZone` pe golf, plasa de mare **sub** cota apei (memoria `ziduri-invizibile-ale-lumii`); scândura e clasă de textură pe carosabil, nu punte fizică (pontonul care se leagănă e semnătura Ha Long-ului) |
 | **Leii de mare, papagalii, pescărușii** | teatru | **reuse** `FlockProp`; leii de mare sunt statici pe plute (lătrat pe sunet), **nu traversează** — traversarea de animale e a Serengeti-ului, a Ha Long-ului și a Transfăgărășanului |
 | **Zebra și semaforul de pe muchie** (D) | telegraful fiecărei sărituri | decal pe carosabil + GLB atârnat; fără coliziune la înălțimea mașinii în zbor (**semaforul stă la ≥ 8 m peste muchie**: zborul cu turbo urcă la 4,0 m peste drum) |
 
-Calibrare (sisteme.md): tramvai lovit ≈ +1,5–2 s; serpentine curate ≈ −1,5 s,
+Calibrare (sisteme.md): tramvai lovit ≈ +2–2,7 s (măsurat la 1c; ținta inițială
+de 1,5–2 s a fost revizuită de dezvoltator: vagon greu, în urcare); serpentine curate ≈ −1,5 s,
 cu bordură ≈ +1 s; cădere în golf ≈ 2 s ≈ 2 poziții; mașină parcată ≈ +0,3 s;
 lanțul ≈ 0 s (e plăcere, nu taxă).
 
@@ -330,7 +333,11 @@ din lumină.
   strada lanțului la ±20°, din spate** (deci dinspre sud-sud-vest, lanțul
   coborând spre nord). Motivul e geometric: o casă de 10 m aruncă la 28° o
   umbră de ~19 m; cu soarele la 20° față de axul străzii, doar ~6,5 m din ea
-  cad pe carosabil — **lanțul rămâne la soare**. Cu soarele de-a curmezișul, ar
+  cad pe carosabil — **lanțul rămâne la soare**. **Corectat la pasul 0:** calculul
+  e pe teren plat. Pe panta de 28% care coboară în sensul luminii umbra iese de
+  ~2× mai lungă, iar la −20° lanțul stătea la soare doar 67,6%. **Ales: 28° / azimut
+  −12° față de stradă → 85,1%**, și ambientul coborât la **0,32** (raport 3,9).
+  Azimutul se remăsoară pe traseul real. Cu soarele de-a curmezișul, ar
   cădea ~18 m: toată strada în umbră, ca fundul căldării de la Carrara. Ambient
   **rece și mic** (`BCCCE8`-ish, ~0,40; raport soare/ambient ≥ 3 — cifrele
   Carrarei, după corecția de cyan). **Umbre pornite**; pe telefon, profilul
@@ -463,6 +470,32 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
    remap (memoria `monocromia-se-masoara-dupa-remap`). Dacă pică: se intervine
    pe tente și pe soare, **nu** pe loc.
 
+   **FĂCUT (10–11 nov 2026) — PASS.** Unelte: `tools/gen_sf_loc.py` → `tools/SfLoc.tscn`
+   (+ `sf_loc_decor.gd`), clasa `sf_clapboard` (`tools/gen_sf_clapboard.py`) cu cinci
+   tente, `sf_brick` definită, tema `sanfrancisco` în `track.gd`, sonda
+   `tools/ProbeSfLoc.tscn`, capturile în `docs/asset_briefs/img/sf_loc/` (cheia:
+   `sf_loc_cheie.json`, lângă folder). Reproducere: `bash tools/sf_loc_measure.sh`,
+   `bash tools/sf_loc_capture_all.sh`, `python tools/sf_loc_shuffle.py`.
+
+   | contract | valoare | țintă |
+   |---|---|---|
+   | critic orb: capturi SF citite „San Francisco” | **5 / 5**, încredere mare | ≥ 3 / 5 |
+   | capturi SF confundate cu altă pistă | **0** | ≤ 1 |
+   | soare pe carosabilul lanțului | 85,1% | ≥ 80% |
+   | ΔV soare/umbră pe fațade (N·L ≥ 0,25 vs ≤ 0; inclusiv razantele: 0,286) | 0,325 | ≥ 0,28 |
+   | ΔE2000 minim între pasteluri, după remap (albedo / cadru) | 15,0 / 14,5 | ≥ 10 |
+   | materiale în scenă | 16 | ≤ 38 |
+
+   Reglaje: soarele (vezi §4), ambientul 0,40 → 0,32, tentele în trei runde (albastrul
+   saturat, cremul deschis, rozul și galbenul coborâte un pas ca să nu se taie la V = 1).
+   **Ce a spus criticul de purtat mai departe:** (1) casele par „înclinate,
+   forfecate”. Geometria e verticală; e perspectiva camerei de joc, cu pitch în jos
+   pe 28%. De verificat pe traseu și, dacă e nevoie, de corectat din pitch-ul
+   camerei pe lanț, nu din case. (2) Trotuarele sunt goale: mobilierul din §5.3. (3)
+   Cadrele de pe lanț seamănă între ele: pe traseu fiecare muchie primește un
+   reper diferit. (4) Soclurile ies pe trotuar ca trepte (pentru kit). Punctul tare:
+   podul plus casele victoriene au dat cea mai sigură recunoaștere din tot setul.
+
 1. **Sondele tehnice** (piste sintetice în `tools/`, nu `Track25`).
 
    **1a. Lanțul de muchii — FĂCUT (10 nov 2026, PR-ul ăsta).**
@@ -566,19 +599,58 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
 
    **Ce NU spune sonda:** cum se simte. Pilotul de probă nu greșește, strada
    n-are case, mașini parcate sau cameră judecată de un om. Verdictul de feel e
-   al dezvoltatorului, cu `DriveScene`.
+   al dezvoltatorului, cu `DriveScene`. **Dat pe 10 nov 2026** (`SondaSfPlan28s`,
+   `--ai=3`): „se simt bine acele sărituri”. Lanțul de patru blocuri e aprobat.
 
-   **1b. Serpentinele** (de făcut): stradă sintetică cu trei ace la raza 8 și
+   **1b. Serpentinele** (în lucru): stradă sintetică cu trei ace la raza 8 și
    carosabil de 7 m, lângă un ocol de 270 m cu trei viraje de 90°. Contract:
    AI-ul trece acele fără `[blocaj]`; trecerea curată câștigă 1–2 s față de
    ocol; cu o bordură atinsă pierde. Precedentul e `SondaCarrara` (ace la raza
    16, lățite până la urmă la 9 m din cauza AI-ului) — **raza 8 e sub tot ce
    s-a măsurat până acum**, deci e primul lucru care poate pica.
 
-   **1c. Tramvaiul în sensul cursei** (de făcut): `BusHazard` pe o dreaptă în
-   urcare de 11,5%, 4,5 m/s, pe ax. Contract pe `[blocaj]` și pe coada de AI din
-   spatele lui (memoria `franare-de-coada-blocaj-reciproc`), cu sabotaj
+   **1b. Runda 1 — raza 8 PICĂ (10 nov 2026).** Rezultatele, ramura proprie a sondei și
+   decizia de formă (ace R16 / 9 m, ocol de ~400–450 m, interior solid) intră aici
+   după runda 2.
+
+   **1c. Tramvaiul în sensul cursei — FĂCUT (10 nov 2026), PASS.** `BusHazard` pe o
+   dreaptă în urcare de 11,5%, 4,5 m/s, pe ax. Contract pe `[blocaj]` și pe coada
+   de AI din spatele lui (memoria `franare-de-coada-blocaj-reciproc`), cu sabotaj
    (`ai_reads_lane` stins → trebuie să pice).
+
+   Forma din main **nu** accepta cazul. Trei lipsuri, rezolvate cu cod minim în
+   spatele a două flaguri, ambele implicit stinse (Carrara și Machu Picchu neatinse:
+   cu flagurile stinse expresiile sunt identice):
+   - `BusHazard.ai_same_direction`: AI-ul citește corpul și când merge în sensul
+     cursei (`_bus_line` cerea `oncoming`). Partea depășirii o alege fiecare mașină
+     după unde e față de tramvai, deci plutonul se desparte. Banda ocupată include
+     lateralul tramvaiului peste 1,5 s, pentru intrarea lui din strada laterală.
+   - `BusHazard.pitch_to_ground`: vagonul se înclină după pantă. Fără el, pe 11,5%
+     coada stă la +0,49 m și botul la −0,49 m în drum, iar Muscle s-a înfipt sub
+     coadă.
+
+   Unelte: `tools/gen_sf_tramvai.py` (`SondaSfTramvai*.tscn`), `tools/probe_sf_tramvai.gd`
+   (contact solo), `tools/sf_tramvai_race.sh` + `sf_tramvai_report.py` (pluton).
+   8 mașini × 200 s; baza fără tramvai: 0 `[blocaj]`, 0 repuneri.
+
+   | variantă | seed-uri | `[blocaj]` | repuneri | întâlniri cu contact | pierdere / întâlnire med / p90 / max |
+   |---|---|---|---|---|---|
+   | ieșire laterală (v1) | 16 | 2 | 0 | 23,1% | 0,07 / 3,71 / 5,9 s |
+   | **ieșire drept înainte, faza 0,66** | 16 | **0** | **0** | **2,2%** din 359 | **0,05 / 0,27 / 2,85 s** |
+   | idem, faza 0 (stres pe turul 1) | 8 | 0 | 0 | 0,9% din 320 | 0,10 / 0,45 / 2,8 s |
+   | **SABOTAJ** (`ai_reads_lane` stins) | 16 | **169** | 0 | **73,5%** | 1,89 / 10,5 / 31,9 s |
+
+   - Coada de AI practic nu există: 0,8% din întâlniri coboară sub 10 m/s. Depășirea
+     se face 95% pe stânga (tramvaiul intră din dreapta), iar pe faza 0 se împarte
+     44 / 56.
+   - Contact solo (Poliția, Muscle, Buggy, Autobuzul, la 26–32 m/s): **0 ejectări în
+     12 lovituri**, 2,1–2,7 s pierdute. **Cost acceptat de dezvoltator** (11 nov 2026),
+     în locul țintei de 1,5–2 s.
+   - **Regulile pentru traseu:** tramvaiul iese **drept înainte** la colț. Faza se
+     transferă împreună cu cele 3,6 s de countdown în care ceasul deja merge.
+     Nemăsurat: la colțul din vârf, cei care l-au depășit pe stânga îi taie fața ca
+     să vireze la dreapta. De verificat pe Track25.
+   - Ciclul: ~66 s, pe toată urcarea (decizia din §2, „Ceasuri”).
 
 2. **Scena**: `Track25.tscn` din `TrackFromPath` prin `tools/gen_sf_route.py`
    (pas de control 12 m, uniform — pasul mixt supraîncarcă spline-ul); tema

@@ -13,15 +13,21 @@ const THUMB_DIR := "res://assets/ui/track_thumbs/"
 
 static var _id_cache: Dictionary = {}
 
-## Cheia STABILA a pistei: cariera, abtibildurile si `career.cfg` se leaga de
-## ea, nu de `display_name`, care e text de afis si poate fi redenumit
-## (recordurile vechi raman pe nume). Goala => se deduce din numele scenei.
+## Cheia STABILA a pistei: cariera, abtibildurile, `career.cfg` si recordurile
+## din `records.cfg` (#690) se leaga de ea, nu de `display_name`, care e text de
+## afis si poate fi redenumit. NU SE MAI SCHIMBA dupa lansare. Goala => se
+## deduce din numele scenei (TrackNN -> tracknn): cine scrie mai tarziu .tres-ul
+## unei piste ajunse deja la jucatori trebuie sa pastreze exact id-ul dedus.
 @export var id: StringName = &""
 @export var display_name: String = ""
 ## Tara / regiunea, afisata sub nume ("JAPONIA", "EUROPA").
 @export var region: String = ""
 ## Culoarea placeholder-ului cat timp lipseste imaginea, si a bulinei de regiune.
 @export var accent: Color = Color(0.35, 0.45, 0.6)
+## Banc de test pentru unelte (Dunele, Okinawa manual): ramane in
+## `GameState.TRACK_SCENES` ca indicii uneltelor sa nu se mute, dar nu ajunge
+## niciodata in fata jucatorului — vezi `QuickRaceTracks`.
+@export var test_bench: bool = false
 
 @export_group("Contratimp")
 ## Timpi pe TOATA cursa (3 tururi) cu rezervor sigilat, PUSI DE DEZVOLTATOR LA

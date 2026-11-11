@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1")
+id = &"yellow"
 display_name = "Galben"
 color = Color(0.95, 0.82, 0.24, 1)
 model = ExtResource("2")

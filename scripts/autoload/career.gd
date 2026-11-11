@@ -58,6 +58,7 @@ var _saved_ai_count: int = -1
 var _tracks: Dictionary = {} # id -> {race_medal, tt_medal, tt_best_ms, challenge}
 var _rivals: Dictionary = {} # id -> true cand e batut
 var _cups: Dictionary = {} # id lume -> true cand e castigata
+## Masinile deblocate, pe `CarData.id` (niciodata pe index in CAR_DATA).
 var _garage_unlocked: Array[String] = []
 ## Fisierul de pe disc e de la o versiune mai noua: nu incarcam nimic si nu
 ## salvam peste el, ca sa nu-l corupem.
@@ -72,6 +73,11 @@ func _ready() -> void:
 	# Probleme de config nu opresc jocul: se vad in log si atat.
 	for problem in validate():
 		push_error("Career: " + problem)
+	# Sondele / verify_local: acelasi director ca GameState (SaveSchema).
+	var save_dir := SaveSchema.dir_override()
+	if save_dir != "":
+		save_path = save_dir + save_path.get_file()
+		ghost_dir = save_dir + "ghosts/"
 	load_progress()
 
 

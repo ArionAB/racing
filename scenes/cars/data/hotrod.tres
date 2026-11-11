@@ -6,6 +6,7 @@
 
 [resource]
 script = ExtResource("1")
+id = &"hotrod"
 display_name = "Hot rod"
 color = Color(0.17, 0.51, 0.91, 1)
 max_speed = 35.5

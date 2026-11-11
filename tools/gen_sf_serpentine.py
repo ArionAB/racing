@@ -53,6 +53,25 @@ G1 = 4.0             # gang de la furca pana la virajul de intrare
 EXIT_AFTER = 6.0     # cat dupa capatul gurii revine banda pe axa strazii T
 
 
+OVERLAP_M = 12.0     # sub atat (ax la ax) banda isi ia cota de la bucla
+
+
+def nearest_on_poly(pts, x, z):
+    """Distanta in plan pana la bucla (polilinie inchisa) si cota ei acolo."""
+    best = (1e18, 0.0)
+    n = len(pts)
+    for i in range(n):
+        a, b = pts[i], pts[(i + 1) % n]
+        sx, sz = b[0] - a[0], b[2] - a[2]
+        L2 = sx * sx + sz * sz
+        t = 0.0 if L2 < 1e-9 else max(0.0, min(1.0, ((x - a[0]) * sx + (z - a[2]) * sz) / L2))
+        qx, qz = a[0] + sx * t, a[2] + sz * t
+        d2 = (x - qx) ** 2 + (z - qz) ** 2
+        if d2 < best[0]:
+            best = (d2, a[1] + (b[1] - a[1]) * t)
+    return math.sqrt(best[0]), best[1]
+
+
 def bezier_cum(points, samples=64):
     """Lungimea cumulata (3D) pana la fiecare punct de control, pe curba pe care
     o face Godot din ele: Bezier cubic cu tangenta (urmatorul - precedentul) *
@@ -212,11 +231,38 @@ def build(R, LEG, RE, bypass_target, drop):
     # Primul punct desenat e cel de la 45 de grade pe virajul de intrare;
     # ultimul, cel de la 45 de grade pe virajul gurii; banda revine pe axa
     # strazii tramvaiului la EXIT_AFTER m dupa capatul analitic al gurii.
-    mid = []
+    # Runda 2 (ProbeLaneClear: RoadTop in fata la furca si la gura): unde banda
+    # se suprapune cu bucla (ax la ax < OVERLAP_M), cota ei e cota buclei, altfel
+    # ramane o treapta intre cele doua plane de asfalt; intre cele doua zone de
+    # suprapunere coboara liniar (nu se strange o treapta locala).
+    raw = []
     for (x, z), sk in zip(sc.pts, sc.s):
         if sk < G1 + 0.5 or sk > short_len - 0.5:
             continue
-        mid.append((F[0] + x, Y_TOP - drop * sk / short_len, F[1] + z))
+        px, pz = F[0] + x, F[1] + z
+        d, ym = nearest_on_poly(main_pts, px, pz)
+        raw.append((px, pz, sk, d, ym))
+    ia = 0
+    while ia + 1 < len(raw) and raw[ia + 1][3] < OVERLAP_M:
+        ia += 1
+    ib = len(raw) - 1
+    while ib - 1 > ia and raw[ib - 1][3] < OVERLAP_M:
+        ib -= 1
+    if raw[ia][3] >= OVERLAP_M:      # primul punct deja departe: pleaca de la furca
+        sa, ya = 0.0, Y_TOP
+    else:
+        sa, ya = raw[ia][2], raw[ia][4]
+    if raw[ib][3] >= OVERLAP_M:
+        sb, yb = short_len, Y_TOP - drop
+    else:
+        sb, yb = raw[ib][2], raw[ib][4]
+    mid = []
+    for k, (px, pz, sk, d, ym) in enumerate(raw):
+        if (k <= ia and raw[ia][3] < OVERLAP_M) or (k >= ib and raw[ib][3] < OVERLAP_M):
+            y = ym
+        else:
+            y = ya + (yb - ya) * (sk - sa) / max(sb - sa, 1e-6)
+        mid.append((px, y, pz))
     exit_pt = (M[0], M[1] + EXIT_AFTER)
     baked = read_baked(R, LEG, RE, bypass_target)
     if baked:
@@ -328,7 +374,11 @@ def write(R, BW, LEG, RE, bypass, drop, ai, suffix):
         "entry_at = %.5f" % info["entry_at"],
         "exit_at = %.5f" % info["exit_at"],
         'label = "Serpentine R%s"' % fmt(R),
-        "surface = 4",
+        # 3 = GRAVEL: o banda de pe uscat SAPA terenul (Track._branch_carve_points);
+        # "deck" (4, runda 1) doar il ridica, si terenul intra in drum la ace
+        # (ProbeLaneClear: 38-64 de sonde blocate de TerrainBody). Suprafata e
+        # doar vizuala pentru fizica (bumpiness 0).
+        "surface = %d" % int(os.environ.get("SURF", "3")),
         "",
     ]
     open(out, "w", newline="\n").write("\n".join(scene))

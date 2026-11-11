@@ -196,6 +196,11 @@ run_step "Registrul MeshCpu (citiri GPU refolosite)" meshcpu.log 'MeshCpu:' -- \
 # simultan (gaz+drift, gaz+turbo) nu se ating.
 run_step "Controale touch: maparea si distantele" touch_zones.log 'VERDICT:' -- \
 	--headless --path . res://tools/ProbeTouchZones.tscn
+# Fara QUIT pe mobil (#692): Apple respinge aplicatiile cu buton de iesire.
+# Meniul real, cu etichetele de platforma simulate; plus coloana fara gol si
+# nicio alta iesire (`quit(`) in scenes/ si scripts/.
+run_step "Meniul principal: fara QUIT pe iOS/Android, intreg" main_menu_quit.log 'VERDICT:' -- \
+	--headless --path . res://tools/ProbeMainMenuQuit.tscn
 
 # Garajul: normalizarea barelor pe intervalul REAL al masinilor, masa ca axa
 # cu semn (nu bara care se umple), conturul-fantoma bidirectional si

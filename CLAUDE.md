@@ -109,6 +109,13 @@ pur plus haosul fizic, nu proiectilele.
   - Garda `ProbeTouchZones` verifică maparea atingere→comandă (inclusiv că
     zonele goale nu mai dau nimic), că discurile apăsate împreună nu se ating,
     și matricea de accelerație — măsurată pe `PlayerController` real.
+- **Tur ghidat la prima pornire** ✔ (nov 2026, #678): invitație în meniu (o
+  dată pe sesiune, cât `GameState.tutorial_done` e fals), apoi Monument Valley
+  fără adversari, câte un indiciu: viraj → gaz → drift → turbo. Fiecare trece
+  **doar la gestul lui, citit din starea mașinii** (`Car.is_drifting`, bara
+  chiar arsă), nu din butoane; pe touch butonul vizat pulsează. Textele și
+  pragurile: `scenes/race/tutorial/tutorial_default.tres`. Se reia din
+  SETTINGS. Garda: `ProbeTutorial` (cu sabotaj pe fiecare contract).
 
 ## Post-MVP (nu implementa fără să fie cerut)
 

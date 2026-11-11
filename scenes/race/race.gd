@@ -57,6 +57,8 @@ var impact_sound: ImpactSoundScript
 ## Clichetul si arcul rocket start-ului (doar jucatorul); vezi RocketStartAudio.
 var rocket_audio: RocketStartAudioScript
 var hud: RaceHUD
+## Turul ghidat (#678): indiciile de la prima pornire. Null in afara lui.
+var tutorial: TutorialDirector
 ## „Parbrizul ud" (Fiordland, brief pasul 4): picaturi pe ecran cand jucatorul
 ## e in perdeaua Stirling sau in ploaie. Null pe piste fara niciun
 ## `WaterfallHazard`/`RainCycle` — vezi `_setup_windshield_wipers`.
@@ -305,9 +307,12 @@ func _setup_race() -> void:
 		if child is EruptionCycle:
 			(child as EruptionCycle).erupted.connect(func(_i: int) -> void:
 				camera.add_trauma(0.5))
+	if GameState.tutorial_run:
+		tutorial = TutorialDirector.attach(self)
 
 func _spawn_cars() -> void:
-	var count := GameState.ai_count + 1
+	# Turul ghidat e singur pe pista: indiciile cer atentie, nu depasiri.
+	var count := (0 if GameState.tutorial_run else GameState.ai_count) + 1
 	var spawns := track.spawn_transforms(count)
 	for i in count:
 		var car := CAR_SCENE.instantiate() as Car

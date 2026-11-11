@@ -164,11 +164,12 @@ func _part_c(feed: Node, car: Car) -> int:
 func _part_d() -> int:
 	print("")
 	print("-- D. setarea persista --")
-	var path: String = GameState.SETTINGS_PATH
-	var had := FileAccess.file_exists(path)
-	var backup := PackedByteArray()
-	if had:
-		backup = FileAccess.get_file_as_bytes(path)
+	# Pe un fisier propriu, nu pe settings.cfg-ul real (#690: un fisier fara
+	# versiune, ca cel de mai jos, ar porni migrarea si ar lasa un .bak-v0).
+	var real_path: String = GameState.settings_path
+	var path := "user://probe_tmp/haptics_settings.cfg"
+	DirAccess.make_dir_recursive_absolute("user://probe_tmp")
+	GameState.settings_path = path
 	var was: bool = GameState.haptics_enabled
 	_check(was, "implicit pornita (valoarea curenta fara fisier explicit: true)")
 	GameState.haptics_enabled = false
@@ -188,13 +189,9 @@ func _part_d() -> int:
 	GameState.haptics_enabled = false
 	GameState.load_settings()
 	_check(GameState.haptics_enabled, "fisier fara cheie => implicit pornita")
-	# Restaureaza fisierul dezvoltatorului exact cum era.
-	if had:
-		var f := FileAccess.open(path, FileAccess.WRITE)
-		f.store_buffer(backup)
-		f.close()
-	else:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	for f in [path, path + ".bak-v0", path + ".bak-v0.last"]:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(f))
+	GameState.settings_path = real_path
 	GameState.load_settings()
 	GameState.haptics_enabled = was
 	return 1

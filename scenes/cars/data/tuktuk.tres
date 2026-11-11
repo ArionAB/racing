@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1")
+id = &"tuktuk"
 display_name = "Tuk-tuk"
 color = Color(0.95, 0.8, 0.15, 1)
 max_speed = 18.0

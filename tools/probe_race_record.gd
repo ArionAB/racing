@@ -24,9 +24,9 @@ var _fails: PackedStringArray = []
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_had_file = FileAccess.file_exists(GameState.RECORDS_PATH)
+	_had_file = FileAccess.file_exists(GameState.records_path)
 	if _had_file:
-		_backup = FileAccess.get_file_as_bytes(GameState.RECORDS_PATH)
+		_backup = FileAccess.get_file_as_bytes(GameState.records_path)
 	var idx := 6
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
@@ -73,7 +73,7 @@ func _report() -> void:
 	var ms := _race._player_race_ms
 	var key := GameState.race_record_key(GameState.selected_track, 1)
 	var cfg := ConfigFile.new()
-	cfg.load(GameState.RECORDS_PATH)
+	cfg.load(GameState.records_path)
 	var on_disk := int(cfg.get_value("race_records", key, 0))
 	print("[race-record] cursa %d ms, best_race %d, pe disc %d, tur %d ms, record nou %s"
 		% [ms, GameState.best_race(GameState.selected_track), on_disk,
@@ -95,11 +95,11 @@ func _report() -> void:
 
 func _finish() -> void:
 	if _had_file:
-		var f := FileAccess.open(GameState.RECORDS_PATH, FileAccess.WRITE)
+		var f := FileAccess.open(GameState.records_path, FileAccess.WRITE)
 		f.store_buffer(_backup)
 		f.close()
 	else:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(GameState.RECORDS_PATH))
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(GameState.records_path))
 	for f in _fails:
 		print("    " + f)
 	print("VERDICT: %s" % ("OK" if _fails.is_empty() else "PROBLEMA"))

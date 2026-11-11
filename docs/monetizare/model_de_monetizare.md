@@ -1,4 +1,4 @@
-# Monetizare — modelul, argumentat pro și contra — v0.1 (analiză, nedecis)
+# Monetizare — modelul, argumentat pro și contra — v0.2 (modelul e decis)
 
 > Analiza cerută de dezvoltator pe 13 oct 2026, în locul unui set de documente:
 > ce model de monetizare ar funcționa pentru un racer arcade cu mașinuțe, cu
@@ -9,14 +9,54 @@
 >
 > **v0.1 (13 oct 2026):** analiza din conversație, înclinațiile dezvoltatorului
 > marcate ca nedecise, recomandarea coordonatorului.
+>
+> **v0.2 (11 nov 2026):** dezvoltatorul a ales modelul. Deciziile sunt în §0.1
+> și în §11; unde restul documentului (analiza din octombrie) le contrazice,
+> **§0.1 câștigă**. Atenție la un cuvânt: v0.1 spune „lume” pentru o pistă
+> („12 lumi”). De la v0.2, **pistă** = o pistă, iar **lume** = grupul de 4 piste
+> din carieră (în World Cup, o **cupă**).
 
 ## 0. Într-o propoziție
 
-Modelul cu cele mai bune șanse e „gratuit de încercat, plătești o dată pentru
-toate lumile”, cu mașinile deblocate doar prin joc, personaje și skinuri
-câștigate sau vândute, lumi noi ca pachete după lansare, fără interstițiale și
-fără upgrade-uri de statistici; reclamele recompensate rămân o opțiune de
-v1.1, doar la volum mare.
+Jocul e gratuit de încercat: prima lume (4 piste din 16) se joacă liber în
+toate modurile, iar o singură plată de 3,99 $ deblochează restul, fără
+cumpărături pe cupă. La lansare nu are reclame; după lansare, doar pe Android,
+cine n-a cumpărat poate vedea o reclamă ca să joace o cursă blocată.
+Cosmeticele de mașină și de pilot sunt stratul al doilea.
+
+## 0.1 Decizii luate (11 nov 2026)
+
+| Ce | Decizia dezvoltatorului |
+|---|---|
+| Modelul (D2) | (b) gratuit de încercat + o singură deblocare |
+| Prețul | **3,99 $**, o singură plată; net ~3,39 $ la comision de 15% (§8) |
+| Cumpărături pe cupă | **nu**, niciodată |
+| Ce e gratuit | **prima lume / cupa 1** (4 piste din 16), în toate modurile: carieră, World Cup, QUICK RACE, contratimp |
+| Reclame la lansare | **niciuna**, niciun SDK de reclame în v1.0 |
+| Reclame după lansare | **doar pe Android**, doar pentru cine n-a cumpărat: o reclamă înaintea unei curse blocate. Se pornește după ce se vede cum merge lansarea („întâi testăm apele”) |
+| Cosmetice | direcție aprobată: vopsele, livree, roți, culoarea flăcării de turbo, figurine de pilot, căști |
+| Conținutul de lansare | 16 piste (cele 15 de azi + San Francisco), apoi nu se mai fac piste; World Cup și cariera au amândouă 4 × 4 (decis 10–11 nov, issue #704) |
+
+Ce a rămas deschis, cu propunerea coordonatorului (nedecis):
+
+- **Care 4 piste formează lumea gratuită.** Ține de împărțirea pe cupe (#704).
+  Trebuie să fie cârlige bune, cu piesele de rezistență ținute în spatele
+  deblocării.
+- **Mașinile jucătorului gratuit.** Propunere: toate mașinile rămân
+  disponibile; se blochează doar pistele (D4).
+- **Regulile reclamei de pe Android.** Propunere: o reclamă pe pistă pe
+  sesiune, nu pe cursă (restartul și rejucarea aceleiași piste nu mai cer
+  alta); fără internet cursa rămâne blocată, cu mesajul „conectează-te sau
+  deblochează”; verificarea de blocare stă într-o singură funcție, ca un
+  „permis” temporar să se poată adăuga fără să atingă modurile. Cere un device
+  Android pentru test (M4) și reclame nepersonalizate (§6).
+- **Ediția de susținător** (~9,99 $: aceeași deblocare plus un set exclusiv de
+  vopsea și pilot). Propusă, neconfirmată.
+- **Cosmeticele: câștigate sau vândute.** Propunere: cele mai multe se câștigă
+  în carieră; se vând unul-două seturi. Vopseaua pe mașină cere sistem nou
+  (P14).
+- **D1, publicul-țintă.** Nedecis; devine obligatoriu înaintea reclamelor de pe
+  Android.
 
 ## 1. Ce vinde jocul, și ce nu
 
@@ -450,9 +490,12 @@ upgrade-uri.
 
 | Fază | Ce intră |
 |---|---|
-| v1.0 | 3 lumi gratuite cu campionatul lor; deblocare unică „toate lumile”; stele și deblocări de mașini și personaje prin joc; Bronz / Argint / Aur; clasamente Game Center / Play Games; fără SDK de reclame |
-| v1.1 | reclama recompensată „cursă de probă pe o lume blocată”, temporară și cu plafon, doar dacă instalările justifică; seturi de personaje și skinuri vândute |
-| post-release | pachete de lumi (Uyuni, Veneția, Petra, Maroc); Play Pass; PC / Steam |
+| v1.0 | prima lume (4 piste) gratuită în toate modurile; deblocare unică de 3,99 $ pentru celelalte 12 piste; deblocări de mașini și personaje prin joc; Bronz / Argint / Aur; fără SDK de reclame |
+| după lansare | pe Android, reclamă la cerere înaintea unei curse blocate, pentru cine n-a cumpărat (regulile, în §0.1); cosmetice de mașină și de pilot, câștigate și vândute |
+| mai târziu | Play Pass; PC / Steam. Pachetele de lumi nu mai sunt în plan: după San Francisco nu se mai fac piste (decis 10 nov 2026) |
+
+Tabelul e cel din v0.2. Varianta din v0.1 avea 3 piste gratuite din 12 și
+pachete de lumi după lansare.
 
 Mecanici noi, în ordinea raportului efect pe efort:
 1. **Stele pe pistă**: dau adâncimea de „10 ore” în cele 3 lumi gratuite și
@@ -494,52 +537,75 @@ Efort: S = ore, M = zile, L = săptămâni.
 Ordinea: P1 → P2 → P3 → P4 → P5 / P9 → P10 / P11 / P12 (= „lansabil”) → P6 →
 P7 → P8 → P13 → restul, la decizie.
 
+Stare la 11 nov 2026 (PR-uri deschise, încă nemergeate): P1 și P2 în #709, P8
+în #710, P10 în #707, P11 în #705. Din P3, pistele de test au ieșit din QUICK
+RACE în #706; redenumirea Monument Valley e issue-ul #673. P6 și P7 sunt
+deblocate de decizia din §0.1. P15 se amână până după lansare și e doar pentru
+Android.
+
 ## 11. Decizii pentru dezvoltator
 
 Format: variante, recomandare, înclinația declarată pe 13 oct 2026, când se
-decide.
+decide. De la v0.2, fiecare decizie are și starea ei la 11 nov 2026.
 
 1. **D1 Publicul-țintă și vârsta.** A: toate vârstele fără program de copii,
    zero date, reclame doar nepersonalizate dacă vreodată; B: Kids Category /
    Designed for Families; C: 13+ cu reclame și analytics. **Recomandare:** A,
    cu levierele din §6. Înclinație: a întrebat dacă A exclude reclamele (nu).
-   **Se decide înainte de** D2.
+   **Se decide înainte de** D2. **Stare (11 nov 2026):** nedecis. D2 s-a luat
+   fără el; devine obligatoriu înaintea reclamelor de pe Android.
 2. **D2 Modelul.** (a) premium; (b) gratuit + deblocare unică; (c) gratuit cu
    reclame + „scoate reclamele”; candidatul propriu: 3 piste gratis fără
    reclame, apoi full cu reclame sau full plătit. **Recomandare:** (b), cu
    reclama recompensată doar în v1.1. Înclinație: nedecis, între candidatul
    propriu și (b). **Se decide înainte de** P6 / P7 și de fișa de magazin.
+   **DECIS (11 nov 2026):** (b), la 3,99 $, fără cumpărături pe cupă, cu prima
+   lume gratuită în toate modurile. Din candidatul propriu rămâne reclama de pe
+   Android, mutată după lansare (§0.1).
 3. **D3 Upgrade-uri de statistici.** Deloc; câștigate prin joc (rescrie
    principiul 4); cumpărabile. **Recomandare:** deloc; scopul se obține prin
    §7. Înclinație: s-a gândit la ele, nedecis. **Se decide înainte de** P5.
+   **Stare (11 nov 2026):** nedecis (issue #675).
 4. **D4 Ce cumpără banii reali.** Doar lumi + cosmetice; sau și mașini
    (pay-to-skip). **Recomandare:** doar lumi + cosmetice; mașinile exclusiv cu
    puncte. Înclinație: „fie cu bani, fie cu puncte”. **Se decide înainte de**
-   P5 / P7.
+   P5 / P7. **Stare (11 nov 2026):** pe jumătate. Banii reali cumpără
+   deblocarea pistelor și, ca direcție aprobată, cosmetice. Dacă se pot cumpăra
+   și mașini e încă nedecis (issue #675).
 5. **D5 Moneda de progresie.** Stele cu total fix; bani pe cursă.
-   **Recomandare:** stele. **Se decide înainte de** P5.
+   **Recomandare:** stele. **Se decide înainte de** P5. **Stare (11 nov
+   2026):** nedecis; cariera folosește deja puncte (issue #675).
 6. **D6 Bronz / Argint / Aur.** Da, cu AI onest pe butoanele din §7.5; nu.
    **Recomandare:** da; țintele ~12 / 6 / 2% se reglează la volan. Înclinație:
-   da. **Se decide înainte de** P8.
+   da. **Se decide înainte de** P8. **Stare (11 nov 2026):** construit în PR
+   #710 pentru QUICK RACE și WORLD CUP; legătura cu cariera e issue-ul #676.
 7. **D7 Pitch Apple Arcade / Netflix.** Înainte de lansarea gratuită, cu
    termen; nu. **Recomandare:** da, cu termen de 2-3 luni. **Se decide înainte
-   de** anunțul public.
+   de** anunțul public. **Stare (11 nov 2026):** nedecis (issue #702).
 8. **D8 Lumile post-release.** Gratuite; pachete plătite. **Recomandare:**
    pachete, cu oferta de lansare formulată „toate lumile de la lansare”. **Se
-   decide înainte de** textul ofertei (P6).
+   decide înainte de** textul ofertei (P6). **Închisă (10 nov 2026):** după
+   San Francisco nu se mai fac piste, deci nu există lumi post-release de
+   vândut. Oferta poate spune simplu „toate pistele”.
 9. **D9 Titlul.** „Toy Racer” (semnal de copii); nume din zona de modelism.
    **Recomandare:** nume nou, verificat la marcă și pe App Store (numele sunt
    unice acolo). **Se decide înainte de** crearea aplicației în App Store
-   Connect, care rezervă numele.
+   Connect, care rezervă numele. **Stare (11 nov 2026):** nedecis (issue
+   #672).
 
 ## 12. Ce NU e aici
 
-Implementare (orice P#), marketing, prețul exact și localizarea lui, entitatea
-juridică și conturile de dezvoltator, politica de confidențialitate, planul de
-lansare. Se scriu când D1 / D2 sunt luate.
+Implementare (orice P#), marketing, localizarea prețului de 3,99 $ pe țări,
+entitatea juridică și conturile de dezvoltator, politica de confidențialitate,
+planul de lansare.
 
 ## Istoric
 
+- **v0.2 (11 nov 2026):** modelul e decis (§0.1): gratuit de încercat cu prima
+  lume liberă în toate modurile, o deblocare de 3,99 $, fără cumpărături pe
+  cupă, fără reclame la lansare, reclamă la cerere pe Android după lansare,
+  cosmetice ca strat al doilea. D2 decisă, D8 închisă, restul cu starea la zi.
+  Faza din §9 rescrisă pe 16 piste în 4 × 4.
 - **v0.1 (13 oct 2026):** analiza din conversația de monetizare, cu
   înclinațiile dezvoltatorului marcate ca nedecise; cifrele verificate la
   aceeași dată; linia de 100 MB din `CLAUDE.md` scoasă separat (#488).

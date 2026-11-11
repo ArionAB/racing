@@ -29,6 +29,9 @@ var _sabotage := false
 ## `--grid=x0,z0,x1,z1`: harta cotelor (primul corp lovit de sus) pe o grila de 1 m, cu numele
 ## corpului — pentru o repunere care se repeta intr-un punct fix.
 var _grid := Vector4.ZERO
+## `--dump-branch=res://tools/data/sf_route_branch.tsv`: scrie banda COAPTA (x y z) pentru
+## generator (cota acostamentului se ia de pe planul real al benzii, nu de pe cel analitic).
+var _dump_branch := ""
 
 
 func _ready() -> void:
@@ -41,6 +44,8 @@ func _ready() -> void:
 			_all = true
 		elif arg == "--sabotaj":
 			_sabotage = true
+		elif arg.begins_with("--dump-branch="):
+			_dump_branch = arg.trim_prefix("--dump-branch=")
 		elif arg.begins_with("--grid="):
 			var g := arg.trim_prefix("--grid=").split(",")
 			_grid = Vector4(float(g[0]), float(g[1]), float(g[2]), float(g[3]))
@@ -68,6 +73,12 @@ func _ready() -> void:
 		return
 	var main: TrackRoute = track.routes[0]
 	var b: TrackRoute = track.routes[1]
+	if not _dump_branch.is_empty():
+		var f := FileAccess.open(_dump_branch, FileAccess.WRITE)
+		for q: Vector3 in b.baked:
+			f.store_line("%.3f %.3f %.3f" % [q.x, q.y, q.z])
+		f.close()
+		print("%s: %d puncte ale benzii coapte" % [_dump_branch, b.baked.size()])
 	if _grid != Vector4.ZERO:
 		for zz in range(int(_grid.y), int(_grid.w) + 1):
 			var row := "z %4d:" % zz

@@ -529,8 +529,13 @@ print(f"scurtatura: entry_at {entry_at:.5f}  exit_at {exit_at:.5f}")
 BW = SERP_BW
 INNER_OFF = 2.0
 BED_H = 0.8
+BED_TIP = 10.0       # varful penei stratului, spre gura acului (m de la centrul acului)
+STRIP_IN = 5.0       # fasia de langa brat intra pana la 5 m de axa acului (sub pana)
+PIE_EXT_DEG = 25.0   # felia de la virajele de 90 trece de capetele arcului cu atat (iesirea: treapta
+                     # de 0,3-0,4 m intre bratul acului 3 si viraj, ProbeRace la (23, 420))
 SLAB_UNDER = 0.6     # cat intra acostamentul sub carosabil
-SLAB_DROP = 0.03     # cat sta sub marginea drumului (fara buza, fara z-fighting)
+# Cat sta acostamentul sub PLANUL benzii, dincolo de muchie (profilul complet: EDGE_E / EDGE_DROP).
+SLAB_DROP = 0.22
 WALL_OFF, WALL_H, WALL_D = 1.0, 1.5, 0.4
 
 
@@ -582,13 +587,57 @@ def lat_dir(th, side):
     return (math.cos(th + side * math.pi / 2.0), math.sin(th + side * math.pi / 2.0))
 
 
+# Cota PLANULUI benzii copte (ProbeSfRoute --dump-branch): spline-ul nu urmeaza exact cota liniara
+# de aici (masurat: pana la 0,07 m), iar acostamentul sta la cativa cm de ea. Fara fisier (sau cu
+# unul vechi) se foloseste cota analitica.
+BR_BAKED_PATH = os.path.join(HERE, "data", "sf_route_branch.tsv")
+BR_BAKED = []
+if os.path.exists(BR_BAKED_PATH):
+    for line in open(BR_BAKED_PATH, encoding="utf-8"):
+        tk = line.split()
+        if len(tk) == 3:
+            BR_BAKED.append(tuple(float(v) for v in tk))
+    if BR_BAKED:
+        def _segd2(gx, gz):
+            best = 1e18
+            for a, b in zip(BR_BAKED, BR_BAKED[1:]):
+                sx, sz = b[0] - a[0], b[2] - a[2]
+                L2 = sx * sx + sz * sz
+                t = 0.0 if L2 < 1e-9 else max(0.0, min(1.0, ((gx - a[0]) * sx + (gz - a[2]) * sz) / L2))
+                best = min(best, (a[0] + sx * t - gx) ** 2 + (a[2] + sz * t - gz) ** 2)
+            return best
+        worst = max(_segd2(g[0], g[2]) for g in DENSE_G[60:-60:10])
+        if worst > 0.8 ** 2:
+            print(f"ATENTIE: banda coapta din {os.path.relpath(BR_BAKED_PATH, ROOT)} e VECHE "
+                  f"({math.sqrt(worst):.1f} m): acostamentul ia cota analitica. Ruleaza ProbeSfRoute "
+                  f"--dump-branch si regenereaza.")
+            BR_BAKED = []
+print(f"banda coapta: {'%d puncte' % len(BR_BAKED) if BR_BAKED else 'LIPSA (cota analitica)'}")
+
+
 def road_y_near(gx, gz):
-    """Cota benzii (punctul dens cel mai apropiat in plan)."""
-    best, by = 1e18, 0.0
-    for p in DENSE_G:
+    """Cota planului benzii in dreptul punctului (gx, gz): proiectia pe cel mai apropiat segment
+    al benzii coapte (sau al liniei dense analitice, fara fisier)."""
+    pts = BR_BAKED if BR_BAKED else [(p[0], p[1], p[2]) for p in DENSE_G]
+    best, bk = 1e18, 0
+    for k, p in enumerate(pts):
         d = (p[0] - gx) ** 2 + (p[2] - gz) ** 2
         if d < best:
-            best, by = d, p[1]
+            best, bk = d, k
+    by = pts[bk][1]
+    bd = best
+    for nb in (bk - 1, bk + 1):
+        if nb < 0 or nb >= len(pts):
+            continue
+        a, b = pts[bk], pts[nb]
+        sx, sz = b[0] - a[0], b[2] - a[2]
+        L2 = sx * sx + sz * sz
+        if L2 < 1e-9:
+            continue
+        t = max(0.0, min(1.0, ((gx - a[0]) * sx + (gz - a[2]) * sz) / L2))
+        d = (a[0] + sx * t - gx) ** 2 + (a[2] + sz * t - gz) ** 2
+        if d < bd:
+            bd, by = d, a[1] + (b[1] - a[1]) * t
     return by
 
 
@@ -632,11 +681,13 @@ def arc_info(si):
 def y_on_arc(si, a):
     """Cota drumului la unghiul `a` pe arcul segmentului si."""
     cx_, cz_, R, ang, sgn, a0, s0, s1 = arc_info(si)
-    u = ((a - a0) * sgn) * R
-    sk = s0 + min(max(u, 0.0), s1 - s0)
-    xs, zs = cx_ + R * math.cos(a), cz_ + R * math.sin(a)
+    u = min(max(((a - a0) * sgn) * R, 0.0), s1 - s0)
+    a_cl = a0 + sgn * u / R
+    xs, zs = cx_ + R * math.cos(a_cl), cz_ + R * math.sin(a_cl)
     gx, _, gz = s2g(xs, zs, 0.0)
-    return branch_elev(sk, gx, gz)
+    if BR_BAKED:
+        return road_y_near(gx, gz)
+    return branch_elev(s0 + u, gx, gz)
 
 
 HAIRPIN_SEGS = [si for si, sg in enumerate(SC_SEGS) if sg[0] == "A" and abs(sg[3][3] - 180.0) < 1e-6]
@@ -644,6 +695,32 @@ NINETY_SEGS = [si for si, sg in enumerate(SC_SEGS) if sg[0] == "A" and abs(sg[3]
 r_edge = SERP_R - BW                 # marginea interioara a acului (11,5)
 r_bed = r_edge - INNER_OFF           # stratul (9,5)
 r_slab_out = r_edge + SLAB_UNDER     # acostamentul intra sub carosabil
+
+# Profilul acostamentului fata de MUCHIA benzii (e = metri dincolo de muchie, spre interior; negativ
+# = sub carosabil). Banda de pietris isi coboara marginea in teren cu Track.BRANCH_EDGE_SINK (0,35 m)
+# pe ultimii ~2,8 m, deci un acostament la cota planului ar fi o bordura de 0,3 m chiar pe muchie
+# (prima varianta: ProbeRace a gasit-o). Aici: lipit de muchie (0,33 sub plan) pe primii 0,6 m de sub
+# carosabil si pana la muchie, apoi urca la 0,22 sub plan in 0,6 m si ramane acolo. La 0,5 m dincolo
+# de muchie: ~0,24 sub plan (contractul cere >= plan - 0,30).
+EDGE_E = (-SLAB_UNDER, 0.0, 0.6)
+EDGE_DROP = (0.33, 0.33, SLAB_DROP)
+
+
+def ribbon(pt, u1, u2, y1, y2, r_edge_, dir_in, r_far):
+    """Fasia de acostament intre doua sectiuni (u1, u2) ale unei margini. `pt(r, u)` da punctul la
+    distanta r (de la centrul virajului / de la axa benzii) pe sectiunea u; muchia benzii e la
+    r_edge_, interiorul e in sensul `dir_in` (-1: spre centrul virajului, r scade; +1: r creste),
+    pana la r_far. Cota = planul benzii din dreptul sectiunii - profilul de mai sus."""
+    rs = [r_edge_ - dir_in * e for e in EDGE_E] + [r_far]
+    ds = list(EDGE_DROP) + [SLAB_DROP]
+    for k in range(len(rs) - 1):
+        p1 = pt(rs[k], u1)
+        p2 = pt(rs[k + 1], u1)
+        p3 = pt(rs[k + 1], u2)
+        p4 = pt(rs[k], u2)
+        add_quad((p1[0], y1 - ds[k], p1[2]), (p2[0], y1 - ds[k + 1], p2[2]),
+                 (p3[0], y2 - ds[k + 1], p3[2]), (p4[0], y2 - ds[k], p4[2]))
+
 
 bed_info = []
 for si in HAIRPIN_SEGS:
@@ -664,18 +741,11 @@ for si in HAIRPIN_SEGS:
     for k in range(13):
         a = a_mid - math.pi / 2.0 + math.pi * k / 12.0
         outline.append((cx_ + r_bed * math.cos(a), cz_ + r_bed * math.sin(a)))
-    p_end1 = (cx_ + ax[0] * ext + lat[0] * r_bed, cz_ + ax[1] * ext + lat[1] * r_bed)
-    p_end2 = (cx_ + ax[0] * ext - lat[0] * r_bed, cz_ + ax[1] * ext - lat[1] * r_bed)
-    # semidiscul merge de la a_mid-90 la a_mid+90; capetele lui sunt la +-lat
-    e_first = outline[0]
-    e_last = outline[-1]
-    # ordonare: semicerc, apoi coltul de pe partea capatului semicercului, apoi celalalt
-    def near(p, q):
-        return math.dist(p, q)
-    if near(e_last, p_end1) < near(e_last, p_end2):
-        outline += [p_end1, p_end2]
-    else:
-        outline += [p_end2, p_end1]
+    # spre gura: o PANA cu varful la BED_TIP m de centru, nu dreptunghiul dintre brate. Masinile
+    # iesite larg din virajul de dinainte (intrarea, acul vecin) intra in gura acului si o iau spre
+    # banda: o fata dreapta, perpendiculara pe drumul lor, le ejecta (ProbeRace: 4-9 ejectari
+    # „perete" pe 16 seed-uri la capatul stratului din acul 1). Pe pana alunecand, la ~35 de grade.
+    outline.append((cx_ + ax[0] * BED_TIP, cz_ + ax[1] * BED_TIP))
     prisms_bed.append(([s2g(x, z, 0.0) for x, z in outline], y_bot, y_top))
     bed_info.append((s2m(cx_, cz_), y_top))
     # acostamentul: inel intre strat si carosabil pe semicerc ...
@@ -683,29 +753,25 @@ for si in HAIRPIN_SEGS:
     for k in range(nseg):
         a_1 = a0 + sgn * math.pi * k / nseg
         a_2 = a0 + sgn * math.pi * (k + 1) / nseg
-        y1 = y_on_arc(si, a_1) - SLAB_DROP
-        y2 = y_on_arc(si, a_2) - SLAB_DROP
-        add_quad(ring_pt(cx_, cz_, r_bed - 0.5, a_1, y1), ring_pt(cx_, cz_, r_slab_out, a_1, y1),
-                 ring_pt(cx_, cz_, r_slab_out, a_2, y2), ring_pt(cx_, cz_, r_bed - 0.5, a_2, y2))
+        ribbon(lambda r_, a_: ring_pt(cx_, cz_, r_, a_, 0.0), a_1, a_2,
+               y_on_arc(si, a_1), y_on_arc(si, a_2), r_edge, -1.0, r_bed - 0.5)
     # ... si fasiile de langa brate, spre gura (pe lungimea bratului mai scurt + 1 m); cota
-    # fiecarui varf = cota bratului in dreptul lui (bratul coboara: o fasie plata ar iesi peste drum)
+    # fiecarui capat = cota bratului in dreptul lui (bratul coboara: o fasie plata ar iesi peste drum)
     for sgn_l in (1.0, -1.0):
-        q = []
+        ys_ = []
         for e_ in (0.0, ext + 1.0):
             axc = (cx_ + lat[0] * sgn_l * R + ax[0] * e_, cz_ + lat[1] * sgn_l * R + ax[1] * e_)
             gcx, _, gcz = s2g(axc[0], axc[1], 0.0)
-            yy = road_y_near(gcx, gcz) - SLAB_DROP
-            for rr in (r_bed - 0.5, r_slab_out):
-                xs = cx_ + lat[0] * sgn_l * rr + ax[0] * e_
-                zs = cz_ + lat[1] * sgn_l * rr + ax[1] * e_
-                gx, _, gz = s2g(xs, zs, 0.0)
-                q.append((gx, yy, gz))
-        add_quad(q[0], q[1], q[3], q[2])
+            ys_.append(road_y_near(gcx, gcz))
+
+        def arm_pt(rr, e_, sgn_l=sgn_l):
+            return s2g(cx_ + lat[0] * sgn_l * rr + ax[0] * e_, cz_ + lat[1] * sgn_l * rr + ax[1] * e_, 0.0)
+        ribbon(arm_pt, 0.0, ext + 1.0, ys_[0], ys_[1], r_edge, -1.0, STRIP_IN)
 
 for si in NINETY_SEGS:
     cx_, cz_, R, ang, sgn, a0, s0, s1 = arc_info(si)
     nseg = 12
-    ext_deg = 8.0
+    ext_deg = PIE_EXT_DEG
     for k in range(-1, nseg + 1):
         if k == -1:
             a_1, a_2 = a0 - sgn * deg(ext_deg), a0
@@ -714,32 +780,25 @@ for si in NINETY_SEGS:
         else:
             a_1 = a0 + sgn * deg(ang) * k / nseg
             a_2 = a0 + sgn * deg(ang) * (k + 1) / nseg
-        y1 = min(y_on_arc(si, a_1), road_y_near(*ring_xz(cx_, cz_, r_slab_out, a_1))) - SLAB_DROP
-        y2 = min(y_on_arc(si, a_2), road_y_near(*ring_xz(cx_, cz_, r_slab_out, a_2))) - SLAB_DROP
-        c1 = ring_pt(cx_, cz_, 0.0, a_1, y1)
-        c2 = ring_pt(cx_, cz_, 0.0, a_2, y2)
-        add_quad(c1, ring_pt(cx_, cz_, r_slab_out, a_1, y1), ring_pt(cx_, cz_, r_slab_out, a_2, y2), c2)
+        y1 = min(y_on_arc(si, a_1), road_y_near(*ring_xz(cx_, cz_, r_slab_out, a_1)))
+        y2 = min(y_on_arc(si, a_2), road_y_near(*ring_xz(cx_, cz_, r_slab_out, a_2)))
+        ribbon(lambda r_, a_: ring_pt(cx_, cz_, r_, a_, 0.0), a_1, a_2, y1, y2, r_edge, -1.0, 0.0)
 # intre virajul de iesire si cel al gurii: dreapta de 6 m, interiorul ei (spre centre)
 for si in range(len(SC_SEGS) - 2):
     if si in NINETY_SEGS and si + 2 in NINETY_SEGS and SC_SEGS[si + 1][0] == "S":
         x0, z0, th, L = SC_SEGS[si + 1][3]
         side = 1.0 if SC_SEGS[si][3][4] else -1.0
         lx, lz = lat_dir(th, side)
-        q2 = []
+        ys_ = []
         for e_ in (0.0, L):
-            sk = SC_SEGS[si + 1][1] + e_
-            xc = x0 + math.cos(th) * e_
-            zc = z0 + math.sin(th) * e_
-            gcx, _, gcz = s2g(xc, zc, 0.0)
-            yy = branch_elev(sk, gcx, gcz) - SLAB_DROP
-            for rr in (BW - SLAB_UNDER, SERP_RE):
-                xs = xc + lx * rr
-                zs = zc + lz * rr
-                gx, _, gz = s2g(xs, zs, 0.0)
-                q2.append((gx, yy, gz))
-        add_quad(q2[0], q2[1], q2[3], q2[2])
+            gcx, _, gcz = s2g(x0 + math.cos(th) * e_, z0 + math.sin(th) * e_, 0.0)
+            ys_.append(road_y_near(gcx, gcz))
 
-# Fatadele: pe exteriorul arcelor si pe partea dreptelor care nu da spre alt tronson al benzii;
+        def g2_pt(rr, e_):
+            return s2g(x0 + math.cos(th) * e_ + lx * rr, z0 + math.sin(th) * e_ + lz * rr, 0.0)
+        ribbon(g2_pt, 0.0, L, ys_[0], ys_[1], BW, 1.0, SERP_RE)
+
+# Fatadele: pe partea care nu da spre alt tronson al benzii (regula sondei 1b, `faces_branch`);
 # niciuna la mai putin de (latimea buclei + 3 m) de axa buclei (furca, gura).
 main_xz = [(p[0], p[2]) for p in MAIN_G]
 
@@ -757,13 +816,19 @@ def near_main(gx, gz, lim):
 
 
 def faces_branch(k, side):
+    """Partea `side` e INTERIOR, cu regula sondei 1b (`probe_sf_serp.gd::_is_inner`): punctul de la
+    hw + 0,5 m cade in cercul unui ac, sau pe directia laterala, pana la 2R + hw + 3 m, e alt
+    tronson al benzii (la cel putin 20 m pe lungime). Acolo nu se pune fatada: e gura unui ac."""
     xs, zs, th, sk, si = DENSE[k]
     lx, lz = lat_dir(th, side)
+    for hx, hz in SC_HP:
+        if math.hypot(xs + lx * (BW + 0.5) - hx, zs + lz * (BW + 0.5) - hz) < SERP_R:
+            return True
     t = BW + 1.0
     while t < 2.0 * SERP_R + BW + 3.0:
         mx_, mz_ = xs + lx * t, zs + lz * t
         for j in range(0, len(DENSE), 2):
-            if abs(DENSE[j][3] - sk) < 12.0:
+            if abs(DENSE[j][3] - sk) < 20.0:
                 continue
             if math.hypot(DENSE[j][0] - mx_, DENSE[j][1] - mz_) < BW + 0.5:
                 return True
@@ -776,11 +841,8 @@ for side in (1.0, -1.0):
     run = []
     for k in range(0, len(DENSE), 3):
         xs, zs, th, sk, si = DENSE[k]
-        kind = SC_SEGS[si][0]
-        if kind == "A":
-            right = SC_SEGS[si][3][4]
-            inner_side = 1.0 if right else -1.0
-            ok = side != inner_side
+        if SC_SEGS[si][0] == "A" and side == (1.0 if SC_SEGS[si][3][4] else -1.0):
+            ok = False      # interiorul unui viraj: acostament / strat, niciodata fatada
         else:
             ok = not faces_branch(k, side)
         lx, lz = lat_dir(th, side)
@@ -815,8 +877,71 @@ for side, runs in wall_runs.items():
             c = ((a[0] + b[0]) / 2.0, ymin - 0.6 + h / 2.0, (a[2] + b[2]) / 2.0)
             boxes_wall.append((c, (WALL_D, h, L + 0.15), yaw))
 
-print(f"\nserpentine (gri): {len(prisms_bed)} straturi, {len(tris_slab)} triunghiuri de acostament, "
-      f"{len(boxes_wall)} segmente de fatada")
+# TALUZ: orice margine a acostamentului care nu sta sub carosabil sau sub un strat e o TREAPTA de
+# 0,3-0,6 m deasupra terenului (samplerul il tine la drum - 0,55) — adica exact zidul pe care
+# acostamentul trebuia sa-l scoata, mutat cu cativa metri. Masurat (ProbeRace, 16 seed-uri): capatul
+# fasiei de langa bratul acului 1 dadea 9 din 15 ejectari „perete" ale scurtaturii, la (13, 324).
+# Fiecare astfel de margine primeste o panta de 3 m care coboara 0,7 m (23%), sub teren.
+SKIRT_W, SKIRT_DROP = 3.0, 0.7
+
+
+def _key(v):
+    return (round(v[0], 2), round(v[2], 2))
+
+
+def _inside_convex(px_, pz_, outline_g):
+    pts = [(p[0], p[2]) for p in outline_g]
+    sgn = 0
+    for i in range(len(pts)):
+        a, b = pts[i], pts[(i + 1) % len(pts)]
+        c = (b[0] - a[0]) * (pz_ - a[1]) - (b[1] - a[1]) * (px_ - a[0])
+        if abs(c) < 1e-9:
+            continue
+        s_ = 1 if c > 0 else -1
+        if sgn == 0:
+            sgn = s_
+        elif s_ != sgn:
+            return False
+    return True
+
+
+def _covered(px_, pz_):
+    for g in DENSE_G[::2]:
+        if math.hypot(g[0] - px_, g[2] - pz_) < BW - 0.05:
+            return True
+    for outline_g, _, _ in prisms_bed:
+        if _inside_convex(px_, pz_, outline_g):
+            return True
+    return False
+
+
+_edges = {}
+for t3 in tris_slab:
+    for a_i, b_i, c_i in ((0, 1, 2), (1, 2, 0), (2, 0, 1)):
+        k_ = tuple(sorted((_key(t3[a_i]), _key(t3[b_i]))))
+        _edges.setdefault(k_, []).append((t3[a_i], t3[b_i], t3[c_i]))
+skirts = 0
+for k_, uses in list(_edges.items()):
+    if len(uses) != 1:
+        continue
+    a, b, c = uses[0]
+    mx_, mz_ = (a[0] + b[0]) / 2.0, (a[2] + b[2]) / 2.0
+    ex, ez = b[0] - a[0], b[2] - a[2]
+    ln = math.hypot(ex, ez)
+    if ln < 0.05:
+        continue
+    nx_, nz_ = -ez / ln, ex / ln
+    if (c[0] - mx_) * nx_ + (c[2] - mz_) * nz_ > 0:
+        nx_, nz_ = -nx_, -nz_
+    if _covered(mx_ + nx_ * 0.3, mz_ + nz_ * 0.3):
+        continue
+    a2 = (a[0] + nx_ * SKIRT_W, a[1] - SKIRT_DROP, a[2] + nz_ * SKIRT_W)
+    b2 = (b[0] + nx_ * SKIRT_W, b[1] - SKIRT_DROP, b[2] + nz_ * SKIRT_W)
+    add_quad(a, b, b2, a2)
+    skirts += 1
+
+print(f"\nserpentine (gri): {len(prisms_bed)} straturi, {len(tris_slab)} triunghiuri de acostament "
+      f"({skirts} margini cu taluz), {len(boxes_wall)} segmente de fatada")
 
 # =============================================================================================
 # OBJ (vizualul gri) — un singur mesh, fara material.
@@ -901,6 +1026,16 @@ SHORE_E = X_E_HI + HW_QUAY + 8.0      # malul de est (faleza de sus la x_E_HI)
 LAGOON = [(-470.0, SHORE_N), (SHORE_E, SHORE_N), (SHORE_E, -760.0), (900.0, -760.0),
           (900.0, 1100.0), (-470.0, 1100.0)]
 SEA_OFFSET = round(0.0 - mean_y, 3)
+# SOARELE (brief §4, pasul 0): 28 de grade, azimut -12 fata de axa strazii lantului, din spate.
+# Conventia temei (`track.gd`, tema `sanfrancisco`): Y 0 = soare din S pe o strada care coboara
+# spre N; Y creste spre E. Strada lantului are azimutul CHAIN_AZ (0 = spre N, masurat aici pe
+# punctele de control ale lantului), deci Y = -12 - CHAIN_AZ. Scris pe pista (nu doar in tema),
+# ca o redesenare a traseului sa-l mute odata cu strada (memoria `azimutul-soarelui-fata-de-drum`).
+_c0 = PTS[i_lant0]
+_c1 = PTS[i_lant0 + CHAIN_STEPS]
+CHAIN_AZ = math.degrees(math.atan2(_c1[0] - _c0[0], _c1[1] - _c0[1]))
+SUN_ELEV = -28
+SUN_AZ = round(-12.0 - CHAIN_AZ, 1)
 PEAKS = [
     # (nume, x, y harta, cota, raza)
     ("Coama", -48.0, -96.0, 56.0, 130.0),
@@ -933,7 +1068,7 @@ def g3(v):
 lips_g = [MAIN_G[L] for L in LIPS]
 hp_map = [s2m(c[0], c[1]) for c in SC_HP]
 tower = (X_E, Y_S - 22.0)
-tram_up_entry = (MK["B0"][2] + 18.0, Y_S + 30.0)   # strada laterala, pe dreapta, la baza urcarii
+tram_up_entry = (MK["B0"][2] - 20.0, Y_S + 40.0)   # strada laterala, pe dreapta, la baza urcarii
 tram_up_exit = (X_B - 40.0, Y_S)                    # continuarea DREAPTA inainte la coltul de sus
 meta = [
     "metadata/jump_crests = [%s]" % ", ".join(V2(a, b) for a, b in jump_crests),
@@ -1028,6 +1163,7 @@ custom_gate_model = "none"
 custom_sea_level_offset = {SEA_OFFSET}
 custom_lagoon = Array[Vector2]([{", ".join(V2(a, -b) for a, b in LAGOON)}])
 custom_width_segments = Array[Vector3]([{", ".join(V3(*w_) for w_ in width_segments)}])
+custom_sun_rotation_deg = Vector3({SUN_ELEV}, {SUN_AZ}, 0)
 branch_smooth_level = true
 terrain_pad_m = 120.0
 {chr(10).join(meta)}
@@ -1057,8 +1193,8 @@ with open(OUT_TSCN, "w", encoding="utf-8", newline="\n") as f:
     f.write(tscn)
 print(f"scris {os.path.relpath(OUT_TSCN, ROOT)}; sea_level_offset {SEA_OFFSET}")
 print(f"turnul cu ceas: harta {tower}; linia de start la {math.dist(tower, (X_E, Y_START)):.0f} m de el")
-print(f"directia strazii lantului: azimut 0 (spre N); soarele temei (-28, -12): din S-SV, "
-      f"la 12 grade de axa, din spate")
+print(f"directia strazii lantului: azimut {CHAIN_AZ:.1f} grade (0 = N); soarele pe pista "
+      f"({SUN_ELEV}, {SUN_AZ}, 0): din S-SV, la 12 grade de axa, din spate")
 
 # =============================================================================================
 # Planul de sus adnotat
@@ -1068,7 +1204,7 @@ if PLAN_PATH:
     SC_ = 1.6
     allx = [p[0] for p in PTS] + [-470.0]
     ally = [p[1] for p in PTS]
-    x0, x1 = min(p[0] for p in PTS) - 120, max(p[0] for p in PTS) + 130
+    x0, x1 = min(p[0] for p in PTS) - 430, max(p[0] for p in PTS) + 130
     y0, y1 = min(ally) - 70, max(ally) + 90
     W, H = int((x1 - x0) * SC_), int((y1 - y0) * SC_)
     im = Image.new("RGB", (W, H), (236, 228, 205))
@@ -1150,28 +1286,63 @@ if PLAN_PATH:
         q = px(p)
         d.ellipse([q[0] - 5, q[1] - 5, q[0] + 5, q[1] + 5], fill=(150, 20, 40))
         d.text((q[0] + 8, q[1] + 4), txt, fill=(150, 20, 40), font=font_s)
-    # sageata de sens
-    # soarele: din S-SV (azimut 192, -12 fata de axa lantului care coboara spre N)
-    sun_az = deg(180.0 + 12.0)          # de unde vine, busola: 0 = N, 90 = E
-    c0 = (-310.0, -250.0)
+    # soarele: din S-SV (azimut 192, adica -12 fata de axa lantului, care coboara spre N)
+    sun_from = deg(180.0 + 12.0)        # busola: 0 = N, 90 = E; de UNDE vine lumina
+    c0 = (-420.0, -230.0)
     q0 = px(c0)
-    fx = math.sin(sun_az)
-    fy = math.cos(sun_az)
-    q1 = px((c0[0] - fx * 0.0, c0[1]))
-    tip = px((c0[0] - fx * 70.0 * -1, c0[1] - fy * 70.0 * -1))
-    # sageata de la soare spre centru (directia luminii)
-    src = px((c0[0] + fx * 70.0, c0[1] + fy * 70.0))
-    d.line([src, q0], fill=(230, 160, 30), width=5)
-    d.ellipse([src[0] - 12, src[1] - 12, src[0] + 12, src[1] + 12], fill=(250, 200, 60))
-    d.text((q0[0] - 80, q0[1] + 10), "soarele 28 grade, azimut -12\n(din S-SV, din spatele lantului)",
+    src = px((c0[0] + math.sin(sun_from) * 80.0, c0[1] + math.cos(sun_from) * 80.0))
+    d.line([src, q0], fill=(230, 160, 30), width=6)
+    d.ellipse([src[0] - 14, src[1] - 14, src[0] + 14, src[1] + 14], fill=(250, 200, 60))
+    d.polygon([(q0[0], q0[1]), (q0[0] - 9, q0[1] + 16), (q0[0] + 9, q0[1] + 16)], fill=(230, 160, 30))
+    d.text((q0[0] - 150, q0[1] - 70), "soarele: 28 grade, azimut 192\n(-12 fata de axa lantului,\ndin S-SV, din spate)",
            fill=(120, 80, 0), font=font)
     # nordul
     nq = px((x1 - 60, y1 - 40))
     d.line([(nq[0], nq[1] + 40), nq], fill=(0, 0, 0), width=3)
     d.text((nq[0] - 5, nq[1] - 22), "N", fill=(0, 0, 0), font=font_b)
     d.text((10, 10), f"Track25 San Francisco — traseul ({TOTAL:.0f} m, orar). Culoarea = cota "
-                     f"(albastru +3 .. rosu +53). Roz: straturile solide; gri: fatadele; caramiziu: "
-                     f"scurtatura.", fill=(0, 0, 0), font=font)
+                     f"(albastru +3 .. rosu +53); fractiile pe lungime.", fill=(0, 0, 0), font=font)
+    # INSERTIA: serpentinele marite (x -24..52, y 296..466), in coltul de vest
+    IS = 5.0
+    ix0, iy0 = -24.0, 296.0
+    iw, ih = 76.0, 170.0
+    ox, oy = 12, 60
+    d.rectangle([ox - 2, oy - 2, ox + iw * IS + 2, oy + ih * IS + 2], fill=(236, 228, 205), outline=(0, 0, 0), width=2)
+
+    def ipx(p):
+        return (ox + (p[0] - ix0) * IS, oy + (iy0 + ih - p[1]) * IS)
+
+    def inside(p):
+        return ix0 <= p[0] <= ix0 + iw and iy0 <= p[1] <= iy0 + ih
+
+    for t3 in tris_slab:
+        pts2 = [(v[0], -v[2]) for v in t3]
+        if all(inside(q_) for q_ in pts2):
+            d.polygon([ipx(q_) for q_ in pts2], fill=(205, 200, 185))
+    for i in range(N):
+        a_, b_ = MAIN_G[i], MAIN_G[(i + 1) % N]
+        pa, pb = (a_[0], -a_[2]), (b_[0], -b_[2])
+        if inside(pa) or inside(pb):
+            d.line([ipx(pa), ipx(pb)], fill=col((a_[1] + b_[1]) / 2), width=int(2 * HW * IS))
+    for k in range(len(DENSE_G) - 1):
+        a_, b_ = DENSE_G[k], DENSE_G[k + 1]
+        d.line([ipx((a_[0], -a_[2])), ipx((b_[0], -b_[2]))], fill=(170, 70, 45), width=int(2 * BW * IS))
+    for outline_g, y0_, y1_ in prisms_bed:
+        d.polygon([ipx((p_[0], -p_[2])) for p_ in outline_g], fill=(200, 120, 160), outline=(120, 60, 90))
+    for c, size, yaw in boxes_wall:
+        ring, _, _ = box_corners(c, size, yaw)
+        d.polygon([ipx((x_, -z_)) for x_, z_ in ring], fill=(60, 60, 60))
+    for k in range(0, len(DENSE_G), 40):
+        g_ = DENSE_G[k]
+        q_ = ipx((g_[0], -g_[2]))
+        d.text((q_[0] + 4, q_[1] - 6), f"+{g_[1]:.1f}", fill=(255, 255, 255), font=font_s)
+    d.text((ox + 6, oy + 6), "E' serpentinele (x5): caramiziu = banda 9 m, roz = straturile solide (retrase 2 m),\n"
+           "gri deschis = acostamentul la cota drumului, gri inchis = fatadele (1 m, 1,5 m)",
+           fill=(0, 0, 0), font=font_s)
+    fq = ipx(F_MAP)
+    d.text((fq[0] - 60, fq[1] + 10), "furca (+14,6)", fill=(0, 0, 0), font=font)
+    mq = ipx((M_X, M_Y))
+    d.text((mq[0] + 10, mq[1] + 12), "reintalnirea (+3)", fill=(0, 0, 0), font=font)
     os.makedirs(os.path.dirname(os.path.abspath(PLAN_PATH)), exist_ok=True)
     im.save(PLAN_PATH)
     print("plan:", PLAN_PATH)

@@ -467,8 +467,11 @@ func _build_walls() -> void:
 				h = _walls.y
 			var w := p + dir * (hw + off + 0.2)
 			var depth := 0.4
+			var top_extra := 0.0
 			if kind == "in" and _inner_fill:
-				depth = _fill_depth(b, i, p, dir, hw)
+				var fd := _fill_depth(b, i, p, dir, hw)
+				depth = fd.x
+				top_extra = maxf(fd.y - p.y, 0.0)
 			var ok := kind != ""
 			# langa bucla (furca, gura): fara zid
 			if ok:
@@ -496,10 +499,11 @@ func _build_walls() -> void:
 				if L > 0.05:
 					var cs := CollisionShape3D.new()
 					var box := BoxShape3D.new()
-					box.size = Vector3(depth, h + 0.6, L + 0.15)
+					var hh := h + top_extra
+					box.size = Vector3(depth, hh + 0.6, L + 0.15)
 					cs.shape = box
 					var mid := (w + prev) * 0.5 + dir * (depth - 0.4) * 0.5
-					mid.y = minf(w.y, prev.y) + (h + 0.6) * 0.5 - 0.6
+					mid.y = minf(w.y, prev.y) + (hh + 0.6) * 0.5 - 0.6
 					cs.transform = Transform3D(Basis.looking_at(seg.normalized(), Vector3.UP), mid)
 					if kind == "in":
 						inner_body.add_child(cs)
@@ -517,7 +521,11 @@ func _build_walls() -> void:
 ## Cat de adanc umple stratul solid de pe partea `dir`: pana la jumatatea
 ## distantei pana la bratul opus (care umple si el jumatatea lui), sau pana la
 ## centrul acului. Plafonat la 2R.
-func _fill_depth(b: TrackRoute, i: int, p: Vector3, dir: Vector3, hw: float) -> float:
+## Intoarce (adancime, cota bratului opus). Cota conteaza: bratele vecine sunt
+## la cote diferite, iar un strat cu varful la „drumul meu + h" iese la nivelul
+## drumului de pe bratul de SUS — masinile urcau pe el (vazut: repuneri de pe
+## varful stratului). Varful se pune la max(cele doua brate) + h.
+func _fill_depth(b: TrackRoute, i: int, p: Vector3, dir: Vector3, hw: float) -> Vector2:
 	var t := hw + 1.0
 	while t < 2.0 * _hp_r + hw + 3.0:
 		var m := p + dir * t
@@ -526,12 +534,16 @@ func _fill_depth(b: TrackRoute, i: int, p: Vector3, dir: Vector3, hw: float) -> 
 				continue
 			var q: Vector3 = b.baked[k]
 			if Vector2(q.x - m.x, q.z - m.z).length() < hw + 0.5:
-				return clampf((t - 2.0 * hw) * 0.5 + 0.5, 0.4, 2.0 * _hp_r)
+				return Vector2(clampf((t - 2.0 * hw) * 0.5 + 0.5, 0.4, 2.0 * _hp_r), q.y)
 		t += 1.0
 	var best := 2.0 * _hp_r
 	for h in _hairpins:
 		best = minf(best, Vector2(p.x - h.x, p.z - h.y).length() - hw)
-	return clampf(best, 0.4, 2.0 * _hp_r)
+	# interiorul arcului: cota cea mai mare a arcului din jur
+	var ymax := p.y
+	for k in range(maxi(i - 25, 0), mini(i + 25, b.baked.size())):
+		ymax = maxf(ymax, b.baked[k].y)
+	return Vector2(clampf(best, 0.4, 2.0 * _hp_r), ymax)
 
 
 ## Partea `dir` a punctului i e INTERIORUL unui ac: fie spre un alt tronson al
@@ -1326,8 +1338,13 @@ func _start_race() -> void:
 func _on_respawn(i: int, car: Car) -> void:
 	var o: Dictionary = _c[i]["open"]
 	var p := car.global_position
+	# starea din tickul de dinainte de repunere: de ce (rasturnata? oprita? unde?)
+	var lp: Vector3 = _c[i].get("lpos", p)
 	_respawn_events.append({"t": snappedf(_t, 0.1), "car": _c[i]["name"], "in_seg": not o.is_empty(),
-		"route": car.route, "pos": [snappedf(p.x, 1), snappedf(p.y, 1), snappedf(p.z, 1)]})
+		"route": car.route, "pos": [snappedf(p.x, 1), snappedf(p.y, 1), snappedf(p.z, 1)],
+		"from": [snappedf(lp.x, 1), snappedf(lp.y, 1), snappedf(lp.z, 1)],
+		"up": snappedf(float(_c[i].get("lup", 1.0)), 0.01), "v": snappedf(float(_c[i].get("lv", 0.0)), 0.1),
+		"touch": String(_c[i].get("ltouch", ""))})
 	if not o.is_empty():
 		o["resp"] = int(o["resp"]) + 1
 
@@ -1376,6 +1393,13 @@ func _physics_process(delta: float) -> void:
 			else:
 				c["stuck_t"] = 0.0
 		c["prev"] = p
+		c["lpos"] = p
+		c["lup"] = car.global_transform.basis.y.dot(Vector3.UP)
+		c["lv"] = car.horizontal_speed()
+		var tl: PackedStringArray = []
+		for body in car.get_colliding_bodies():
+			tl.append(String((body as Node).name))
+		c["ltouch"] = ",".join(tl)
 	if _t >= _seconds:
 		_done = true
 		_race_report()

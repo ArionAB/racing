@@ -77,11 +77,23 @@ C_EAST = 48.0      # latura de sud a parcului (si cei ~290 m ai strazii tramvaiu
 R_C2 = 36.0        # la stanga spre N, larg: iesirea din viraj tine viteza pentru elan
 RUNUP = 96.0       # elanul drept pana la prima muchie (contract >= 70 m)
 TERRACE = 36.0     # terasa plata de dupa ultimul bloc, pana la furca
-QUAY_X_END = 238.0  # capatul de est al cheiului (inceputul coltului de NE)
 R_NE = 30.0
-JOG_R = 36.0       # cotul de pe faleza: doua arce de 45 de grade + o diagonala
+# LATURA DE EST in trei gesturi (brief §2, randurile A si G; runda 2, cererea dezvoltatorului:
+# runda 1 avea o dreapta de ~540 m cu un singur cot). Spre S, de la coltul de NE:
+#   1. coltul de NE (F -> G), R30;
+#   2. COTUL PIATETEI: doua arce de 45 de grade + o diagonala, 29,6 m spre V (piateta cu tramvaiul
+#      vechi ramane intre drum si apa);
+#   3. DEVIEREA de pe faleza: doua arce de 30 de grade (R50) + o diagonala, ~19 m inapoi spre E,
+#      care se termina la 40 m inaintea liniei de start: dreapta de start (grila + 202 m de
+#      imbranceala pana la coltul A/B) are 242 m, cu turnul in ax.
+# Nicio dreapta a laturii nu trece de ~250 m (S1 172, S2 172, dreapta de start 242).
+JOG_R = 36.0       # cotul piatetei: doua arce de 45 de grade + o diagonala
 JOG_DIAG = 12.0
-JOG_Y = 236.0      # unde incepe cotul (pe faleza de sus)
+DEV_R = 50.0       # devierea de pe faleza: doua arce de 30 de grade + o diagonala
+DEV_ANG = 30.0
+DEV_DIAG = 12.0
+DEV_BEFORE_START = 40.0   # devierea se termina cu atatia metri inaintea liniei de start
+S1_LEN = 172.0            # dreapta de dupa coltul de NE, pana la cotul piatetei
 START_TO_CORNER = 202.0  # linia de start -> inceputul coltului A/B
 
 CHAIN_STEPS = int(round((RUNUP + BLOCKS * 72.0 - 24.0 + TERRACE) / STEP))  # 33 de pasi
@@ -199,8 +211,13 @@ X_B = -(R_C2 + C_EAST + R_C1)
 Y_CTOP = -RUNUP - R_C2 - R_C1        # capatul urcarii (inceputul virajului C1)
 Y_S = Y_CTOP - B_NORTH - R_B         # strada tramvaiului (latura de sud)
 JOG_SHIFT = 2.0 * JOG_R * (1.0 - math.cos(deg(45))) + JOG_DIAG * math.sin(deg(45))
-X_E_HI = QUAY_X_END + R_NE           # faleza de sus
-X_E = X_E_HI - JOG_SHIFT             # faleza de jos (start, A)
+JOG_V = 2.0 * JOG_R * math.sin(deg(45)) + JOG_DIAG * math.cos(deg(45))
+DEV_SHIFT = 2.0 * DEV_R * (1.0 - math.cos(deg(DEV_ANG))) + DEV_DIAG * math.sin(deg(DEV_ANG))
+DEV_V = 2.0 * DEV_R * math.sin(deg(DEV_ANG)) + DEV_DIAG * math.cos(deg(DEV_ANG))
+X_E = 268.0 - JOG_SHIFT              # faleza de jos (start, A): aceeasi ca in runda 1, deci B neatinsa
+X_E_HI = X_E + JOG_SHIFT - DEV_SHIFT # faleza de sus (dupa coltul de NE)
+X_MID = X_E_HI - JOG_SHIFT           # intre piateta si deviere
+QUAY_X_END = X_E_HI - R_NE           # capatul de est al cheiului (inceputul coltului de NE)
 B_WEST_REAL = (X_E - R_AB) - (X_B + R_B)
 Y_START = Y_S + R_AB + START_TO_CORNER
 
@@ -235,11 +252,18 @@ def build_loop():
     t.straight(QUAY_X_END - t.x, "E/F strada de jos")
     t.mark("NE")
     t.arc(R_NE, 90, True, "G colt NE")
-    t.straight(QUAY_Y - R_NE - JOG_Y, "G faleza")
+    t.straight(S1_LEN, "G faleza")
     t.mark("cot")
-    t.arc(JOG_R, 45, True, "G cot")
-    t.straight(JOG_DIAG, "G cot")
-    t.arc(JOG_R, 45, False, "G cot")
+    t.arc(JOG_R, 45, True, "G cot piateta")
+    t.straight(JOG_DIAG, "G cot piateta")
+    t.arc(JOG_R, 45, False, "G cot piateta")
+    t.mark("S2")
+    t.straight(t.y - (Y_START + DEV_BEFORE_START + DEV_V), "G faleza 2")
+    t.mark("deviere")
+    t.arc(DEV_R, DEV_ANG, False, "G deviere")
+    t.straight(DEV_DIAG, "G deviere")
+    t.arc(DEV_R, DEV_ANG, True, "G deviere")
+    t.mark("sprint")
     t.straight(t.y - Y_START, "G sprint")
     assert abs(t.x - X_E) < 1e-6 and abs(t.y - Y_START) < 1e-6, (t.x, t.y, X_E, Y_START)
     t.pts.pop()
@@ -1204,7 +1228,7 @@ if PLAN_PATH:
     SC_ = 1.6
     allx = [p[0] for p in PTS] + [-470.0]
     ally = [p[1] for p in PTS]
-    x0, x1 = min(p[0] for p in PTS) - 430, max(p[0] for p in PTS) + 130
+    x0, x1 = min(p[0] for p in PTS) - 430, max(p[0] for p in PTS) + 220
     y0, y1 = min(ally) - 70, max(ally) + 90
     W, H = int((x1 - x0) * SC_), int((y1 - y0) * SC_)
     im = Image.new("RGB", (W, H), (236, 228, 205))
@@ -1271,7 +1295,8 @@ if PLAN_PATH:
     label((-120, 400), "E  ocolul 400 m\n    +14,6 -> +3")
     label((40, 380), "E'  serpentine\n     R16, 9 m")
     label((60, QUAY_Y + 20), "F  cheiul de nord (+3, 12 m)", fill=(255, 255, 255))
-    label((X_E_HI + 18, 260), "G  faleza\n    (+3)", fill=(255, 255, 255))
+    label((X_E_HI + 24, 330), "G  faleza (+3)", fill=(255, 255, 255))
+    label((X_MID + 9, 196), "piateta", f=font, fill=(40, 40, 40))
     label((X_E_HI + 18, 30), "golful", fill=(255, 255, 255))
     # start, turn, tramvaie
     s0 = px((X_E, Y_START))

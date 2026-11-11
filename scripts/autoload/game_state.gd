@@ -269,6 +269,13 @@ var cam_fov_scale: float = 1.0
 ## Cat de repede se aseaza camera in spatele masinii. Sub 1.0 = mai lenesa.
 var cam_follow_scale: float = 1.0
 
+## Turul ghidat (#678) a fost terminat SAU sarit: nu se mai ofera la pornire
+## (se reia din SETTINGS). Persistat. Logica sta in TutorialDirector.
+var tutorial_done: bool = false
+## Cursa curenta e turul ghidat: fara adversari, cu indiciile peste HUD.
+## Doar pe sesiune; `go_to_menu` il stinge.
+var tutorial_run: bool = false
+
 ## Contorul de performanta din HUD (FPS, desene, triunghiuri, timp GPU).
 ## E prima unealta pe care o pornesti pe telefon: fara ea, "merge prost" nu
 ## are cifra, iar cifra e singura care spune DACA sunt umbrele, ceata sau
@@ -807,6 +814,7 @@ func go_to_menu() -> void:
 	if champ_active:
 		menu_open_panel = &"world_cup"
 	champ_active = false
+	tutorial_run = false
 	Career.leave() # iesirea prin MENU inchide si cursa de cariera
 	reset_touch()
 	get_tree().change_scene_to_file(MENU_SCENE)
@@ -856,6 +864,7 @@ func load_settings() -> void:
 	gfx_tier = clampi(int(cfg.get_value("video", "gfx_tier", 1)), 0, 2)
 	haptics_enabled = bool(cfg.get_value("input", "haptics", true))
 	reduce_flashes = bool(cfg.get_value("video", "reduce_flashes", false))
+	tutorial_done = bool(cfg.get_value("game", "tutorial_done", false))
 
 func save_settings() -> void:
 	if _settings_read_only:
@@ -882,6 +891,7 @@ func save_settings() -> void:
 	cfg.set_value("video", "gfx_tier", gfx_tier)
 	cfg.set_value("input", "haptics", haptics_enabled)
 	cfg.set_value("video", "reduce_flashes", reduce_flashes)
+	cfg.set_value("game", "tutorial_done", tutorial_done)
 	cfg.save(settings_path)
 
 

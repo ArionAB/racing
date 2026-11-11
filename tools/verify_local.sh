@@ -200,6 +200,8 @@ run_step "Registrul MeshCpu (citiri GPU refolosite)" meshcpu.log 'MeshCpu:' -- \
 # simultan (gaz+drift, gaz+turbo) nu se ating.
 run_step "Controale touch: maparea si distantele" touch_zones.log 'VERDICT:' -- \
 	--headless --path . res://tools/ProbeTouchZones.tscn
+run_step "Turul ghidat: indicii la gest, SKIP, salvare, SETTINGS, layout" tutorial.log 'VERDICT:' -- \
+	--headless --fixed-fps 60 --path . res://tools/ProbeTutorial.tscn
 # Fara QUIT pe mobil (#692): Apple respinge aplicatiile cu buton de iesire.
 # Meniul real, cu etichetele de platforma simulate; plus coloana fara gol si
 # nicio alta iesire (`quit(`) in scenes/ si scripts/.

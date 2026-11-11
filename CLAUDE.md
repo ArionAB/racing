@@ -68,6 +68,14 @@ pur plus haosul fizic, nu proiectilele.
   scrâșnet după alunecare, bara de turbo pulsează. Garda: `ProbeDriftEntry`
   (4 contracte, fiecare cu sabotaj care pică).
 - Countdown + rocket start (ține TURBO în ultima secundă), poziții live ✔
+- **Niveluri AI BRONZE / SILVER / GOLD** ✔ (nov 2026, #682): resursa `AiSkill`
+  (`scenes/cars/ai_skill/`) ține DOAR cum se conduce (marja în viraj, cât apasă
+  pe drept, linia, drift, turbo, scurtătura, depășirea, greșelile vizibile);
+  niciun câmp nu atinge mașina (principiul 5). Selector în QUICK RACE și WORLD
+  CUP; cariera și sondele rămân pe profilul implicit (`AiSkill.new()` = AI-ul
+  de dinainte, bit cu bit — pe el stau liniile de bază). Gărzi:
+  `ProbeAiSkillWiring` (în verify) și `tools/ai_skill_gap.sh` (ecartul pe tur,
+  unealtă lungă).
 - **World Cup** ✔ (oct 2026): 3 cupe × 4 curse (`scenes/world_cup/data/`),
   puncte cumulate 6-5-4-3-2-1 (`GameState.CHAMP_POINTS`). La fiecare cupă
   nouă adversarii sunt trași aleatoriu din garaj, **niciodată aceeași mașină

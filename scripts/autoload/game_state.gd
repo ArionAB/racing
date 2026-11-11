@@ -226,6 +226,11 @@ var selected_car: int = 0
 ## deschisa; AI-ul isi tine figurina din .tres.
 var selected_driver: int = 0
 var selected_track: int = 0
+## Nivelul adversarilor ales in QUICK RACE / WORLD CUP (index in
+## `AiSkill.LEVEL_PATHS`, persistat), si cel aplicat cursei care porneste: -1 =
+## profilul implicit (cariera, sonde, orice cursa care nu trece pe aici).
+var ai_level: int = AiSkill.DEFAULT_LEVEL
+var race_ai_level: int = -1
 ## Panoul pe care MainMenu il deschide direct la intrare (&"career" dupa o
 ## cursa de cariera). Citit o singura data si golit.
 var menu_open_panel: StringName = &""
@@ -732,6 +737,7 @@ func start_quick_race(track_index: int) -> void:
 	champ_active = false
 	Career.leave()
 	selected_track = track_index
+	race_ai_level = ai_level
 	start_race()
 
 ## Porneste o cupa de la prima cursa, cu adversari trasi din nou. Fara
@@ -746,6 +752,7 @@ func start_championship(cup: WorldCup = champ_cup) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	champ_ai_cars = draw_ai_lineup(selected_car, ai_count, rng)
+	race_ai_level = ai_level
 	selected_track = cup.track_index(0)
 	start_race()
 
@@ -864,6 +871,8 @@ func load_settings() -> void:
 	gfx_tier = clampi(int(cfg.get_value("video", "gfx_tier", 1)), 0, 2)
 	haptics_enabled = bool(cfg.get_value("input", "haptics", true))
 	reduce_flashes = bool(cfg.get_value("video", "reduce_flashes", false))
+	ai_level = clampi(int(cfg.get_value("game", "ai_level", AiSkill.DEFAULT_LEVEL)),
+		0, AiSkill.LEVEL_PATHS.size() - 1)
 	tutorial_done = bool(cfg.get_value("game", "tutorial_done", false))
 
 func save_settings() -> void:
@@ -891,6 +900,7 @@ func save_settings() -> void:
 	cfg.set_value("video", "gfx_tier", gfx_tier)
 	cfg.set_value("input", "haptics", haptics_enabled)
 	cfg.set_value("video", "reduce_flashes", reduce_flashes)
+	cfg.set_value("game", "ai_level", ai_level)
 	cfg.set_value("game", "tutorial_done", tutorial_done)
 	cfg.save(settings_path)
 

@@ -36,6 +36,7 @@ func _ready() -> void:
 	margin.add_child(root)
 
 	root.add_child(_build_header())
+	root.add_child(AiSkillSelector.new())
 
 	# Se trage cu degetul oriunde pe grila, inclusiv peste cartonase; o tragere
 	# nu apasa cartonasul de sub deget.

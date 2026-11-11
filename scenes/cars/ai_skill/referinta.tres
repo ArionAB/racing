@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="AiSkill" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/cars/ai_skill/ai_skill.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+inside_bias = 0.8
+drift_severity = 0.18
+turbo_min_charge = 0.4
+rocket_start_chance = 1.0
+overtake_reach = 1.3

@@ -30,6 +30,7 @@ func _ready() -> void:
 
 	root.add_child(TrackSelectPanel.build_header("WORLD CUP", "CHOOSE A CUP",
 		back_pressed.emit))
+	root.add_child(AiSkillSelector.new())
 
 	var scroll := TouchScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL

@@ -225,11 +225,22 @@ class SkilledAI extends AIController:
 	## Greseala „taiat la interior" in acul 2: linia AI-ului impinsa la maximum
 	## (LINE_MAX) spre centrul acului, ca sa atinga bordura interioara.
 	var cut_h2: bool = false
+	## „cut90": linia impinsa la maximum spre interiorul virajelor de 90 (centre
+	## si raza de zona date din linia de comanda) — taie interiorul moale.
+	var cut_zones: Array[Vector3] = []
 
 	func is_turbo_pressed() -> bool:
 		return false if no_turbo else super.is_turbo_pressed()
 
 	func update(delta: float) -> void:
+		if not cut_zones.is_empty():
+			line_offset = 0.0
+			for zc in cut_zones:
+				if car.route == 1 and Vector2(car.global_position.x - zc.x, car.global_position.z - zc.y).length() < zc.z:
+					var rz: TrackRoute = track.route_at(1)
+					var iz := clampi(car.road_index, 0, rz.baked.size() - 1)
+					var to_z := Vector3(zc.x, 0.0, zc.y) - rz.baked[iz]
+					line_offset = 0.8 * signf(rz.side_at(iz).dot(to_z))
 		if cut_h2:
 			line_offset = 0.0
 			if car.route == 1 and Vector2(car.global_position.x - h2.x, car.global_position.z - h2.y).length() < h2_r:
@@ -320,6 +331,12 @@ var _inner_fill: bool = false
 ## `--line=x`: line_offset al AI-ului in solo (personalitatea din cursa e
 ## randf(-0.28, 0.28) in AIController.configure; solo implicit 0)
 var _line_off: float = 0.0
+## `--soft90=D`: interiorul virajelor de 90 (intrare, iesire) MOALE — stratul
+## solid ramane doar unde axa drumului e la < R + hw + D de centrul unui ac
+## (arcul acului si bratele dintre ace). Negativ = stratul peste tot (runda 2).
+var _soft90: float = -1.0
+## `--cut90=x,z,raza[,x,z,raza]`: zonele virajelor de 90 pentru pilotul „cut90"
+var _cut90: PackedFloat32Array = PackedFloat32Array()
 var _wall_body: StaticBody3D = null
 
 var _track: Track
@@ -361,6 +378,11 @@ func _ready() -> void:
 			var iv := arg.trim_prefix("--inner=").split(",")
 			_inner = Vector2(float(iv[0]), float(iv[1]) if iv.size() > 1 else 0.35)
 			_inner_fill = iv.size() > 2 and iv[2] == "fill"
+		elif arg.begins_with("--cut90="):
+			for v in arg.trim_prefix("--cut90=").split(","):
+				_cut90.append(float(v))
+		elif arg.begins_with("--soft90="):
+			_soft90 = float(arg.trim_prefix("--soft90="))
 		elif arg.begins_with("--line="):
 			_line_off = float(arg.trim_prefix("--line="))
 		elif arg.begins_with("--rneed="):
@@ -439,6 +461,7 @@ func _build_walls() -> void:
 	_wall_body = outer_body
 	var made := 0
 	var made_in := 0
+	var soft_n := 0
 	for side: float in [-1.0, 1.0]:
 		var prev := Vector3.INF
 		var prev_kind := ""
@@ -450,6 +473,14 @@ func _build_walls() -> void:
 			var right := d.cross(Vector3.UP).normalized()
 			var dir := right * side
 			var inner := _is_inner(b, i, p, dir, hw)
+			if inner and _soft90 >= 0.0 and _inner.x >= 0.0:
+				var w0 := p + dir * (hw + _inner.x + 0.2)
+				if not _in_hairpin_interior(w0, hw):
+					inner = false
+					soft_n += 1
+					prev = Vector3.INF
+					prev_kind = ""
+					continue
 			var kind := ""
 			var off := 0.0
 			var h := 0.0
@@ -515,7 +546,8 @@ func _build_walls() -> void:
 			prev_kind = kind
 	print("  ziduri pe scurtatura: %d segmente exterioare (%.1f m de margine, %.2f m)%s; interior: %s" % [
 		made, _walls.x, _walls.y, "" if _walls_inner else " doar pe exterior",
-		"moale (fara coliziune)" if _inner.x < 0.0 else "%d segmente la %.1f m de margine, %.2f m inalte" % [made_in, _inner.x, _inner.y]])
+		"moale (fara coliziune)" if _inner.x < 0.0 else "%d segmente la %.1f m de margine, %.2f m inalte%s" % [made_in, _inner.x, _inner.y,
+			"" if _soft90 < 0.0 else " (moale la virajele de 90: %d puncte, granita R+hw+%.1f m)" % [soft_n, _soft90]]])
 
 
 ## Cat de adanc umple stratul solid de pe partea `dir`: pana la jumatatea
@@ -544,6 +576,31 @@ func _fill_depth(b: TrackRoute, i: int, p: Vector3, dir: Vector3, hw: float) -> 
 	for k in range(maxi(i - 25, 0), mini(i + 25, b.baked.size())):
 		ymax = maxf(ymax, b.baked[k].y)
 	return Vector2(clampf(best, 0.4, 2.0 * _hp_r), ymax)
+
+
+## Punctul w e in interiorul PROPRIU-ZIS al unui ac: intre cele doua brate ale
+## lui (|dx| < R - hw fata de centru, bratele merg pe Z in sonda asta) si pe
+## adancimea dintre arc si gura acului (spre randul celalalt de ace), plus
+## `_soft90` m. Tot restul (interiorul virajelor de 90 de la intrare si de la
+## iesire, U-ul iesire->gura) ramane moale.
+func _in_hairpin_interior(w: Vector3, hw: float) -> bool:
+	var zavg := 0.0
+	for h in _hairpins:
+		zavg += h.y
+	zavg /= float(_hairpins.size())
+	for h in _hairpins:
+		if absf(w.x - h.x) >= _hp_r - hw:
+			continue
+		var o := signf(zavg - h.y)
+		var along := (w.z - h.y) * o
+		# randul celalalt de ace: centrul lor e la |dz| de acesta
+		var gap := 0.0
+		for g in _hairpins:
+			if signf(zavg - g.y) != o:
+				gap = maxf(gap, absf(g.y - h.y))
+		if along >= -_hp_r and along <= gap + _soft90:
+			return true
+	return false
 
 
 ## Partea `dir` a punctului i e INTERIORUL unui ac: fie spre un alt tronson al
@@ -799,7 +856,7 @@ func _do_solo() -> void:
 	for ci in _cars:
 		for pilot in _pilots:
 			for route in _routes:
-				if pilot in ["wide", "line", "pro", "cut"] and route == 0:
+				if pilot in ["wide", "line", "pro", "cut", "cut90"] and route == 0:
 					continue
 				if pilot in ["pro", "wide", "cut"]:
 					var best: Dictionary = {}
@@ -871,12 +928,15 @@ func _run_solo(ci: int, pilot: String, route: int, alat: float) -> Dictionary:
 	car.last_safe_index = si
 	var ai: AIController = null
 	var pp: PathPilot = null
-	if pilot in ["ai", "pro", "wide", "cut"]:
+	if pilot in ["ai", "pro", "wide", "cut", "cut90"]:
 		if true:
 			# „ai" = AIController neschimbat (cap 99 m/s = fara punct de franare);
 			# toti pilotii AI au turbo-ul blocat, ca bara sa se poata masura
 			var sk := SkilledAI.new()
-			sk.v_hair = 99.0 if pilot == "ai" else alat
+			sk.v_hair = 99.0 if pilot in ["ai", "cut90"] else alat
+			if pilot == "cut90":
+				for k in range(0, _cut90.size() - 2, 3):
+					sk.cut_zones.append(Vector3(_cut90[k], _cut90[k + 1], _cut90[k + 2]))
 			sk.r_tight = maxf(14.0, _hp_r * 1.25)
 			if pilot == "cut" and _hairpins.size() >= 2:
 				sk.cut_h2 = true

@@ -31,6 +31,7 @@ if [[ "$MODE" == solo ]]; then
         [[ "$w" != none ]] && wa="--walls=$w" && tag="${sc}_walls${w//,/_}"
         [[ "$inn" != soft ]] && wa="$wa --inner=$inn" && tag="${tag}_in${inn//,/_}"
         [[ -n "$ALAT" ]] && wa="$wa --alat=$ALAT"
+        [[ -n "${EXTRA:-}" ]] && wa="$wa $EXTRA" && tag="${tag}_${TAG:-x}"
         echo "timeout 3000 $GODOT --headless --fixed-fps 60 --path . res://tools/ProbeSfSerp.tscn -- --mode=solo --scene=res://tools/SondaSfSerp$sc.tscn --pilots=$PILOTS $wa > $OUT/solo_$tag.log 2>&1" >> "$jobs_file"
       done
     done
@@ -44,6 +45,7 @@ else
       wa=""; tag="${sc}_free"
       [[ "$w" != none ]] && wa="--walls=$w" && tag="${sc}_walls${w//,/_}"
       [[ "$inn" != soft ]] && wa="$wa --inner=$inn" && tag="${tag}_in${inn//,/_}"
+      [[ -n "${EXTRA:-}" ]] && wa="$wa $EXTRA" && tag="${tag}_${TAG:-x}"
       for s in $SEEDS; do
         echo "timeout 900 $GODOT --headless --fixed-fps 60 --path . res://tools/ProbeSfSerp.tscn -- --mode=race --scene=res://tools/SondaSfSerp$sc.tscn --seed=$s --seconds=150 $wa > $OUT/race_${tag}_s$s.log 2>&1" >> "$jobs_file"
       done

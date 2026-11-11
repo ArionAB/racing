@@ -317,6 +317,9 @@ var _inner: Vector2 = Vector2(-1.0, 0.0)
 ## opus / centrul acului, nu o bordura subtire (altfel o masina intra pe dupa
 ## capatul liber al bordurii si ramane prinsa intre ea si strat — vazut pe trace).
 var _inner_fill: bool = false
+## `--line=x`: line_offset al AI-ului in solo (personalitatea din cursa e
+## randf(-0.28, 0.28) in AIController.configure; solo implicit 0)
+var _line_off: float = 0.0
 var _wall_body: StaticBody3D = null
 
 var _track: Track
@@ -358,6 +361,8 @@ func _ready() -> void:
 			var iv := arg.trim_prefix("--inner=").split(",")
 			_inner = Vector2(float(iv[0]), float(iv[1]) if iv.size() > 1 else 0.35)
 			_inner_fill = iv.size() > 2 and iv[2] == "fill"
+		elif arg.begins_with("--line="):
+			_line_off = float(arg.trim_prefix("--line="))
 		elif arg.begins_with("--rneed="):
 			_r_need = float(arg.trim_prefix("--rneed="))
 		elif arg.begins_with("--lead="):
@@ -385,6 +390,8 @@ func _ready() -> void:
 			_do_solo.call_deferred()
 		"race":
 			_start_race()
+		"curb":
+			_do_curb.call_deferred()
 		_:
 			push_error("probe_sf_serp: mod necunoscut %s" % _mode)
 			get_tree().quit(2)
@@ -882,7 +889,7 @@ func _run_solo(ci: int, pilot: String, route: int, alat: float) -> Dictionary:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = 20261110 + ci
 		ai.configure(_track, rng)
-		ai.line_offset = 0.0
+		ai.line_offset = _line_off
 		ai.prefers_shortcut = route == 1
 	else:
 		pp = PathPilot.new()
@@ -1165,6 +1172,89 @@ func _solo_summary(results: Array[Dictionary]) -> void:
 				line += " %s %+.2f (vs ocol %+.2f)" % [nm, tw - tc, (tw - t0) if t0 > 0.0 else 0.0]
 		if not line.is_empty():
 			print("  %-6s fata de trecerea curata a pilotului pro:%s" % [pilot, line])
+
+
+# ------------------------------------------------------------------ curb
+
+## `--mode=curb --inner=0,H`: ce face bordura de fapt (memoria
+## `suprafete-cu-goluri-si-praguri`: un prag > 0,3 m e zid pentru suspensie).
+## Masina e lansata cu gaz la fund, volan drept, din axa bratului 2, in unghi
+## spre interior; se noteaza daca trece de bordura (centrul ajunge la > 1,5 m
+## dincolo de margine) sau ricoseaza, si viteza pierduta.
+class StraightCtl extends CarController:
+	func get_steer() -> float:
+		return 0.0
+	func get_throttle() -> float:
+		return 1.0
+
+
+func _do_curb() -> void:
+	if not await _load_track():
+		get_tree().quit(2)
+		return
+	var b: TrackRoute = _track.routes[1]
+	var hw := b.half_width
+	# varful acului 2: punctul de pe arc opus bratelor (dinspre acele 1 si 3);
+	# masina pleaca din axa lui spre centrul acului, deci bordura interioara e
+	# singurul lucru intre ea si strat
+	var h2 := _hairpins[1]
+	var away := (h2 - (_hairpins[0] + _hairpins[2]) * 0.5).normalized()
+	var apex := h2 + away * _hp_r
+	var bi := 0
+	var bd := INF
+	for i in b.baked.size():
+		var d := Vector2(b.baked[i].x - apex.x, b.baked[i].y * 0.0 + b.baked[i].z - apex.y).length()
+		if d < bd:
+			bd = d
+			bi = i
+	var p := b.baked[bi]
+	var tan := (b.baked[bi + 2] - b.baked[bi - 2])
+	tan.y = 0.0
+	tan = tan.normalized()
+	var inward := (Vector3(h2.x, p.y, h2.y) - p)
+	inward.y = 0.0
+	inward = inward.normalized()
+	# sensul de mers e cel al tangentei; unghiul se masoara de la ea spre centru
+	print("=== BORDURA %.2f m (%s) pe %s ===" % [_inner.y, "bloc plin" if _inner_fill else "subtire", _scene.get_file()])
+	print("  unghi  v0 | %s" % "  ".join(PackedStringArray(["Muscle", "Autobuz", "Buggy", "Monster"])))
+	for ang in [30.0, 60.0, 90.0]:
+		for v0 in [6.0, 12.0, 18.0]:
+			var cells: PackedStringArray = []
+			for ci in [0, 3, 5, 9]:
+				var car := (load(CAR_SCENE) as PackedScene).instantiate() as Car
+				add_child(car)
+				car.apply_data(GameState.CAR_DATA[ci])
+				car.track = _track
+				var dir := tan.rotated(Vector3.UP, 0.0).lerp(inward, ang / 90.0).normalized()
+				if ang >= 89.0:
+					dir = inward
+				var start := p - inward * 1.0 + Vector3(0, 0.6, 0)
+				car.global_transform = Transform3D(Basis.looking_at(dir, Vector3.UP), start)
+				car.linear_velocity = dir * v0
+				car.road_index = bi
+				car.route = 1
+				car.last_safe_index = bi
+				car.set_controller(StraightCtl.new())
+				car.race_active = true
+				var over := false
+				var vmin: float = v0
+				var ymax := 0.0
+				var t := 0.0
+				while t < 1.5:
+					await get_tree().physics_frame
+					t += 1.0 / 60.0
+					# trecut = centrul masinii a ajuns in strat (la > 1,5 m dincolo de
+					# marginea interioara a arcului, spre centrul acului)
+					var dc := Vector2(car.global_position.x - h2.x, car.global_position.z - h2.y).length()
+					if dc < _hp_r - hw - 1.5:
+						over = true
+					vmin = minf(vmin, car.horizontal_speed())
+					ymax = maxf(ymax, car.global_position.y - p.y)
+				cells.append("%s v%4.1f h%3.1f" % ["TRECE " if over else "ricos.", vmin, ymax])
+				car.queue_free()
+				await get_tree().process_frame
+			print("  %3.0f°  %4.1f | %s" % [ang, v0, " | ".join(cells)])
+	get_tree().quit(0)
 
 
 # ------------------------------------------------------------------ race

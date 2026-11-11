@@ -42,7 +42,7 @@ def solo_table(solo):
             otf = [r.get("t_full", -1) for r in res if r["pilot"] == "ai" and r["route"] == 0 and r["done"] and r.get("t_full", -1) >= 0]
             print("  %-16s %-8s | ocol  | %3d/%-3d        | %5.2f [%5.2f-%5.2f]  | bara %.2f bare med, plina dupa %.1f s" % (
                 scene, walls, len(ts), len(ts), med(ts), min(ts), max(ts), med(ob), med(otf)))
-        for pilot in ("ai", "pro", "wide", "line"):
+        for pilot in ("ai", "pro", "cut", "wide", "line"):
             rs = [r for r in res if r["pilot"] == pilot and r["route"] == 1]
             if not rs:
                 continue

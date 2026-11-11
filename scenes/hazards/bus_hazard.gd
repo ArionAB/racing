@@ -128,6 +128,20 @@ extends "res://scenes/props/path_mover.gd"
 @export var soft_contact: bool = false
 @export_range(0.2, 3.0, 0.1) var soft_crush_s: float = 1.2
 
+## TRAMVAIUL MERGE IN SENSUL CURSEI (San Francisco, brief §3, sonda 1c): doua
+## flaguri, AMBELE implicit stinse, deci Carrara si Machu Picchu raman neatinse.
+##
+## `ai_same_direction` (cere si `ai_reads_lane`): AI-ul citeste corpul si cand
+## merge in ACELASI sens cu masina (camioanele din Carrara vin doar din fata).
+## Partea pe care il depaseste o alege masina dupa unde e ea cand il vede
+## (stanga sau dreapta lui), nu dupa locul ramas — pe ax locul e egal si tot
+## plutonul ar trece pe aceeasi parte. Vezi `AIController._bus_line`.
+@export var ai_same_direction: bool = false
+## `pitch_to_ground`: corpul se inclina dupa panta (cota terenului la bot si la
+## coada). Fara el corpul sta orizontal: pe 11,5% un vagon de 8,5 m are coada
+## ~0,5 m deasupra drumului si botul ~0,5 m in el.
+@export var pitch_to_ground: bool = false
+
 ## Grupul pe care il citeste AI-ul (doar daca `ai_reads_lane`).
 const AI_GROUP: StringName = &"ai_bus_lane"
 
@@ -166,6 +180,7 @@ var _apex: Vector3 = Vector3.ZERO
 var _prev_pos: Vector3 = Vector3.ZERO
 var _has_prev: bool = false
 var _box_center: Vector3 = Vector3.ZERO
+var _pitch: float = 0.0
 
 
 ## Cutia autobuzului, nu tractorul din PathMover.
@@ -315,12 +330,36 @@ func _physics_process(delta: float) -> void:
 	_yaw = lerp_angle(_yaw, target_yaw, minf(TURN_RATE * delta, 1.0))
 	if stick_to_ground:
 		pos.y = _ground_y(pos)
+	var rot := Basis(Vector3.UP, _yaw)
+	if pitch_to_ground and stick_to_ground:
+		_pitch = lerpf(_pitch, _ground_pitch(pos), minf(TURN_RATE * delta, 1.0))
+		rot = rot * Basis(Vector3.RIGHT, _pitch)
 	# O SINGURA scriere de transform (memoria jolt-sync-transform).
-	_body.global_transform = Transform3D(Basis(Vector3.UP, _yaw), pos)
+	_body.global_transform = Transform3D(rot, pos)
 	_apply_sway()
 	if not Engine.is_editor_hint():
 		_shove_cars(delta)
 	last_tick_usec = int(Time.get_ticks_usec() - t0)
+
+
+## Panta sub corp (rad, + = botul sus): cota la bot si la coada, cu
+## raycast-ul lui PathMover. O masina sub bot sau sub coada nu e teren: atunci
+## ramane panta de acum.
+func _ground_pitch(pos: Vector3) -> float:
+	var half := body_half_length()
+	var fwd := Vector3(-sin(_yaw), 0.0, -cos(_yaw))
+	var space := get_world_3d().direct_space_state
+	if space == null or half <= 0.1:
+		return _pitch
+	var ys: Array[float] = []
+	for p: Vector3 in [pos + fwd * half, pos - fwd * half]:
+		var q := PhysicsRayQueryParameters3D.create(p + Vector3.UP * GROUND_PROBE_UP,
+			p - Vector3.UP * GROUND_PROBE_DOWN, 0xFFFFFFFF, [_body.get_rid()])
+		var hit := space.intersect_ray(q)
+		if hit.is_empty() or hit["collider"] is Car:
+			return _pitch
+		ys.append((hit["position"] as Vector3).y)
+	return atan2(ys[0] - ys[1], half * 2.0)
 
 
 ## Ofsetul spre exteriorul virajului in punctul curent: curbura din unghiul

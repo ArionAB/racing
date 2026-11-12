@@ -381,6 +381,12 @@ var _bus_side: Dictionary = {}
 ## Lateralul tramvaiului la tick-ul trecut (cheie = instance id), ca sa se vada
 ## INCOTRO se muta pe latime (intra pe ax dintr-o strada laterala).
 var _bus_prev_tl: Dictionary = {}
+## Ruta pe care s-a citit ultima oara fiecare corp (doar `ai_same_direction`): la trecerea de pe
+## scurtatura pe bucla (gura serpentinelor SF, tramvaiul 2) indexul, lateralul si partea aleasa
+## erau in coordonatele RUTEI VECHI, deci masina isi schimba brusc partea si intra in coada lui.
+var _bus_route: Dictionary = {}
+## Comutator de sonda pentru resetarea de mai sus (A/B in tools/probe_sf_watch.gd).
+static var bus_reset_on_route: bool = true
 ## Pe cate secunde inainte se rezerva drumul lateral al unui corp care intra
 ## pe ax sau iese de pe el (doar `ai_same_direction`).
 const BUS_LAT_LOOKAHEAD_S: float = 1.5
@@ -1193,6 +1199,11 @@ func _bus_line(idx: int, speed: float, line: float, severity: float) -> float:
 			continue
 		var key := bus.get_instance_id()
 		var target_blend := 0.0
+		if bus.ai_same_direction and bus_reset_on_route and int(_bus_route.get(key, car.route)) != car.route:
+			_bus_idx.erase(key)
+			_bus_side.erase(key)
+			_bus_prev_tl.erase(key)
+		_bus_route[key] = car.route
 		var tline: float = _bus_tline.get(key, 0.0)
 		if bus.is_hidden():
 			_bus_prev_tl.erase(key)
@@ -1239,7 +1250,13 @@ func _bus_line(idx: int, speed: float, line: float, severity: float) -> float:
 			# mers pana la el cel mult BUS_FAR_ALONG_M — de pe terasa de sus se vede camionul de pe cea de
 			# jos peste gol (brief §2: "il vezi de pe terasa de sus, alegi interiorul acului").
 			var planar := Vector2(car.global_position.x - tp.x, car.global_position.z - tp.z).length()
+			# `ai_branch_reach_m` > 0 (tramvaiul din gura scurtaturii SF): de pe o ruta SECUNDARA il
+			# citeste doar pe atatia metri de drum, fara privirea peste gol — altfel AI-ul din serpentine
+			# se aseza pe linia lui inca din ace (masurat: oprit in strat). Pe bucla, ca pana acum.
+			# Implicit 0 = valorile globale peste tot.
 			var seen := along <= bus_reach_m or (planar <= bus_sight_m and along <= BUS_FAR_ALONG_M)
+			if bus.ai_branch_reach_m > 0.0 and car.route != 0:
+				seen = along <= bus.ai_branch_reach_m
 			if oncoming and on_road and seen and along >= -BUS_PASSED_M:
 				_bus_latched[key] = true
 			else:

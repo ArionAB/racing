@@ -141,6 +141,19 @@ extends "res://scenes/props/path_mover.gd"
 ## coada). Fara el corpul sta orizontal: pe 11,5% un vagon de 8,5 m are coada
 ## ~0,5 m deasupra drumului si botul ~0,5 m in el.
 @export var pitch_to_ground: bool = false
+## Pe cati metri de drum il citeste AI-ul aflat pe o ruta SECUNDARA (scurtatura), doar cu
+## `ai_reads_lane`. 0 = valorile globale din `AIController` (`bus_reach_m` 90 m + privirea in
+## linie dreapta peste gol) — Carrara, Machu Picchu, tramvaiul de pe urcare. Tramvaiul din gura
+## scurtaturii SF il are scurt: din serpentine, la 90 m de drum, AI-ul se aseza pe linia lui inca
+## din ace si se oprea in strat. Pe bucla raman cei 90 m (cu 35 m peste tot, masinile care vin de
+## dupa colt il prindeau mai tarziu: contactele au urcat ~10% -> ~15%, la limita zgomotului).
+@export_range(0.0, 200.0, 1.0) var ai_branch_reach_m: float = 0.0
+
+## Culorile cutiei placeholder (fara model). Implicit galben + bot portocaliu, ca pana acum
+## (Carrara si Machu Picchu au model, deci nu le folosesc). Tramvaiele SF le dau gri pana vine
+## `cable_car.glb` (brief san_francisco.md §7 pasul 5).
+@export var placeholder_color: Color = Color(0.95, 0.85, 0.2)
+@export var placeholder_nose_color: Color = Color(0.85, 0.3, 0.15)
 
 ## Grupul pe care il citeste AI-ul (doar daca `ai_reads_lane`).
 const AI_GROUP: StringName = &"ai_bus_lane"
@@ -190,7 +203,7 @@ func _build_placeholder() -> void:
 	box.size = body_size
 	mesh.mesh = box
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.95, 0.85, 0.2)
+	mat.albedo_color = placeholder_color
 	mesh.material_override = mat
 	mesh.position = Vector3.UP * (body_size.y * 0.5)
 	_pivot.add_child(mesh)
@@ -274,7 +287,7 @@ func _add_box(size: Vector3, xform: Transform3D) -> void:
 		mi.mesh = bm
 		mi.transform = xform
 		var mat := StandardMaterial3D.new()
-		mat.albedo_color = Color(0.85, 0.3, 0.15)
+		mat.albedo_color = placeholder_nose_color
 		mi.material_override = mat
 		_pivot.add_child(mi)
 

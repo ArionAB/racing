@@ -386,7 +386,12 @@ const BASELINE := {
 	# gol, plus geometria gri a serpentinelor (straturile retrase 2 m, fatadele la 1 m, acostamentul
 	# la cota drumului — `SerpentineGri`). 0 raportari, masurate de 2 ori. Baza = 0, fara marja: orice
 	# corp in banda e acum o regresie. Sabotaj (`--sabotaj`) verificat la armare.
-	"San Francisco (Track25)": 0,
+	# 0 -> 6 (12 nov 2026, pasul 5, tramvaiele): toate pe `@AnimatableBody3D`, corpurile celor
+	# doua TRAMVAIE (BusHazard, pe ax, in sensul cursei) la ceasul de la incarcare — 3 la frac
+	# 0.135 (tramvaiul 1, pe urcare: lat +0.0 si +-2.3) si 3 la 0.690 (tramvaiul 2, la gura
+	# scurtaturii: lat +0.0 si +-2.1). Hazarde intentionate, ca CAMIONUL 2 de pe Carrara. Masurat
+	# de 2 ori, identic. Fara marja; sabotaj (`--sabotaj`) verificat.
+	"San Francisco (Track25)": 6,
 }
 
 

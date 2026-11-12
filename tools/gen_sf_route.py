@@ -1092,8 +1092,112 @@ def g3(v):
 lips_g = [MAIN_G[L] for L in LIPS]
 hp_map = [s2m(c[0], c[1]) for c in SC_HP]
 tower = (X_E, Y_S - 22.0)
-tram_up_entry = (MK["B0"][2] - 20.0, Y_S + 40.0)   # strada laterala, pe dreapta, la baza urcarii
-tram_up_exit = (X_B - 40.0, Y_S)                    # continuarea DREAPTA inainte la coltul de sus
+# =============================================================================================
+# TRAMVAIELE (brief §2 „Ceasuri care nu impart durata turului", §3, §7 pasul 5). Doua `BusHazard`
+# pe Path3D, in SENSUL cursei, cu flagurile sondei 1c: `soft_contact`, `ai_reads_lane`,
+# `ai_same_direction`, `pitch_to_ground`. Placeholder gri 2,5 x 3,2 x 8,5 m (cable_car.glb nu
+# exista inca). Ambele intra pe ax dintr-o strada laterala din DREAPTA cursei (de acolo pornesc
+# ascunse, la TRAM_HIDE_LAT m de ax: corpul cinematic nu apare niciodata pe carosabil — memoria
+# `corp-cinematic-aparut-in-masina`) cu un sfert de cerc de raza TRAM_R.
+#
+# TRAMVAIUL 1, URCAREA (latura de sud, spre V): intra la baza urcarii (20 m dupa coltul A/B) si
+# iese DREPT INAINTE la coltul de sus (sonda 1c: iesirea laterala taia banda celor care il
+# depasesc), pana la 16 m dincolo de axa laturii de nord (spatele lui la ~5 m de marginea ei).
+# Ciclul ~66 s pe toata urcarea e decizia dezvoltatorului (10 nov 2026). Strada reala are 292 m
+# + coltul + intrarea, deci curba are ~326 m: la 4,5 m/s ar fi 73 s de mers, adica un ciclu de
+# ~77 s = EXACT turul mediu (77,4 s) — ceasul care imparte turul (lectia Stromboli). De aceea
+# viteza e 5,0 m/s (ciclu 66 s, turul / ciclu = 1,17), nu 4,5.
+#
+# TRAMVAIUL 2, GURA SCURTATURII (strada de jos, spre E): ciclul de 29 s (turul / ciclu = 2,67) nu
+# incape de la placa turnanta: placa e la 125 m de gura (ocolul de 400 m de la 1b a mutat-o), deci
+# curba placa -> dincolo de gura ar avea ~165 m = 37 s, iar 37 s ~ turul / 2. Tramvaiul intra din
+# strada laterala din dreapta TRAM2_BEFORE m inaintea gurii (in blocul dintre ocol si serpentine),
+# trece prin fata gurii si iese in dreapta TRAM2_AFTER m dupa ea (magaziile de chei; la stanga e
+# golful). Placa turnanta ramane reper de decor.
+# =============================================================================================
+TRAM_BODY = (2.5, 3.2, 8.5)      # latime, inaltime, lungime
+TRAM_R = 14.0
+TRAM_HIDE_LAT = 20.0
+TRAM_Y_UP = 1.0                  # curba cu 1 m peste drum: raza de lipire porneste de la +5 m
+TRAM1_SPEED, TRAM1_PERIOD = 5.0, 66.0
+TRAM1_EXIT_PAST = 16.0           # cat trece de axa laturii de nord
+TRAM2_SPEED, TRAM2_PERIOD = 4.5, 29.0
+TRAM2_ENTRY_X = -36.0            # strada laterala a tramvaiului 2 (harta x); pe ax la x + TRAM_R
+TRAM2_EXIT_X = 50.0              # unde paraseste axul spre dreapta (gura: x -5..20)
+# FAZELE (`phase` = fractia curbei la incarcarea pistei; ceasul merge si in countdown, ~3,6 s).
+# Tramvaiul 1 e deja pe ax, la mijlocul urcarii, cand vine plutonul in turul 1 (il desparte, ca
+# in brief §2 B — sonda 1c, faza 0: 0,9% contact), niciodata in strada laterala cu plutonul strans.
+# Tramvaiul 2: masurat in ProbeRace (vezi brief §7 pasul 5).
+TRAM1_PHASE = float(os.environ.get("TRAM1_PHASE", "0.196"))
+TRAM2_PHASE = float(os.environ.get("TRAM2_PHASE", "0.608"))
+TRAM_AI = os.environ.get("TRAM_AI", "1") == "1"     # 0 = sabotaj (ai_reads_lane stins)
+# Cat citeste AI-ul de pe SCURTATURA tramvaiul 2 (`BusHazard.ai_branch_reach_m`; pe bucla raman
+# 90 m). Cu cei 90 m impliciti, AI-ul din serpentine se aseza pe linia lui inca din al treilea ac (si
+# se oprea in strat): masurat, scurtatura pierdea 2,4 s la mediana pe trecerile care il intalneau,
+# fara contact.
+TRAM2_READ_M = float(os.environ.get("TRAM2_READ_M", "35"))
+
+
+def _arc_pts(cx, cy, r, a0, a1, n=4):
+    return [(cx + r * math.cos(a0 + (a1 - a0) * k / n), cy + r * math.sin(a0 + (a1 - a0) * k / n))
+            for k in range(1, n + 1)]
+
+
+def _axis(x0, x1, y):
+    n = max(1, int(round(abs(x1 - x0) / STEP)))
+    return [(x0 + (x1 - x0) * k / n, y) for k in range(1, n + 1)]
+
+
+def _climb_elev(x):
+    """Cota strazii tramvaiului 1 (latura de sud, spre V); dincolo de coltul de sus, panta
+    continua drept inainte (strada pe care iese tramvaiul)."""
+    x_c = MK["B colt"][2]
+    if x >= MK["B0"][2]:
+        return Y_LOW
+    if x >= x_c:
+        return elev_s(MK["B0"][1] + (MK["B0"][2] - x))
+    return elev_s(MK["B colt"][1]) + GRADE * (x_c - x)
+
+
+def _low_elev(x):
+    """Cota strazii de jos (dupa placa; ocolul coboara liniar pana la gura)."""
+    return elev_s(MK["placa"][1] + (x - MK["placa"][2])) if x < M_X else Y_LOW
+
+
+X1_E = MK["B0"][2] - 20.0
+TRAM1_MAP = [(X1_E, Y_S + TRAM_HIDE_LAT), (X1_E, Y_S + TRAM_R)]
+TRAM1_MAP += _arc_pts(X1_E - TRAM_R, Y_S + TRAM_R, TRAM_R, 0.0, -math.pi / 2)
+TRAM1_MAP += _axis(X1_E - TRAM_R, X_B - TRAM1_EXIT_PAST, Y_S)
+TRAM1_G = [godot(p, _climb_elev(p[0]) + TRAM_Y_UP) for p in TRAM1_MAP]
+
+# TRAM2_LAYOUT=placa (varianta B, de A/B): DOUA vagoane pe aceeasi linie, fiecare cu ciclul
+# 2 x TRAM2_PERIOD, defazate o jumatate de ciclu (la gura trece unul la ~29 s), care pleaca de pe
+# PLACA TURNANTA (brief §2 E), trec prin fata gurii, merg pe cheu si ies in dreapta la x = 100.
+TRAM2_LAYOUT = os.environ.get("TRAM2_LAYOUT", "gura")
+if TRAM2_LAYOUT == "placa":
+    TRAM2_EXIT_X = 100.0
+    TRAM2_MAP = [(MK["placa"][2] - 26.0, QUAY_Y)]
+    TRAM2_MAP += _axis(MK["placa"][2] - 26.0, TRAM2_EXIT_X, QUAY_Y)
+else:
+    TRAM2_MAP = [(TRAM2_ENTRY_X, QUAY_Y - TRAM_HIDE_LAT), (TRAM2_ENTRY_X, QUAY_Y - TRAM_R)]
+    TRAM2_MAP += _arc_pts(TRAM2_ENTRY_X + TRAM_R, QUAY_Y - TRAM_R, TRAM_R, math.pi, math.pi / 2)
+    TRAM2_MAP += _axis(TRAM2_ENTRY_X + TRAM_R, TRAM2_EXIT_X, QUAY_Y)
+TRAM2_MAP += _arc_pts(TRAM2_EXIT_X, QUAY_Y - TRAM_R, TRAM_R, math.pi / 2, 0.0)
+TRAM2_MAP += [(TRAM2_EXIT_X + TRAM_R, QUAY_Y - TRAM_HIDE_LAT)]
+TRAM2_G = [godot(p, _low_elev(p[0]) + TRAM_Y_UP) for p in TRAM2_MAP]
+
+
+def _plen(seq):
+    return sum(math.dist(a, b) for a, b in zip(seq, seq[1:]))
+
+
+for nm, g, v, per, ph in (("tramvai 1 (urcarea)", TRAM1_G, TRAM1_SPEED, TRAM1_PERIOD, TRAM1_PHASE),
+                          ("tramvai 2 (gura)", TRAM2_G, TRAM2_SPEED, TRAM2_PERIOD, TRAM2_PHASE)):
+    L_ = _plen(g)
+    print(f"{nm}: curba {L_:.0f} m, {L_ / v:.1f} s la {v} m/s, ciclu {per:.0f} s (ascuns "
+          f"{max(per - L_ / v, 0.5):.1f} s), turul mediu 77,4 s / ciclu = {77.4 / per:.2f}, faza {ph:.3f}")
+tram_up_entry = TRAM1_MAP[0]          # strada laterala, pe dreapta, la baza urcarii
+tram_up_exit = TRAM1_MAP[-1]          # continuarea DREAPTA inainte la coltul de sus
 meta = [
     "metadata/jump_crests = [%s]" % ", ".join(V2(a, b) for a, b in jump_crests),
     "metadata/sf_lips = [%s]" % ", ".join(g3(p) for p in lips_g),
@@ -1111,7 +1215,14 @@ meta = [
     "metadata/sf_turntable = %s" % g3(godot((MK["placa"][2], MK["placa"][3]), elev_s(MK["placa"][1]))),
     "metadata/sf_clock_tower = %s" % g3(godot(tower, Y_LOW)),
     "metadata/sf_tram_up_entry = %s" % g3(godot(tram_up_entry, Y_LOW)),
-    "metadata/sf_tram_up_exit = %s" % g3(godot(tram_up_exit, elev_s(MK["B colt"][1]))),
+    "metadata/sf_tram_up_exit = %s" % g3(godot(tram_up_exit, _climb_elev(tram_up_exit[0]))),
+    "metadata/sf_tram_low_entry = %s" % g3(godot(TRAM2_MAP[0], _low_elev(TRAM2_MAP[0][0]))),
+    "metadata/sf_tram_low_exit = %s" % g3(godot(TRAM2_MAP[-1], Y_LOW)),
+    # Portile sondei de tramvaie (tools/probe_sf_watch.gd): [punct, directie] x N, pe harta Godot.
+    # urcare: baza ei (B0) -> 30 m pe latura de nord; jos: 70 m dupa gura (pereche cu sf_gate_in).
+    "metadata/sf_climb_gates = [%s, Vector3(-1, 0, 0), %s, Vector3(0, 0, -1)]" % (
+        g3(godot((MK["B0"][2], Y_S), Y_LOW)), g3(godot((X_B, Y_S + R_B + 30.0), Y_LOW))),
+    "metadata/sf_gate_out2 = %s" % g3(godot((M_X + 70.0, M_Y), Y_LOW)),
 ]
 
 # Coliziunea gri: acostament (trimesh), straturi (convex), fatade (cutii).
@@ -1153,12 +1264,43 @@ for name, x, y, e, r in PEAKS:
                   f'transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {x}, {e}, {-y})\n'
                   f'gizmo_extents = {r}\nscript = ExtResource("2_peak")\nradius_m = {r}\n')
 
+def _tram_node(name, curve_id, speed, period, phase, reach=0.0):
+    b = "true" if TRAM_AI else "false"
+    lines = [
+        '[node name="%s" type="Path3D" parent="Tramvaie"]' % name,
+        'curve = SubResource("%s")' % curve_id,
+        'script = ExtResource("5_bus")',
+        "speed = %s" % speed, "phase = %.4f" % phase, "period = %s" % period,
+        "body_size = Vector3(%s, %s, %s)" % TRAM_BODY,
+        "nose_side = 1", "nose_angle_deg = 20.0", "apex_outer_m = 0.0",
+        "shove = 3.0", "side_accel = 8.0",
+        "ai_reads_lane = " + b, "ai_same_direction = " + b,
+        "soft_contact = true", "pitch_to_ground = true",
+        "ai_branch_reach_m = %.1f" % reach,
+        "placeholder_color = Color(0.55, 0.55, 0.55, 1)",
+        "placeholder_nose_color = Color(0.42, 0.42, 0.42, 1)",
+    ]
+    return chr(10) + chr(10).join(lines) + chr(10)
+
+
+tram_nodes = _tram_node("Tramvai1", "Curve3D_tram1", TRAM1_SPEED, TRAM1_PERIOD, TRAM1_PHASE)
+if TRAM2_LAYOUT == "placa":
+    _p2 = 2.0 * TRAM2_PERIOD
+    _off = 0.5 * _p2 * TRAM2_SPEED / _plen(TRAM2_G)
+    tram_nodes += _tram_node("Tramvai2", "Curve3D_tram2", TRAM2_SPEED, _p2, TRAM2_PHASE, TRAM2_READ_M)
+    tram_nodes += _tram_node("Tramvai3", "Curve3D_tram2", TRAM2_SPEED, _p2, (TRAM2_PHASE + _off) % 1.0,
+                             TRAM2_READ_M)
+else:
+    tram_nodes += _tram_node("Tramvai2", "Curve3D_tram2", TRAM2_SPEED, TRAM2_PERIOD, TRAM2_PHASE,
+                             TRAM2_READ_M)
+
 tscn = f"""[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="3_branch"]
 [ext_resource type="ArrayMesh" path="res://{OBJ_REL}" id="4_gri"]
+[ext_resource type="Script" path="res://scenes/hazards/bus_hazard.gd" id="5_bus"]
 
 [sub_resource type="Curve3D" id="Curve3D_sf"]
 closed = true
@@ -1174,6 +1316,20 @@ _data = {{
 "tilts": PackedFloat32Array({", ".join("0" for _ in BR_MID)})
 }}
 point_count = {len(BR_MID)}
+
+[sub_resource type="Curve3D" id="Curve3D_tram1"]
+_data = {{
+"points": {pva(TRAM1_G)},
+"tilts": PackedFloat32Array({", ".join("0" for _ in TRAM1_G)})
+}}
+point_count = {len(TRAM1_G)}
+
+[sub_resource type="Curve3D" id="Curve3D_tram2"]
+_data = {{
+"points": {pva(TRAM2_G)},
+"tilts": PackedFloat32Array({", ".join("0" for _ in TRAM2_G)})
+}}
+point_count = {len(TRAM2_G)}
 
 {chr(10).join(sub)}
 [node name="Track25" type="Node3D"]
@@ -1212,7 +1368,9 @@ surface = 3
 mesh = ExtResource("4_gri")
 material_override = SubResource("Mat_gri")
 
-{chr(10).join(nodes)}"""
+{chr(10).join(nodes)}
+[node name="Tramvaie" type="Node3D" parent="."]
+{tram_nodes}"""
 with open(OUT_TSCN, "w", encoding="utf-8", newline="\n") as f:
     f.write(tscn)
 print(f"scris {os.path.relpath(OUT_TSCN, ROOT)}; sea_level_offset {SEA_OFFSET}")
@@ -1307,7 +1465,9 @@ if PLAN_PATH:
            fill=(0, 0, 0), font=font)
     for p, txt in ((tram_up_entry, "tramvai 1: intra din strada laterala"),
                    (tram_up_exit, "tramvai 1: iese DREPT inainte"),
-                   ((MK["placa"][2], MK["placa"][3]), "placa turnanta / tramvai 2 spre E")):
+                   ((MK["placa"][2], MK["placa"][3]), "placa turnanta (decor)"),
+                   (TRAM2_MAP[0], "tramvai 2: intra din dreapta"),
+                   (TRAM2_MAP[-1], "tramvai 2: iese in dreapta")):
         q = px(p)
         d.ellipse([q[0] - 5, q[1] - 5, q[0] + 5, q[1] + 5], fill=(150, 20, 40))
         d.text((q[0] + 8, q[1] + 4), txt, fill=(150, 20, 40), font=font_s)

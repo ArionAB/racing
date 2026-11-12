@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="3_branch"]
 [ext_resource type="ArrayMesh" path="res://scenes/tracks/track25_serp_gri.obj" id="4_gri"]
+[ext_resource type="Script" path="res://scenes/hazards/bus_hazard.gd" id="5_bus"]
 
 [sub_resource type="Curve3D" id="Curve3D_sf"]
 closed = true
@@ -19,6 +20,20 @@ _data = {
 "tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
 point_count = 24
+
+[sub_resource type="Curve3D" id="Curve3D_tram1"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 188.426, 4.951, 292, 0, 0, 0, 0, 0, 0, 188.426, 4.951, 298, 0, 0, 0, 0, 0, 0, 187.361, 5.055, 303.358, 0, 0, 0, 0, 0, 0, 184.326, 5.381, 307.899, 0, 0, 0, 0, 0, 0, 179.784, 5.899, 310.934, 0, 0, 0, 0, 0, 0, 174.426, 6.511, 312, 0, 0, 0, 0, 0, 0, 162.489, 7.873, 312, 0, 0, 0, 0, 0, 0, 150.552, 9.235, 312, 0, 0, 0, 0, 0, 0, 138.615, 10.598, 312, 0, 0, 0, 0, 0, 0, 126.678, 11.96, 312, 0, 0, 0, 0, 0, 0, 114.741, 13.322, 312, 0, 0, 0, 0, 0, 0, 102.804, 14.684, 312, 0, 0, 0, 0, 0, 0, 90.867, 16.047, 312, 0, 0, 0, 0, 0, 0, 78.93, 17.409, 312, 0, 0, 0, 0, 0, 0, 66.993, 18.771, 312, 0, 0, 0, 0, 0, 0, 55.056, 20.134, 312, 0, 0, 0, 0, 0, 0, 43.119, 21.496, 312, 0, 0, 0, 0, 0, 0, 31.182, 22.858, 312, 0, 0, 0, 0, 0, 0, 19.245, 24.22, 312, 0, 0, 0, 0, 0, 0, 7.308, 25.583, 312, 0, 0, 0, 0, 0, 0, -4.629, 26.945, 312, 0, 0, 0, 0, 0, 0, -16.566, 28.307, 312, 0, 0, 0, 0, 0, 0, -28.504, 29.67, 312, 0, 0, 0, 0, 0, 0, -40.441, 31.032, 312, 0, 0, 0, 0, 0, 0, -52.378, 32.394, 312, 0, 0, 0, 0, 0, 0, -64.315, 33.756, 312, 0, 0, 0, 0, 0, 0, -76.252, 35.119, 312, 0, 0, 0, 0, 0, 0, -88.189, 36.481, 312, 0, 0, 0, 0, 0, 0, -100.126, 37.843, 312, 0, 0, 0, 0, 0, 0, -112.063, 39.206, 312, 0, 0, 0, 0, 0, 0, -124, 40.568, 312),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 31
+
+[sub_resource type="Curve3D" id="Curve3D_tram2"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -36, 5.508, -434, 0, 0, 0, 0, 0, 0, -36, 5.508, -440, 0, 0, 0, 0, 0, 0, -34.934, 5.477, -445.358, 0, 0, 0, 0, 0, 0, -31.899, 5.389, -449.899, 0, 0, 0, 0, 0, 0, -27.358, 5.257, -452.934, 0, 0, 0, 0, 0, 0, -22, 5.102, -454, 0, 0, 0, 0, 0, 0, -10, 4.754, -454, 0, 0, 0, 0, 0, 0, 2, 4.406, -454, 0, 0, 0, 0, 0, 0, 14, 4.058, -454, 0, 0, 0, 0, 0, 0, 26, 4, -454, 0, 0, 0, 0, 0, 0, 38, 4, -454, 0, 0, 0, 0, 0, 0, 50, 4, -454, 0, 0, 0, 0, 0, 0, 55.358, 4, -452.934, 0, 0, 0, 0, 0, 0, 59.899, 4, -449.899, 0, 0, 0, 0, 0, 0, 62.934, 4, -445.358, 0, 0, 0, 0, 0, 0, 64, 4, -440, 0, 0, 0, 0, 0, 0, 64, 4, -434),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 17
 
 [sub_resource type="StandardMaterial3D" id="Mat_gri"]
 cull_mode = 2
@@ -84,8 +99,12 @@ metadata/sf_short_len = 260.19
 metadata/sf_bypass_len = 400.00
 metadata/sf_turntable = Vector3(-109.657, 6.644, -454.000)
 metadata/sf_clock_tower = Vector3(238.426, 3.000, 334.000)
-metadata/sf_tram_up_entry = Vector3(188.426, 3.000, 272.000)
-metadata/sf_tram_up_exit = Vector3(-148.000, 35.003, 312.000)
+metadata/sf_tram_up_entry = Vector3(188.426, 3.000, 292.000)
+metadata/sf_tram_up_exit = Vector3(-124.000, 39.568, 312.000)
+metadata/sf_tram_low_entry = Vector3(-36.000, 4.508, -434.000)
+metadata/sf_tram_low_exit = Vector3(64.000, 3.000, -434.000)
+metadata/sf_climb_gates = [Vector3(208.426, 3.000, 312.000), Vector3(-1, 0, 0), Vector3(-108.000, 3.000, 258.000), Vector3(0, 0, -1)]
+metadata/sf_gate_out2 = Vector3(86.000, 3.000, -454.000)
 
 [node name="Path" type="Path3D" parent="."]
 curve = SubResource("Curve3D_sf")
@@ -606,3 +625,45 @@ shape = SubResource("Box_fatada3")
 [node name="Fatada112" type="CollisionShape3D" parent="SerpentineGri/SerpFatade"]
 transform = Transform3D(-0.98569, 0, -0.16859, 0, 1, 0, 0.16859, 0, -0.98569, -5.367, 4.209, -441.655)
 shape = SubResource("Box_fatada3")
+
+[node name="Tramvaie" type="Node3D" parent="."]
+
+[node name="Tramvai1" type="Path3D" parent="Tramvaie"]
+curve = SubResource("Curve3D_tram1")
+script = ExtResource("5_bus")
+speed = 5.0
+phase = 0.1960
+period = 66.0
+body_size = Vector3(2.5, 3.2, 8.5)
+nose_side = 1
+nose_angle_deg = 20.0
+apex_outer_m = 0.0
+shove = 3.0
+side_accel = 8.0
+ai_reads_lane = true
+ai_same_direction = true
+soft_contact = true
+pitch_to_ground = true
+ai_branch_reach_m = 0.0
+placeholder_color = Color(0.55, 0.55, 0.55, 1)
+placeholder_nose_color = Color(0.42, 0.42, 0.42, 1)
+
+[node name="Tramvai2" type="Path3D" parent="Tramvaie"]
+curve = SubResource("Curve3D_tram2")
+script = ExtResource("5_bus")
+speed = 4.5
+phase = 0.6080
+period = 29.0
+body_size = Vector3(2.5, 3.2, 8.5)
+nose_side = 1
+nose_angle_deg = 20.0
+apex_outer_m = 0.0
+shove = 3.0
+side_accel = 8.0
+ai_reads_lane = true
+ai_same_direction = true
+soft_contact = true
+pitch_to_ground = true
+ai_branch_reach_m = 35.0
+placeholder_color = Color(0.55, 0.55, 0.55, 1)
+placeholder_nose_color = Color(0.42, 0.42, 0.42, 1)

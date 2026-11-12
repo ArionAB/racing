@@ -5,8 +5,9 @@ extends Node
 ## Contractele (decizia dezvoltatorului, 30 oct 2026):
 ##   1. trei cupe, pistele fiecareia se rezolva; nicio pista in doua cupe; pe
 ##      dinafara Dunele (Track01), Okinawa manual (Track08), Ha Long (Track22),
-##      Carrara (Track23) si Angkor (Track24, doar cursa rapida pana decide
-##      dezvoltatorul — brief angkor.md §8); restul pistelor sunt toate intr-o cupa;
+##      Carrara (Track23), Angkor (Track24, doar cursa rapida pana decide
+##      dezvoltatorul — brief angkor.md §8) si San Francisco (Track25, idem —
+##      brief san_francisco.md §8); restul pistelor sunt toate intr-o cupa;
 ##   2. la fiecare cupa noua, adversarii sunt trasi aleatoriu si NICIODATA nu
 ##      apare aceeasi masina de doua ori (nici a jucatorului) — verificat pe
 ##      fiecare masina a jucatorului x 300 de extrageri, iar garda e armata:
@@ -19,7 +20,7 @@ extends Node
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeWorldCup.tscn
 ##   ... -- --no-race   # fara pasul 4 (doar date si aritmetica)
 
-const EXCLUDED: Array[String] = ["Track01", "Track08", "Track22", "Track23", "Track24"]
+const EXCLUDED: Array[String] = ["Track01", "Track08", "Track22", "Track23", "Track24", "Track25"]
 ## Pista pe care ruleaza pasul 4: cea mai usoara de incarcat. Nu e in nicio
 ## cupa, dar cursa nu citeste pista din cupa — `track_scene_override` bate.
 const RACE_BENCH := "res://scenes/tracks/Track01.tscn"

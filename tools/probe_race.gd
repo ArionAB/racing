@@ -237,6 +237,10 @@ var _train_meter: Node = null
 ## `--angkor`: observatorul sondelor Angkor (tools/probe_angkor_watch.gd).
 var _angkor_watch: Node = null
 var _angkor: bool = false
+## `--sf`: observatorul traseului San Francisco (tools/probe_sf_watch.gd): lantul de muchii,
+## scurtatura fata de ocol intre aceleasi doua porti.
+var _sf_watch: Node = null
+var _sf: bool = false
 ## `--no-tub`: scoate `ShishiOdoshiHazard` din scena (A/B-ul tubului, Kyoto).
 var _no_tub: bool = false
 ## `--no-calm`: zero pe `TorrentCycle.calm_*` (A/B-ul efectului din CALM, #493).
@@ -457,6 +461,8 @@ func _ready() -> void:
 			_haboob_at = float(arg.trim_prefix("--haboob-at="))
 		elif arg == "--angkor":
 			_angkor = true
+		elif arg == "--sf":
+			_sf = true
 		elif arg == "--no-daruma":
 			_no_daruma = true
 		elif arg == "--no-shishimai":
@@ -678,6 +684,10 @@ func _setup_kyoto() -> void:
 		_angkor_watch = preload("res://tools/probe_angkor_watch.gd").new()
 		add_child(_angkor_watch)
 		_angkor_watch.setup(_race)
+	if _sf:
+		_sf_watch = preload("res://tools/probe_sf_watch.gd").new()
+		add_child(_sf_watch)
+		_sf_watch.setup(_race)
 	if _train_cam:
 		_train_meter = preload("res://tools/train_cam_meter.gd").new()
 		add_child(_train_meter)
@@ -1397,6 +1407,8 @@ func _report_race() -> void:
 		_train_meter.report()
 	if _angkor_watch != null:
 		_angkor_watch.report()
+	if _sf_watch != null:
+		_sf_watch.report()
 	var cars: Array[Car] = _race.cars
 	print("\n=== CURSA: %s — %.0fs, %d masini ===" % [
 		track.track_name, _elapsed, cars.size()])

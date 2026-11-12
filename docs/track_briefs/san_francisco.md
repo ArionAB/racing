@@ -719,6 +719,33 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
    probe_manual) și în `EXCLUDED` din `tools/probe_world_cup.gd`.
 3. **ProbeRace devreme** (memoria `proberace-la-inceput-nu-la-final`): 8 mașini
    × 16 seed-uri; se citesc `[blocaj]`, lent și invers, nu doar repunerile.
+
+   **Pașii 2–3 — FĂCUȚI (11 nov 2026).** `tools/gen_sf_route.py` scrie
+   `scenes/tracks/Track25.tscn`, geometria gri a serpentinelor
+   (`track25_serp_gri.obj`) și planul `docs/asset_briefs/img/sf_route/sf_route_plan.png`.
+   Hărțile coapte sunt în `tools/data/sf_route_*.tsv`; generatorul avertizează când
+   sunt vechi. Garda proprie: `tools/ProbeSfRoute.tscn`, care măsoară cota
+   acostamentului la virajele ramurii și are sabotaj. Cursa se rulează cu
+   `tools/sf_route_race.sh` + `sf_route_report.py` (ProbeRace `--sf`). Pista e la
+   indexul 17, „San Francisco”.
+
+   | | valoare |
+   |---|---|
+   | lungime / tur mediu (8 × 16 × 250 s) | 2.424 m / **77,4 s** (minim 72,1) |
+   | ProbeLayout | OK: raza minimă 13,5 m, panta maximă 12,0% în afara muchiilor, apropierea 46,5 m |
+   | ProbeLaneClear | 0 blocate (linia de bază 0); sabotajul pică |
+   | acostamentul la virajele ramurii | minim −0,29 m (contract ≥ −0,30); fără el −0,65 m, 100/100 picate |
+   | lanțul | 1.525 de zboruri, airtime median 0,57 s (0,67 s pe muchia 3, unde AI-ul arde turbo), aterizarea la cel mult 27 m |
+   | ejectări pe lanț | 5 în ~9.200 de zboruri (0,05%), Autobuzul sau Pompierii, în genunchiul dintre 28% și racord. **Acceptat de dezvoltator** (11 nov): rămân 4 blocuri, cifra se urmărește |
+   | scurtătura față de ocol | 13,42 s față de 13,87 s mediană (câștig 0,45 s; 1,38 s între cele mai bune); repunere la 1,6%, `[blocaj]` la 4,8% din treceri |
+   | restul turului | 0 `[blocaj]`, 0 ejectări |
+
+   **Abateri față de §2, măsurate:**
+   - **Urcarea:** 462 m la 11,4%, nu ~435. Fără racordurile de 24 m, spline-ul trecea de 13%.
+   - **Apa:** e la ~460 m de muchia 1, nu la ~355. Blocul serpentinelor R16 are 154 m în adâncime, nu 65. De pe muchia 1 se vede golful de est, nu apa din ax.
+   - **Latura de est:** după decizia dezvoltatorului (11 nov), e spartă în trei gesturi: colțul de NE la R30, cotul piațetei (2 × 45° la R36, deplasare de 29,6 m spre V) și devierea de pe faleză (2 × 30° la R50). Dreptele au 172, 172 și 242 m, cu 202 m de îmbrânceală după grilă. În prima variantă era o dreaptă de ~540 m.
+   - **Soarele:** strada lanțului merge pe azimut 0° (spre N), deci `custom_sun_rotation_deg = (−28, −12, 0)`.
+   - **De urmărit:** pâcla temei (`fog_max` 0,55, aproape albă) arată a ceață pe captura de pe muchia 1, fără inelul de fundal. Se reduce când intră fundalul și se arată dezvoltatorului.
 4. **Turul de feel, capturile `--gamecam`, tabelul de frustum**; apoi planul de
    sus adnotat, dioramă, foaia de assets.
 5. Tramvaiele, cu A/B pe ProbeRace. 6. Serpentinele, pontonul, mașinile

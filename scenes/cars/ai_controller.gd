@@ -637,6 +637,10 @@ func update(delta: float) -> void:
 			else (signf(line_offset) if absf(line_offset) > 0.02 else 1.0)
 		line = floor_side * clampf(absf(line), floor_off, LINE_MAX)
 	line = _alley_gate_line(idx, line)
+	# Despartitorul mobil de pe podul rosu (San Francisco 1d): culoarul liber
+	# CURENT e regula de siguranta cu veto, dupa ocolire si ranchiuna. No-op pe
+	# orice pista fara `MovableMedianHazard.ai_reads_corridor`.
+	line = _median_line(idx, speed, line)
 	# Muchia fara parapet are ultimul cuvant, dupa ocolire: nici depasirea nu
 	# trece pe buza, nici nu inchide usa celui de langa noi spre apa.
 	if _drop_side != 0.0:
@@ -1310,6 +1314,76 @@ func _bus_line(idx: int, speed: float, line: float, severity: float) -> float:
 	_bus_best_blend = best_blend
 	if best_blend > 0.0 and bus_corner_speed < 1.0:
 		_bus_speed_scale = lerpf(1.0, bus_corner_speed, best_blend * severity)
+	return line
+
+
+## DESPARTITORUL MOBIL (podul rosu, San Francisco, brief §7 pasul 1d): bariera
+## de beton dintre sensuri, mutata pe diagonala de un camion lent
+## (`MovableMedianHazard`). Linia se strange in culoarul liber de pe banda
+## noastra: intre fata barierei (sau a camionului) si parapetul exterior, cu
+## semilatimea masinii + `median_margin_m`.
+##
+## AI ONEST: culoarul e cel de ACUM — pozitia vizibila a barierei pe fereastra
+## pe care o vede si jucatorul in fata (`median_read_s` secunde de drum, intre
+## 12 si 50 m), cea mai stransa fata din fereastra. Nu citeste faza camionului
+## si nici unde va fi bariera. Cu S-ul care se misca la 4 m/s, in 1,3 s
+## fereastra ramane in urma cu ~5 m — marja acopera.
+##
+## Implicit nimic: nodul intra in grup doar cu `ai_reads_corridor`, deci pe
+## orice pista fara el functia iese la prima linie (Carrara, Machu Picchu &
+## co. neschimbate). Sabotajul (`ai_reads_corridor` stins sau `ai_static_read`)
+## e masurat in tools/probe_sf_pod.gd.
+static var median_read_s: float = 1.3
+static var median_margin_m: float = 0.5
+var _median_trace: bool = OS.get_environment("MEDIAN_TRACE") == "1"
+
+func _median_line(idx: int, speed: float, line: float) -> float:
+	var nodes := get_tree().get_nodes_in_group(MovableMedianHazard.AI_GROUP)
+	if nodes.is_empty():
+		return line
+	var r := track.route_at(car.route)
+	if r == null or r.count() < 2:
+		return line
+	var ci := r.closest_index(idx, car.global_position)
+	var base := r.baked[ci]
+	var side := r.side_at(ci)
+	var rd := r.baked[r.wrap_index(ci + 1)] - base
+	rd.y = 0.0
+	if rd.length_squared() < 1e-6:
+		return line
+	for node in nodes:
+		var m := node as MovableMedianHazard
+		if m == null:
+			continue
+		var inv := m.global_transform.affine_inverse()
+		var local := inv * car.global_position
+		if absf(local.z) > m.deck_half_width + 4.0:
+			continue
+		var dir_local := inv.basis * rd.normalized()
+		# Doar in lungul tablierului (nu in balonul de intoarcere).
+		if absf(dir_local.x) < 0.7:
+			continue
+		var dir_s := signf(dir_local.x)
+		var lane_side := float(m.plus_dir_side) * dir_s
+		var ahead := clampf(speed * median_read_s, 12.0, 50.0)
+		var cor := m.corridor(local, lane_side, dir_s, ahead)
+		if cor == Vector2.INF:
+			continue
+		var zlo := cor.x + (BUS_CAR_HALF_M + median_margin_m)
+		var zhi := cor.y - (BUS_CAR_HALF_M + median_margin_m)
+		var la := side.dot(m.global_transform * Vector3(local.x, local.y, zlo) - base)
+		var lb := side.dot(m.global_transform * Vector3(local.x, local.y, zhi) - base)
+		var lo := minf(la, lb)
+		var hi := maxf(la, lb)
+		var steps := int(_lookahead_near(speed) / maxf(track.curve.bake_interval, 0.001))
+		var hw: float = maxf(track.width_at_index(idx + steps) if car.route == 0 			else r.half_width, 0.5)
+		var lat := line * hw
+		lat = (lo + hi) * 0.5 if lo > hi else clampf(lat, lo, hi)
+		if _median_trace and Engine.get_physics_frames() % 15 == 0:
+			print("[median] %s s=%.1f z=%.2f side=%+d coridor z[%.2f, %.2f] lat[%.2f, %.2f] linie %.2f -> %.2f m (hw %.1f)" % [
+				car.pilot_name, local.x, local.z, int(lane_side), cor.x, cor.y, lo, hi,
+				line * hw, lat, hw])
+		line = clampf(lat / hw, -1.0, 1.0)
 	return line
 
 

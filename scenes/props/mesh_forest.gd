@@ -156,6 +156,19 @@ extends Node3D
 ## cu ProbeForest, coloana „LOD tri/instanta".
 @export_range(0, 12) var leaf_mid_every: int = 3
 @export_range(0, 12) var leaf_far_every: int = 0
+## ADANCIMEA PADURII: niciun arbore la mai mult de atatia metri de MARGINEA
+## soselei, in nicio zona (0 = nelimitat, cat cer zonele). Kyoto, nov 2026:
+## padurea era 60% din triunghiurile unui cadru mediu si 88% in valea de
+## artari, iar costul scade aproape liniar cu adancimea (ProbePerf --mobile
+## --phone-shadow, arborii cu frunzis punctat; valea la 0,33 / 0,42, media):
+##   15 m ->  475k /  710k, 376k      40 m -> 1184k / 1234k, 562k
+##   25 m ->  839k / 1026k, 469k      55 m -> 1531k / 1471k, 663k
+##   30 m ->  963k / 1092k, 502k      tot  -> 1832k / 1645k, 738k
+## Nu exista un cot in curba: adancimea se alege pe ASPECT. La 25 m, de pe
+## scena Kiyomizu (camera sus) padurea e un gard viu cu iarba goala in spate;
+## la 40 m citeste plina si de acolo. Umbra nu se schimba peste 25 m (`shadow_m`).
+## Sonda `-- --forest-depth=N` o suprascrie pentru masuratori, fara editarea scenei.
+@export_range(0.0, 200.0, 1.0, "suffix:m") var max_edge_m: float = 0.0
 ## Cat intra trunchiul in pamant (m): relieful palpaie sub radacina.
 @export_range(0.0, 1.0, 0.01, "suffix:m") var sink_m: float = 0.25
 ## Cat de mult mai multa marja fata de o sosea obisnuita cere o scurtatura
@@ -1191,10 +1204,10 @@ static func _part_material(stem: String, theme: String, part: String) -> Materia
 
 # --- plasare ---------------------------------------------------------------
 
-## SONDA DE ADANCIME: `-- --forest-depth=20` taie orice arbore aflat la mai mult
-## de atatia metri de marginea soselei, fara editarea scenei. Pentru masuratoarea
-## „cat costa padurea din spatele primelor randuri" (ProbePerf, Snapshot); fara
-## argument nu se intampla nimic. -1 = inca necitit.
+## SONDA DE ADANCIME: `-- --forest-depth=20` suprascrie `max_edge_m` (taie orice
+## arbore aflat la mai mult de atatia metri de marginea soselei), fara editarea
+## scenei. Pentru masuratoarea „cat costa padurea din spatele primelor randuri"
+## (ProbePerf, Snapshot); fara argument ramane `max_edge_m`. -1 = inca necitit.
 static var _depth_cap: float = -1.0
 
 static func _depth_cap_m() -> float:
@@ -1261,7 +1274,8 @@ func _fill_zone(zi: int, z: MeshForestZone, track: Track, main: TrackRoute,
 			continue
 		# `_check` a calculat deja distanta pana la margine (ultimul candidat trecut de el).
 		var edge := _check_edge
-		if _depth_cap_m() > 0.0 and edge > _depth_cap_m():
+		var depth_cap := _depth_cap_m() if _depth_cap_m() > 0.0 else max_edge_m
+		if depth_cap > 0.0 and edge > depth_cap:
 			_reject("adancime")
 			continue
 		if z.max_below_road_m < 199.0:

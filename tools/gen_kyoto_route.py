@@ -935,6 +935,7 @@ seed_value = {d.get('seed', 1)}
     forest_node = f"""
 [node name="PadureMasa" type="Node3D" parent="."]
 script = ExtResource("mf_script")
+max_edge_m = 40.0
 scenes = Array[PackedScene]([{scenes_txt}])
 zones = Array[ExtResource("mf_zone")]([{zones_txt}])
 """

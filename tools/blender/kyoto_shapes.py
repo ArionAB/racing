@@ -296,6 +296,156 @@ def leaf_pad(b, center, rx, ry, rz, slot, lobes=7, seg_per_lobe=5, rings=5,
     return b._tag(verts, slot)
 
 
+def leaf_dabs(b, pads, slot, count, seed=0, size=(0.24, 0.42), shell=(0.99, 1.30),
+              spray=0.10, face_mix=0.45, below=0.28, accent_slot=None, accent=0.20,
+              accent_tint=(1.0, 1.0, 1.0)):
+    """FRUNZIS PUNCTAT: `count` pete mici (quad-uri de 2 triunghiuri) presarate
+    pe coaja ciorchinilor, ca tusele de pensula din art of rally (cererea
+    dezvoltatorului, 13 nov 2026: "imi plac copacii aia fata de ce avem").
+
+    Masa ramane a ciorchinilor (memoria coroana-e-masa-nu-frunze): petele NU
+    inlocuiesc coroana, ii rup doar conturul si ii dau granulatie. De aceea stau
+    intre `shell[0]` si `shell[1]` din raza ciorchinelui (de la putin sub
+    suprafata la un sfert in afara), iar `spray` din ele zboara si mai departe,
+    mai mici -- stropii de la margine care fac silueta moale.
+
+    accent_slot: al doilea slot, mai deschis, pe `accent` din petele din
+    jumatatea luminata de sus (sansa creste cu inaltimea) -- sclipirile care
+    fac coroana sa nu fie o singura culoare cu trepte de gri.
+
+    pads: (cx, cy, cz, ax, ay, az_sus, az_jos) -- elipsoidul fiecarui ciorchine.
+    Petele ingropate in alt ciorchine se arunca (nu se vad, costa triunghiuri).
+
+    Doua straturi per varf, citite de `dab_post` dupa finish():
+      dab_n  normala de UMBRIRE: amestec intre normala masei (elipsoid + radial
+             din centrul coroanei) si fata reala a petei (`face_mix`). Doar masa
+             = glob neted cu pete lipite; doar fata = zgomot fara volum.
+      dab_c  culoarea de varf: gradient jos-sus, mai inchis spre interior, plus
+             variatie pe pata; umbra trage spre rosu, nu spre gri (memoria
+             umbra-fara-culoare-e-negru-mort)."""
+    rnd = _lcg(seed * 7919 + 13)
+    bm = b.bm
+    ln = bm.verts.layers.float_vector.get("dab_n") or bm.verts.layers.float_vector.new("dab_n")
+    lc = bm.verts.layers.float_vector.get("dab_c") or bm.verts.layers.float_vector.new("dab_c")
+    z_lo = min(p[2] - p[6] for p in pads)
+    z_hi = max(p[2] + p[5] for p in pads)
+    z_span = max(z_hi - z_lo, 1e-6)
+    cc = Vector((sum(p[0] for p in pads) / len(pads), sum(p[1] for p in pads) / len(pads),
+                 (z_lo + z_hi) * 0.5))
+    weights = [p[3] * p[4] + p[3] * p[5] + p[4] * p[5] for p in pads]
+    wsum = sum(weights)
+    verts = []
+    verts_accent = []
+    made = 0
+    for k, (cx, cy, cz, ax, ay, azu, azd) in enumerate(pads):
+        want = int(round(count * weights[k] / wsum))
+        got = 0
+        tries = 0
+        while got < want and tries < want * 12:
+            tries += 1
+            uz = 2.0 * rnd() - 1.0
+            ph = 2.0 * math.pi * rnd()
+            ur = math.sqrt(max(0.0, 1.0 - uz * uz))
+            ux, uy = ur * math.cos(ph), ur * math.sin(ph)
+            if uz < -0.15 and rnd() > below:
+                continue
+            is_spray = rnd() < spray
+            s = shell[0] + rnd() * (shell[1] - shell[0])
+            if is_spray:
+                s = shell[1] + rnd() * 0.30
+            az = azu if uz >= 0.0 else azd
+            p = Vector((cx + ax * ux * s, cy + ay * uy * s, cz + az * uz * s))
+            buried = False
+            for j, q in enumerate(pads):
+                if j == k:
+                    continue
+                qz = q[5] if p.z >= q[2] else q[6]
+                e = ((p.x - q[0]) / q[3]) ** 2 + ((p.y - q[1]) / q[4]) ** 2 + ((p.z - q[2]) / qz) ** 2
+                if e < 0.78:
+                    buried = True
+                    break
+            if buried:
+                continue
+            grad = Vector((ux / ax, uy / ay, uz / az)).normalized()
+            rad = (p - cc).normalized()
+            nm = (grad * 0.6 + rad * 0.4).normalized()
+            jit = Vector((rnd() - 0.5, rnd() - 0.5, rnd() - 0.5)) * 1.1
+            f = (nm + jit).normalized()
+            ref = Vector((0, 0, 1)) if abs(f.z) < 0.9 else Vector((1, 0, 0))
+            t1 = ref.cross(f).normalized()
+            t2 = f.cross(t1)
+            roll = rnd() * math.pi
+            cr_, sr_ = math.cos(roll), math.sin(roll)
+            t1, t2 = t1 * cr_ + t2 * sr_, t2 * cr_ - t1 * sr_
+            hw = (size[0] + rnd() * (size[1] - size[0])) * 0.5 * (0.62 if is_spray else 1.0)
+            hh = hw * (0.75 + rnd() * 0.5)
+            ns = (nm * (1.0 - face_mix) + f * face_mix).normalized()
+            t = min(1.0, max(0.0, (p.z - z_lo) / z_span))
+            depth = min(1.0, max(0.0, (s - shell[0]) / (shell[1] - shell[0])))
+            v = (0.56 + 0.44 * t ** 0.8) * (0.80 + 0.20 * depth) * (0.84 + 0.16 * rnd())
+            if rnd() < 0.14:
+                v = v * 1.12 + 0.08
+            v = min(1.0, max(0.30, v))
+            col = Vector((v, v * (0.80 + 0.20 * v), v * (0.70 + 0.30 * v)))
+            is_accent = accent_slot is not None and rnd() < accent * (0.25 + 1.5 * t * t)
+            if is_accent:        # sclipirea ramane deschisa: nu mosteneste umbra
+                v = max(v, 0.86)
+                col = Vector((v * accent_tint[0], v * accent_tint[1], v * accent_tint[2]))
+            quad = []
+            for (sa, sb) in ((-1, -1), (1, -1), (1, 1), (-1, 1)):
+                # colturi miscate: patrulater neregulat, nu patrat de hartie
+                ja = sa * (0.72 + 0.56 * rnd())
+                jb = sb * (0.72 + 0.56 * rnd())
+                bv = bm.verts.new(p + t1 * (hw * ja) + t2 * (hh * jb))
+                bv[ln] = ns
+                bv[lc] = col
+                quad.append(bv)
+            bm.faces.new(quad)
+            (verts_accent if is_accent else verts).extend(quad)
+            got += 1
+        made += got
+    b._tag(verts, slot)
+    if verts_accent:
+        b._tag(verts_accent, accent_slot)
+    return made
+
+
+def dab_post(objs):
+    """Dupa finish(): scrie culoarea si normala de umbrire ale petelor (straturile
+    `dab_c` / `dab_n` din `leaf_dabs`) peste AO-ul copt si peste normalele de
+    fata. Nodurile fara straturi trec neatinse. AO-ul prin raycast nu are ce
+    cauta pe pete: un quad singur in aer nu se umbreste pe el insusi, iar
+    gradientul vertical e deja in `dab_c`, pe intervalul INTREGII coroane."""
+    # Arborii fara pete (pinul niwaki) trec neatinsi, cu tot cu coroana.
+    if not any(o.data.attributes.get("dab_n") is not None for o in objs):
+        return
+    for o in objs:
+        me = o.data
+        an = me.attributes.get("dab_n")
+        ac = me.attributes.get("dab_c")
+        if an is None or ac is None:
+            # Masa coroanei: AO-ul copt e gri (v, v, v). Sub pete, umbra ei trebuie
+            # sa traga spre aceeasi nuanta ca umbra petelor, altfel golurile dintre
+            # ele ies murdare. Trunchiul ramane gri.
+            if o.name.endswith("_Crown"):
+                ca = me.color_attributes.get("AO")
+                for d in ca.data:
+                    v = d.color[0]
+                    d.color = (v, v * (0.80 + 0.20 * v), v * (0.70 + 0.30 * v), 1.0)
+            continue
+        ca = me.color_attributes.get("AO")
+        nors = []
+        for i in range(len(me.vertices)):
+            c = ac.data[i].vector
+            ca.data[i].color = (c[0], c[1], c[2], 1.0)
+            n = Vector(an.data[i].vector)
+            nors.append(n.normalized() if n.length > 1e-6 else Vector((0, 0, 1)))
+        for name in ("dab_n", "dab_c"):
+            me.attributes.remove(me.attributes[name])
+        me.normals_split_custom_set_from_vertices(nors)
+        me.update()
+
+
 # ---------------------------------------------------------------------------
 # emit -- comun tuturor build-urilor Kyoto
 # ---------------------------------------------------------------------------
@@ -304,7 +454,7 @@ RESULTS = []
 
 
 def emit(objs, path, ao, origin="base", bevel=0.0, smooth_angle=None,
-         budget=None, bevel_angle=30.0):
+         budget=None, bevel_angle=30.0, post=None):
     """Finish pe fiecare nod + export. Pe piesele cu mai multe noduri offsetul
     de origine se calculeaza O DATA pe ansamblu si se aplica identic (memoria
     finish-recentreaza-fiecare-nod-separat). `path` e relativ la
@@ -329,6 +479,8 @@ def emit(objs, path, ao, origin="base", bevel=0.0, smooth_angle=None,
                     origin=("base" if solo else None), smooth_angle=smooth_angle)
         total += st["tris"]
         per_node[o.name] = st["tris"]
+    if post is not None:       # dupa finish, inainte de export (vezi dab_post)
+        post(objs)
     xs, ys, zs = [], [], []
     for o in objs:
         for v in o.data.vertices:

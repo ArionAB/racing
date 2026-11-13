@@ -142,6 +142,20 @@ extends Node3D
 ## de umbra 271k -> 365k fara ea, ProbePerf --mobile --phone-shadow) si padurea
 ## are loc sub plafon, deci acolo e pornita.
 @export var shadow_lod_mid: bool = false
+## FRUNZISUL PUNCTAT PE TREPTE (nodurile `*_Leaves`, vezi `Palette.LEAF_PREFIX`;
+## Kyoto, nov 2026). Petele sunt quad-uri de 2 triunghiuri, sute pe arbore
+## (artarul: 1200 de pete = 2400 de triunghiuri, cat masa coroanei): simplificatorul
+## n-are ce face cu ele, deci se RARESC ca numar, ca la cardurile de bambus.
+## Treapta intreaga (pana la `lod_near_m`) le are pe toate; cea medie pastreaza
+## fiecare a `leaf_mid_every`-a pata, cea grosiera (plus celulele si bulgarii)
+## fiecare a `leaf_far_every`-a. 0 = fara pete pe treapta aceea: masa coroanei
+## poarta aceeasi culoare plata, deci arborele ramane intreg, doar fara franjuri.
+## La speciile din `mid_from_far_species` masa treptei medii ramane cea grosiera,
+## iar petele se adauga peste ea dupa `leaf_mid_every`.
+## Costul e in triunghiuri pe treapta cea mai plina a padurii (26-65 m): masurat
+## cu ProbeForest, coloana „LOD tri/instanta".
+@export_range(0, 12) var leaf_mid_every: int = 3
+@export_range(0, 12) var leaf_far_every: int = 0
 ## Cat intra trunchiul in pamant (m): relieful palpaie sub radacina.
 @export_range(0.0, 1.0, 0.01, "suffix:m") var sink_m: float = 0.25
 ## Cat de mult mai multa marja fata de o sosea obisnuita cere o scurtatura
@@ -465,7 +479,9 @@ func _build_species(theme: String) -> void:
 			far = far_s
 			mid = smooth if mid == mesh else Palette.smoothed_mesh(mid, Palette.foliage_surfaces(mid))
 			mesh = smooth
-		if mid_from_far_species.has(stem) and far != mid:
+		# Cu frunzis punctat, treapta medie e deja „masa grosiera + pete rarite"
+		# (facuta pe nod in `_species_meshes`); copia de aici i-ar sterge petele.
+		if mid_from_far_species.has(stem) and far != mid and not levels.has("leaves"):
 			mid = far.duplicate()
 		_species_mesh[stem] = mesh
 		_species_mid[stem] = mid
@@ -1025,6 +1041,10 @@ func _species_meshes(ps: PackedScene, stem: String, theme: String) -> Dictionary
 	var outs := {"full": null, "mid": null, "far": null}
 	var mats := {"full": [] as Array[Material], "mid": [] as Array[Material], "far": [] as Array[Material]}
 	var any_lod := false
+	var has_leaves := false
+	for mi in nodes:
+		if Palette.is_leaf_material(_part_material(stem, theme, String(mi.name))):
+			has_leaves = true
 	for mi in nodes:
 		var xf := Transform3D.IDENTITY
 		var cur: Node = mi
@@ -1036,14 +1056,23 @@ func _species_meshes(ps: PackedScene, stem: String, theme: String) -> Dictionary
 		if not remap.is_empty():
 			src = WorldProp._mesh_with_slots_moved(src, remap)
 		var levels := {"full": src, "mid": src, "far": src}
-		if lod_m > 0.0:
+		var is_leaf := has_leaves 			and Palette.is_leaf_material(_part_material(stem, theme, String(mi.name)))
+		if lod_m > 0.0 and is_leaf:
+			levels["mid"] = _leaf_level(src, leaf_mid_every)
+			levels["far"] = _leaf_level(src, leaf_far_every)
+			any_lod = true
+		elif lod_m > 0.0:
 			var lv := _lod_variants(src, mid_lod_ratio, far_lod_min_ratio,
 				frond_far_every if frond_thin_species.has(stem) else 0, frond_mid_every)
 			levels["mid"] = lv.get("mid", src)
 			levels["far"] = lv.get("far", src)
+			if has_leaves and mid_from_far_species.has(stem):
+				levels["mid"] = levels["far"]
 			any_lod = any_lod or levels["mid"] != src or levels["far"] != src
 		for level: String in levels:
 			var pm_src: Mesh = levels[level]
+			if pm_src == null:      # petele lipsesc de pe treapta asta
+				continue
 			var pieces: Array = [[pm_src, _part_material(stem, theme, String(mi.name))]]
 			var accent: Variant = _split_part(stem, theme, mi, pm_src)
 			if accent != null:
@@ -1066,7 +1095,28 @@ func _species_meshes(ps: PackedScene, stem: String, theme: String) -> Dictionary
 	if not any_lod:
 		outs["mid"] = outs["full"]
 		outs["far"] = outs["full"]
+	if has_leaves:
+		outs["leaves"] = true
 	return outs
+
+
+## Petele de frunzis ale unei trepte: fiecare a `every`-a (0 = niciuna, deci
+## null; 1 = toate). Aceeasi rarire pe componente ca la cardurile de bambus.
+static func _leaf_level(src: Mesh, every: int) -> Mesh:
+	if every <= 0:
+		return null
+	if every == 1:
+		return src
+	var out := ArrayMesh.new()
+	for si in src.get_surface_count():
+		var arr := src.surface_get_arrays(si)
+		if arr[Mesh.ARRAY_INDEX] == null:
+			out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		else:
+			out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,
+				_every_nth_component(arr, _components(arr), every))
+		out.surface_set_material(si, src.surface_get_material(si))
+	return out
 
 
 ## Ruptura de accente pe TEMA (`WorldProp.SPLIT_MODELS_BY_THEME` /
@@ -1128,6 +1178,8 @@ static func _part_material(stem: String, theme: String, part: String) -> Materia
 		return Palette.world_material()
 	if cls == Palette.PLAIN_PREFIX:
 		return Palette.plain_material()
+	if Palette.stipple_material(cls) != null:
+		return Palette.stipple_material(cls)
 	if cls.begins_with(Palette.GLOW_PREFIX):
 		return Palette._glow_from_spec(cls.trim_prefix(Palette.GLOW_PREFIX))
 	if cls.begins_with(Palette.FINISH_PREFIX):
@@ -1138,6 +1190,20 @@ static func _part_material(stem: String, theme: String, part: String) -> Materia
 
 
 # --- plasare ---------------------------------------------------------------
+
+## SONDA DE ADANCIME: `-- --forest-depth=20` taie orice arbore aflat la mai mult
+## de atatia metri de marginea soselei, fara editarea scenei. Pentru masuratoarea
+## „cat costa padurea din spatele primelor randuri" (ProbePerf, Snapshot); fara
+## argument nu se intampla nimic. -1 = inca necitit.
+static var _depth_cap: float = -1.0
+
+static func _depth_cap_m() -> float:
+	if _depth_cap < 0.0:
+		_depth_cap = 0.0
+		for a in OS.get_cmdline_user_args():
+			if a.begins_with("--forest-depth="):
+				_depth_cap = maxf(0.0, float(a.trim_prefix("--forest-depth=")))
+	return _depth_cap
 
 func _reject(why: String) -> void:
 	rejected[why] = int(rejected.get(why, 0)) + 1
@@ -1195,6 +1261,9 @@ func _fill_zone(zi: int, z: MeshForestZone, track: Track, main: TrackRoute,
 			continue
 		# `_check` a calculat deja distanta pana la margine (ultimul candidat trecut de el).
 		var edge := _check_edge
+		if _depth_cap_m() > 0.0 and edge > _depth_cap_m():
+			_reject("adancime")
+			continue
 		if z.max_below_road_m < 199.0:
 			# Cota soselei in dreptul punctului: cel mai apropiat punct copt
 			# (acelasi rezultat ca `closest_index_global`, vezi `_nearest_baked`).

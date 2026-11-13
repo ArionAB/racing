@@ -76,7 +76,8 @@ def report(label, runs, base):
     rs_deck = sum(1 for r in runs for b in r["respawns"] if b["on_deck"] or -2 < b["s"] < 302)
     ej = [len(r["ejects"]) for r in runs]
     cr = [len(r["crossings"]) for r in runs]
-    ho = [len(r["headon"]) for r in runs]
+    ho = [sum(1 for h in r["headon"] if h.get("corridor", True)) for r in runs]
+    ho_out = sum(1 for r in runs for h in r["headon"] if not h.get("corridor", True))
     print("  treceri peste pod            %5d (%.1f / seed), complete %d" % (
         len(passes), len(passes) / max(n, 1), sum(1 for p in passes if good(p))))
     print("  [blocaj]                     %5d (pe tablier %d)   pe seed: %s" % (
@@ -85,7 +86,7 @@ def report(label, runs, base):
         sum(rs), rs_deck, " ".join(map(str, rs))))
     print("  ejectari (sofer)             %5d   pe seed: %s" % (sum(ej), " ".join(map(str, ej))))
     print("  TRECERI PESTE DESPARTITOR    %5d   pe seed: %s" % (sum(cr), " ".join(map(str, cr))))
-    print("  ciocniri FRONTALE            %5d" % sum(ho))
+    print("  ciocniri FRONTALE pe coridor %5d   (in afara lui, in baloane: %d)" % (sum(ho), ho_out))
     pb = [p for p in passes if p["block_contacts"] > 0]
     pt = [p for p in passes if p["truck_contacts"] > 0]
     print("  treceri cu contact BARIERA   %5d = %.1f%% (contacte %d, cadre %d; v la primul contact med %.1f m/s)" % (
@@ -98,9 +99,11 @@ def report(label, runs, base):
     slow = [p for p in near if p["truck_slow"]]
     print("  intalniri cu camionul        %5d, sub 10 m/s langa el (coada) %d = %.1f%%" % (
         len(near), len(slow), 100.0 * len(slow) / max(len(near), 1)))
-    narrow = [p for p in passes if p["w_min"] < 10.0]
-    print("  treceri cu banda INGUSTA     %5d = %.1f%% (culoar minim < 10 m)" % (
-        len(narrow), 100.0 * len(narrow) / max(len(passes), 1)))
+    nn = sum(p.get("narrow_n", 0) for p in passes)
+    nt = sum(p["n"] for p in passes)
+    wavg = [p["w_sum"] / p["n"] for p in passes if p["n"] > 0]
+    print("  banda INGUSTA (< 10 m)       %.1f%% din timpul pe tablier; latimea medie a benzii %.1f m" % (
+        100.0 * nn / max(nt, 1), statistics.mean(wavg) if wavg else -1))
     ov = [o for r in runs for o in r["overtakes"]]
     ovn = [o for o in ov if o["narrow"]]
     print("  depasiri pe tablier          %5d (%.1f / seed), in banda ingusta %d = %.1f%%" % (

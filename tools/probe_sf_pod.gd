@@ -62,6 +62,9 @@ var _phase: float = -1.0
 var _pilot_kind: String = "hug"
 var _line_z: float = 2.5
 var _label: String = ""
+## `--trace-car=Buggy --trace-window=20,27`: pozitia unei masini la 10 Hz.
+var _trace_car: String = ""
+var _trace_win: Vector2 = Vector2(0.0, 1e9)
 
 var _race: Node = null
 var _track: Track = null
@@ -112,6 +115,11 @@ func _ready() -> void:
 			_line_z = float(arg.trim_prefix("--line-z="))
 		elif arg.begins_with("--label="):
 			_label = arg.trim_prefix("--label=")
+		elif arg.begins_with("--trace-car="):
+			_trace_car = arg.trim_prefix("--trace-car=")
+		elif arg.begins_with("--trace-window="):
+			var tw := arg.trim_prefix("--trace-window=").split(",")
+			_trace_win = Vector2(float(tw[0]), float(tw[1]))
 		elif arg.begins_with("--median-read="):
 			AIController.median_read_s = float(arg.trim_prefix("--median-read="))
 		elif arg.begins_with("--median-margin="):
@@ -275,6 +283,12 @@ func _tick_car(i: int, car: Car, delta: float) -> void:
 		c.slow_s = float(c.slow_s) + delta
 	var on_deck := _on_deck(local)
 	var side := _own_side(car)
+	if not _trace_car.is_empty() and String(c.name).contains(_trace_car) 			and _t >= _trace_win.x and _t <= _trace_win.y and Engine.get_physics_frames() % 6 == 0:
+		var fw := _med.global_transform.basis.inverse() * (-car.global_transform.basis.z)
+		print("[trace] t=%.2f %s s=%.1f z=%.2f y=%.2f v=%.1f cap=%.0f steer=%.2f gaz=%.2f drift=%s idx=%d lat=%.2f roti=%d" % [
+			_t, c.name, local.x, local.z, local.y, speed, rad_to_deg(atan2(fw.z, fw.x)),
+			car.controller.get_steer(), car.controller.get_throttle(), str(car.is_drifting),
+			car.road_index, rc.y, car.wheels_on_ground])
 	# --- trecerea peste pod ---
 	if on_deck and int(c.pass) < 0:
 		_passes.append({"car": i, "name": c.name, "car_name": c.car_name, "side": side,
@@ -290,6 +304,8 @@ func _tick_car(i: int, car: Car, delta: float) -> void:
 			p.v_min = minf(float(p.v_min), speed)
 			var w := _med.lane_width_at(local.x, side)
 			p.w_min = minf(float(p.w_min), w)
+			if w < NARROW_M:
+				p.narrow_n = int(p.get("narrow_n", 0)) + 1
 			p.w_sum = float(p.w_sum) + w
 			p.n = int(p.n) + 1
 			# distanta de la marginea masinii la fata barierei (negativ = suprapunere)
@@ -332,6 +348,9 @@ func _tick_car(i: int, car: Car, delta: float) -> void:
 			hit_truck = true
 	if hit_block or hit_truck:
 		c.last_contact_t = _t
+		if _mode == "solo" and _t > float(c.get("escape_until", -1.0)) + 0.5:
+			c.escape_until = _t + 1.5
+			c.line_hit_pass = int(c.pass)
 	if int(c.pass) >= 0:
 		var p2: Dictionary = _passes[int(c.pass)]
 		if hit_block:
@@ -393,8 +412,13 @@ func _tick_pairs(cars: Array[Car]) -> void:
 				var key := i * 100 + j
 				if _t - float(_headon_last.get(key, -99.0)) > 1.0:
 					var la := _local(a)
+					# pe coridorul cu doua sensuri (gat de balon la gat de balon)?
+					var lane_z := float(_track.get_meta("sf_pod", {}).get("lane_z", 6.2))
+					var x_f := float(_track.get_meta("sf_pod", {}).get("x_f", 624.0))
+					var x0 := _med.global_position.x
+					var corr := la.x > -x0 and la.x < x_f - x0 and absf(la.z) < 2.0 * lane_z + 1.0
 					_headon.append({"t": snappedf(_t, 0.01), "a": _c[i].name, "b": _c[j].name,
-						"s": snappedf(la.x, 0.1), "z": snappedf(la.z, 0.1)})
+						"s": snappedf(la.x, 0.1), "z": snappedf(la.z, 0.1), "corridor": corr})
 					print("[frontal] t=%.1f %s x %s s=%.1f z=%.1f" % [_t, _c[i].name, _c[j].name, la.x, la.z])
 				_headon_last[key] = _t
 	# depasiri: doua masini pe tablier, pe aceeasi latura, ordinea pe s se inverseaza
@@ -467,12 +491,18 @@ func pilot_steer(car: Car) -> float:
 	# tinta laterala (m de la axa benzii, + dreapta) — pe tablier, din z local
 	var target_lat := 0.0
 	var lane_z := float(_track.get_meta("sf_pod", {}).get("lane_z", 6.2))
-	var on_span := local.x > -40.0 and local.x < _med.deck_length + 40.0 and absf(local.z) < 16.0
-	if on_span and _pilot_kind != "axis":
+	var on_span := local.x > 0.0 and local.x < _med.deck_length and absf(local.z) < 16.0
+	# Dupa un contact pilotul iese pe axa benzii, ca un om (nu un zid care tot
+	# apasa in bariera): `hug` 1,5 s, apoi se lipeste iar; `line` pana la capatul
+	# trecerii (o singura lovitura „oarba" pe trecere).
+	var c0: Dictionary = _c[0]
+	var escaping := _t < float(c0.get("escape_until", -1.0)) 		or (_pilot_kind == "line" and int(c0.get("line_hit_pass", -2)) == int(c0.pass) and int(c0.pass) >= 0)
+	if on_span and _pilot_kind != "axis" and not escaping:
 		var want_z := 0.0
 		if _pilot_kind == "hug":
-			# centrul masinii la 0,6 m de fata barierei: caroseria (~1 m) o freaca
-			want_z = side * (_med.obstacle_face(local.x, side) + 0.6)
+			# caroseria freaca fata barierei (10 cm de suprapunere)
+			var half_w: float = car.data.body_width * 0.5 if car.data != null else 1.1
+			want_z = side * (_med.obstacle_face(local.x, side) + half_w - 0.1)
 		else:
 			want_z = side * _line_z
 		# z local -> lateral fata de axa benzii: pe latura + (spre +X) dreapta e +Z,

@@ -1360,8 +1360,9 @@ func _median_line(idx: int, speed: float, line: float) -> float:
 		if absf(local.z) > m.deck_half_width + 4.0:
 			continue
 		var dir_local := inv.basis * rd.normalized()
-		# Doar in lungul tablierului (nu in balonul de intoarcere).
-		if absf(dir_local.x) < 0.7:
+		# Doar in lungul coridorului (nu in intoarcere): pana la 60 de grade, ca
+		# iesirea dintr-un viraj spre despartitor sa fie deja stransa in culoar.
+		if absf(dir_local.x) < 0.5:
 			continue
 		var dir_s := signf(dir_local.x)
 		var lane_side := float(m.plus_dir_side) * dir_s

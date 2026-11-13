@@ -70,13 +70,24 @@ R = float(os.environ.get("R", "20"))
 # raza viraielor de racord (dreapta THETA) ale balonului: larga, ca masina care
 # iese din balon sa nu fie aruncata spre capul despartitorului fix
 R_IN = float(os.environ.get("R_IN", "40"))
+# Intre balon si coridorul cu doua sensuri benzile se DESPART: fiecare se muta
+# SPLIT_D m spre exterior pe SPLIT_L m (doua arce in S, raza ~114 m). Masurat in
+# runda 1-2: cu balonul lipit de capul despartitorului, iesirea din ultimul viraj
+# (trasa de cursa: apex in interior, iesire spre exterior = spre despartitor)
+# arunca masinile in capul lui sau PE SENSUL OPUS (3 „treceri" pe 16 seed-uri,
+# toate venite pe langa cap, si 4 ejectari pe latura lui, la fel cu bariera fixa).
+SPLIT_D = float(os.environ.get("SPLIT_D", "8"))
+SPLIT_L = float(os.environ.get("SPLIT_L", "60"))
+# capul despartitorului fix la gatul fiecarui balon: atenuator de impact (corp
+# MOALE, `soft_hit_crush`), nu zid de beton cu fata spre trafic
+CUSHION = 6.0
 GRADE = float(os.environ.get("GRADE", "0.115"))
 Y0 = float(os.environ.get("Y0", "12"))
 EASE = 24.0
 CLIMB = 72.0
 LANDING = 36.0
-X_START = 72.0
-FLAT_RUN = 60.0           # elan plat de la start la piciorul rampei
+X_START = 48.0
+FLAT_RUN = 36.0           # elan plat de la start la piciorul rampei
 FIX = os.environ.get("FIX", "0") == "1"
 AI = os.environ.get("AI", "1") == "1"
 STATIC = os.environ.get("STATIC", "0") == "1"
@@ -146,11 +157,21 @@ class Turtle:
         self.th += total
 
 
+def split(t, out):
+    """S-ul dintre coridor si balon: `out` = banda se departeaza de axa (spre
+    dreapta ei), altfel se apropie. Doua arce egale, deplasare SPLIT_D pe SPLIT_L."""
+    alpha = 2.0 * math.atan2(SPLIT_D, SPLIT_L)
+    rad = SPLIT_L / (2.0 * math.sin(alpha))
+    t.arc(rad, math.degrees(alpha), out)
+    t.arc(rad, math.degrees(alpha), not out)
+
+
 def balloon(t):
-    """Intoarcere pe stanga intre doua benzi la 2*LANE_Z: dreapta THETA la R_IN,
-    stanga 180+2*THETA la R, dreapta THETA la R_IN (cercurile tangente)."""
-    dx = math.sqrt((R + R_IN) ** 2 - (LANE_Z + R_IN) ** 2)
-    theta = 90.0 - math.degrees(math.atan2(LANE_Z + R_IN, dx))
+    """Intoarcere pe stanga intre doua benzi la 2*W (W = LANE_Z + SPLIT_D):
+    dreapta THETA la R_IN, stanga 180+2*THETA la R, dreapta THETA la R_IN."""
+    w = LANE_Z + SPLIT_D
+    dx = math.sqrt((R + R_IN) ** 2 - (w + R_IN) ** 2)
+    theta = 90.0 - math.degrees(math.atan2(w + R_IN, dx))
     t.arc(R_IN, theta, True)
     t.arc(R, 180.0 + 2.0 * theta, False)
     t.arc(R_IN, theta, True)
@@ -161,13 +182,16 @@ def build():
     t = Turtle(X_START, LANE_Z, 0.0)
     for length, _ in SEGS:
         t.straight(length)
-    a_far = len(t.pts) - 1
+    split(t, True)
     theta = balloon(t)
+    split(t, False)
     assert abs(t.x - X_F) < 0.05 and abs(t.z + LANE_Z) < 0.05, (t.x, t.z)
     for length, _ in reversed(SEGS):
         t.straight(length)
-    t.straight(X_START)                     # pana la gatul balonului de start (x = 0)
-    theta2 = balloon(t)
+    t.straight(X_START)                     # pana la capul coridorului (x = 0)
+    split(t, True)
+    balloon(t)
+    split(t, False)
     assert abs(t.x) < 0.05 and abs(t.z - LANE_Z) < 0.05, (t.x, t.z)
     t.straight(X_START)                     # dreapta de grila
     last = t.pts.pop()
@@ -255,8 +279,8 @@ def main():
     # despartitorul fix pe pamant: de la gatul balonului de start (x 0) pana la
     # palier (X_LAND0), pe segmentele de 12 m ale rampei
     nodes.append('[node name="DespartitorFixRampa" type="StaticBody3D" parent="Static"]\n')
-    xs = [0.0]
-    x = 0.0
+    xs = [CUSHION]
+    x = CUSHION
     while x < X_LAND0 - 0.01:
         # rupturi la capetele segmentelor de panta
         nxt = min(x + STEP, X_LAND0)
@@ -276,12 +300,31 @@ def main():
         off = bh * 0.5 - 0.05
         box(sub, nodes, "fix%d" % int(round(L * 100)), "F%d" % k, "Static/DespartitorFixRampa",
             (L + 0.1, bh, bw), xf_pitch(cx + nx * off, cy + ny * off, 0.0, pitch))
-    # parapetele exterioare (perete vertical 1,2 m), de la palier la palier
+    nodes.append('[node name="Atenuator" type="StaticBody3D" parent="Static"]\nmetadata/soft_hit_crush = 1.0\n')
+    yc = y_of_x(CUSHION * 0.5)
+    box(sub, nodes, "cushion", "Cap", "Static/Atenuator", (CUSHION, 0.95, 0.9),
+        (1, 0, 0, 0, 1, 0, 0, 0, 1, CUSHION * 0.5, yc + 0.425, 0.0), mat="Mat_galben")
+    # parapetele exterioare (perete vertical 1,2 m), pe tablier + 12 m, cu capetele
+    # EVAZATE spre exterior (20 grade pe 10 m): un capat de zid cu fata spre trafic
+    # ejecta masinile impinse spre margine la start (masurat, 2 ejectari / 16 seed-uri)
     nodes.append('[node name="Parapet" type="StaticBody3D" parent="Static"]\n')
-    par_len = X_F - X_LAND0
+    pa, pb = X_D0 - 12.0, X_D1 + 12.0
+    par_len = pb - pa
+    flare_l, flare_a = 10.0, math.radians(20.0)
     for side, nm in ((1, "Dus"), (-1, "Intors")):
+        zc = side * (DECK_HALF + 0.25)
         box(sub, nodes, "parapet", "Parapet" + nm, "Static/Parapet", (par_len, 1.2, 0.5),
-            (1, 0, 0, 0, 1, 0, 0, 0, 1, (X_LAND0 + X_F) * 0.5, Y_D + 0.55, side * (DECK_HALF + 0.25)))
+            (1, 0, 0, 0, 1, 0, 0, 0, 1, (pa + pb) * 0.5, Y_D + 0.55, zc))
+        for end, xe in (("A", pa), ("B", pb)):
+            dx = -1.0 if end == "A" else 1.0
+            cxf = xe + dx * math.cos(flare_a) * flare_l * 0.5
+            czf = zc + side * math.sin(flare_a) * flare_l * 0.5
+            # axa X a cutiei pe directia (dx*cos, side*sin) in planul XZ; Basis(UP, yaw)
+            # duce X in (cos yaw, 0, -sin yaw)
+            yaw = math.atan2(-side * math.sin(flare_a), dx * math.cos(flare_a))
+            c_, s_ = math.cos(yaw), math.sin(yaw)
+            box(sub, nodes, "flare", "Evazare%s%s" % (nm, end), "Static/Parapet", (flare_l, 1.2, 0.5),
+                (c_, 0, -s_, 0, 1, 0, s_, 0, c_, cxf, y_of_x(xe) + 0.55, czf))
     # turnurile podului: portaluri, picioarele in afara tablierului, traversa la +10 si +36
     nodes.append('[node name="Turnuri" type="StaticBody3D" parent="Static"]\n')
     tower_h = 45.0
@@ -309,6 +352,7 @@ def main():
         '[sub_resource type="Curve3D" id="Curve3D_route"]\n' + curve_data(pts), "",
         '[sub_resource type="StandardMaterial3D" id="Mat_gri"]\nalbedo_color = Color(0.62, 0.62, 0.6, 1)\n',
         '[sub_resource type="StandardMaterial3D" id="Mat_rosu"]\nalbedo_color = Color(0.72, 0.22, 0.14, 1)\n',
+        '[sub_resource type="StandardMaterial3D" id="Mat_galben"]\nalbedo_color = Color(0.85, 0.72, 0.2, 1)\n',
     ]
     head += [v for v in sub.values()]
     scene = head + [
@@ -340,6 +384,7 @@ def main():
         "taper_m = %.1f" % TAPER,
         "approach_m = %.1f" % LANDING,
         "deck_half_width = %.2f" % DECK_HALF,
+        "cushion_far_m = %.1f" % CUSHION,
         "truck_speed = %.2f" % TRUCK_SPEED,
         "truck_dwell_s = %.2f" % DWELL,
         "phase = %.4f" % PHASE,

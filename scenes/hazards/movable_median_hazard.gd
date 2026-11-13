@@ -47,10 +47,19 @@ extends Node3D
 @export var block_len: float = 3.0
 @export var block_width: float = 0.6
 @export var block_height: float = 0.95
+## Inaltimea COLIZIUNII blocului (m), peste cea vizuala. Masurat: cu 0,95 m un
+## Buggy imbrancit in bariera la 33 m/s a urcat pe muchia ei si a trecut pe
+## sensul opus (cutia caroseriei sta intre +0,25 si +1,25 m, deci muchia de sus
+## a unui bloc mai scund ii da o normala in sus). 1,3 m = `Track.WALL_HEIGHT`.
+@export var block_collision_height: float = 1.3
 ## Despartitor FIX pe pamant, la axa, inainte si dupa tablier (m): aceleasi
 ## blocuri, statice (unde se largeste soseaua spre tablier, AI-ul trebuie sa-l
 ## vada si el).
 @export var approach_m: float = 36.0
+## Ultimii metri ai despartitorului fix de la capatul +X sunt ATENUATOR de impact
+## (corp moale, meta `soft_hit_crush`): acolo se termina despartitorul, cu capul
+## spre traficul care vine din intoarcere. 0 = beton pana la capat.
+@export var cushion_far_m: float = 0.0
 ## Semilatimea tablierului pana la fata interioara a parapetului exterior (m).
 ## Doar pentru culoarul AI-ului: soseaua de pe tablier e mai lata (benzile se
 ## suprapun la mijloc), parapetul e marginea reala.
@@ -196,7 +205,7 @@ func _build() -> void:
 	pmat.friction = 0.1
 	pmat.bounce = 0.0
 	var shape := BoxShape3D.new()
-	shape.size = Vector3(block_len + 0.15, block_height, block_width)
+	shape.size = Vector3(block_len + 0.15, block_collision_height, block_width)
 	_block_z.resize(n)
 	_block_yaw.resize(n)
 	for k in n:
@@ -207,6 +216,7 @@ func _build() -> void:
 		body.physics_material_override = pmat
 		var cs := CollisionShape3D.new()
 		cs.shape = shape
+		cs.position = Vector3(0.0, block_collision_height * 0.5, 0.0)
 		body.add_child(cs)
 		add_child(body)
 		_blocks.append(body)
@@ -218,6 +228,12 @@ func _build() -> void:
 	fixed.name = "DespartitorFix"
 	fixed.physics_material_override = pmat
 	add_child(fixed)
+	var cushion: StaticBody3D = null
+	if cushion_far_m > 0.0:
+		cushion = StaticBody3D.new()
+		cushion.name = "Atenuator"
+		cushion.set_meta(&"soft_hit_crush", soft_crush_s)
+		add_child(cushion)
 	var nf := n_fixed / 2
 	for side in [-1.0, 1.0]:
 		for k in nf:
@@ -225,17 +241,21 @@ func _build() -> void:
 				else deck_length + (float(k) + 0.5) * block_len
 			var cs := CollisionShape3D.new()
 			cs.shape = shape
-			cs.position = Vector3(s, block_height * 0.5 - 0.05, 0.0)
-			fixed.add_child(cs)
+			cs.position = Vector3(s, block_collision_height * 0.5 - 0.05, 0.0)
+			if cushion != null and side > 0.0 and s > deck_length + approach_m - cushion_far_m:
+				cushion.add_child(cs)
+			else:
+				fixed.add_child(cs)
 			var idx := n + (0 if side < 0.0 else nf) + k
-			_mm.set_instance_transform(idx, Transform3D(Basis.IDENTITY, cs.position))
+			_mm.set_instance_transform(idx, Transform3D(Basis.IDENTITY,
+				Vector3(s, block_height * 0.5 - 0.05, 0.0)))
 	if truck_enabled and not static_center:
 		_build_truck()
 		_place_truck()
 
 
 func _block_xform(s: float, z: float, yaw: float) -> Transform3D:
-	return Transform3D(Basis(Vector3.UP, yaw), Vector3(s, block_height * 0.5 - 0.05, z))
+	return Transform3D(Basis(Vector3.UP, yaw), Vector3(s, -0.05, z))
 
 
 func _place_block(k: int, s: float, s_t: float, force: bool) -> bool:
@@ -247,7 +267,7 @@ func _place_block(k: int, s: float, s_t: float, force: bool) -> bool:
 	_block_yaw[k] = yaw
 	var xf := _block_xform(s, z, yaw)
 	_blocks[k].transform = xf
-	_mm.set_instance_transform(k, xf)
+	_mm.set_instance_transform(k, xf.translated_local(Vector3(0.0, block_height * 0.5, 0.0)))
 	return true
 
 
@@ -400,4 +420,4 @@ func truck_body() -> AnimatableBody3D:
 func is_block(body: Object) -> bool:
 	return body is AnimatableBody3D and _blocks.has(body) \
 		or (body is StaticBody3D and (body as Node).get_parent() == self \
-			and String((body as Node).name) == "DespartitorFix")
+			and String((body as Node).name) in ["DespartitorFix", "Atenuator"])

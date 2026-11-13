@@ -110,8 +110,8 @@ def ct_place(c):
     # dupa pozitia masinii (harta): strada de jos are axul la y = 454
     if c["x"] < -100.0 or (c["x"] < -15.0 and c["y"] < 446.0):
         return "intrare"
-    if c["x"] > 30.0 and c["y"] < 446.0:
-        return "iesire"
+    if (c["x"] > 30.0 and c["y"] < 446.0) or c["y"] > 458.0:
+        return "iesire"     # runda 1: in dreapta dupa gura; runda 2: spre mal (stanga)
     if -10.0 <= c["x"] <= 25.0:
         return "gura"
     return "pe ax"

@@ -750,14 +750,15 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
    sus adnotat, dioramă, foaia de assets.
 5. Tramvaiele, cu A/B pe ProbeRace.
 
-   **FĂCUT (12 nov 2026) — tramvaiul 1 PASS, tramvaiul 2 cu probleme (decizia e a
-   dezvoltatorului, mai jos).** Ambele sunt `BusHazard` pe `Path3D`, generate de
+   **FĂCUT (12–13 nov 2026) — PASS după runda 2.** Runda 1 (mai jos, păstrată ca istoric) a lăsat
+   tramvaiul 2 pe unirea fluxurilor, cu 14–22% contact. Runda 2, pe decizia dezvoltatorului, l-a
+   scos de pe ax **înainte de unire**: tramvaiul 2 ajunge la 1,3–3,1% contact. Ambele sunt `BusHazard` pe `Path3D`, generate de
    `tools/gen_sf_route.py` (nodurile `Tramvaie/Tramvai1`, `Tramvai2`), cu flagurile de la 1c:
    `soft_contact`, `ai_reads_lane`, `ai_same_direction`, `pitch_to_ground`. Placeholder gri de
    2,5 × 3,2 × 8,5 m (`cable_car.glb` nu există încă). Capturi: `docs/asset_briefs/img/sf_route/sf_tramvai1_gamecam.png`
    și `sf_tramvai2_gamecam.png` (`--bus-at=14`).
 
-   | | tramvaiul 1 (urcarea) | tramvaiul 2 (gura) |
+   | | tramvaiul 1 (urcarea) | tramvaiul 2, runda 1 (vezi runda 2 mai jos) |
    |---|---|---|
    | traseu | intră din strada laterală din dreapta, la 20 m după colțul A/B, și iese **drept înainte** la colțul de sus, cu 16 m dincolo de axa laturii de nord | intră din dreapta cu 36 m înaintea gurii, trece prin fața ei și iese în dreapta la 30 m după ea (`x` = 50) |
    | curbă / viteză / ciclu | 328 m, **5,0 m/s**, 66 s (tur / ciclu = 1,17) | 128 m, 4,5 m/s, **29 s** (2,67) |
@@ -834,17 +835,52 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
      `ProbeLaneClear --track=17` dă 6 raportări, toate corpurile tramvaielor la ceasul de
      încărcare. Linia de bază a trecut de la 0 la 6, iar sabotajul pică (9 > 6).
 
-   **Decizii ale dezvoltatorului (deschise):**
-   1. **Scurtătura nu mai câștigă la mediană cu tramvaiul 2 activ** (de la +0,47 s la −0,03..−0,31
-     s). Cele mai bune treceri câștigă tot ~1,4–1,5 s. Geometria n-a fost atinsă (cerința).
-     Pârghiile posibile: ocolul mai lung (la 1b, 450 m dădea +3 s), tramvaiul 2 mai rar, sau
-     `branch_gate`.
-   2. **Tramvaiul 2 ca poartă la gură**, cu contact de 14–22% din întâlniri: rămâne așa, intră
-     în `branch_gate` (AI-ul nu intră în scurtătură când gura va fi ocupată), sau i se mută
-     porțiunea de ax ca să nu stea pe unirea fluxurilor?
-   3. **Viteza tramvaiului 1** (5,0 față de 4,5 m/s) și placa turnantă păstrată doar ca decor.
-   4. **Colțul de sus:** contactele de acolo sunt acceptate (costă ~1,5 s), sau AI-ul trece pe
-     interior (pe dreapta) în ultimii metri înaintea colțului?
+   **Deciziile dezvoltatorului (13 nov 2026)** pe cele patru întrebări ale rundei 1:
+   1. și 2. Tramvaiul 2 **se mută de pe unire**: trece prin fața gurii și părăsește axul
+      înainte ca ocolul și scurtătura să se unească. Rămâne poarta de timing a gurii. **Fără
+      `branch_gate`**. Ocolul nu se lungește acum.
+   3. Tramvaiul 1 la 5,0 m/s: **aprobat**. Placa turnantă rămâne decor.
+   4. Contactele de la colțul de sus: **acceptate**, AI-ul nu se schimbă.
+
+   **Runda 2 — tramvaiul 2 iese spre mal (`TRAM2_LAYOUT=stanga`, implicit în generator).**
+   - **Traseul:** intră din strada laterală din dreapta, la `x` = −60, adică 55 m înaintea
+     gurii. Merge pe ax. La `x` = −2 virează la stânga (raza 14) spre mal, în fața gurii.
+     Iese de pe carosabil pe la `x` ≈ 12, înainte de reîntâlnire (`x` ≈ 22). Capătul liniei e
+     un **petic de chei** de 34 × 22 m, tăiat din golf (`LAGOON`) doar pentru varianta asta: acolo
+     se ascunde vagonul.
+   - **Curba și ciclul:** curba are 106 m. La 4,5 m/s ciclul rămâne de **29 s** (2,67 față de
+     tur), din care 23,5 s vizibil. Faza e 0,564 (76 m pe curbă la verde).
+   - Captura `sf_tramvai2_gamecam.png` (`--bus-at=19`) îl arată virând spre mal în fața gurii.
+
+   | variantă (8 × 16 × 250 s) | `[blocaj]` | tram. | întâlniri | cu contact | coadă < 10 m/s | pierdere med / p90 / max |
+   |---|---|---|---|---|---|---|
+   | **fără tramvaie** (cu peticul de chei) | 13 (toate în serpentine) | — | — | — | — | — |
+   | **cu tramvaie** | 9 (serpentine 5, urcare 2, strada de jos 2) | 1 | 409 | 2,7% | 3,2% | 0,19 / 1,08 / 6,4 s |
+   | | | 2 | 161 | **3,1%** | 2,5% | 0,73 / 2,92 / 10,6 s |
+   | idem, repetare | 7 (serpentine 6, urcare 1) | 1 | 415 | 2,2% | 1,7% | 0,18 / 1,02 / 5,5 s |
+   | | | 2 | 155 | **1,3%** | 1,9% | 0,52 / 2,92 / 6,7 s |
+   | **SABOTAJ** (`--tram-blind`) | **235** (urcare 216, gura și strada de jos 18) | 1 / 2 | 313 / 218 | **78% / 61%** | 76% / 53% | 2,33 / 9,26 s ; 1,43 / 4,27 s |
+
+   | scurtătura față de ocol (furcă → gură + 20 m) | mediană | cele mai bune | treceri cu contact cu tramvaiul 2 |
+   |---|---|---|---|
+   | fără tramvaie | +0,36 s | +1,40 s | — |
+   | cu tramvaie (două rulări) | **+0,57 / +0,71 s** | +1,65 / +1,30 s | 4,5% / 2,0% |
+   | runda 1, pentru comparație | −0,31 / −0,03 / −0,24 s | ~1,45 s | 20–32% |
+
+   **Ce a ieșit:**
+   - **Contractul e atins.** Tramvaiul 2 are 1,3–3,1% contact pe întâlnire, cât tramvaiul 1
+     (2,2–2,7%). Coada e de 2–2,5%. `[blocaj]` 7–9, față de 13 fără tramvaie.
+   - **Scurtătura câștigă din nou:** +0,57–0,71 s la mediană față de ocol, iar între cele mai
+     bune treceri +1,3–1,65 s. E chiar puțin peste linia de bază: ocolul îl întâlnește pe ax pe
+     tramvai, scurtătura iese după el.
+   - **Pierderea mediană pe întâlnire e mai mare decât la tramvaiul 1** (0,5–0,7 s față de
+     0,2 s). Cine vine pe ocol îl ajunge pe ax, chiar înainte de gură, și trebuie să-l ocolească.
+     p90 e de 2,9 s, iar contactele sunt rare.
+   - **Sabotajul pică:** 235 de `[blocaj]`, contact 61–78%.
+   - **Ejectări pe lanț:** 0–2 pe lot (~0,05%), ca înainte. Turul mediu: 77,3 s fără tramvaie,
+     77,9 s cu ele.
+   - **Gărzi:** `ProbeLaneClear --track=17` dă tot 6 (tramvaiul 2 apare acum pe INAINTE la
+     0,670). `ProbeSfRoute` și `ProbeLayout` sunt OK.
 
    Nemăsurat: feel-ul la volan (DriveScene sau iPhone) și tramvaiul jucătorului cu cameră reală.
    Placeholderul se rotește pe loc ~1 s când reapare la capătul de start, în afara carosabilului.

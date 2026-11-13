@@ -30,10 +30,10 @@ point_count = 31
 
 [sub_resource type="Curve3D" id="Curve3D_tram2"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -36, 5.508, -434, 0, 0, 0, 0, 0, 0, -36, 5.508, -440, 0, 0, 0, 0, 0, 0, -34.934, 5.477, -445.358, 0, 0, 0, 0, 0, 0, -31.899, 5.389, -449.899, 0, 0, 0, 0, 0, 0, -27.358, 5.257, -452.934, 0, 0, 0, 0, 0, 0, -22, 5.102, -454, 0, 0, 0, 0, 0, 0, -10, 4.754, -454, 0, 0, 0, 0, 0, 0, 2, 4.406, -454, 0, 0, 0, 0, 0, 0, 14, 4.058, -454, 0, 0, 0, 0, 0, 0, 26, 4, -454, 0, 0, 0, 0, 0, 0, 38, 4, -454, 0, 0, 0, 0, 0, 0, 50, 4, -454, 0, 0, 0, 0, 0, 0, 55.358, 4, -452.934, 0, 0, 0, 0, 0, 0, 59.899, 4, -449.899, 0, 0, 0, 0, 0, 0, 62.934, 4, -445.358, 0, 0, 0, 0, 0, 0, 64, 4, -440, 0, 0, 0, 0, 0, 0, 64, 4, -434),
-"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -60, 6.204, -434, 0, 0, 0, 0, 0, 0, -60, 6.204, -440, 0, 0, 0, 0, 0, 0, -58.934, 6.173, -445.358, 0, 0, 0, 0, 0, 0, -55.899, 6.085, -449.899, 0, 0, 0, 0, 0, 0, -51.358, 5.953, -452.934, 0, 0, 0, 0, 0, 0, -46, 5.798, -454, 0, 0, 0, 0, 0, 0, -35, 5.479, -454, 0, 0, 0, 0, 0, 0, -24, 5.16, -454, 0, 0, 0, 0, 0, 0, -13, 4.841, -454, 0, 0, 0, 0, 0, 0, -2, 4.522, -454, 0, 0, 0, 0, 0, 0, 3.358, 4.367, -455.066, 0, 0, 0, 0, 0, 0, 7.899, 4.235, -458.101, 0, 0, 0, 0, 0, 0, 10.934, 4.147, -462.642, 0, 0, 0, 0, 0, 0, 12, 4.116, -468, 0, 0, 0, 0, 0, 0, 12, 4.116, -480),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
-point_count = 17
+point_count = 15
 
 [sub_resource type="StandardMaterial3D" id="Mat_gri"]
 cull_mode = 2
@@ -79,7 +79,7 @@ custom_half_width = 7.0
 custom_road_surface = "asphalt"
 custom_gate_model = "none"
 custom_sea_level_offset = -17.16
-custom_lagoon = Array[Vector2]([Vector2(-470.0, -466.0), Vector2(262.6025403784439, -466.0), Vector2(262.6025403784439, 760.0), Vector2(900.0, 760.0), Vector2(900.0, -1100.0), Vector2(-470.0, -1100.0)])
+custom_lagoon = Array[Vector2]([Vector2(-470.0, -466.0), Vector2(-10.0, -466.0), Vector2(-10.0, -490.0), Vector2(24.0, -490.0), Vector2(24.0, -466.0), Vector2(262.6025403784439, -466.0), Vector2(262.6025403784439, 760.0), Vector2(900.0, 760.0), Vector2(900.0, -1100.0), Vector2(-470.0, -1100.0)])
 custom_width_segments = Array[Vector3]([Vector3(0.6949, 0.7681, 6.0)])
 custom_sun_rotation_deg = Vector3(-28, -12.0, 0)
 branch_smooth_level = true
@@ -101,8 +101,8 @@ metadata/sf_turntable = Vector3(-109.657, 6.644, -454.000)
 metadata/sf_clock_tower = Vector3(238.426, 3.000, 334.000)
 metadata/sf_tram_up_entry = Vector3(188.426, 3.000, 292.000)
 metadata/sf_tram_up_exit = Vector3(-124.000, 39.568, 312.000)
-metadata/sf_tram_low_entry = Vector3(-36.000, 4.508, -434.000)
-metadata/sf_tram_low_exit = Vector3(64.000, 3.000, -434.000)
+metadata/sf_tram_low_entry = Vector3(-60.000, 5.204, -434.000)
+metadata/sf_tram_low_exit = Vector3(12.000, 3.000, -480.000)
 metadata/sf_climb_gates = [Vector3(208.426, 3.000, 312.000), Vector3(-1, 0, 0), Vector3(-108.000, 3.000, 258.000), Vector3(0, 0, -1)]
 metadata/sf_gate_out2 = Vector3(86.000, 3.000, -454.000)
 
@@ -652,7 +652,7 @@ placeholder_nose_color = Color(0.42, 0.42, 0.42, 1)
 curve = SubResource("Curve3D_tram2")
 script = ExtResource("5_bus")
 speed = 4.5
-phase = 0.6080
+phase = 0.5640
 period = 29.0
 body_size = Vector3(2.5, 3.2, 8.5)
 nose_side = 1

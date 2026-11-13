@@ -1047,8 +1047,19 @@ print(f"scris {OBJ_REL}: {len(obj_v)} varfuri, {len(obj_f)} triunghiuri")
 # =============================================================================================
 SHORE_N = QUAY_Y + HW_QUAY + 6.0      # 466
 SHORE_E = X_E_HI + HW_QUAY + 8.0      # malul de est (faleza de sus la x_E_HI)
-LAGOON = [(-470.0, SHORE_N), (SHORE_E, SHORE_N), (SHORE_E, -760.0), (900.0, -760.0),
-          (900.0, 1100.0), (-470.0, 1100.0)]
+# Tramvaiul 2 (runda 2, decizia dezvoltatorului 13 nov 2026) iese pe STANGA, spre mal, inainte de
+# gura: are nevoie de un petic de chei (capatul liniei) intre strada de jos si golf. Peticul e
+# taiat din golf doar pentru varianta `stanga` (vezi blocul TRAMVAIELE).
+TRAM2_LAYOUT = os.environ.get("TRAM2_LAYOUT", "stanga")
+TRAM2_LEFT_EXIT_X = float(os.environ.get("TRAM2_EXIT_X", "-2"))
+TRAM_R_ = 14.0
+if TRAM2_LAYOUT == "stanga":
+    _nx0, _nx1, _ny = TRAM2_LEFT_EXIT_X - 8.0, TRAM2_LEFT_EXIT_X + TRAM_R_ + 12.0, QUAY_Y + 36.0
+    LAGOON = [(-470.0, SHORE_N), (_nx0, SHORE_N), (_nx0, _ny), (_nx1, _ny), (_nx1, SHORE_N),
+              (SHORE_E, SHORE_N), (SHORE_E, -760.0), (900.0, -760.0), (900.0, 1100.0), (-470.0, 1100.0)]
+else:
+    LAGOON = [(-470.0, SHORE_N), (SHORE_E, SHORE_N), (SHORE_E, -760.0), (900.0, -760.0),
+              (900.0, 1100.0), (-470.0, 1100.0)]
 SEA_OFFSET = round(0.0 - mean_y, 3)
 # SOARELE (brief §4, pasul 0): 28 de grade, azimut -12 fata de axa strazii lantului, din spate.
 # Conventia temei (`track.gd`, tema `sanfrancisco`): Y 0 = soare din S pe o strada care coboara
@@ -1129,7 +1140,7 @@ TRAM2_EXIT_X = 50.0              # unde paraseste axul spre dreapta (gura: x -5.
 # in brief §2 B — sonda 1c, faza 0: 0,9% contact), niciodata in strada laterala cu plutonul strans.
 # Tramvaiul 2: masurat in ProbeRace (vezi brief §7 pasul 5).
 TRAM1_PHASE = float(os.environ.get("TRAM1_PHASE", "0.196"))
-TRAM2_PHASE = float(os.environ.get("TRAM2_PHASE", "0.608"))
+TRAM2_PHASE = float(os.environ.get("TRAM2_PHASE", "0.564"))
 TRAM_AI = os.environ.get("TRAM_AI", "1") == "1"     # 0 = sabotaj (ai_reads_lane stins)
 # Cat citeste AI-ul de pe SCURTATURA tramvaiul 2 (`BusHazard.ai_branch_reach_m`; pe bucla raman
 # 90 m). Cu cei 90 m impliciti, AI-ul din serpentine se aseza pe linia lui inca din al treilea ac (si
@@ -1173,8 +1184,20 @@ TRAM1_G = [godot(p, _climb_elev(p[0]) + TRAM_Y_UP) for p in TRAM1_MAP]
 # TRAM2_LAYOUT=placa (varianta B, de A/B): DOUA vagoane pe aceeasi linie, fiecare cu ciclul
 # 2 x TRAM2_PERIOD, defazate o jumatate de ciclu (la gura trece unul la ~29 s), care pleaca de pe
 # PLACA TURNANTA (brief §2 E), trec prin fata gurii, merg pe cheu si ies in dreapta la x = 100.
-TRAM2_LAYOUT = os.environ.get("TRAM2_LAYOUT", "gura")
-if TRAM2_LAYOUT == "placa":
+# TRAM2_LAYOUT=gura (runda 1, masurata: contact 14-22%): intra la x = -36, iese in DREAPTA la x = 50,
+# adica dupa unirea fluxurilor — coada lui statea exact unde se varsa scurtatura in ocol.
+# TRAM2_LAYOUT=stanga (implicit, runda 2): intra la TRAM2_ENTRY_X (-60), trece prin fata gurii si
+# paraseste axul spre STANGA (malul, capatul liniei pe un petic de chei) incepand de la x =
+# TRAM2_EXIT_X (-2): e afara de pe carosabil pe la x ~ 12, inainte de reintalnire (x ~ 22).
+if TRAM2_LAYOUT == "stanga":
+    _ex = TRAM2_LEFT_EXIT_X
+    _en = float(os.environ.get("TRAM2_ENTRY_X", "-60"))
+    TRAM2_MAP = [(_en, QUAY_Y - TRAM_HIDE_LAT), (_en, QUAY_Y - TRAM_R)]
+    TRAM2_MAP += _arc_pts(_en + TRAM_R, QUAY_Y - TRAM_R, TRAM_R, math.pi, math.pi / 2)
+    TRAM2_MAP += _axis(_en + TRAM_R, _ex, QUAY_Y)
+    TRAM2_MAP += _arc_pts(_ex, QUAY_Y + TRAM_R, TRAM_R, -math.pi / 2, 0.0)
+    TRAM2_MAP += [(_ex + TRAM_R, QUAY_Y + 26.0)]
+elif TRAM2_LAYOUT == "placa":
     TRAM2_EXIT_X = 100.0
     TRAM2_MAP = [(MK["placa"][2] - 26.0, QUAY_Y)]
     TRAM2_MAP += _axis(MK["placa"][2] - 26.0, TRAM2_EXIT_X, QUAY_Y)
@@ -1182,8 +1205,9 @@ else:
     TRAM2_MAP = [(TRAM2_ENTRY_X, QUAY_Y - TRAM_HIDE_LAT), (TRAM2_ENTRY_X, QUAY_Y - TRAM_R)]
     TRAM2_MAP += _arc_pts(TRAM2_ENTRY_X + TRAM_R, QUAY_Y - TRAM_R, TRAM_R, math.pi, math.pi / 2)
     TRAM2_MAP += _axis(TRAM2_ENTRY_X + TRAM_R, TRAM2_EXIT_X, QUAY_Y)
-TRAM2_MAP += _arc_pts(TRAM2_EXIT_X, QUAY_Y - TRAM_R, TRAM_R, math.pi / 2, 0.0)
-TRAM2_MAP += [(TRAM2_EXIT_X + TRAM_R, QUAY_Y - TRAM_HIDE_LAT)]
+if TRAM2_LAYOUT != "stanga":
+    TRAM2_MAP += _arc_pts(TRAM2_EXIT_X, QUAY_Y - TRAM_R, TRAM_R, math.pi / 2, 0.0)
+    TRAM2_MAP += [(TRAM2_EXIT_X + TRAM_R, QUAY_Y - TRAM_HIDE_LAT)]
 TRAM2_G = [godot(p, _low_elev(p[0]) + TRAM_Y_UP) for p in TRAM2_MAP]
 
 
@@ -1467,7 +1491,7 @@ if PLAN_PATH:
                    (tram_up_exit, "tramvai 1: iese DREPT inainte"),
                    ((MK["placa"][2], MK["placa"][3]), "placa turnanta (decor)"),
                    (TRAM2_MAP[0], "tramvai 2: intra din dreapta"),
-                   (TRAM2_MAP[-1], "tramvai 2: iese in dreapta")):
+                   (TRAM2_MAP[-1], "tramvai 2: iese spre mal" if TRAM2_LAYOUT == "stanga" else "tramvai 2: iese in dreapta")):
         q = px(p)
         d.ellipse([q[0] - 5, q[1] - 5, q[0] + 5, q[1] + 5], fill=(150, 20, 40))
         d.text((q[0] + 8, q[1] + 4), txt, fill=(150, 20, 40), font=font_s)

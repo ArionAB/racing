@@ -19,8 +19,8 @@ extends Node
 ##   5. fiecare pista din lista se incarca si se instantiaza ca `Track`
 ##      (`--full`: o si construieste in arbore — lent, minute).
 ##
-## Cand intra San Francisco (Track25) in TRACK_SCENES, se adauga "Track25" in
-## EXPECTED — garda pica pana atunci, intentionat: lista de lansare e o decizie.
+## San Francisco (Track25) e in EXPECTED din 13 nov 2026: dezvoltatorul o joaca din
+## Quick Race (build iOS 54). O pista noua intra aici doar prin decizie explicita.
 ##
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeQuickRace.tscn
 ##   ... -- --full   # construieste fiecare pista in arbore (5. complet)
@@ -28,7 +28,7 @@ extends Node
 const EXPECTED: Array[String] = [
 	"Track10", "Track11", "Track12", "Track13", "Track14", "Track15",
 	"Track16", "Track17", "Track18", "Track19", "Track20", "Track21",
-	"Track22", "Track23", "Track24",
+	"Track22", "Track23", "Track24", "Track25",
 ]
 const TEST_BENCHES: Array[String] = ["Track01", "Track08"]
 ## Registrul de la 10 nov 2026, in ordine. Uneltele il indexeaza cu literal.

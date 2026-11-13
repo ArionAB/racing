@@ -748,7 +748,144 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
    - **De urmărit:** pâcla temei (`fog_max` 0,55, aproape albă) arată a ceață pe captura de pe muchia 1, fără inelul de fundal. Se reduce când intră fundalul și se arată dezvoltatorului.
 4. **Turul de feel, capturile `--gamecam`, tabelul de frustum**; apoi planul de
    sus adnotat, dioramă, foaia de assets.
-5. Tramvaiele, cu A/B pe ProbeRace. 6. Serpentinele, pontonul, mașinile
+5. Tramvaiele, cu A/B pe ProbeRace.
+
+   **FĂCUT (12–13 nov 2026) — PASS după runda 2.** Runda 1 (mai jos, păstrată ca istoric) a lăsat
+   tramvaiul 2 pe unirea fluxurilor, cu 14–22% contact. Runda 2, pe decizia dezvoltatorului, l-a
+   scos de pe ax **înainte de unire**: tramvaiul 2 ajunge la 1,3–3,1% contact. Ambele sunt `BusHazard` pe `Path3D`, generate de
+   `tools/gen_sf_route.py` (nodurile `Tramvaie/Tramvai1`, `Tramvai2`), cu flagurile de la 1c:
+   `soft_contact`, `ai_reads_lane`, `ai_same_direction`, `pitch_to_ground`. Placeholder gri de
+   2,5 × 3,2 × 8,5 m (`cable_car.glb` nu există încă). Capturi: `docs/asset_briefs/img/sf_route/sf_tramvai1_gamecam.png`
+   și `sf_tramvai2_gamecam.png` (`--bus-at=14`).
+
+   | | tramvaiul 1 (urcarea) | tramvaiul 2, runda 1 (vezi runda 2 mai jos) |
+   |---|---|---|
+   | traseu | intră din strada laterală din dreapta, la 20 m după colțul A/B, și iese **drept înainte** la colțul de sus, cu 16 m dincolo de axa laturii de nord | intră din dreapta cu 36 m înaintea gurii, trece prin fața ei și iese în dreapta la 30 m după ea (`x` = 50) |
+   | curbă / viteză / ciclu | 328 m, **5,0 m/s**, 66 s (tur / ciclu = 1,17) | 128 m, 4,5 m/s, **29 s** (2,67) |
+   | faza / la verde | 0,196 / 82 m pe curbă: e deja pe ax, la mijlocul urcării, când vine plutonul | 0,608 / 94 m |
+
+   **Abateri, măsurate:**
+   - **Tramvaiul 1 merge cu 5,0 m/s, nu cu 4,5.** Strada are 292 m, dar curba are 328 m
+     (strada laterală, colțul și ieșirea). La 4,5 m/s, ciclul ar fi fost de ~77 s, adică **exact
+     turul mediu**: tramvaiul ar fi stat în același loc la fiecare tur. 5,0 m/s păstrează ciclul
+     de 66 s ales de dezvoltator, pe toată urcarea.
+   - **Tramvaiul 2 nu pleacă de pe placa turnantă.** Ocolul de 400 m (1b) a mutat placa la 125 m
+     de gură. Curba placă → gură → ieșire are ~165 m (37 s), iar 37 s ≈ turul / 2. Placa rămâne
+     reper de decor. Varianta „două vagoane pe placă” (`TRAM2_LAYOUT=placa`: ciclul de 58 s
+     fiecare, defazate cu jumătate) a fost măsurată și respinsă: contact 22%, 14 `[blocaj]` la
+     colțul plăcii, unde vagonul intră pe carosabil prin exteriorul virajului.
+   - **Flag nou `BusHazard.ai_branch_reach_m`** (implicit 0). Cu citirea globală de 90 m, AI-ul
+     din serpentine se așeza pe linia tramvaiului 2 încă din al treilea ac. Mergea fără drift și
+     se oprea în strat. Trecerile prin scurtătură care îl întâlneau pierdeau 2,4 s la mediană,
+     **fără contact**, iar scurtătura pierdea 0,82 s la mediană față de ocol. Acum, de pe
+     scurtătură, AI-ul îl citește doar pe 35 m. Pe buclă rămân 90 m: cu 35 m peste tot,
+     contactele urcau.
+   - **`AIController`**: la trecerea de pe scurtătură pe buclă, AI-ul recitește corpul
+     `ai_same_direction` în coordonatele rutei noi (indexul, lateralul, partea aleasă).
+     Corectură de cod; efectul pe cifre e sub zgomot (`--no-bus-route-reset` face A/B-ul).
+
+   Unelte: `bash tools/sf_route_race.sh <dir> [--no-tram | --tram-only=1|2 | --tram-blind]`
+   (ProbeRace `--sf`; observatorul `tools/probe_sf_watch.gd`), apoi `python tools/sf_tram_report.py
+   <dir_fără_tramvaie> <etichetă>=<dir> ...`. Tabelul folosește definiția de la 1c: întâlnirea
+   ține de la 60 m în spatele tramvaiului până la 8 m în fața lui. Pierderea se calculează pe
+   urcare pentru tramvaiul 1 și pe furcă → gură + 70 m pentru tramvaiul 2, față de mediana
+   aceleiași mașini fără tramvaie. Măsurătoarea: 8 mașini × 16 seed-uri × 250 s.
+
+   | variantă | `[blocaj]` (zone) | tram. | întâlniri | cu contact | coadă < 10 m/s | pierdere med / p90 / max |
+   |---|---|---|---|---|---|---|
+   | **fără tramvaie** | 11 (toate în serpentine, 8 într-un seed) | — | — | — | — | — |
+   | **cu tramvaie** | 6 (urcare 2, strada de jos 3, serpentine 1) | 1 | 408 | **2,5%** | 2,7% | 0,14 / 1,05 / 8,9 s |
+   | | | 2 | 241 | **14,5%** | 11,2% | 0,28 / 3,33 / 13,3 s |
+   | idem, a doua rulare (fără recitirea rutei) | 16 (serpentine 11) | 1 / 2 | 400 / 241 | 2,2% / 17,4% | 2,8% / 14,5% | 0,17 / 0,98 ; 0,37 / 4,83 s |
+   | doar tramvaiul 1 | 4 (serpentine) | 1 | 413 | 3,1% | 3,4% | 0,17 / 1,12 / 6,8 s |
+   | doar tramvaiul 2 | 32 (29 în serpentine, în turul 1, trei seed-uri) | 2 | 250 | 22,4% | 19,6% | 0,85 / 3,96 / 10,8 s |
+   | **SABOTAJ** (`--tram-blind`) | **256** (urcare 218, strada de jos 35) | 1 / 2 | 313 / 293 | **78% / 74%** | 79% / 63% | tramvaiul 1: 2,33 / 10,7 / 40 s |
+
+   Repunerile au rămas între 4 și 12 în toate variantele, aproape toate în serpentine, ca la
+   bază (7). **Ejectările pe lanț: 1 pe lot în toate variantele**, ~0,05% din zboruri, aceeași
+   cifră ca la pasul 3. Turul mediu: 77,3 s fără tramvaie, 78,2 s cu ele.
+
+   **Scurtătura față de ocol** (aceleași porți ca la pasul 3):
+
+   | | mediană | cele mai bune | treceri cu contact cu tramvaiul 2 |
+   |---|---|---|---|
+   | fără tramvaie | ocolul e mai lent cu **0,47 s** | 1,35 s | — |
+   | cu tramvaie (trei rulări) | **−0,31 / −0,03 / −0,24 s** (scurtătura pierde) | 1,44 / 1,43 / 1,52 s | 23,8% / 20,3% / 31,7% |
+
+   **Ce a ieșit:**
+   - **Tramvaiul 1 trece contractul de la 1c.** Contact 2,2–3,1% din întâlniri, coadă 3%, pierdere
+     mediană 0,14–0,17 s. Plutonul se desparte pe din două: 47–52% depășesc pe stânga. În turul 1
+     sunt 128 de întâlniri, toate pe ax, cu 1 contact.
+   - **Colțul de sus, neverificat la 1c: DA, acolo sunt contactele.** 16 din 18 contacte cu
+     tramvaiul 1 sunt la colț (`x` < −70): cei care l-au depășit pe stânga vin în fața lui ca să
+     vireze la dreapta. În 2 din 3 rulări cu tramvaiul 1 au apărut și 1–2 `[blocaj]` la colț
+     (t ≈ 182 s). Un contact costă 0,6–1,9 s la mediană.
+   - **Tramvaiul 2 e de 5–8 ori mai lovit decât tramvaiul 1.** Are 14–22% contact și 11–20% coadă.
+     Contactele sunt din spate, la viteză mică (mediana 7–8 m/s), în gură și imediat după ea, pe
+     ax. Acolo cele două fluxuri (ocolul și scurtătura) se unesc chiar în coada lui. Variantele
+     încercate (citirea de 90 m și de 35 m, recitirea rutei, două vagoane de pe placă) au dat
+     10–23%. Diferențele dintre ele sunt de ordinul zgomotului dintre două rulări identice (14,5%
+     față de 22,4%). **Niciuna nu aduce tramvaiul 2 la nivelul tramvaiului 1.**
+   - **Sabotajul pică clar:** 256 de `[blocaj]` față de 6, contact 74–78% față de 2,5–14,5%.
+     Garda măsoară.
+   - **`branch_gate`: la limită.** Pragul din §2 este peste 30% din trecerile prin scurtătură cu
+     contact. Trei rulări au dat 23,8%, 20,3% și 31,7%, adică 25% pe toate cele 582 de treceri.
+     Conform regulii, nu se scrie. Cifra stă însă lângă prag.
+   - Gărzi: `ProbeSfRoute` OK, cu acostamentul de la −0,29 m. `ProbeLayout --track=17` OK.
+     `ProbeLaneClear --track=17` dă 6 raportări, toate corpurile tramvaielor la ceasul de
+     încărcare. Linia de bază a trecut de la 0 la 6, iar sabotajul pică (9 > 6).
+
+   **Deciziile dezvoltatorului (13 nov 2026)** pe cele patru întrebări ale rundei 1:
+   1. și 2. Tramvaiul 2 **se mută de pe unire**: trece prin fața gurii și părăsește axul
+      înainte ca ocolul și scurtătura să se unească. Rămâne poarta de timing a gurii. **Fără
+      `branch_gate`**. Ocolul nu se lungește acum.
+   3. Tramvaiul 1 la 5,0 m/s: **aprobat**. Placa turnantă rămâne decor.
+   4. Contactele de la colțul de sus: **acceptate**, AI-ul nu se schimbă.
+
+   **Runda 2 — tramvaiul 2 iese spre mal (`TRAM2_LAYOUT=stanga`, implicit în generator).**
+   - **Traseul:** intră din strada laterală din dreapta, la `x` = −60, adică 55 m înaintea
+     gurii. Merge pe ax. La `x` = −2 virează la stânga (raza 14) spre mal, în fața gurii.
+     Iese de pe carosabil pe la `x` ≈ 12, înainte de reîntâlnire (`x` ≈ 22). Capătul liniei e
+     un **petic de chei** de 34 × 22 m, tăiat din golf (`LAGOON`) doar pentru varianta asta: acolo
+     se ascunde vagonul.
+   - **Curba și ciclul:** curba are 106 m. La 4,5 m/s ciclul rămâne de **29 s** (2,67 față de
+     tur), din care 23,5 s vizibil. Faza e 0,564 (76 m pe curbă la verde).
+   - Captura `sf_tramvai2_gamecam.png` (`--bus-at=19`) îl arată virând spre mal în fața gurii.
+
+   | variantă (8 × 16 × 250 s) | `[blocaj]` | tram. | întâlniri | cu contact | coadă < 10 m/s | pierdere med / p90 / max |
+   |---|---|---|---|---|---|---|
+   | **fără tramvaie** (cu peticul de chei) | 13 (toate în serpentine) | — | — | — | — | — |
+   | **cu tramvaie** | 9 (serpentine 5, urcare 2, strada de jos 2) | 1 | 409 | 2,7% | 3,2% | 0,19 / 1,08 / 6,4 s |
+   | | | 2 | 161 | **3,1%** | 2,5% | 0,73 / 2,92 / 10,6 s |
+   | idem, repetare | 7 (serpentine 6, urcare 1) | 1 | 415 | 2,2% | 1,7% | 0,18 / 1,02 / 5,5 s |
+   | | | 2 | 155 | **1,3%** | 1,9% | 0,52 / 2,92 / 6,7 s |
+   | **SABOTAJ** (`--tram-blind`) | **235** (urcare 216, gura și strada de jos 18) | 1 / 2 | 313 / 218 | **78% / 61%** | 76% / 53% | 2,33 / 9,26 s ; 1,43 / 4,27 s |
+
+   | scurtătura față de ocol (furcă → gură + 20 m) | mediană | cele mai bune | treceri cu contact cu tramvaiul 2 |
+   |---|---|---|---|
+   | fără tramvaie | +0,36 s | +1,40 s | — |
+   | cu tramvaie (două rulări) | **+0,57 / +0,71 s** | +1,65 / +1,30 s | 4,5% / 2,0% |
+   | runda 1, pentru comparație | −0,31 / −0,03 / −0,24 s | ~1,45 s | 20–32% |
+
+   **Ce a ieșit:**
+   - **Contractul e atins.** Tramvaiul 2 are 1,3–3,1% contact pe întâlnire, cât tramvaiul 1
+     (2,2–2,7%). Coada e de 2–2,5%. `[blocaj]` 7–9, față de 13 fără tramvaie.
+   - **Scurtătura câștigă din nou:** +0,57–0,71 s la mediană față de ocol, iar între cele mai
+     bune treceri +1,3–1,65 s. E chiar puțin peste linia de bază: ocolul îl întâlnește pe ax pe
+     tramvai, scurtătura iese după el.
+   - **Pierderea mediană pe întâlnire e mai mare decât la tramvaiul 1** (0,5–0,7 s față de
+     0,2 s). Cine vine pe ocol îl ajunge pe ax, chiar înainte de gură, și trebuie să-l ocolească.
+     p90 e de 2,9 s, iar contactele sunt rare.
+   - **Sabotajul pică:** 235 de `[blocaj]`, contact 61–78%.
+   - **Ejectări pe lanț:** 0–2 pe lot (~0,05%), ca înainte. Turul mediu: 77,3 s fără tramvaie,
+     77,9 s cu ele.
+   - **Gărzi:** `ProbeLaneClear --track=17` dă tot 6 (tramvaiul 2 apare acum pe INAINTE la
+     0,670). `ProbeSfRoute` și `ProbeLayout` sunt OK.
+
+   Nemăsurat: feel-ul la volan (DriveScene sau iPhone) și tramvaiul jucătorului cu cameră reală.
+   Placeholderul se rotește pe loc ~1 s când reapare la capătul de start, în afara carosabilului.
+
+6. Serpentinele, pontonul, mașinile
    parcate. 7. Hero. 8. Kituri, fundal, teatru, sunet; `probe_decor`; testul de
    citire final; **verdictul dezvoltatorului la volan**.
 

@@ -89,6 +89,13 @@ extends Node3D
 ## A/B: bariera FIXA la axa pe tot tablierul, fara camion (despartitorul clasic).
 @export var static_center: bool = false
 @export var soft_crush_s: float = 1.0
+## Blocurile barierei MOBILE sunt contact MOALE (meta `soft_hit_crush`, secunde de
+## strivire): lovitura nu ejecteaza soferul. Masurat cu pilotul care freaca
+## bariera (ProbeSfPod --pilot=hug, 10 masini x 4 faze): cu blocuri dure, 12
+## ejectari in 40 de tururi, toate in S-ul care vine spre masina, dv 27-40 m/s
+## peste pragul de perete (26). Un zid care SE MISCA spre tine nu e un zid pe care
+## l-ai ratat. 0 = beton dur.
+@export var block_soft_crush_s: float = 0.6
 
 @export_group("AI")
 ## AI-ul citeste culoarul liber curent. Implicit stins.
@@ -221,6 +228,8 @@ func _build() -> void:
 		var body := AnimatableBody3D.new()
 		body.name = "Bloc%d" % k
 		body.sync_to_physics = true
+		if block_soft_crush_s > 0.0:
+			body.set_meta(&"soft_hit_crush", block_soft_crush_s)
 		body.physics_material_override = pmat
 		var cs := CollisionShape3D.new()
 		cs.shape = shape

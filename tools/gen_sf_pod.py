@@ -251,8 +251,12 @@ def box(sub, nodes, key, name, parent, size, xform, mesh=True, coll=True, mat="M
 def xf_pitch(cx, cy, cz, pitch):
     """Basis cu rotatie in jurul lui Z (panta in planul XY), pozitie (cx, cy, cz)."""
     c, s = math.cos(pitch), math.sin(pitch)
-    # coloane: X = (c, s, 0), Y = (-s, c, 0), Z = (0, 0, 1)
-    return (c, s, 0, -s, c, 0, 0, 0, 1, cx, cy, cz)
+    # coloane: X = (c, s, 0), Y = (-s, c, 0), Z = (0, 0, 1). ATENTIE: in .tscn
+    # Transform3D(...) scrie bazele pe RANDURI (Basis(xx, xy, xz, ...) = rows), deci
+    # X.x, Y.x, Z.x, X.y, ... Prima versiune le scria pe coloane: rampa despartitorului
+    # era inclinata invers (capetele ieseau din drum) si capetele de parapet evazate
+    # intrau spre banda — un Buggy oprit de pe 32 m/s in varful evazarii (masurat).
+    return (c, -s, 0, s, c, 0, 0, 0, 1, cx, cy, cz)
 
 
 def main():
@@ -329,7 +333,7 @@ def main():
             yaw = math.atan2(-side * math.sin(flare_a), dx * math.cos(flare_a))
             c_, s_ = math.cos(yaw), math.sin(yaw)
             box(sub, nodes, "flare", "Evazare%s%s" % (nm, end), "Static/Parapet", (flare_l, 1.2, 0.5),
-                (c_, 0, -s_, 0, 1, 0, s_, 0, c_, cxf, y_of_x(xe) + 0.55, czf))
+                (c_, 0, s_, 0, 1, 0, -s_, 0, c_, cxf, y_of_x(xe) + 0.55, czf))
     # turnurile podului: portaluri, picioarele in afara tablierului, traversa la +15 si +39 (peste camera de urmarire, care sta la +10)
     nodes.append('[node name="Turnuri" type="StaticBody3D" parent="Static"]\n')
     tower_h = 45.0

@@ -128,139 +128,139 @@ ai_static_read = false
 [node name="DespartitorFixRampa" type="StaticBody3D" parent="Static"]
 
 [node name="F0" type="CollisionShape3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, -0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 12.00000, 12.42500, 0.00000)
+transform = Transform3D(1.00000, -0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 12.00000, 12.42500, 0.00000)
 shape = SubResource("Box_fix1200")
 
 [node name="F0M" type="MeshInstance3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, -0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 12.00000, 12.42500, 0.00000)
+transform = Transform3D(1.00000, -0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 12.00000, 12.42500, 0.00000)
 mesh = SubResource("Mesh_fix1200")
 
 [node name="F1" type="CollisionShape3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, -0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 24.00000, 12.42500, 0.00000)
+transform = Transform3D(1.00000, -0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 24.00000, 12.42500, 0.00000)
 shape = SubResource("Box_fix1200")
 
 [node name="F1M" type="MeshInstance3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, -0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 24.00000, 12.42500, 0.00000)
+transform = Transform3D(1.00000, -0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 24.00000, 12.42500, 0.00000)
 mesh = SubResource("Mesh_fix1200")
 
 [node name="F2" type="CollisionShape3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, -0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 36.00000, 12.42500, 0.00000)
+transform = Transform3D(1.00000, -0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 36.00000, 12.42500, 0.00000)
 shape = SubResource("Box_fix1200")
 
 [node name="F2M" type="MeshInstance3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, -0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 36.00000, 12.42500, 0.00000)
+transform = Transform3D(1.00000, -0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 36.00000, 12.42500, 0.00000)
 mesh = SubResource("Mesh_fix1200")
 
 [node name="F3" type="CollisionShape3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, -0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 48.00000, 12.42500, 0.00000)
+transform = Transform3D(1.00000, -0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 48.00000, 12.42500, 0.00000)
 shape = SubResource("Box_fix1200")
 
 [node name="F3M" type="MeshInstance3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, -0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 48.00000, 12.42500, 0.00000)
+transform = Transform3D(1.00000, -0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 48.00000, 12.42500, 0.00000)
 mesh = SubResource("Mesh_fix1200")
 
 [node name="F4" type="CollisionShape3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, -0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 60.00000, 12.42500, 0.00000)
+transform = Transform3D(1.00000, -0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 60.00000, 12.42500, 0.00000)
 shape = SubResource("Box_fix1200")
 
 [node name="F4M" type="MeshInstance3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, -0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 60.00000, 12.42500, 0.00000)
+transform = Transform3D(1.00000, -0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 60.00000, 12.42500, 0.00000)
 mesh = SubResource("Mesh_fix1200")
 
 [node name="F5" type="CollisionShape3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, -0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 72.00000, 12.42500, 0.00000)
+transform = Transform3D(1.00000, -0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 72.00000, 12.42500, 0.00000)
 shape = SubResource("Box_fix1200")
 
 [node name="F5M" type="MeshInstance3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, -0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 72.00000, 12.42500, 0.00000)
+transform = Transform3D(1.00000, -0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 72.00000, 12.42500, 0.00000)
 mesh = SubResource("Mesh_fix1200")
 
 [node name="F6" type="CollisionShape3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, -0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 81.00000, 12.42500, 0.00000)
+transform = Transform3D(1.00000, -0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 81.00000, 12.42500, 0.00000)
 shape = SubResource("Box_fix600")
 
 [node name="F6M" type="MeshInstance3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, -0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 81.00000, 12.42500, 0.00000)
+transform = Transform3D(1.00000, -0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 81.00000, 12.42500, 0.00000)
 mesh = SubResource("Mesh_fix600")
 
 [node name="F7" type="CollisionShape3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(0.99835, 0.05741, 0.00000, -0.05741, 0.99835, 0.00000, 0.00000, 0.00000, 1.00000, 89.97560, 12.76930, 0.00000)
+transform = Transform3D(0.99835, -0.05741, 0.00000, 0.05741, 0.99835, 0.00000, 0.00000, 0.00000, 1.00000, 89.97560, 12.76930, 0.00000)
 shape = SubResource("Box_fix1202")
 
 [node name="F7M" type="MeshInstance3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(0.99835, 0.05741, 0.00000, -0.05741, 0.99835, 0.00000, 0.00000, 0.00000, 1.00000, 89.97560, 12.76930, 0.00000)
+transform = Transform3D(0.99835, -0.05741, 0.00000, 0.05741, 0.99835, 0.00000, 0.00000, 0.00000, 1.00000, 89.97560, 12.76930, 0.00000)
 mesh = SubResource("Mesh_fix1202")
 
 [node name="F8" type="CollisionShape3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(0.99835, 0.05741, 0.00000, -0.05741, 0.99835, 0.00000, 0.00000, 0.00000, 1.00000, 101.97560, 13.45930, 0.00000)
+transform = Transform3D(0.99835, -0.05741, 0.00000, 0.05741, 0.99835, 0.00000, 0.00000, 0.00000, 1.00000, 101.97560, 13.45930, 0.00000)
 shape = SubResource("Box_fix1202")
 
 [node name="F8M" type="MeshInstance3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(0.99835, 0.05741, 0.00000, -0.05741, 0.99835, 0.00000, 0.00000, 0.00000, 1.00000, 101.97560, 13.45930, 0.00000)
+transform = Transform3D(0.99835, -0.05741, 0.00000, 0.05741, 0.99835, 0.00000, 0.00000, 0.00000, 1.00000, 101.97560, 13.45930, 0.00000)
 mesh = SubResource("Mesh_fix1202")
 
 [node name="F9" type="CollisionShape3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(0.99345, 0.11425, 0.00000, -0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 113.95145, 14.49222, 0.00000)
+transform = Transform3D(0.99345, -0.11425, 0.00000, 0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 113.95145, 14.49222, 0.00000)
 shape = SubResource("Box_fix1208")
 
 [node name="F9M" type="MeshInstance3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(0.99345, 0.11425, 0.00000, -0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 113.95145, 14.49222, 0.00000)
+transform = Transform3D(0.99345, -0.11425, 0.00000, 0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 113.95145, 14.49222, 0.00000)
 mesh = SubResource("Mesh_fix1208")
 
 [node name="F10" type="CollisionShape3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(0.99345, 0.11425, 0.00000, -0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 125.95145, 15.87222, 0.00000)
+transform = Transform3D(0.99345, -0.11425, 0.00000, 0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 125.95145, 15.87222, 0.00000)
 shape = SubResource("Box_fix1208")
 
 [node name="F10M" type="MeshInstance3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(0.99345, 0.11425, 0.00000, -0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 125.95145, 15.87222, 0.00000)
+transform = Transform3D(0.99345, -0.11425, 0.00000, 0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 125.95145, 15.87222, 0.00000)
 mesh = SubResource("Mesh_fix1208")
 
 [node name="F11" type="CollisionShape3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(0.99345, 0.11425, 0.00000, -0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 137.95145, 17.25222, 0.00000)
+transform = Transform3D(0.99345, -0.11425, 0.00000, 0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 137.95145, 17.25222, 0.00000)
 shape = SubResource("Box_fix1208")
 
 [node name="F11M" type="MeshInstance3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(0.99345, 0.11425, 0.00000, -0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 137.95145, 17.25222, 0.00000)
+transform = Transform3D(0.99345, -0.11425, 0.00000, 0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 137.95145, 17.25222, 0.00000)
 mesh = SubResource("Mesh_fix1208")
 
 [node name="F12" type="CollisionShape3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(0.99345, 0.11425, 0.00000, -0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 149.95145, 18.63222, 0.00000)
+transform = Transform3D(0.99345, -0.11425, 0.00000, 0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 149.95145, 18.63222, 0.00000)
 shape = SubResource("Box_fix1208")
 
 [node name="F12M" type="MeshInstance3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(0.99345, 0.11425, 0.00000, -0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 149.95145, 18.63222, 0.00000)
+transform = Transform3D(0.99345, -0.11425, 0.00000, 0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 149.95145, 18.63222, 0.00000)
 mesh = SubResource("Mesh_fix1208")
 
 [node name="F13" type="CollisionShape3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(0.99345, 0.11425, 0.00000, -0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 161.95145, 20.01222, 0.00000)
+transform = Transform3D(0.99345, -0.11425, 0.00000, 0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 161.95145, 20.01222, 0.00000)
 shape = SubResource("Box_fix1208")
 
 [node name="F13M" type="MeshInstance3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(0.99345, 0.11425, 0.00000, -0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 161.95145, 20.01222, 0.00000)
+transform = Transform3D(0.99345, -0.11425, 0.00000, 0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 161.95145, 20.01222, 0.00000)
 mesh = SubResource("Mesh_fix1208")
 
 [node name="F14" type="CollisionShape3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(0.99345, 0.11425, 0.00000, -0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 173.95145, 21.39222, 0.00000)
+transform = Transform3D(0.99345, -0.11425, 0.00000, 0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 173.95145, 21.39222, 0.00000)
 shape = SubResource("Box_fix1208")
 
 [node name="F14M" type="MeshInstance3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(0.99345, 0.11425, 0.00000, -0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 173.95145, 21.39222, 0.00000)
+transform = Transform3D(0.99345, -0.11425, 0.00000, 0.11425, 0.99345, 0.00000, 0.00000, 0.00000, 1.00000, 173.95145, 21.39222, 0.00000)
 mesh = SubResource("Mesh_fix1208")
 
 [node name="F15" type="CollisionShape3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(0.99835, 0.05741, 0.00000, -0.05741, 0.99835, 0.00000, 0.00000, 0.00000, 1.00000, 185.97560, 22.42930, 0.00000)
+transform = Transform3D(0.99835, -0.05741, 0.00000, 0.05741, 0.99835, 0.00000, 0.00000, 0.00000, 1.00000, 185.97560, 22.42930, 0.00000)
 shape = SubResource("Box_fix1202")
 
 [node name="F15M" type="MeshInstance3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(0.99835, 0.05741, 0.00000, -0.05741, 0.99835, 0.00000, 0.00000, 0.00000, 1.00000, 185.97560, 22.42930, 0.00000)
+transform = Transform3D(0.99835, -0.05741, 0.00000, 0.05741, 0.99835, 0.00000, 0.00000, 0.00000, 1.00000, 185.97560, 22.42930, 0.00000)
 mesh = SubResource("Mesh_fix1202")
 
 [node name="F16" type="CollisionShape3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(0.99835, 0.05741, 0.00000, -0.05741, 0.99835, 0.00000, 0.00000, 0.00000, 1.00000, 197.97560, 23.11930, 0.00000)
+transform = Transform3D(0.99835, -0.05741, 0.00000, 0.05741, 0.99835, 0.00000, 0.00000, 0.00000, 1.00000, 197.97560, 23.11930, 0.00000)
 shape = SubResource("Box_fix1202")
 
 [node name="F16M" type="MeshInstance3D" parent="Static/DespartitorFixRampa"]
-transform = Transform3D(0.99835, 0.05741, 0.00000, -0.05741, 0.99835, 0.00000, 0.00000, 0.00000, 1.00000, 197.97560, 23.11930, 0.00000)
+transform = Transform3D(0.99835, -0.05741, 0.00000, 0.05741, 0.99835, 0.00000, 0.00000, 0.00000, 1.00000, 197.97560, 23.11930, 0.00000)
 mesh = SubResource("Mesh_fix1202")
 
 [node name="Atenuator" type="StaticBody3D" parent="Static"]
@@ -285,19 +285,19 @@ transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.
 mesh = SubResource("Mesh_parapet")
 
 [node name="EvazareDusA" type="CollisionShape3D" parent="Static/Parapet"]
-transform = Transform3D(-0.93969, 0.00000, 0.34202, 0.00000, 1.00000, 0.00000, -0.34202, 0.00000, -0.93969, 223.30154, 23.59000, 14.16010)
+transform = Transform3D(-0.93969, 0.00000, -0.34202, 0.00000, 1.00000, 0.00000, 0.34202, 0.00000, -0.93969, 223.30154, 23.59000, 14.16010)
 shape = SubResource("Box_flare")
 
 [node name="EvazareDusAM" type="MeshInstance3D" parent="Static/Parapet"]
-transform = Transform3D(-0.93969, 0.00000, 0.34202, 0.00000, 1.00000, 0.00000, -0.34202, 0.00000, -0.93969, 223.30154, 23.59000, 14.16010)
+transform = Transform3D(-0.93969, 0.00000, -0.34202, 0.00000, 1.00000, 0.00000, 0.34202, 0.00000, -0.93969, 223.30154, 23.59000, 14.16010)
 mesh = SubResource("Mesh_flare")
 
 [node name="EvazareDusB" type="CollisionShape3D" parent="Static/Parapet"]
-transform = Transform3D(0.93969, 0.00000, 0.34202, 0.00000, 1.00000, 0.00000, -0.34202, 0.00000, 0.93969, 556.69846, 23.59000, 14.16010)
+transform = Transform3D(0.93969, 0.00000, -0.34202, 0.00000, 1.00000, 0.00000, 0.34202, 0.00000, 0.93969, 556.69846, 23.59000, 14.16010)
 shape = SubResource("Box_flare")
 
 [node name="EvazareDusBM" type="MeshInstance3D" parent="Static/Parapet"]
-transform = Transform3D(0.93969, 0.00000, 0.34202, 0.00000, 1.00000, 0.00000, -0.34202, 0.00000, 0.93969, 556.69846, 23.59000, 14.16010)
+transform = Transform3D(0.93969, 0.00000, -0.34202, 0.00000, 1.00000, 0.00000, 0.34202, 0.00000, 0.93969, 556.69846, 23.59000, 14.16010)
 mesh = SubResource("Mesh_flare")
 
 [node name="ParapetIntors" type="CollisionShape3D" parent="Static/Parapet"]
@@ -309,19 +309,19 @@ transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.
 mesh = SubResource("Mesh_parapet")
 
 [node name="EvazareIntorsA" type="CollisionShape3D" parent="Static/Parapet"]
-transform = Transform3D(-0.93969, 0.00000, -0.34202, 0.00000, 1.00000, 0.00000, 0.34202, 0.00000, -0.93969, 223.30154, 23.59000, -14.16010)
+transform = Transform3D(-0.93969, 0.00000, 0.34202, 0.00000, 1.00000, 0.00000, -0.34202, 0.00000, -0.93969, 223.30154, 23.59000, -14.16010)
 shape = SubResource("Box_flare")
 
 [node name="EvazareIntorsAM" type="MeshInstance3D" parent="Static/Parapet"]
-transform = Transform3D(-0.93969, 0.00000, -0.34202, 0.00000, 1.00000, 0.00000, 0.34202, 0.00000, -0.93969, 223.30154, 23.59000, -14.16010)
+transform = Transform3D(-0.93969, 0.00000, 0.34202, 0.00000, 1.00000, 0.00000, -0.34202, 0.00000, -0.93969, 223.30154, 23.59000, -14.16010)
 mesh = SubResource("Mesh_flare")
 
 [node name="EvazareIntorsB" type="CollisionShape3D" parent="Static/Parapet"]
-transform = Transform3D(0.93969, 0.00000, -0.34202, 0.00000, 1.00000, 0.00000, 0.34202, 0.00000, 0.93969, 556.69846, 23.59000, -14.16010)
+transform = Transform3D(0.93969, 0.00000, 0.34202, 0.00000, 1.00000, 0.00000, -0.34202, 0.00000, 0.93969, 556.69846, 23.59000, -14.16010)
 shape = SubResource("Box_flare")
 
 [node name="EvazareIntorsBM" type="MeshInstance3D" parent="Static/Parapet"]
-transform = Transform3D(0.93969, 0.00000, -0.34202, 0.00000, 1.00000, 0.00000, 0.34202, 0.00000, 0.93969, 556.69846, 23.59000, -14.16010)
+transform = Transform3D(0.93969, 0.00000, 0.34202, 0.00000, 1.00000, 0.00000, -0.34202, 0.00000, 0.93969, 556.69846, 23.59000, -14.16010)
 mesh = SubResource("Mesh_flare")
 
 [node name="Turnuri" type="StaticBody3D" parent="Static"]

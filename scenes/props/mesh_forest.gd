@@ -142,20 +142,21 @@ extends Node3D
 ## de umbra 271k -> 365k fara ea, ProbePerf --mobile --phone-shadow) si padurea
 ## are loc sub plafon, deci acolo e pornita.
 @export var shadow_lod_mid: bool = false
-## FRUNZISUL PUNCTAT PE TREPTE (nodurile `*_Leaves`, vezi `Palette.LEAF_PREFIX`;
-## Kyoto, nov 2026). Petele sunt quad-uri de 2 triunghiuri, sute pe arbore
-## (artarul: 1200 de pete = 2400 de triunghiuri, cat masa coroanei): simplificatorul
-## n-are ce face cu ele, deci se RARESC ca numar, ca la cardurile de bambus.
-## Treapta intreaga (pana la `lod_near_m`) le are pe toate; cea medie pastreaza
-## fiecare a `leaf_mid_every`-a pata, cea grosiera (plus celulele si bulgarii)
-## fiecare a `leaf_far_every`-a. 0 = fara pete pe treapta aceea: masa coroanei
-## poarta aceeasi culoare plata, deci arborele ramane intreg, doar fara franjuri.
-## La speciile din `mid_from_far_species` masa treptei medii ramane cea grosiera,
-## iar petele se adauga peste ea dupa `leaf_mid_every`.
-## Costul e in triunghiuri pe treapta cea mai plina a padurii (26-65 m): masurat
-## cu ProbeForest, coloana „LOD tri/instanta".
-@export_range(0, 12) var leaf_mid_every: int = 3
+## FRUNZISUL PUNCTAT PE TREPTE (nodurile `*_Core` / `*_Leaves` / `*_Crown`, vezi
+## `Palette.CROWN_PREFIX`; Kyoto, nov 2026). Treptele intreaga si medie (pana la
+## `lod_m`) sunt infatisarea de aproape: miezul + cardurile, fara coroana — pe
+## cea medie doar fiecare al `leaf_mid_every`-lea card, marit de `leaf_mid_gain`
+## ori ca sa acopere la fel. Treapta grosiera (plus celulele si bulgarii) e cea
+## de departe: coroana intreaga, simplificata ca pana acum, si fiecare al
+## `leaf_far_every`-lea card (0 = fara carduri). Cardurile sunt quad-uri pe care
+## simplificatorul nu le poate reduce, de aceea se raresc ca numar.
+## Coroana pe treapta medie a fost incercata si respinsa: de pe scena Kiyomizu
+## aproape toata valea e pe treapta medie, iar coroanele pline, luminoase, cu
+## cateva carduri peste ele citeau arborii vechi cu nasturi.
+## Masurat cu ProbeForest, coloana "LOD tri/instanta".
+@export_range(0, 12) var leaf_mid_every: int = 2
 @export_range(0, 12) var leaf_far_every: int = 0
+@export_range(1.0, 3.0, 0.05) var leaf_mid_gain: float = 1.35
 ## ADANCIMEA PADURII: niciun arbore la mai mult de atatia metri de MARGINEA
 ## soselei, in nicio zona (0 = nelimitat, cat cer zonele). Kyoto, nov 2026:
 ## padurea era 60% din triunghiurile unui cadru mediu si 88% in valea de
@@ -1070,9 +1071,16 @@ func _species_meshes(ps: PackedScene, stem: String, theme: String) -> Dictionary
 			src = WorldProp._mesh_with_slots_moved(src, remap)
 		var levels := {"full": src, "mid": src, "far": src}
 		var is_leaf := has_leaves 			and Palette.is_leaf_material(_part_material(stem, theme, String(mi.name)))
+		# Arbore cu carduri: miezul doar de aproape, coroana doar de departe.
+		var role := ""
+		if has_leaves and not is_leaf:
+			role = _stipple_role(stem, theme, String(mi.name))
 		if lod_m > 0.0 and is_leaf:
-			levels["mid"] = _leaf_level(src, leaf_mid_every)
-			levels["far"] = _leaf_level(src, leaf_far_every)
+			levels["mid"] = _leaf_level(src, leaf_mid_every, leaf_mid_gain)
+			levels["far"] = _leaf_level(src, leaf_far_every, leaf_mid_gain)
+			any_lod = true
+		elif lod_m > 0.0 and role == Palette.CORE_PREFIX:
+			levels["far"] = null
 			any_lod = true
 		elif lod_m > 0.0:
 			var lv := _lod_variants(src, mid_lod_ratio, far_lod_min_ratio,
@@ -1081,10 +1089,16 @@ func _species_meshes(ps: PackedScene, stem: String, theme: String) -> Dictionary
 			levels["far"] = lv.get("far", src)
 			if has_leaves and mid_from_far_species.has(stem):
 				levels["mid"] = levels["far"]
+			if role == Palette.CROWN_PREFIX:
+				levels["full"] = null
+				levels["mid"] = null
 			any_lod = any_lod or levels["mid"] != src or levels["far"] != src
+		elif role == Palette.CROWN_PREFIX:
+			# Fara LOD exista o singura infatisare, cea de aproape.
+			levels = {"full": null, "mid": null, "far": null}
 		for level: String in levels:
 			var pm_src: Mesh = levels[level]
-			if pm_src == null:      # petele lipsesc de pe treapta asta
+			if pm_src == null:      # nodul lipseste de pe treapta asta
 				continue
 			var pieces: Array = [[pm_src, _part_material(stem, theme, String(mi.name))]]
 			var accent: Variant = _split_part(stem, theme, mi, pm_src)
@@ -1113,9 +1127,33 @@ func _species_meshes(ps: PackedScene, stem: String, theme: String) -> Dictionary
 	return outs
 
 
-## Petele de frunzis ale unei trepte: fiecare a `every`-a (0 = niciuna, deci
-## null; 1 = toate). Aceeasi rarire pe componente ca la cardurile de bambus.
-static func _leaf_level(src: Mesh, every: int) -> Mesh:
+## Rolul unui nod intr-un arbore cu carduri: `Palette.CROWN_PREFIX`,
+## `Palette.CORE_PREFIX` sau "" (trunchi, altele), dupa aceeasi mapare de clase
+## din care iese materialul.
+static func _stipple_role(stem: String, theme: String, part: String) -> String:
+	var cls := ""
+	var tables: Array[Dictionary] = [WorldProp.CLASSES_BY_MODEL]
+	if WorldProp.CLASSES_BY_THEME.has(theme):
+		tables.append(WorldProp.CLASSES_BY_THEME[theme])
+	for table in tables:
+		if not table.has(stem):
+			continue
+		var mapping: Dictionary = table[stem]
+		var best := -1
+		for prefix: String in mapping:
+			if part.begins_with(prefix) and prefix.length() > best:
+				best = prefix.length()
+				cls = String(mapping[prefix])
+	return cls if cls == Palette.CROWN_PREFIX or cls == Palette.CORE_PREFIX else ""
+
+
+## Cardurile de frunzis ale unei trepte: fiecare al `every`-lea (0 = niciunul,
+## deci null; 1 = toate), marite de `gain` ori in jurul centrului lor, ca sa
+## acopere cat acopereau toate. Centrul se reface ca in leaf_cards.gdshader
+## (t1 = sus x n, t2 = n x t1, coltul in UV2), iar UV2 se mareste la fel, altfel
+## shaderul ar reface alt centru. Aceeasi rarire pe componente ca la cardurile
+## de bambus.
+static func _leaf_level(src: Mesh, every: int, gain: float = 1.0) -> Mesh:
 	if every <= 0:
 		return null
 	if every == 1:
@@ -1123,11 +1161,22 @@ static func _leaf_level(src: Mesh, every: int) -> Mesh:
 	var out := ArrayMesh.new()
 	for si in src.get_surface_count():
 		var arr := src.surface_get_arrays(si)
-		if arr[Mesh.ARRAY_INDEX] == null:
-			out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
-		else:
-			out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,
-				_every_nth_component(arr, _components(arr), every))
+		if arr[Mesh.ARRAY_INDEX] != null:
+			arr = _every_nth_component(arr, _components(arr), every)
+		if gain != 1.0 and arr[Mesh.ARRAY_TEX_UV2] != null and arr[Mesh.ARRAY_NORMAL] != null:
+			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var nrm: PackedVector3Array = arr[Mesh.ARRAY_NORMAL]
+			var uv2: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV2]
+			for i in v.size():
+				var n := nrm[i].normalized()
+				var t1 := Vector3.UP.cross(n).normalized()
+				var t2 := n.cross(t1)
+				var off := t1 * uv2[i].x + t2 * uv2[i].y
+				v[i] += off * (gain - 1.0)
+				uv2[i] *= gain
+			arr[Mesh.ARRAY_VERTEX] = v
+			arr[Mesh.ARRAY_TEX_UV2] = uv2
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 		out.surface_set_material(si, src.surface_get_material(si))
 	return out
 

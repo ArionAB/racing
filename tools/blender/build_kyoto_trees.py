@@ -30,25 +30,35 @@ RUST = LARCH_RUST          # -> clasa leaf_litter / ruginiu (#A8683A)
 AO_TREE = dict(gradient="vertical",
                samples=20, dist=3.2, low=0.62, high=1.0, power=0.8, floor=0.32)
 
-# Frunzis punctat: pete per arbore (2 triunghiuri fiecare). 0 = arborele vechi.
-# Pinul niwaki ramane sculptat in nori.
-DABS = {"momiji_a": 1200, "momiji_b": 950, "momiji_c": 1050, "ginkgo": 1200}
+# Frunzis din carduri punctate (`leaf_cards`): carduri per arbore (2 triunghiuri
+# fiecare, ~14 puncte decupate in shader), culoarea de baza si cea a sclipirilor.
+# 0 carduri = arborele vechi. Pinul niwaki ramane sculptat in nori.
+#                 carduri  baza (slotul coroanei)   sclipiri
+CARDS = {
+    "momiji_a": (280, "BB3522", "E8622D"),     # carmin KERB_RED, sclipiri portocalii
+    "momiji_b": (215, "E8622D", "F2B03C"),     # portocaliu LAVA_ORANGE, sclipiri aurii
+    "momiji_c": (240, "A8683A", "E8622D"),     # ruginiu LARCH_RUST, sclipiri portocalii
+    "ginkgo": (280, "F2D03C", "F6E79A"),       # auriu CAR_YELLOW, sclipiri galben pal
+}
 
 clear_built()
 
 
 def _tree(prefix, blobs, limbs, crown_slot, trunk_r=0.5, fork_z=2.0, seed=1,
           subdiv=2, jag=0.24, trunk_fn=None, limb_w=(0.46, 0.32), pads=False,
-          dabs=0, accent_slot=None, accent_tint=(1.0, 1.0, 1.0)):
+          cards=None):
     """blobs: (x, y, z, rx, ry, rz); limbs: puncte (x, y, z) spre care pleaca
     crengile groase din furca (intra in ciorchini).
 
-    dabs > 0: al treilea nod, `<Nume>_Leaves` -- frunzisul punctat (`leaf_dabs`)
-    peste ciorchini. Nodurile Trunk si Crown raman cele dinainte: treptele
-    departate ale padurii (MeshForest) si bulgarii se fac tot din ele."""
+    cards = (numar, hex baza, hex sclipiri): inca doua noduri, infatisarea de
+    APROAPE a arborelui -- `<Nume>_Core` (miezul mic si intunecat, `leaf_core`)
+    si `<Nume>_Leaves` (cardurile punctate, `leaf_cards`). Nodurile Trunk si
+    Crown raman cele dinainte: Crown e infatisarea de DEPARTE, din care padurea
+    (MeshForest) isi face treptele grosiere si bulgarii."""
     tr = Builder()
     cr = Builder()
-    lv = Builder() if dabs > 0 else None
+    lv = Builder() if cards else None
+    co = Builder() if cards else None
     # trunchi scurt cu evazare la radacina, furca la ~1/4 din inaltime
     if trunk_fn is None:
         tr.frustum((0, 0, 0.2), trunk_r * 1.9, trunk_r * 1.3, 0.4, BARK, segments=8)
@@ -76,10 +86,10 @@ def _tree(prefix, blobs, limbs, crown_slot, trunk_r=0.5, fork_z=2.0, seed=1,
                for (x, y, z, rx, ry, rz) in blobs]
     else:        # leaf_blob: icosfera zimtata, simetrica pe verticala
         ell = [(x, y, z, rx, ry, rz * 0.95, rz * 0.95) for (x, y, z, rx, ry, rz) in blobs]
-    leaf_dabs(lv, ell, crown_slot, dabs, seed=seed, accent_slot=accent_slot,
-              accent_tint=accent_tint)
+    leaf_core(co, ell, crown_slot)
+    leaf_cards(lv, ell, crown_slot, cards[0], cards[1], accent_hex=cards[2], seed=seed)
     return (tr.to_object(prefix + "_Trunk"), cr.to_object(prefix + "_Crown"),
-            lv.to_object(prefix + "_Leaves"))
+            co.to_object(prefix + "_Core"), lv.to_object(prefix + "_Leaves"))
 
 
 def build_momiji_a():
@@ -112,8 +122,7 @@ def build_momiji_a():
     limbs = [(-2.9, 0.2, 5.0), (3.0, -0.1, 4.8), (-3.9, 0.0, 3.6),
              (4.1, 0.2, 3.4), (0.2, 0.5, 4.4)]
     return _tree("Maple", b, limbs, CRIMSON, trunk_r=0.5, fork_z=2.0, seed=1,
-                 subdiv=3, jag=0.34, pads=True, dabs=DABS["momiji_a"],
-                 accent_slot=LAVA_ORANGE)
+                 subdiv=3, jag=0.34, pads=True, cards=CARDS["momiji_a"])
 
 
 def build_momiji_b():
@@ -139,8 +148,7 @@ def build_momiji_b():
     limbs = [(-2.5, 0.0, 3.0), (2.6, 0.1, 2.9), (0.0, -1.2, 3.1),
              (-0.9, 0.1, 4.9), (1.1, 0.0, 4.8), (0.0, 0.0, 6.5)]
     return _tree("Maple", b, limbs, LAVA_ORANGE, trunk_r=0.5, fork_z=2.4, seed=7,
-                 subdiv=3, jag=0.34, pads=True, dabs=DABS["momiji_b"],
-                 accent_slot=CAR_YELLOW)
+                 subdiv=3, jag=0.34, pads=True, cards=CARDS["momiji_b"])
 
 
 def build_momiji_c():
@@ -168,8 +176,7 @@ def build_momiji_c():
     limbs = [(-3.4, 0.2, 2.5), (3.5, 0.0, 2.4), (-2.4, 0.1, 4.0),
              (2.5, 0.2, 4.1), (0.1, -0.8, 4.2)]
     return _tree("Maple", b, limbs, RUST, trunk_r=0.8, fork_z=2.2, seed=11,
-                 subdiv=3, jag=0.34, limb_w=(0.7, 0.45), pads=True, dabs=DABS["momiji_c"],
-                 accent_slot=LAVA_ORANGE)
+                 subdiv=3, jag=0.34, limb_w=(0.7, 0.45), pads=True, cards=CARDS["momiji_c"])
 
 
 def build_ginkgo():
@@ -197,8 +204,7 @@ def build_ginkgo():
     limbs = [(-2.7, 0.2, 2.5), (2.8, 0.0, 2.5), (0.1, -1.8, 2.6),
              (-1.8, 0.3, 4.3), (1.9, 0.1, 4.3), (0.0, 0.0, 7.0)]
     return _tree("Ginkgo", b, limbs, GINKGO_GOLD, trunk_r=0.6, fork_z=2.2, seed=21,
-                 subdiv=3, jag=0.34, limb_w=(0.55, 0.4), dabs=DABS["ginkgo"],
-                 accent_slot=FOAM_WHITE, accent_tint=(1.0, 0.92, 0.50))
+                 subdiv=3, jag=0.34, limb_w=(0.55, 0.4), cards=CARDS["ginkgo"])
 
 
 def build_niwaki_pine():
@@ -243,12 +249,12 @@ def build_niwaki_pine():
 def _emit_tree(fn, name, budget):
     clear_built()      # nume stabile de noduri (fara sufix .001)
     emit(list(fn()), "plants/%s.glb" % name, AO_TREE, bevel=0.0, smooth_angle=None,
-         budget=budget, post=dab_post)
+         budget=budget, post=card_post)
 
 
-_emit_tree(build_momiji_a, "momiji_a", 5200)
-_emit_tree(build_momiji_b, "momiji_b", 4200)
-_emit_tree(build_momiji_c, "momiji_c", 4800)
-_emit_tree(build_ginkgo, "ginkgo", 5200)
+_emit_tree(build_momiji_a, "momiji_a", 4200)
+_emit_tree(build_momiji_b, "momiji_b", 3500)
+_emit_tree(build_momiji_c, "momiji_c", 4200)
+_emit_tree(build_ginkgo, "ginkgo", 4600)
 _emit_tree(build_niwaki_pine, "niwaki_pine", 1500)
 report()

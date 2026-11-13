@@ -296,37 +296,54 @@ def leaf_pad(b, center, rx, ry, rz, slot, lobes=7, seg_per_lobe=5, rings=5,
     return b._tag(verts, slot)
 
 
-def leaf_dabs(b, pads, slot, count, seed=0, size=(0.24, 0.42), shell=(0.99, 1.30),
-              spray=0.10, face_mix=0.45, below=0.28, accent_slot=None, accent=0.20,
-              accent_tint=(1.0, 1.0, 1.0)):
-    """FRUNZIS PUNCTAT: `count` pete mici (quad-uri de 2 triunghiuri) presarate
-    pe coaja ciorchinilor, ca tusele de pensula din art of rally (cererea
-    dezvoltatorului, 13 nov 2026: "imi plac copacii aia fata de ce avem").
+def _srgb_hex_to_linear(hx):
+    out = []
+    for i in (0, 2, 4):
+        c = int(hx[i:i + 2], 16) / 255.0
+        out.append(c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4)
+    return Vector(out)
 
-    Masa ramane a ciorchinilor (memoria coroana-e-masa-nu-frunze): petele NU
-    inlocuiesc coroana, ii rup doar conturul si ii dau granulatie. De aceea stau
-    intre `shell[0]` si `shell[1]` din raza ciorchinelui (de la putin sub
-    suprafata la un sfert in afara), iar `spray` din ele zboara si mai departe,
-    mai mici -- stropii de la margine care fac silueta moale.
 
-    accent_slot: al doilea slot, mai deschis, pe `accent` din petele din
-    jumatatea luminata de sus (sansa creste cu inaltimea) -- sclipirile care
-    fac coroana sa nu fie o singura culoare cu trepte de gri.
+def leaf_cards(b, pads, slot, count, base_hex, accent_hex=None, seed=0, size=(0.95, 1.40),
+               shell=(0.80, 1.12), spray=0.08, below=0.30, accent=0.20):
+    """FRUNZIS DIN CARDURI PUNCTATE: `count` carduri presarate pe coaja
+    ciorchinilor. Fiecare card e 2 triunghiuri, se intoarce spre camera si e
+    decupat in ~14 puncte rotunde de `assets/shaders/leaf_cards.gdshader` --
+    tusele din art of rally (cererea dezvoltatorului, 13 nov 2026).
+
+    Prima incercare (`leaf_dabs`, o pata = un quad cu orientare fixa) cerea
+    1200 de quad-uri pe arbore, dubla triunghiurile din valea de artari si tot
+    iesea rara si colturoasa. Aici punctele sunt in shader, nu in geometrie.
+
+    De aproape, sub carduri sta doar un miez mic si intunecat (`leaf_core`), deci
+    silueta e a cardurilor: stau intre `shell[0]` si `shell[1]` din raza
+    ciorchinelui, iar `spray` din ele zboara mai departe, mai mici. Coroana
+    plina (`*_Crown`) ramane infatisarea de departe (memoria
+    coroana-e-masa-nu-frunze).
 
     pads: (cx, cy, cz, ax, ay, az_sus, az_jos) -- elipsoidul fiecarui ciorchine.
-    Petele ingropate in alt ciorchine se arunca (nu se vad, costa triunghiuri).
+    Cardurile ingropate adanc in alt ciorchine se arunca.
 
-    Doua straturi per varf, citite de `dab_post` dupa finish():
-      dab_n  normala de UMBRIRE: amestec intre normala masei (elipsoid + radial
-             din centrul coroanei) si fata reala a petei (`face_mix`). Doar masa
-             = glob neted cu pete lipite; doar fata = zgomot fara volum.
-      dab_c  culoarea de varf: gradient jos-sus, mai inchis spre interior, plus
-             variatie pe pata; umbra trage spre rosu, nu spre gri (memoria
-             umbra-fara-culoare-e-negru-mort)."""
+    CONTRACTUL CU SHADERUL (straturi per varf, scrise in mesh de `card_post`):
+      pozitia  coltul cardului, in planul perpendicular pe normala masei:
+               centru + t1 * ox + t2 * oy, cu t1 = sus x n, t2 = n x t1.
+               Geometrie reala, nu 4 varfuri in acelasi punct: prima varianta
+               (degenerata) isi pierdea cardurile in LOD-urile importerului.
+      card_o   (ox, oy), coltul fata de centru, in metri  -> UV2
+      card_s   samanta cardului, aceeasi pe 4 colturi     -> UV
+      card_n   normala MASEI (elipsoid + radial din centrul coroanei),
+               aplecata la cel putin 6 grade de verticala: din ea reface
+               shaderul planul cardului, iar sus x n nu are voie sa fie zero
+      card_c   culoarea ABSOLUTA, liniara: `base_hex` (sau `accent_hex` pe o
+               parte din cardurile de sus) x gradient jos-sus x variatie;
+               umbra trage spre rosu, nu spre gri."""
     rnd = _lcg(seed * 7919 + 13)
     bm = b.bm
-    ln = bm.verts.layers.float_vector.get("dab_n") or bm.verts.layers.float_vector.new("dab_n")
-    lc = bm.verts.layers.float_vector.get("dab_c") or bm.verts.layers.float_vector.new("dab_c")
+    lay = {}
+    for name in ("card_o", "card_s", "card_n", "card_c"):
+        lay[name] = bm.verts.layers.float_vector.get(name) or bm.verts.layers.float_vector.new(name)
+    base = _srgb_hex_to_linear(base_hex)
+    acc = _srgb_hex_to_linear(accent_hex) if accent_hex else None
     z_lo = min(p[2] - p[6] for p in pads)
     z_hi = max(p[2] + p[5] for p in pads)
     z_span = max(z_hi - z_lo, 1e-6)
@@ -335,8 +352,8 @@ def leaf_dabs(b, pads, slot, count, seed=0, size=(0.24, 0.42), shell=(0.99, 1.30
     weights = [p[3] * p[4] + p[3] * p[5] + p[4] * p[5] for p in pads]
     wsum = sum(weights)
     verts = []
-    verts_accent = []
     made = 0
+    min_tilt = math.sin(math.radians(6.0))
     for k, (cx, cy, cz, ax, ay, azu, azd) in enumerate(pads):
         want = int(round(count * weights[k] / wsum))
         got = 0
@@ -352,7 +369,7 @@ def leaf_dabs(b, pads, slot, count, seed=0, size=(0.24, 0.42), shell=(0.99, 1.30
             is_spray = rnd() < spray
             s = shell[0] + rnd() * (shell[1] - shell[0])
             if is_spray:
-                s = shell[1] + rnd() * 0.30
+                s = shell[1] + rnd() * 0.22
             az = azu if uz >= 0.0 else azd
             p = Vector((cx + ax * ux * s, cy + ay * uy * s, cz + az * uz * s))
             buried = False
@@ -361,88 +378,112 @@ def leaf_dabs(b, pads, slot, count, seed=0, size=(0.24, 0.42), shell=(0.99, 1.30
                     continue
                 qz = q[5] if p.z >= q[2] else q[6]
                 e = ((p.x - q[0]) / q[3]) ** 2 + ((p.y - q[1]) / q[4]) ** 2 + ((p.z - q[2]) / qz) ** 2
-                if e < 0.78:
+                if e < 0.55:
                     buried = True
                     break
             if buried:
                 continue
             grad = Vector((ux / ax, uy / ay, uz / az)).normalized()
             rad = (p - cc).normalized()
-            nm = (grad * 0.6 + rad * 0.4).normalized()
-            jit = Vector((rnd() - 0.5, rnd() - 0.5, rnd() - 0.5)) * 1.1
-            f = (nm + jit).normalized()
-            ref = Vector((0, 0, 1)) if abs(f.z) < 0.9 else Vector((1, 0, 0))
-            t1 = ref.cross(f).normalized()
-            t2 = f.cross(t1)
-            roll = rnd() * math.pi
-            cr_, sr_ = math.cos(roll), math.sin(roll)
-            t1, t2 = t1 * cr_ + t2 * sr_, t2 * cr_ - t1 * sr_
-            hw = (size[0] + rnd() * (size[1] - size[0])) * 0.5 * (0.62 if is_spray else 1.0)
-            hh = hw * (0.75 + rnd() * 0.5)
-            ns = (nm * (1.0 - face_mix) + f * face_mix).normalized()
+            nm = (grad * 0.55 + rad * 0.45).normalized()
+            hz = math.hypot(nm.x, nm.y)
+            if hz < min_tilt:      # aproape verticala: aplecata intr-o directie oarecare
+                a = 2.0 * math.pi * rnd()
+                sz = 1.0 if nm.z >= 0.0 else -1.0
+                nm = Vector((math.cos(a) * min_tilt, math.sin(a) * min_tilt,
+                             sz * math.sqrt(1.0 - min_tilt * min_tilt)))
+            hw = (size[0] + rnd() * (size[1] - size[0])) * 0.5 * (0.6 if is_spray else 1.0)
+            hh = hw * (0.85 + rnd() * 0.3)
             t = min(1.0, max(0.0, (p.z - z_lo) / z_span))
             depth = min(1.0, max(0.0, (s - shell[0]) / (shell[1] - shell[0])))
-            v = (0.56 + 0.44 * t ** 0.8) * (0.80 + 0.20 * depth) * (0.84 + 0.16 * rnd())
-            if rnd() < 0.14:
-                v = v * 1.12 + 0.08
+            v = (0.58 + 0.42 * t ** 0.8) * (0.82 + 0.18 * depth) * (0.88 + 0.12 * rnd())
             v = min(1.0, max(0.30, v))
-            col = Vector((v, v * (0.80 + 0.20 * v), v * (0.70 + 0.30 * v)))
-            is_accent = accent_slot is not None and rnd() < accent * (0.25 + 1.5 * t * t)
-            if is_accent:        # sclipirea ramane deschisa: nu mosteneste umbra
-                v = max(v, 0.86)
-                col = Vector((v * accent_tint[0], v * accent_tint[1], v * accent_tint[2]))
+            col = Vector((base[0] * v, base[1] * v * (0.80 + 0.20 * v), base[2] * v * (0.70 + 0.30 * v)))
+            if acc is not None and rnd() < accent * (0.25 + 1.5 * t * t):
+                v = max(v, 0.88)
+                col = acc * v
+            sd = Vector((rnd(), rnd(), 0.0))
+            t1 = Vector((0, 0, 1)).cross(nm).normalized()
+            t2 = nm.cross(t1)
             quad = []
             for (sa, sb) in ((-1, -1), (1, -1), (1, 1), (-1, 1)):
-                # colturi miscate: patrulater neregulat, nu patrat de hartie
-                ja = sa * (0.72 + 0.56 * rnd())
-                jb = sb * (0.72 + 0.56 * rnd())
-                bv = bm.verts.new(p + t1 * (hw * ja) + t2 * (hh * jb))
-                bv[ln] = ns
-                bv[lc] = col
+                bv = bm.verts.new(p + t1 * (hw * sa) + t2 * (hh * sb))
+                bv[lay["card_o"]] = Vector((hw * sa, hh * sb, 0.0))
+                bv[lay["card_s"]] = sd
+                bv[lay["card_n"]] = nm
+                bv[lay["card_c"]] = col
                 quad.append(bv)
             bm.faces.new(quad)
-            (verts_accent if is_accent else verts).extend(quad)
+            verts.extend(quad)
             got += 1
         made += got
     b._tag(verts, slot)
-    if verts_accent:
-        b._tag(verts_accent, accent_slot)
     return made
 
 
-def dab_post(objs):
-    """Dupa finish(): scrie culoarea si normala de umbrire ale petelor (straturile
-    `dab_c` / `dab_n` din `leaf_dabs`) peste AO-ul copt si peste normalele de
-    fata. Nodurile fara straturi trec neatinse. AO-ul prin raycast nu are ce
-    cauta pe pete: un quad singur in aer nu se umbreste pe el insusi, iar
-    gradientul vertical e deja in `dab_c`, pe intervalul INTREGII coroane."""
-    # Arborii fara pete (pinul niwaki) trec neatinsi, cu tot cu coroana.
-    if not any(o.data.attributes.get("dab_n") is not None for o in objs):
+def leaf_core(b, pads, slot, shrink=0.68):
+    """MIEZUL de sub carduri: cate o icosfera mica (80 de triunghiuri) in fiecare
+    ciorchine, la `shrink` din raza lui. Nu e coroana -- e doar ce opreste
+    privirea sa treaca prin arbore intre puncte, si ce ascunde cardurile de pe
+    partea cealalta (mai putini pixeli desenati de doua ori). `card_post` il
+    intuneca."""
+    for (cx, cy, cz, ax, ay, azu, azd) in pads:
+        res = bmesh.ops.create_icosphere(b.bm, subdivisions=1, radius=1.0)
+        verts = res["verts"]
+        for v in verts:
+            az = azu if v.co.z >= 0.0 else azd
+            v.co = Vector((cx + v.co.x * ax * shrink, cy + v.co.y * ay * shrink,
+                           cz + v.co.z * az * shrink))
+        b._tag(verts, slot)
+
+
+# Umbra din interiorul coroanei: calda si inchisa, nu o a doua suprafata luminata.
+CORE_SHADE = (0.50, 0.38, 0.38)
+
+
+def card_post(objs):
+    """Dupa finish(): muta straturile lui `leaf_cards` in atributele pe care le
+    citeste shaderul (culoare, normala, UV = samanta, UV2 = colt) si incalzeste
+    umbra coapta a masei de coroana. Arborii fara carduri (pinul niwaki) trec
+    neatinsi, cu tot cu coroana."""
+    if not any(o.data.attributes.get("card_o") is not None for o in objs):
         return
     for o in objs:
         me = o.data
-        an = me.attributes.get("dab_n")
-        ac = me.attributes.get("dab_c")
-        if an is None or ac is None:
-            # Masa coroanei: AO-ul copt e gri (v, v, v). Sub pete, umbra ei trebuie
-            # sa traga spre aceeasi nuanta ca umbra petelor, altfel golurile dintre
-            # ele ies murdare. Trunchiul ramane gri.
+        if me.attributes.get("card_o") is None:
+            # Masa coroanei: AO-ul copt e gri (v, v, v). Umbra ei trebuie sa traga
+            # spre aceeasi nuanta ca umbra cardurilor. Trunchiul ramane gri.
             if o.name.endswith("_Crown"):
                 ca = me.color_attributes.get("AO")
                 for d in ca.data:
                     v = d.color[0]
                     d.color = (v, v * (0.80 + 0.20 * v), v * (0.70 + 0.30 * v), 1.0)
+            elif o.name.endswith("_Core"):
+                ca = me.color_attributes.get("AO")
+                for d in ca.data:
+                    v = d.color[0]
+                    d.color = (v * CORE_SHADE[0], v * CORE_SHADE[1], v * CORE_SHADE[2], 1.0)
             continue
-        ca = me.color_attributes.get("AO")
-        nors = []
-        for i in range(len(me.vertices)):
-            c = ac.data[i].vector
-            ca.data[i].color = (c[0], c[1], c[2], 1.0)
-            n = Vector(an.data[i].vector)
-            nors.append(n.normalized() if n.length > 1e-6 else Vector((0, 0, 1)))
-        for name in ("dab_n", "dab_c"):
+        n = len(me.vertices)
+        off = [Vector(me.attributes["card_o"].data[i].vector) for i in range(n)]
+        sd = [Vector(me.attributes["card_s"].data[i].vector) for i in range(n)]
+        nor = [Vector(me.attributes["card_n"].data[i].vector).normalized() for i in range(n)]
+        col = [Vector(me.attributes["card_c"].data[i].vector) for i in range(n)]
+        for name in ("card_o", "card_s", "card_n", "card_c"):
             me.attributes.remove(me.attributes[name])
-        me.normals_split_custom_set_from_vertices(nors)
+        ca = me.color_attributes.get("AO")
+        for i in range(n):
+            ca.data[i].color = (col[i][0], col[i][1], col[i][2], 1.0)
+        uv1 = me.uv_layers.get("UVMap") or me.uv_layers.new(name="UVMap")
+        uv2 = me.uv_layers.get("UV2") or me.uv_layers.new(name="UV2")
+        for lp in me.loops:
+            i = lp.vertex_index
+            uv1.data[lp.index].uv = (sd[i][0], sd[i][1])
+            # Exportatorul glTF intoarce V (v -> 1 - v); il intoarcem inainte, ca
+            # in joc UV2.y sa fie chiar coltul, cu semn.
+            uv2.data[lp.index].uv = (off[i][0], 1.0 - off[i][1])
+        me.uv_layers.active = uv1
+        me.normals_split_custom_set_from_vertices(nor)
         me.update()
 
 
@@ -479,7 +520,7 @@ def emit(objs, path, ao, origin="base", bevel=0.0, smooth_angle=None,
                     origin=("base" if solo else None), smooth_angle=smooth_angle)
         total += st["tris"]
         per_node[o.name] = st["tris"]
-    if post is not None:       # dupa finish, inainte de export (vezi dab_post)
+    if post is not None:       # dupa finish, inainte de export (vezi card_post)
         post(objs)
     xs, ys, zs = [], [], []
     for o in objs:

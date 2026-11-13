@@ -1840,7 +1840,7 @@ static func foliage_surfaces(mesh: Mesh) -> Dictionary:
 	if not SMOOTH_FOLIAGE or mesh == null:
 		return out
 	for si in mesh.get_surface_count():
-		if _crown_mat != null and mesh.surface_get_material(si) == _crown_mat:
+		if is_crown_material(mesh.surface_get_material(si)):
 			out[si] = true
 			continue
 		for cls in CLASS_TRIPLANAR_SHARPNESS:
@@ -2132,50 +2132,60 @@ const ATLAS_PREFIX := "atlas"
 ## aceeasi masca, doar `detail_enabled=false` pe o copie).
 const PLAIN_PREFIX := "plain"
 
-## Al optulea si al noualea prefix: "crown" si "leaf" — COROANA PUNCTATA
-## (arborii Kyoto, nov 2026; cererea dezvoltatorului dupa capturile din art of
-## rally: „imi plac copacii aia fata de ce avem").
+## Prefixele "crown", "core" si "leaf" — COROANA PUNCTATA (arborii Kyoto, nov
+## 2026; cererea dezvoltatorului dupa capturile din art of rally: "imi plac
+## copacii aia fata de ce avem").
 ##
 ## Coroana veche era o clasa triplanara (dala `autumn_foliage` cu goluri negre):
-## pe captura de joc citea palarii de ciuperca patate. Aici culoarea e PLATA:
-## slotul din atlas x culoarea de varf, fara dala si fara stratul de detaliu, iar
-## granulatia vine din geometrie — sute de pete mici pe coaja coroanei, fiecare
-## cu nuanta ei coapta in culoarea de varf (`leaf_dabs` in
-## tools/blender/kyoto_shapes.py).
+## pe captura de joc citea palarii de ciuperca patate. Aici culoarea e PLATA, iar
+## granulatia vine din CARDURI PUNCTATE: cateva sute de carduri pe coaja
+## coroanei, fiecare intors spre camera si decupat in puncte rotunde
+## (`assets/shaders/leaf_cards.gdshader`, `leaf_cards` in
+## tools/blender/kyoto_shapes.py). Prima incercare, o pata = un quad, dubla
+## triunghiurile din valea de artari; cardul poarta zeci de puncte pe 2 triunghiuri.
 ##
-##   "crown"  masa coroanei (nodul `*_Crown`): fete inchise, cull normal,
-##            normale netezite ca la clasele de frunzis (`is_smooth_foliage`).
-##   "leaf"   petele (nodul `*_Leaves`): n-au grosime, deci ambele fete.
+## Arborele are doua infatisari, din noduri diferite ale aceluiasi GLB:
+##   de APROAPE  `*_Core` ("core": miez mic si intunecat, doar ca sa nu se vada
+##               prin coroana) + `*_Leaves` ("leaf": cardurile, care dau silueta);
+##   de DEPARTE  `*_Crown` ("crown": coroana intreaga pe culoarea slotului),
+##               fara carduri.
+## Padurea in masa alege pe treapta de LOD (`MeshForest._species_meshes`). Un
+## arbore pus ca NOD e mereu "de aproape": WorldProp ii ascunde `*_Crown`.
 ##
 ## Doua materiale partajate de TOTI arborii punctati, oricate specii si culori
-## (culoarea e in slot si in varf, nu in material) — in locul cate unei clase
-## triplanare per nuanta. Si mai ieftine pe pixel: o citire de atlas in loc de
-## trei citiri triplanare.
+## (culoarea e in slot si in varf, nu in material), in locul cate unei clase
+## triplanare per nuanta. Nicio textura noua.
 const CROWN_PREFIX := "crown"
+const CORE_PREFIX := "core"
 const LEAF_PREFIX := "leaf"
 
 static var _crown_mat: StandardMaterial3D = null
-static var _leaf_mat: StandardMaterial3D = null
+static var _leaf_mat: ShaderMaterial = null
 
+## Masa coroanei si miezul: atlasul plat, cull normal (fete inchise).
 static func crown_material() -> StandardMaterial3D:
 	if _crown_mat == null:
 		_crown_mat = plain_material().duplicate() as StandardMaterial3D
 	return _crown_mat
 
-static func leaf_material() -> StandardMaterial3D:
+static func leaf_material() -> ShaderMaterial:
 	if _leaf_mat == null:
-		_leaf_mat = plain_material().duplicate() as StandardMaterial3D
-		_leaf_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+		_leaf_mat = ShaderMaterial.new()
+		_leaf_mat.shader = load("res://assets/shaders/leaf_cards.gdshader")
 	return _leaf_mat
 
-## E `mat` materialul petelor? Fara sa-l creeze: pe pistele fara frunzis
-## punctat nu trebuie sa apara un material in plus doar fiindca s-a intrebat.
+## E `mat` materialul cardurilor / al masei de coroana? Fara sa le creeze: pe
+## pistele fara frunzis punctat nu trebuie sa apara un material in plus doar
+## fiindca s-a intrebat.
 static func is_leaf_material(mat: Material) -> bool:
 	return _leaf_mat != null and mat == _leaf_mat
 
+static func is_crown_material(mat: Material) -> bool:
+	return _crown_mat != null and mat == _crown_mat
+
 ## Materialul unui prefix de coroana punctata, sau null daca `cls` nu e unul.
-static func stipple_material(cls: String) -> StandardMaterial3D:
-	if cls == CROWN_PREFIX:
+static func stipple_material(cls: String) -> Material:
+	if cls == CROWN_PREFIX or cls == CORE_PREFIX:
 		return crown_material()
 	if cls == LEAF_PREFIX:
 		return leaf_material()

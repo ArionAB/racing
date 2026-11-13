@@ -2033,21 +2033,26 @@ const CLASSES_BY_MODEL := {
 	# Frunzisul de toamna: o coroana = o clasa, trei nuante de artar (siluete
 	# diferite in GLB, culori diferite aici). Trunchiurile (100% slot 9) iau
 	# scoarta `bark_kyoto`.
-	# COROANA PUNCTATA (nov 2026, vezi `Palette.CROWN_PREFIX`): masa pe culoarea
+	# COROANA PUNCTATA (nov 2026, vezi `Palette.CROWN_PREFIX`): de aproape miezul
+	# `*_Core` + cardurile `*_Leaves`, de departe coroana `*_Crown` pe culoarea
 	# plata a slotului (artar carmin KERB_RED 7, portocaliu LAVA_ORANGE 30,
-	# ruginiu LARCH_RUST 27, ginkgo CAR_YELLOW 16), petele `*_Leaves` peste ea.
-	# Clasele `maple_*` / `ginkgo_gold` raman definite (covorul si gramezile de
-	# frunze le folosesc), dar coroanele nu le mai poarta.
+	# ruginiu LARCH_RUST 27, ginkgo CAR_YELLOW 16). Clasele `maple_*` /
+	# `ginkgo_gold` raman definite (covorul si gramezile de frunze le folosesc),
+	# dar coroanele nu le mai poarta.
 	"momiji_a": {"Maple_Crown": Palette.CROWN_PREFIX,
+		"Maple_Core": Palette.CORE_PREFIX,
 		"Maple_Leaves": Palette.LEAF_PREFIX,
 		"Maple_Trunk": Palette.TRI_PREFIX + "bark_kyoto"},
 	"momiji_b": {"Maple_Crown": Palette.CROWN_PREFIX,
+		"Maple_Core": Palette.CORE_PREFIX,
 		"Maple_Leaves": Palette.LEAF_PREFIX,
 		"Maple_Trunk": Palette.TRI_PREFIX + "bark_kyoto"},
 	"momiji_c": {"Maple_Crown": Palette.CROWN_PREFIX,
+		"Maple_Core": Palette.CORE_PREFIX,
 		"Maple_Leaves": Palette.LEAF_PREFIX,
 		"Maple_Trunk": Palette.TRI_PREFIX + "bark_kyoto"},
 	"ginkgo": {"Ginkgo_Crown": Palette.CROWN_PREFIX,
+		"Ginkgo_Core": Palette.CORE_PREFIX,
 		"Ginkgo_Leaves": Palette.LEAF_PREFIX,
 		"Ginkgo_Trunk": Palette.TRI_PREFIX + "bark_kyoto"},
 	"niwaki_pine": {"Pine_Crown": Palette.TRI_PREFIX + "cedar_needles",
@@ -3819,6 +3824,12 @@ func _apply_classes_mapping(by_stem: Dictionary) -> void:
 			# pentru care s-a facut ruptura pe arcada.
 			var is_accent := nm.ends_with(Palette.ACCENT_SUFFIX)
 			if is_accent and not cls.begins_with(Palette.GLOW_PREFIX) 					and not mapping.has(nm):
+				continue
+			# Arbore punctat pus ca nod: e mereu infatisarea de aproape (miez +
+			# carduri), deci coroana de departe se ascunde. Ascunsa, nu intra
+			# nici in coacere, nici in cifrele garzii.
+			if cls == Palette.CROWN_PREFIX:
+				mi.visible = false
 				continue
 			mi.material_override = _model_class_material(cls)
 			if Palette.is_smooth_foliage(cls):

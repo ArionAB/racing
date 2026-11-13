@@ -266,8 +266,13 @@ def main():
     o_d0, o_d1 = f(X_D0, 1), f(X_D1, 1)
     r_d1, r_d0 = f(X_D1, -1), f(X_D0, -1)
     # rapa: putin inauntrul tablierului (racordul RAVINE_FADE_FRAC iese in afara)
-    o_r0, o_r1 = f(X_D0 + 10.0, 1), f(X_D1 - 10.0, 1)
-    r_r0, r_r1 = f(X_D1 - 10.0, -1), f(X_D0 + 10.0, -1)
+    # Racordul rapei (Track: RAVINE_FADE_FRAC = 0,02 din tur) incepe INAINTEA
+    # capatului declarat; cu rapa pana la 10 m de capete, saparea ajungea sub palier
+    # si o masina iesita cu o roata peste marginea lui lovea fusta (ejectare, masurat).
+    # Deci capetele rapei se retrag cu tot racordul: palierele raman pe pamant.
+    fade_m = 0.02 * total + 4.0
+    o_r0, o_r1 = f(X_D0 + fade_m, 1), f(X_D1 - fade_m, 1)
+    r_r0, r_r1 = f(X_D1 - fade_m, -1), f(X_D0 + fade_m, -1)
     # latimea: rampa de 30 m (Track.WIDTH_RAMP_M) INAUNTRUL sectorului
     o_w0, o_w1 = f(X_D0 - 30.0, 1), f(X_D1 + 30.0, 1)
     r_w0, r_w1 = f(X_D1 + 30.0, -1), f(X_D0 - 30.0, -1)
@@ -325,7 +330,7 @@ def main():
             c_, s_ = math.cos(yaw), math.sin(yaw)
             box(sub, nodes, "flare", "Evazare%s%s" % (nm, end), "Static/Parapet", (flare_l, 1.2, 0.5),
                 (c_, 0, -s_, 0, 1, 0, s_, 0, c_, cxf, y_of_x(xe) + 0.55, czf))
-    # turnurile podului: portaluri, picioarele in afara tablierului, traversa la +10 si +36
+    # turnurile podului: portaluri, picioarele in afara tablierului, traversa la +15 si +39 (peste camera de urmarire, care sta la +10)
     nodes.append('[node name="Turnuri" type="StaticBody3D" parent="Static"]\n')
     tower_h = 45.0
     leg_z = DECK_HALF + 2.3
@@ -333,7 +338,7 @@ def main():
         for side in (1, -1):
             box(sub, nodes, "leg", "T%dPicior%d" % (ti, side + 1), "Static/Turnuri", (3.0, tower_h + 8.0, 3.0),
                 (1, 0, 0, 0, 1, 0, 0, 0, 1, xt, Y_D + tower_h * 0.5 - 4.0, side * leg_z), mat="Mat_rosu")
-        for bi, yb in enumerate((Y_D + 10.0, Y_D + tower_h - 6.0)):
+        for bi, yb in enumerate((Y_D + 15.0, Y_D + tower_h - 6.0)):
             box(sub, nodes, "beam", "T%dTraversa%d" % (ti, bi), "Static/Turnuri", (2.4, 2.4, 2 * leg_z + 3.0),
                 (1, 0, 0, 0, 1, 0, 0, 0, 1, xt, yb, 0.0), coll=False, mat="Mat_rosu")
 
@@ -385,6 +390,8 @@ def main():
         "approach_m = %.1f" % LANDING,
         "deck_half_width = %.2f" % DECK_HALF,
         "cushion_far_m = %.1f" % CUSHION,
+        "corridor_before_m = %.1f" % (X_D0 - CUSHION),
+        "corridor_after_m = %.1f" % LANDING,
         "truck_speed = %.2f" % TRUCK_SPEED,
         "truck_dwell_s = %.2f" % DWELL,
         "phase = %.4f" % PHASE,

@@ -60,6 +60,14 @@ extends Node3D
 ## (corp moale, meta `soft_hit_crush`): acolo se termina despartitorul, cu capul
 ## spre traficul care vine din intoarcere. 0 = beton pana la capat.
 @export var cushion_far_m: float = 0.0
+## Cat de departe de capete CITESTE AI-ul despartitorul (m inainte de s=0 si dupa
+## deck_length). Negativ = `approach_m`. Pe o pista cu despartitor fix construit
+## separat (rampa sondei), lungimea lui intreaga: AI-ul trebuie sa vada si capul
+## lui, nu doar bucata construita de nodul asta. Masurat: cu citirea pornita doar
+## de la 5 m inaintea capului, o masina care depasea pe stanga a intrat in el si
+## a ajuns pe sensul opus.
+@export var corridor_before_m: float = -1.0
+@export var corridor_after_m: float = -1.0
 ## Semilatimea tablierului pana la fata interioara a parapetului exterior (m).
 ## Doar pentru culoarul AI-ului: soseaua de pe tablier e mai lata (benzile se
 ## suprapun la mijloc), parapetul e marginea reala.
@@ -384,14 +392,17 @@ func obstacle_face(s: float, side: float, s_t: float = INF) -> float:
 func corridor(local: Vector3, side: float, dir_s: float, ahead_m: float,
 		back_m: float = 3.0) -> Vector2:
 	var s0 := local.x
-	if s0 < -approach_m - 5.0 or s0 > deck_length + approach_m + 5.0:
-		return Vector2.INF
+	var m0 := -(corridor_before_m if corridor_before_m >= 0.0 else approach_m)
+	var m1 := deck_length + (corridor_after_m if corridor_after_m >= 0.0 else approach_m)
 	var s_t := _static_s_t if ai_static_read else truck_s
 	var face := -INF
 	var a := s0 - back_m * dir_s
 	var b := s0 + ahead_m * dir_s
-	var lo_s := minf(a, b)
-	var hi_s := maxf(a, b)
+	# fereastra de citire, taiata la lungimea despartitorului: in afara lui nu e nimic
+	var lo_s := maxf(minf(a, b), m0)
+	var hi_s := minf(maxf(a, b), m1)
+	if lo_s > hi_s:
+		return Vector2.INF
 	var step := 1.5
 	var s := lo_s
 	while s <= hi_s + 0.01:

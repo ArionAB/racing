@@ -92,7 +92,7 @@ custom_world_seed_name = "sonda_sf_pod"
 custom_half_width = 6.0
 custom_gate_model = "none"
 custom_sea_level_offset = -19.475
-custom_ravines = Array[Vector4]([Vector4(0.12457, 0.29676, 32.0, 0), Vector4(0.49877, 0.67096, 32.0, 0)])
+custom_ravines = Array[Vector4]([Vector4(0.14088, 0.28045, 32.0, 0), Vector4(0.51508, 0.65465, 32.0, 0)])
 custom_viaduct_ravines = Array[int]([0, 1])
 custom_viaduct_net_margin = 12.0
 custom_width_segments = Array[Vector3]([Vector3(0.09997, 0.32136, 9.80), Vector3(0.47417, 0.69556, 9.80)])
@@ -113,6 +113,8 @@ taper_m = 30.0
 approach_m = 36.0
 deck_half_width = 12.20
 cushion_far_m = 6.0
+corridor_before_m = 234.0
+corridor_after_m = 36.0
 truck_speed = 4.00
 truck_dwell_s = 6.00
 phase = 0.2030
@@ -341,7 +343,7 @@ transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.
 mesh = SubResource("Mesh_leg")
 
 [node name="T0Traversa0M" type="MeshInstance3D" parent="Static/Turnuri"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 315.00000, 33.04000, 0.00000)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 315.00000, 38.04000, 0.00000)
 mesh = SubResource("Mesh_beam")
 
 [node name="T0Traversa1M" type="MeshInstance3D" parent="Static/Turnuri"]
@@ -365,7 +367,7 @@ transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.
 mesh = SubResource("Mesh_leg")
 
 [node name="T1Traversa0M" type="MeshInstance3D" parent="Static/Turnuri"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 465.00000, 33.04000, 0.00000)
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 465.00000, 38.04000, 0.00000)
 mesh = SubResource("Mesh_beam")
 
 [node name="T1Traversa1M" type="MeshInstance3D" parent="Static/Turnuri"]

@@ -107,8 +107,8 @@ func _zone_at(pos: Vector2) -> String:
 	return ""
 
 ## Ce comanda ar da o atingere in `pos` (coordonatele controlului), fara sa
-## atinga starea. Doar citire: HUD-ul isi aseaza bara de turbo in afara
-## zonelor intrebandu-le pe ele, nu copiind razele (#719).
+## atinga starea. Doar citire: ProbeTouchZones verifica bara de turbo si linia
+## etichetelor de mod fata de zone intrebandu-le pe ele, nu copiind razele (#719).
 func zone_at(pos: Vector2) -> String:
 	return _zone_at(pos)
 

@@ -65,7 +65,10 @@ var _home_pending: bool = false
 ##           cantareasca ca o masina (tuk-tuk-urile Angkorului: Buggy-ul (100 kg) le
 ##           impinge greu, Autobuzul (260 kg) le arunca);
 ##   "home"  true: dupa ce a fost lovita si s-a oprit, piesa se intoarce la locul ei
-##           (cand nicio masina nu e aproape), ca sa nu ramana blocaj pe drum.
+##           (cand nicio masina nu e aproape), ca sa nu ramana blocaj pe drum;
+##   "max_footprint"  plafonul de marime in plan (m) pentru piesa asta, in locul celor 2 m —
+##           cerut EXPLICIT de cine stie ce face (masinile parcate din San Francisco: 3,7 m,
+##           cu masa de masina de joc). Fara cheie, regula de la #489 ramane neschimbata.
 static func wrap(model: Node3D, opts: Dictionary = {}) -> BumpProp:
 	# In editor (Track e @tool) nu: fara simulare, corpul ar fi doar zgomot in
 	# arbore, iar scriptul asta nu ruleaza acolo.
@@ -83,8 +86,9 @@ static func wrap(model: Node3D, opts: Dictionary = {}) -> BumpProp:
 		Vector3.ZERO)
 	var aabb := Track.model_aabb(model)
 	model.transform = saved
+	var max_foot := float(opts.get("max_footprint", MAX_FOOTPRINT_M))
 	if aabb.size.y <= 0.01 or aabb.size.y > MAX_HEIGHT_M \
-			or maxf(aabb.size.x, aabb.size.z) > MAX_FOOTPRINT_M:
+			or maxf(aabb.size.x, aabb.size.z) > max_foot:
 		return null
 	var body := BumpProp.new()
 	body.name = "%s_bump" % model.name

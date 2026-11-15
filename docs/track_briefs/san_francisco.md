@@ -196,7 +196,7 @@ rece** de golf, **auriu-pai** de deal uscat, **verde-închis** de chiparos,
 > | **C** | 0.26–0.33 | **Colțul de sus** (R24, la dreapta), brațul coamei de 84 m spre V (+53), virajul R36 spre N, elanul de 96 m | respiro; tramvaiul 1 iese drept înainte la colț |
 > | **D** | 0.33–0.49 | **Lanțul**, neschimbat: patru muchii spre N, +53 → +14,6 | semnătura |
 > | **E / E′** | 0.49–0.65 | Terasa și furca; **ocolul de 400 m** sau **serpentinele**; tramvaiul 2 în gura scurtăturii, neschimbat | decizia |
-> | **F** | 0.65–0.68 | **Cheiul de nord**, spre E, la +3 (scurtat: se termină la x 120) | |
+> | **F** | 0.65–0.68 | **Cheiul de nord**, spre E, la +3 (scurtat: se termină la x 120). **Pontonul** pe x 40–120 (pasul 6) | căderea în golf printre stâlpi, ~2 s |
 > | **G** | 0.68–0.78 | Colțul de NE, apoi **strada de întors spre pod**, spre S, care urcă +3 → +20 pe 172 m (11,5 %, racorduri de 24 m) | |
 > | **P′** | 0.78–1.00 | Virajul de 90° la stânga spre pod (R24), S-ul de 60 m, **podul spre larg** (banda de nord), **întoarcerea-balon** pe malul celălalt (R40–R20–R40, S-uri de 60 m), sosirea | al doilea pasaj peste pod, cu bariera mutată de camion între timp |
 >
@@ -327,11 +327,11 @@ Acoperirea claselor din `ref_notes/sisteme.md` §3:
 | mecanică | pe scurt | ce cere în cod |
 |---|---|---|
 | **Lanțul de muchii** (D) | patru blocuri: muchie, 28% pe 24 m, racord 17% → 7%, intersecție plată de 24 m | **zero cod** — geometrie de traseu, cu ferestrele declarate în `metadata/jump_crests` (excepția numită a ProbeLayout, ca la Angkor). **Contract măsurat** (§7 pasul 1a): airtime 0,58–0,70 s la plafon pentru toate cele 10 mașini, 0,77–0,85 s cu turbo; aterizare pe bloc, niciodată pe intersecție; **0 incidente în ~1.400 de zboruri** solo și în 1.020 în pluton. Profilul **nu** se schimbă fără sondă: forma lui, nu căderea, decide dacă aterizarea e sigură |
-| **Mașinile parcate** (D, B) | parcate perpendicular pe trotuar; aterizezi strâmb, intri în ele | **reuse** `BumpProp` (masă per piesă) + `PropDebris`. **Zero cod.** Masa aleasă ca Autobuzul să le arunce și Poliția să ricoșeze. **Niciuna pe carosabil și niciuna în zona de aterizare** (primii 45 m după muchie rămân liberi pe toată lățimea) |
+| **Mașinile parcate** (D, B) | parcate perpendicular pe trotuar; aterizezi strâmb, intri în ele | **reuse** `BumpProp` (masă per piesă) + `PropDebris`. **Cod minim** (pasul 6): opțiunea `max_footprint` a `BumpProp` (plafonul de 2 m în plan). Masa aleasă ca Autobuzul să le arunce și Poliția să ricoșeze — **nu se pot atinge odată cu „+0,3 s”**, vezi §7 pasul 6 (ales 70 kg). **Niciuna pe carosabil și niciuna în zona de aterizare** (primii 45 m după muchie rămân liberi pe toată lățimea) |
 | **Tramvaiul de pe urcare** (B) | vagon greu, ~4,5 m/s, pe șinele din mijloc, **în sensul cursei**; ciclu ~66 s, pe toată urcarea | **reuse** `BusHazard` pe `Path3D`, cu `soft_contact` + `ai_reads_lane` **+ flagurile noi `ai_same_direction` și `pitch_to_ground`** (pasul 1c: fără ele AI-ul nu citește un corp care merge în sensul cursei, iar pe 11,5% vagonul stă orizontal, cu botul în drum). Intră pe ax dintr-o stradă laterală și **iese drept înainte** la colțul unde cursa cotește. Ieșirea laterală taie banda celor care depășesc, măsurat. **Nu** `TRAIN_ALONG` (vine din față, letal pe ax, max 110 m de dreaptă). Model nou `cable_car.glb`, un singur corp |
 | **Tramvaiul din gură** (E, E′) | același tip de vagon, pe strada de jos, trece prin fața gurii scurtăturii; ciclu 29 s | **reuse** `BusHazard` (al doilea nod); eventual grupul `branch_gate` (decis de ProbeRace). **Nu** `TrainHazard`: are viteza și timpii constante (26 m/s), cere trei noduri de tren în model, iar AI-ul nu îl citește deloc |
 | **Serpentinele** (E′) | §2 | `TrackBranch` pe ruta cu indexul 1 + suprafață de cărămidă (`road_tint` / suprafața ramurii) + **bloc solid** cu hortensii în interiorul acelor (nu `SoftVegetation` pe tot stratul) + acostament la cota drumului pe interiorul virajelor de 90°. **Zero cod de joc** (sonda 1b, runda 2) |
-| **Pontonul** (F) | carosabil de scândură, stâlpi cu goluri, apă | **reuse** `RespawnZone` pe golf, plasa de mare **sub** cota apei (memoria `ziduri-invizibile-ale-lumii`); scândura e clasă de textură pe carosabil, nu punte fizică (pontonul care se leagănă e semnătura Ha Long-ului) |
+| **Pontonul** (F) | carosabil de scândură, stâlpi cu goluri, apă | **reuse** `RespawnZone` pe golf, plasa de mare **sub** cota apei (memoria `ziduri-invizibile-ale-lumii`); scândura e clasă de textură pe carosabil, nu punte fizică (pontonul care se leagănă e semnătura Ha Long-ului). **Făcut la pasul 6**: `custom_wood_deck_ranges`, rapă-cornișă spre golf, stâlpi moi, `ai_drop_edges` |
 | **Leii de mare, papagalii, pescărușii** | teatru | **reuse** `FlockProp`; leii de mare sunt statici pe plute (lătrat pe sunet), **nu traversează** — traversarea de animale e a Serengeti-ului, a Ha Long-ului și a Transfăgărășanului |
 | **Zebra și semaforul de pe muchie** (D) | telegraful fiecărei sărituri | decal pe carosabil + GLB atârnat; fără coliziune la înălțimea mașinii în zbor (**semaforul stă la ≥ 8 m peste muchie**: zborul cu turbo urcă la 4,0 m peste drum) |
 
@@ -1367,8 +1367,237 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
    Nemăsurat: feel-ul la volan (DriveScene sau iPhone) și tramvaiul jucătorului cu cameră reală.
    Placeholderul se rotește pe loc ~1 s când reapare la capătul de start, în afara carosabilului.
 
-6. Serpentinele, pontonul, mașinile
-   parcate. 7. Hero. 8. Kituri, fundal, teatru, sunet; `probe_decor`; testul de
+6. **Serpentinele, pontonul, mașinile parcate — FĂCUT (15 nov 2026)**, pe B200, din
+   `tools/gen_sf_route.py` (ramura `sanfrancisco/pas6`). Ultimele elemente care schimbă jocul;
+   după ele rămân doar vizualul și sunetul. Totul e placeholder: cărămida și scândura sunt
+   clasele de textură existente, mașinile parcate sunt cutii pe atlasul de paletă, hortensiile
+   sunt sfere.
+
+   **Golful lipsea pe B200 (găsit de agentul foii de assets, reparat aici).** Poligonul
+   `custom_lagoon` era corect, dar fundul lagunei se calculează ca `media șoselei − lagoon_depth`
+   (`TrackSideSampler._carve_lagoon`), cu implicitul 20. Pe bucla veche media era mică; pe B200
+   podul și străzile de la +20 au urcat-o la ~23,4, deci fundul ieșea la **+3,4, peste apă (0)**.
+   Apa rămânea doar în rapele-viaduct de sub pod. Generatorul scrie acum `lagoon_depth = media + 8`
+   (fundul la −8, ca rapele podului). Capturi de sus: `p6_sus_inainte_golf.png` /
+   `p6_sus_dupa_golf.png` (`docs/asset_briefs/img/sf_route/`). Consecința: golful e acum apă și
+   lângă cheu, la est de strada de întors și în jurul capului de pod. Loturile D și E de mai jos
+   sunt cu golful reparat; A, B, C au fost înainte sau imediat după (vezi tabelul).
+
+   **Unde a ajuns pontonul și de ce.** Pe B200 cheiul de nord a rămas în aceleași coordonate
+   (`y` 454, la +3), scurtat până la colțul de NE (`x` 120). Golful e imediat la nord de el, deci
+   **pontonul încape fără să mute traseul**: `x` 40 → 120 (80 m), de la 18 m după reîntâlnire până
+   la începutul colțului de NE. Alte locuri cercetate și respinse: strada de întors spre pod (urcă
+   +3 → +20 pe toată lungimea, apa e la 33 m de ea) și colțul de NE (apa e la ~40 m de exteriorul
+   lui). Pe ponton:
+   - carosabilul are scândura clasei `wood` (export nou `custom_wood_deck_ranges` pe
+     `TrackFromPath`, care scrie cheia de temă `wood_deck_ranges` a Kyoto-ului doar pentru pista
+     asta; culoarea în temă, `wood_deck_color`). Aceeași geometrie și coliziune ca șoseaua;
+   - spre golf e o **rapă-cornișă** pe latura de nord (−1), cu fundul la −8 și lățimea de 60 m.
+     Fracțiile rapei sunt pe **lungime** (`_dists / _total_len` în sampler), nu pe indice ca
+     muchiile: cu indicele, primii 14 m nu se săpau. Adâncimea e 200 (cu podeaua la −8), fiindcă
+     rapa se stinge pe `RAVINE_FADE_FRAC` (~51 m) de la fiecare capăt: cu 30, pe 80 m cornișa
+     ajungea sub apă doar la mijloc;
+   - **stâlpi de amarare** gri (0,5 × 0,8 × 0,5 m) la 0,3 m dincolo de asfalt, din 6 în 6 m
+     (goluri de 5,5 m), **de la `x` 52** (primii 12 m fără stâlpi, vezi mai jos), cu contact moale
+     (`soft_hit_crush`);
+   - **AI onest**: `ai_drop_edges` pe ponton (latura stângă, marginea 2,5 m), ca la fântâna din
+     Jodhpur. AI-ul vede muchia, nu pe cine îl împinge;
+   - căderea ajunge în apă și în plasa de mare (SeaRespawn, plafonul la −1,18, apa la +0,02).
+
+   Garda `tools/ProbeSfPonton.tscn` (raze verticale pe coliziunea reală, din 4 în 4 m): carosabil
+   la +3 (abatere 0,00 m); spre golf, la 1,5 m de asfalt, solul e cu ≥ 2,53 m sub drum, iar la 8 m
+   e la ≤ −3,83 (sub apă); spre oraș, la 1,5 m, abaterea e de 0,30 m (≤ 0,35); plasa e sub apă și
+   peste fund. **Sabotajul** (`--side=1`, părțile inversate) pică pe 4 puncte.
+
+   **Căderea, măsurată solo** (`ProbeSfPonton --fall`): 7 mașini × 3 goluri; pilotul trage de
+   volan spre golul dintre doi stâlpi, cade, e repus, apoi ține axa până la capătul pontonului.
+
+   | | rezultat |
+   |---|---|
+   | căderi | **20 / 21** (Poliția a lovit un stâlp moale la golul 3: −1,85 s, fără cădere) |
+   | repunerea | **pe carosabil** în toate, pe axa cheiului, cu 7–9 m înaintea golului |
+   | pierderea față de aceeași trecere fără cădere | **mediană 2,27 s** (1,98–2,65) — ținta ≈ 2 s |
+
+   **Mașinile parcate.** `scenes/props/sf_parked_car.gd`: trei caroserii placeholder (sedan,
+   hatchback, dubă), 3,7 × 1,9 m, până la 1,6 m înălțime, în culori stinse (`PAINTED_METAL`,
+   `CORAL_SAND`, `CONCRETE`) pe `Palette.world_material()`, deci **zero materiale noi**. La rulare,
+   după primul pas de fizică, coboară pe sol cu o rază verticală și devin `BumpProp` cu masă de
+   mașină de joc și `home` (se întorc la locul lor când nu e nimeni la 30 m).
+   - **Cod minim, nu zero cod.** `BumpProp.wrap` refuza orice piesă mai mare de **2 m în plan**
+     (AABB-ul piesei pe X și Z, fără rotația rădăcinii) sau **1,8 m înălțime**. O mașină parcată
+     are 3,7 m. Opțiune nouă `max_footprint` în `opts`; fără ea, regula de la #489 e neschimbată
+     pe celelalte piste. Mașina parcată cere 4,5 m (încape și caroseria de 4,2 m a foii de
+     assets). **Plafonul de înălțime (1,8 m) a rămas**: o dubă reală mai înaltă de 1,8 m ar deveni
+     zid static. De decis la foaia de assets (vezi „de decis”).
+   - **42 de mașini**: 30 pe lanț (4 pe fiecare parte a blocurilor 1–3 și 3 pe blocul 4, la 46,6,
+     49,5, 56,0 și 62,5 m după muchie, adică pe racordul final și pe intersecția plată) și 12 pe
+     strada tramvaiului 1 (două grupuri de câte 3 pe fiecare parte, la `y` 120 și 30, departe de
+     intrarea tramvaiului). Perpendiculare pe trotuar, cu capătul dinspre drum la 0,4 m dincolo de
+     asfalt. Generatorul verifică fiecare colț al fiecărei caroserii: **niciunul pe carosabil**
+     (cel mai apropiat colț e la 7,40 m de axă, carosabilul are 7,0 m) și **niciunul în primii 45 m
+     după vreo muchie**.
+
+   **Calibrarea** (`tools/ProbeSfParked.tscn`): teren plat, mașina la 30 m/s, mașina parcată
+   perpendiculară pe drum, cu botul intrat 0,6–1,8 m în lățimea ei. Pierderea până la +100 m,
+   față de aceeași trecere fără mașină parcată:
+
+   | masa mașinii parcate | Poliția (90 kg) | Taxiul (115) | Autobuzul (260) | mediana tuturor | aruncată de Poliție / de Autobuz |
+   |---|---|---|---|---|---|
+   | 40 kg | +0,27..+0,60 s | +0,32..+0,60 | +0,18..+0,35 | **+0,35 s** | 26–51 m / 34–64 m |
+   | **70 kg (ales)** | **+0,48..+0,92** | **+0,50..+0,90** | **+0,32..+0,55** | **+0,57 s** | 21–39 m / 31–56 m |
+   | 100 kg | +0,63..+1,13 | +0,65..+1,13 | +0,43..+0,72 | +0,73 s | 18–31 m / 29–50 m |
+   | 140 kg | +0,82..+1,35 | +0,80..+1,35 | +0,57..+0,92 | +0,92 s | 15–24 m / 26–43 m |
+
+   0 ejectări în toate cele 84 de lovituri (și Muscle, Hot rod, Monster). **Cele două cerințe nu
+   se pot atinge odată:** la masa la care lovitura costă ~0,3 s (40 kg), Poliția aruncă mașina
+   parcată aproape la fel de departe ca Autobuzul; ca Poliția să „ricoșeze” (să piardă mult și s-o
+   miște puțin), mașina parcată trebuie să cântărească peste ~140 kg, iar lovitura costă ~1 s.
+   Nicio masă nu întoarce Poliția: botul unei mașini perpendiculare e lovit în axa de mers, deci
+   mașina de joc își pierde viteza, nu direcția. **Ales: 70 kg**, la mijloc: Autobuzul pierde
+   0,3–0,55 s și o aruncă la 31–56 m, Poliția pierde de ~1,7 ori mai mult. Masa e un export
+   (`SF_PARK_MASS` în generator, `mass_kg` pe nod).
+
+   **Lanțul cu mașinile parcate** (`probe_sf_crest.gd` pe Track25: sonda știe acum să lucreze în
+   cadrul străzii dintr-o pistă reală, din `metadata/sf_chain_azimuth_deg`). Toată flota (10
+   mașini), modurile `max`, `t1`–`t4` (turbo înaintea fiecărei muchii), abaterile 0, −4 și +4 m,
+   adică 600 de zboruri pe variantă, A/B cu și fără mașini parcate:
+
+   | | cu mașini parcate | fără |
+   |---|---|---|
+   | zboruri | 600 | 600 |
+   | airtime median la plafon / cu turbo | 0,63–0,64 / 0,81–0,83 s | identic |
+   | zborul cel mai lung (turbo) | 37,6 m | 37,6 m |
+   | mașini parcate atinse | **0** | — |
+   | ejectări | 2 | 5 |
+
+   **0 incidente noi.** Toate cele 7 ejectări (în ambele variante) sunt pe `RoadTop`, la 21–37 m
+   după muchie, în racordul concav: mecanismul cunoscut de la 1a (aterizarea cu turbo pe racord,
+   decizia celor 4 blocuri scurte). Pe strada sintetică aceeași sondă dădea 0 din ~1.400; pe
+   Track25 dă 2–5 din 600 pe aceeași geometrie. Diferența dintre variante (2 față de 5) e Jolt:
+   mașinile parcate stau la 7,4 m de axă, iar cele trei ejectări în plus (în varianta FĂRĂ ele)
+   sunt la abaterile −4 și 0 m.
+
+   **ProbeRace, 8 mașini × 16 seed-uri × 250 s, `--track=Track25`.** `2b` = main (3c039143),
+   rulat în același worktree înainte de orice schimbare. Pasul 6 a trecut prin trei stări:
+   - **A**: prima formă (golful încă uscat, stâlpi duri de la `x` 43, fațada intrării la 1 m,
+     70 kg);
+   - **B, C**: golful reparat, stâlpi moi, fațada de pe exteriorul primului viraj de 90 retrasă la
+     4 m. B și C sunt aceeași stare, rulată de două ori;
+   - **D, E**: starea finală (ca B/C, plus primii 12 m ai pontonului fără stâlpi), rulată de două
+     ori.
+
+   | lot | tur mediu | repuneri / `[blocaj]` / ejectări (total) | serpentine: repuneri / `[blocaj]` din treceri | ejectări la intrarea în serpentine (2, 319) | lanț: ejectări / zboruri | scurtătura − ocol, mediană (cele mai bune) | tramvai 1 / 2: întâlniri cu contact | pod: contact barieră, peste / frontale |
+   |---|---|---|---|---|---|---|---|---|
+   | **2b (main)** | 82,66 s | 7 / 7 / 7 | 4,1 % / 2,9 % | 4 | 0 / 1.529 | +1,14 (+1,27) s | 1,3 % / 2,4 % | 5,4 %, 0 / 0 |
+   | A | 82,81 | 8 / 10 / 7 | 2,8 % / 4,5 % | 1 | 1 / 1.529 | +0,98 (+1,37) | 2,0 % / 1,7 % | 5,3 %, 0 / 0 |
+   | B | 82,98 | 8 / 19 / 3 | 1,7 % / **9,8 %** | 0 | 1 / 1.526 | +1,23 (+1,42) | 0,3 % / 2,7 % | 5,9 %, 0 / 0 |
+   | C (= B, repetat) | 82,75 | 5 / 8 / 4 | 1,7 % / 4,5 % | 0 | 1 / 1.529 | +1,29 (+1,17) | 1,0 % / 2,7 % | 5,2 %, 0 / 0 |
+   | **D (final)** | **82,61** | **4 / 7 / 2** | **1,1 % / 3,9 %** | **0** | **0 / 1.526** | **+1,39 (+1,39)** | **1,0 % / 5,0 %** | **6,1 %, 0 / 0** |
+   | **E (final, repetat)** | **82,63** | **8 / 8 / 7** | **2,7 % / 4,3 %** | **0** | **0 / 1.529** | **+1,26 (+1,28)** | **1,0 % / 4,0 %** | **4,9 %, 0 / 0** |
+
+   Pasul 6, pe loturi (`--- PASUL 6`):
+
+   | lot | ponton: treceri / căderi / ejectări pe stâlp | mașini parcate: piese urnite (pe cursă) | impacturi distincte / tur-mașină | resturi pe carosabil (s-piesă) / în zona de aterizare | aterizări / ejectări la < 8 m de resturi |
+   |---|---|---|---|---|---|
+   | A | 390 / 0 / 2 (stâlpi duri, `x` 43) | 22 (1,4) | — | 13,3 / 0 | 0 / 0 |
+   | B | 388 / 2 / 2 (stâlpi moi, `x` 43) | 27 (1,7) | — | 0 / 0 | 0 / 0 |
+   | C | 384 / 1 / 0 | 21 (1,3) | — | 0 / 0 | 0 / 0 |
+   | **D** | **385 / 1 / 0** | **22 (1,4)** | **0,033 (D + E)** | **0 / 0** | **0 / 0** |
+   | **E** | **388 / 2 / 2 (stâlpi moi, `x` 55)** | **15 (0,9)** | | **6,3 / 0** | **0 / 0** |
+
+   Trecerile prin serpentine care au atins blocul solid al unui ac (`STRAT`, fără repunere): D + E
+   **n = 27, mediana 15,90 s față de 14,88 s pe ocol, deci scurtătura pierde 1,03 s** (B–E: n = 57,
+   −1,24 s).
+
+   **Ce a ieșit:**
+   - **Turul nu se mișcă**: 82,61–82,98 s pe toate loturile, față de 82,66 s pe 2b.
+   - **Serpentinele trec contractul.** Scurtătura curată câștigă **+1,26..+1,39 s** la mediană (2b:
+     +1,14 aici, +1,27 la 2b runda 2). O bordură atinsă **pierde 1,03 s** față de ocol (ținta ≈ 1 s).
+     Repunerile scad (4,1 % → 1,1–2,7 %), `[blocaj]` rămâne în banda lui (2,9 % pe 2b aici, 9,1 %
+     pe 2b runda 2; pe pasul 6: 3,9–4,5 %, cu un lot de 9,8 % — B, cu două seed-uri care fac 12 din
+     17, toate în turul 1, la t ≈ 51–59 s). Variația dintre loturi identice (B și C: 9,8 % și
+     4,5 %) e mai mare decât orice efect: e îmbulzeala turului 1, ca la 2b.
+   - **Cum am scăzut repunerile fără să ating forma:** pe 2b, 4 din 7 ejectări din serpentine erau
+     în **același punct** (2, 319): exteriorul primului viraj de 90 de la intrare, unde plutonul
+     vine din terasă cu ~30 m/s și cine iese larg lovește frontal fațada de la 1 m. Fațada de pe
+     exteriorul acestui viraj (segmentele 0–2 ale ramurii) stă acum la **4 m** de carosabil
+     (`SF_ENTRY_WALL_OFF`; trotuar / grădină în fața casei, de rezolvat în kit). Pe B–E: **0
+     ejectări acolo** în 64 de curse. Carosabilul, acele, blocurile solide și celelalte fațade sunt
+     neschimbate.
+   - **Pontonul.** Căderi: 1–2 pe lot, **0,26–0,52 % din treceri, ~0,005 pe tur-mașină**, toate la
+     `x` 49–54, adică imediat după vărsarea fluxurilor de la reîntâlnire (ocol + scurtătură), nu pe
+     tot pontonul. AI-ul nu cade sistematic. Plus 0–2 ejectări pe lot pe **primul stâlp** întâlnit
+     (`lovit=Stalpi`), tot acolo, tot în turul 1 sau 2. Contactul moale (`soft_hit_crush`) nu le
+     oprește: mașina e deja cu jumătate peste muchie și atinge în același tick și fusta șoselei,
+     iar `Car` ejectează când lovitura nu e „doar moale”. Mutarea stâlpilor cu 12 m mai la est
+     (D/E) a mutat ejectarea după ei (`x` 52), nu a scos-o. O ejectare acolo costă cât o cădere
+     (repunere, ~2 s), deci contractul „greșeala costă ~2 s” ține; e trecută la „de decis”.
+   - **Mașinile parcate.** ~1 impact pe cursă (0,033 pe tur-mașină; o mașină lovită o împinge pe
+     vecina, de aceea „piese urnite” e ~1,8 × impacturile). Jumătate pe strada tramvaiului 1, în
+     turul 1 (t ≈ 15–20 s): plutonul îngrămădit de după primul viraj. Pe lanț, mai ales pe blocul
+     1. **Resturile nu ajung în zona de aterizare**: 0 s în primii 45 m după vreo muchie, 0
+     aterizări și 0 ejectări la mai puțin de 8 m de o piesă urnită, în toate loturile. Cât stau pe
+     carosabil: 0–13 s-piesă pe 16 curse, apoi se întorc la loc (`home`).
+   - **Lanțul în pluton**: 3 ejectări în 7.636 de zboruri pe loturile pasului 6 (**0,04 %**), toate pe
+     racordul de după muchie, la 23–25 m după ea, niciuna lângă o mașină parcată. 2b: 0 / 1.529 aici,
+     ~0,05–0,07 % pe loturile vechi.
+   - **Tramvaiele și podul**: tramvaiul 1 la 0,3–2,0 % contact (2b: 1,3 %), tramvaiul 2 la 1,7–5,0 %
+     (2b: 2,4 % aici, 3,7–5,5 % la 2b runda 2); bariera 4,9–6,1 % (5,4 %), **0 treceri peste
+     despărțitor și 0 frontale în coridor** pe toate cele 6 loturi.
+
+   **Unelte noi sau schimbate:**
+   - `tools/gen_sf_route.py`: blocul „PASUL 6”. Steaguri: `SF_PAS6=0` (scena 2b), `SF_PONTON=0`,
+     `SF_PARCATE=0`, `SF_HORTENSII=0`, `SF_PARK_MASS`, `SF_BOLLARD_STEP`, `SF_BOLLARD_FROM`,
+     `SF_PONT_X0/X1`, `SF_DROP_MARGIN`, `SF_ENTRY_WALL_OFF`;
+   - `tools/ProbeSfPonton.tscn` (`probe_sf_ponton.gd`): garda pontonului, `--side=1` (sabotaj),
+     `--fall` (căderea solo);
+   - `tools/ProbeSfParked.tscn` (`probe_sf_parked.gd`): calibrarea mașinilor parcate;
+   - `tools/probe_sf_crest.gd`: rulează și pe Track25 (`--scene=res://scenes/tracks/Track25.tscn`),
+     cu incidentul `PARCATA`;
+   - `tools/probe_sf_watch.gd` + `sf_route_report.py`: secțiunea `--- PASUL 6` (trecerile pe ponton,
+     căderile, piesele urnite, cât stau resturile pe carosabil și în zona de aterizare, aterizările
+     și ejectările lângă resturi), zona `ponton`, steagurile `STRAT` / `FATADA` pe trecerile prin
+     serpentine, obiectul lovit la fiecare ejectare (`lovit=`).
+
+   **Gărzi:**
+
+   | gardă | rezultat |
+   |---|---|
+   | ProbeLayout `--track=17` | OK |
+   | ProbeSfRoute | OK, acostamentul −0,29 m (contract ≥ −0,30); apa la +0,02 |
+   | ProbeLaneClear `--track=17` | **50, exact linia de bază**: mașinile parcate (stratul 9) și stâlpii (dincolo de asfalt) nu intră. Sabotajul pică (53 > 50) |
+   | ProbeSfPonton | OK; sabotajul pică |
+   | `probe_decor --track=25` (numărul scenei) | OK, **26 de materiale** (≤ 38): +1 scânduri, +1 hortensii |
+   | `verify_local.sh` | **OK, 79 de pași** (prima rulare a picat doar pe `.uid`-ul necomis al scriptului nou, reparat) |
+
+   **Capturi `--gamecam`** (`docs/asset_briefs/img/sf_route/`): `p6_serpentine_gamecam.png`
+   (cărămida și hortensiile pe blocul solid, `--route=1`), `p6_ponton_gamecam.png` (scândura,
+   stâlpii, golful; `p6_ponton_inainte_golf_gamecam.png` e aceeași vedere cu golful uscat),
+   `p6_lant_parcate_gamecam.png` (blocul 2, mașinile parcate pe intersecție). Plus cele două
+   capturi de sus ale golfului.
+
+   **Nemăsurat:** feel-ul la volan; costul unei lovituri în mașina parcată în pluton (calibrarea e
+   solo, pe teren plat); petalele (`PropDebris`) la atingerea stratului de hortensii (nefăcute:
+   hortensiile sunt doar vizuale); costul pe iPhone al celor 42 de corpuri (adormite, deci
+   aproape zero până la prima lovitură).
+
+   **De decis (dezvoltatorul):**
+   1. **Masa mașinilor parcate**: 70 kg (+0,57 s mediana unei lovituri solo, Autobuzul le aruncă,
+      Poliția pierde de ~1,7 ori mai mult, dar nu ricoșează) sau 40 kg (+0,35 s, cât ținta de
+      0,3 s, dar Poliția le aruncă aproape ca Autobuzul). „Ricoșeul” cere peste ~140 kg și ~1 s pe
+      lovitură. Tabelul de calibrare e mai sus.
+   2. **Primul stâlp de pe ponton**: 0–2 ejectări pe lot, la vărsarea fluxurilor. Variante:
+      (a) lăsat așa (ejectarea costă cât o cădere); (b) fără stâlpi pe primii ~25 m (greșeala de
+      acolo devine cădere); (c) o bordură joasă de lemn în loc de stâlpi pe primii metri (cod: un
+      parapet nou pe muchie, pe care AI-ul îl vede ca muchie).
+   3. **Plafonul de înălțime al `BumpProp` (1,8 m)**: o dubă parcată mai înaltă din foaia de
+      assets ar deveni zid static. Se poate deschide ca `max_footprint` (opțiune explicită per piesă)
+      sau duba rămâne sub 1,8 m.
+   4. **Fațada de la intrarea în serpentine** stă la 4 m de carosabil (abatere de la „fațade la
+      1 m”): kitul de case trebuie să lase acolo un trotuar sau o grădină.
+   5. **Hortensiile fără petale**: brief-ul cerea `PropDebris` când atingi stratul. Nu e făcut
+      (stratul e doar vizual); ar cere o `Area3D` pe fiecare bloc, ca perdeaua de liane din Angkor.
+7. Hero. 8. Kituri, fundal, teatru, sunet; `probe_decor`; testul de
    citire final; **verdictul dezvoltatorului la volan**.
 
 ## 8. Lecții aplicate anticipat, și ce a fost respins

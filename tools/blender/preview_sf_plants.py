@@ -699,20 +699,25 @@ def _piece_shot(key, out, azimuth, elevation, lens=50.0, aspect=1.2, res_height=
 
 # --- moduri ------------------------------------------------------------------------
 
-def compare():
+def compare(only_cypress=False):
+    """`--cypress` in plus: doar comparatiile chiparosilor (restul pieselor a fost acceptat)."""
     os.makedirs(FID_DIR, exist_ok=True)
     jobs = [
-        ("sf_cypress_a", "sf_cypress_a", dict(azimuth=-82.0, elevation=8.0, aspect=1.15)),
-        ("sf_cypress_b", "sf_cypress_b", dict(azimuth=-85.0, elevation=8.0, aspect=1.45)),
-        ("sf_cypress_c", "sf_cypress_c", dict(azimuth=-82.0, elevation=8.0, aspect=0.85)),
+        ("sf_cypress_a", "sf_cypress_a", dict(azimuth=-82.0, elevation=8.0, aspect=1.5)),
+        ("sf_cypress_b", "sf_cypress_b", dict(azimuth=-85.0, elevation=8.0, aspect=1.6)),
+        ("sf_cypress_c", "sf_cypress_c", dict(azimuth=-82.0, elevation=8.0, aspect=1.4)),
         ("sf_street_tree", "sf_street_tree", dict(azimuth=-70.0, elevation=10.0, aspect=1.0)),
     ]
+    if only_cypress:
+        jobs = jobs[:3]
     for key, crop, cam in jobs:
         tmp = os.path.join(FID_DIR, "_r_%s.png" % key)
         _piece_shot(key, tmp, **cam)
         _compose(["--compare", "--crop", os.path.join(CROPS, crop + ".png"), "--render", tmp,
                   "--out", os.path.join(FID_DIR, key + ".png"), "--height", "700"])
         _rm(tmp)
+    if only_cypress:
+        return
     # hortensia: roz, albastra (3/4 ca decuparea) si cum se vede de la 10 m de sus
     tmps = []
     for key in ("sf_hydrangea", "sf_hydrangea_blue"):
@@ -951,7 +956,7 @@ def gamecam():
 argv = sys.argv
 args = argv[argv.index("--") + 1:] if "--" in argv else []
 if "--compare" in args or "--all" in args:
-    compare()
+    compare(only_cypress="--cypress" in args)
 if "--views" in args or "--all" in args:
     views()
 if "--silhouettes" in args or "--all" in args:

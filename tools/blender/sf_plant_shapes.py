@@ -181,7 +181,7 @@ def core_blob(b, center, rx, ry, rz, slot, subdiv=2):
 
 def sf_leaf_cards(b, pads, slot, count, base_hex, accent_hex=None, seed=0,
                   size=(0.85, 1.15), shell=(0.80, 1.10), spray=0.06, below=0.18,
-                  accent=0.22, radial=0.15, shade_lo=0.46):
+                  accent=0.22, radial=0.15, shade_lo=0.46, size_by_pad=False):
     """Cardurile punctate, cu lumina PE CIORCHINE (vezi docstringul modulului).
 
     Diferente fata de `leaf_cards` (kyoto_shapes):
@@ -211,6 +211,7 @@ def sf_leaf_cards(b, pads, slot, count, base_hex, accent_hex=None, seed=0,
     made = 0
     min_tilt = math.sin(math.radians(6.0))
     verts = []
+    ax_max = max(p[3] for p in pads)
     for k, (cx, cy, cz, ax, ay, azu, azd) in enumerate(pads):
         want = int(round(count * weights[k] / wsum))
         got = 0
@@ -250,6 +251,8 @@ def sf_leaf_cards(b, pads, slot, count, base_hex, accent_hex=None, seed=0,
                 nm = Vector((math.cos(a) * min_tilt, math.sin(a) * min_tilt,
                              sz * math.sqrt(1.0 - min_tilt * min_tilt)))
             hw = (size[0] + rnd() * (size[1] - size[0])) * 0.5 * (0.6 if is_spray else 1.0)
+            if size_by_pad:     # ciorchinii mici (coada politei) au carduri mai mici
+                hw *= max(0.55, min(1.0, (ax / ax_max) ** 0.6))
             hh = hw * (0.85 + rnd() * 0.3)
             tg = min(1.0, max(0.0, (p.z - z_lo) / z_span))
             tl = 0.5 + 0.5 * uz

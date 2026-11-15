@@ -8,12 +8,14 @@ Citeste GLB-urile direct (coordonate Godot: Y sus, Blender +Y = Godot -Z), cu ci
 radacinile fara scala/rotatie/translatie (memoria scala-glb-neaplicata-la-radacina) si
 numele exacte ale nodurilor:
 
-  sf_cypress_a/b/c  inaltimea in 8-12 m; coroana (`Cypress_Crown`) lata pe X intre 8 si 10 m,
-                    iar cardurile (`Cypress_Leaves`) cel mult 11 m; APLECAREA: centrul de
-                    masa al coroanei la cel putin +1,0 m pe X fata de baza trunchiului (vantul
-                    vine din -X, deci un palc pus cu yaw 0 se apleaca la fel); baza trunchiului
-                    centrata pe origine (varfurile trunchiului sub 0,3 m, in 0,25 m de axa)
-                    si pe sol (min Y = 0).
+  sf_cypress_a/b/c  (v2, arbore de polite) a si b: inaltimea 7-9 m, coroana (`Cypress_Crown`)
+                    11-13 m pe X, inaltime / latime <= 0,75; c: 6,5-8 m si 9-10 m. Cardurile
+                    cel mult 1 m peste latimea maxima. APLECAREA: centrul de masa al coroanei
+                    la cel putin +2,5 m pe X fata de baza (vantul vine din -X, deci un palc pus
+                    cu yaw 0 se apleaca la fel); SURPLOMBA: polita de sus (ultimii 1,2 m ai
+                    coroanei) ajunge la cel putin +3,0 m pe X; BAZA: diametrul trunchiului la
+                    +0,5 m (cu contraforturi) cel putin 1,6 m, centrata pe origine (varfurile
+                    sub 0,3 m, in 0,25 m de axa) si pe sol (min Y = 0).
   sf_street_tree    inaltimea in 6-8 m; coroana rotunda O 4-5 m pe X si pe Z, centrata pe
                     trunchi (0,3 m); trunchiul DREPT (intre 0,3 si 2,0 m nimic la peste 0,45 m
                     de axa); baza centrata si pe sol.
@@ -50,6 +52,11 @@ PIECES = {
 }
 CYP = ("sf_cypress_a", "sf_cypress_b", "sf_cypress_c")
 HYD = ("sf_hydrangea", "sf_hydrangea_blue")
+# v2 (16 nov 2026, verdictul coordonatorului: v1 citea pin niwaki): arbore de polite mai lat
+# decat inalt. Inaltimea pe toate nodurile, latimea pe masa `Cypress_Crown`.
+CYP_SPEC = {"sf_cypress_a": dict(h=(7.0, 9.0), w=(11.0, 13.0), ratio=0.75),
+            "sf_cypress_b": dict(h=(7.0, 9.0), w=(11.0, 13.0), ratio=0.75),
+            "sf_cypress_c": dict(h=(6.5, 8.0), w=(9.0, 10.0), ratio=None)}
 NODES = {k: ["Cypress_Trunk", "Cypress_Crown", "Cypress_Core", "Cypress_Leaves"] for k in CYP}
 NODES["sf_street_tree"] = ["StreetTree_Trunk", "StreetTree_Crown", "StreetTree_Core",
                            "StreetTree_Leaves"]
@@ -99,24 +106,39 @@ def check(key, path, report=True):
     if abs(y0) > 0.005:
         bad.append("(sol) min Y = %.3f, nu 0" % y0)
     if key in CYP and not any(line.startswith("(noduri)") for line in bad):
+        sp = CYP_SPEC[key]
         crown = nodes["Cypress_Crown"]["verts"]
         leaves = nodes["Cypress_Leaves"]["verts"]
+        trunk = nodes["Cypress_Trunk"]["verts"]
         cb = _box(crown)
         lb = _box(leaves)
         cw = cb[0][1] - cb[0][0]
         lw = lb[0][1] - lb[0][0]
         cxm = sum(p[0] for p in crown) / len(crown)
-        if not 8.0 <= y1 <= 12.0:
-            bad.append("(inaltime) %.2f m, contract 8-12" % y1)
-        if not 8.0 <= cw <= 10.0:
-            bad.append("(latime) coroana %.2f m pe X, contract 8-10" % cw)
-        if lw > 11.0:
-            bad.append("(latime) cardurile %.2f m pe X, cel mult 11" % lw)
-        if cxm < 1.0:
-            bad.append("(aplecare) centrul coroanei la X %.2f m, cel putin +1,0 (spre +X)" % cxm)
-        _base(bad, nodes["Cypress_Trunk"]["verts"])
-        info = "inalt %.2f  coroana X %.2f (carduri %.2f) Z %.2f  centrul coroanei X %+.2f" % (
-            y1, cw, lw, cb[2][1] - cb[2][0], cxm)
+        ratio = y1 / cw
+        if not sp["h"][0] <= y1 <= sp["h"][1]:
+            bad.append("(inaltime) %.2f m, contract %.1f-%.1f" % ((y1,) + sp["h"]))
+        if not sp["w"][0] <= cw <= sp["w"][1]:
+            bad.append("(latime) coroana %.2f m pe X, contract %.1f-%.1f" % ((cw,) + sp["w"]))
+        if lw > sp["w"][1] + 1.0:
+            bad.append("(latime) cardurile %.2f m pe X, cel mult %.1f" % (lw, sp["w"][1] + 1.0))
+        if sp["ratio"] is not None and ratio > sp["ratio"]:
+            bad.append("(proportie) inaltime / latime = %.2f, cel mult %.2f" % (ratio, sp["ratio"]))
+        if cxm < 2.5:
+            bad.append("(aplecare) centrul coroanei la X %.2f m, cel putin +2,5 (spre +X)" % cxm)
+        top = [p for p in crown if p[1] >= cb[1][1] - 1.2]
+        over = max(p[0] for p in top)
+        if over < 3.0:
+            bad.append("(surplomba) polita de sus ajunge doar la X %+.2f, cel putin +3,0" % over)
+        ring = [p for p in trunk if 0.4 <= p[1] <= 0.6]
+        dia = min(max(p[0] for p in ring) - min(p[0] for p in ring),
+                  max(p[2] for p in ring) - min(p[2] for p in ring)) if ring else 0.0
+        if dia < 1.6:
+            bad.append("(baza) diametrul la +0,5 m e %.2f m, cel putin 1,6" % dia)
+        _base(bad, trunk)
+        info = ("inalt %.2f  coroana X %.2f (carduri %.2f) Z %.2f  h/l %.2f  centru X %+.2f  "
+                "polita de sus pana la X %+.2f  baza O %.2f" % (
+                    y1, cw, lw, cb[2][1] - cb[2][0], ratio, cxm, over, dia))
     elif key == "sf_street_tree" and not any(line.startswith("(noduri)") for line in bad):
         crown = nodes["StreetTree_Crown"]["verts"]
         cb = _box(crown)
@@ -211,16 +233,26 @@ def sabotages(key):
             ("coroana mutata cu 2 m spre -X (aplecare inversa)", "aplecare",
              lambda g, b: poke_all(g, b, "Cypress_Crown", lambda p: True,
                                    lambda p: (p[0] - 2.0, p[1], p[2])) > 0),
-            ("un varf de coroana urcat la 13 m", "inaltime",
-             lambda g, b: poke(g, b, "Cypress_Crown", lambda p: p[1] > 7.0,
-                               lambda p: (p[0], 13.0, p[2]))),
-            ("un varf de coroana scos la X = +8 m", "latime",
+            ("un varf de coroana urcat la 10,5 m", "inaltime",
+             lambda g, b: poke(g, b, "Cypress_Crown", lambda p: p[1] > 5.0,
+                               lambda p: (p[0], 10.5, p[2]))),
+            ("un varf de coroana scos la X = +12 m", "latime",
              lambda g, b: poke(g, b, "Cypress_Crown", lambda p: p[0] > 3.0,
-                               lambda p: (8.0, p[1], p[2]))),
+                               lambda p: (12.0, p[1], p[2]))),
+            ("polita de sus trasa 6 m spre -X", "surplomba",
+             lambda g, b: poke_all(g, b, "Cypress_Crown", lambda p: p[1] > 5.6,
+                                   lambda p: (p[0] - 6.0, p[1], p[2])) > 0),
+            ("trunchiul subtiat la 30 % intre +0,35 si +0,65 m", "baza",
+             lambda g, b: poke_all(g, b, "Cypress_Trunk", lambda p: 0.35 < p[1] < 0.65,
+                                   lambda p: (p[0] * 0.3, p[1], p[2] * 0.3)) > 0),
             ("baza trunchiului mutata 0,6 m pe X", "baza",
              lambda g, b: poke_all(g, b, "Cypress_Trunk", lambda p: p[1] < 0.3,
                                    lambda p: (p[0] + 0.6, p[1], p[2])) > 0),
         ]
+        if CYP_SPEC[key]["ratio"] is not None:
+            out.append(("coroana stransa pe X la 60 % (arbore inalt si ingust)", "proportie",
+                        lambda g, b: poke_all(g, b, "Cypress_Crown", lambda p: True,
+                                              lambda p: (p[0] * 0.6, p[1], p[2])) > 0))
     elif key == "sf_street_tree":
         out += [
             ("un varf de coroana scos la +1 m pe X", "coroana",

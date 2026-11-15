@@ -20,6 +20,12 @@ extends Node
 ##
 ## Nu e verdict de arta: casele-cutie nu au bovindouri, fronton sau decalaj; e aceeasi aproximare
 ## ca la pasul 0, deci cifrele se compara intre ele (bucla veche / B200 / alt soare), nu cu ochiul.
+##
+##   ... -- --real   (pasul 8) FARA casele-cutie: masoara contra caselor REALE ale pistei, adica
+##       instantele kitului de sub `DecorManual` cu metadata `sf_case` (scrise de gen_sf_route.py),
+##       cu un corp trimesh din geometria lor randata (fronton, cornisa, turnulet, bovindou) — ca
+##       `tools/sf_loc_decor.gd --glb` pe strada sintetica. Plus cutiile lor (`CaseCorpuri`). Pe
+##       scena fara case (`SF_CASE=0`) da soarele pe carosabil contra terenului singur.
 
 const ROAD_HALF_SAMPLE: float = 6.75
 const FACADE_OFF: float = 10.5
@@ -31,6 +37,7 @@ const CROSS_W: float = 14.0
 
 var _scene: String = "res://scenes/tracks/Track25.tscn"
 var _sun_over := Vector3.ZERO
+var _real := false
 var _track: Track
 var _houses: Node3D
 
@@ -42,6 +49,8 @@ func _ready() -> void:
 		elif a.begins_with("--sun="):
 			var p := a.trim_prefix("--sun=").split(",")
 			_sun_over = Vector3(-float(p[0]), float(p[1]), 0.0)
+		elif a == "--real":
+			_real = true
 	_track = (load(_scene) as PackedScene).instantiate() as Track
 	if _sun_over != Vector3.ZERO:
 		_track.set("custom_sun_rotation_deg", _sun_over)
@@ -76,7 +85,10 @@ func _ready() -> void:
 			idx.append(i)
 			i = (i + 1) % n
 		spans[key] = idx
-		_build_rows(r, idx)
+		if not _real:
+			_build_rows(r, idx)
+	if _real:
+		print("  --real: %d case reale (trimesh din geometria randata)" % _real_houses())
 	for _i in 4:
 		await get_tree().physics_frame
 	var space := get_viewport().world_3d.direct_space_state
@@ -131,6 +143,43 @@ func _ready() -> void:
 			100.0 * float(contra) / maxf(float(head_ang.size()), 1.0), _mean(nl_l), _mean(nl_r)])
 	print("  TOATE strazile masurate: %.1f%% la soare" % (100.0 * float(lit_all) / maxf(float(tot_all), 1.0)))
 	get_tree().quit(0)
+
+
+## Corpuri trimesh din geometria caselor reale (instantele cu `sf_case`), in grupul caselor.
+func _real_houses() -> int:
+	var dm := _track.get_node_or_null(^"DecorManual")
+	var corp := _track.get_node_or_null(^"CaseCorpuri")
+	if corp != null:
+		corp.add_to_group("sf_light_house")
+	if dm == null:
+		return 0
+	var n := 0
+	var stack: Array[Node] = [dm]
+	while not stack.is_empty():
+		var nd: Node = stack.pop_back()
+		for c in nd.get_children():
+			stack.append(c)
+		if not (nd is Node3D and nd.has_meta("sf_case")):
+			continue
+		n += 1
+		var body := StaticBody3D.new()
+		body.add_to_group("sf_light_house")
+		for c in nd.find_children("*", "MeshInstance3D", true, false):
+			var mi := c as MeshInstance3D
+			if mi.mesh == null:
+				continue
+			var faces := mi.mesh.get_faces()
+			var xf := mi.global_transform
+			for i in faces.size():
+				faces[i] = xf * faces[i]
+			var shape := ConcavePolygonShape3D.new()
+			shape.backface_collision = true
+			shape.set_faces(faces)
+			var cs := CollisionShape3D.new()
+			cs.shape = shape
+			body.add_child(cs)
+		_houses.add_child(body)
+	return n
 
 
 static func _mean(a: Array[float]) -> float:

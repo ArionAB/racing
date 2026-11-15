@@ -20,6 +20,20 @@
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/structures/sf_bridge_lamp.glb" id="p7_pod_lamp"]
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/vehicles/sf_median_truck.glb" id="p7_camion"]
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/props/sf_median_block.glb" id="p7_bloc"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_a_canted.glb" id="p8_sf_row_a_canted"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_b_square.glb" id="p8_sf_row_b_square"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_c_canted.glb" id="p8_sf_row_c_canted"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_a_square.glb" id="p8_sf_row_a_square"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_b_canted.glb" id="p8_sf_row_b_canted"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_corner_turret_m.glb" id="p8_sf_row_corner_turret_m"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_a_square_m.glb" id="p8_sf_row_a_square_m"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_b_canted_m.glb" id="p8_sf_row_b_canted_m"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_c_square_m.glb" id="p8_sf_row_c_square_m"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_a_canted_m.glb" id="p8_sf_row_a_canted_m"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_b_square_m.glb" id="p8_sf_row_b_square_m"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_corner_turret.glb" id="p8_sf_row_corner_turret"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_c_square.glb" id="p8_sf_row_c_square"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_c_canted_m.glb" id="p8_sf_row_c_canted_m"]
 [ext_resource type="Script" path="res://scenes/props/world_prop.gd" id="p7_worldprop"]
 
 [sub_resource type="Curve3D" id="Curve3D_sf"]
@@ -141,6 +155,12 @@ size = Vector3(0.5, 0.8, 0.5)
 [sub_resource type="BoxMesh" id="Mesh_stalp"]
 size = Vector3(0.5, 0.8, 0.5)
 material = SubResource("Mat_gri")
+
+[sub_resource type="BoxShape3D" id="Box_casa7"]
+size = Vector3(7.0, 12.0, 12.0)
+
+[sub_resource type="BoxShape3D" id="Box_casa9"]
+size = Vector3(9.0, 12.0, 12.0)
 
 [node name="Track25" type="Node3D"]
 script = ExtResource("1_track")
@@ -1785,3 +1805,1885 @@ metadata/coliziune = "none"
 [node name="FelinarS09" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 455.000, 20.200, -215.026)
 metadata/coliziune = "none"
+
+[node name="CaseD" type="Node3D" parent="DecorManual"]
+
+[node name="D1E_00" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_a_canted")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 52.020, -4.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D1E_01" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_b_square")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 50.465, -11.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D1E_02" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_c_canted")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 48.432, -18.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D1E_03" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_a_square")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 46.550, -25.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D1E_04" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_b_canted")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 45.050, -32.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D1E_05" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_corner_turret_m")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 44.050, -40.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "D"
+metadata/sf_case_w = 9.0
+
+[node name="D1V_00" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_a_square_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 51.984, -4.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D1V_01" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_b_canted_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 50.405, -11.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D1V_02" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_c_square_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 48.401, -18.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D1V_03" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_a_canted_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 46.552, -25.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D1V_04" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_b_square_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 45.069, -32.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D1V_05" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_corner_turret")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 44.069, -40.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "D"
+metadata/sf_case_w = 9.0
+
+[node name="D2E_00" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_b_canted")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 42.433, -76.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D2E_01" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_c_square")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 40.856, -83.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D2E_02" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_a_canted")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 38.832, -90.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D2E_03" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_b_square")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 36.967, -97.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D2E_04" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_c_canted")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 35.471, -104.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D2E_05" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_corner_turret_m")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 34.447, -112.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "D"
+metadata/sf_case_w = 9.0
+
+[node name="D2V_00" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_b_square_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 42.404, -76.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D2V_01" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_c_canted_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 40.799, -83.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D2V_02" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_a_square_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 38.803, -90.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D2V_03" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_b_canted_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 36.965, -97.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D2V_04" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_c_square_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 35.491, -104.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D2V_05" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_corner_turret")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 34.466, -112.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "D"
+metadata/sf_case_w = 9.0
+
+[node name="D3E_00" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_c_canted")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 32.854, -148.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D3E_01" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_a_square")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 31.243, -155.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D3E_02" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_b_canted")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 29.229, -162.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D3E_03" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_c_square")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 27.377, -169.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D3E_04" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_a_canted")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 25.887, -176.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D3E_05" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_corner_turret_m")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 24.860, -184.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "D"
+metadata/sf_case_w = 9.0
+
+[node name="D3V_00" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_c_square_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 32.828, -148.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D3V_01" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_a_canted_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 31.188, -155.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D3V_02" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_b_square_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 29.200, -162.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D3V_03" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_c_canted_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 27.373, -169.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D3V_04" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_a_square_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 25.906, -176.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D3V_05" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_corner_turret")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 24.882, -184.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "D"
+metadata/sf_case_w = 9.0
+
+[node name="D4E_00" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_a_canted")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 23.292, -220.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D4E_01" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_b_square")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 21.633, -227.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D4E_02" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_c_canted")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 19.624, -234.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D4E_03" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_a_square")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 17.782, -241.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D4E_04" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_b_canted")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 16.302, -248.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D4E_05" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_corner_turret_m")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 15.337, -256.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "D"
+metadata/sf_case_w = 9.0
+
+[node name="D4V_00" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_a_square_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 23.270, -220.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D4V_01" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_b_canted_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 21.580, -227.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D4V_02" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_c_square_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 19.596, -234.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D4V_03" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_a_canted_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 17.776, -241.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D4V_04" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_b_square_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 16.317, -248.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "D"
+metadata/sf_case_w = 7.0
+
+[node name="D4V_05" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_corner_turret")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 15.297, -256.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "D"
+metadata/sf_case_w = 9.0
+
+[node name="CaseB" type="Node3D" parent="DecorManual"]
+
+[node name="B1E_00" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_square")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 21.302, -162.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B1E_01" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_canted")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 22.054, -155.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B1E_02" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_square")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 22.843, -148.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B1E_03" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_canted")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 23.634, -141.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B1E_04" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_square")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 24.429, -134.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B1E_05" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_canted")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 25.226, -127.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B1E_06" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_square")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 26.024, -120.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B1E_07" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_canted")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 26.822, -113.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B1E_08" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_square")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 27.620, -106.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2E_00" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_square")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 30.017, -85.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2E_01" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_canted")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 30.816, -78.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2E_02" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_square")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 31.614, -71.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2E_03" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_canted")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 32.413, -64.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2E_04" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_square")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 33.212, -57.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2E_05" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_canted")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 34.011, -50.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2E_06" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_square")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 34.810, -43.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2E_07" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_canted")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 35.609, -36.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2E_08" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_square")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 36.408, -29.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2E_09" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_canted")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 37.206, -22.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2E_10" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_square")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 38.005, -15.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3E_00" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_square")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 40.402, 5.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3E_01" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_canted")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 41.201, 12.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3E_02" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_square")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 41.999, 19.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3E_03" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_canted")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 42.798, 26.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3E_04" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_square")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 43.597, 33.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3E_05" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_canted")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 44.396, 40.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3E_06" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_square")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 45.194, 47.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3E_07" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_canted")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 45.993, 54.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3E_08" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_square")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 46.791, 61.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3E_09" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_canted")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 47.588, 68.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3E_10" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_square")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 48.384, 75.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3E_11" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_canted")]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 49.176, 82.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B1V_00" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_corner_turret")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 22.846, -149.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "B"
+metadata/sf_case_w = 9.0
+
+[node name="B1V_01" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 23.637, -141.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B1V_02" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 24.430, -134.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B1V_03" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 25.226, -127.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B1V_04" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 26.024, -120.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B1V_05" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 26.822, -113.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B1V_06" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 27.621, -106.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2V_00" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 30.017, -85.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2V_01" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 30.816, -78.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2V_02" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 31.615, -71.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2V_03" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 32.413, -64.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2V_04" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 33.212, -57.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2V_05" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 34.011, -50.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2V_06" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 34.810, -43.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2V_07" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 35.609, -36.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2V_08" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 36.407, -29.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2V_09" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 37.206, -22.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B2V_10" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 38.005, -15.526)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3V_00" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 40.402, 5.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3V_01" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 41.201, 12.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3V_02" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 41.999, 19.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3V_03" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 42.799, 26.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3V_04" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 43.598, 33.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3V_05" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 44.397, 40.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3V_06" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 45.197, 47.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3V_07" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 45.998, 54.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3V_08" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 46.800, 61.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3V_09" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 47.601, 68.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3V_10" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 48.403, 75.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="B3V_11" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 49.203, 82.474)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "B"
+metadata/sf_case_w = 7.0
+
+[node name="CaseG" type="Node3D" parent="DecorManual"]
+
+[node name="G1V_00" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_b_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 5.421, -406.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "G"
+metadata/sf_case_w = 7.0
+
+[node name="G1V_01" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_c_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 6.228, -399.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "G"
+metadata/sf_case_w = 7.0
+
+[node name="G1V_02" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_a_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 7.031, -392.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "G"
+metadata/sf_case_w = 7.0
+
+[node name="G1V_03" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_b_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 7.835, -385.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "G"
+metadata/sf_case_w = 7.0
+
+[node name="G1V_04" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_c_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 8.640, -378.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "G"
+metadata/sf_case_w = 7.0
+
+[node name="G1V_05" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_a_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 9.445, -371.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "G"
+metadata/sf_case_w = 7.0
+
+[node name="G1V_06" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_b_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 10.250, -364.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "G"
+metadata/sf_case_w = 7.0
+
+[node name="G1V_07" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_c_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 11.055, -357.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "G"
+metadata/sf_case_w = 7.0
+
+[node name="G1V_08" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_a_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 11.860, -350.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "G"
+metadata/sf_case_w = 7.0
+
+[node name="G2V_00" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_a_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 14.273, -329.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "G"
+metadata/sf_case_w = 7.0
+
+[node name="G2V_01" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_b_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 15.075, -322.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "G"
+metadata/sf_case_w = 7.0
+
+[node name="G2V_02" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_c_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 15.877, -315.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "G"
+metadata/sf_case_w = 7.0
+
+[node name="G2V_03" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_a_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 16.680, -308.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "G"
+metadata/sf_case_w = 7.0
+
+[node name="G2V_04" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_b_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 17.499, -301.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "G"
+metadata/sf_case_w = 7.0
+
+[node name="G2V_05" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_c_square_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 18.221, -294.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "G"
+metadata/sf_case_w = 7.0
+
+[node name="G2V_06" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_a_canted_m")]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 18.690, -287.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "G"
+metadata/sf_case_w = 7.0
+
+[node name="CaseE" type="Node3D" parent="DecorManual"]
+
+[node name="EAN_00" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_c_canted")]
+transform = Transform3D(-1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, -1.00000, -33.500, 13.180, -331.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EAN_01" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_a_square")]
+transform = Transform3D(-1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, -1.00000, -40.500, 12.978, -331.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EAN_02" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_b_canted")]
+transform = Transform3D(-1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, -1.00000, -47.500, 12.775, -331.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EAN_03" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_c_square")]
+transform = Transform3D(-1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, -1.00000, -54.500, 12.571, -331.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EAN_04" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_a_canted")]
+transform = Transform3D(-1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, -1.00000, -61.500, 12.367, -331.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EAN_05" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_b_square")]
+transform = Transform3D(-1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, -1.00000, -68.500, 12.162, -331.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EAN_06" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_c_canted")]
+transform = Transform3D(-1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, -1.00000, -75.500, 11.956, -331.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EAN_07" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_a_square")]
+transform = Transform3D(-1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, -1.00000, -82.500, 11.748, -331.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EAN_08" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_b_canted")]
+transform = Transform3D(-1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, -1.00000, -89.500, 11.536, -331.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBE_00" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_b_canted")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 9.754, -349.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBE_01" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_c_square")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 9.542, -356.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBE_02" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_a_canted")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 9.331, -363.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBE_03" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_b_square")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 9.122, -370.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBE_04" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_c_canted")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 8.916, -377.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBE_05" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_a_square")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 8.709, -384.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBE_06" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_b_canted")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 8.502, -391.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBE_07" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_c_square")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 8.296, -398.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBE_08" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_a_canted")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 8.090, -405.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBE_09" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_b_square")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 7.884, -412.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBE_10" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_c_canted")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 7.673, -419.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBV_00" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_b_square_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 9.609, -353.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBV_01" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_c_canted_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 9.407, -360.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBV_02" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_a_square_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 9.204, -367.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBV_03" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_b_canted_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 9.001, -374.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBV_04" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_c_square_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 8.797, -381.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBV_05" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_a_canted_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 8.593, -388.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBV_06" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_b_square_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 8.390, -395.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBV_07" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_c_canted_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 8.186, -402.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBV_08" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_a_square_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 7.983, -409.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="EBV_09" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_b_canted_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 7.780, -416.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "E"
+metadata/sf_case_w = 7.0
+
+[node name="CaseCorpuri" type="StaticBody3D" parent="."]
+
+[node name="Corp_D1E_00" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 55.620, -4.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D1E_01" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 54.065, -11.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D1E_02" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 52.032, -18.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D1E_03" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 50.150, -25.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D1E_04" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 48.650, -32.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D1E_05" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 47.650, -40.500)
+shape = SubResource("Box_casa9")
+
+[node name="Corp_D1V_00" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 55.584, -4.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D1V_01" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 54.005, -11.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D1V_02" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 52.001, -18.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D1V_03" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 50.152, -25.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D1V_04" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 48.669, -32.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D1V_05" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 47.669, -40.500)
+shape = SubResource("Box_casa9")
+
+[node name="Corp_D2E_00" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 46.033, -76.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D2E_01" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 44.456, -83.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D2E_02" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 42.432, -90.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D2E_03" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 40.567, -97.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D2E_04" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 39.072, -104.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D2E_05" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 38.047, -112.500)
+shape = SubResource("Box_casa9")
+
+[node name="Corp_D2V_00" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 46.004, -76.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D2V_01" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 44.399, -83.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D2V_02" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 42.403, -90.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D2V_03" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 40.565, -97.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D2V_04" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 39.091, -104.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D2V_05" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 38.066, -112.500)
+shape = SubResource("Box_casa9")
+
+[node name="Corp_D3E_00" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 36.454, -148.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D3E_01" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 34.843, -155.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D3E_02" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 32.829, -162.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D3E_03" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 30.977, -169.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D3E_04" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 29.487, -176.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D3E_05" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 28.460, -184.500)
+shape = SubResource("Box_casa9")
+
+[node name="Corp_D3V_00" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 36.428, -148.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D3V_01" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 34.788, -155.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D3V_02" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 32.800, -162.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D3V_03" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 30.973, -169.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D3V_04" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 29.506, -176.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D3V_05" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 28.482, -184.500)
+shape = SubResource("Box_casa9")
+
+[node name="Corp_D4E_00" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 26.892, -220.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D4E_01" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 25.233, -227.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D4E_02" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 23.224, -234.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D4E_03" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 21.382, -241.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D4E_04" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 19.901, -248.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D4E_05" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.500, 18.937, -256.500)
+shape = SubResource("Box_casa9")
+
+[node name="Corp_D4V_00" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 26.870, -220.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D4V_01" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 25.180, -227.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D4V_02" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 23.196, -234.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D4V_03" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 21.377, -241.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D4V_04" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 19.917, -248.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_D4V_05" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 18.897, -256.500)
+shape = SubResource("Box_casa9")
+
+[node name="Corp_B1E_00" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 24.902, -162.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B1E_01" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 25.654, -155.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B1E_02" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 26.443, -148.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B1E_03" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 27.234, -141.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B1E_04" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 28.029, -134.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B1E_05" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 28.826, -127.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B1E_06" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 29.624, -120.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B1E_07" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 30.422, -113.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B1E_08" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 31.220, -106.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2E_00" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 33.617, -85.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2E_01" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 34.416, -78.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2E_02" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 35.214, -71.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2E_03" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 36.013, -64.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2E_04" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 36.812, -57.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2E_05" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 37.611, -50.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2E_06" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 38.410, -43.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2E_07" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 39.209, -36.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2E_08" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 40.008, -29.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2E_09" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 40.806, -22.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2E_10" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 41.605, -15.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3E_00" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 44.002, 5.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3E_01" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 44.801, 12.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3E_02" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 45.599, 19.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3E_03" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 46.398, 26.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3E_04" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 47.197, 33.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3E_05" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 47.996, 40.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3E_06" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 48.794, 47.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3E_07" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 49.593, 54.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3E_08" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 50.391, 61.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3E_09" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 51.188, 68.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3E_10" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 51.984, 75.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3E_11" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 52.776, 82.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B1V_00" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 26.446, -149.526)
+shape = SubResource("Box_casa9")
+
+[node name="Corp_B1V_01" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 27.237, -141.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B1V_02" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 28.030, -134.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B1V_03" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 28.826, -127.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B1V_04" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 29.624, -120.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B1V_05" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 30.422, -113.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B1V_06" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 31.221, -106.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2V_00" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 33.617, -85.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2V_01" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 34.416, -78.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2V_02" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 35.215, -71.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2V_03" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 36.013, -64.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2V_04" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 36.812, -57.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2V_05" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 37.611, -50.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2V_06" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 38.410, -43.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2V_07" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 39.209, -36.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2V_08" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 40.007, -29.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2V_09" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 40.806, -22.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B2V_10" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 41.605, -15.526)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3V_00" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 44.002, 5.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3V_01" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 44.801, 12.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3V_02" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 45.599, 19.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3V_03" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 46.399, 26.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3V_04" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 47.198, 33.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3V_05" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 47.997, 40.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3V_06" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 48.797, 47.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3V_07" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 49.598, 54.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3V_08" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 50.400, 61.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3V_09" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 51.201, 68.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3V_10" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 52.003, 75.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_B3V_11" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 52.803, 82.474)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_G1V_00" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 9.021, -406.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_G1V_01" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 9.828, -399.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_G1V_02" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 10.631, -392.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_G1V_03" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 11.435, -385.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_G1V_04" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 12.240, -378.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_G1V_05" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 13.045, -371.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_G1V_06" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 13.850, -364.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_G1V_07" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 14.655, -357.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_G1V_08" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 15.460, -350.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_G2V_00" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 17.873, -329.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_G2V_01" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 18.675, -322.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_G2V_02" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 19.477, -315.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_G2V_03" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 20.280, -308.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_G2V_04" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 21.099, -301.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_G2V_05" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 21.821, -294.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_G2V_06" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 22.290, -287.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EAN_00" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, -1.00000, -33.500, 16.779, -331.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EAN_01" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, -1.00000, -40.500, 16.578, -331.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EAN_02" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, -1.00000, -47.500, 16.375, -331.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EAN_03" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, -1.00000, -54.500, 16.171, -331.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EAN_04" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, -1.00000, -61.500, 15.967, -331.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EAN_05" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, -1.00000, -68.500, 15.762, -331.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EAN_06" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, -1.00000, -75.500, 15.556, -331.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EAN_07" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, -1.00000, -82.500, 15.348, -331.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EAN_08" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, -1.00000, -89.500, 15.136, -331.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBE_00" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 13.354, -349.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBE_01" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 13.142, -356.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBE_02" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 12.931, -363.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBE_03" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 12.722, -370.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBE_04" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 12.516, -377.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBE_05" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 12.309, -384.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBE_06" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 12.102, -391.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBE_07" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 11.896, -398.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBE_08" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 11.690, -405.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBE_09" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 11.484, -412.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBE_10" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 11.273, -419.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBV_00" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 13.209, -353.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBV_01" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 13.007, -360.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBV_02" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 12.804, -367.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBV_03" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 12.601, -374.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBV_04" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 12.397, -381.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBV_05" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 12.193, -388.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBV_06" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 11.990, -395.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBV_07" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 11.786, -402.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBV_08" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 11.583, -409.500)
+shape = SubResource("Box_casa7")
+
+[node name="Corp_EBV_09" type="CollisionShape3D" parent="CaseCorpuri"]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 11.380, -416.500)
+shape = SubResource("Box_casa7")

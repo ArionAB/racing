@@ -1570,3 +1570,25 @@ reală de sus din Godot**, cu legenda desenată peste ea, după ce traseul a tre
 Notă pentru noi (nu face parte din prompt): turnul cu ceas nu apare în prompt. Pe B200 latura de
 est a dispărut, iar locul lui e decizia dezvoltatorului (vezi `sanfrancisco_inventory.md`, H7).
 După ce diorama e acceptată, inventarul de assets se ajustează pe ea.
+
+### 9.1 Rezultatul: `docs/asset_briefs/img/sf_route/sf_diorama_v1.jpg` (15 nov 2026)
+
+Prima generare, adusă de dezvoltator. Verdictul complet e în `sanfrancisco_inventory.md` §3.1.
+
+**Adoptăm:**
+- podul la E, cu balonul și startul în carouri pe malul celălalt; dealurile aurii cu bolovani gri;
+- D cu semafoarele atârnate și mașinile parcate perpendicular, cu insula cu far în axul lui;
+- serpentinele de cărămidă cu hortensii; vagonul pe placa turnantă din colțul de NV;
+- magaziile de pe cheu, dar doar la V de pontoon: latura apei a pontonului rămâne deschisă;
+- cele cinci pasteluri și casele de 2–3 niveluri;
+- **casele pictate pe latura de N a coamei, cu fața spre S, luminate**: devine recomandarea pentru
+  decizia deschisă despre ele.
+
+**Nu adoptăm:**
+- **forma podului**, prea aproape de cel real: brief-ul podului rămâne generic și a fost corectat;
+- o a treia stradă N–S, care nu există în plan;
+- relieful aplatizat;
+- chiparoșii ca umbrele plate, care s-ar confunda cu salcâmii din Serengeti.
+
+**Intră nou în inventar:** arbori de stradă, grădinițe în fața caselor pictate, scări publice,
+palmieri la capul de pod și la terasă, bolovani pe malul celălalt.

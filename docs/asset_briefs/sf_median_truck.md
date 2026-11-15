@@ -169,3 +169,6 @@ bloc, pus în rând de generator (26 de blocuri pe fiecare). Și aici e date, nu
   vede, iar utilajul pare să meargă înapoi, ca cele reale.
 - Între parapetele roșii ale podului (`sf_red_bridge.md`): roșul podului, betonul blocurilor și
   gri-albastrul utilajului sunt trei valori distincte.
+- **Diorama** (`img/sf_route/sf_diorama_v1.jpg`) desenează pe tablier o furgonetă gri. **Nu e
+  referință:** utilajul rămâne cel de mai sus (scund, cu tunel, cu două cabine), fiindcă trebuie
+  să citească „mută bariera”, nu „mașină în trafic”.

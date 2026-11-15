@@ -181,3 +181,9 @@ crem e generic.
 - Al doilea vagon trece prin fața gurii străzii cu serpentine de cărămidă (hortensii roz și
   albastre). Contrastul e roșul vagonului pe cărămidă: de aceea caroseria de jos e `kerb_red`,
   iar partea de sus crem.
+- **Diorama** (`img/sf_route/sf_diorama_v1.jpg`, inventarul §3.1) confirmă culorile (roșu-vișiniu
+  jos, crem sus) și scara pe stradă. Acolo vagoanele sunt mai închise. **Brief-ul păstrează
+  capetele deschise**, cu bănci spre exterior și călători pe scări: asta e silueta care citește
+  „vagon de cablu”, nu „tramvai”. Diorama arată și **un al treilea vagon, parcat pe placa
+  turnantă** din colțul de NV. E **același `cable_car.glb`**, pus ca decor static (inventarul H4),
+  deci modelul nu se schimbă.

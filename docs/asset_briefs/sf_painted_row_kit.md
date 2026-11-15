@@ -208,6 +208,14 @@ Kitul corectează (4): fusta e la fața peretelui, iar scara e în nișă, nu pe
 
 ## 12. Abateri și dependențe
 
+- **Diorama** (`img/sf_route/sf_diorama_v1.jpg`, inventarul §3.1) confirmă kitul: case de 2–3
+  niveluri, lipite, în cinci pasteluri, cu bovindouri, cornișe și ancadramente albe. Relieful e
+  aproape plat acolo (fără socluri în trepte), dar **geometria pistei e cea din plan**, deci
+  **fusta-soclu rămâne**. Ce aduce nou, în afara acestui brief (val 2): **casele pictate de pe
+  coamă (K2) stau pe latura de N a drumului, cu fața spre S, luminate din față** (recomandarea
+  pentru decizia 3), cu **grădinițe** în față (`sf_front_garden`, 7 × 3 m, N2). Aceeași grădiniță
+  umple trotuarul lat din fața casei de la intrarea în serpentine.
+
 - **Fațada de la intrarea în serpentine (E') stă la 4 m de carosabil, nu la 1 m** (pasul 6,
   PR #735; decizia dezvoltatorului, 15 nov 2026). Acolo erau 4 din 7 ejectări din serpentine,
   pe exteriorul primului viraj de 90°. Kitul nu se schimbă: la plasare, generatorul lasă în fața

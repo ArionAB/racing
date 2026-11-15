@@ -20,8 +20,15 @@ Sursa reproductibilă (de creat de agent): `tools/blender/build_sf_bridge.py`.
 
 Un **pod suspendat roșu-portocaliu**, low-poly și stilizat, pentru un joc de curse cu mașinuțe de
 jucărie în stil dioramă (ton *Art of Rally*: machetă de masă, NU foto-realist). Pista trece **pe
-el**, dus-întors: e locul de start și de sosire. Un design generic, robust, de jucărie, nu copia
-unui pod real.
+el**, dus-întors: e locul de start și de sosire. Un design **generic, robust, de jucărie**, nu
+copia unui pod real.
+
+**Ce NU faci (regula de formă):** turnurile **nu** au decorațiunile art-deco ale podurilor
+celebre: fără picioare care se îngustează în trepte, fără caneluri sau nervuri verticale adâncite,
+fără panouri de portal în registre, fără muchii verticale ornamentale. Imaginea de atmosferă a
+pistei (o dioramă generată) are exact turnurile astea. **Imaginea aia NU e referință pentru forma
+turnurilor**, ci doar pentru culoare și pentru cât de mare e podul în cadru. Forma e cea din §4.1:
+două picioare-cutie, traverse simple și un X gros între ele, ca la un pod suspendat oarecare.
 
 Podul se livrează ca **kit de piese separate** (câte un `.glb` fiecare), pe care jocul le
 asamblează din cod pe geometria lui exactă. Toate piesele sunt **pur vizuale**: jocul are deja
@@ -39,9 +46,10 @@ peste carosabil.** Consecința, măsurată pe geometria pistei:
 - **partea de sus a turnului (+39…+45) aproape nu intră niciodată în cadru**: doar de la ≥ 310 m,
   în pâclă.
 
-Deci **identitatea podului stă în primii 30 m ai turnului și în cabluri**: picioarele cu trepte și
-caneluri, traversa de jos cu panoul ei, cablurile groase care urcă oblic și ies din cadru pe sus,
-parapetele roșii care încadrează drumul. Pune detaliul acolo. Partea de sus rămâne simplă, dar
+Deci **identitatea podului stă în primii 30 m ai turnului și în cabluri**: cele două picioare
+masive, traversa de jos cu colțarii ei, începutul X-ului de contravântuire, cablurile groase care
+urcă oblic și ies din cadru pe sus, parapetele roșii care încadrează drumul. Pune detaliul acolo
+(rosturi de tablă, colțari, capace), nu ornamente. Partea de sus rămâne simplă, dar
 completă (se vede ca siluetă de pe mal).
 
 **Testul de reușită:** din camera de joc, de pe grilă (123–223 m) și de pe tablier (0–60 m),
@@ -81,17 +89,18 @@ Originea: pe axa turnului (X = 0 al piesei), la Y = 0 (fața carosabilului), Z =
 X 50 și X 150.
 
 - **Două picioare** centrate la Z = ±14,5, de la **Y = −30 la Y = +45**. **Secțiunea nu iese
-  niciodată din pătratul de 3,0 × 3,0 m** (X ±1,5, Z de la ±13,0 la ±16,0). Picioarele se
-  îngustează **în trepte, spre interiorul pătratului**: 3,0 m până la +18, 2,6 m de la +18 la +32,
-  2,2 m de la +32 la +45. Pe fețele dinspre X+ și X− și pe cea exterioară, **caneluri verticale
-  adâncite** (3 pe față, 0,15 m adâncime): ele dau umbra care face piciorul să nu fie un stâlp
-  plat.
+  niciodată din pătratul de 3,0 × 3,0 m** (X ±1,5, Z de la ±13,0 la ±16,0). Picioarele sunt
+  cutii cu muchiile teșite (0,2 m), care se îngustează **continuu și ușor**, spre interiorul
+  pătratului, de la 3,0 m jos la 2,4 m sus. **Nu în trepte.** Umbra care le scoate din „stâlp
+  plat” vine din **rosturi orizontale de tablă** (o fâșie în relief de 0,06 m, la 4 m una de
+  alta) și din capacele de la capete, nu din caneluri verticale.
 - **Traversa de jos:** între fețele interioare ale picioarelor (Z de la −13,0 la +13,0),
-  **cu fundul la Y ≥ +13,8**, grosime 2,4 m pe X. Deasupra ei, un **panou de portal** în trepte,
-  până la +19,5: două sau trei registre cu adâncituri verticale. E piesa cea mai văzută din
-  turn.
-- **Traversa de sus:** cu centrul la +39 (de la +37,8 la +40,2), cu un panou asemănător până la
-  +43,5.
+  **cu fundul la Y ≥ +13,8**, o grindă-cutie simplă de 2,4 × 2,4 m, cu **colțari triunghiulari**
+  groși (1,5 m pe latură) în cele două colțuri de sus, unde se prinde de picioare. E piesa cea mai
+  văzută din turn.
+- **Traversa de sus:** cu centrul la +39 (de la +37,8 la +40,2), tot o grindă-cutie cu colțari.
+- **Contravântuirea:** între cele două traverse, **un singur X** din două bare-cutie de 1,2 m
+  grosime, de la colțurile traversei de jos la cele ale traversei de sus. Nimic subțire.
 - **Capetele picioarelor:** un capac cu cușeta cablului (saddle), Y +44…+45, unde cablul
   principal trece peste turn la Z = ±14,5.
 - **Pila de beton** (`_Concrete`): un bloc care cuprinde ambele picioare, X ±4,5, Z ±19,0, de la
@@ -188,7 +197,7 @@ toate UV-urile pe **un singur punct**, centrul slotului: `u = (slot + 0,5) / 32`
 
 | slot | nume | **u** | hex | unde |
 |---|---|---|---|---|
-| 7 | `kerb_red` | **0.234375** | `#BB3522` | **tot oțelul**: picioare, traverse, panouri, cabluri, tiranți, parapete, grinzi, capace (nodurile `_Steel`) |
+| 7 | `kerb_red` | **0.234375** | `#BB3522` | **tot oțelul**: picioare, traverse, colțari, contravântuirea, cabluri, tiranți, parapete, grinzi, capace (nodurile `_Steel`) |
 | 8 | `concrete` | **0.265625** | `#C8BDA9` | pile, ancoraje, culee, trotuarul exterior (nodurile `_Concrete`) |
 | 22 | `foam_white` | **0.703125** | `#E9F2F0` | doar sticla felinarelor (în nodul `_Steel` al felinarului) |
 
@@ -200,8 +209,8 @@ caldă. Roșul podului e `kerb_red`, care e la câteva unități RGB de culoarea
 Un strat de Color Attribute, gri, care se înmulțește peste culoare în joc. 1,0 = neatins, ~0,5 =
 adânc. **Obligatoriu.**
 
-- Turnul: gradient vertical 0,55 la pila de beton → 1,0 la vârf; canelurile și adânciturile
-  panourilor ~0,6; sub traverse ~0,65.
+- Turnul: gradient vertical 0,55 la pila de beton → 1,0 la vârf; în colțurile dintre colțari și
+  picioare ~0,6; sub traverse ~0,65; rosturile de tablă ~0,8.
 - Segmentul de tablier: intradosul ~0,5 (e mereu în umbră); grinzile laterale 0,75 jos → 0,95 sus.
 - Parapetul: 0,8 la bază → 1,0 sus (perete plat: gradient blând).
 - Cablurile: 1,0 (fără AO; sunt subțiri față de lume).
@@ -294,3 +303,10 @@ reală e una nouă de gabarit, care citește GLB-urile și verifică cotele din 
   nu invers.
 - **Despărțitorul și camionul** sunt în `sf_median_truck.md`: se văd între parapete, deci roșul
   podului, betonul blocurilor și gri-albastrul camionului trebuie să rămână trei valori distincte.
+- **Diorama (`img/sf_route/sf_diorama_v1.jpg`) nu e referință de formă** (inventarul §3.1). Ea
+  confirmă culoarea, poziția (la E, cu balonul și startul pe malul celălalt) și cât de mare e
+  podul în cadru. Turnurile ei art-deco sunt prea aproape de podul real. **Corectură v0.2:** prima
+  versiune a acestui brief cerea chiar ea picioare în trepte, caneluri verticale și panouri de
+  portal în registre, adică limbajul podului real. Le-am înlocuit cu picioare-cutie cu îngustare
+  continuă, rosturi de tablă, colțari și un X de contravântuire. Gabaritul și cotele nu s-au
+  schimbat.

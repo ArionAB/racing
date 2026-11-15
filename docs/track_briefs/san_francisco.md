@@ -1568,7 +1568,7 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
    | ProbeLaneClear `--track=17` | **50, exact linia de bază**: mașinile parcate (stratul 9) și stâlpii (dincolo de asfalt) nu intră. Sabotajul pică (53 > 50) |
    | ProbeSfPonton | OK; sabotajul pică |
    | `probe_decor --track=25` (numărul scenei) | OK, **26 de materiale** (≤ 38): +1 scânduri, +1 hortensii |
-   | `verify_local.sh` | ⟨VERIFY⟩ |
+   | `verify_local.sh` | **OK, 79 de pași** (prima rulare a picat doar pe `.uid`-ul necomis al scriptului nou, reparat) |
 
    **Capturi `--gamecam`** (`docs/asset_briefs/img/sf_route/`): `p6_serpentine_gamecam.png`
    (cărămida și hortensiile pe blocul solid, `--route=1`), `p6_ponton_gamecam.png` (scândura,

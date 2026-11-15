@@ -298,6 +298,29 @@ var _mistake_kind: int = 0
 var _mistake_left: float = 0.0
 ## Doar pentru sonde: cate greseli a facut, pe tipuri [tarzie, linie].
 var mistakes_done: Array[int] = [0, 0]
+
+## ZARUL DE NIVEL (`AiSkill.hazard_dice` / `shortcut_dice`): un zar cu 6 fete,
+## dat o data per TRECERE pe langa un hazard si o data per APROPIERE de o furca.
+## Are rng PROPRIU, din acelasi motiv ca `_mistake_rng`: un nivel cu zar nu muta
+## zarurile cursei (grila, linia, rocket start-ul raman aceleasi pe acelasi seed).
+## Nul pe profilul implicit, care nu da cu zarul deloc.
+var _dice_rng: RandomNumberGenerator = null
+## Ceasul zarului (s de `update`): o „trecere" = cat timp hazardul e intrebat
+## fara o pauza mai lunga de DICE_PASS_GAP_S. Asa nu trebuie ca fiecare hazard
+## sa-si anunte singur „am trecut": cine n-a mai fost intrebat 3 s a fost lasat
+## in urma, iar la turul urmator zarul se da din nou.
+var _dice_now: float = 0.0
+const DICE_PASS_GAP_S: float = 3.0
+## Per hazard (cheie: instance id): verdictul trecerii curente (true = il
+## citeste) si cand a fost intrebat ultima oara.
+var _haz_reads: Dictionary = {}
+var _haz_asked: Dictionary = {}
+## Cand a fost ultima oara in raza unei furci (acelasi tipar de „trecere").
+var _fork_asked: float = -INF
+var _dice_hooked: bool = false
+## Doar pentru sonde: zarurile date (1-6), in ordine, pe fiecare fel.
+var hazard_rolls: Array[int] = []
+var shortcut_rolls: Array[int] = []
 ## Linia "de personalitate" a pilotului: fiecare are alt culoar preferat pe
 ## portiunile drepte. Peste ea se adauga tragerea spre interiorul virajului.
 var line_offset: float = 0.0
@@ -502,10 +525,25 @@ func configure(race_track: Track, rng: RandomNumberGenerator,
 	track = race_track
 	traffic = cars
 	line_offset = rng.randf_range(-0.28, 0.28)
+	# Cu zar de scurtatura, tragerea de aici e doar starea de pornire (aceeasi
+	# sansa, fete / 6): decizia adevarata se da la fiecare furca, vezi
+	# `_shortcut_dice_tick`. `rng.randf()` se consuma oricum, ca grila sa fie
+	# aceeasi pe acelasi seed la orice nivel.
 	var chance := skill.shortcut_chance
+	if skill.shortcut_dice > 0:
+		chance = float(skill.shortcut_dice) / 6.0
 	if race_track != null and race_track.ai_shortcut_chance >= 0.0:
 		chance = race_track.ai_shortcut_chance
 	prefers_shortcut = rng.randf() < chance
+	# Zarul de nivel: ca la greseli, samanta vine din STAREA rng-ului cursei
+	# (citirea nu-l avanseaza). Nul pe profilul implicit.
+	_dice_rng = null
+	_haz_reads.clear()
+	_haz_asked.clear()
+	_fork_asked = -INF
+	if skill.hazard_dice > 0 or skill.shortcut_dice > 0:
+		_dice_rng = RandomNumberGenerator.new()
+		_dice_rng.seed = hash([rng.state, line_offset, "zar"])
 	# Zarul greselilor: din STAREA rng-ului cursei (citirea nu-l avanseaza), deci
 	# determinist pe seed, fara sa consume nimic din el.
 	_mistake_rng = null
@@ -527,9 +565,13 @@ func update(delta: float) -> void:
 	var speed := car.horizontal_speed()
 	_react_tick(delta)
 	_watch_progress(delta, speed)
+	# Ceasul zarului merge si in deblocare: o masina care a stat blocata langa
+	# un hazard mai mult de o „trecere" da din nou cu zarul cand porneste.
+	_dice_now += delta
 	if _unstick_timer > 0.0:
 		_drive_unstick(delta)
 		return
+	_shortcut_dice_tick()
 
 	# --- unde merge drumul ---
 	var idx := car.road_index
@@ -818,6 +860,109 @@ func update(delta: float) -> void:
 	if zone_scale < 0.999:
 		_turbo = false
 
+# ------------------------------------------------------------ zarul de nivel
+
+## Un zar cu 6 fete, din rng-ul propriu al zarului de nivel. Samanta de rezerva
+## (pilot + linie) e pentru sondele care nu trec prin `configure`.
+func _dice() -> RandomNumberGenerator:
+	if _dice_rng == null:
+		_dice_rng = RandomNumberGenerator.new()
+		_dice_rng.seed = hash("zar|%.5f|%s" % [
+			line_offset, car.pilot_name if car != null else ""])
+	return _dice_rng
+
+
+func _roll_d6() -> int:
+	return _dice().randi_range(1, 6)
+
+
+## CITESTE pilotul hazardul asta, la trecerea asta? (`AiSkill.hazard_dice`)
+##
+## Se cheama din fiecare cititor de hazard, in clipa in care hazardul a intrat
+## in raza lui de decizie si pilotul ar face ceva pentru el. Prima intrebare a
+## unei treceri da cu zarul; raspunsul se TINE pana la sfarsitul trecerii (cat
+## timp hazardul e intrebat fara o pauza de DICE_PASS_GAP_S) — fara asta, un
+## zar dat in fiecare cadru ar iesi „citeste" in prima zecime de secunda la
+## orice nivel. `false` = pilotul trece pe nevazute: cititorul se poarta exact
+## ca si cum hazardul n-ar fi acolo, iar ce urmeaza e pariu (poate scapa, poate
+## fi lovit), ca la jucatorul care nu s-a uitat.
+##
+## Profilul implicit (`hazard_dice` 0) raspunde mereu `true`, fara zar si fara
+## stare: AI-ul de dinainte de niveluri, bit cu bit.
+##
+## CE NU INTRA SUB ZAR, dinadins — un zid nu e un pariu, e un zid:
+##   - usa de piatra (Cappadocia) si semaforul in modul STOP: inchis = perete;
+##   - decorul fix cu o singura fanta / stalpii (`lane_forced_at`,
+##     `lane_floor_at`, `lane_bias_at`), muchia fara parapet, poarta ulicioarei;
+##   - corpul care merge in SENSUL cursei (tramvaiul SF, `ai_same_direction`):
+##     e trafic lent, se depaseste, nu se ghiceste;
+##   - despartitorul mobil de pe podul SF (`_median_line`): e parapet intre
+##     benzi, se vede si se tine pe partea lui, nu se nimereste;
+##   - banda inchisa a unei scurtaturi (`Track.branch_is_open`: lava, vaca);
+##   - zonele de prudenta (praful din Monument Valley) si asfaltul ud.
+func _reads_hazard(hz: Object) -> bool:
+	if skill.hazard_dice <= 0:
+		return true
+	if not _dice_hooked:
+		# Pacalit o data, a doua oara se uita: vezi `_on_dice_respawn`.
+		_dice_hooked = true
+		if car != null and not car.respawned.is_connected(_on_dice_respawn):
+			car.respawned.connect(_on_dice_respawn)
+	var key := hz.get_instance_id()
+	if not _haz_reads.has(key) \
+			or _dice_now - float(_haz_asked[key]) > DICE_PASS_GAP_S:
+		var roll := _roll_d6()
+		hazard_rolls.append(roll)
+		_haz_reads[key] = roll <= skill.hazard_dice
+	_haz_asked[key] = _dice_now
+	return bool(_haz_reads[key])
+
+
+## Dupa o repunere, pilotul se uita la hazardele trecerii in curs: cine a
+## pariat, a pierdut si a fost repus in fata aceluiasi hazard nu mai intra a
+## doua oara pe nevazute. Fara asta, un zar pierdut langa un hazard cu ciclu
+## scurt putea tine masina in bucla de repuneri (acelasi verdict „nu citesc",
+## aceeasi lovitura). La trecerea urmatoare zarul se da din nou, normal.
+##
+## Ceasul intrebarii se improspateaza si el: aruncarea + tranzitia de repunere
+## pot tine mai mult de DICE_PASS_GAP_S, iar fara asta prima intrebare de dupa
+## repunere ar fi „o trecere noua" si ar da iar cu zarul, in fata aceluiasi
+## hazard. Hazardele ramase departe in urma nu simt nimic: pana ajunge iar la
+## ele, pauza a trecut oricum.
+func _on_dice_respawn(_c: Car) -> void:
+	for key: int in _haz_reads:
+		_haz_reads[key] = true
+		_haz_asked[key] = _dice_now
+
+
+## Zarul de scurtatura (`AiSkill.shortcut_dice`): la fiecare apropiere de o
+## furca, pilotul da din nou cu zarul daca o ia. Aceeasi notiune de „trecere"
+## ca la hazarde: o apropiere = cat sta in raza furcii, fara pauza.
+##
+## Schimba doar `prefers_shortcut`; tot restul (banda inchisa, torentul, usa de
+## piatra, poarta ingustata) decide exact ca inainte, pe deasupra.
+func _shortcut_dice_tick() -> void:
+	if skill.shortcut_dice <= 0 or car.route != 0:
+		return
+	if not track.fork_in_range(car.global_position):
+		return
+	if _dice_now - _fork_asked > DICE_PASS_GAP_S:
+		_roll_shortcut()
+	_fork_asked = _dice_now
+
+
+## O aruncare a zarului de scurtatura: pune `prefers_shortcut`.
+func _roll_shortcut() -> void:
+	if track != null and track.ai_shortcut_chance >= 0.0:
+		# Pista cu sansa proprie (gura ingusta din Jodhpur): sansa ei, nu a
+		# nivelului — dar tot per apropiere.
+		prefers_shortcut = _dice().randf() < track.ai_shortcut_chance
+		return
+	var roll := _roll_d6()
+	shortcut_rolls.append(roll)
+	prefers_shortcut = roll <= skill.shortcut_dice
+
+
 # --------------------------------------------------------------- depasirea
 
 ## Muta linia tinta pe langa cea mai apropiata masina care ne blocheaza
@@ -866,6 +1011,9 @@ func _fireball_line(speed: float, line: float) -> float:
 		var along := float(d_idx) * bake
 		# Doar ce e in FATA si in raza de decizie.
 		if along < 0.0 or along > FireballGeyser.AI_REACH_M:
+			continue
+		# Zarul de nivel: perechea asta, la trecerea asta, pe nevazute?
+		if not _reads_hazard(g):
 			continue
 		if along < best_d:
 			best_d = along
@@ -945,6 +1093,8 @@ func _span_line(speed: float, line: float) -> float:
 			d_idx -= n_pts
 		var along := float(d_idx) * bake
 		if along < 0.0 or along > RotatingSpanHazard.AI_REACH_M:
+			continue
+		if not _reads_hazard(sp):
 			continue
 		if along < best_d:
 			best_d = along
@@ -1038,6 +1188,12 @@ func _signal_lane_keep(idx: int, speed: float, line: float) -> float:
 		# masura ce trecem de linie, la fel ca la usa de piatra si la semafor
 		# in modul STOP).
 		if along > SIGNAL_LANE_REACH_M or along < -sig.tunnel_length:
+			continue
+		# Zarul de nivel: pilotul care nu se uita la lampa la trecerea asta isi
+		# tine linia si pariaza ca nu vine autocarul. Regula stricta de mai jos
+		# (0 masini pe stanga pe rosu) ramane a profilului implicit si a celor
+		# care au citit lampa.
+		if not _reads_hazard(sig):
 			continue
 		# Runda 2 (coordonator): declansator ANTICIPAT, nu doar reactiv la
 		# `is_red()` chiar acum. Un sofer care se apropie de tunel nu se uita
@@ -1144,6 +1300,9 @@ func _shishi_line(idx: int, speed: float, line: float) -> float:
 		# exterioara cu o secunda prea tarziu.
 		var along := _arc_to(r, idx, d_idx, bake)
 		var in_zone := along <= SHISHI_REACH_M and along >= -SHISHI_PASSED_M
+		# Zarul de nivel: pe nevazute = ca si cum tubul n-ar fi in raza.
+		if in_zone and not _reads_hazard(hz):
+			in_zone = false
 		if not in_zone:
 			_shishi_latched.erase(key)
 		elif not _shishi_latched.has(key):
@@ -1261,7 +1420,11 @@ func _bus_line(idx: int, speed: float, line: float, severity: float) -> float:
 			var seen := along <= bus_reach_m or (planar <= bus_sight_m and along <= BUS_FAR_ALONG_M)
 			if bus.ai_branch_reach_m > 0.0 and car.route != 0:
 				seen = along <= bus.ai_branch_reach_m
-			if oncoming and on_road and seen and along >= -BUS_PASSED_M:
+			# Zarul de nivel se da doar pentru corpul care vine din FATA (pariu pe
+			# banda). Cel care merge in sensul cursei e trafic lent: se depaseste
+			# mereu, nu se ghiceste — vezi `_reads_hazard`.
+			if oncoming and on_road and seen and along >= -BUS_PASSED_M \
+					and (bus.ai_same_direction or _reads_hazard(bus)):
 				_bus_latched[key] = true
 			else:
 				_bus_latched.erase(key)
@@ -1475,7 +1638,10 @@ func _exc_line(idx: int, line: float) -> float:
 					_exc_rng.seed = hash("%.5f|%s|%.2f" % [line_offset, car.pilot_name, car.mass])
 				var roll := _exc_rng.randi_range(1, 6)
 				dice_log.append(roll)
-				choice = 1 if roll <= 3 else 2
+				# Fara nivel: 1-3 ocoleste (jumatate-jumatate, ca pana acum). Cu
+				# nivel, fetele care ocolesc sunt ale pilotului (`hazard_dice`).
+				var avoid_faces := skill.hazard_dice if skill.hazard_dice > 0 else 3
+				choice = 1 if roll <= avoid_faces else 2
 				_exc_choice[key] = choice
 		elif choice != 0 and (along < -EXC_PASSED_M or along > EXC_REACH_M + 40.0):
 			_exc_choice.erase(key)
@@ -1604,6 +1770,9 @@ func _daruma_cap(idx: int, speed: float) -> float:
 		if along > DARUMA_REACH_M or along < -DARUMA_PASSED_M:
 			_daruma_state.erase(key)
 			continue
+		# Zarul de nivel: pe nevazute nu ridica piciorul, trece cum vine.
+		if not _reads_hazard(hz):
+			continue
 		if not _daruma_state.has(key):
 			var ahead := maxf(along, 0.0)
 			var eta_fast := ahead / maxf(maxf(speed, cruise * SHISHI_FAST), 10.0)
@@ -1679,6 +1848,9 @@ func _shishimai_line(idx: int, speed: float, line: float) -> float:
 			_shishimai_lane.erase(key)
 			_shishimai_blend.erase(key)
 			_shishimai_timer.erase(key)
+			continue
+		# Zarul de nivel: pe nevazute isi tine linia prin dansul leului.
+		if not _reads_hazard(hz):
 			continue
 		var hw: float = maxf(track.width_at_index(idx) if car.route == 0 			else r.half_width, 0.001)
 		var sgn: float = _shishimai_sign[key]
@@ -1968,6 +2140,9 @@ func _crossing_ahead(speed: float) -> float:
 		var along := float(d_idx) * bake
 		if along < 0.0 or along > DOOR_REACH_M or along >= best:
 			continue
+		# Zarul de nivel: pe nevazute nu cedeaza, trece cu talpa jos.
+		if not _reads_hazard(hz):
+			continue
 		var eta := along / maxf(speed, 6.0)
 		if hz.crossing_blocks_in(eta) or hz.crossing_blocks_in(eta + DOOR_ETA_SLACK):
 			best = along
@@ -2040,6 +2215,10 @@ func _torrent_blocks_branch(speed: float) -> bool:
 			d_idx -= n_pts
 		var along := float(d_idx) * bake
 		if along < 0.0 or along > TORRENT_REACH_M:
+			continue
+		# Zarul de nivel: pe nevazute nu socoteste pulsul — daca are de gand sa
+		# ia scurtatura, o ia si pariaza ca trece inainte de perdea.
+		if not _reads_hazard(torrent):
 			continue
 		# Metri pe BANDA de la intrare pana la perdea: `branch_frac` e
 		# fractia din lungimea rutei, deci `branch_frac * route.length()`.

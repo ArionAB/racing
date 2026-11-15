@@ -2169,13 +2169,35 @@ const CORE_PREFIX := "core"
 const LEAF_PREFIX := "leaf"
 
 static var _crown_mat: StandardMaterial3D = null
+static var _core_mat: StandardMaterial3D = null
 static var _leaf_mat: ShaderMaterial = null
 
-## Masa coroanei si miezul: atlasul plat, cull normal (fete inchise).
+## Masa coroanei (infatisarea de departe): atlasul plat, cull normal (fete inchise).
 static func crown_material() -> StandardMaterial3D:
 	if _crown_mat == null:
 		_crown_mat = plain_material().duplicate() as StandardMaterial3D
 	return _crown_mat
+
+## Miezul de sub carduri: aceeasi culoare plata, dar NELUMINAT. Miezul e umbra
+## din interiorul coroanei (`CORE_SHADE` in kyoto_shapes.py), nu o a doua
+## suprafata luminata. Pe materialul coroanei, fata de sus a fiecarei icosfere
+## turtite prindea soarele si luciul: de pe telefon (15 nov 2026, gradina din
+## zona F, privind spre soare) arborii pusi ca nod citeau discuri lucioase cu
+## capac alb printre puncte — „formele rotunde de la arborii vechi". Neluminat,
+## miezul are peste tot tonul punctelor din umbra si nu mai are forma. Un
+## material in plus pe pistele cu frunzis punctat (Kyoto 35 -> 36, din 38).
+##
+## `CORE_UNLIT_GAIN`: o suprafata neluminata iese la fel de aprinsa ca una in
+## plin soare, deci fara el miezul era o pata de rosu curat, mai tare decat
+## cardurile. Valoarea e potrivita pe captura: tonul cardurilor din umbra.
+const CORE_UNLIT_GAIN := 0.46
+
+static func core_material() -> StandardMaterial3D:
+	if _core_mat == null:
+		_core_mat = plain_material().duplicate() as StandardMaterial3D
+		_core_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		_core_mat.albedo_color = Color(CORE_UNLIT_GAIN, CORE_UNLIT_GAIN, CORE_UNLIT_GAIN)
+	return _core_mat
 
 static func leaf_material() -> ShaderMaterial:
 	if _leaf_mat == null:
@@ -2194,8 +2216,10 @@ static func is_crown_material(mat: Material) -> bool:
 
 ## Materialul unui prefix de coroana punctata, sau null daca `cls` nu e unul.
 static func stipple_material(cls: String) -> Material:
-	if cls == CROWN_PREFIX or cls == CORE_PREFIX:
+	if cls == CROWN_PREFIX:
 		return crown_material()
+	if cls == CORE_PREFIX:
+		return core_material()
 	if cls == LEAF_PREFIX:
 		return leaf_material()
 	return null

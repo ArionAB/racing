@@ -12,7 +12,10 @@ In `main`: #723 (the route), #724 (cable cars as `BusHazard`), #733 (B200 loop
 over the drivable red bridge), #735 + #738 (step 6: switchbacks, pontoon, parked
 cars, petals), #739 (asset sheet, briefs).
 
-**Step 7 is on branch `sanfrancisco/pas7-hero`** (worktree `D:/GameDev/wt-sf-pas7`):
+**Step 7 is in two open PRs** (worktree `D:/GameDev/wt-sf-pas7`; `verify_local` OK, 80 steps, on each):
+**#740** `sanfrancisco/pas7-hero` (cable car, bridge, barrier machine) and **#741**
+`sanfrancisco/pas7b-case` (the house kit; cut from #740's branch, so it contains it). Neither
+is merged; the developer merges.
 
 | Piece | State |
 |---|---|

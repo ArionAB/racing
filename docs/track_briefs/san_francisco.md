@@ -1592,3 +1592,38 @@ Prima generare, adusă de dezvoltator. Verdictul complet e în `sanfrancisco_inv
 
 **Intră nou în inventar:** arbori de stradă, grădinițe în fața caselor pictate, scări publice,
 palmieri la capul de pod și la terasă, bolovani pe malul celălalt.
+
+### 9.2 Prompt pentru ChatGPT (planșa de inventar de assets) — v0.1, paste-ready (15 nov 2026)
+
+Se dă **în aceeași conversație cu diorama v1** (`sf_diorama_v1.jpg`), ca la Angkor §9.2. Numele de
+fișier de pe planșă sunt contractul pentru `assets/models/sanfrancisco/` și pentru briefurile din
+`docs/asset_briefs/sf_*.md`. Cotele vin din inventar și din `Track25`, nu din planșă: proporțiile le
+corectează modelatorul din briefuri, nu ChatGPT.
+
+**Nu intră în planșă** ce face codul sau ce se refolosește: cărămida și straturile serpentinelor
+(K3), zebrele și șinele (K4), scândura pontonului, apa, petalele, stâlpii de amarare
+(`chongqing/props/bollard.glb`), palmierul (întâi `angkor/plants/sugar_palm.glb`), bolovanii
+(`fiordland/rocks/guard_rock.glb`), farul și insula (`okinawa/buildings/cape_lighthouse.glb`),
+feribotul (`okinawa/vehicles/island_ferry.glb`), felinarele de hârtie (`chongqing`). **Turnul cu
+ceas e scos** (decizia din 15 nov). Casele de rând se desenează **în crem**: pastelul vine din cod
+(decizia din 15 nov: un model, recolorat).
+
+> Now make an asset inventory sheet for this diorama, in the same low-poly toy style, palette and clear golden-hour light: every distinct object drawn once, isolated, on a plain light-grey background, in a neat grid, in a 3/4 view, all at the same scale (a small toy race car shown for scale in one corner), with small simple text labels under each object using exactly these file names (labels are the only text allowed). Painted wood is soft pastel with white trims, slightly worn at the edges; metal is painted and a little chipped; concrete is pale and stained. No brand names, no logos, no letters or numbers on any object, no real bridge.
+>
+> Bridge kit (a generic chunky toy suspension bridge, red-orange, NOT the famous real one: no Art Deco towers, no recessed vertical panels, no stepped legs): sf_bridge_tower (one portal tower about 45 m tall: two plain box legs that taper smoothly from bottom to top, horizontal plate seams, two simple straight cross-beams with corner gussets and ONE big thick X brace between the legs, a flat cap on each leg), sf_bridge_deck_8 (an 8 m section of deck with a thick boxy girder underneath), sf_bridge_parapet_8 (an 8 m solid red parapet), sf_bridge_walkway_8 (an 8 m narrow pedestrian sidewalk that hangs outside the parapet), sf_bridge_flares (the short widening piece where the deck meets the shore), sf_bridge_cable_main (one thick main cable segment with its cable bands), sf_bridge_cable_side (a thick vertical hanger), sf_bridge_anchor (a heavy concrete anchor block where the cables end), sf_bridge_lamp (a simple lamp post for the parapet).
+>
+> Vehicles and hazards: cable_car (an open wooden cable car, maroon and cream, with open running boards at both ends, a few tiny standing passengers, brass bells, no lettering), sf_median_truck (a slow boxy grey work truck about 10 m long with a big slanted S-shaped conveyor underneath that lifts barrier blocks, orange-and-white stripes, amber beacons), sf_median_block (one low grey concrete barrier block about 3 m long with a T-shaped top), sf_parked_sedan, sf_parked_wagon, sf_parked_van (three plain boxy toy parked cars in muted faded colours, the van no taller than a car and a half).
+>
+> Houses: sf_row_a_canted and sf_row_a_square (an Italianate row house with a flat roof and a heavy bracketed cornice), sf_row_b_canted and sf_row_b_square (a Queen Anne row house with a pointed gable), sf_row_c_canted and sf_row_c_square (a Stick-style row house) — "canted" means a three-sided bay window, "square" a squared bay window; each is three storeys, about 7 m wide, garage door at street level on one half and a recessed entry with stairs inside a niche on the other half, horizontal clapboard siding, white window trims and cornice, and a plain grey concrete skirt under the floor. Draw these six in cream, because their colour is changed later. sf_row_corner_turret (a corner house with a round turret). sf_painted_lady_a to sf_painted_lady_f (six richly decorated Victorian houses, each in two pastels: body plus a coloured trim — cream, pink, powder blue, mint, butter yellow — with turrets, double gables and fish-scale shingles). sf_front_garden (a 7 by 3 m front garden: a small lawn, a low clipped hedge and a wooden planter box with pink flowers).
+>
+> Waterfront and street: sf_pier_shed (a long wooden pier shed with an arched gable front and a big sliding door, standing on piles), sf_turntable (a round wooden cable-car turntable 10 m wide with rails and a small operator's booth beside it), sf_dragon_gate (a decorative street gate with green-tiled curved roofs and red beams, an open passage, no lettering), sf_signal_mast (a pole with a long arm reaching over the street and a traffic light hanging from it), sf_street_lamp, sf_street_props (a red fire hydrant, a mailbox with no logo, newspaper boxes, a trash can, a traffic cone), sf_trolley_pole (a tall pole with one thick overhead wire), sf_bench, sf_bike_rack, sf_crab_traps (stacked wire crab traps and wooden crates), sf_stair_lane (a white public concrete stair with thick railings between two houses on a slope).
+>
+> Nature and life: sf_cypress_a, sf_cypress_b, sf_cypress_c (Monterey cypresses bent by the wind: short thick trunk, crown leaning to one side in dense layered clumps — NOT a flat disc on a thin trunk, nothing like an African acacia), sf_hydrangea (round bushes of pink and blue hydrangea flowers), sf_street_tree (a small street tree with a round crown), sf_sea_lions (a floating wooden raft with three or four sea lions lying on it), sf_seagull, sf_parrot (a small green parrot with a red head).
+>
+> Background: sf_horizon (a long strip: dry golden-straw hills with a few dark cypresses, and a hazy generic city of plain towers, no pyramid-shaped tower, no bridge).
+
+Ce verifici la primirea planșei, înainte de orice altceva:
+1. `sf_bridge_tower` **nu** e turnul podului real: picioare-cutie netede care se îngustează,
+   traverse drepte și un X gros; fără panouri adâncite și fără trepte.
+2. `cable_car` are platformele deschise la ambele capete și nicio inscripție.
+3. `sf_cypress_*` sunt aplecați de vânt, în pâlcuri, nu discuri plate pe trunchi subțire.

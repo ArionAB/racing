@@ -365,7 +365,7 @@ culoare, coliziune, LOD și triunghiuri orientative, prioritate și val.
 | H4 | `sf_turntable.glb`: placa turnantă, **cu un vagon parcat pe ea** (diorama) | colțul de NV al ocolului, **în afara carosabilului**, pe exteriorul virajului, la ~(−145, 448), pe uscat (apa începe la y 466) | `DecorManual`; vagonul e `cable_car.glb` refolosit ca decor static (`coliziune = hull`) | disc de ⌀ 10 m la cota solului (+0,05), cu șine, inel de lemn și o gheretă de 2 × 2 × 2,6 m alături | `WOOD_WEATHERED` 9, `PAINTED_METAL` 11, `ASPHALT_EDGE` 6 | discul: niciuna; gheretă și vagon: hull | ~1,5k (+ vagonul, deja modelat) | P2 / val 2 |
 | H5 | `sf_dragon_gate.glb`: poarta cu acoperișuri de țiglă verde | o stradă laterală de E a străzii tramvaiului, la ~y 40, cu fața spre stradă, **în afara benzii** | `DecorManual` | 12 m lățime × 9 m înălțime, golul de 6 m (o stradă laterală, nu cursa) | `MARBLE_GREY` 29 (stâlpi), `CACTUS_GREEN` 12 / `TROPICAL_GREEN` 21 (țiglă), `KERB_RED` 7 (grinzi) | hull pe stâlpi (mesh dacă golul trebuie liber) | ~3k | P3 / val 3. **Fără text, fără însemne** (brief §8) |
 | H6 | `sf_pier_shed.glb`: magazia de chei cu fronton arcuit (2 variante de lungime) | F, pe piloni, pe latura apei, **doar la V de peticul tramvaiului 2** (x −100 → −15, y 466–490); 4–5 magazii. **Nu pe latura apei a pontonului** (x 40 → 120): golurile dintre stâlpi sunt mecanica | `DecorManual` | 20 × 12 m, 9 m la cheia arcului; varianta scurtă 12 m | `WOOD_WEATHERED` 9 pereți, `PAINTED_METAL` 11 acoperiș, `FOAM_WHITE` 22 ancadramente | hull | ~2,5k | P2 / val 2. Fără firme |
-| H7 | `sf_clock_tower.glb` | **de decis** (§7) | `DecorManual` | ≤ 32 m peste baza lui | `CORAL_SAND` 19, `FOAM_WHITE` 22, `VOLCANIC_BLACK` 20 | hull pe soclu | ~4k | **P3, nefăcut până la decizie** |
+| H7 | `sf_clock_tower.glb` | **scos** (decizia din 15 nov 2026, §7) | — | ≤ 32 m peste baza lui | `CORAL_SAND` 19, `FOAM_WHITE` 22, `VOLCANIC_BLACK` 20 | hull pe soclu | ~4k | **SCOS, nu se comandă** |
 
 **H7, turnul cu ceas:** în B200 latura de est (faleza A/G) a dispărut, iar odată cu ea axul în
 care stătea turnul. Reperul de start e acum podul însuși: din spatele grilei, portalul e pe ax
@@ -458,16 +458,16 @@ punctul din §4 unde piesa e cea mai aproape.
 - ~~Apa golfului la N de chei~~: **reparată la pasul 6** (`lagoon_depth`).
 
 **Decizii care rămân ale dezvoltatorului:**
-1. **Cele cinci pasteluri:** cod (o listă de clase de perete în `CityFill` și o metadata pe
-   instanță) sau cinci fișiere pe casă (§1.2). **Deschisă.** Nu blochează pilotul.
-2. **Turnul cu ceas:** scos, sau mutat la capătul vizual al tablierului spre oraș (§5.1, H7).
-   **Deschisă.** Diorama citește bine fără el, deci recomandarea rămâne „scos”.
+1. ~~Cele cinci pasteluri~~: **decis (15 nov 2026): cod**, un model pe casă recolorat (o listă de
+   clase de perete în `CityFill` și o metadata pe instanță, §1.2); varianta mai ieftină.
+2. ~~Turnul cu ceas~~: **decis (15 nov 2026): scos.** H7 nu se comandă.
 3. **Casele pictate (C):** **are acum o recomandare, varianta (b)**, din dioramă (§3.1): șirul pe
    latura de N a brațului coamei, cu fața spre S, luminat din față (N·L ≈ 0,86). Din mașină îl
    vezi frontal, în 3/4, doar la ieșirea din colțul de sus, iar pe braț razant. Varianta (a),
-   contra-lumina de la capătul urcării, rămâne alternativa. **Aștept confirmarea.**
+   contra-lumina de la capătul urcării, rămâne alternativa. **Decis (15 nov 2026): (b).**
 4. **Trotuarul exterior al podului** (piesa opțională `sf_bridge_walkway_8`) acoperă pervazul de
-   3,8 m de asfalt dincolo de parapet (2b, punctul 4) fără cod. **Deschisă.**
+   3,8 m de asfalt dincolo de parapet (2b, punctul 4) fără cod. **Decis (15 nov 2026): DA**, piesa
+   intră în comanda podului.
 5. ~~Mașinile parcate ca `BumpProp`~~: **decis** la pasul 6 (`max_footprint` 4,5 m, 70 kg,
    `home`); duba prin `max_height` (decizia din 15 nov, în lucru).
 6. ~~Scândura pontonului și cărămida serpentinelor~~: **rezolvat** la pasul 6, fără GLB

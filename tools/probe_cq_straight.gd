@@ -8,7 +8,7 @@ func _ready() -> void:
 		if arg.begins_with("--from="): f0 = float(arg.trim_prefix("--from="))
 		if arg.begins_with("--to="): f1 = float(arg.trim_prefix("--to="))
 		if arg.begins_with("--win="): win = float(arg.trim_prefix("--win="))
-	var scene := load(GameState.TRACK_SCENES[GameState.resolve_track_index(12)]) as PackedScene
+	var scene := load("res://scenes/tracks/Track12.tscn") as PackedScene
 	var track := scene.instantiate() as Track
 	get_tree().root.add_child(track)
 	await get_tree().process_frame

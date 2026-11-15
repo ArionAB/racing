@@ -37,7 +37,7 @@ func _ready() -> void:
 			f0 = float(arg.trim_prefix("--from="))
 		if arg.begins_with("--to="):
 			f1 = float(arg.trim_prefix("--to="))
-	var track := (load(GameState.TRACK_SCENES[GameState.resolve_track_index(12)])
+	var track := (load("res://scenes/tracks/Track12.tscn")
 		as PackedScene).instantiate() as Track
 	add_child(track)
 	await get_tree().process_frame

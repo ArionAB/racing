@@ -2,7 +2,7 @@ extends Node
 ## Diagnostic: e autobuzul de pe Track15 construit si vizibil?
 func _ready() -> void:
 	await get_tree().process_frame
-	var track := (load(GameState.TRACK_SCENES[8]) as PackedScene).instantiate() as Track
+	var track := (load("res://scenes/tracks/Track15.tscn") as PackedScene).instantiate() as Track
 	get_tree().root.add_child(track)
 	await get_tree().process_frame
 	await get_tree().process_frame

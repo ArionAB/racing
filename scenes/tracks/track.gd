@@ -10015,11 +10015,26 @@ func _prop_contact_discs() -> PackedVector4Array:
 			continue
 		if n3 is FlockProp:
 			# Stol copt din WorldProp: discurile calculate la coacere.
-			var fp := n3 as FlockProp
-			for k in fp.contact_discs.size():
-				out.append(fp.contact_discs[k])
+			#
+			# Citite NETIPIZAT, cu `get` (#717). flock.gd nu e @tool, deci in
+			# editor nodul poarta un script-substitut (placeholder), care intoarce
+			# null pentru exporturile nescrise in .tscn. Accesul tipizat
+			# `(n3 as FlockProp).contact_discs.size()` se compileaza ca apel
+			# validat pe PackedVector4Array si, pe null, omoara editorul cu
+			# segfault la redeschiderea pistei. In joc scriptul e real si valorile
+			# sunt mereu array-uri, deci rezultatul e acelasi.
+			var fdiscs: Variant = n3.get("contact_discs")
+			if not fdiscs is PackedVector4Array:
+				continue
+			var discs: PackedVector4Array = fdiscs
+			var fflat: Variant = n3.get("contact_flat")
+			var flat := PackedByteArray()
+			if fflat is PackedByteArray:
+				flat = fflat
+			for k in discs.size():
+				out.append(discs[k])
 				if not _contact_flat.is_empty():
-					_disc_flat.append(fp.contact_flat[k] if k < fp.contact_flat.size() else 0)
+					_disc_flat.append(flat[k] if k < flat.size() else 0)
 			continue
 		var d := _contact_disc_for(n3, root)
 		if is_nan(d.x):
@@ -16521,9 +16536,13 @@ func _set_decor_veg_exclusions() -> void:
 					continue
 				# Stoluri FlockProp coapte din WorldProp (tools/bake_okinawa_decor.py):
 				# poarta cercurile pe care nodurile originale le-ar fi dat.
+				# Citite netipizat, ca in `_prop_contact_discs` (#717): in editor
+				# stolul are script-substitut, care da null pentru exporturile
+				# nescrise, iar bucla tipizata pe null cade cu segfault.
 				if on is FlockProp:
-					for fc in (on as FlockProp).veg_circles:
-						circles.append(fc)
+					var fcircles: Variant = on.get("veg_circles")
+					if fcircles is PackedVector3Array:
+						circles.append_array(fcircles)
 				for oc in on.get_children():
 					ostack.append(oc)
 	if String(theme_flag("props", "desert")) == "monumentvalley" and _sampler != null:

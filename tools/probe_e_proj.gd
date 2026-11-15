@@ -16,7 +16,7 @@ func _ready() -> void:
 			var e := arg.trim_prefix("--p=").split(",")
 			pts.append(Vector3(float(e[0]), float(e[1]), float(e[2])))
 	await get_tree().process_frame
-	var only := GameState.resolve_track_index(7)
+	var only := TrackInfo.index_of_id(&"serengeti")
 	var scene := load(GameState.TRACK_SCENES[only]) as PackedScene
 	var track := scene.instantiate() as Track
 	get_tree().root.add_child(track)

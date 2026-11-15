@@ -34,18 +34,21 @@ var _space: PhysicsDirectSpaceState3D
 
 
 func _ready() -> void:
-	var wanted := 7
+	var wanted := "serengeti"
 	var fix := false
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
-			wanted = int(arg.trim_prefix("--track="))
+			wanted = arg.trim_prefix("--track=")
 		elif arg == "--fix":
 			fix = true
-	var idx := GameState.resolve_track_index(wanted)
+	# `--track=`: index sau numar de scena ca pana acum, ori fara ambiguitate
+	# "Track14" / "serengeti" (#718).
+	var idx := GameState.resolve_track_arg(wanted)
 	if idx < 0:
-		push_error("ProbeAnimalOverlap: pista invalida %d" % wanted)
+		push_error("ProbeAnimalOverlap: pista invalida %s" % wanted)
 		get_tree().quit(2)
 		return
+	print("ProbeAnimalOverlap: pista %s" % GameState.track_arg_label(wanted, idx))
 	_track = (load(GameState.TRACK_SCENES[idx]) as PackedScene).instantiate() as Track
 	add_child(_track)
 	# Turma de fundal se construieste in primul pas de fizica, WorldProp-urile

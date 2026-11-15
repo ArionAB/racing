@@ -14,7 +14,7 @@ extends Node
 ## sa nu marcheze pixeli ocluzati.
 ##
 ##   godot --rendering-driver vulkan --path . res://tools/ProbeMasca.tscn -- \
-##       --track=13 --frac=0.27 --match=Taietura
+##       --track=cappadocia --frac=0.27 --match=Taietura
 ##
 ## `--gamecam`: foloseste parametrii REALI ai ChaseCamera (ca `snapshot.gd
 ## --gamecam`) in loc de camera inghetata MEASURE_*, pentru compozitie "cum
@@ -50,7 +50,9 @@ var _h: int = 720
 
 
 func _ready() -> void:
-	var track_index := 13
+	# Implicit pe id (#718): 13 era Cappadocia (scena) la scriere, azi INDEXUL 13
+	# e Okinawa. --track= ia index / numar de scena, sau "TrackNN" / id de pista.
+	var track_arg := "cappadocia"
 	var frac := 0.27
 	var matches: Array[String] = []
 	var groups: Array[String] = []
@@ -91,7 +93,7 @@ func _ready() -> void:
 			var l := arg.trim_prefix("--look=").split(",")
 			look_pos = Vector3(float(l[0]), float(l[1]), float(l[2]))
 		if arg.begins_with("--track="):
-			track_index = int(arg.trim_prefix("--track="))
+			track_arg = arg.trim_prefix("--track=")
 		elif arg.begins_with("--frac="):
 			frac = float(arg.trim_prefix("--frac="))
 		elif arg.begins_with("--caster="):
@@ -117,7 +119,12 @@ func _ready() -> void:
 	if matches.is_empty():
 		matches.append("Taietura")
 
-	var idx := GameState.resolve_track_index(track_index)
+	var idx := GameState.resolve_track_arg(track_arg)
+	if idx < 0:
+		push_error("probe_masca: pista invalida %s" % track_arg)
+		get_tree().quit(2)
+		return
+	print("probe_masca: pista %s" % GameState.track_arg_label(track_arg, idx))
 	var scene: PackedScene = load(GameState.TRACK_SCENES[idx])
 	var track: Track = scene.instantiate() as Track
 	add_child(track)

@@ -63,7 +63,7 @@ func _ready() -> void:
 				_fracs.append(float(x))
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(_out_dir))
 
-	var idx := GameState.resolve_track_index(10)
+	var idx := TrackInfo.index_of_id(&"jodhpur")
 	_track = (load(GameState.TRACK_SCENES[idx]) as PackedScene).instantiate() as Track
 	# Pista pe RADACINA (nu copil al sondei, care e PROCESS_MODE_ALWAYS): asa
 	# `paused` chiar o ingheata.

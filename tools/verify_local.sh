@@ -13,20 +13,36 @@
 #   bash tools/verify_local.sh             # import + toate verificarile
 #   bash tools/verify_local.sh --no-import # sare peste import (cache proaspat)
 #
+#   bash tools/verify_local.sh --print-dirs # doar arata unde merg log-urile/save-ul
+#
 # Iese cu 0 doar daca toate verificarile trec. Log-urile raman in
-# $VERIFY_LOGS (implicit un folder temporar), numite dupa pas.
+# $VERIFY_LOGS (implicit un folder temporar al worktree-ului), numite dupa pas.
 #
 # Godot: variabila GODOT, altfel calea standard de pe masina de dezvoltare.
 
 set -uo pipefail
 
 GODOT="${GODOT:-/d/GameDev/Godot_v4.7-stable_win64_console.exe}"
-LOGS="${VERIFY_LOGS:-${TMPDIR:-/tmp}/verify_local}"
+# Log-urile si save-ul sondelor sunt ale WORKTREE-ULUI (#722): `user://` si
+# folderul temporar sunt comune tuturor worktree-urilor, iar doua verificari
+# paralele isi stergeau una alteia log-urile (`rm -f` de mai jos) si isi
+# migrau/rescriau save-ul. Cheia = numele folderului + cksum pe calea absoluta,
+# in forma Windows (`pwd -W` din Git Bash: /tmp si /c/Users/.../Temp sunt
+# acelasi folder) si cu litere mici (D:/ si d:/ la fel). Acelasi worktree ->
+# aceeasi cheie la fiecare rulare. VERIFY_LOGS si TOY_RACER_SAVE_DIR setate de
+# apelant castiga, ca inainte.
+WT_ABS="$(pwd -W 2>/dev/null || pwd -P)"
+WT_LOWER="$(printf '%s' "$WT_ABS" | tr 'A-Z' 'a-z')"
+WT_KEY="$(basename "$WT_LOWER" | tr -c 'a-z0-9_.\n-' '_')_$(printf '%s' "$WT_LOWER" | cksum | cut -d' ' -f1)"
+LOGS="${VERIFY_LOGS:-${TMPDIR:-/tmp}/verify_local_$WT_KEY}"
+SAVE_DIR="${TOY_RACER_SAVE_DIR:-user://verify_local_save_$WT_KEY/}"
 STEP_TIMEOUT="${STEP_TIMEOUT:-900}"   # secunde pe pas; un pas agatat pica, nu blocheaza
 DO_IMPORT=1
+PRINT_DIRS=0
 for a in "$@"; do
 	case "$a" in
 		--no-import) DO_IMPORT=0 ;;
+		--print-dirs) PRINT_DIRS=1 ;;
 		*) echo "argument necunoscut: $a"; exit 2 ;;
 	esac
 done
@@ -34,6 +50,12 @@ done
 if [ ! -f project.godot ]; then
 	echo "Ruleaza din radacina proiectului (unde e project.godot)."
 	exit 2
+fi
+if [ $PRINT_DIRS -eq 1 ]; then
+	echo "worktree: $WT_ABS"
+	echo "log-uri:  $LOGS"
+	echo "save:     $SAVE_DIR"
+	exit 0
 fi
 if [ ! -x "$GODOT" ] && [ ! -f "$GODOT" ]; then
 	echo "Nu gasesc Godot la $GODOT — seteaza GODOT=..."
@@ -44,7 +66,9 @@ rm -f "$LOGS"/*.log
 # Save-urile jocului (settings/records/career/fantome) merg intr-un director
 # propriu, nu in user:// real: orice sonda trece prin GameState._ready, care
 # incarca si — pe un save vechi — MIGREAZA fisierele (#690, SaveSchema).
-export TOY_RACER_SAVE_DIR="${TOY_RACER_SAVE_DIR:-user://verify_local_save/}"
+# Directorul e al worktree-ului (SAVE_DIR, sus).
+export TOY_RACER_SAVE_DIR="$SAVE_DIR"
+echo "Log-uri in $LOGS, save-ul sondelor in $TOY_RACER_SAVE_DIR"
 
 FAILED=()
 PASSED=()
@@ -85,10 +109,36 @@ if [ $DO_IMPORT -eq 1 ]; then
 	# Dupa un merge, scenele pot cere resurse inca neimportate (memoria
 	# `merge-curat-scena-stricata`). Doua treceri, ca in CI: unele resurse
 	# depind de altele.
+	#
+	# Fiecare trecere se verifica (#717). Inainte ambele coduri de iesire erau
+	# ignorate, iar testul de fum cauta in log doar erori de script/parse/load,
+	# deci un segfault al editorului headless (redeschiderea scenelor din
+	# .godot/editor/editor_layout.cfg) trecea drept import reusit.
 	printf '%-58s ' "Import resurse"
-	timeout "$STEP_TIMEOUT" "$GODOT" --headless --path . --import > "$LOGS/import.log" 2>&1
-	timeout "$STEP_TIMEOUT" "$GODOT" --headless --path . --import >> "$LOGS/import.log" 2>&1
-	echo "gata"
+	import_t0=$SECONDS
+	import_why=""
+	: > "$LOGS/import.log"
+	for import_pass in 1 2; do
+		timeout "$STEP_TIMEOUT" "$GODOT" --headless --path . --import >> "$LOGS/import.log" 2>&1
+		import_status=$?
+		if [ -z "$import_why" ]; then
+			if [ $import_status -eq 124 ]; then
+				import_why="trecerea $import_pass AGATATA (peste ${STEP_TIMEOUT}s)"
+			elif [ $import_status -ne 0 ]; then
+				import_why="trecerea $import_pass: cod de iesire $import_status"
+			fi
+		fi
+	done
+	if [ -z "$import_why" ] && grep -qE 'CrashHandlerException|signal 11' "$LOGS/import.log"; then
+		import_why="crash in log (CrashHandlerException / signal 11)"
+	fi
+	if [ -z "$import_why" ]; then
+		echo "OK   ($((SECONDS - import_t0))s)"
+		PASSED+=("Import resurse")
+	else
+		echo "PICA ($((SECONDS - import_t0))s) — $import_why — vezi $LOGS/import.log"
+		FAILED+=("Import resurse")
+	fi
 fi
 
 # Testul de fum: scena principala porneste fara erori de script/parse/load.
@@ -129,6 +179,22 @@ for scene in $(awk '/const TRACK_SCENES/,/^]/' scripts/autoload/game_state.gd \
 		echo "    avertisment: $scene n-are imagine comisa in assets/ui/track_thumbs/"
 	fi
 done
+
+# Ce intra in build-ul de magazin (#716): presetul exporta all_resources, asa
+# ca orice demo de addon sau poza de referinta neignorata ajunge in pachet fara
+# sa observe cineva (road_demos/, postere Okinawa, r27_ref.jpeg). Garda pica la
+# un folder nou de top sau la o cale de demo/referinta, si tipareste marimea pe
+# folder ca cifra sa se vada la fiecare verificare.
+printf '%-58s ' "Continutul exportului (fara demo-uri si referinte)"
+if bash tools/export_inventory.sh > "$LOGS/export_inventory.log" 2>&1; then
+	echo "OK"
+	PASSED+=("Continutul exportului")
+else
+	echo "PICA — vezi $LOGS/export_inventory.log"
+	grep '^PICA' "$LOGS/export_inventory.log" | head -10 | sed 's/^/    /'
+	FAILED+=("Continutul exportului")
+fi
+grep '^export ' "$LOGS/export_inventory.log" | sed 's/^/    /'
 
 # Restul pasilor sunt aceiasi ca in vechiul ci.yml; motivarea fiecaruia e in
 # sonda respectiva.
@@ -222,7 +288,7 @@ run_step "Garajul: bare, masa si incadrarea vitrinei" garage.log 'probe_garage:'
 # in copaci sau stanci, nici cocotati pe ele (157 din 856 de gnu stateau asa).
 run_step "Serengeti: traversarile calca pe sol, cu fata inainte" hazard_ground.log 'VERDICT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeHazardGround.tscn -- --track=7
-run_step "Angkor: elefantul se intoarce doar vizual, cu fata inainte" hazard_ground_angkor.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeHazardGround.tscn -- --track=16
+run_step "Angkor: elefantul se intoarce doar vizual, cu fata inainte" hazard_ground_angkor.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeHazardGround.tscn -- --track=angkor
 run_step "Serengeti: animalele nu stau in copaci si stanci" animal_overlap.log 'VERDICT:|PICAT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeAnimalOverlap.tscn -- --track=7 --no-batch
 # Cariera pasul 1: config validat (cu sabotaj), persistenta pe pista, stampile
@@ -258,6 +324,12 @@ run_step "Credite: sursa in export, inventar, ecran, layout" credits.log 'VERDIC
 run_step "Quick Race: piste de lansare, fara bancuri de test" quick_race.log 'VERDICT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeQuickRace.tscn
 
+# Recordurile, cariera si fantomele jucatorilor sunt cheiate pe TrackInfo.id,
+# fara tabela de alias-uri: o pista fara .tres primeste id-ul dedus (`track25`)
+# pe vecie, iar un id schimbat lasa save-urile vechi dormante (#720).
+run_step "Id-uri de pista: explicite, unice, inghetate" track_ids.log 'VERDICT:' -- \
+	--headless --fixed-fps 60 --path . res://tools/ProbeTrackIds.tscn
+
 # Decorul asezat pe solul de la generare ramane sub teren cand terenul creste
 # dupa aceea: padurea Lerai ajunsese la 20-30 m sub peretele craterului.
 run_step "Serengeti: niciun decor ingropat sub teren" decor_buried.log 'VERDICT:|PICAT:' -- \
@@ -274,6 +346,22 @@ run_step "Torent Fiordland: CALM simtit, SURGE mai dur" torrent_b.log 'REZULTAT 
 run_step "Transfagarasan: oi si urs (hazarde animale)" tf_hazards.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeTfHazards.tscn
 # Conurile din tunel (road_works) se imprastie, nu sunt zid (#602).
 run_step "Transfagarasan: conurile din tunel se imprastie" tf_cones.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeBumpProps.tscn -- --track=21
+
+# Uneltele nu-si numesc pista cu un numar scris in cod (#718). Cu 18 piste, 12
+# e indexul Monument Valley, dar scena Track12 e Chongqing; resolve_track_index
+# da castig indexului, deci un literal incarca TACUT alta pista — 63 de unelte
+# masurau asa. In cod: calea scenei sau TrackInfo.index_of_id(&"..."); pe linia
+# de comanda: --track=Track12 / --track=chongqing (GameState.resolve_track_arg).
+printf '%-58s ' "Unelte: nicio pista numita cu numar in cod (#718)"
+track_literals=$(grep -rnE 'resolve_track_index\(\s*-?[0-9]|TRACK_SCENES\[\s*-?[0-9]' --include='*.gd' tools)
+if [ -n "$track_literals" ]; then
+	echo "PICA — pista ceruta cu numar literal:"
+	echo "$track_literals" | head -20 | sed 's/^/    /'
+	FAILED+=("Unelte: nicio pista numita cu numar in cod")
+else
+	echo "OK"
+	PASSED+=("Unelte: nicio pista numita cu numar in cod")
+fi
 
 # Nivelurile AI (#682), partea scumpa, varianta scurta: o pista de drepte
 # (Monument Valley) x 3 seed-uri x 5 profiluri = 15 curse reale, 5 in paralel

@@ -10,7 +10,7 @@ const CAR_H: float = 1.00
 
 func _ready() -> void:
 	await get_tree().process_frame
-	var track := (load(GameState.TRACK_SCENES[GameState.resolve_track_index(12)])
+	var track := (load("res://scenes/tracks/Track12.tscn")
 		as PackedScene).instantiate() as Track
 	add_child(track)
 	for _i in 12:

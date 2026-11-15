@@ -15,11 +15,13 @@
 #   bash tools/ai_skill_gap.sh --sabotaj=ordine --skills="referinta bronz argint aur"
 #   bash tools/ai_skill_gap.sh --report-only                      # doar raportul
 #
-# Pistele se dau ca POZITIE in GameState.TRACK_SCENES (ca la probe_race);
-# eticheta tiparita de sonda spune ce pista a fost de fapt. Implicitul = cele
-# trei piste de stil diferit: 12 Monument Valley (drepte lungi), 11 Kyoto
-# (serpentine, hazarde), 3 Baikal (sarituri si gheata). Restul pistelor de
-# lansare (cariera): 6 7 2 5 8 13 4 10 9.
+# Pistele se dau ca POZITIE in GameState.TRACK_SCENES (ca la probe_race) sau,
+# fara ambiguitate, ca id de pista / nume de scena (`monument_valley`, `Track19`;
+# GameState.resolve_track_arg, #718): 12 e indexul Monument Valley, dar scena
+# Track12 e Chongqing. Eticheta tiparita de sonda spune ce pista a fost de fapt.
+# Implicitul = cele trei piste de stil diferit: Monument Valley (12, drepte
+# lungi), Kyoto (11, serpentine, hazarde), Baikal (3, sarituri si gheata).
+# Restul pistelor de lansare (cariera), ca pozitii: 6 7 2 5 8 13 4 10 9.
 #
 # Rezultatele se ADAUGA in $AISKILL_OUT (implicit $TMPDIR/ai_skill_gap/rezultate.txt):
 # rulari succesive pe piste diferite intra in acelasi raport. `--fresh` il goleste.
@@ -31,7 +33,7 @@ GODOT="${GODOT:-/d/GameDev/Godot_v4.7-stable_win64_console.exe}"
 DIR="${AISKILL_DIR:-${TMPDIR:-/tmp}/ai_skill_gap}"
 OUT="${AISKILL_OUT:-$DIR/rezultate.txt}"
 RUN_TIMEOUT="${RUN_TIMEOUT:-900}"
-TRACKS="12 11 3"
+TRACKS="monument_valley kyoto baikal"
 SEEDS="$(seq 1 16 | tr '\n' ' ')"
 SKILLS="referinta implicit bronz argint aur"
 JOBS=4
@@ -51,7 +53,7 @@ for a in "$@"; do
 		--report-only) REPORT_ONLY=1 ;;
 		--fresh) FRESH=1 ;;
 		--short)
-			TRACKS="12"; SEEDS="1 2 3"; SKILLS="referinta implicit bronz argint aur"
+			TRACKS="monument_valley"; SEEDS="1 2 3"; SKILLS="referinta implicit bronz argint aur"
 			JOBS=5; FRESH=1 ;;
 		*) echo "argument necunoscut: $a"; exit 2 ;;
 	esac

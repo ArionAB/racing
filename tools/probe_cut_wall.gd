@@ -37,6 +37,10 @@ func _ready() -> void:
 		elif arg == "--sabotaj":
 			_sabotage = true
 	var path := "res://scenes/tracks/Track%02d.tscn" % _track_no
+	# Aici --track e NUMARUL SCENEI (nu trece prin resolve_track_index), deci
+	# --track=16 e Fiordland. Linia spune pe ce pista se masoara (#718).
+	print("probe_cut_wall: pista %s (--track=%d = numarul scenei)" % [
+		GameState.track_label(GameState.index_of_scene(path)), _track_no])
 	var track := (load(path) as PackedScene).instantiate() as Track
 	if _thick >= 0.0:
 		for f in track.find_children("*", "CliffFace", true, false):

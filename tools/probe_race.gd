@@ -202,6 +202,9 @@ var _car_set: Dictionary = {}
 ## `--scene=res://...tscn`: ruleaza cursa pe ACEASTA scena in locul celei din
 ## TRACK_SCENES (`GameState.track_scene_override`); --track ramane indexul pistei.
 var _track_index: int = 0
+## `--track=` ca text: numar (indexul castiga) sau, fara ambiguitate, "Track12" /
+## "chongqing" — vezi `GameState.resolve_track_arg` (#718).
+var _track_arg: String = "0"
 var _seconds: float = 150.0
 ## `--rain=1`: fortata ploaia peste orice `RainCycle` de pe pista, prin
 ## `force_factor(1.0)` (Fiordland, docs/track_briefs/fiordland.md §7 pasul
@@ -415,7 +418,7 @@ func _ready() -> void:
 		if arg.begins_with("--mode="):
 			_mode = arg.trim_prefix("--mode=")
 		elif arg.begins_with("--track="):
-			_track_index = int(arg.trim_prefix("--track="))
+			_track_arg = arg.trim_prefix("--track=")
 		elif arg.begins_with("--scene="):
 			# Varianta unei piste (alt .tscn) cu acelasi --track: comparatii A/B in
 			# paralel fara sa rescrii scena reala (Angkor, faza elefantului).
@@ -501,14 +504,14 @@ func _ready() -> void:
 	# scenei (--track=11). Fara verificarea asta, un index gresit nu se plangea
 	# aici, ci pica mai tarziu cu "Out of bounds" si turna zeci de mii de erori
 	# derivate, in care cauza nu se mai vedea.
-	var resolved := GameState.resolve_track_index(_track_index)
+	var resolved := GameState.resolve_track_arg(_track_arg)
 	if resolved < 0:
-		push_error("probe_race: --track=%d nu e nici pozitie in lista (0..%d), nici numar de pista din lista."
-			% [_track_index, GameState.TRACK_SCENES.size() - 1])
+		push_error("probe_race: --track=%s nu e nici pozitie in lista (0..%d), nici numar de pista din lista, nici TrackNN / id de pista."
+			% [_track_arg, GameState.TRACK_SCENES.size() - 1])
 		get_tree().quit(1)
 		return
 	_track_index = resolved
-	print("probe_race: pista %s" % GameState.track_label(_track_index))
+	print("probe_race: pista %s" % GameState.track_arg_label(_track_arg, _track_index))
 	match _mode:
 		"race":
 			_start_race()

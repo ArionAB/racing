@@ -7,15 +7,17 @@ extends Node
 ## MeshInstance3D din fiecare hazard, numele nodului, textura din
 ## material_override si uv1_triplanar/uv1_world_triplanar/uv1_scale.
 ##
-##   godot --headless --fixed-fps 60 --path . res://tools/ProbeElephantHazard.tscn -- --track=14
+##   godot --headless --fixed-fps 60 --path . res://tools/ProbeElephantHazard.tscn -- --track=serengeti
 
 func _ready() -> void:
 	await get_tree().process_frame
-	var only := 14
+	# Implicit pe id (#718): 14 era Serengeti (scena Track14) la scriere, azi
+	# INDEXUL 14 e Ha Long. --track= ia si "TrackNN" / id de pista.
+	var only := "serengeti"
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
-			only = int(arg.trim_prefix("--track="))
-	var idx := GameState.resolve_track_index(only)
+			only = arg.trim_prefix("--track=")
+	var idx := GameState.resolve_track_arg(only)
 	if idx < 0:
 		push_error("ProbeElephantHazard: track invalid")
 		get_tree().quit(1)
@@ -30,7 +32,7 @@ func _ready() -> void:
 
 	var hazards: Array[Node] = []
 	_collect_sliding(t, hazards)
-	print("=== PROBE ELEPHANT HAZARD — %s ===" % GameState.track_label(only))
+	print("=== PROBE ELEPHANT HAZARD — %s ===" % GameState.track_arg_label(only, idx))
 	print("SlidingHazard gasite: %d" % hazards.size())
 	var checked := 0
 	for h in hazards:

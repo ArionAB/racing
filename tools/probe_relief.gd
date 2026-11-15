@@ -7,7 +7,7 @@ extends Node
 ## sau doar vertex color pe un perete neted?" — pe geometrie, nu pe pixeli.
 
 func _ready() -> void:
-	var idx := GameState.resolve_track_index(13)
+	var idx := TrackInfo.index_of_id(&"cappadocia")
 	var track: Track = (load(GameState.TRACK_SCENES[idx]) as PackedScene).instantiate() as Track
 	add_child(track)
 	await get_tree().process_frame

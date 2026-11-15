@@ -16,7 +16,7 @@ func _go() -> void:
 					continue
 				var xy := pair.split(",")
 				pts.append(Vector2(float(xy[0]), float(xy[1])))
-	var t := (load(GameState.TRACK_SCENES[6]) as PackedScene).instantiate()
+	var t := (load("res://scenes/tracks/Track13.tscn") as PackedScene).instantiate()
 	get_tree().root.add_child(t)
 	for i in 12:
 		await get_tree().process_frame

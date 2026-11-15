@@ -2,7 +2,7 @@ extends Node
 ## Unde stau peroanele telecabinei fata de sosea, si pe ce cota.
 func _ready() -> void:
 	await get_tree().process_frame
-	var track := (load(GameState.TRACK_SCENES[GameState.resolve_track_index(12)])
+	var track := (load("res://scenes/tracks/Track12.tscn")
 		as PackedScene).instantiate() as Track
 	add_child(track)
 	await get_tree().process_frame

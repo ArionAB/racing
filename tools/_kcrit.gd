@@ -1,7 +1,7 @@
 extends Node
 func _ready() -> void:
 	await get_tree().process_frame
-	var ps := load(GameState.TRACK_SCENES[GameState.resolve_track_index(12)]) as PackedScene
+	var ps := load("res://scenes/tracks/Track12.tscn") as PackedScene
 	var track := ps.instantiate() as Track
 	add_child(track)
 	for _i in 10:

@@ -22,16 +22,17 @@ extends Node
 ##      dupa `nudge_after_s`, pe tastatura textul numeste tasta; la final
 ##      starea se salveaza si se reincarca; SKIP incheie, salveaza si iese.
 ##
-## Nu atinge setarile reale: `GameState.settings_path` merge in
-## user://probe_tmp/ (sters la final). Dovada: cat ruleaza, sonda tine in
+## Nu atinge setarile reale: `GameState.settings_path` merge in folderul
+## temporar al procesului, `user://probe_tmp/tutorial_<pid>/` (ProbeTmp, #722;
+## sters la final). Dovada: cat ruleaza, sonda tine in
 ## memorie un `cam_follow_scale` marcator (LEAK_MARK); orice salvare scapata
 ## spre user://settings.cfg l-ar duce acolo, iar sonda pica daca il gaseste.
 ## (Nu MD5 pe fisierul real: user:// e comun tuturor worktree-urilor, iar alte
 ## sonde, de ex. ProbeHaptics, il rescriu si il restaureaza in paralel.)
 
-## Subdosar PROPRIU: user://probe_tmp/ e folosit si de alte sonde.
-const TMP_DIR := "user://probe_tmp/tutorial/"
-const TMP_SETTINGS := TMP_DIR + "tutorial_settings.cfg"
+## Folder PROPRIU procesului: user:// e comun tuturor worktree-urilor, iar doua
+## rulari paralele pe un nume fix isi stergeau fisierul una alteia (#722).
+const ProbeTmp := preload("res://tools/probe_tmp.gd")
 const RACE_SCENE := "res://scenes/race/Race.tscn"
 const BENCH := "res://scenes/tracks/Track01.tscn"
 ## Valoare pe care sliderul (pas 0.05) n-o produce: marcatorul de scurgere.
@@ -44,6 +45,9 @@ var _exits: int = 0
 var _saved_sensitivity: float = 1.0
 var _saved_follow: float = 1.0
 var _bench: bool = false
+var _tmp_dir: String = ""
+var _tmp_settings: String = ""
+var _real_settings_path: String = ""
 var _cfg: TutorialConfig = TutorialDirector.DEFAULT_CONFIG
 
 
@@ -56,7 +60,11 @@ func _ready() -> void:
 	print("== A. layout")
 	await _check_layout(Vector2i(1280, 720), "1280x720")
 	await _check_layout(Vector2i(1558, 720), "telefon 2532x1170 -> 1558x720")
-	await _check_layout(Vector2i(960, 720), "4:3 (iPad) 960x720")
+	# 4:3 cu stretch `expand` (baza 1280x720) NU da un canvas mai ingust, ci
+	# unul mai INALT: 1280x960 (iPad 2732x2048 -> 1280x959). Un SubViewport de
+	# 960x720 descrie un canvas pe care jocul nu-l produce — din el s-a nascut
+	# alarma falsa din #719 (vezi ProbeTouchZones, care trece prin stretch).
+	await _check_layout(Vector2i(1280, 960), "4:3 (iPad) -> 1280x960")
 	print("== B. invitatia de la prima pornire")
 	await _check_invite()
 	print("== C. REPLAY TUTORIAL din SETTINGS")
@@ -81,8 +89,10 @@ func _check(ok: bool, what: String) -> void:
 # ----------------------------------------------------------------- izolare
 
 func _isolate() -> void:
-	DirAccess.make_dir_recursive_absolute(TMP_DIR)
-	GameState.settings_path = TMP_SETTINGS
+	_tmp_dir = ProbeTmp.make("tutorial")
+	_tmp_settings = _tmp_dir + "tutorial_settings.cfg"
+	_real_settings_path = GameState.settings_path
+	GameState.settings_path = _tmp_settings
 	_saved_sensitivity = GameState.steer_sensitivity
 	GameState.steer_sensitivity = 1.0
 	_saved_follow = GameState.cam_follow_scale
@@ -102,17 +112,29 @@ func _restore() -> void:
 	GameState.cam_follow_scale = _saved_follow
 	# Salvarile sondei au ajuns in fisierul ei (cu marcatorul), nu in cel real.
 	var tmp := ConfigFile.new()
-	var tmp_ok := tmp.load(TMP_SETTINGS) == OK \
+	var tmp_ok := tmp.load(_tmp_settings) == OK \
 		and is_equal_approx(float(tmp.get_value("camera", "follow_scale", 0.0)), LEAK_MARK)
-	_check(tmp_ok, "salvarile sondei au mers in %s" % TMP_SETTINGS)
+	_check(tmp_ok, "salvarile sondei au mers in %s" % _tmp_settings)
 	var real := ConfigFile.new()
 	var leaked := real.load(GameState.SETTINGS_PATH) == OK \
 		and is_equal_approx(float(real.get_value("camera", "follow_scale", 0.0)), LEAK_MARK)
 	_check(not leaked, "user://settings.cfg real neatins (fara marcatorul sondei)")
-	if FileAccess.file_exists(TMP_SETTINGS):
-		DirAccess.remove_absolute(TMP_SETTINGS)
-	DirAccess.remove_absolute(TMP_DIR)
-	GameState.settings_path = GameState.SETTINGS_PATH
+	_remove_tmp()
+
+
+## Si pe iesirile care nu trec prin `_restore` (sonda oprita la jumatate).
+func _exit_tree() -> void:
+	_remove_tmp()
+
+
+func _remove_tmp() -> void:
+	if _tmp_dir == "":
+		return
+	ProbeTmp.remove(_tmp_dir)
+	_tmp_dir = ""
+	# Inapoi la calea de dinainte: sub verify_local.sh e TOY_RACER_SAVE_DIR,
+	# nu `user://settings.cfg`.
+	GameState.settings_path = _real_settings_path
 
 
 ## Starea salvata e cea din fisier: o stergem din memorie si o recitim.
@@ -473,7 +495,7 @@ func _check_flow() -> void:
 
 	# --- FINAL: salvat, recitit, CONTINUE iese
 	_check(GameState.tutorial_done and _reloaded_done(),
-		"gata: tutorial_done salvat in %s si recitit" % TMP_SETTINGS)
+		"gata: tutorial_done salvat in %s si recitit" % _tmp_settings)
 	_check(ov.continue_button().visible and not ov.skip_button().visible,
 		"gata: cartonasul final are CONTINUE, nu SKIP")
 	_exits = 0

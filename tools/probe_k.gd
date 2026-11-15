@@ -4,10 +4,12 @@ extends Node
 ## se vada daca semnalul pictat e bimodal la sursa sau abia rasterizatorul si
 ## lumina il netezesc.
 func _ready() -> void:
-	var idx := 13
+	# Implicit pe id, nu cu un numar: 13 era Track13 la scriere (scena), azi INDEXUL
+	# lui e Okinawa (#718). --track= ia si "TrackNN" / id de pista.
+	var idx := TrackInfo.index_of_id(&"cappadocia")
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
-			idx = GameState.resolve_track_index(int(arg.trim_prefix("--track=")))
+			idx = GameState.resolve_track_arg(arg.trim_prefix("--track="))
 	await get_tree().process_frame
 	var track := (load(GameState.TRACK_SCENES[idx]) as PackedScene).instantiate() as Track
 	get_tree().root.add_child(track)

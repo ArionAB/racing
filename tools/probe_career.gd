@@ -14,9 +14,11 @@ extends Node
 ## numara cate verificari au rulat si sub `MIN_CHECKS` verdictul pica, (c)
 ## raftul se numara pe noduri reale (carduri, etichete), nu pe apeluri.
 ##
-## Nu atinge salvarea reala: `Career.save_path` merge pe un fisier temporar.
+## Nu atinge salvarea reala: `Career.save_path` merge pe un fisier temporar,
+## in folderul procesului (`user://probe_tmp/career_<pid>/`, ProbeTmp): pe numele
+## fix de dinainte, doua rulari paralele picau amandoua (19 din 20, #722).
 
-const TMP_PATH := "user://probe_career_tmp.cfg"
+const ProbeTmp := preload("res://tools/probe_tmp.gd")
 ## Cate verificari trebuie sa fi rulat. Daca cineva scoate o sectiune sau o
 ## iesire timpurie sare peste ele, numarul scade si verdictul pica.
 const MIN_CHECKS := 170
@@ -26,6 +28,8 @@ var _checks: int = 0
 var _real_config: CareerConfig
 var _real_save_path: String
 var _real_track: int
+var _tmp_dir: String = ""
+var _tmp_path: String = ""
 
 
 func _ready() -> void:
@@ -41,7 +45,9 @@ func _ready() -> void:
 	_real_config = Career.config
 	_real_save_path = Career.save_path
 	_real_track = GameState.selected_track
-	Career.save_path = TMP_PATH
+	_tmp_dir = ProbeTmp.make("career")
+	_tmp_path = _tmp_dir + "career.cfg"
+	Career.save_path = _tmp_path
 	_reset_save()
 
 	_check_track_ids()
@@ -60,7 +66,7 @@ func _ready() -> void:
 	Career.race_starter = Callable()
 	Career.leave()
 	GameState.selected_track = _real_track
-	_remove_tmp()
+	_remove_tmp_dir()
 	_report()
 
 
@@ -73,9 +79,21 @@ func _expect(cond: bool, msg: String) -> void:
 
 
 func _remove_tmp() -> void:
-	var abs_path := ProjectSettings.globalize_path(TMP_PATH)
+	var abs_path := ProjectSettings.globalize_path(_tmp_path)
 	if FileAccess.file_exists(abs_path):
 		DirAccess.remove_absolute(abs_path)
+
+
+## Tot folderul procesului; si din `_exit_tree`, pentru iesirile timpurii.
+func _remove_tmp_dir() -> void:
+	if _tmp_dir == "":
+		return
+	ProbeTmp.remove(_tmp_dir)
+	_tmp_dir = ""
+
+
+func _exit_tree() -> void:
+	_remove_tmp_dir()
 
 
 ## Fisier de salvare gol + stare goala in memorie.
@@ -206,7 +224,7 @@ func _check_persistence() -> void:
 	var before_k := Career.track_state(k)
 	var before_s := Career.track_state(&"serengeti")
 	var before_untouched := Career.track_state(&"cappadocia")
-	var text := _read_text(TMP_PATH)
+	var text := _read_text(_tmp_path)
 	_expect("[track:kyoto]" in text and "version=1" in text,
 		"fisierul nu are schema asteptata")
 
@@ -220,7 +238,7 @@ func _check_persistence() -> void:
 		"o pista neatinsa trebuie sa ramana la zero")
 	_expect(Career.is_cup_won(&"world_1") and not Career.is_cup_won(&"world_2"),
 		"cupa lumii 1 trebuie sa persiste (si numai ea)")
-	_expect("[rival:rival_test]" in _read_text(TMP_PATH), "rivalul batut nu e in fisier")
+	_expect("[rival:rival_test]" in _read_text(_tmp_path), "rivalul batut nu e in fisier")
 
 
 # ------------------------------------------------------------- 3. gating
@@ -304,20 +322,20 @@ func _check_gating() -> void:
 
 func _check_unknown_version() -> void:
 	_reset_save()
-	var f := FileAccess.open(TMP_PATH, FileAccess.WRITE)
+	var f := FileAccess.open(_tmp_path, FileAccess.WRITE)
 	f.store_string("[meta]\nversion=99\n\n[track:kyoto]\nrace_medal=3\nfutur=\"necunoscut\"\n")
 	f.close()
-	var before := _read_text(TMP_PATH)
+	var before := _read_text(_tmp_path)
 	Career.load_progress() # trebuie sa dea push_warning, vezi _read_only
 	_expect(Career._read_only, "versiunea 99 trebuie sa puna _read_only")
 	_expect(int(Career.track_state(&"kyoto").race_medal) == 0 and Career.points() == 0,
 		"un fisier mai nou nu se incarca")
 	Career.set_race_medal(&"serengeti", Career.MEDAL_GOLD)
-	_expect(_read_text(TMP_PATH) == before, "un fisier mai nou nu are voie sa fie rescris")
+	_expect(_read_text(_tmp_path) == before, "un fisier mai nou nu are voie sa fie rescris")
 	# Contra-proba: aceeasi operatie pe un fisier de versiunea 1 SCRIE.
 	_reset_save()
 	Career.set_race_medal(&"serengeti", Career.MEDAL_GOLD)
-	_expect("[track:serengeti]" in _read_text(TMP_PATH), "pe versiunea 1 salvarea trebuie sa scrie")
+	_expect("[track:serengeti]" in _read_text(_tmp_path), "pe versiunea 1 salvarea trebuie sa scrie")
 
 
 # ------------------------------------------------------------ 5. regrupare

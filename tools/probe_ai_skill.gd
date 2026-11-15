@@ -68,6 +68,9 @@ const RESPAWN_FACTOR: float = 1.5
 const RESPAWN_SLACK_PER_SEED: float = 1.0
 
 var _track_index: int = 12
+## `--track=` ca text: numar (indexul castiga, 12 = Monument Valley) sau, fara
+## ambiguitate, "Track19" / "monument_valley" (#718).
+var _track_arg: String = "12"
 var _seed: int = 1
 var _skill_name: String = "implicit"
 var _laps: int = 2
@@ -100,7 +103,7 @@ var _params_note: String = ""
 func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
-			_track_index = int(arg.trim_prefix("--track="))
+			_track_arg = arg.trim_prefix("--track=")
 		elif arg.begins_with("--seed="):
 			_seed = int(arg.trim_prefix("--seed="))
 		elif arg.begins_with("--skill="):
@@ -138,9 +141,9 @@ func _start() -> void:
 	# Masina jucatorului se FIXEAZA (vezi ProbeRace): altfel ar mosteni ce a
 	# ales dezvoltatorul ultima data in garaj.
 	GameState.selected_car = 0
-	var resolved := GameState.resolve_track_index(_track_index)
+	var resolved := GameState.resolve_track_arg(_track_arg)
 	if resolved < 0:
-		push_error("probe_ai_skill: --track=%d nu e in lista" % _track_index)
+		push_error("probe_ai_skill: --track=%s nu e in lista" % _track_arg)
 		get_tree().quit(1)
 		return
 	_track_index = resolved
@@ -161,7 +164,7 @@ func _start() -> void:
 	if level >= 0:
 		GameState.set("race_ai_level", level)
 	print("probe_ai_skill: pista %s · seed %d · nivel %s%s" % [
-		GameState.track_label(_track_index), _seed, _skill_name,
+		GameState.track_arg_label(_track_arg, _track_index), _seed, _skill_name,
 		(" · SABOTAJ " + _sabotage) if not _sabotage.is_empty() else ""])
 
 	_race = (load(RACE_SCENE) as PackedScene).instantiate()

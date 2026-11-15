@@ -19,7 +19,7 @@ const SLOT_NAMES := {0: "SAND_LIGHT", 1: "SAND_MID", 2: "SAND_SHADOW",
 
 
 func _ready() -> void:
-	var ti := GameState.resolve_track_index(13)
+	var ti := TrackInfo.index_of_id(&"cappadocia")
 	var track := (load(GameState.TRACK_SCENES[ti]) as PackedScene).instantiate() as Track
 	add_child(track)
 	for i in range(6):

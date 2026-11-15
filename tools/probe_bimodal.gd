@@ -41,7 +41,7 @@ extends Node
 ## clopot ar fi exact capcana din memoria `efecte-invizibile-nu-se-numara`.
 ##
 ##   godot --path . --rendering-driver vulkan res://tools/ProbeBimodal.tscn -- \
-##       --track=13 --frac=0.06 --nume=hornSoare11,hornSoare12
+##       --track=cappadocia --frac=0.06 --nume=hornSoare11,hornSoare12
 ##
 ## RULEAZA CU FEREASTRA (fara --headless): headless nu randeaza.
 
@@ -68,7 +68,9 @@ var _dist: PackedFloat32Array
 
 
 func _ready() -> void:
-	var idx := 13
+	# Implicit pe id, nu cu un numar: 13 era Track13 la scriere (scena), azi INDEXUL
+	# lui e Okinawa (#718). --track= ia si "TrackNN" / id de pista.
+	var idx := TrackInfo.index_of_id(&"cappadocia")
 	var frac := 0.06
 	var f_nume: Array[String] = []
 	var minpx := 200
@@ -76,7 +78,7 @@ func _ready() -> void:
 	var variante: Array[String] = []
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
-			idx = GameState.resolve_track_index(int(arg.trim_prefix("--track=")))
+			idx = GameState.resolve_track_arg(arg.trim_prefix("--track="))
 		elif arg.begins_with("--frac="):
 			frac = float(arg.trim_prefix("--frac="))
 		elif arg.begins_with("--nume="):

@@ -32,6 +32,23 @@ extends Node3D
 ## OGLINDITA (scale.x = -1 in cadrul casei), ca garajul sa ramana spre capatul de jos.
 ## Corpul de coliziune (soare pe carosabil, camera) e trimesh din geometria randata, ca la
 ## casele din cod (`Corp_<n>`). Fara `--glb`, comportamentul e cel de la pasul 0, neschimbat.
+##
+## MODUL KIT (pasul 7b, `-- --glb=kit`): aceeasi asezare ca modul GLB, dar cu cele SAPTE case
+## ale kitului amestecate determinist (regula, de copiat de generatorul pistei):
+##   - tipul casei de pe pozitia i a unui rand = KIT_SEQ[(i + 2*idx + (0 la est, 1 la vest)) % 6]
+##     (idx = numaratoarea randurilor ca la pasteluri). Secventa alterneaza familiile A/B/C, deci
+##     doi vecini nu au niciodata aceeasi familie (deci nici acelasi fisier), iar bovindoul
+##     (tesit/patrat) se schimba de la o trecere la alta;
+##   - COLTUL (`sf_row_corner_turret`, 9 m) doar pe randurile din FATA ale strazii principale, la
+##     capatul de rand care da spre o strada transversala (`_end_faces_cross`): ia locul casei de
+##     la capat si se lungeste cu 2 m spre intersectie, cu turnuletul spre ea. Podeaua lui e la
+##     cota trotuarului din capatul LUI de sus (la capatul de sus al randului, cu 2 m mai sus);
+##   - MANA: pe latura de vest (s = -1) casele de rand sunt `_m` (garajul spre capatul de JOS, ca
+##     la pilot, fara scale.x = -1); coltul e `_m` cand turnuletul din fisierul de baza (pe -X)
+##     ar cadea departe de intersectie;
+##   - pastelurile prin `wall_class`, ca in modul GLB.
+## In `houses` intrarea coltului ramane pe felia lui de 7 m (za/zb), ca masuratorile sondei sa
+## numere aceleasi pozitii in toate modurile.
 
 const PASTELS: Array[String] = ["sf_clapboard", "sf_clapboard_pink", "sf_clapboard_blue",
 	"sf_clapboard_mint", "sf_clapboard_butter"]
@@ -86,6 +103,20 @@ const GLB_SKIRT: float = 2.4
 var glb_mode: bool = false
 var _glb_prop: WorldProp
 var _glb_packed: PackedScene
+## Modul kit (vezi antetul).
+const KIT_DIR := "res://assets/models/sanfrancisco/buildings/"
+const KIT_SEQ: Array[String] = ["sf_row_a_canted", "sf_row_b_square", "sf_row_c_canted",
+	"sf_row_a_square", "sf_row_b_canted", "sf_row_c_square"]
+const KIT_CORNER := "sf_row_corner_turret"
+## Coltul: 2 m in plus fata de felia de 7 m, spre intersectie.
+const KIT_CORNER_EXTRA: float = 2.0
+var kit_mode: bool = false
+var _kit_packed: Dictionary = {}
+## Casa curenta in modul kit: [nume de fisier fara .glb, directia coltului (+1 spre +z, -1 spre
+## -z, 0 = casa de rand)].
+var _kit_cur: Array = ["", 0]
+## Cate `_m` au primit materialul de pastel din cod (vezi `_kit_fix_mirrored`).
+var kit_m_fixed: int = 0
 ## O intrare pe casa, pentru sonda (ambele moduri; nu schimba nimic la randare):
 ## facade_o = punctul de pe planul fatadei, la podea, la mijlocul casei (lume); n = normala
 ## fatadei spre strada; u = axa in lungul fatadei, spre capatul de SUS; yf = podeaua; za/zb =
@@ -110,6 +141,9 @@ func _build() -> void:
 	_hide_start_line()
 	_build_street_furniture()
 	glb_mode = "--glb" in OS.get_cmdline_user_args()
+	if "--glb=kit" in OS.get_cmdline_user_args():
+		glb_mode = true
+		kit_mode = true
 	if glb_mode:
 		_glb_packed = load(ROW_GLB) as PackedScene
 		_glb_prop = WorldProp.new()
@@ -126,9 +160,15 @@ func _build() -> void:
 			var p := (i * 2 + (0 if s > 0 else 3) + idx) % PASTELS.size()
 			var roof := "gable" if ((i + idx + (1 if s > 0 else 0)) % 3) != 1 else "flat"
 			_xf = Transform3D.IDENTITY
+			_kit_cur = [_kit_type(i, idx, s), 0]
+			if i == 0 and _end_faces_cross(z0, 1.0):
+				_kit_cur = [KIT_CORNER, 1]
+			elif i == n - 1 and _end_faces_cross(z0 - float(n) * HOUSE_W, -1.0):
+				_kit_cur = [KIT_CORNER, -1]
 			_house(s, za, p, roof, NAN, "main")
 			# randul din SPATE (aceeasi cota), ca deasupra acoperisurilor sa fie oras, nu iarba
 			_xf = Transform3D(Basis.IDENTITY, Vector3(float(s) * (HOUSE_D + 0.5), 0.0, 0.0))
+			_kit_cur = [_kit_type(i + 3, idx, s), 0]
 			_house(s, za, (p + 2) % PASTELS.size(), "flat" if roof == "gable" else "gable", NAN, "back")
 		idx += 1
 	# Randurile de pe STRAZILE TRANSVERSALE (plate): cadrul local are strada pe z, deci
@@ -144,20 +184,28 @@ func _build() -> void:
 					var za := (23.0 + HOUSE_W * float(i + 1)) if e > 0.0 else -(23.0 + HOUSE_W * float(i))
 					var p := (i * 3 + (1 if s > 0 else 4) + (2 if e > 0.0 else 0) + idx) % PASTELS.size()
 					var roof := "gable" if (i + idx) % 3 != 2 else "flat"
+					_kit_cur = [_kit_type(i, idx, s), 0]
 					_house(s, za, p, roof, yflat, "cross")
 				idx += 1
 	_xf = Transform3D.IDENTITY
 	if glb_mode:
 		# Metadata e pe instante INAINTE de intrarea in arbore: `WorldProp._ready` le citeste.
 		add_child(_glb_prop)
+		if kit_mode:
+			_kit_fix_mirrored()
 	_hide_chevrons()
 	_build_parked_car()
 	_build_bridge()
 	_build_island()
 	_build_hills()
+	var mode_s := ""
+	if kit_mode:
+		mode_s = " (KIT: %d fisiere, %d _m cu pastelul pus din cod)" % [_kit_packed.size(),
+			kit_m_fixed]
+	elif glb_mode:
+		mode_s = " (GLB %s)" % ROW_GLB.get_file()
 	print("sf_loc_decor: %d case%s, soare spre (%.3f, %.3f, %.3f)"
-		% [_house_n, " (GLB %s)" % ROW_GLB.get_file() if glb_mode else "", _to_sun.x, _to_sun.y,
-		_to_sun.z])
+		% [_house_n, mode_s, _to_sun.x, _to_sun.y, _to_sun.z])
 
 
 # --------------------------------------------------------------------- strada
@@ -316,6 +364,9 @@ func _build_street_furniture() -> void:
 ## O casa, in modul ales (cod sau GLB), plus inregistrarea ei pentru sonda.
 func _house(s: int, za: float, pastel: int, roof: String, flat_y: float, kind: String) -> void:
 	var yf := (road_y(za) if is_nan(flat_y) else flat_y) + CURB_H
+	if kit_mode and int(_kit_cur[1]) > 0:
+		# coltul de la capatul de SUS se lungeste in sus: podeaua la capatul lui de sus
+		yf = (road_y(za + KIT_CORNER_EXTRA) if is_nan(flat_y) else flat_y) + CURB_H
 	if glb_mode:
 		_glb_house(s, za, pastel, yf)
 	else:
@@ -342,13 +393,28 @@ func _glb_house(s: int, za: float, pastel: int, yf: float) -> void:
 	var mirror := s < 0
 	var basis := rot * Basis.from_scale(Vector3(-1, 1, 1)) if mirror else rot
 	var origin := Vector3(fs * (FACADE_X - GLB_FRONT_Z), yf, za - HOUSE_W * 0.5)
+	var packed := _glb_packed
+	if kit_mode:
+		# fisierul `_m` in loc de scale.x = -1 (vezi antetul): +X_glb merge spre -s*z, deci
+		# casa de rand e `_m` la vest; coltul are turnuletul pe -X_glb, adica spre +s*z.
+		var cdir := int(_kit_cur[1])
+		var use_m := (s < 0) if cdir == 0 else (s != cdir)
+		basis = rot
+		origin.z += float(cdir) * KIT_CORNER_EXTRA * 0.5
+		var fname: String = String(_kit_cur[0]) + ("_m" if use_m else "")
+		if not _kit_packed.has(fname):
+			_kit_packed[fname] = load(KIT_DIR + fname + ".glb") as PackedScene
+		packed = _kit_packed[fname]
+		mirror = use_m
 	var local := _xf * Transform3D(basis, origin)
-	var inst := _glb_packed.instantiate() as Node3D
+	var inst := packed.instantiate() as Node3D
 	inst.name = "Casa_%d" % _house_n
 	inst.transform = local
 	inst.set_meta(WorldProp.WALL_CLASS_META, PASTELS[pastel])
 	inst.set_meta("sf_pastel", pastel)
 	inst.set_meta("sf_mirror", mirror)
+	if kit_mode:
+		inst.set_meta("sf_kit", String(_kit_cur[0]))
 	for c in inst.get_children():
 		var mi := c as MeshInstance3D
 		if mi == null:
@@ -388,6 +454,44 @@ func _glb_house(s: int, za: float, pastel: int, yf: float) -> void:
 		body.add_child(cs)
 	add_child(body)
 	_last_body = body
+
+
+## Modul kit: tipul casei de pe pozitia `i` a randului `idx` (vezi antetul).
+func _kit_type(i: int, idx: int, s: int) -> String:
+	return KIT_SEQ[(i + 2 * idx + (0 if s > 0 else 1)) % KIT_SEQ.size()]
+
+
+## Capatul de rand de la z = `z_end` da spre o strada transversala, in directia `dir` (+1 spre
+## +z, -1 spre -z): o intersectie din CROSS la cel mult 20 m dincolo de el.
+func _end_faces_cross(z_end: float, dir: float) -> bool:
+	for c: Array in CROSS:
+		var d := (float(c[0]) - z_end) * dir
+		if d > 0.0 and d < 20.0:
+			return true
+	return false
+
+
+## Garda temporara (pasul 7b): `WorldProp.CLASSES_BY_MODEL` are doar numele de baza ale
+## kitului, deci pe instantele `_m` `_apply_wall_class` nu gaseste maparea si `Row_Wall` ramane
+## pe atlas. Pana se adauga cele sapte `_m` acolo (scenes/props/world_prop.gd, langa
+## `"sf_row_a_canted": SF_ROW_CLASSES`), pastelul se pune aici EXACT cum l-ar pune
+## `_apply_wall_class` (aceeasi `triplanar_class_material`). Daca WorldProp il pune deja,
+## nu atinge nimic (numaratoarea iese 0).
+func _kit_fix_mirrored() -> void:
+	for inst: Node in _glb_prop.get_children():
+		if not inst.scene_file_path.get_file().get_basename().ends_with("_m"):
+			continue
+		var want := Palette.triplanar_class_material(String(inst.get_meta(WorldProp.WALL_CLASS_META)))
+		for c in inst.get_children():
+			var mi := c as MeshInstance3D
+			if mi == null:
+				continue
+			if String(mi.name).begins_with("Row_Wall"):
+				if mi.material_override != want:
+					mi.material_override = want
+					kit_m_fixed += 1
+			elif mi.material_override != Palette.world_material():
+				mi.material_override = Palette.world_material()
 
 
 func _build_house(s: int, za: float, pastel: int, roof: String, flat_y: float = NAN) -> void:

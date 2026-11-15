@@ -1211,7 +1211,7 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
    exterioară a virajelor și a balonului. N-am pus: e decizie de design (pista cu ziduri unde
    până acum n-avea).
 
-   `verify_local` pe ramura cu main: vezi mai jos.
+   `bash tools/verify_local.sh` pe ramura cu main și cu zidul: **OK, 79 de pași**.
 
    **De decis (dezvoltatorul):**
    1. **Turul de 82,9 s** e cu ~3 s peste fereastra de 65–80 s. Pârghiile: tablierul de 170 m

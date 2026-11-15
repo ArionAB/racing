@@ -709,6 +709,154 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
      să vireze la dreapta. De verificat pe Track25.
    - Ciclul: ~66 s, pe toată urcarea (decizia din §2, „Ceasuri”).
 
+   **1d. Podul roșu carosabil (dus-întors, despărțitor mobil) — SONDĂ FĂCUTĂ (13 nov
+   2026), mecanismul ține; legarea în Track25 rămâne de decis.** Decizia
+   dezvoltatorului din 13 nov: podul roșu din fundal (§5.5) devine **carosabil**, dus-întors
+   pe același tablier, cu un **despărțitor de beton mobil** între sensuri. Un camion lent
+   mută bariera pe diagonală, ca mașinile care mută despărțitorul pe podurile reale, deci
+   banda ta se îngustează sau se lărgește după unde e camionul. Numele real al podului nu
+   se folosește nicăieri.
+
+   Unelte:
+   - `scenes/hazards/movable_median_hazard.gd` + `MovableMedian.tscn` (`MovableMedianHazard`,
+     hazard nou);
+   - `tools/gen_sf_pod.py` scrie strada sintetică `tools/SondaSfPod*.tscn` (`Fix` = bariera
+     fixă la axă, `Cap` = faza pentru captură);
+   - sonda `tools/probe_sf_pod.gd` (`--mode=race|solo`, `--config=mobil|fix|orb|static`);
+   - loturile `sf_pod_race.sh` / `sf_pod_solo.sh`, tabelele `sf_pod_report.py` /
+     `sf_pod_solo_report.py`, capturile `sf_pod_capture.sh`.
+
+   **Forma sondei.** Un „os de câine” de 1.626 m: două benzi paralele, axele la 12,4 m
+   (`half_width` 6). Rampa de acces urcă 11 m la 11,5%. Tablierul are **300 m**, la +23 m
+   peste apă, cu palier de 36 m la fiecare capăt. Parapetele exterioare sunt verticale, de
+   1,2 m, la |z| = 12,2, deci tablierul are 24,4 m. Turnurile sunt portaluri roșii cu
+   picioarele în afara tablierului și traversa la +15 m (la +10 m tăia camera). La capete
+   sunt baloane de întoarcere, la raza 20 / 40. Plasa viaductului stă sub tablier, iar
+   SeaRespawn sub apă.
+
+   Pe pod, benzile au `half_width` **9,8** (6 + 3,5 + jumătatea blocului): fiecare bandă
+   trebuie să fie „pe drum” până la fața barierei când aceasta e pe partea cealaltă.
+   Altfel, `is_on_road` ar taxa lățimea câștigată ca iarbă (45%). Deci pe pod cele două
+   șosele **se suprapun** pe 7,6 m la mijloc, despărțite fizic de barieră. ProbeLayout
+   măsoară pe `half_width`-ul de bază și trece: rază minimă 18,8 m, pantă maximă 12,7%
+   (racordurile rampei), apropiere 12,5 m. Suprapunerea e voită. Marginea șoselei late
+   iese 3,8 m dincolo de parapet, un pervaz la care nu ajunge nimeni.
+
+   **Despărțitorul** e o funcție de poziția camionului, nu o stare ascunsă:
+   `offset(s) = 3,5 · racord(s) · (2·smoothstep(S de 30 m centrat pe camion) − 1)`.
+   - În spatele camionului bariera e la −3,5 m, în fața lui la +3,5 m. Când trece, o
+     întoarce.
+   - Racordul fix are 30 m la fiecare capăt, de la axă (unde continuă despărțitorul fix) la
+     poziția mobilă. Fiecare bandă se îngustează la ieșirea de pe pod.
+   - Banda îngustă are **8,4 m**, cea largă **15,4 m**.
+   - Camionul (cutie gri de 2,6 × 3,2 × 10 m, rotită după S) face naveta pe 210 m, la
+     4 m/s, cu 6 s de oprire la capete. Ciclul e de **117 s**, adică 2,3 tururi de sondă.
+   - Blocurile sunt **100 × `AnimatableBody3D`**, mișcate doar în fereastra S-ului (cel mult
+     11 pe tick, o singură scriere de transform). Vizual sunt un singur MultiMesh.
+   - Coliziunea blocului are **1,3 m**, iar vizualul 0,95 m. Cu 0,95 m, un Buggy îmbrâncit
+     a urcat pe muchie și a trecut pe sensul opus.
+   - Blocurile mobile și camionul au **contact moale** (`soft_hit_crush`): strivire, fără
+     ejectarea șoferului.
+   - Capul despărțitorului fix e un atenuator de impact, tot moale.
+   - Totul e în export vars.
+
+   **AI onest.** `AIController._median_line`, în spatele `MovableMedianHazard.ai_reads_corridor`
+   (implicit stins). Linia se strânge între fața barierei de **acum** (sau a camionului) și
+   parapet, cu cea mai strânsă față din fereastra pe care o vede în față (1,3 s de drum,
+   12–50 m). Nu citește faza camionului. Fereastra prinde și capul despărțitorului fix: cu
+   citirea pornită abia pe despărțitor, o mașină care depășea pe stânga a intrat în cap și a
+   ajuns pe sensul opus. Cu flagul stins, funcția iese la prima linie.
+
+   Pistele existente rămân neschimbate, verificat cu ProbeRace × 150 s, același cod față de
+   main (0daeb26e):
+   - **Carrara** (`--track=15`): 4/4 seed-uri **identice cifră cu cifră** (repuneri,
+     `[blocaj]`, ejectări, tur mediu).
+   - **Machu Picchu** (`--track=8`): 7/8 identice. Al optulea (seed 4) e bimodal din
+     Jolt: rulat de două ori pe ramură, a dat o dată cifrele din main și o dată altele.
+
+   **Solo** (pilot scriptat cu gazul la fund, 10 mașini × 4 faze ale camionului, un tur =
+   trecerea pe dus și pe întors):
+
+   | pilot | treceri | contacte cu bariera / camionul | treceri peste despărțitor | ejectări / repuneri |
+   |---|---|---|---|---|
+   | `hug` (freacă bariera, intră în fiecare S) | 80 | 335 / 45 | **0** | **0 / 0** |
+   | `line` (linie fixă la z 2,5, pe care bariera o taie) | 80 | 0 / 80 (camionul, la 31,9 m/s) | **0** | **0 / 0** |
+   | `hug` cu blocuri **dure** (prima formă) | 92 | 339 / 49 | 0 | **12 / 12** (dv 27–40, toate în S-ul care vine spre mașină) |
+
+   Un zid care se mișcă spre tine nu e un zid pe care l-ai ratat: de aici contactul moale.
+   Pilotul iese pe axa benzii după contact, ca un om.
+
+   **ProbeRace pe sondă** (8 mașini × 16 seed-uri × 200 s, ~1.030 de treceri peste pod pe
+   variantă). Pierderea e față de mediana trecerii cu bariera fixă, per mașină și sens:
+
+   | variantă | `[blocaj]` | repuneri | ejectări | treceri peste despărțitor | frontale pe coridor | treceri cu contact barieră / camion | pierdere / trecere med / p90 / max |
+   |---|---|---|---|---|---|---|---|
+   | fix (bariera la axă, fără camion) | 0 | 0 | 0 | 0 | 0 | 1,3% / — | 0,00 / 0,30 / 0,65 s |
+   | **mobil** | **0** | **0** | **0** | **0** | **0** | **8,9% / 1,1%** | **0,00 / 0,31 / 7,6 s** |
+   | SABOTAJ `orb` (AI-ul nu citește bariera) | 0 | 3 | 2 | **3** | 0 | **31,7% / 12,6%** | 0,03 / 0,76 / 5,1 s |
+   | SABOTAJ `static` (citește bariera de la t = 0) | 0 | 0 | 0 | 0 | 0 | **20,7% / 6,3%** | 0,02 / 0,48 / 4,8 s |
+
+   Alte cifre, pe varianta mobilă:
+   - turul mediu e 50,0 s, la fel ca la cea fixă;
+   - o trecere peste pod durează 9,1 s;
+   - **49% din timpul pe tablier** banda e îngustă (< 10 m);
+   - pe tablier sunt 21,6 depășiri / seed, **45% dintre ele în banda îngustă**;
+   - coada din spatele camionului: 0,2% din întâlniri coboară sub 10 m/s;
+   - pierderea pe o trecere cu contact cu bariera e de 0,22 s mediană, 0,75 s p90; cu
+     camionul, 0,63 / 0,78 s.
+
+   **Sabotajul pică**, dar trebuie spus pe ce: **pe contacte și pe treceri, nu pe
+   `[blocaj]`**.
+   - Fără citire, contactele cresc de 3,6 ori cu bariera și de 11 ori cu camionul.
+   - Apar 3 treceri peste despărțitor: două mașini urcate pe barieră în S, una pe lângă
+     capul despărțitorului fix.
+   - Contactul moale și S-ul blând (19°) nu opresc pe nimeni, deci `[blocaj]` rămâne 0 în
+     toate variantele. Garda acestui hazard e procentul de treceri cu contact, nu
+     `[blocaj]`.
+
+   **Ce a picat pe drum (sonda, nu podul):**
+   - **Ieșirea din balon lipită de capul despărțitorului.** Trasa de cursă (apex înăuntru,
+     ieșire în afară) ducea mașinile spre despărțitor. Au fost 4 ejectări pe latura lui și 3
+     treceri pe lângă cap, la fel și cu bariera fixă. S-a rezolvat cu un S de 60 m în care
+     benzile se despart cu 8 m înainte de balon.
+   - **Transform3D în `.tscn` e scris pe RÂNDURI.** Rampa despărțitorului și evazările
+     parapetului au ieșit oglindite: un Buggy s-a oprit de pe 32 m/s în vârful evazării.
+   - **Racordul rapei.** `RAVINE_FADE_FRAC` sapă înaintea capătului declarat. Cu rapa până la
+     10 m de capete, palierul stătea pe gol.
+
+   **Regula pentru traseu:** coridorul cu două sensuri începe cu **≥ 60 m drepți** după
+   ultimul viraj. Capul despărțitorului e atenuator moale, iar AI-ul îl citește din timp.
+
+   Capturi `--gamecam`: `docs/asset_briefs/img/sf_pod/pod_tablier_camion_gamecam.png`
+   (tablierul, cu camionul și S-ul în față) și `pod_ac_gamecam.png` (din întoarcere, spre
+   pod).
+
+   Ca s-o conduci:
+   `godot --path . res://tools/DriveScene.tscn -- --scene=res://tools/SondaSfPod.tscn --ai=3`.
+   Verdictul de feel e al dezvoltatorului.
+
+   **Ce rămâne de decis (dezvoltatorul):**
+   1. **Unde se leagă în Track25 și cât costă turul.** Pe sondă, dus-întorsul de la capătul
+      podului la capătul podului ia **~28 s**: 9,1 s + 9,9 s de întoarcere + 9,1 s.
+      - Pe Track25 (2.424 m, ~77 s), o ramificație dus-întors adaugă ~900 m (2 × 372 m de
+        pod cu paliere, plus întoarcerea), deci **~+25–28 s → tur ~103–105 s**. Asta e mult
+        peste fereastra de 65–80 s.
+      - Variante: tablier mai scurt (200 m = −6 s), podul în locul unei bucăți existente
+        din tur (de ex. latura de est, pe care o înlocuiește), sau doar dus pe pod.
+      - Planul din memorie: final de tur, înainte de sosire.
+   2. **Ciclul camionului pe Track25:** cu turul de ~105 s, 117 s e aproape un tur întreg
+      (regula „ceasuri care nu împart turul”). Se alege după lungimea finală (de ex.
+      ~80 s sau ~150 s).
+   3. **Pervazul de 3,8 m** dincolo de parapet (artefact al benzilor late): pe Track25,
+      parapetul pe marginea șoselei înseamnă alt mod de a declara suprapunerea (lățime
+      asimetrică), cod în `Track`.
+   4. **Mobil:**
+      - 100 de corpuri statice, din care ≤ 11 mișcate pe tick;
+      - scriptul hazardului costă 80 µs median / 125 µs p99 pe tick pe desktop;
+      - un MultiMesh pentru blocuri.
+
+      De măsurat pe iPhone cu ProbePerf când intră în Track25.
+
 2. **Scena**: `Track25.tscn` din `TrackFromPath` prin `tools/gen_sf_route.py`
    (pas de control 12 m, uniform — pasul mixt supraîncarcă spline-ul); tema
    `sanfrancisco` doar cu lumină, cer, pâclă și sol. ProbeLayout: pantă < 13% în

@@ -86,6 +86,7 @@ check "structures/sf_bridge_lamp.glb" 600 --origin=assembly
 echo
 echo "== kitul casei de rand (sf_painted_row_kit.md): pilotul =="
 check "buildings/sf_row_b_canted.glb" 2500 --origin=waterline
+check "buildings/sf_row_b_canted_m.glb" 2500 --origin=waterline
 
 echo
 echo "== garzile de cote =="

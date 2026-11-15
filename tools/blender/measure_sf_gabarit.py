@@ -19,7 +19,8 @@ urmeaza e ce citeste FIZICA jocului din fisier si verify nu vede:
   sf_median_block   EXACT 3,00 x 0,95 x 0,60 (+-0,01), min Y 0, centrat; un nod `MedianBlock`;
                     fetele laterale ale bazei VERTICALE (profilul in panta arunca masinile peste
                     bariera): talpa si umarul la |Z| 0,30, niciun varf de fata tras spre ax.
-  sf_row_b_canted   X +-3,5, fatada la Z -6,0 cu bovindoul pana la -6,9, spatele la +6,0, Y de la
+  sf_row_b_canted, sf_row_b_canted_m (oglindita)
+                    X +-3,5, fatada la Z -6,0 cu bovindoul pana la -6,9, spatele la +6,0, Y de la
                     -2,4 la cel mult +12,6; exact nodurile `Row_Wall` si `Row_Trim`; nimic nu
                     iese din planul fatadei sub +3,3 (scara e in nisa, nu pe trotuar).
 
@@ -41,7 +42,11 @@ PIECES = {
     "sf_median_truck": "vehicles/sf_median_truck.glb",
     "sf_median_block": "props/sf_median_block.glb",
     "sf_row_b_canted": "buildings/sf_row_b_canted.glb",
+    "sf_row_b_canted_m": "buildings/sf_row_b_canted_m.glb",
 }
+# Variantele `_m` (oglindite de-adevaratelea, pentru MultiMesh-ul din CityFill: o instanta cu
+# scale.x = -1 iese pe dos acolo) au aceeasi amprenta, cu garajul pe -X.
+ROW_KEYS = ("sf_row_b_canted", "sf_row_b_canted_m")
 
 
 def _box(ps):
@@ -110,7 +115,7 @@ def check(key, path, report=True):
             bad.append("(profil) fata laterala a bazei nu e verticala de la 0 la +0,65 "
                        "(%d varfuri trase spre ax; talpa la 0,30: %s; umarul la 0,30: %s)"
                        % (len(slope), foot, shoulder))
-    elif key == "sf_row_b_canted":
+    elif key in ROW_KEYS:
         _names(bad, nodes, ["Row_Wall", "Row_Trim"])
         (x0, x1), (y0, y1), (z0, z1) = b
         for name, got, want, tol in (("X-", x0, -3.5, 0.01), ("X+", x1, 3.5, 0.01), ("Y-", y0, -2.4, 0.01),
@@ -167,7 +172,7 @@ def sabotages(key):
             ("capul inaltat cu 5 cm", "aabb",
              lambda g, b: poke(g, b, node0(g), lambda p: p[1] > 0.94, lambda p: (p[0], p[1] + 0.05, p[2]))),
         ]
-    elif key == "sf_row_b_canted":
+    elif key in ROW_KEYS:
         out += [
             ("o treapta scoasa pe trotuar (0,5 m in fata fatadei, sub +3,3)", "fatada",
              lambda g, b: poke(g, b, "Row_Trim", lambda p: p[1] < 0.0 and p[2] < -5.9,

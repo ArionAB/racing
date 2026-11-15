@@ -13,10 +13,14 @@ Briefurile Blender ale primului val (auto-conținute, pentru agentul extern care
 
 | brief | piesă | stare |
 |---|---|---|
-| [`sf_cable_car.md`](sf_cable_car.md) | vagonul de cablu, ambele tramvaie | **primul de dat**: consumatorul îl primește fără cod |
-| [`sf_red_bridge.md`](sf_red_bridge.md) | podul roșu carosabil, kit modular | al doilea; integrarea e date în generator, nu cod de motor |
-| [`sf_painted_row_kit.md`](sf_painted_row_kit.md) | kitul casei de rând + soclul | pilotul (o casă) se poate da; cele cinci tente cer o decizie (§1.2) |
-| [`sf_median_truck.md`](sf_median_truck.md) | camionul despărțitorului + blocul | se modelează oricând; intră în joc abia după codul din §1.5 |
+| [`sf_cable_car.md`](sf_cable_car.md) | vagonul de cablu, ambele tramvaie | **în joc** (pasul 7, 15 nov 2026) |
+| [`sf_red_bridge.md`](sf_red_bridge.md) | podul roșu carosabil, kit modular | **în joc**: 9 piese, 110 instanțe sub `DecorManual/Pod` |
+| [`sf_painted_row_kit.md`](sf_painted_row_kit.md) | kitul casei de rând + soclul | **pilotul modelat** (`sf_row_b_canted`); celelalte șase după verdictul pe `SfLoc` |
+| [`sf_median_truck.md`](sf_median_truck.md) | camionul despărțitorului + blocul | **în joc**, prin exporturile de model ale hazardului (§1.5) |
+
+> **Starea după pasul 7 (15 nov 2026):** rezultatele, măsurătorile și abaterile față de planșă
+> sunt în `docs/track_briefs/san_francisco.md` §7 pasul 7. Verificarea kitului:
+> `bash tools/blender/verify_sanfrancisco.sh`.
 
 ## 0. Cum se citește
 
@@ -42,7 +46,7 @@ tema are `decor: "none"`), **LIPSEȘTE COD** (cu ce anume).
 | 2 | casele de rând pe pantă | `CityFill row_mode` (rândurile din spate), `DecorManual` (rândul din față) | **PARȚIAL.** Treptele de acoperiș ies fără cod; cele cinci pasteluri și soclul exact cer cod |
 | 3 | cărămida serpentinelor | cheile de temă `branch_texture` / `branch_tint` | **REZOLVAT la pasul 6**, fără GLB (v0.1 spunea greșit „lipsește cod”, §1.3) |
 | 4 | golful / pontonul | `SeaRespawn` (automat), `ViaductNet`; `custom_wood_deck_ranges` | **REZOLVAT**: plasa există, scândura și golful făcute la pasul 6 |
-| 5 | camionul și blocul despărțitorului | `MovableMedianHazard` | **LIPSEȘTE COD**: hazardul n-are export de model |
+| 5 | camionul și blocul despărțitorului | `MovableMedianHazard` | **REZOLVAT la pasul 7**: exporturile `truck_model` / `block_model` |
 | 6 | podul roșu | nimic azi: cutii generate în `Pod/` | **decor pur + date în generator**; coliziunea rămâne a jocului |
 | 7 | mașinile parcate | `BumpProp` (`opts["max_footprint"]`, `["max_height"]`) | **REZOLVAT la pasul 6**: 4,5 m în plan, 70 kg; duba prin `max_height` (în lucru) |
 | 8 | fundalul | `horizon_model` / `horizon_rings` din temă | **ARE CONSUMATOR** (date în temă) |
@@ -125,7 +129,11 @@ Citit în `scenes/props/city_fill.gd`:
 - **Golful (defectul găsit la v0.1) e reparat la pasul 6:** fundul lagunei ieșea peste apă, fiindcă
   pe B200 media șoselei urcase. Generatorul scrie acum `lagoon_depth`.
 
-### 1.5 `MovableMedianHazard`: camionul și blocul — LIPSEȘTE COD
+### 1.5 `MovableMedianHazard`: camionul și blocul — REZOLVAT la pasul 7 (15 nov 2026)
+
+**Rezolvat:** hazardul are `truck_model` (instanțiat sub `Camion`, rotit cu −90°, pe atlas) și
+`block_model` (primul mesh din GLB, în `MultiMesh`, cu originea la bază). Coliziunea și citirea
+AI-ului rămân pe `truck_size` și pe cutia blocului. Mai jos, starea de dinainte.
 
 - `scenes/hazards/movable_median_hazard.gd:208–226`: blocurile sunt un `BoxMesh` de
   `block_len + 0,1` × `block_height` × `block_width` (3,1 × 0,95 × 0,6) într-un `MultiMesh`, cu
@@ -460,6 +468,8 @@ punctul din §4 unde piesa e cea mai aproape.
 **Decizii care rămân ale dezvoltatorului:**
 1. ~~Cele cinci pasteluri~~: **decis (15 nov 2026): cod**, un model pe casă recolorat (o listă de
    clase de perete în `CityFill` și o metadata pe instanță, §1.2); varianta mai ieftină.
+   **Făcut la pasul 7 pentru `WorldProp`** (metadata `wall_class`); lista din `CityFill` vine cu
+   rândurile din spate, la pasul 8.
 2. ~~Turnul cu ceas~~: **decis (15 nov 2026): scos.** H7 nu se comandă.
 3. **Casele pictate (C):** **are acum o recomandare, varianta (b)**, din dioramă (§3.1): șirul pe
    latura de N a brațului coamei, cu fața spre S, luminat din față (N·L ≈ 0,86). Din mașină îl

@@ -1680,7 +1680,73 @@ parcate (4,2 m) sunt refuzate de `BumpProp` (plafonul de 2 m), deci rămân stat
    p6_petale_hortensii_gamecam.png` (`godot --path . res://tools/ProbeSfPetals.tscn --
    --capture=res://snapshots/sf_petale.png`). Petalele se văd, dar sunt puține și mici: 8 plăci
    de 0,42 m, cât permite managerul comun.
-7. Hero. 8. Kituri, fundal, teatru, sunet; `probe_decor`; testul de
+7. **Hero — FĂCUT (15 nov 2026)**, ramura `sanfrancisco/pas7-hero`. Modelarea s-a făcut din
+   sesiune, cu Blender headless (`D:/Blender/blender.exe --background ... run_build.py`), de către
+   constructori separați pe fiecare brief; coordonatorul a judecat randările lângă decupările din
+   planșa de inventar (`docs/track_briefs/img/sf_assets_v1/`, `tools/blender/crop_sf_sheet.py`) și
+   capturile din joc.
+
+   **Ce a intrat în joc** (totul prin `tools/gen_sf_route.py`, care leagă un GLB doar dacă
+   fișierul există; `SF_PAS7=0` reface scena pasului 6, `SF_POD_MODEL=0` / `SF_TRAM_MODEL=0` /
+   `SF_MEDIAN_MODEL=0` sting câte o familie):
+   - **Vagonul de cablu** (`vehicles/cable_car.glb`, 16.126 tri) pe `Tramvai1` și `Tramvai2`,
+     `model_yaw 0`. AABB exact 2,50 × 3,20 × 8,50, deci cutia de coliziune e cea a placeholderului.
+     Acoperișul e **crem, cu lanternoul și capetele roșii** (tabelul din `sf_cable_car.md` §5), nu
+     roșu ca în planșă: camera vede vagonul de sus, iar roșu peste caroseria roșie citea ca o pată
+     (`img/sf_fidelity/cable_car_roof_ab.png`). Comutatorul e `ROOF_SLOT` în
+     `build_sf_cable_car.py`.
+   - **Podul roșu**: kitul de 9 piese (`structures/sf_bridge_*.glb`), 110 instanțe sub
+     `DecorManual/Pod`, cu `coliziune = none`. Meshurile gri/roșii ale placeholderului au ieșit,
+     **cutiile de coliziune au rămas neatinse**. Felinarele stau la 20 m, la x 5…195, între
+     tiranți. Zidurile moi din S (`Pod/CapS`) rămân cutii gri: se îmbracă la pasul 8.
+   - **Utilajul și blocul** (`vehicles/sf_median_truck.glb`, `props/sf_median_block.glb`) prin
+     exporturile noi `truck_model` / `block_model` ale `MovableMedianHazard` (codul care lipsea,
+     inventarul §1.5). Coliziunea și citirea AI-ului rămân pe cutii.
+   - **Cele cinci pasteluri din cod**: `WorldProp` are metadata `wall_class` pe instanță (sau pe
+     container) și clasele kitului (`SF_ROW_CLASSES`: `Row_Wall` pe `sf_clapboard`, `Row_Trim` pe
+     atlas).
+
+   **Măsurat** (8 mașini × 16 seed-uri × 250 s, `tools/sf_route_race.sh`; A = doar vagonul pe
+   placeholderul de pod și de despărțitor, B = toate modelele):
+
+   | | A | B | banda de la 2b / pasul 6 |
+   |---|---|---|---|
+   | tur mediu | 82,73 s | 82,83 s | ~82,6 s |
+   | tramvaiul 1, întâlniri cu contact | 0,3 % | 1,7 % | 1,3–3,2 % |
+   | tramvaiul 2, întâlniri cu contact | 3,4 % | 2,8 % | 2,1–5,5 % |
+   | pod: treceri peste despărțitor / frontale în coridor | 0 / 0 | 0 / 0 | 0 / 0 |
+   | pod: treceri cu contact cu bariera | 6,1 % | 6,7 % | 4,6–5,5 % |
+   | ponton: căderi în golf | 0,52 % | 0,52 % | 0,26–0,52 % |
+   | repuneri / ejectări / `[blocaj]` | 11 / 5 / 16 | 9 / 7 / 7 | — |
+
+   Contactul cu bariera e **peste banda de la 2b în ambele loturi**, deci nu vine de la modele
+   (în A despărțitorul e încă placeholderul, iar coliziunea e aceeași în B); diferența A–B e în
+   zgomot (46 față de 50 de treceri din ~750). Banda fusese măsurată înaintea pasului 6. Rămâne de
+   urmărit.
+
+   `probe_decor --track=25`: **17 materiale** (erau 26; plafon 38): au dispărut placeholderele
+   tramvaielor, ale podului, ale camionului și ale blocurilor. `ProbeLaneClear --track=17`: 50,
+   exact linia de bază.
+
+   **Gărzi noi:** `bash tools/blender/verify_sanfrancisco.sh` (verify_glb cu excepțiile declarate +
+   `measure_sf_bridge.py`, gabaritul liber al podului, + `measure_sf_gabarit.py`, cutiile pe care
+   le citește fizica: vagonul, utilajul, blocul, amprenta casei). Ambele gărzi de cote au selftest
+   pe copii sabotate.
+
+   **Capturi `--gamecam`** (`docs/asset_briefs/img/sf_route/`): `p7_grila_pod_gamecam.png`
+   (`--frac=0.995`), `p7_tablier_utilaj_gamecam.png` (`0.022`), `p7_tablier_turn_gamecam.png`
+   (`0.06`), `p7_tramvai1_gamecam.png` (`--frac=0.2025 --bus-at=26`). Randările Blender lângă
+   decupări: `docs/asset_briefs/img/sf_fidelity/`.
+
+   **Abateri față de planșă, de judecat de dezvoltator:**
+   - utilajul e mașinăria joasă cu două cabine și tunel din `sf_median_truck.md`, nu camionul cu
+     rampă din planșă; din lateral aduce a locomotivă, din camera de joc citește „mașinărie pe
+     barieră”;
+   - turnul podului e zvelt (picioare de 3 × 3 m pe 75 m, cât cutiile de coliziune), nu masiv ca
+     în planșă; în joc se vede doar partea de jos și citește bine;
+   - oțelul roșu poartă stratul de detaliu al materialului lumii și arată ca lemn vopsit de
+     jucărie. O clasă de „oțel vopsit” (+1 material) nu s-a adăugat.
+8. Kituri, fundal, teatru, sunet; `probe_decor`; testul de
    citire final; **verdictul dezvoltatorului la volan**.
 
 ## 8. Lecții aplicate anticipat, și ce a fost respins

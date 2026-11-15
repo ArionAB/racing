@@ -70,6 +70,8 @@ FRACMAP = os.path.join(HERE, "data", f"sf_pod_plan_{TAG}_fracmap.tsv")
 
 # Traseul aprobat, fara sa scrie nimic (Track25.tscn ramane cel din joc).
 os.environ["SF_ROUTE_DRY"] = "1"
+# planurile pornesc de la bucla VECHE (cea aprobata pe 11-13 nov); Track25 e din 15 nov B200
+os.environ["SF_LAYOUT"] = "vechi"
 sys.argv = [sys.argv[0]]
 with contextlib.redirect_stdout(io.StringIO()):
     import gen_sf_route as gr  # noqa: E402

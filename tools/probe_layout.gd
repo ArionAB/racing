@@ -48,6 +48,14 @@ const SELF_SKIP: int = 30
 const STACK_MIN_DY: float = 14.0
 
 
+static func _in_windows(i: int, lo: Array[int], hi: Array[int]) -> bool:
+	for k in lo.size():
+		if (lo[k] <= hi[k] and i >= lo[k] and i <= hi[k]) \
+				or (lo[k] > hi[k] and (i >= lo[k] or i <= hi[k])):
+			return true
+	return false
+
+
 func _ready() -> void:
 	await get_tree().process_frame
 	var only := -1
@@ -221,11 +229,30 @@ func _check_route(track: Track, ri: int) -> int:
 	# etajul de jos "e pe sosea" si pe cel de sus (TrackRoute.ROAD_ABOVE_TOLERANCE).
 	var min_dy := INF
 	var dy_at := 0.0
+	# CORIDOARE CU DOUA SENSURI declarate (`metadata/two_way_corridors` pe nodul pistei: perechi de
+	# fractii pe INDEX, cap de despartitor -> cap de despartitor): podul rosu de pe San Francisco B200
+	# poarta dus-intorsul pe acelasi tablier, cu axele benzilor la 12,4 m si un despartitor fizic intre
+	# ele. Doua puncte din coridoare, cu sensuri OPUSE, nu intra in cifra; apropierea lor se tipareste
+	# separat — exceptie numita, nu ascunsa (ca `jump_crests`).
+	var tw_lo: Array[int] = []
+	var tw_hi: Array[int] = []
+	if ri == 0 and track.has_meta("two_way_corridors"):
+		for w: Vector2 in track.get_meta("two_way_corridors"):
+			tw_lo.append(int(w.x * float(n)))
+			tw_hi.append(int(w.y * float(n)))
+	var tw_sep := INF
 	for i in range(0, n, 3):
 		for j in range(i + SELF_SKIP, n - (SELF_SKIP if r.closed else 0), 3):
 			var d := Vector2(r.baked[i].x - r.baked[j].x,
 				r.baked[i].z - r.baked[j].z).length()
 			var dy := absf(r.baked[i].y - r.baked[j].y)
+			if not tw_lo.is_empty() and d < sep_limit and _in_windows(i, tw_lo, tw_hi) \
+					and _in_windows(j, tw_lo, tw_hi):
+				var da := r.baked[(i + 1) % n] - r.baked[i]
+				var db := r.baked[(j + 1) % n] - r.baked[j]
+				if Vector2(da.x, da.z).normalized().dot(Vector2(db.x, db.z).normalized()) < -0.9:
+					tw_sep = minf(tw_sep, d)
+					continue
 			if d < sep_limit and dy >= STACK_MIN_DY:
 				if dy < min_dy:
 					min_dy = dy
@@ -255,6 +282,9 @@ func _check_route(track: Track, ri: int) -> int:
 	if min_dy < INF:
 		print("      stiva (pista peste pista): separare verticala minima %5.1f m la frac %.2f (prag %.0f)"
 			% [min_dy, dy_at, STACK_MIN_DY])
+	if not tw_lo.is_empty():
+		print("      coridoare cu doua sensuri declarate: %d, apropierea sensurilor %.1f m (exceptie numita)"
+			% [tw_lo.size(), tw_sep])
 	if ri > 0:
 		# Scurtatura: capetele trebuie sa cada FIX pe sosea, altfel racordul e o
 		# treapta in aer. Si trebuie sa fie mai scurta decat portiunea ocolita,

@@ -393,7 +393,15 @@ const BASELINE := {
 	# de 2 ori, identic. Fara marja; sabotaj (`--sabotaj`) verificat.
 	# Runda 2 (13 nov 2026, tramvaiul 2 iese spre mal inaintea gurii): tot 6 — cele 3 ale
 	# tramvaiului 2 sunt acum pe INAINTE la 0.670 (h 0.4/1.0/1.6, la 5,8 m), tot corpul lui.
-	"San Francisco (Track25)": 6,
+	# B200 (15 nov 2026, brief §7 pasul 2b: bucla reconstruita in jurul PODULUI ROSU): 6 -> 50.
+	# 38 sunt DESPARTITORUL MOBIL (`MovableMedianHazard`: `Bloc*` + `Camion`, hazardul semnatura al
+	# podului), pe firul lateral de +3,3 m (o treime din semilatimea de 9,8 a benzii de pe tablier):
+	# unde bariera sta pe partea ta (+-3,5 m fata de axa podului) banda se ingusteaza la 8,4 m prin
+	# design, iar firul interior trece prin ea. La incarcare camionul e la capatul de E: 9 pe banda
+	# spre oras (frac 0.020-0.035) si 29 pe cea spre larg (0.825-0.875), cu camionul la 0.875.
+	# Restul: tramvaiul 1 pe strada rotita (9, la 0.165-0.170, faza noua 0.130) si tramvaiul 2 (3,
+	# INAINTE la 0.635). Masurat de 2 ori, identic; fara marja. Sabotaj (`--sabotaj`): 53 > 50, pica.
+	"San Francisco (Track25)": 50,
 }
 
 

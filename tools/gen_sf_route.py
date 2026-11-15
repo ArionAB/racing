@@ -33,6 +33,25 @@ Bucla e ORARA, cu dealul in interior si golful la nord si la est (brief §2):
   F  cheiul de nord, spre E (+3, 12 m).
   G  coltul de NE, spre S; un cot scurt (deplasare de ~30 m spre V in jurul unei piatete), apoi
      sprintul spre linia de start.
+
+BUCLA B200 (implicita din 15 nov 2026, decizia dezvoltatorului; brief §7 pasul 2b): bucla
+RECONSTRUITA in jurul PODULUI ROSU carosabil, exact ca planul
+docs/asset_briefs/img/sf_pod_plan/sf_pod_plan_B200.png (tools/gen_sf_pod_plan.py --variant=B):
+tablier de 200 m la +20, dus-intors cu despartitorul mobil (`MovableMedianHazard`, sonda 1d),
+CIRCULATIE PE STANGA pe pod (pe dreapta, strada care vine pe pod ar taia banda de intors),
+STARTUL si SOSIREA pe pod (grila pe banda spre oras, imediat dupa intoarcerea-balon de pe malul
+celalalt); latura de est (faleza) dispare. Spre oras: virajul de 90 de la capatul podului, strada
+tramvaiului 1 ROTITA spre S (+20 -> +53), coltul de sus, coama cu bratul de 84 m spre V, elanul de
+96 m, lantul, terasa, scurtatura + ocolul de 400 m, tramvaiul 2, cheiul de nord, coltul de NE si
+strada de intors spre pod (+3 -> +20). Lantul, scurtatura si strada de jos raman in ACELEASI
+coordonate de harta (geometria serpentinelor, tramvaiul 2 si hartile coapte ale benzii raman
+valabile).
+
+    python tools/gen_sf_route.py                       # B200 (Track25 din joc)
+    SF_LAYOUT=vechi python tools/gen_sf_route.py       # bucla veche (istoric; nu scrie peste
+                                                       # Track25 decat cu SF_LAYOUT_WRITE=1)
+    SF_START=far0 python tools/gen_sf_route.py         # alternativa de start: linia la capatul
+                                                       # benzii spre larg (inaintea balonului)
 """
 import math
 import os
@@ -51,10 +70,27 @@ PLAN_PATH = None
 if "--plan" in ARGS:
     PLAN_PATH = ARGS[ARGS.index("--plan") + 1]
 
-OUT_TSCN = os.path.join(ROOT, "scenes", "tracks", "Track25.tscn")
+# Bucla: "b200" (implicit, podul rosu, decizia din 15 nov 2026) sau "vechi" (bucla cu faleza de est,
+# pasii 2-5; ramane pentru tools/gen_sf_pod_plan.py si ca istoric). Bucla veche NU scrie Track25 decat
+# cu SF_LAYOUT_WRITE=1 (altfel ar inlocui tacut pista din joc).
+LAYOUT = os.environ.get("SF_LAYOUT", "b200")
+assert LAYOUT in ("b200", "vechi"), LAYOUT
+B200 = LAYOUT == "b200"
+if not B200 and os.environ.get("SF_LAYOUT_WRITE", "0") != "1":
+    DRY = True
+# Linia de start pe B200: "far1" (planul: banda spre oras, imediat dupa intoarcere) sau "far0"
+# (alternativa: capatul benzii spre larg, inaintea balonului).
+START_AT = os.environ.get("SF_START", "far1")
+
+# SF_OUT=res-relativ: scrie scena in alta parte (ex. bucla veche pentru comparatii de lumina)
+OUT_TSCN = os.path.join(ROOT, *os.environ.get("SF_OUT", "scenes/tracks/Track25.tscn").split("/"))
 OBJ_REL = "scenes/tracks/track25_serp_gri.obj"
 OBJ_PATH = os.path.join(ROOT, *OBJ_REL.split("/"))
-FRACMAP = os.path.join(HERE, "data", "sf_route_fracmap.tsv")
+# Harta de fractii e per bucla SI per linie de start (fractiile pornesc de la punctul 0; garda de
+# „harta veche" compara doar pozitii, deci n-ar prinde o rotire a startului).
+FRACMAP = os.path.join(HERE, "data", ("sf_route_fracmap.tsv" if START_AT == "far1" else
+                                      "sf_route_%s_fracmap.tsv" % START_AT) if B200 else
+                       "sf_route_vechi_fracmap.tsv")
 
 STEP = 12.0
 HW = 7.0           # 14 m (A, B, C, D, E)
@@ -275,7 +311,201 @@ def build_loop():
     return t
 
 
-T = build_loop()
+T_OLD = build_loop()
+# Panta urcarii vechi (11,4%) e si panta strazii tramvaiului 1 pe B200 (aceeasi strada, rotita).
+_MK_OLD = T_OLD.marks
+CLIMB = Y_TOP - Y_LOW
+CLIMB_LEN = _MK_OLD["B1"][1] - _MK_OLD["B0"][1]
+GRADE = CLIMB / (CLIMB_LEN - RACORD_TOP / 2.0 - RACORD_BASE / 2.0)
+
+
+def chain_elev(o):
+    """Cota pe lant la `o` pasi de 12 m dupa prima muchie (o < 0: elanul de pe coama)."""
+    if o < 0:
+        return Y_TOP
+    b, r = divmod(o, 6)
+    if b >= BLOCKS:
+        return Y_TERRACE
+    return Y_TOP + BLOCK[-1] * b + (BLOCK[r] if r < len(BLOCK) else BLOCK[-1])
+
+
+# =============================================================================================
+# B200: bucla reconstruita in jurul podului rosu (geometria din tools/gen_sf_pod_plan.py, varianta
+# B, tablier 200 m la +20). Podul vine din sonda 1d (tools/gen_sf_pod.py): doua benzi cu axele la
+# 12,4 m, despartitor mobil +-3,5 m pe tablier, paliere de 36 m, intoarcere-balon pe malul celalalt
+# (S de despartire 60 m / 8 m, R40 - R20 - R40), coridorul cu doua sensuri incepe dupa >= 60 m drepti
+# (S-ul) dupa ultimul viraj. CIRCULATIE PE STANGA: banda spre larg (E) e cea de NORD.
+# =============================================================================================
+LANE_Z = 6.2               # axa benzii fata de axa podului (axele la 12,4 m)
+SPLIT_D, SPLIT_L = 8.0, 60.0
+R_BAL, R_IN = 20.0, 40.0   # balonul de intoarcere
+LAND = 36.0                # palierele de la capetele tablierului
+GRADE_P = 0.115            # rampa strazii de intors spre pod
+EASE = 24.0                # racordurile ei (la jumatate de panta)
+DECK = 200.0
+DECK_Y = 20.0
+DECK_HALF = 12.2           # fata interioara a parapetului exterior (sonda 1d)
+HW_DECK = 9.8              # semilatimea fiecarei benzi pe tablier: 6 + 3,5 + 0,3 (sonda 1d)
+OFFSET = 3.5               # despartitorul mobil, +-
+X_G = 150.0                # strada de intors (fosta faleza G) pe harta
+R_J = 24.0                 # virajul de 90 de la baza podului, pe banda care intra pe pod
+R_T = 30.0                 # virajul de 90 la iesirea de pe pod (inaintea strazii tramvaiului)
+Y_COAMA = -RUNUP - 36.0    # strada coamei (spre V) inainte de C2 (dreapta R36 spre N)
+X_T = X_G + R_J - R_T      # strada tramvaiului 1 (spre S)
+# Camionul despartitorului: naveta pe (200 - 2 x (30 + 15)) = 110 m la 4 m/s, 4 s de oprire la
+# capete -> ciclu 63 s (turul ~83 s / 63 = 1,3: nu imparte turul, regula Stromboli; sonda avea 117 s
+# pe tablierul de 300 m, adica 0,70 din turul de acum).
+TRUCK_SPEED = float(os.environ.get("TRUCK_SPEED", "4.0"))
+TRUCK_DWELL = float(os.environ.get("TRUCK_DWELL", "4.0"))
+MEDIAN_FIX = os.environ.get("MEDIAN_FIX", "0") == "1"     # A/B: despartitor fix la axa, fara camion
+MEDIAN_AI = os.environ.get("MEDIAN_AI", "1") == "1"       # 0 = SABOTAJ (ai_reads_corridor stins)
+
+
+def s_curve(t, first_right, tag):
+    """S-ul de 60 m cu deplasare de 8 m (sonda 1d: benzile se despart / se unesc la capete)."""
+    alpha = 2.0 * math.atan2(SPLIT_D, SPLIT_L)
+    rad = SPLIT_L / (2.0 * math.sin(alpha))
+    t.arc(rad, math.degrees(alpha), first_right, tag)
+    t.arc(rad, math.degrees(alpha), not first_right, tag)
+
+
+def balloon_right(t, tag):
+    """Intoarcerea-balon OGLINDITA fata de sonda (circulatie pe stanga): stanga T la R_IN,
+    dreapta 180+2T la R_BAL, stanga T la R_IN."""
+    w = LANE_Z + SPLIT_D
+    dx = math.sqrt((R_BAL + R_IN) ** 2 - (w + R_IN) ** 2)
+    theta = 90.0 - math.degrees(math.atan2(w + R_IN, dx))
+    t.arc(R_IN, theta, False, tag)
+    t.arc(R_BAL, 180.0 + 2.0 * theta, True, tag)
+    t.arc(R_IN, theta, False, tag)
+
+
+def ramp_len(rise):
+    return abs(rise) / GRADE_P + EASE
+
+
+def ramp_y(d, rise):
+    """Cota relativa pe rampa (racord 24 m la jumatate de panta, panta, racord 24 m)."""
+    L = ramp_len(rise)
+    g = GRADE_P * (1 if rise >= 0 else -1)
+    d = min(max(d, 0.0), L)
+    if d <= EASE:
+        return d * g * 0.5
+    if d <= L - EASE:
+        return EASE * g * 0.5 + (d - EASE) * g
+    return rise - (L - d) * g * 0.5
+
+
+def climb_q(d, rise, g=None, rb=RACORD_BASE, rt=RACORD_TOP):
+    """Urcarea cu racorduri patratice (forma urcarii vechi), panta GRADE; dincolo de capat, plat."""
+    g = g or GRADE
+    L = rise / g + (rb + rt) / 2.0
+    d = min(max(d, 0.0), L)
+    if d <= rb:
+        return g * d * d / (2.0 * rb)
+    y_rb = g * rb / 2.0
+    r0 = L - rt
+    if d <= r0:
+        return y_rb + g * (d - rb)
+    u = d - r0
+    return y_rb + g * (r0 - rb) + g * u - g * u * u / (2.0 * rt)
+
+
+def build_b200():
+    t = Turtle(0.0, -RUNUP, deg(90))
+    t.mark("lant0")
+    t.straight(CHAIN_STEPS * STEP, "D", steps=CHAIN_STEPS)
+    t.mark("furca")
+    t.arc(RB, 90, False, "E ocol 1")
+    t.straight(BYP_A, "E ocol A")
+    t.arc(RB, 90, True, "E ocol 2")
+    t.straight(BYP_B, "E ocol B")
+    t.arc(RB, 90, True, "E ocol 3")
+    t.mark("placa")
+    assert abs(t.y - QUAY_Y) < 1e-6
+    t.straight((X_G - R_NE) - t.x, "E/F strada de jos")
+    t.mark("NE")
+    t.arc(R_NE, 90, True, "G colt NE")
+    t.mark("G0")
+    # unde incepe virajul spre pod, ca strada tramvaiului sa ajunga exact la coltul de sus dupa
+    # cei B_WEST_REAL m ai ei (aceeasi strada ca in bucla veche)
+    y_turn = (Y_COAMA + R_B + B_WEST_REAL + R_T + SPLIT_D + 2 * LANE_Z + SPLIT_D + R_J)
+    t.straight(t.y - y_turn, "G spre pod")
+    t.mark("G1")
+    t.arc(R_J, 90, False, "pod baza")             # S -> E, la stanga (circulatie pe stanga)
+    s_curve(t, True, "pod S")
+    t.mark("pod0")                                # capul despartitorului de la baza
+    t.straight(LAND, "pod palier")
+    t.mark("tab0")
+    t.straight(DECK, "pod tablier")
+    t.mark("tab1")
+    t.straight(LAND, "pod palier")
+    t.mark("far0")                                # capatul benzii spre larg
+    s_curve(t, False, "pod intoarcere")
+    balloon_right(t, "pod intoarcere")
+    s_curve(t, True, "pod intoarcere")
+    t.mark("far1")                                # capul despartitorului de pe malul celalalt
+    t.straight(LAND, "pod palier")
+    t.mark("tab1r")
+    t.straight(DECK, "pod tablier")
+    t.mark("tab0r")
+    t.straight(LAND, "pod palier")
+    t.mark("pod1")
+    s_curve(t, False, "pod S")
+    rest = t.x - (X_T + R_T)
+    if rest > 1e-6:
+        t.straight(rest, "pod baza")
+    t.arc(R_T, 90, False, "B colt A/B")           # V -> S, la stanga: strada tramvaiului (PRIMUL VIRAJ)
+    t.mark("B0")
+    assert abs(t.x - X_T) < 1e-6, (t.x, X_T)
+    t.straight(B_WEST_REAL, "B sud")              # strada tramvaiului 1, acum spre S
+    t.mark("B colt")
+    t.arc(R_B, 90, True, "B colt")                # S -> V, la dreapta; tramvaiul iese drept
+    t.mark("C0")
+    assert abs(t.y - Y_COAMA) < 1e-6, (t.y, Y_COAMA)
+    t.straight(t.x - 36.0, "C vest")              # coama, spre V (parcul, casele pictate): 84 m
+    t.arc(36.0, 90, True, "C2")                   # V -> N, la dreapta: elanul de 96 m
+    assert abs(t.x) < 1e-6 and abs(t.y + RUNUP) < 1e-6, (t.x, t.y)
+    t.pts.pop()
+    t.s.pop()
+    t.seg.pop()
+    mk = t.marks
+    s_fork_ = mk["furca"][1]
+    s_M_ = mk["placa"][1] + (M_X - mk["placa"][2])
+    rise_up = DECK_Y - Y_LOW
+    s_up0 = mk["G1"][1] - ramp_len(rise_up)       # rampa de intors se termina la virajul spre pod
+    elev = []
+    for i in range(len(t.pts)):
+        sv = t.s[i]
+        if sv <= s_fork_:
+            elev.append(chain_elev(i - LIP1_STEP))
+        elif sv <= s_M_:
+            elev.append(Y_TERRACE - DROP * (sv - s_fork_) / (s_M_ - s_fork_))
+        elif sv < s_up0:
+            elev.append(Y_LOW)
+        elif sv <= mk["G1"][1]:
+            elev.append(Y_LOW + ramp_y(sv - s_up0, rise_up))
+        elif sv <= mk["B0"][1]:
+            elev.append(DECK_Y)
+        else:
+            elev.append(DECK_Y + climb_q(sv - mk["B0"][1], Y_TOP - DECK_Y))
+    # punctul 0 = linia de start
+    k0 = mk[START_AT][0]
+    n = len(t.pts)
+    s0 = t.s[k0]
+    t.marks = {nm: ((v[0] - k0) % n, (v[1] - s0) % t.len, v[2], v[3]) for nm, v in mk.items()}
+    t.pts = t.pts[k0:] + t.pts[:k0]
+    t.s = [(v - s0) % t.len for v in t.s[k0:] + t.s[:k0]]
+    t.seg = t.seg[k0:] + t.seg[:k0]
+    elev = elev[k0:] + elev[:k0]
+    t.s_up0 = (s_up0 - s0) % t.len
+    return t, elev
+
+
+if B200:
+    T, ELEV = build_b200()
+else:
+    T = T_OLD
 PTS = T.pts
 N = len(PTS)
 TOTAL = T.len
@@ -284,16 +514,21 @@ MK = T.marks
 
 i_lant0 = MK["lant0"][0]
 i_lip1 = i_lant0 + LIP1_STEP
-s_B0, s_B1 = MK["B0"][1], MK["B1"][1]
+s_B0 = MK["B0"][1]
+s_B1 = MK["B1"][1] if "B1" in MK else None
 s_fork = MK["furca"][1]
 s_M = MK["placa"][1] + (M_X - MK["placa"][2])
-CLIMB = Y_TOP - Y_LOW
-CLIMB_LEN = s_B1 - s_B0
-GRADE = CLIMB / (CLIMB_LEN - RACORD_TOP / 2.0 - RACORD_BASE / 2.0)
+
+
+def low_street_elev(sv):
+    """Cota pe ocol si pe strada de jos (ambele bucle): coborare liniara furca -> reintalnire."""
+    if sv <= s_M:
+        return Y_TERRACE - DROP * (sv - s_fork) / (s_M - s_fork)
+    return Y_LOW
 
 
 def elev_s(sv):
-    """Cota pe lungimea analitica (fara lant: lantul se pune pe indici)."""
+    """Cota pe lungimea analitica (fara lant: lantul se pune pe indici). Bucla veche."""
     if sv < s_B0:
         return Y_LOW
     if sv <= s_B1:
@@ -316,21 +551,13 @@ def elev_s(sv):
     return Y_LOW
 
 
-ELEV = []
-for i in range(N):
-    e = elev_s(S[i])
-    if e is None:
-        o = i - i_lip1
-        if o < 0:
-            e = Y_TOP
-        else:
-            b, r = divmod(o, 6)
-            if b >= BLOCKS:
-                e = Y_TERRACE
-            else:
-                base = Y_TOP + BLOCK[-1] * b
-                e = base + (BLOCK[r] if r < len(BLOCK) else BLOCK[-1])
-    ELEV.append(e)
+if not B200:
+    ELEV = []
+    for i in range(N):
+        e = elev_s(S[i])
+        if e is None:
+            e = chain_elev(i - i_lip1)
+        ELEV.append(e)
 LIPS = [i_lip1 + 6 * b for b in range(BLOCKS)]
 assert abs(ELEV[LIPS[0]] - Y_TOP) < 1e-6 and abs(ELEV[LIPS[-1] + 4] - Y_TERRACE) < 1e-6
 assert all(abs(PTS[k][0]) < 1e-6 for k in range(i_lant0, i_lant0 + CHAIN_STEPS + 1))
@@ -530,6 +757,26 @@ for L in LIPS:
     jump_crests.append((r4(a), r4(b)))
 # Cheiul de 12 m (F): de la 24 m dupa reintalnire pana la coltul de NE.
 width_segments = [(r4(F_s(s_M + 24.0)[0]), r4(F_s(MK["NE"][1])[0]), HW_QUAY)]
+if B200:
+    # PODUL (sonda 1d): pe tablier fiecare banda are semilatimea HW_DECK (9,8 m) — trebuie sa fie
+    # „pe drum" pana la fata barierei cand ea sta pe partea cealalta, altfel `is_on_road` taxeaza
+    # latimea castigata ca iarba (45%). Rampa de 30 m (Track.WIDTH_RAMP_M) e INAUNTRUL sectorului,
+    # pe palier, deci la capetele tablierului latimea e deja 9,8. Cele doua benzi se SUPRAPUN la
+    # mijloc, despartite fizic de bariera (exceptia voita din ProbeLayout, `two_way_corridors`).
+    for a_, b_ in (("tab0", "tab1"), ("tab1r", "tab0r")):
+        width_segments.append((r4(F_s(MK[a_][1] - 30.0)[0]), r4(F_s(MK[b_][1] + 30.0)[0]), HW_DECK))
+    width_segments.sort()
+    # Rapele-viaduct de sub tablier (golul e si SUB asfalt; plasa viaductului sub el). Fereastra =
+    # tablierul; racordul rapei (RAVINE_FADE_FRAC 0,02 din tur, ~51 m) se face INAUNTRUL ei, deci
+    # adancimea mare (60 m, cu podeaua la -8) aduce fundul sub apa la ~17 m de la mal; palierele
+    # raman pe pamant (sonda 1d: o rapa care intra sub palier lasa fusta tablierului in drumul rotii).
+    DECK_RAVINES = [(r4(F_s(MK[a_][1] + 2.0)[0]), r4(F_s(MK[b_][1] - 2.0)[0]))
+                    for a_, b_ in (("tab0", "tab1"), ("tab1r", "tab0r"))]
+    # Coridoarele cu doua sensuri, cu S-urile de despartire de la capete (acolo sensurile se departeaza
+    # de la 12,4 m la 28,4 m), pentru ProbeLayout: exceptie NUMITA, apropierea dintre sensuri.
+    TWO_WAY = [(r4(F_s(MK[a_][1] - SPLIT_L)[0]), r4(F_s(MK[b_][1] + SPLIT_L)[0]))
+               for a_, b_ in (("pod0", "far0"), ("far1", "pod1"))]
+    print(f"podul: rapele (idx) {DECK_RAVINES}; coridoarele cu doua sensuri {TWO_WAY}")
 # Capetele scurtaturii, DECLARATE (gen_sf_serpentine: furca e un Y, gura un T).
 entry_at = F_xy(*F_MAP)[0]
 exit_at = F_xy(M_X + serp.EXIT_AFTER, M_Y)[0]
@@ -1063,6 +1310,22 @@ if TRAM2_LAYOUT == "stanga":
 else:
     LAGOON = [(-470.0, SHORE_N), (SHORE_E, SHORE_N), (SHORE_E, -760.0), (900.0, -760.0),
               (900.0, 1100.0), (-470.0, 1100.0)]
+if B200:
+    # GOLFUL pe B200: cheiul de nord ca inainte (cu peticul tramvaiului 2); malul orasului la
+    # COAST_N m spre E de strada de intors (x 150), apoi, de la AXIS_Y + 60 spre S, la capatul
+    # podului (6 m inaintea tablierului) — capul de pod si dealul strazii tramvaiului 1 sunt uscat;
+    # strâmtoarea de sub pod pana la malul celalalt (6 m dupa tablier). MALUL CELALALT (dealurile
+    # aurii, cu intoarcerea-balon) e uscat la E de x_far pana la FAR_N spre N; dincolo, apa deschisa.
+    _axis_y = MK["tab0"][3] - LANE_Z
+    _x_city = MK["tab0"][2] - 6.0
+    _x_far = MK["tab1"][2] + 6.0
+    _y_cut = _axis_y + 60.0
+    FAR_N = _axis_y + 110.0
+    COAST_N = X_G + 40.0
+    _west = LAGOON[:5] if TRAM2_LAYOUT == "stanga" else LAGOON[:1]
+    LAGOON = _west + [(COAST_N, SHORE_N), (COAST_N, _y_cut), (_x_city, _y_cut), (_x_city, -760.0),
+                      (_x_far, -760.0), (_x_far, FAR_N), (1400.0, FAR_N), (1400.0, 1100.0),
+                      (-470.0, 1100.0)]
 SEA_OFFSET = round(0.0 - mean_y, 3)
 # SOARELE (brief §4, pasul 0): 28 de grade, azimut -12 fata de axa strazii lantului, din spate.
 # Conventia temei (`track.gd`, tema `sanfrancisco`): Y 0 = soare din S pe o strada care coboara
@@ -1082,6 +1345,19 @@ PEAKS = [
     ("FlancVest", -240.0, -40.0, 44.0, 170.0),
     ("FlancSV", -170.0, -330.0, 30.0, 140.0),
 ]
+if B200:
+    # Dealul se intoarce cu strada tramvaiului (acum spre S, pe x 144, +20 -> +53): flancul de est
+    # urca spre colţul de sus (coama), flancul de NE coboara spre capul de pod (+20). Malul
+    # celalalt: dealurile aurii, in spatele balonului (nu peste el: soseaua de acolo e la +20).
+    PEAKS = [
+        ("Coama", -48.0, -96.0, 56.0, 130.0),
+        ("FlancEst", 190.0, -90.0, 50.0, 140.0),
+        ("FlancNE", 205.0, 110.0, 30.0, 110.0),
+        ("FlancVest", -240.0, -40.0, 44.0, 170.0),
+        ("FlancSV", -170.0, -330.0, 30.0, 140.0),
+        ("MalulCelalalt", 640.0, 90.0, 48.0, 140.0),
+        ("MalulCelalaltSud", 540.0, 40.0, 34.0, 110.0),
+    ]
 
 
 def V2(a, b):
@@ -1144,6 +1420,15 @@ TRAM2_EXIT_X = 50.0              # unde paraseste axul spre dreapta (gura: x -5.
 # Tramvaiul 2: masurat in ProbeRace (vezi brief §7 pasul 5).
 TRAM1_PHASE = float(os.environ.get("TRAM1_PHASE", "0.196"))
 TRAM2_PHASE = float(os.environ.get("TRAM2_PHASE", "0.564"))
+if B200:
+    # Pe B200 plutonul ajunge mai tarziu la ambele (startul e pe pod): fazele se trag inapoi cu
+    # intarzierea sosirii, ca tramvaiul sa fie in turul 1 unde era pe bucla veche cand vine plutonul
+    # (tramvaiul 1 deja pe ax, la mijlocul urcarii). Intarzierea = metrii in plus de la start pana la
+    # baza urcarii / furca, la ritmul de cursa de acolo (V_EARLY, ~30 m/s; ProbeRace pas 3).
+    V_EARLY = 30.0
+    _dt1 = (MK["B0"][1] - _MK_OLD["B0"][1]) / V_EARLY
+    _dt2 = (MK["furca"][1] - _MK_OLD["furca"][1]) / V_EARLY
+    TRAM1_PHASE_DT, TRAM2_PHASE_DT = _dt1, _dt2
 TRAM_AI = os.environ.get("TRAM_AI", "1") == "1"     # 0 = sabotaj (ai_reads_lane stins)
 # Cat citeste AI-ul de pe SCURTATURA tramvaiul 2 (`BusHazard.ai_branch_reach_m`; pe bucla raman
 # 90 m). Cu cei 90 m impliciti, AI-ul din serpentine se aseza pe linia lui inca din al treilea ac (si
@@ -1162,6 +1447,10 @@ def _axis(x0, x1, y):
     return [(x0 + (x1 - x0) * k / n, y) for k in range(1, n + 1)]
 
 
+def _plen_pre(seq):
+    return sum(math.dist(a, b) for a, b in zip(seq, seq[1:]))
+
+
 def _climb_elev(x):
     """Cota strazii tramvaiului 1 (latura de sud, spre V); dincolo de coltul de sus, panta
     continua drept inainte (strada pe care iese tramvaiul)."""
@@ -1175,14 +1464,38 @@ def _climb_elev(x):
 
 def _low_elev(x):
     """Cota strazii de jos (dupa placa; ocolul coboara liniar pana la gura)."""
-    return elev_s(MK["placa"][1] + (x - MK["placa"][2])) if x < M_X else Y_LOW
+    return low_street_elev(MK["placa"][1] + (x - MK["placa"][2])) if x < M_X else Y_LOW
 
 
-X1_E = MK["B0"][2] - 20.0
-TRAM1_MAP = [(X1_E, Y_S + TRAM_HIDE_LAT), (X1_E, Y_S + TRAM_R)]
-TRAM1_MAP += _arc_pts(X1_E - TRAM_R, Y_S + TRAM_R, TRAM_R, 0.0, -math.pi / 2)
-TRAM1_MAP += _axis(X1_E - TRAM_R, X_B - TRAM1_EXIT_PAST, Y_S)
-TRAM1_G = [godot(p, _climb_elev(p[0]) + TRAM_Y_UP) for p in TRAM1_MAP]
+if not B200:
+    X1_E = MK["B0"][2] - 20.0
+    TRAM1_MAP = [(X1_E, Y_S + TRAM_HIDE_LAT), (X1_E, Y_S + TRAM_R)]
+    TRAM1_MAP += _arc_pts(X1_E - TRAM_R, Y_S + TRAM_R, TRAM_R, 0.0, -math.pi / 2)
+    TRAM1_MAP += _axis(X1_E - TRAM_R, X_B - TRAM1_EXIT_PAST, Y_S)
+    TRAM1_G = [godot(p, _climb_elev(p[0]) + TRAM_Y_UP) for p in TRAM1_MAP]
+else:
+    # Aceeasi constructie, pe strada ROTITA (spre S, x = X_T): intra din strada laterala din DREAPTA
+    # (V) la 20 m dupa primul viraj, sfert de cerc R14 pe ax, iese DREPT inainte (spre S) 16 m
+    # dincolo de axa coamei. Cota: urcarea strazii la distanta d de baza ei (B0); dincolo de coltul
+    # de sus, panta continua drept inainte (strada pe care iese tramvaiul).
+    _b0 = (MK["B0"][2], MK["B0"][3])
+    _d_corner = MK["B colt"][1] - MK["B0"][1]
+
+    def _climb_elev_b(d):
+        if d <= _d_corner:
+            return DECK_Y + climb_q(d, Y_TOP - DECK_Y)
+        return DECK_Y + climb_q(_d_corner, Y_TOP - DECK_Y) + GRADE * (d - _d_corner)
+
+    _e = _b0[1] - 20.0                                 # y-ul intrarii pe ax (strada merge spre -y)
+    TRAM1_MAP = [(X_T - TRAM_HIDE_LAT, _e), (X_T - TRAM_R, _e)]
+    TRAM1_MAP += _arc_pts(X_T - TRAM_R, _e - TRAM_R, TRAM_R, math.pi / 2, 0.0)
+    _end_y = Y_COAMA - TRAM1_EXIT_PAST
+    _n = max(1, int(round(((_e - TRAM_R) - _end_y) / STEP)))
+    TRAM1_MAP += [(X_T, (_e - TRAM_R) + (_end_y - (_e - TRAM_R)) * k / _n) for k in range(1, _n + 1)]
+    TRAM1_G = [godot(p, _climb_elev_b(max(_b0[1] - p[1], 0.0)) + TRAM_Y_UP) for p in TRAM1_MAP]
+    # fazele (vezi mai sus): la incarcare tramvaiul e cu intarzierea sosirii plutonului mai in urma
+    if "TRAM1_PHASE" not in os.environ:
+        TRAM1_PHASE = round((0.196 - TRAM1_PHASE_DT * TRAM1_SPEED / _plen_pre(TRAM1_G)) % 1.0, 3)
 
 # TRAM2_LAYOUT=placa (varianta B, de A/B): DOUA vagoane pe aceeasi linie, fiecare cu ciclul
 # 2 x TRAM2_PERIOD, defazate o jumatate de ciclu (la gura trece unul la ~29 s), care pleaca de pe
@@ -1212,6 +1525,8 @@ if TRAM2_LAYOUT != "stanga":
     TRAM2_MAP += _arc_pts(TRAM2_EXIT_X, QUAY_Y - TRAM_R, TRAM_R, math.pi / 2, 0.0)
     TRAM2_MAP += [(TRAM2_EXIT_X + TRAM_R, QUAY_Y - TRAM_HIDE_LAT)]
 TRAM2_G = [godot(p, _low_elev(p[0]) + TRAM_Y_UP) for p in TRAM2_MAP]
+if B200 and "TRAM2_PHASE" not in os.environ:
+    TRAM2_PHASE = round((0.564 - TRAM2_PHASE_DT * TRAM2_SPEED / _plen_pre(TRAM2_G)) % 1.0, 3)
 
 
 def _plen(seq):
@@ -1239,17 +1554,34 @@ meta = [
     "metadata/sf_serp_radius = %.1f" % SERP_R,
     "metadata/sf_short_len = %.2f" % SHORT_LEN,
     "metadata/sf_bypass_len = %.2f" % (s_M - s_fork),
-    "metadata/sf_turntable = %s" % g3(godot((MK["placa"][2], MK["placa"][3]), elev_s(MK["placa"][1]))),
+    "metadata/sf_turntable = %s" % g3(godot((MK["placa"][2], MK["placa"][3]), low_street_elev(MK["placa"][1]))),
+] + ([
     "metadata/sf_clock_tower = %s" % g3(godot(tower, Y_LOW)),
     "metadata/sf_tram_up_entry = %s" % g3(godot(tram_up_entry, Y_LOW)),
     "metadata/sf_tram_up_exit = %s" % g3(godot(tram_up_exit, _climb_elev(tram_up_exit[0]))),
+] if not B200 else [
+    "metadata/sf_tram_up_entry = %s" % g3(godot(tram_up_entry, DECK_Y + climb_q(20.0, Y_TOP - DECK_Y))),
+    "metadata/sf_tram_up_exit = %s" % g3(TRAM1_G[-1]),
+]) + [
     "metadata/sf_tram_low_entry = %s" % g3(godot(TRAM2_MAP[0], _low_elev(TRAM2_MAP[0][0]))),
     "metadata/sf_tram_low_exit = %s" % g3(godot(TRAM2_MAP[-1], Y_LOW)),
     # Portile sondei de tramvaie (tools/probe_sf_watch.gd): [punct, directie] x N, pe harta Godot.
-    # urcare: baza ei (B0) -> 30 m pe latura de nord; jos: 70 m dupa gura (pereche cu sf_gate_in).
-    "metadata/sf_climb_gates = [%s, Vector3(-1, 0, 0), %s, Vector3(0, 0, -1)]" % (
-        g3(godot((MK["B0"][2], Y_S), Y_LOW)), g3(godot((X_B, Y_S + R_B + 30.0), Y_LOW))),
+    # urcare: baza ei (B0) -> 30 m pe strada urmatoare dupa coltul de sus; jos: 70 m dupa gura
+    # (pereche cu sf_gate_in).
+    ("metadata/sf_climb_gates = [%s, Vector3(-1, 0, 0), %s, Vector3(0, 0, -1)]" % (
+        g3(godot((MK["B0"][2], Y_S), Y_LOW)), g3(godot((X_B, Y_S + R_B + 30.0), Y_LOW)))) if not B200 else
+    ("metadata/sf_climb_gates = [%s, Vector3(0, 0, 1), %s, Vector3(-1, 0, 0)]" % (
+        g3(godot((X_T, MK["B0"][3]), DECK_Y)), g3(godot((X_T - R_B - 30.0, Y_COAMA), Y_TOP)))),
     "metadata/sf_gate_out2 = %s" % g3(godot((M_X + 70.0, M_Y), Y_LOW)),
+    # strazile pe care tools/probe_sf_light.gd pune randuri de case si masoara soarele (fractii pe
+    # INDEX): lantul (prima muchie -> capatul blocului 4), strada tramvaiului 1 (baza -> coltul de
+    # sus), bratul coamei pana la virajul spre lant
+    "metadata/sf_streets = {%s}" % ", ".join('"%s": %s' % (k_, V2(*v_)) for k_, v_ in (
+        ("lant", (r4(F_s(S[LIPS[0]])[0]), r4(F_s(S[LIPS[-1]] + 48.0)[0]))),
+        ("urcare", (r4(F_s(MK["B0"][1])[0]), r4(F_s(MK["B colt"][1])[0]))),
+        ("coama", (r4(F_s(MK["C0"][1] if B200 else MK["B1"][1] + R_C1 * math.pi / 2)[0]),
+                   r4(F_s(MK["lant0"][1] - 36.0 * math.pi / 2 if B200 else MK["lant0"][1] - R_C2 * math.pi / 2)[0]))),
+    )),
 ]
 
 # Coliziunea gri: acostament (trimesh), straturi (convex), fatade (cutii).
@@ -1321,6 +1653,140 @@ else:
     tram_nodes += _tram_node("Tramvai2", "Curve3D_tram2", TRAM2_SPEED, TRAM2_PERIOD, TRAM2_PHASE,
                              TRAM2_READ_M)
 
+# =============================================================================================
+# PODUL ROSU pe Track25 (B200; brief §7 pasul 2b). Geometria si regulile sondei 1d
+# (tools/gen_sf_pod.py), in coordonatele pistei: axa podului pe harta y = AXIS_Y (Godot z = -AXIS_Y),
+# tablierul de la tab0 (x 270) la tab1 (x 470) la +20; +X local al hazardului = spre E (larg).
+#   - DESPARTITORUL: nodul `MovableMedianHazard` cu originea la capatul de V al tablierului, fix pe
+#     paliere (36 m), mobil pe tablier, ATENUATOR (moale) la AMBELE capete ale coridorului (capul
+#     de pe malul celalalt, spre traficul din balon; capul de la baza, spre traficul din virajul de
+#     90). CIRCULATIE PE STANGA: sensul spre +X (larg) e pe -Z local -> `plus_dir_side = -1`;
+#     `ai_reads_corridor` aprins (singura pista cu nodul);
+#   - PARAPETELE exterioare: perete vertical de 1,2 m la |z| = 12,2 (fata interioara), pe tablier
+#     + 12 m, cu capetele EVAZATE spre exterior (20 de grade pe 10 m); cutii statice, gri;
+#   - PORTALURILE rosii la 1/4 si 3/4 din tablier: picioarele (cu coliziune) in afara parapetului,
+#     traversele la +15 si +39 (fara coliziune; la +10 taiau camera de urmarire, sonda 1d);
+#   - golul: rapele-viaduct de sub tablier (plasa viaductului sub el), apa golfului dedesubt si
+#     SeaRespawn sub cota apei (plasa globala a temei).
+# Placeholder gri (rosu doar portalurile): modelele podului nu exista inca.
+# =============================================================================================
+POD_EXT = ""
+POD_SUB = []
+POD_NODES = []
+POD_PROPS = []
+if B200:
+    AXIS_Y = MK["tab0"][3] - LANE_Z
+    GZ = -AXIS_Y
+    X_D0, X_D1 = MK["tab0"][2], MK["tab1"][2]
+    assert abs(MK["tab1r"][3] - (AXIS_Y - LANE_Z)) < 1e-6 and abs(X_D1 - X_D0 - DECK) < 1e-6
+    _sub = {}
+
+    def _box(key, name, parent, size, xform, coll=True, mesh=True, mat="Mat_pod_gri"):
+        sid = "Box_pod_%s" % key
+        if sid not in _sub:
+            _sub[sid] = ('[sub_resource type="BoxShape3D" id="%s"]\nsize = Vector3(%.3f, %.3f, %.3f)\n'
+                         % (sid, size[0], size[1], size[2]))
+            _sub["Mesh_pod_" + key] = ('[sub_resource type="BoxMesh" id="Mesh_pod_%s"]\n'
+                                       'size = Vector3(%.3f, %.3f, %.3f)\nmaterial = SubResource("%s")\n'
+                                       % (key, size[0], size[1], size[2], mat))
+        tx = "transform = Transform3D(%s)\n" % ", ".join("%.5f" % v for v in xform)
+        if coll:
+            POD_NODES.append('[node name="%s" type="CollisionShape3D" parent="%s"]\n%sshape = SubResource("%s")\n'
+                             % (name, parent, tx, sid))
+        if mesh:
+            POD_NODES.append('[node name="%sM" type="MeshInstance3D" parent="%s"]\n%smesh = SubResource("Mesh_pod_%s")\n'
+                             % (name, parent, tx, key))
+
+    POD_SUB.append('[sub_resource type="StandardMaterial3D" id="Mat_pod_gri"]\nalbedo_color = Color(0.62, 0.62, 0.6, 1)\n')
+    POD_SUB.append('[sub_resource type="StandardMaterial3D" id="Mat_pod_rosu"]\nalbedo_color = Color(0.73, 0.21, 0.13, 1)\n')
+    POD_NODES.append('[node name="Pod" type="Node3D" parent="."]\n')
+    # parapetele exterioare + evazarile
+    POD_NODES.append('[node name="Parapet" type="StaticBody3D" parent="Pod"]\n')
+    pa, pb = X_D0 - 12.0, X_D1 + 12.0
+    flare_l, flare_a = 10.0, math.radians(20.0)
+    for side, nm in ((-1, "Nord"), (1, "Sud")):
+        zc = GZ + side * (DECK_HALF + 0.25)
+        _box("parapet", "Parapet" + nm, "Pod/Parapet", (pb - pa, 1.2, 0.5),
+             (1, 0, 0, 0, 1, 0, 0, 0, 1, (pa + pb) * 0.5, DECK_Y + 0.55, zc))
+        for end, xe in (("V", pa), ("E", pb)):
+            dx = -1.0 if end == "V" else 1.0
+            cxf = xe + dx * math.cos(flare_a) * flare_l * 0.5
+            czf = zc + side * math.sin(flare_a) * flare_l * 0.5
+            yaw = math.atan2(-side * math.sin(flare_a), dx * math.cos(flare_a))
+            c_, s_ = math.cos(yaw), math.sin(yaw)
+            # Basis(UP, yaw) pe RANDURI (sonda 1d: Transform3D din .tscn e scris pe randuri)
+            _box("flare", "Evazare%s%s" % (nm, end), "Pod/Parapet", (flare_l, 1.2, 0.5),
+                 (c_, 0, s_, 0, 1, 0, -s_, 0, c_, cxf, DECK_Y + 0.55, czf))
+    # portalurile: picioarele de la apa (-10) pana la varful turnului (+20 + 45)
+    POD_NODES.append('[node name="Turnuri" type="StaticBody3D" parent="Pod"]\n')
+    tower_h = 45.0
+    leg_z = DECK_HALF + 2.3
+    leg_bot = -10.0
+    leg_top = DECK_Y + tower_h
+    for ti, xt in enumerate((X_D0 + DECK * 0.25, X_D0 + DECK * 0.75)):
+        for side in (1, -1):
+            _box("leg", "T%dPicior%d" % (ti, side + 1), "Pod/Turnuri", (3.0, leg_top - leg_bot, 3.0),
+                 (1, 0, 0, 0, 1, 0, 0, 0, 1, xt, (leg_top + leg_bot) * 0.5, GZ + side * leg_z),
+                 mat="Mat_pod_rosu")
+        for bi, yb in enumerate((DECK_Y + 15.0, DECK_Y + tower_h - 6.0)):
+            _box("beam", "T%dTraversa%d" % (ti, bi), "Pod/Turnuri", (2.4, 2.4, 2 * leg_z + 3.0),
+                 (1, 0, 0, 0, 1, 0, 0, 0, 1, xt, yb, GZ), coll=False, mat="Mat_pod_rosu")
+    POD_SUB += list(_sub.values())
+    # despartitorul
+    run = (DECK - 2 * (30.0 + 15.0)) / TRUCK_SPEED
+    TRUCK_CYCLE = 2.0 * (run + TRUCK_DWELL)
+    # FAZA: la verde (dupa ~3,6 s de numaratoare in care ceasul merge) camionul sta la capatul de E
+    # (s_hi): pe aproape tot tablierul bariera e spre banda de intors (-Z), deci banda spre oras, pe
+    # care pleaca grila, e LATA la start. Pleaca spre V abia dupa ce trece plutonul.
+    TRUCK_PHASE = float(os.environ.get("TRUCK_PHASE", "%.4f" % (((run + 0.5) - 3.6) / TRUCK_CYCLE % 1.0)))
+    POD_EXT = '[ext_resource type="PackedScene" path="res://scenes/hazards/MovableMedian.tscn" id="6_median"]\n'
+    POD_NODES.append("\n".join([
+        '[node name="Despartitor" parent="Pod" instance=ExtResource("6_median")]',
+        "transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, %.3f, %.3f, %.3f)" % (X_D0, DECK_Y, GZ),
+        "deck_length = %.1f" % DECK,
+        "offset_m = %.2f" % OFFSET,
+        "transition_m = 30.0",
+        "taper_m = 30.0",
+        "approach_m = %.1f" % LAND,
+        "cushion_far_m = 6.0",
+        "cushion_near_m = 6.0",
+        "deck_half_width = %.2f" % DECK_HALF,
+        "plus_dir_side = -1",
+        "truck_enabled = %s" % ("false" if MEDIAN_FIX else "true"),
+        "static_center = %s" % ("true" if MEDIAN_FIX else "false"),
+        "truck_speed = %.2f" % TRUCK_SPEED,
+        "truck_dwell_s = %.2f" % TRUCK_DWELL,
+        "phase = %.4f" % TRUCK_PHASE,
+        "ai_reads_corridor = %s" % ("true" if MEDIAN_AI else "false"),
+        "",
+    ]))
+    POD_PROPS = [
+        "custom_ravines = Array[Vector4]([%s])" % ", ".join(
+            "Vector4(%.4f, %.4f, 60.0, 0)" % r_ for r_ in DECK_RAVINES),
+        "custom_viaduct_ravines = Array[int]([0, 1])",
+        "custom_viaduct_net_margin = 12.0",
+        "custom_ravine_floors = Array[Vector2]([Vector2(0, -8), Vector2(1, -8)])",
+    ]
+    # Zidul lumii: Track._build_world_bounds pune peretii la 420 m de CENTROID (media punctelor
+    # coapte). Malul celalalt trece de el (memoria `ziduri-invizibile-ale-lumii`), deci pista isi
+    # declara jumatatea de latura: cea mai departata margine de sosea + 25 m.
+    _seglen = [math.dist(PTS[i], PTS[(i + 1) % N]) for i in range(N)]
+    _cx = sum(PTS[i][0] * _seglen[i] for i in range(N)) / TOTAL
+    _cy = sum(PTS[i][1] * _seglen[i] for i in range(N)) / TOTAL
+    _ext = max(max(abs(p[0] - _cx), abs(p[1] - _cy)) for p in PTS) + HW
+    WORLD_HALF = float(math.ceil((_ext + 25.0) / 5.0) * 5.0)
+    POD_PROPS.append("world_half_extent_m = %.1f" % WORLD_HALF)
+    meta += [
+        "metadata/two_way_corridors = [%s]" % ", ".join(V2(a, b) for a, b in TWO_WAY),
+        "metadata/sf_pod_axis = [%s, %s]" % (g3((X_D0, DECK_Y, GZ)), g3((X_D1, DECK_Y, GZ))),
+        "metadata/sf_first_turn = %s" % g3(godot((X_T + R_T, MK["B0"][3] + R_T), DECK_Y)),
+    ]
+    print(f"podul: axa y {AXIS_Y:.1f} (Godot z {GZ:.1f}), tablier x {X_D0:.0f}..{X_D1:.0f} la +{DECK_Y:.0f}; "
+          f"camion {TRUCK_SPEED} m/s, oprire {TRUCK_DWELL} s, ciclu {TRUCK_CYCLE:.1f} s, faza {TRUCK_PHASE:.4f}"
+          f"{' (FIX, fara camion)' if MEDIAN_FIX else ''}{' SABOTAJ: AI orb' if not MEDIAN_AI else ''}")
+    print(f"zidul lumii: centroid ({_cx:.0f}, {_cy:.0f}), cea mai departata margine {_ext:.0f} m -> "
+          f"world_half_extent_m {WORLD_HALF:.0f} (implicit 420); racordul rapei {TOTAL * 0.02:.0f} m")
+
 tscn = f"""[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
@@ -1328,7 +1794,7 @@ tscn = f"""[gd_scene format=3]
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="3_branch"]
 [ext_resource type="ArrayMesh" path="res://{OBJ_REL}" id="4_gri"]
 [ext_resource type="Script" path="res://scenes/hazards/bus_hazard.gd" id="5_bus"]
-
+{POD_EXT}
 [sub_resource type="Curve3D" id="Curve3D_sf"]
 closed = true
 _data = {{
@@ -1358,7 +1824,7 @@ _data = {{
 }}
 point_count = {len(TRAM2_G)}
 
-{chr(10).join(sub)}
+{chr(10).join(sub + POD_SUB)}
 [node name="Track25" type="Node3D"]
 script = ExtResource("1_track")
 custom_name = "San Francisco"
@@ -1373,7 +1839,7 @@ custom_width_segments = Array[Vector3]([{", ".join(V3(*w_) for w_ in width_segme
 custom_sun_rotation_deg = Vector3({SUN_ELEV}, {SUN_AZ}, 0)
 branch_smooth_level = true
 terrain_pad_m = 120.0
-{chr(10).join(meta)}
+{chr(10).join(POD_PROPS + meta)}
 
 [node name="Path" type="Path3D" parent="."]
 curve = SubResource("Curve3D_sf")
@@ -1397,11 +1863,13 @@ material_override = SubResource("Mat_gri")
 
 {chr(10).join(nodes)}
 [node name="Tramvaie" type="Node3D" parent="."]
-{tram_nodes}"""
+{tram_nodes}
+{chr(10).join(POD_NODES)}"""
 with open(os.devnull if DRY else OUT_TSCN, "w", encoding="utf-8", newline="\n") as f:
     f.write(tscn)
 print(f"scris {os.path.relpath(OUT_TSCN, ROOT)}; sea_level_offset {SEA_OFFSET}")
-print(f"turnul cu ceas: harta {tower}; linia de start la {math.dist(tower, (X_E, Y_START)):.0f} m de el")
+if not B200:
+    print(f"turnul cu ceas: harta {tower}; linia de start la {math.dist(tower, (X_E, Y_START)):.0f} m de el")
 print(f"directia strazii lantului: azimut {CHAIN_AZ:.1f} grade (0 = N); soarele pe pista "
       f"({SUN_ELEV}, {SUN_AZ}, 0): din S-SV, la 12 grade de axa, din spate")
 
@@ -1445,6 +1913,8 @@ if PLAN_PATH and not DRY:
     for i in range(N):
         a, b = MAIN_G[i], MAIN_G[(i + 1) % N]
         w = HW_QUAY if (MK["placa"][1] + (M_X - MK["placa"][2]) + 24 <= S[i] <= MK["NE"][1]) else HW
+        if B200 and T.seg[(i + 1) % N].startswith("pod") and T.seg[(i + 1) % N] != "pod baza":
+            w = LANE_Z      # pe pod: fiecare banda pana la axa (despartitorul)
         d.line([px((a[0], -a[2])), px((b[0], -b[2]))], fill=col((a[1] + b[1]) / 2), width=int(2 * w * SC_))
     for k in range(len(DENSE_G) - 1):
         a, b = DENSE_G[k], DENSE_G[k + 1]
@@ -1472,32 +1942,88 @@ if PLAN_PATH and not DRY:
         q = px(p)
         d.text((q[0] + dx, q[1] + dy), txt, fill=fill, font=f)
 
-    label((X_E + 10, Y_START + 60), "A  faleza de est, START (+3)")
-    label((X_B + 70, Y_S - 30), "B  urcarea +3 -> +53, 11,4%")
-    label((X_B - 110, Y_CTOP + 40), "C  coama +53")
-    label((-150, 150), "D  lantul: 4 muchii\n    spre N, +53 -> +14,6")
-    label((-150, 290), "E  terasa +14,6 / furca")
-    label((-120, 400), "E  ocolul 400 m\n    +14,6 -> +3")
-    label((40, 380), "E'  serpentine\n     R16, 9 m")
-    label((60, QUAY_Y + 20), "F  cheiul de nord (+3, 12 m)", fill=(255, 255, 255))
-    label((X_E_HI + 24, 330), "G  faleza (+3)", fill=(255, 255, 255))
-    label((X_MID + 9, 196), "piateta", f=font, fill=(40, 40, 40))
-    label((X_E_HI + 18, 30), "golful", fill=(255, 255, 255))
-    # start, turn, tramvaie
-    s0 = px((X_E, Y_START))
-    d.line([(s0[0] - 14, s0[1]), (s0[0] + 14, s0[1])], fill=(0, 0, 0), width=4)
-    q = px(tower)
-    d.rectangle([q[0] - 6, q[1] - 6, q[0] + 6, q[1] + 6], fill=(120, 60, 30))
-    d.text((q[0] + 10, q[1] - 2), f"turnul (<=32 m), {math.dist(tower, (X_E, Y_START)):.0f} m de la start",
-           fill=(0, 0, 0), font=font)
-    for p, txt in ((tram_up_entry, "tramvai 1: intra din strada laterala"),
-                   (tram_up_exit, "tramvai 1: iese DREPT inainte"),
-                   ((MK["placa"][2], MK["placa"][3]), "placa turnanta (decor)"),
-                   (TRAM2_MAP[0], "tramvai 2: intra din dreapta"),
-                   (TRAM2_MAP[-1], "tramvai 2: iese spre mal" if TRAM2_LAYOUT == "stanga" else "tramvai 2: iese in dreapta")):
-        q = px(p)
-        d.ellipse([q[0] - 5, q[1] - 5, q[0] + 5, q[1] + 5], fill=(150, 20, 40))
-        d.text((q[0] + 8, q[1] + 4), txt, fill=(150, 20, 40), font=font_s)
+    if not B200:
+        label((X_E + 10, Y_START + 60), "A  faleza de est, START (+3)")
+        label((X_B + 70, Y_S - 30), "B  urcarea +3 -> +53, 11,4%")
+        label((X_B - 110, Y_CTOP + 40), "C  coama +53")
+        label((-150, 150), "D  lantul: 4 muchii\n    spre N, +53 -> +14,6")
+        label((-150, 290), "E  terasa +14,6 / furca")
+        label((-120, 400), "E  ocolul 400 m\n    +14,6 -> +3")
+        label((40, 380), "E'  serpentine\n     R16, 9 m")
+        label((60, QUAY_Y + 20), "F  cheiul de nord (+3, 12 m)", fill=(255, 255, 255))
+        label((X_E_HI + 24, 330), "G  faleza (+3)", fill=(255, 255, 255))
+        label((X_MID + 9, 196), "piateta", f=font, fill=(40, 40, 40))
+        label((X_E_HI + 18, 30), "golful", fill=(255, 255, 255))
+        # start, turn, tramvaie
+        s0 = px((X_E, Y_START))
+        d.line([(s0[0] - 14, s0[1]), (s0[0] + 14, s0[1])], fill=(0, 0, 0), width=4)
+        q = px(tower)
+        d.rectangle([q[0] - 6, q[1] - 6, q[0] + 6, q[1] + 6], fill=(120, 60, 30))
+        d.text((q[0] + 10, q[1] - 2), f"turnul (<=32 m), {math.dist(tower, (X_E, Y_START)):.0f} m de la start",
+               fill=(0, 0, 0), font=font)
+        for p, txt in ((tram_up_entry, "tramvai 1: intra din strada laterala"),
+                       (tram_up_exit, "tramvai 1: iese DREPT inainte"),
+                       ((MK["placa"][2], MK["placa"][3]), "placa turnanta (decor)"),
+                       (TRAM2_MAP[0], "tramvai 2: intra din dreapta"),
+                       (TRAM2_MAP[-1], "tramvai 2: iese spre mal" if TRAM2_LAYOUT == "stanga" else "tramvai 2: iese in dreapta")):
+            q = px(p)
+            d.ellipse([q[0] - 5, q[1] - 5, q[0] + 5, q[1] + 5], fill=(150, 20, 40))
+            d.text((q[0] + 8, q[1] + 4), txt, fill=(150, 20, 40), font=font_s)
+    else:
+        # PODUL: tablierul (parapetele rosii pe fata exterioara), despartitorul (gri fix pe paliere,
+        # portocaliu mobil pe tablier, cu S-ul camionului la mijloc), portalurile, sensurile.
+        ax0, ax1 = (X_D0, AXIS_Y), (X_D1, AXIS_Y)
+        for sg in (1, -1):
+            d.line([px((ax0[0] - 12.0, AXIS_Y + sg * DECK_HALF)), px((ax1[0] + 12.0, AXIS_Y + sg * DECK_HALF))],
+                   fill=(200, 40, 25), width=5)
+        d.line([px((X_D0 - LAND, AXIS_Y)), px((X_D1 + LAND, AXIS_Y))], fill=(235, 235, 235), width=3)
+        for k in range(24):
+            f0, f1 = k / 24.0, (k + 0.6) / 24.0
+            off = OFFSET * (1 if k >= 12 else -1)
+            d.line([px((X_D0 + DECK * f0, AXIS_Y + off)), px((X_D0 + DECK * f1, AXIS_Y + off))],
+                   fill=(255, 150, 30), width=4)
+        tm = px((X_D0 + DECK * 0.5, AXIS_Y))
+        d.rectangle([tm[0] - 8, tm[1] - 3, tm[0] + 8, tm[1] + 3], fill=(40, 40, 40))
+        for f_ in (0.25, 0.75):
+            for sg in (1, -1):
+                q_ = px((X_D0 + DECK * f_, AXIS_Y + sg * (DECK_HALF + 2.3)))
+                d.rectangle([q_[0] - 5, q_[1] - 5, q_[0] + 5, q_[1] + 5], fill=(170, 30, 20))
+        for xa, yy, sgn in ((X_D0 + 40, AXIS_Y + LANE_Z, 1), (X_D1 - 40, AXIS_Y - LANE_Z, -1)):
+            pa_, pb_ = px((xa, yy)), px((xa + sgn * 40, yy))
+            d.line([pa_, pb_], fill=(255, 255, 255), width=3)
+            d.polygon([pb_, (pb_[0] - sgn * 9, pb_[1] - 5), (pb_[0] - sgn * 9, pb_[1] + 5)], fill=(255, 255, 255))
+        label((X_D0 + 5, AXIS_Y + 70), f"PODUL ROSU: tablier {DECK:.0f} m la +{DECK_Y:.0f}, dus-intors,\n"
+              f"despartitor mobil (camion, ciclu {TRUCK_CYCLE:.0f} s); circulatie pe STANGA", f=font,
+              fill=(255, 255, 255))
+        label((MK["far0"][2] + 10, MK["far0"][3] + 60), "malul celalalt (+20):\nintoarcerea-balon R20",
+              f=font, fill=(90, 60, 10))
+        label((MK["pod0"][2] - 70, MK["pod0"][3] + 40), "capul de pod", f=font_s)
+        label((X_T + 14, 100), f"B  strada tramvaiului, spre S\n    +{DECK_Y:.0f} -> +53, {B_WEST_REAL:.0f} m la 11,4%",
+              f=font)
+        label((40, Y_COAMA - 30), "C  coama +53: bratul de 84 m spre V", f=font)
+        label((-150, 150), "D  lantul: 4 muchii\n    spre N, +53 -> +14,6")
+        label((-150, 290), "E  terasa +14,6 / furca")
+        label((-120, 400), "E  ocolul 400 m\n    +14,6 -> +3")
+        label((40, 380), "E'  serpentine\n     R16, 9 m")
+        label((-60, QUAY_Y + 20), "F  cheiul de nord (+3, 12 m)", fill=(255, 255, 255))
+        label((X_G + 12, 380), f"G  spre pod: +3 -> +{DECK_Y:.0f}\n    ({ramp_len(DECK_Y - Y_LOW):.0f} m de rampa)",
+              f=font)
+        label((MK["B0"][2] + 30, MK["B0"][3] + 10), "PRIMUL VIRAJ (R30)", f=font_s)
+        # start pe banda spre oras
+        st_ = PTS[0]
+        d.line([px((st_[0], st_[1] - 6.5)), px((st_[0], st_[1] + 6.5))], fill=(0, 0, 0), width=5)
+        label((st_[0] - 40, st_[1] - 20), "START / SOSIRE" + (" (alternativa)" if START_AT != "far1" else ""),
+              f=font, fill=(0, 0, 0))
+        for p, txt in ((tram_up_entry, "tramvai 1: intra din dreapta"),
+                       (TRAM1_MAP[-1], "tramvai 1: iese DREPT inainte"),
+                       ((MK["placa"][2], MK["placa"][3]), "placa turnanta (decor)"),
+                       (TRAM2_MAP[0], "tramvai 2: intra din dreapta"),
+                       (TRAM2_MAP[-1], "tramvai 2: iese spre mal")):
+            q = px(p)
+            d.ellipse([q[0] - 5, q[1] - 5, q[0] + 5, q[1] + 5], fill=(150, 20, 40))
+            d.text((q[0] + 8, q[1] + 4), txt, fill=(150, 20, 40), font=font_s)
+        for path in (TRAM1_MAP, TRAM2_MAP):
+            d.line([px(p) for p in path], fill=(150, 20, 40), width=2)
     # soarele: din S-SV (azimut 192, adica -12 fata de axa lantului, care coboara spre N)
     sun_from = deg(180.0 + 12.0)        # busola: 0 = N, 90 = E; de UNDE vine lumina
     c0 = (-420.0, -230.0)
@@ -1512,7 +2038,7 @@ if PLAN_PATH and not DRY:
     nq = px((x1 - 60, y1 - 40))
     d.line([(nq[0], nq[1] + 40), nq], fill=(0, 0, 0), width=3)
     d.text((nq[0] - 5, nq[1] - 22), "N", fill=(0, 0, 0), font=font_b)
-    d.text((10, 10), f"Track25 San Francisco — traseul ({TOTAL:.0f} m, orar). Culoarea = cota "
+    d.text((10, 10), f"Track25 San Francisco — traseul{' B200 (podul rosu)' if B200 else ''} ({TOTAL:.0f} m, orar). Culoarea = cota "
                      f"(albastru +3 .. rosu +53); fractiile pe lungime.", fill=(0, 0, 0), font=font)
     # INSERTIA: serpentinele marite (x -24..52, y 296..466), in coltul de vest
     IS = 5.0

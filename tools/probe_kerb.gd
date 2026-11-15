@@ -38,9 +38,16 @@ func _check(ok: bool, what: String) -> void:
 func _ready() -> void:
 	_off = "--off" in OS.get_cmdline_user_args()
 	var idx := -1
+	var track_arg := ""
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
-			idx = GameState.resolve_track_index(int(arg.trim_prefix("--track=")))
+			# index / numar de scena, sau "Track21" / "transfagarasan" (#718)
+			track_arg = arg.trim_prefix("--track=")
+			idx = GameState.resolve_track_arg(track_arg)
+			if idx < 0:
+				push_error("probe_kerb: pista invalida %s" % track_arg)
+				get_tree().quit(2)
+				return
 	print("")
 	print("=== Bordura scutura suspensia ===")
 	if _off:
@@ -72,7 +79,7 @@ func _try_track(t: int) -> bool:
 	for i in track._kerb_idx.size():
 		if track._kerb_idx[i] == 1 and i % 2 == 0:
 			spots.append(i)
-	print("-- pista %d (%s): %d indici cu bordura --" % [t, track.track_name, spots.size()])
+	print("-- pista %s: %d indici cu bordura --" % [GameState.track_label(t), spots.size()])
 	if spots.size() < 30:
 		race.queue_free()
 		await get_tree().physics_frame

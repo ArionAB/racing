@@ -43,19 +43,22 @@ var _done: bool = false
 
 
 func _ready() -> void:
+	var track_arg := str(_track_index)
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--mode="):
 			_mode = arg.substr(7)
 		elif arg.begins_with("--track="):
-			_track_index = int(arg.substr(8))
+			track_arg = arg.substr(8)
 	# `--track=` ia pozitia din lista SAU numarul scenei (Track18 = 18) — vezi
 	# GameState.resolve_track_index. Indexul brut nu vedea decat pozitiile, deci un
 	# numar de scena iesea din tablou sau, la clampi, devenea TACUT alta pista.
-	_track_index = GameState.resolve_track_index(_track_index)
+	# Fara ambiguitate: --track=Track18 sau --track=kyoto (#718).
+	_track_index = GameState.resolve_track_arg(track_arg)
 	if _track_index < 0:
-		printerr("probe_reentry: --track nu e nici pozitie in lista, nici numar de scena din GameState.TRACK_SCENES")
+		printerr("probe_reentry: --track nu e nici pozitie in lista, nici numar de scena din GameState.TRACK_SCENES, nici TrackNN / id de pista")
 		get_tree().quit(1)
 		return
+	print("probe_reentry: pista %s" % GameState.track_arg_label(track_arg, _track_index))
 	GameState.selected_track = _track_index
 	_track = (load(GameState.TRACK_SCENES[_track_index]) as PackedScene) \
 		.instantiate() as Track

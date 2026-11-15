@@ -209,6 +209,21 @@ static func resolve_track_arg(arg: String) -> int:
 	return TrackInfo.index_of_id(StringName(s.to_lower()))
 
 
+## Eticheta pentru linia "pista masurata" a unei sonde: `track_label`, plus o
+## avertizare cand `--track=` a fost un numar ambiguu (index al unei piste SI
+## numar de scena al alteia), ca rezultatul sa spuna pe ce pista a fost.
+static func track_arg_label(arg: String, index: int) -> String:
+	var label := track_label(index)
+	var s := arg.strip_edges()
+	if not s.is_valid_int():
+		return label
+	var as_scene := TRACK_SCENES.find("res://scenes/tracks/Track%02d.tscn" % s.to_int())
+	if as_scene < 0 or as_scene == index:
+		return label
+	return "%s — ATENTIE: --track=%s e INDEXUL; scena Track%02d e %s (cere-o cu --track=Track%02d)" % [
+		label, s, s.to_int(), TRACK_NAMES[as_scene], s.to_int()]
+
+
 ## Numele lizibil pentru un index deja rezolvat — pentru mesajele uneltelor.
 static func track_label(index: int) -> String:
 	if index < 0 or index >= TRACK_SCENES.size():

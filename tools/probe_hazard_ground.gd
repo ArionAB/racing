@@ -33,17 +33,20 @@ var _max_gap := MAX_GAP_DEFAULT
 
 
 func _ready() -> void:
-	var wanted := 7
+	var wanted := "serengeti"
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
-			wanted = int(arg.trim_prefix("--track="))
+			wanted = arg.trim_prefix("--track=")
 		elif arg.begins_with("--max-gap="):
 			_max_gap = float(arg.trim_prefix("--max-gap="))
-	var idx := GameState.resolve_track_index(wanted)
+	# `--track=`: index sau numar de scena ca pana acum, ori fara ambiguitate
+	# "Track14" / "serengeti" (#718).
+	var idx := GameState.resolve_track_arg(wanted)
 	if idx < 0:
-		push_error("ProbeHazardGround: pista invalida %d" % wanted)
+		push_error("ProbeHazardGround: pista invalida %s" % wanted)
 		get_tree().quit(2)
 		return
+	print("ProbeHazardGround: pista %s" % GameState.track_arg_label(wanted, idx))
 	var t := (load(GameState.TRACK_SCENES[idx]) as PackedScene).instantiate() as Track
 	add_child(t)
 	for i in 4:

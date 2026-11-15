@@ -6,7 +6,9 @@ extends Node
 ##   2. pune jucatorul la 9 m in fata piesei celei mai apropiate de drum si il
 ##      trimite in ea cu 15 m/s: cat s-a deplasat piesa si cata viteza a
 ##      pierdut masina (trebuie sa fie imprastiere, nu zid).
-##   godot --headless --fixed-fps 60 --path . res://tools/ProbeBumpProps.tscn -- --track=12
+##   godot --headless --fixed-fps 60 --path . res://tools/ProbeBumpProps.tscn -- --track=transfagarasan
+##   (`--track=`: index / numar de scena ca la restul uneltelor, sau fara ambiguitate
+##   "Track21" / id-ul pistei — GameState.resolve_track_arg; implicit Chongqing.)
 
 const RACE_SCENE := "res://scenes/race/Race.tscn"
 const RAM_SPEED := 15.0
@@ -32,10 +34,16 @@ var _done: Array[BumpProp] = []
 
 
 func _ready() -> void:
-	var idx := 5
+	var track_arg := "chongqing"
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
-			idx = GameState.resolve_track_index(int(arg.trim_prefix("--track=")))
+			track_arg = arg.trim_prefix("--track=")
+	var idx := GameState.resolve_track_arg(track_arg)
+	if idx < 0:
+		push_error("ProbeBumpProps: pista invalida %s" % track_arg)
+		get_tree().quit(2)
+		return
+	print("[bump-props] pista %s" % GameState.track_arg_label(track_arg, idx))
 	GameState.selected_track = idx
 	GameState.champ_active = false
 	GameState.total_laps = 99

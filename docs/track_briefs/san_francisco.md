@@ -1627,3 +1627,37 @@ Ce verifici la primirea planșei, înainte de orice altceva:
    traverse drepte și un X gros; fără panouri adâncite și fără trepte.
 2. `cable_car` are platformele deschise la ambele capete și nicio inscripție.
 3. `sf_cypress_*` sunt aplecați de vânt, în pâlcuri, nu discuri plate pe trunchi subțire.
+
+### 9.3 Rezultatul: planșa de inventar (15 nov 2026)
+
+`docs/asset_briefs/img/sf_route/sf_inventar_v01_a.jpg`, promptul §9.2, prima generare.
+
+Cele trei verificări:
+1. `sf_bridge_tower`: **trecută.** Picioare-cutie, traverse drepte, un singur X gros, fără panouri
+   adâncite și fără trepte. Picioarele nu se îngustează vizibil, iar soclurile sunt de piatră:
+   îngustarea și cotele le ia modelatorul din `sf_red_bridge.md`.
+2. `cable_car`: **trecută.** Capete deschise cu călători pe platforme, fără inscripții.
+3. `sf_cypress_*`: **picată.** Toți trei sunt discuri plate pe trunchi (salcâmii din Serengeti),
+   exact ce §3.1 din inventar respinge. Același salcâm apare și în `sf_horizon`.
+
+Alte note (nu cer regenerare):
+- Casele de rând au ieșit în pasteluri, nu în crem. Nu contează: modelatorul le face neutre, iar
+  culoarea vine din cod (decizia din 15 nov).
+- `sf_row_a_*` are acoperiș plat cu cornișă, `sf_row_b_*` fronton: variantele se deosebesc. Fusta
+  de beton apare ca soclu de piatră: cotele din `sf_painted_row_kit.md` bat planșa.
+- Restul pieselor se iau ca referință de formă și culoare.
+
+**Corectura** (în aceeași conversație), doar pentru chiparoși și orizont:
+
+> Redraw only sf_cypress_a, sf_cypress_b, sf_cypress_c and sf_horizon, in exactly the same style,
+> light, grey background and label style as the sheet. The cypresses are wrong: they read as
+> African acacias (a flat umbrella disc on a thin trunk). A Monterey cypress on a windy sea cliff
+> looks different: a short, very thick, gnarled trunk that splits low into a few heavy twisted
+> branches; the whole tree leans hard to one side, pushed by the sea wind; the crown is NOT flat
+> and NOT a single disc, it is a stack of four to six dense, dark blue-green, cloud-like clumps
+> at different heights, all swept to the same side and ragged on the windward side; the tree is
+> about as wide as it is tall. Dark green, almost black-green, not olive. Make the three
+> different: sf_cypress_a a single leaning tree with clumps at three heights, sf_cypress_b a
+> broad old tree with two trunks, sf_cypress_c a smaller young tree, more upright but still bent
+> by the wind. In sf_horizon replace the acacia-like trees with a few small dark wind-bent cypress
+> clumps; keep the golden hills, the grey rocks and the hazy generic city.

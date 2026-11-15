@@ -96,6 +96,12 @@ extends Track
 @export var custom_rock_band_tint: Color = Color(0, 0, 0, 0)
 @export var custom_rock_line: float = 0.0
 @export var custom_rock_fade: float = 12.0
+## PUNTE DE LEMN pe traseul principal (scandurile clasei `wood` pe carosabil, aceeasi geometrie si
+## coliziune): intervale (frac_start, frac_end) pe INDICE. Cheia de tema `wood_deck_ranges`
+## (puntea Kiyomizu de pe Kyoto), declarata de PISTA: pontonul San Francisco. Gol = tema neatinsa.
+@export var custom_wood_deck_ranges: Array[Vector2] = []
+## Culoarea scandurilor (cheia de tema `wood_deck_color`); alfa 0 = cea a temei.
+@export var custom_wood_deck_color: Color = Color(0, 0, 0, 0)
 ## Din ce e facut drumul — schimba materialul, marcajele si urmele lasate de
 ## masini. Vezi Track.road_surface (e o alegere a PISTEI, nu a temei).
 @export_enum("asphalt", "dirt", "snow") var custom_road_surface: String = "asphalt"
@@ -354,6 +360,10 @@ func _theme_overrides() -> Dictionary:
 		over["rock_band_tint"] = custom_rock_band_tint
 		over["rock_line"] = custom_rock_line
 		over["rock_fade"] = custom_rock_fade
+	if not custom_wood_deck_ranges.is_empty():
+		over["wood_deck_ranges"] = custom_wood_deck_ranges
+	if custom_wood_deck_color.a > 0.0:
+		over["wood_deck_color"] = custom_wood_deck_color
 	return over
 
 

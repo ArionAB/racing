@@ -48,6 +48,9 @@ def zone(x, y):
 
 def zone_b200(x, y):
     """Zonele noi ale buclei B200 (None = zonele comune cu bucla veche: lant, serpentine...)."""
+    # pontonul (pasul 6): cheiul de nord x 40..120 si apa de langa el (inainte de „spre pod”)
+    if 28 <= x <= 136 and 446 <= y <= 500:
+        return "ponton"
     if 230 <= x <= 510 and 205 <= y <= 252:
         return "pod"
     if x > 510 and 150 <= y <= 300:
@@ -90,6 +93,7 @@ def main():
     passes = {0: [], 1: []}
     pass_resp = {0: 0, 1: 0}
     pass_unfin = {0: 0, 1: 0}
+    bed_passes, wall_passes = [], []
     buckets = {}
     land_max = 0.0
     seeds_ok = 0
@@ -141,9 +145,13 @@ def main():
                 (m.group(2), float(m.group(3)), float(m.group(4)), float(m.group(5))))
         for m in re.finditer(r"^    \[zbor in afara lantului\] (.+?)\s+ruta=(\d) frac=([\d.]+) ([\d.]+)s v0=([\d.]+)", txt, re.M):
             out_flights.append((m.group(1).strip(), int(m.group(2)), float(m.group(3)), float(m.group(4))))
-        for m in re.finditer(r"^    \[sf poarta\] (.+?)\s+ruta=(\d) (-?[\d.]+)s( REPUSA)?$", txt, re.M):
+        for m in re.finditer(r"^    \[sf poarta\] (.+?)\s+ruta=(\d) (-?[\d.]+)s( REPUSA)?( STRAT)?( FATADA)?$", txt, re.M):
             r = int(m.group(2))
             t = float(m.group(3))
+            if r == 1 and not m.group(4) and t >= 0 and m.group(5):
+                bed_passes.append(t)
+            if r == 1 and not m.group(4) and t >= 0 and m.group(6):
+                wall_passes.append(t)
             if m.group(4):
                 pass_resp[r] += 1
             elif t < 0:
@@ -209,6 +217,14 @@ def main():
     if passes[0] and passes[1]:
         print(f"  castig median (ocol - serpentine): {st.median(passes[0]) - st.median(passes[1]):+.2f} s; "
               f"cea mai buna vs cea mai buna: {min(passes[0]) - min(passes[1]):+.2f} s")
+    if passes[0]:
+        for nm_, arr_ in (("blocul solid (STRAT)", bed_passes), ("o fatada", wall_passes)):
+            if arr_:
+                print(f"  serpentine cu {nm_} atins(a), fara repunere: {len(arr_)} treceri, timp med "
+                      f"{st.median(arr_):.2f} s -> fata de ocol {st.median(passes[0]) - st.median(arr_):+.2f} s "
+                      f"(pozitiv = tot castiga)")
+            else:
+                print(f"  serpentine cu {nm_} atins(a): 0 treceri")
     n1 = len(passes[1]) + pass_resp[1] + pass_unfin[1]
     rs_serp = [r for r in resps if r[3] == "serpentine"]
     bl_serp = [b for b in blocks if b[4] == "serpentine"]
@@ -222,7 +238,7 @@ def main():
         print(f"    [blocaj] {b[0]} t={b[1]:.0f} {b[2]} la ({b[6][0]:.0f}, {b[6][1]:.0f}) atinge {b[5]}")
 
     print("\n--- REST")
-    for zn in ("terasa/furca", "ocol", "strada de jos/chei", "faleza", "urcare", "coama", "pod", "balon",
+    for zn in ("terasa/furca", "ocol", "strada de jos/chei", "ponton", "faleza", "urcare", "coama", "pod", "balon",
                "capul de pod", "primul viraj", "colt de sus", "spre pod", "rest"):
         r_ = [r for r in resps if r[3] == zn]
         b_ = [b for b in blocks if b[4] == zn]
@@ -283,6 +299,55 @@ def main():
             print("    peste: " + row)
         for c, row in head_rows[:12]:
             print("    frontal: " + row)
+
+    # --- PASUL 6: pontonul si masinile parcate (probe_sf_watch.gd, _report_p6)
+    pont_pass = pont_falls = 0
+    fall_rows = []
+    pk = {"n": 0, "hits": 0, "road": 0.0, "land": 0.0, "land_near": 0, "ej_near": 0}
+    pk_rows = []
+    pk_seeds = 0
+    for p in logs:
+        txt = open(p, encoding="utf-8", errors="replace").read()
+        m = re.search(r"^=== SF ponton: treceri=(\d+) caderi=(\d+)", txt, re.M)
+        if m:
+            pont_pass += int(m.group(1))
+            pont_falls += int(m.group(2))
+        for m in re.finditer(r"^    \[sf cadere\] (.*)$", txt, re.M):
+            fall_rows.append(os.path.basename(p) + " " + m.group(1))
+        m = re.search(r"^=== SF parcate: piese=(\d+) urnite=(\d+) pe_carosabil=([\d.]+)s in_zona_de_aterizare=([\d.]+)s "
+                      r"aterizari_langa_resturi=(\d+) ejectari_langa_resturi=(\d+)", txt, re.M)
+        if m:
+            pk_seeds += 1
+            pk["n"] = int(m.group(1))
+            pk["hits"] += int(m.group(2))
+            pk["road"] += float(m.group(3))
+            pk["land"] += float(m.group(4))
+            pk["land_near"] += int(m.group(5))
+            pk["ej_near"] += int(m.group(6))
+        for m in re.finditer(r"^    \[sf parcata\] t=\s*([\d.]+)s (\S+) (.+?)\s+v=([\d.]+)$", txt, re.M):
+            pk_rows.append((m.group(2), m.group(3).strip(), float(m.group(4))))
+    if pont_pass or pk_seeds:
+        print("\n--- PASUL 6")
+    if pont_pass:
+        print(f"  PONTON: {pont_pass} treceri, {pont_falls} caderi in golf ({100.0 * pont_falls / pont_pass:.2f}% "
+              f"din treceri; {pont_falls / max(lap_n, 1):.3f} pe tur-masina, {lap_n} ture)")
+        for row in fall_rows[:12]:
+            print("    cadere: " + row)
+    if pk_seeds:
+        by_tag = {}
+        by_car = {}
+        for tag, car, v in pk_rows:
+            by_tag[tag] = by_tag.get(tag, 0) + 1
+            by_car[car] = by_car.get(car, 0) + 1
+        print(f"  MASINI PARCATE: {pk['n']} piese; urnite {pk['hits']} in {pk_seeds} seed-uri "
+              f"({pk['hits'] / max(lap_n, 1):.3f} pe tur-masina, {pk['hits'] / pk_seeds:.1f} pe cursa)")
+        print(f"    pe strazi: {by_tag}; cine: {by_car}")
+        vs = [v for _, _, v in pk_rows]
+        if vs:
+            print(f"    viteza celui care loveste: med {st.median(vs):.1f} m/s, max {max(vs):.1f}")
+        print(f"    resturile pe carosabil: {pk['road']:.1f} s-piesa, din care {pk['land']:.1f} s in zona de "
+              f"aterizare (primii 45 m dupa muchie); aterizari la < 8 m de o piesa urnita {pk['land_near']}, "
+              f"ejectari langa una {pk['ej_near']}")
 
     print("\n--- felii (v_med medie, % lent mediu, pereti total)")
     for k in sorted(buckets):

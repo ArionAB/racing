@@ -811,6 +811,11 @@ SLAB_UNDER = 0.6     # cat intra acostamentul sub carosabil
 # Cat sta acostamentul sub PLANUL benzii, dincolo de muchie (profilul complet: EDGE_E / EDGE_DROP).
 SLAB_DROP = 0.22
 WALL_OFF, WALL_H, WALL_D = 1.0, 1.5, 0.4
+# Pasul 6: fatada de pe EXTERIORUL primului viraj de 90 (intrarea din furca, segmentele 0..2) poate
+# sta mai departe de carosabil (trotuar / gradina in fata casei): acolo intra plutonul din terasa
+# cu ~30 m/s, iar cine iese larg loveste fatada frontal (ejectari „perete" in acelasi punct, pe 2b).
+ENTRY_WALL_OFF = float(os.environ.get("SF_ENTRY_WALL_OFF", "4.0"))
+ENTRY_WALL_SEGS = 2
 
 
 def sc_dense(step=0.5):
@@ -1120,7 +1125,8 @@ for side in (1.0, -1.0):
         else:
             ok = not faces_branch(k, side)
         lx, lz = lat_dir(th, side)
-        wx_s, wz_s = xs + lx * (BW + WALL_OFF + 0.2), zs + lz * (BW + WALL_OFF + 0.2)
+        off_ = ENTRY_WALL_OFF if si <= ENTRY_WALL_SEGS else WALL_OFF
+        wx_s, wz_s = xs + lx * (BW + off_ + 0.2), zs + lz * (BW + off_ + 0.2)
         gx, _, gz = s2g(wx_s, wz_s, 0.0)
         if ok and near_main(gx, gz, HW + 3.0):
             ok = False
@@ -1804,6 +1810,15 @@ if B200:
     _ext = max(max(abs(p[0] - _cx), abs(p[1] - _cy)) for p in PTS) + HW
     WORLD_HALF = float(math.ceil((_ext + 25.0) / 5.0) * 5.0)
     POD_PROPS.append("world_half_extent_m = %.1f" % WORLD_HALF)
+    # GOLFUL (pasul 6, gasit de agentul foii de assets): fundul lagunei e `media soselei -
+    # lagoon_depth` (TrackSideSampler._carve_lagoon), cu implicitul 20. Pe bucla veche media era
+    # mica; pe B200 podul si strazile de la +20 o urca la ~23,4, deci fundul iesea la +3,4, PESTE apa
+    # (0): golful era uscat peste tot, apa ramanea doar in rapele-viaduct ale podului. Fundul se
+    # cere la LAGOON_BED, sub apa, ca la rapele podului (-8).
+    LAGOON_BED = -8.0
+    POD_PROPS.append("lagoon_depth = %.2f" % (mean_y - LAGOON_BED))
+    print(f"golful: fundul lagunei la {LAGOON_BED:+.0f} (lagoon_depth {mean_y - LAGOON_BED:.2f}; implicitul 20 "
+          f"l-ar fi pus la {mean_y - 20.0:+.1f}, peste apa)")
     meta += [
         "metadata/two_way_corridors = [%s]" % ", ".join(V2(a, b) for a, b in TWO_WAY),
         "metadata/sf_pod_axis = [%s, %s]" % (g3((X_D0, DECK_Y, GZ)), g3((X_D1, DECK_Y, GZ))),
@@ -1815,6 +1830,222 @@ if B200:
     print(f"zidul lumii: centroid ({_cx:.0f}, {_cy:.0f}), cea mai departata margine {_ext:.0f} m -> "
           f"world_half_extent_m {WORLD_HALF:.0f} (implicit 420); racordul rapei {TOTAL * 0.02:.0f} m")
 
+# =============================================================================================
+# PASUL 6 (brief §7 pasul 6, 15 nov 2026): serpentinele (caramida + hortensii pe blocul solid),
+# PONTONUL de pe cheiul de nord (scandura pe carosabil, cornisa spre golf, stalpi de amarare cu
+# goluri) si MASINILE PARCATE (BumpProp, pe blocurile lantului si pe strada tramvaiului 1).
+#   SF_PAS6=0       scena pasului 2b (A/B), fara nimic din pasul 6
+#   SF_PONTON=0     fara ponton;  SF_PARCATE=0  fara masini parcate;  SF_HORTENSII=0  fara flori
+#   SF_PARK_MASS    masa unei masini parcate (kg)
+#   SF_BOLLARD_STEP pasul stalpilor de amarare (m; 0 = fara stalpi)
+# =============================================================================================
+P6 = os.environ.get("SF_PAS6", "1") == "1"
+P6_PONTON = P6 and os.environ.get("SF_PONTON", "1") == "1"
+P6_PARKED = P6 and os.environ.get("SF_PARCATE", "1") == "1"
+P6_HORT = P6 and os.environ.get("SF_HORTENSII", "1") == "1"
+PARK_MASS = float(os.environ.get("SF_PARK_MASS", "70"))
+BOLLARD_STEP = float(os.environ.get("SF_BOLLARD_STEP", "6"))
+P6_EXT, P6_SUB, P6_NODES, P6_PROPS = [], [], [], []
+P6_BRANCH = []          # proprietati in plus pe nodul Serpentine
+
+
+def _seg_dist(px, py, a, b):
+    sx, sy = b[0] - a[0], b[1] - a[1]
+    L2 = sx * sx + sy * sy
+    t = max(0.0, min(1.0, ((px - a[0]) * sx + (py - a[1]) * sy) / max(L2, 1e-9)))
+    return math.hypot(a[0] + sx * t - px, a[1] + sy * t - py), t
+
+
+def road_at(px, py):
+    """(distanta la axa buclei, cota interpolata a buclei in punctul cel mai apropiat)."""
+    best = (1e18, 0.0)
+    for i in range(N):
+        a, b = PTS[i], PTS[(i + 1) % N]
+        d, t = _seg_dist(px, py, a, b)
+        if d < best[0]:
+            best = (d, ELEV[i] + (ELEV[(i + 1) % N] - ELEV[i]) * t)
+    return best
+
+
+def branch_dist(gx, gz):
+    return min(math.hypot(g[0] - gx, g[2] - gz) for g in DENSE_G)
+
+
+if P6:
+    # --- SERPENTINELE: caramida pe carosabilul ramurii (clasa `sf_brick`: dala roof_tiles + tenta
+    # caramizie, din tema `sanfrancisco`: branch_texture / branch_tint), marginea dreapta, nu
+    # zdrentuita ca drumul de tara. Coliziunea nu se schimba (aceeasi reteta `gravel`).
+    P6_BRANCH.append("edge_noise = 0.0")
+if P6_HORT:
+    # --- HORTENSIILE: doar VIZUAL, pe fata de sus a blocului solid din fiecare ac (sonda 1b:
+    # straturile moi se taiau in linie dreapta). Un MultiMesh (o singura trecere de desen), sfere
+    # low-poly (8 x 4 segmente) cu culoarea pe instanta: roz si albastru, un singur material.
+    hort = []
+    rng_h = 0
+    for outline_g, y0_, y1_ in prisms_bed:
+        xs_ = [p[0] for p in outline_g]
+        zs_ = [p[2] for p in outline_g]
+        gx0, gx1, gz0, gz1 = min(xs_), max(xs_), min(zs_), max(zs_)
+        k_ = 0
+        gx = gx0 + 0.7
+        while gx < gx1:
+            gz = gz0 + 0.7 + (0.6 if k_ % 2 else 0.0)
+            while gz < gz1:
+                # in contur, la >= 0,6 m de margine (cele 8 directii)
+                ok = _inside_convex(gx, gz, outline_g) and all(
+                    _inside_convex(gx + 0.6 * math.cos(a_), gz + 0.6 * math.sin(a_), outline_g)
+                    for a_ in [k__ * math.pi / 4 for k__ in range(8)])
+                if ok:
+                    rng_h = (rng_h * 1103515245 + 12345) & 0x7FFFFFFF
+                    r_ = 0.5 + 0.3 * ((rng_h >> 8) % 100) / 100.0
+                    pink = math.sin(gx * 0.35) + math.cos(gz * 0.41) > 0.0
+                    # tufa nu sta pe grila: +-0,35 m, si culoarea variaza putin (pata, nu pixel)
+                    jx = (((rng_h >> 3) % 71) / 71.0 - 0.5) * 0.7
+                    jz = (((rng_h >> 11) % 67) / 67.0 - 0.5) * 0.7
+                    k_c = 0.85 + 0.15 * ((rng_h >> 17) % 10) / 10.0
+                    col = (0.86 * k_c, 0.36 * k_c, 0.58 * k_c) if pink else (0.36 * k_c, 0.46 * k_c, 0.86 * k_c)
+                    hort.append((gx + jx, y1_ + r_ * 0.45, gz + jz, r_, col))
+                gz += 1.3
+            gx += 1.15
+            k_ += 1
+    buf = []
+    for gx, gy, gz, r_, col in hort:
+        buf += [r_, 0.0, 0.0, gx, 0.0, r_ * 0.75, 0.0, gy, 0.0, 0.0, r_, gz, col[0], col[1], col[2], 1.0]
+    P6_SUB.append('[sub_resource type="SphereMesh" id="Mesh_hortensie"]\nradius = 1.0\nheight = 2.0\n'
+                  'radial_segments = 8\nrings = 4\n')
+    P6_SUB.append('[sub_resource type="StandardMaterial3D" id="Mat_hortensie"]\nvertex_color_use_as_albedo = true\n'
+                  'roughness = 0.95\n')
+    P6_SUB.append('[sub_resource type="MultiMesh" id="MM_hortensii"]\ntransform_format = 1\nuse_colors = true\n'
+                  'instance_count = %d\nmesh = SubResource("Mesh_hortensie")\nbuffer = PackedFloat32Array(%s)\n'
+                  % (len(hort), ", ".join(("%.3f" % v).rstrip("0").rstrip(".") for v in buf)))
+    P6_NODES.append('[node name="Hortensii" type="MultiMeshInstance3D" parent="SerpentineGri"]\n'
+                    'multimesh = SubResource("MM_hortensii")\nmaterial_override = SubResource("Mat_hortensie")\n')
+    print(f"hortensii: {len(hort)} tufe pe {len(prisms_bed)} straturi solide (vizual, fara coliziune)")
+
+# --- PONTONUL (F): cheiul de nord, spre E, de la PONT_X0 pana la inceputul coltului de NE.
+PONT_X0 = float(os.environ.get("SF_PONT_X0", "40"))
+PONT_X1 = float(os.environ.get("SF_PONT_X1", str(MK["NE"][2])))
+PONT_INFO = None
+if P6_PONTON:
+    assert PONT_X0 > M_X + 12.0 and PONT_X1 <= MK["NE"][2] + 1e-6, (PONT_X0, PONT_X1, M_X)
+    s_p0 = s_M + (PONT_X0 - M_X)
+    s_p1 = s_M + (PONT_X1 - M_X)
+    fi0, fl0 = F_xy(PONT_X0, QUAY_Y)
+    fi1, fl1 = F_xy(PONT_X1, QUAY_Y)
+    # scandura: tot pontonul, plus 6 m in coltul de NE (pontonul se termina pe uscat, nu in apa)
+    fiw1 = F_s(s_p1 + 6.0)[0]
+    # CORNISA spre golf: rapa pe latura NORDULUI (stanga sensului spre E = -1 in `_side_at`),
+    # fundul la -8 (sub apa, ca rapele podului), lata cat sa se verse in golf.
+    ravine_idx = len(DECK_RAVINES) if B200 else 0
+    PONT_INFO = dict(fi0=fi0, fi1=fi1, fl0=fl0, fl1=fl1, fiw1=fiw1, ravine=ravine_idx)
+    # stalpii de amarare: pe muchia dinspre apa, cu goluri intre ei (golurile sunt singurele locuri
+    # unde cazi). Cutii statice gri, 0,5 x 0,8 x 0,5 m, centrul la 0,3 m dincolo de asfalt.
+    edge_y = QUAY_Y + HW_QUAY + 0.3
+    P6_NODES.append('[node name="Ponton" type="Node3D" parent="."]\n')
+    if BOLLARD_STEP > 0.0:
+        P6_SUB.append('[sub_resource type="BoxShape3D" id="Box_stalp"]\nsize = Vector3(0.5, 0.8, 0.5)\n')
+        P6_SUB.append('[sub_resource type="BoxMesh" id="Mesh_stalp"]\nsize = Vector3(0.5, 0.8, 0.5)\n'
+                      'material = SubResource("Mat_gri")\n')
+        # Contact MOALE (meta `soft_hit_crush`, ca atenuatorul podului): stalpul opreste si striveste,
+        # dar nu arunca soferul. Pasul 6, lotul A: 2 ejectari „perete” (dv 47-48) pe primul stalp, la
+        # x ~ 41, unde fluxurile de la reintalnire (ocol + scurtatura) intra pe ponton.
+        P6_NODES.append('[node name="Stalpi" type="StaticBody3D" parent="Ponton"]\n'
+                        'metadata/soft_hit_crush = 0.5\n')
+        nb = 0
+        x_ = PONT_X0 + BOLLARD_STEP * 0.5
+        while x_ < PONT_X1 - 2.0:
+            y_ = Y_LOW + 0.4
+            for nm_, typ_, res_ in (("S%d" % nb, "CollisionShape3D", 'shape = SubResource("Box_stalp")'),
+                                    ("S%dM" % nb, "MeshInstance3D", 'mesh = SubResource("Mesh_stalp")')):
+                P6_NODES.append('[node name="%s" type="%s" parent="Ponton/Stalpi"]\n'
+                                'transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, %.3f, %.3f, %.3f)\n%s\n'
+                                % (nm_, typ_, x_, y_, -edge_y, res_))
+            nb += 1
+            x_ += BOLLARD_STEP
+        print(f"ponton: {nb} stalpi de amarare la {BOLLARD_STEP:.1f} m (goluri de {BOLLARD_STEP - 0.5:.1f} m)")
+    P6_PROPS.append("metadata/sf_ponton = [%s, %s]" % (g3(godot((PONT_X0, QUAY_Y), Y_LOW)),
+                                                      g3(godot((PONT_X1, QUAY_Y), Y_LOW))))
+    P6_PROPS.append("custom_wood_deck_ranges = Array[Vector2]([Vector2(%.4f, %.4f)])" % (fi0, fiw1))
+    # AI onest: muchia fara parapet e prapastie si pentru el (fractii pe LUNGIME, stanga = -1,
+    # tine axa la 2,5 m de muchie) — vede ce vede jucatorul, nimic despre cine il impinge.
+    P6_PROPS.append("ai_drop_edges = Array[Vector4]([Vector4(%.4f, %.4f, -1, %.1f)])"
+                    % (fl0, fl1, float(os.environ.get("SF_DROP_MARGIN", "2.5"))))
+    print(f"ponton: x {PONT_X0:.0f}..{PONT_X1:.0f} ({PONT_X1 - PONT_X0:.0f} m) la +{Y_LOW:.0f}, idx {fi0:.4f}..{fi1:.4f}, "
+          f"lungime {fl0:.4f}..{fl1:.4f}; scandura pana la {fiw1:.4f}; rapa-cornisa #{ravine_idx}, fundul la -8")
+
+# --- MASINILE PARCATE (D, B): perpendicular pe trotuar, pe blocurile lantului (dupa zona de
+# aterizare: >= 45 m de muchie, pe toata latimea) si pe strada tramvaiului 1. Niciuna pe carosabil:
+# capatul dinspre drum la PARK_GAP m dincolo de asfalt.
+PARK_GAP = 0.4
+PARK_LEN, PARK_W = 3.7, 1.9
+PARK_LAT = HW + PARK_GAP + PARK_LEN / 2.0
+PARK_SLOTS = [46.6, 49.5, 56.0, 62.5]           # metri dupa muchie (zona de aterizare: < 45)
+PARK_SLOTS_LAST = [46.6, 49.5, 56.0]             # dupa muchia 4: terasa, pana inainte de furca
+PARK_COLORS = [11, 19, 8]                        # PAINTED_METAL, CORAL_SAND, CONCRETE (stinse)
+parked = []                                      # (x, y harta, latura, varianta, slot, eticheta)
+if P6_PARKED:
+    kk = 0
+    for b, L in enumerate(LIPS):
+        lx, ly = PTS[L]
+        for u in (PARK_SLOTS if b < len(LIPS) - 1 else PARK_SLOTS_LAST):
+            assert u - PARK_W / 2.0 >= 45.0
+            for side in (-1.0, 1.0):
+                parked.append((lx + side * PARK_LAT, ly + u, side, kk % 3, PARK_COLORS[(kk * 7 + b) % 3],
+                               "lant%d" % (b + 1)))
+                kk += 1
+    # strada tramvaiului 1 (spre S, x = X_T): doua grupuri pe fiecare parte, departe de intrarea
+    # tramvaiului (strada laterala din dreapta, la 20 m dupa primul viraj) si de colturi
+    for y0_ in (120.0, 30.0):
+        for j in range(3):
+            for side in (-1.0, 1.0):
+                parked.append((X_T + side * PARK_LAT, y0_ - j * 2.9 - (0.0 if side < 0 else 1.4), side,
+                               kk % 3, PARK_COLORS[(kk * 5) % 3], "urcare"))
+                kk += 1
+    P6_EXT.append('[ext_resource type="Script" path="res://scenes/props/sf_parked_car.gd" id="7_parked"]\n')
+    P6_NODES.append('[node name="MasiniParcate" type="Node3D" parent="."]\n')
+    worst = 1e9
+    for k, (mx, my, side, kind, slot, tag) in enumerate(parked):
+        d_, y_ = road_at(mx, my)
+        # niciuna pe carosabil: fiecare colt al caroseriei (lunga pe X: perpendiculara pe strazile
+        # N-S) la >= HW + 0,3 m de axa oricarui tronson al buclei si dincolo de scurtatura
+        for cx_ in (-PARK_LEN / 2.0, PARK_LEN / 2.0):
+            for cz_ in (-PARK_W / 2.0, PARK_W / 2.0):
+                px_, py_ = mx + cx_, my + cz_
+                dd = road_at(px_, py_)[0]
+                worst = min(worst, dd)
+                if dd < HW + 0.3 or branch_dist(px_, -py_) < SERP_BW + 0.3:
+                    raise SystemExit(f"masina parcata {k} ({tag}) pe carosabil: colt la {dd:.2f} m de axa")
+        # botul spre case sau spre strada, alternativ: yaw +-90 de grade (Basis pe RANDURI)
+        s_ = 1.0 if (k // 2) % 2 == 0 else -1.0
+        P6_NODES.append('[node name="P%02d" type="Node3D" parent="MasiniParcate"]\n'
+                        'transform = Transform3D(0, 0, %.0f, 0, 1, 0, %.0f, 0, 0, %.3f, %.3f, %.3f)\n'
+                        'script = ExtResource("7_parked")\nbody_kind = %d\ncolor_slot = %d\nmass_kg = %.1f\n'
+                        'metadata/sf_tag = "%s"\nmetadata/sf_axis_x = %.2f\n'
+                        % (k, s_, -s_, mx, y_ + 0.05, -my, kind, slot, PARK_MASS, tag, mx - side * PARK_LAT))
+    print(f"masini parcate: {len(parked)} ({sum(1 for p in parked if p[5].startswith('lant'))} pe lant, "
+          f"{sum(1 for p in parked if p[5] == 'urcare')} pe strada tramvaiului), masa {PARK_MASS:.0f} kg; "
+          f"cel mai apropiat colt la {worst:.2f} m de axa (carosabilul: {HW} m)")
+
+if PONT_INFO is not None:
+    # rapa pontonului se adauga la rapele podului (aceeasi lista, indicele `ravine`). Adancimea 200
+    # (cu podeaua la -8): rapa se stinge pe RAVINE_FADE_FRAC (0,02 din tur, ~51 m) de la fiecare
+    # capat, iar tinta e drum - adancime x stingere; cu 30 m, pe pontonul de 80 m cornisa ajungea
+    # sub apa doar pe mijloc. Cu 200, la 3 m de capete e deja pe podea (ProbeSfPonton). Fractiile
+    # rapei sunt pe LUNGIME (`TrackSideSampler`: _dists / _total_len), nu pe indice ca muchiile.
+    _ri = PONT_INFO["ravine"]
+    _new = []
+    _found = False
+    for line_ in POD_PROPS:
+        if line_.startswith("custom_ravines = "):
+            line_ = line_[:-2] + ", Vector4(%.4f, %.4f, 200.0, -1)])" % (PONT_INFO["fl0"], PONT_INFO["fl1"])
+            _found = True
+        elif line_.startswith("custom_ravine_floors = "):
+            line_ = line_[:-2] + ", Vector2(%d, -8)])" % _ri
+        _new.append(line_)
+    assert _found
+    POD_PROPS = _new + ["custom_cornice_ravines = Array[int]([%d])" % _ri,
+                        "custom_ravine_widths = Array[Vector2]([Vector2(%d, 60)])" % _ri]
+
 tscn = f"""[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
@@ -1822,7 +2053,7 @@ tscn = f"""[gd_scene format=3]
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="3_branch"]
 [ext_resource type="ArrayMesh" path="res://{OBJ_REL}" id="4_gri"]
 [ext_resource type="Script" path="res://scenes/hazards/bus_hazard.gd" id="5_bus"]
-{POD_EXT}
+{POD_EXT}{"".join(P6_EXT)}
 [sub_resource type="Curve3D" id="Curve3D_sf"]
 closed = true
 _data = {{
@@ -1852,7 +2083,7 @@ _data = {{
 }}
 point_count = {len(TRAM2_G)}
 
-{chr(10).join(sub + POD_SUB)}
+{chr(10).join(sub + POD_SUB + P6_SUB)}
 [node name="Track25" type="Node3D"]
 script = ExtResource("1_track")
 custom_name = "San Francisco"
@@ -1867,7 +2098,7 @@ custom_width_segments = Array[Vector3]([{", ".join(V3(*w_) for w_ in width_segme
 custom_sun_rotation_deg = Vector3({SUN_ELEV}, {SUN_AZ}, 0)
 branch_smooth_level = true
 terrain_pad_m = 120.0
-{chr(10).join(POD_PROPS + meta)}
+{chr(10).join(POD_PROPS + P6_PROPS + meta)}
 
 [node name="Path" type="Path3D" parent="."]
 curve = SubResource("Curve3D_sf")
@@ -1882,7 +2113,7 @@ entry_at = {entry_at:.5f}
 exit_at = {exit_at:.5f}
 label = "Serpentine"
 surface = 3
-
+{"".join(l_ + chr(10) for l_ in P6_BRANCH)}
 [node name="SerpentineGri" type="Node3D" parent="."]
 
 [node name="Mesh" type="MeshInstance3D" parent="SerpentineGri"]
@@ -1892,7 +2123,8 @@ material_override = SubResource("Mat_gri")
 {chr(10).join(nodes)}
 [node name="Tramvaie" type="Node3D" parent="."]
 {tram_nodes}
-{chr(10).join(POD_NODES)}"""
+{chr(10).join(POD_NODES)}
+{chr(10).join(P6_NODES)}"""
 with open(os.devnull if DRY else OUT_TSCN, "w", encoding="utf-8", newline="\n") as f:
     f.write(tscn)
 print(f"scris {os.path.relpath(OUT_TSCN, ROOT)}; sea_level_offset {SEA_OFFSET}")

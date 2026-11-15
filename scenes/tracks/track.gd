@@ -4582,6 +4582,15 @@ static func themes() -> Dictionary:
 		"scarp_slope_deg": 40.0,
 		"scarp_fade_deg": 10.0,
 		"dirt_road_tint": Color(0.70, 0.62, 0.50),
+		# STRADA CU SERPENTINE (E', pasul 6): caramida pe banda ramurii — dala clasei `sf_brick`
+		# (roof_tiles), tentata caramiziu (A54E3C pe ecran; tenta se ia ~15% mai deschisa,
+		# vezi TrackBranch.tint). Reteta ramane `gravel` (coliziunea si terenul neschimbate).
+		"branch_texture": "res://assets/textures/classes/roof_tiles.png",
+		"branch_tint": Color(0.66, 0.38, 0.32),
+		# PONTONUL (F): scandura gri-cafenie de debarcader batut de vant si de sare (clasa `wood`,
+		# media 0,49/0,39/0,28, adusa spre gri). Intervalele le declara pista
+		# (`custom_wood_deck_ranges`).
+		"wood_deck_color": Color(0.86, 0.9, 1.02),
 		# Solul e IARBA uscata (perechea de texturi de iarba a terenului), nu nisipul cu dune
 		# implicit: prima captura a strazii sintetice citea "desert".
 		"savanna_grass_w": 1.0,
@@ -18729,6 +18738,21 @@ const BRANCH_LURE_RANGE: float = 70.0
 ## `lure_before_entry_only`: banda pleaca tangent si sta pe asfaltul buclei
 ## ~25 m, deci o masina abia trecuta de indexul furcii e inca pe ea.
 const BRANCH_LURE_GRACE_M: float = 15.0
+
+## E masina in raza de momeala a vreunei furci? Acelasi cerc ca la
+## `branch_lure` (fara ocolurile de pedeapsa, care nu se momesc), dar fara
+## scanarea benzii: e intrebat in fiecare cadru de zarul de scurtatura
+## (`AIController._shortcut_dice_tick`), care are nevoie doar de „se apropie o
+## furca", nu de punctul-tinta.
+func fork_in_range(pos: Vector3) -> bool:
+	for bi in range(1, routes.size()):
+		var b := routes[bi]
+		if b.detour or b.baked.is_empty():
+			continue
+		if pos.distance_to(b.baked[0]) <= BRANCH_LURE_RANGE:
+			return true
+	return false
+
 
 ## Punct-tinta care duce spre intrarea unei scurtaturi.
 ##

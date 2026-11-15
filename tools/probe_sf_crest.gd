@@ -39,13 +39,15 @@ class StreetController extends CarController:
 	var lat: float = 0.0
 	var turbo_from_x: float = INF
 	var fired: bool = false
+	var frame: Node = null
 	func update(_d: float) -> void:
-		if not fired and car.global_position.x >= turbo_from_x:
+		if not fired and frame._loc(car.global_position).x >= turbo_from_x:
 			fired = true
 			car.turbo_charge = 1.0
 	func get_steer() -> float:
 		var p := car.global_position
-		var target := Vector3(p.x + 16.0, p.y, lat)
+		var pl: Vector3 = frame._loc(p)
+		var target: Vector3 = frame._world(pl.x + 16.0, p.y, lat)
 		var f := -car.global_transform.basis.z
 		f.y = 0.0
 		var t := target - p
@@ -61,6 +63,13 @@ class StreetController extends CarController:
 
 
 var _track: Track
+## Cadrul strazii: pe sondele sintetice strada e pe +X la z = 0 (cadrul identitate); pe o pista
+## reala (Track25, `metadata/sf_chain_azimuth_deg`) originea e prima muchie, `_fwd` sensul de
+## coborare, `_right` dreapta lui. `_loc(p)` = (in lungul strazii, cota, lateral).
+var _origin := Vector3.ZERO
+var _fwd := Vector3(1, 0, 0)
+var _right := Vector3(0, 0, 1)
+var _real_track: bool = false
 var _lips: Array[Vector3] = []
 var _block_len: float = 60.0
 var _xs: PackedFloat32Array = PackedFloat32Array()
@@ -73,6 +82,8 @@ var _detail: bool = false
 var _runup: float = 70.0
 ## rezultate: cheie "mod|muchie" -> Array de Dictionary
 var _rows: Dictionary = {}
+## Masinile parcate trezite in trecerea curenta (golit la fiecare trecere).
+var _parked_hit: Dictionary = {}
 var _by_car: Dictionary = {}
 
 
@@ -110,13 +121,21 @@ func _ready() -> void:
 		print("probe_sf_crest: scena n-are metadata/sf_lips (nu e o SondaSf)")
 		get_tree().quit(2)
 		return
+	if _track.has_meta("sf_chain_azimuth_deg"):
+		# pista reala: azimutul busolei (0 = N = -Z, 90 = E = +X)
+		_real_track = true
+		var az := deg_to_rad(float(_track.get_meta("sf_chain_azimuth_deg")))
+		_fwd = Vector3(sin(az), 0.0, -cos(az))
+		_right = _fwd.cross(Vector3.UP).normalized()
+		_origin = (_track.get_meta("sf_lips") as Array)[0]
+		_origin.y = 0.0
 	for l: Vector3 in _track.get_meta("sf_lips"):
-		_lips.append(l)
+		_lips.append(_loc(l))
 	_block_len = float(_track.get_meta("sf_block_len"))
 	_build_profile()
 	print("")
 	print("=== LANT DE SARITURI — %s | %d muchii, bloc %.0f m, plat %.0f m, profil %s | pilot: %s ===" % [
-		scene_path.get_file(), _lips.size(), _block_len, float(_track.get_meta("sf_flat")),
+		scene_path.get_file(), _lips.size(), _block_len, float(_track.get_meta("sf_flat", 24.0)),
 		str(_track.get_meta("sf_profile")), "AI" if _ai else "proba (gaz la fund, pe axa)"])
 	_print_baked_grades()
 	if _detail:
@@ -134,11 +153,25 @@ func _ready() -> void:
 	get_tree().quit(0 if flights > 0 else 1)
 
 
-## Profilul REAL (copt) al strazii: punctele cu z ~ 0, sortate dupa x.
+## Coordonatele in cadrul strazii: x = in lungul ei, y = cota, z = lateral (dreapta +).
+func _loc(p: Vector3) -> Vector3:
+	var d := p - _origin
+	return Vector3(d.dot(_fwd), p.y, d.dot(_right))
+
+
+func _world(u: float, y: float, lat: float) -> Vector3:
+	return _origin + _fwd * u + _right * lat + Vector3.UP * y
+
+
+## Profilul REAL (copt) al strazii: punctele cu z ~ 0, sortate dupa x. Pe pista reala, doar
+## portiunea lantului (elanul + blocurile + terasa): bucla mai trece prin axa in alte locuri.
 func _build_profile() -> void:
 	var pairs: Array[Vector2] = []
-	for p in _track.baked:
-		if absf(p.z) < 0.5:
+	var u_lo := -_runup - 40.0
+	var u_hi := _lips[_lips.size() - 1].x + _block_len + 80.0
+	for pw in _track.baked:
+		var p := _loc(pw)
+		if absf(p.z) < 0.5 and (not _real_track or (p.x > u_lo and p.x < u_hi)):
 			pairs.append(Vector2(p.x, p.y))
 	pairs.sort_custom(func(a: Vector2, b: Vector2) -> bool: return a.x < b.x)
 	for q in pairs:
@@ -181,7 +214,7 @@ func _start_index(x_target: float) -> int:
 	var best := 0
 	var bd := 1e18
 	for i in _track.baked.size():
-		var p := _track.baked[i]
+		var p := _loc(_track.baked[i])
 		if absf(p.z) > 0.5:
 			continue
 		var d := absf(p.x - x_target)
@@ -206,15 +239,15 @@ func _run(ci: int, mode: String, lat: float) -> void:
 	car.apply_data(data)
 	car.track = _track
 	var si := _start_index(_lips[0].x - _runup)
-	var start := _track.baked[si] + Vector3(0.0, 0.6, lat)
-	car.global_transform = Transform3D(Basis.looking_at(Vector3(1, 0, 0), Vector3.UP), start)
+	var start := _track.baked[si] + Vector3(0.0, 0.6, 0.0) + _right * lat
+	car.global_transform = Transform3D(Basis.looking_at(_fwd, Vector3.UP), start)
 	var v0 := car.max_speed
 	var turbo_k := -1
 	if mode.begins_with("t"):
 		turbo_k = int(mode.trim_prefix("t")) - 1
 	elif mode != "max":
 		v0 = float(mode)
-	car.velocity = Vector3(v0, 0.0, 0.0)
+	car.velocity = _fwd * v0
 	car.road_index = si
 	car.last_safe_index = si
 	if _ai:
@@ -227,6 +260,7 @@ func _run(ci: int, mode: String, lat: float) -> void:
 	else:
 		var ctl := StreetController.new()
 		ctl.lat = lat
+		ctl.frame = self
 		if turbo_k >= 0 and turbo_k < _lips.size():
 			ctl.turbo_from_x = _lips[turbo_k].x - 40.0
 		car.set_controller(ctl)
@@ -238,6 +272,7 @@ func _run(ci: int, mode: String, lat: float) -> void:
 	car.wall_hit.connect(func(_c: Car, imp: float) -> void: ev["wall"] = maxf(float(ev["wall"]), imp))
 	car.landed.connect(func(_c: Car, fs: float) -> void: ev["fall"] = fs)
 
+	_parked_hit.clear()
 	var crests: Array[Dictionary] = []
 	for i in _lips.size():
 		crests.append({"v_lip": -1.0, "air": 0.0, "dist": 0.0, "h": 0.0, "vn": 0.0, "grade": 0.0,
@@ -255,7 +290,7 @@ func _run(ci: int, mode: String, lat: float) -> void:
 	while t < 40.0:
 		await get_tree().physics_frame
 		t += 1.0 / 60.0
-		var p := car.global_position
+		var p := _loc(car.global_position)
 		var k := _crest_of(p.x)
 		if k >= 0 and float(crests[k]["v_lip"]) < 0.0 and p.x >= _lips[k].x:
 			crests[k]["v_lip"] = Vector2(car.velocity.x, car.velocity.z).length()
@@ -277,7 +312,7 @@ func _run(ci: int, mode: String, lat: float) -> void:
 					c["hops"] = int(c["hops"]) + 1
 				if air_t > float(c["air"]):
 					var g := _road_grade(p.x)
-					var n := Vector3(-g, 1.0, 0.0).normalized()
+					var n := (_fwd * -g + Vector3.UP).normalized()
 					var fwd := -car.global_transform.basis.z
 					c["air"] = air_t
 					c["dist"] = Vector2(p.x - lift.x, p.z - lift.z).length()
@@ -292,6 +327,12 @@ func _run(ci: int, mode: String, lat: float) -> void:
 				inc.append("RASTURNAT")
 			if absf(p.z) > half_w + 0.5 and not inc.has("AFARA"):
 				inc.append("AFARA")
+			# masinile parcate (Track25, pasul 6): o piesa trezita langa masina = lovita
+			for b in get_tree().get_nodes_in_group(&"sf_parked_bodies"):
+				var rb := b as RigidBody3D
+				if rb != null and not rb.sleeping and not _parked_hit.has(rb) 						and rb.global_position.distance_to(car.global_position) < 6.0:
+					_parked_hit[rb] = true
+					inc.append("PARCATA")
 			if bool(ev["eject"]):
 				inc.append("EJECTAT(%.0f)" % float(ev["fall"]))
 				stop = "ejectat"
@@ -313,7 +354,7 @@ func _run(ci: int, mode: String, lat: float) -> void:
 		prev_vel = car.velocity
 		if stop != "" or p.x > end_x:
 			break
-	if stop == "" and car.global_position.x <= end_x:
+	if stop == "" and _loc(car.global_position).x <= end_x:
 		stop = "timp"
 	var cname: String = data.display_name
 	for i in crests.size():
@@ -336,7 +377,7 @@ func _run(ci: int, mode: String, lat: float) -> void:
 				float(c["h"]), float(c["vn"]), float(c["grade"]) * 100.0, float(c["pitch"]),
 				int(c["hops"]), " ".join(c["inc"] as PackedStringArray)])
 	if _detail and stop != "":
-		print("      ^ oprit: %s la x=%.0f" % [stop, car.global_position.x])
+		print("      ^ oprit: %s la x=%.0f" % [stop, _loc(car.global_position).x])
 	car.queue_free()
 	await get_tree().process_frame
 	await get_tree().process_frame

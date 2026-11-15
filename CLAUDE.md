@@ -76,6 +76,20 @@ pur plus haosul fizic, nu proiectilele.
   de dinainte, bit cu bit — pe el stau liniile de bază). Gărzi:
   `ProbeAiSkillWiring` (în verify) și `tools/ai_skill_gap.sh` (ecartul pe tur,
   unealtă lungă).
+  - **Zarul de nivel** (nov 2026, cererea dezvoltatorului: „mereu un pariu, ca
+    un zar cu 6 fețe"). Două câmpuri în `AiSkill`, în fețe din 6:
+    `hazard_dice` — câte fețe îl fac să CITEASCĂ un hazard mobil (Bronz 3,
+    Argint 4, Aur 5) — și `shortcut_dice` — câte îl trimit pe scurtătură
+    (Bronz 1, Argint 2, Aur 3). Zarul de hazard se dă **o dată per trecere,
+    per hazard**; pe o față pierzătoare pilotul trece pe nevăzute, pe linia
+    lui, și poate scăpa sau nu (onest: zarul îi ia informație, nu-i dă). Zarul
+    de scurtătură se dă **la fiecare apropiere de furcă**, nu o dată pe cursă.
+    Nivelurile stau între 1 și 5 fețe — niciodată sigur, niciodată imposibil;
+    0 = fără zar = profilul implicit. **Zidurile nu sunt pariuri** (ușa de
+    piatră, decorul cu o singură fantă, tramvaiul din sensul cursei, banda
+    închisă a scurtăturii): lista e la `AIController._reads_hazard`. După o
+    repunere pilotul citește hazardul care tocmai l-a prins (fără bucle de
+    repuneri). Garda: `ProbeAiDice` (în verify, 4 sabotaje).
 - **World Cup** ✔ (oct 2026): 3 cupe × 4 curse (`scenes/world_cup/data/`),
   puncte cumulate 6-5-4-3-2-1 (`GameState.CHAMP_POINTS`). La fiecare cupă
   nouă adversarii sunt trași aleatoriu din garaj, **niciodată aceeași mașină

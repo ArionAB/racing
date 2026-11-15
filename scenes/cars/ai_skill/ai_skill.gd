@@ -67,6 +67,28 @@ extends Resource
 ## (intra pe exterior). Onest: e condus prost, fizica e aceeasi. 0 = nu greseste.
 @export_range(0.0, 0.6, 0.01) var mistake_chance: float = 0.0
 
+@export_group("Zarul de nivel (6 fete)")
+## ZARUL DE HAZARD: cate fete din 6 il fac sa CITEASCA un hazard mobil. La
+## fiecare trecere pe langa un hazard pilotul da cu zarul o data: pe o fata
+## castigatoare il citeste si il ocoleste ca pana acum (schimba banda, ridica
+## piciorul, cedeaza); pe celelalte trece PE NEVAZUTE, pe linia lui, si poate
+## scapa sau poate fi lovit — exact pariul jucatorului care nu se uita. Onest:
+## zarul nu atinge masina si nu ii da nicio informatie, i-o ia.
+##
+## 0 = fara zar: AI-ul de dinainte de niveluri (citeste tot, mereu). Nivelurile
+## de joc stau intre 1 si 5, niciodata 6: nimeni nu e sigur ca scapa si nimeni
+## nu e sigur ca o ia in plin — mereu un pariu. Ce intra sub zar si ce nu
+## (zidurile nu sunt pariuri): vezi `AIController._reads_hazard`.
+@export_range(0, 5, 1) var hazard_dice: int = 0
+## ZARUL DE SCURTATURA: cate fete din 6 il trimit pe scurtatura. Se da la
+## FIECARE apropiere de o furca (tur de tur), nu o data pe cursa: acelasi pilot
+## o ia la un tur si o ocoleste la urmatorul.
+##
+## 0 = fara zar: `shortcut_chance`, trasa o data pe cursa (AI-ul de dinainte de
+## niveluri). Pista care isi declara propria sansa (`Track.ai_shortcut_chance`)
+## o pastreaza si aici — tot per apropiere, dar cu sansa ei.
+@export_range(0, 5, 1) var shortcut_dice: int = 0
+
 
 ## Profilul AI-ului de dinainte de niveluri (valorile implicite de mai sus).
 ## Comun tuturor pilotilor care n-au primit alt nivel: resursa nu se modifica

@@ -28,8 +28,32 @@ extends Node
 ##     Steaguri: `--median-blind` scoate hazardul din grupul AI (SABOTAJ: `ai_reads_corridor` stins),
 ##     `--median-static` il face sa citeasca bariera de la t = 0, `--median-fix` il ingheata la axa
 ##     fara camion (A/B-ul cu despartitorul clasic). Raportul: tools/sf_route_report.py.
+##   - PASUL 6 (brief §7 pasul 6): PONTONUL (`metadata/sf_ponton`): trecerile pe el si caderile in
+##     golf (repunerile cu masina sub cota cheiului, langa ponton); MASINILE PARCATE (grupul
+##     `sf_parked_bodies`): fiecare piesa urnita de la locul ei (cine era langa ea, cu ce viteza),
+##     cat sta pe carosabil, cat din timpul asta in zona de aterizare a unei muchii (primii 45 m),
+##     si zborurile / ejectarile care aterizeaza la < 8 m de o piesa urnita (resturile strica
+##     aterizarea urmatorilor?).
 
 const MIN_AIR_S: float = 0.25
+# --- pasul 6: pontonul si masinile parcate ---
+const PONT_LAT_M: float = 14.0
+const PARK_MOVED_M: float = 0.4
+const PARK_NEAR_M: float = 8.0
+var _pont := PackedVector3Array()
+var _pont_in: Array[bool] = []
+var _pont_pass: int = 0
+var _pont_falls: Array = []      # [t, masina, poz]
+var _parked: Array[RigidBody3D] = []
+var _park_home: Array[Vector3] = []
+var _park_tag: Array[String] = []
+var _park_axis: Array[float] = []
+var _park_moved: Array[bool] = []
+var _park_hits: Array = []       # [t, tag, masina (-1 = niciuna aproape), v masinii, eticheta]
+var _park_road_s: float = 0.0    # secunde-piesa pe carosabil (urnite)
+var _park_land_s: float = 0.0    # din care in zona de aterizare a unei muchii
+var _park_land_near: int = 0     # zboruri cu aterizarea la < 8 m de o piesa urnita
+var _park_eject_near: int = 0
 const LIP_BEFORE: float = 6.0
 const LIP_AFTER: float = 20.0
 const CHAIN_HALF: float = 12.0
@@ -49,6 +73,10 @@ var _air_f: Array[float] = []
 var _gate_t: Array[float] = []
 var _gate_branch: Array[bool] = []
 var _gate_resp: Array[bool] = []
+## Pasul 6: in trecerea furca -> gura, masina a atins blocul solid al unui ac (`SerpStraturi`) /
+## o fatada (`SerpFatade`)? Contractul „o bordura atinsa pierde ~1 s fata de ocol”.
+var _gate_bed: Array[bool] = []
+var _gate_wall: Array[bool] = []
 var _lip_v: Array = []           # per muchie: vitezele la trecere
 var _flights: Array = []         # [masina, muchie (-1 = in afara lantului), airtime, v0, dist, frac, route]
 var _passes: Array = []          # [masina, ruta (0/1), secunde, repusa]
@@ -107,6 +135,8 @@ func setup(race: Node) -> void:
 		_gate_out2 = track.get_meta("sf_gate_out2")
 	_setup_trams(track)
 	_setup_pod(track)
+	if track.has_meta("sf_ponton"):
+		_pont = PackedVector3Array(track.get_meta("sf_ponton"))
 	var cars: Array[Car] = race.cars
 	for i in cars.size():
 		_pod_open.append(-1)
@@ -127,6 +157,7 @@ func setup(race: Node) -> void:
 		_enc_open.append(eo)
 		_tc_last.append(tl)
 		_prev.append(cars[i].global_position)
+		_pont_in.append(false)
 		_air_t.append(0.0)
 		_air_p.append(Vector3.ZERO)
 		_air_v.append(0.0)
@@ -134,6 +165,8 @@ func setup(race: Node) -> void:
 		_gate_t.append(-1.0)
 		_gate_branch.append(false)
 		_gate_resp.append(false)
+		_gate_bed.append(false)
+		_gate_wall.append(false)
 		cars[i].respawned.connect(_on_respawn.bind(i))
 		cars[i].ejected.connect(_on_eject.bind(i))
 
@@ -316,6 +349,8 @@ func _tick_pod_pairs(cars: Array[Car]) -> void:
 func _zone(p: Vector3) -> String:
 	if _podm != null and _in_corridor(_pod_local(p)):
 		return "pod"
+	if _near_pontoon(p):
+		return "ponton"
 	if not _lips.is_empty() and absf(p.x - _lips[0].x) < CHAIN_HALF \
 			and p.z <= _lips[0].z + 20.0 and p.z >= _lips[_lips.size() - 1].z - 60.0:
 		return "lant"
@@ -323,6 +358,96 @@ func _zone(p: Vector3) -> String:
 			and p.x > -14.0 and p.x < 50.0:
 		return "serpentine"
 	return "rest"
+
+
+## Pe carosabilul pontonului (intre capete, pe latimea cheiului).
+func _on_pontoon(p: Vector3) -> bool:
+	if _pont.size() != 2:
+		return false
+	return p.x >= _pont[0].x and p.x <= _pont[1].x and absf(p.z - _pont[0].z) < 6.5
+
+
+## Pontonul, apa de langa el si capetele lui (zona de raport si de cadere).
+func _near_pontoon(p: Vector3) -> bool:
+	if _pont.size() != 2:
+		return false
+	return p.x >= _pont[0].x - 12.0 and p.x <= _pont[1].x + 16.0 \
+		and p.z <= _pont[0].z + 8.0 and p.z >= _pont[0].z - PONT_LAT_M - 30.0
+
+
+func _near_moved_parked(p: Vector3) -> bool:
+	for j in _parked.size():
+		if _park_moved[j] and is_instance_valid(_parked[j]) \
+				and _parked[j].global_position.distance_to(p) < PARK_NEAR_M \
+				and _parked[j].global_position.distance_to(_park_home[j]) > PARK_MOVED_M:
+			return true
+	return false
+
+
+## Masinile parcate: se strang la primul tick (devin corpuri dupa primul pas de fizica).
+func _tick_parked(cars: Array[Car], delta: float) -> void:
+	if _parked.is_empty():
+		for b in get_tree().get_nodes_in_group(&"sf_parked_bodies"):
+			var rb := b as RigidBody3D
+			_parked.append(rb)
+			_park_home.append(rb.global_position)
+			_park_tag.append(String(rb.get_parent().get_meta("sf_tag", "?")))
+			_park_axis.append(float(rb.get_parent().get_meta("sf_axis_x", 0.0)))
+			_park_moved.append(false)
+		if not _parked.is_empty():
+			print("=== SF masini parcate: %d piese" % _parked.size())
+		else:
+			_parked.append(null)       # niciuna: nu mai cauta
+		return
+	for j in _parked.size():
+		var rb := _parked[j]
+		if rb == null or not is_instance_valid(rb):
+			continue
+		var p := rb.global_position
+		var off := p.distance_to(_park_home[j])
+		if off < PARK_MOVED_M:
+			_park_moved[j] = false
+			continue
+		if not _park_moved[j]:
+			_park_moved[j] = true
+			var who := -1
+			var bd := 6.0
+			for i in cars.size():
+				var d := cars[i].global_position.distance_to(p)
+				if d < bd:
+					bd = d
+					who = i
+			_park_hits.append([_t, _park_tag[j], who,
+				cars[who].horizontal_speed() if who >= 0 else 0.0, j])
+		# pe carosabil: centrul piesei la < semilatimea strazii + 1 m de axa ei (strazile cu masini
+		# parcate merg N-S; axa e `metadata/sf_axis_x` a piesei, scrisa de generator)
+		var axis_x := _park_axis[j]
+		if absf(p.x - axis_x) < 8.0:
+			_park_road_s += delta
+			for L in _lips:
+				if p.z <= L.z and p.z >= L.z - 45.0:
+					_park_land_s += delta
+					break
+
+
+func _report_p6() -> void:
+	var cars: Array[Car] = _race.cars
+	if _pont.size() == 2:
+		print("=== SF ponton: treceri=%d caderi=%d" % [_pont_pass, _pont_falls.size()])
+		for f in _pont_falls:
+			var p: Vector3 = f[2]
+			print("    [sf cadere] t=%5.1fs %-18s poz=(%.0f,%.1f,%.0f)" % [float(f[0]),
+				cars[int(f[1])].pilot_name, p.x, p.y, p.z])
+	var n := 0
+	for rb in _parked:
+		if rb != null:
+			n += 1
+	if n > 0:
+		print("=== SF parcate: piese=%d urnite=%d pe_carosabil=%.1fs in_zona_de_aterizare=%.1fs aterizari_langa_resturi=%d ejectari_langa_resturi=%d" % [
+			n, _park_hits.size(), _park_road_s, _park_land_s, _park_land_near, _park_eject_near])
+		for h in _park_hits:
+			print("    [sf parcata] t=%5.1fs %s %-18s v=%.1f" % [float(h[0]), String(h[1]),
+				cars[int(h[2])].car_name if int(h[2]) >= 0 else "-", float(h[3])])
 
 
 func _on_respawn(c: Car, i: int) -> void:
@@ -338,13 +463,19 @@ func _on_respawn(c: Car, i: int) -> void:
 	if _gate2_t[i] >= 0.0:
 		_gate2_resp[i] = true
 	_resp.append([_t, i, _zone(_prev[i]), _prev[i]])
+	if _near_pontoon(_prev[i]) and _prev[i].y < _pont[0].y - 1.0:
+		_pont_falls.append([_t, i, _prev[i]])
 
 
 func _on_eject(c: Car, _rag: Node3D, i: int) -> void:
 	if _podm != null and i < _pod_open.size() and _pod_open[i] >= 0:
 		(_pod_passes[_pod_open[i]] as Dictionary).eject = true
+	var hit: Node = c.get("_last_static")
 	_ejects.append([_t, i, _zone(c.global_position), String(c.last_eject_cause),
-		float(c.last_eject_value), c.global_position])
+		float(c.last_eject_value), c.global_position,
+		(String(hit.name) if hit != null else "-")])
+	if _near_moved_parked(c.global_position):
+		_park_eject_near += 1
 
 
 func _lip_of(p: Vector3) -> int:
@@ -365,6 +496,7 @@ func _physics_process(delta: float) -> void:
 	var cars: Array[Car] = _race.cars
 	if _podm != null:
 		_tick_pod_pairs(cars)
+	_tick_parked(cars, delta)
 	for i in cars.size():
 		var c := cars[i]
 		var p := c.global_position
@@ -376,6 +508,11 @@ func _physics_process(delta: float) -> void:
 		if q.distance_to(p) > 8.0:
 			continue          # repunere: nu e trecere
 		_tick_tram_gates(i, c, p, q)
+		if _pont.size() == 2:
+			var inp := _on_pontoon(p)
+			if inp and not _pont_in[i]:
+				_pont_pass += 1
+			_pont_in[i] = inp
 		if c.route == 0:
 			for k in _lips.size():
 				var L := _lips[k]
@@ -383,6 +520,8 @@ func _physics_process(delta: float) -> void:
 					(_lip_v[k] as Array).append(c.horizontal_speed())
 		if c.is_on_floor():
 			if _air_t[i] >= MIN_AIR_S:
+				if _near_moved_parked(p):
+					_park_land_near += 1
 				var k := _lip_of(_air_p[i])
 				var dist := (_lips[k].z - p.z) if k >= 0 else -1.0
 				_flights.append([i, k, _air_t[i], _air_v[i], dist, _air_f[i], c.route])
@@ -398,14 +537,24 @@ func _physics_process(delta: float) -> void:
 				_gate_t[i] = _t
 				_gate_branch[i] = false
 				_gate_resp[i] = false
+				_gate_bed[i] = false
+				_gate_wall[i] = false
 			if _gate_t[i] >= 0.0:
 				if c.route == 1:
 					_gate_branch[i] = true
+				var ls: Node = c.get("_last_static")
+				if ls != null:
+					if ls.name == &"SerpStraturi":
+						_gate_bed[i] = true
+					elif ls.name == &"SerpFatade":
+						_gate_wall[i] = true
 				if absf(p.z - _gate_out.z) < GATE_HALF and q.x < _gate_out.x and p.x >= _gate_out.x:
-					_passes.append([i, 1 if _gate_branch[i] else 0, _t - _gate_t[i], _gate_resp[i]])
+					_passes.append([i, 1 if _gate_branch[i] else 0, _t - _gate_t[i], _gate_resp[i],
+						_gate_bed[i], _gate_wall[i]])
 					_gate_t[i] = -1.0
 				elif _t - _gate_t[i] > PASS_TIMEOUT:
-					_passes.append([i, 1 if _gate_branch[i] else 0, -1.0, _gate_resp[i]])
+					_passes.append([i, 1 if _gate_branch[i] else 0, -1.0, _gate_resp[i],
+						_gate_bed[i], _gate_wall[i]])
 					_gate_t[i] = -1.0
 
 
@@ -559,9 +708,9 @@ func report() -> void:
 	print("=== SF zboruri in afara lantului: %d" % other)
 	for e in _ejects:
 		var p: Vector3 = e[5]
-		print("    [sf ejectare] t=%5.1fs %-18s zona=%s %s %.1f poz=(%.0f,%.1f,%.0f)" % [
+		print("    [sf ejectare] t=%5.1fs %-18s zona=%s %s %.1f poz=(%.0f,%.1f,%.0f) lovit=%s" % [
 			float(e[0]), cars[int(e[1])].pilot_name, String(e[2]), String(e[3]), float(e[4]),
-			p.x, p.y, p.z])
+			p.x, p.y, p.z, String(e[6])])
 	for r in _resp:
 		var p2: Vector3 = r[3]
 		print("    [sf repunere] t=%5.1fs %-18s zona=%s poz=(%.0f,%.1f,%.0f)" % [
@@ -585,10 +734,12 @@ func report() -> void:
 			route, "ocol" if route == 0 else "scurtatura", total,
 			ts.size(), resp, unfinished, _med(ts), -1.0 if ts.is_empty() else float(ts.min())])
 	for ps in _passes:
-		print("    [sf poarta] %-18s ruta=%d %.2fs%s" % [cars[int(ps[0])].pilot_name, int(ps[1]),
-			float(ps[2]), " REPUSA" if bool(ps[3]) else ""])
+		print("    [sf poarta] %-18s ruta=%d %.2fs%s%s%s" % [cars[int(ps[0])].pilot_name, int(ps[1]),
+			float(ps[2]), " REPUSA" if bool(ps[3]) else "", " STRAT" if bool(ps[4]) else "",
+			" FATADA" if bool(ps[5]) else ""])
 	_report_trams()
 	_report_pod()
+	_report_p6()
 
 
 func _report_pod() -> void:

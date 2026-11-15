@@ -44,6 +44,9 @@ sys.path.insert(0, HERE)
 import gen_sf_serpentine as serp  # noqa: E402  (geometria scurtaturii, masurata la 1b)
 
 ARGS = sys.argv[1:]
+# SF_ROUTE_DRY=1: nu scrie nimic (nici Track25.tscn, nici OBJ-ul, nici planul) — modul in care
+# tools/gen_sf_pod_plan.py importa geometria traseului aprobat ca sa deseneze variantele cu pod.
+DRY = os.environ.get("SF_ROUTE_DRY", "0") == "1"
 PLAN_PATH = None
 if "--plan" in ARGS:
     PLAN_PATH = ARGS[ARGS.index("--plan") + 1]
@@ -1021,7 +1024,7 @@ for c, size, yaw in boxes_wall:
     prism_faces([(x, 0.0, z) for x, z in ring], y0, y1)
 
 
-with open(OBJ_PATH, "w", newline="\n") as f:
+with open(os.devnull if DRY else OBJ_PATH, "w", newline="\n") as f:
     f.write("# Track25: geometria gri a serpentinelor (tools/gen_sf_route.py). Nu se editeaza de mana.\n")
     f.write("o serpentine_gri\n")
     for v in obj_v:
@@ -1395,7 +1398,7 @@ material_override = SubResource("Mat_gri")
 {chr(10).join(nodes)}
 [node name="Tramvaie" type="Node3D" parent="."]
 {tram_nodes}"""
-with open(OUT_TSCN, "w", encoding="utf-8", newline="\n") as f:
+with open(os.devnull if DRY else OUT_TSCN, "w", encoding="utf-8", newline="\n") as f:
     f.write(tscn)
 print(f"scris {os.path.relpath(OUT_TSCN, ROOT)}; sea_level_offset {SEA_OFFSET}")
 print(f"turnul cu ceas: harta {tower}; linia de start la {math.dist(tower, (X_E, Y_START)):.0f} m de el")
@@ -1405,7 +1408,7 @@ print(f"directia strazii lantului: azimut {CHAIN_AZ:.1f} grade (0 = N); soarele 
 # =============================================================================================
 # Planul de sus adnotat
 # =============================================================================================
-if PLAN_PATH:
+if PLAN_PATH and not DRY:
     from PIL import Image, ImageDraw, ImageFont
     SC_ = 1.6
     allx = [p[0] for p in PTS] + [-470.0]

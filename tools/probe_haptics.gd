@@ -17,6 +17,10 @@ extends Node
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeHaptics.tscn
 
 const FeedScript := preload("res://scenes/race/haptics_feed.gd")
+## Partea D scrie intr-un folder PROPRIU procesului (#722): pe numele fix
+## `user://probe_tmp/haptics_settings.cfg`, doua rulari paralele isi stergeau
+## fisierul una alteia (2 din 20 picate).
+const ProbeTmp := preload("res://tools/probe_tmp.gd")
 
 var _failed: bool = false
 var _t: float = 0.0
@@ -167,8 +171,8 @@ func _part_d() -> int:
 	# Pe un fisier propriu, nu pe settings.cfg-ul real (#690: un fisier fara
 	# versiune, ca cel de mai jos, ar porni migrarea si ar lasa un .bak-v0).
 	var real_path: String = GameState.settings_path
-	var path := "user://probe_tmp/haptics_settings.cfg"
-	DirAccess.make_dir_recursive_absolute("user://probe_tmp")
+	var tmp_dir := ProbeTmp.make("haptics")
+	var path := tmp_dir + "settings.cfg"
 	GameState.settings_path = path
 	var was: bool = GameState.haptics_enabled
 	_check(was, "implicit pornita (valoarea curenta fara fisier explicit: true)")
@@ -189,8 +193,8 @@ func _part_d() -> int:
 	GameState.haptics_enabled = false
 	GameState.load_settings()
 	_check(GameState.haptics_enabled, "fisier fara cheie => implicit pornita")
-	for f in [path, path + ".bak-v0", path + ".bak-v0.last"]:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(f))
+	# Tot folderul, cu copiile .bak-v0* lasate de migrare.
+	ProbeTmp.remove(tmp_dir)
 	GameState.settings_path = real_path
 	GameState.load_settings()
 	GameState.haptics_enabled = was

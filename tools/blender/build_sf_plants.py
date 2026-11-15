@@ -43,37 +43,45 @@ AO_GARDEN = dict(gradient="vertical", samples=24, dist=0.8, low=0.85, high=1.0,
 
 # Cardurile: (numar, verde de baza, sclipirile de pe crestete). Verdele chiparosului e
 # adanc si putin RECE (albastrui in umbra, vezi sf_leaf_cards), ca sa nu se faca maro-oliv
-# in lumina calda de apus; sclipirile sunt galben-verzi, ca petele de soare din decupare.
-CYP_CARDS = {"a": (820, "41784A", "8DAE58"),
-             "b": (790, "41784A", "8DAE58"),
-             "c": (620, "41784A", "8DAE58")}
+# in lumina calda de apus; sclipirile sunt galben-verzi, ca petele de soare din decupare, si
+# stau pe crestetul si pe fata dinspre vant a fiecarei mase (`windward`), ca straturile sa se
+# desparta in lumina.
+CYP_CARDS = {"a": (1050, "41784A", "8DAE58"),
+             "b": (1000, "41784A", "8DAE58"),
+             "c": (800, "41784A", "8DAE58")}
 STREET_CARDS = (205, "8FA83A", "CBD05C")
-# Masa de departe (`*_Crown`, doar in MeshForest) nu are grosimea cardurilor (~0,7 m in plus
-# pe verticala): se ingroasa putin, ca polita de departe sa aiba aceeasi grosime vizuala.
-FAR_UP_K, FAR_DN_K = 1.25, 1.2
+# Masa de departe (`*_Crown`, doar in MeshForest) nu are grosimea cardurilor: se umfla putin.
+FAR_UP_K, FAR_DN_K = 1.15, 1.1
 SMOOTH_TREE = {"_Trunk": 70.0, "_Crown": 80.0}
 
 clear_built()
 
 
 # ---------------------------------------------------------------------------
-# Chiparosii (V1) -- v2 (verdictul coordonatorului, 16 nov 2026)
+# Chiparosii (V1) -- v3 (verdictul coordonatorului, 16 nov 2026)
 #
-# v1 citea pin tuns in nori (niwaki: perne-bila stivuite pe un trunchi zvelt, ~10 x 9 m),
-# adica silueta pinului niwaki din Kyoto -- iar inventarul cere ca doua piste sa nu imparta
-# silueta unui arbore. v2 urmeaza decuparile: arbore MAI LAT DECAT INALT (h/l ~0,6), POLITE
-# lungi si plate (4-7 m pe X, 2,5-4 m pe Z, <= ~1,3 m grosime), bonte in vant (-X) si
-# ascutite in coada spre +X; trunchi masiv si scurt cu furca joasa si crengi groase care
-# merg aproape ORIZONTAL spre +X sub fiecare polita.
+# v1 citea pin tuns in nori (niwaki: perne-bila stivuite pe un trunchi zvelt, ~10 x 9 m).
+# v2 a reparat proportiile (mai lat decat inalt), aplecarea si cozile spre +X, dar politele
+# de ~1,2 m pe crengi lungi si goale citeau salcam / bonsai cu polite (silueta salcamilor din
+# Serengeti, interzisa de inventar §3.1). v3 pastreaza tot ce a reusit v2 si pune MASA:
+# fiecare strat e un NOR gros de 2-2,8 m (lobi de baza cu crestet bombat si burta plata, plus
+# un rand de domuri deasupra), care se subtiaza spre coada din +X; norii se suprapun pe
+# verticala ~30 % si sunt esalonati pe Z (adancime), deci din lateral coroana e un singur
+# corp in trepte, pieptanat de vant, cu putine goluri de cer, iar crengile se vad mai ales
+# dedesubt, langa trunchi. Garda masoara umplerea siluetei (>= 55 %) si adancimea (>= 6,5 m).
 # ---------------------------------------------------------------------------
 
-def shelf(x0, x1, z, y=0.0, depth=3.0, thick=0.62, lobes=4, rise=0.25, wobble=0.25, k=0.72):
-    """O POLITA de frunzis: `lobes` ciorchini care se suprapun ca tiglele, de la capatul bont
-    din vant (x0, cel mai mare si mai gros) spre coada ascutita din +X (x1). Semi-axa pe X a
-    lobului i e A * k^i, centrele la 0,62 x (a_i + a_i+1) unul de altul, A ales ca polita sa
-    aiba exact lungimea x1 - x0. Adancimea (pe Y Blender = Z Godot) si grosimea scad si ele
-    spre coada; polita urca usor (`rise`) spre +X, ca tiglele unui acoperis.
-    Intoarce lista de ciorchini (cx, cy, cz, ax, ay, az_sus, az_jos)."""
+def cloud(x0, x1, z, y=0.0, depth=4.0, thick=1.8, lobes=4, rise=0.2, wobble=0.35, k=0.72):
+    """Un NOR de frunzis pieptanat de vant, de la capatul bont din vant (x0) la coada din +X
+    (x1). Doua randuri de ciorchini:
+      - BAZA: `lobes` ciorchini care se suprapun ca tiglele si scad spre +X (semi-axa pe X a
+        lobului i = A * k^i, centrele la 0,62 x (a_i + a_i+1), A ales ca norul sa aiba exact
+        lungimea x1 - x0); crestet bombat (0,55 x grosimea), burta plata (0,32 x);
+      - DOMURI: pe toti lobii in afara de ultimul, cate un ciorchine mai mic ridicat deasupra,
+        spre vant -- crestetul in bulgari din decupare.
+    Grosimea (`thick` = burta + crestet ale primului lob, fara domuri si fara carduri) scade
+    spre coada (0,8^i), adancimea (pe Y Blender = Z Godot) la fel (0,88^i). Norul urca usor
+    (`rise`) spre +X. Intoarce lista de ciorchini (cx, cy, cz, ax, ay, az_sus, az_jos)."""
     ws = [k ** i for i in range(lobes)]
     span = ws[0] + sum(0.62 * (ws[i] + ws[i + 1]) for i in range(lobes - 1)) + ws[-1]
     A = (x1 - x0) / span
@@ -82,161 +90,155 @@ def shelf(x0, x1, z, y=0.0, depth=3.0, thick=0.62, lobes=4, rise=0.25, wobble=0.
     for i in range(lobes):
         t = i / max(lobes - 1, 1)
         ax = A * ws[i]
-        ay = depth * 0.5 * (0.86 ** i)
-        th = thick * (0.78 ** i)
+        ay = depth * 0.5 * (0.88 ** i)
+        th = thick * (0.80 ** i)
         cy = y + wobble * (1 if i % 2 else -1) * (0.5 + 0.5 * t)
-        out.append((cx, cy, z + rise * t, ax, ay, th * 0.62, th * 0.38))
-        if i < lobes - 2:
-            # smocul de pe crestet (decuparea: politele au crestetul in bulgari de nor, nu
-            # o tabla): un lob mai mic, ridicat, spre vant pe primele polite
-            out.append((cx - ax * 0.25, cy - wobble * 0.6, z + rise * t + th * 0.42,
-                        ax * 0.55, ay * 0.6, th * 0.42, th * 0.22))
+        cz = z + rise * t
+        out.append((cx, cy, cz, ax, ay, th * 0.62, th * 0.38))
+        if i < lobes - 1:
+            out.append((cx - ax * 0.15, cy - wobble * 0.5, cz + th * 0.45,
+                        ax * 0.72, ay * 0.72, th * 0.45, th * 0.25))
         if i < lobes - 1:
             cx += 0.62 * (A * ws[i] + A * ws[i + 1])
     return out
 
 
-def _cypress(trunks, limbs, shelves, cards, seed, roots):
-    """trunks: [(puncte, raze, faza)], limbs: [(puncte, r0, r1)], shelves: liste de ciorchini
-    (din `shelf`), roots: (raza bazei, numar de contraforturi). Intoarce cele patru noduri."""
+def _cypress(trunks, limbs, clouds, cards, seed, roots):
+    """trunks: [(puncte, raze, faza)], limbs: [(puncte, r0, r1)], clouds: liste de ciorchini
+    (din `cloud`), roots: (raza bazei, numar de contraforturi). Intoarce cele patru noduri."""
     tr, cr, co, lv = Builder(), Builder(), Builder(), Builder()
-    # r3 a plansei v2: politele ieseau de ~0,9 m vizual, mai subtiri decat in decupare;
-    # grosimea masei x1,3 => ~1,2-1,3 m vizual pe capatul bont, coada ramane subtire
-    pads = [(x, y, z, ax, ay, azu * 1.3, azd * 1.3) for s in shelves for (x, y, z, ax, ay, azu, azd) in s]
+    pads = [p for c in clouds for p in c]
     for (pts, radii, phase) in trunks:
-        # 9 laturi / 3 caneluri: 3 varfuri pe canelura (cu 10/4 crestele aliasau)
-        twisted_trunk(tr, pts, radii, BARK, BARK_LIGHT, segments=9, flutes=3, depth=0.15,
-                      turns=0.6, phase=phase, crest=0.35)
-    root_flare(tr, roots[0], roots[1], BARK, seed=seed, height=1.0, reach=1.6, thick=0.46,
-               segments=7)
+        # 15 laturi / 5 caneluri rasucite (3 varfuri pe canelura): mai multe creste decat v2
+        twisted_trunk(tr, pts, radii, BARK, BARK_LIGHT, segments=15, flutes=5, depth=0.13,
+                      turns=0.55, phase=phase, crest=0.35)
+    root_flare(tr, roots[0], roots[1], BARK, seed=seed, height=1.0, reach=1.6, thick=0.48,
+               segments=7, toe=True)
     for (pts, r0, r1) in limbs:
-        limb(tr, pts, r0, r1, BARK, segments=6)
+        limb(tr, pts, r0, r1, BARK, segments=7 if r0 >= 0.3 else 6)
     for k, (x, y, z, ax, ay, azu, azd) in enumerate(pads):
-        pad_mass(cr, (x, y, z, ax * 1.04, ay * 1.04, azu * FAR_UP_K, azd * FAR_DN_K),
+        pad_mass(cr, (x, y, z, ax * 1.03, ay * 1.03, azu * FAR_UP_K, azd * FAR_DN_K),
                  CYPRESS_GREEN, seg=7, seed=seed * 31 + k, lobe=0.10)
     core_lens(co, pads, CYPRESS_GREEN, shrink=0.85, seg=6)
     n = sf_leaf_cards(lv, pads, CYPRESS_GREEN, cards[0], cards[1], accent_hex=cards[2],
-                      seed=seed, size=(0.72, 0.98), shell=(0.86, 1.05), below=0.15,
-                      radial=0.10, accent=0.30, shade_lo=0.50, size_by_pad=True)
+                      seed=seed, size=(0.95, 1.30), shell=(0.82, 1.05), below=0.15,
+                      radial=0.10, accent=0.32, shade_lo=0.48, size_by_pad=True,
+                      windward=0.8)
     print("  carduri:", n)
     return (tr.to_object("Cypress_Trunk"), cr.to_object("Cypress_Crown"),
             co.to_object("Cypress_Core"), lv.to_object("Cypress_Leaves"))
 
 
 def build_cypress_a():
-    """`sf_cypress_a.png` -- UN SINGUR TRUNCHI APLECAT (v2). Lista de elemente:
+    """`sf_cypress_a.png` -- UN SINGUR TRUNCHI APLECAT (v3). Lista de elemente:
 
-    1. trunchi MASIV si scurt (O baza ~1,9 m), rasucit (caneluri in spirala, creste mai
-       deschise), care se culca spre +X;
-    2. 5 contraforturi de radacina mari;
-    3. furca JOASA (~2 m): liderul urca aplecat spre +X pana sub polita de sus;
-    4. creanga groasa (O ~0,8 m) aproape ORIZONTALA spre +X care poarta polita joasa din
-       dreapta (~3,7 m), coada pana la +8 m;
-    5. creanga scurta spre -X (in vant) cu perna mica si bonta din stanga (~2,6 m);
-    6. creanga spre stanga-sus la polita de MIJLOC (~5,1 m), de la -2,4 la +4,4;
-    7. polita de SUS (~7 m), cea mai lunga, de la +0,4 la +7,4: depaseste baza cu peste
-       7 m pe +X si se termina in coada ascutita;
-    8. politele sunt plate (<= ~1,3 m), bonte in vant si ascutite in coada, suprapuse ca
-       tiglele, cu GOL intre ele prin care se vad crengile orizontale;
-    9. ansamblu MAI LAT DECAT INALT (~12 x ~7,8 m), masa deplasata spre +X.
+    1. trunchi MASIV si scurt (O baza ~1,9 m), rasucit (5 caneluri in spirala, creste mai
+       deschise), care se culca in S spre +X; 5 contraforturi cu varful rotunjit;
+    2. furca JOASA (~2 m), crengi groase (O >= 0,6 m la furca, >= 0,36 m unde intra in nor);
+    3. norul de SUS (~6,6 m), cel mai lung, de la 0 la +7,6: depaseste baza cu peste 7 m pe +X
+       si se termina in coada;
+    4. norul de mijloc din vant (~4,9 m, -2,6..+4,8), esalonat spre fata (Z-), si norul de
+       mijloc din spate (~5,2 m, +0,5..+6,6), esalonat spre spate: impreuna cu cel de sus fac un
+       singur corp in trepte, suprapus ~30 % pe verticala;
+    5. norul jos din dreapta (~3,4 m) pe creanga orizontala lunga spre +X, coada pana la +8,1;
+    6. norul mic si bont din vant (~3 m), pe creanga scurta spre -X;
+    7. norii au crestet in bulgari (domuri), burta plata si intunecata; crengile se vad mai
+       ales dedesubt, langa trunchi; 3-5 goluri mici de cer;
+    8. ansamblu mai LAT decat inalt (~12,4 x ~8,4 m), adanc de ~7 m, masa spre +X.
     """
     trunks = [([(0, 0, 0), (0.2, 0, 0.7), (0.7, 0, 1.4), (1.5, 0, 1.95), (2.4, 0, 2.65),
                 (2.9, 0, 3.6), (3.0, 0, 4.7), (3.2, 0, 5.7), (3.6, 0, 6.7)],
-               [0.95, 0.82, 0.72, 0.64, 0.55, 0.46, 0.38, 0.30, 0.22], 0.0)]
+               [0.95, 0.82, 0.72, 0.64, 0.55, 0.47, 0.40, 0.33, 0.26], 0.0)]
     limbs = [
-        ([(1.6, 0, 2.0), (3.0, 0.1, 2.75), (4.6, 0.05, 3.25), (6.2, 0, 3.55)], 0.40, 0.14),
-        ([(0.6, 0, 1.1), (-0.8, 0.05, 1.65), (-2.0, 0.1, 2.15), (-2.8, 0, 2.4)], 0.34, 0.12),
-        ([(2.6, 0, 3.0), (1.5, 0, 3.95), (0.3, 0.05, 4.6), (-1.0, 0.1, 4.95)], 0.36, 0.12),
-        ([(2.95, 0, 4.3), (3.3, 0.5, 4.75)], 0.24, 0.10),
-        ([(3.3, 0, 6.1), (4.8, 0.05, 6.65), (6.2, 0, 6.95)], 0.22, 0.09),
-        ([(3.5, 0, 6.6), (2.3, 0.05, 6.85), (1.2, 0, 6.95)], 0.18, 0.08),
-        ([(2.95, 0, 4.1), (2.8, -1.0, 4.8), (2.7, -1.5, 5.0)], 0.18, 0.08),
-        ([(3.15, 0, 5.4), (3.3, 1.0, 6.3), (3.5, 1.4, 6.8)], 0.16, 0.08),
+        ([(1.6, 0, 2.0), (3.0, -0.2, 2.75), (4.6, -0.4, 3.25), (6.0, -0.5, 3.45)], 0.40, 0.19),
+        ([(0.6, 0, 1.1), (-0.8, 0.3, 1.8), (-2.0, 0.6, 2.4), (-2.7, 0.8, 2.85)], 0.34, 0.18),
+        ([(2.6, 0, 3.0), (1.5, 0.4, 3.95), (0.3, 0.9, 4.55), (-1.0, 1.2, 4.85)], 0.36, 0.19),
+        ([(2.95, 0, 4.1), (3.6, -0.8, 4.7), (4.3, -1.4, 5.05)], 0.30, 0.18),
+        ([(3.3, 0, 6.1), (4.8, 0.05, 6.5), (6.0, 0, 6.7)], 0.30, 0.18),
+        ([(3.5, 0, 6.5), (2.3, 0.05, 6.6), (1.2, 0, 6.7)], 0.26, 0.18),
     ]
-    shelves = [
-        shelf(0.4, 7.4, 7.0, y=0.0, depth=3.8, thick=0.70, lobes=4, rise=0.25),
-        shelf(-2.4, 4.4, 5.05, y=0.7, depth=3.4, thick=0.64, lobes=4, rise=0.2),
-        shelf(3.6, 8.0, 3.6, y=-0.8, depth=2.8, thick=0.58, lobes=3, rise=0.15),
-        shelf(-4.0, -1.5, 2.55, y=0.4, depth=2.5, thick=0.56, lobes=2, rise=0.05),
+    clouds = [
+        cloud(0.0, 7.6, 6.6, y=0.0, depth=4.4, thick=1.8, lobes=4, rise=0.2),
+        cloud(-2.6, 4.8, 4.9, y=1.4, depth=4.0, thick=1.8, lobes=4, rise=0.2),
+        cloud(0.5, 6.6, 5.1, y=-1.5, depth=3.6, thick=1.6, lobes=3, rise=0.15),
+        cloud(3.2, 8.1, 3.4, y=-0.6, depth=3.4, thick=1.6, lobes=3, rise=0.15),
+        cloud(-4.0, -0.8, 3.05, y=0.9, depth=3.0, thick=1.5, lobes=2, rise=0.05),
     ]
-    return _cypress(trunks, limbs, shelves, CYP_CARDS["a"], seed=3, roots=(0.95, 5))
+    return _cypress(trunks, limbs, clouds, CYP_CARDS["a"], seed=3, roots=(0.95, 5))
 
 
 def build_cypress_b():
-    """`sf_cypress_b.png` -- URIASUL CU DOUA TRUNCHIURI (v2). Lista de elemente:
+    """`sf_cypress_b.png` -- URIASUL CU DOUA TRUNCHIURI (v3). Lista de elemente:
 
-    1. baza ENORMA (O ~2,2 m) din care pleaca doua trunchiuri rasucite, lipite jos;
-    2. 6 contraforturi de radacina mari;
-    3. trunchiul stang urca abrupt, apoi se apleaca spre +X: poarta polita de sus din STANGA
-       (~6,3 m) si, printr-o creanga joasa spre -X, perna bonta din vant (~3,1 m);
-    4. trunchiul drept se culca puternic spre +X de la baza: poarta polita de sus din
-       DREAPTA (~7,6 m, cea mai inalta si cea mai lunga, coada pana la +8,2 m), polita de
-       mijloc din dreapta (~4,8 m) pe o creanga orizontala si polita joasa din dreapta
-       (~2,8 m);
-    5. o creanga spre centru cu polita centrala (~4,6 m);
-    6. politele sunt plate, bonte in vant si ascutite spre +X, suprapuse in trepte;
-    7. ansamblu mult MAI LAT DECAT INALT (~12,4 x ~8,4 m), masa spre +X.
+    1. baza ENORMA (O ~2,2 m) din care pleaca doua trunchiuri rasucite, arcuite, lipite jos;
+       6 contraforturi cu varful rotunjit;
+    2. trunchiul stang se arcuieste spre -X si revine: poarta norul de sus din STANGA (~5,9 m)
+       si, pe o creanga groasa joasa spre -X, norul bont din vant (~2,9 m);
+    3. trunchiul drept se culca puternic spre +X de la baza: poarta norul de sus din DREAPTA
+       (~6,8 m, cel mai inalt si cel mai lung, coada pana la +8,2), norul de mijloc din dreapta
+       (~4,6 m, esalonat spre spate) si norul jos din dreapta (~2,8 m);
+    4. norul central (~4,3 m), esalonat spre fata, leaga cele doua jumatati;
+    5. norii se suprapun pe verticala ~30 %: din lateral un singur corp lat in trepte;
+    6. ansamblu mult MAI LAT decat inalt (~12,7 x ~8,6 m), adanc de ~7 m, masa spre +X.
     """
     trunks = [
         ([(-0.45, 0, 0), (-0.9, 0, 0.9), (-1.3, 0, 1.9), (-1.2, 0, 3.0), (-0.7, 0, 4.0),
           (-0.1, 0, 4.9), (0.4, 0, 5.6), (0.7, 0, 6.1)],
          [0.90, 0.78, 0.66, 0.56, 0.48, 0.40, 0.32, 0.24], 0.0),
         ([(0.45, 0, 0), (1.1, 0, 0.7), (2.0, 0, 1.4), (3.0, 0, 2.1), (3.9, 0, 3.0),
-          (4.5, 0, 4.1), (4.8, 0, 5.4), (4.9, 0, 6.6), (4.9, 0, 7.3)],
+          (4.5, 0, 4.1), (4.8, 0, 5.4), (4.9, 0, 6.6), (4.9, 0, 7.2)],
          [0.95, 0.82, 0.70, 0.60, 0.50, 0.42, 0.34, 0.26, 0.18], 1.3),
     ]
     limbs = [
-        ([(-1.3, 0, 1.8), (-2.2, 0.1, 2.4), (-2.9, 0.05, 2.9)], 0.36, 0.12),
-        ([(0.2, 0, 5.6), (-0.9, 0.1, 6.0), (-2.0, 0, 6.2)], 0.26, 0.10),
-        ([(0.5, 0, 6.0), (1.6, 0, 6.25)], 0.20, 0.10),
-        ([(-0.85, 0, 3.7), (0.4, 0.05, 4.2), (1.8, 0, 4.5)], 0.30, 0.10),
-        ([(4.4, 0, 4.0), (5.6, 0.05, 4.5), (7.0, 0, 4.8)], 0.36, 0.12),
-        ([(3.0, 0, 2.1), (4.4, 0.05, 2.5), (6.0, 0, 2.75)], 0.34, 0.12),
-        ([(4.9, 0, 6.8), (3.4, 0.1, 7.3), (2.2, 0, 7.5)], 0.22, 0.10),
-        ([(4.9, 0, 7.0), (6.4, 0, 7.5)], 0.20, 0.10),
-        ([(4.6, 0, 4.6), (4.4, -1.0, 5.3)], 0.18, 0.08),
-        ([(-0.3, 0, 4.6), (-0.4, 1.0, 5.3)], 0.18, 0.08),
+        ([(-1.3, 0, 1.8), (-2.2, -0.3, 2.4), (-2.9, -0.5, 2.9)], 0.36, 0.19),
+        ([(0.2, 0, 5.6), (-0.9, 0.6, 5.8), (-2.0, 1.0, 5.9)], 0.30, 0.18),
+        ([(0.5, 0, 6.0), (1.6, 0.6, 6.1)], 0.26, 0.18),
+        ([(-0.85, 0, 3.7), (0.4, 0.8, 4.1), (1.8, 1.3, 4.3)], 0.32, 0.18),
+        ([(4.4, 0, 4.0), (5.6, -0.7, 4.4), (7.0, -1.2, 4.6)], 0.36, 0.19),
+        ([(3.0, 0, 2.1), (4.4, 0.3, 2.5), (6.0, 0.5, 2.75)], 0.34, 0.18),
+        ([(4.9, 0, 6.6), (3.4, -0.2, 7.0), (2.2, -0.3, 7.1)], 0.26, 0.18),
+        ([(4.9, 0, 6.8), (6.4, -0.2, 7.1)], 0.24, 0.18),
     ]
-    shelves = [
-        shelf(1.4, 8.2, 7.55, y=0.0, depth=3.9, thick=0.70, lobes=4, rise=0.25),
-        shelf(-3.0, 2.6, 6.3, y=0.6, depth=3.4, thick=0.64, lobes=4, rise=0.2),
-        shelf(2.9, 8.2, 4.85, y=-0.8, depth=3.2, thick=0.62, lobes=4, rise=0.15),
-        shelf(-1.0, 3.4, 4.55, y=1.0, depth=2.8, thick=0.56, lobes=3, rise=0.15),
-        shelf(4.7, 8.0, 2.85, y=0.5, depth=2.6, thick=0.54, lobes=3, rise=0.1),
-        shelf(-4.2, -1.6, 3.1, y=-0.3, depth=2.6, thick=0.56, lobes=2, rise=0.05),
+    clouds = [
+        cloud(1.2, 8.2, 6.8, y=-0.3, depth=4.4, thick=1.8, lobes=4, rise=0.2),
+        cloud(-3.2, 2.4, 5.9, y=1.3, depth=4.0, thick=1.8, lobes=4, rise=0.2),
+        cloud(2.6, 8.3, 4.6, y=-1.4, depth=3.8, thick=1.7, lobes=4, rise=0.15),
+        cloud(-1.2, 3.6, 4.3, y=1.6, depth=3.2, thick=1.5, lobes=3, rise=0.15),
+        cloud(4.6, 8.1, 2.8, y=0.6, depth=3.0, thick=1.4, lobes=3, rise=0.1),
+        cloud(-4.3, -1.4, 2.9, y=-0.6, depth=3.0, thick=1.5, lobes=2, rise=0.05),
     ]
-    return _cypress(trunks, limbs, shelves, CYP_CARDS["b"], seed=7, roots=(1.1, 6))
+    return _cypress(trunks, limbs, clouds, CYP_CARDS["b"], seed=7, roots=(1.1, 6))
 
 
 def build_cypress_c():
-    """`sf_cypress_c.png` -- MIC, COMPACT (v2). Lista de elemente:
+    """`sf_cypress_c.png` -- MIC, COMPACT (v3). Lista de elemente:
 
-    1. trunchi gros si scurt (O baza ~1,65 m) in S, culcat spre +X, rasucit;
-    2. 5 contraforturi de radacina;
-    3. furca joasa: creanga lunga spre -X (in vant) cu perna bonta din stanga (~2,6 m);
-    4. polita joasa din dreapta (~2,4 m) pe o creanga orizontala spre +X;
-    5. polita de mijloc din dreapta (~4,3 m);
-    6. polita de SUS (~6,3 m), de la -0,4 la +5,8, coada ascutita spre +X;
-    7. mai mic si mai strans decat a si b (~9,4 x ~7,1 m), tot mai lat decat inalt.
+    1. trunchi gros si scurt (O baza ~1,7 m) in S, culcat spre +X, rasucit; 5 contraforturi;
+    2. furca joasa: creanga groasa spre -X (in vant) cu norul bont din stanga (~2,6 m),
+       esalonat spre spate;
+    3. norul jos din dreapta (~2,3 m) pe o creanga orizontala spre +X, esalonat spre spate;
+    4. norul de mijloc din dreapta (~3,9 m), esalonat spre fata;
+    5. norul de SUS (~5,6 m), de la -0,6 la +5,9, coada spre +X;
+    6. norii se suprapun pe verticala: un corp in trepte, mai mic si mai strans decat a si b
+       (~9,7 x ~7,5 m), adanc de ~6 m.
     """
     trunks = [([(0, 0, 0), (0.4, 0, 0.7), (1.0, 0, 1.4), (1.6, 0, 2.1), (2.0, 0, 3.0),
                 (2.1, 0, 4.0), (2.3, 0, 5.0), (2.6, 0, 5.8)],
-               [0.83, 0.72, 0.62, 0.54, 0.46, 0.38, 0.30, 0.22], 0.6)]
+               [0.85, 0.74, 0.64, 0.56, 0.48, 0.40, 0.32, 0.24], 0.6)]
     limbs = [
-        ([(0.5, 0, 0.9), (-0.7, 0.05, 1.6), (-1.8, 0.1, 2.2), (-2.4, 0, 2.45)], 0.30, 0.10),
-        ([(1.6, 0, 2.1), (2.8, 0.05, 2.3), (4.0, 0, 2.5)], 0.30, 0.10),
-        ([(2.1, 0, 3.7), (3.4, 0.05, 4.0), (4.6, 0, 4.2)], 0.26, 0.10),
-        ([(2.5, 0, 5.6), (1.2, 0.05, 6.0), (0.4, 0, 6.2)], 0.20, 0.08),
-        ([(2.6, 0, 5.8), (4.0, 0, 6.2), (5.0, 0, 6.35)], 0.20, 0.08),
-        ([(2.1, 0, 4.2), (2.0, -1.0, 4.9)], 0.15, 0.08),
+        ([(0.5, 0, 0.9), (-0.7, 0.5, 1.6), (-1.8, 1.0, 2.2), (-2.4, 1.3, 2.5)], 0.32, 0.18),
+        ([(1.6, 0, 2.1), (2.8, 0.4, 2.25), (4.0, 0.8, 2.4)], 0.32, 0.18),
+        ([(2.1, 0, 3.7), (3.4, -0.6, 3.9), (4.6, -1.1, 4.0)], 0.30, 0.18),
+        ([(2.5, 0, 5.6), (1.2, 0.05, 5.7), (0.4, 0, 5.75)], 0.24, 0.18),
+        ([(2.6, 0, 5.7), (4.0, 0, 5.85), (5.0, 0, 5.95)], 0.24, 0.18),
     ]
-    shelves = [
-        shelf(-0.4, 5.8, 6.3, y=0.0, depth=3.4, thick=0.66, lobes=4, rise=0.2),
-        shelf(1.6, 6.0, 4.3, y=-0.7, depth=3.0, thick=0.60, lobes=3, rise=0.15),
-        shelf(2.0, 5.6, 2.45, y=0.6, depth=2.6, thick=0.54, lobes=3, rise=0.1),
-        shelf(-3.4, -0.7, 2.65, y=0.3, depth=2.5, thick=0.56, lobes=2, rise=0.05),
+    clouds = [
+        cloud(-0.6, 5.9, 5.6, y=0.0, depth=4.0, thick=1.7, lobes=4, rise=0.2),
+        cloud(1.4, 6.1, 3.9, y=-1.2, depth=3.4, thick=1.6, lobes=3, rise=0.15),
+        cloud(1.8, 5.7, 2.3, y=0.9, depth=2.8, thick=1.4, lobes=3, rise=0.1),
+        cloud(-3.5, -0.6, 2.6, y=1.4, depth=2.8, thick=1.4, lobes=2, rise=0.05),
     ]
-    return _cypress(trunks, limbs, shelves, CYP_CARDS["c"], seed=11, roots=(0.83, 5))
+    return _cypress(trunks, limbs, clouds, CYP_CARDS["c"], seed=11, roots=(0.85, 5))
 
 
 # ---------------------------------------------------------------------------
@@ -434,9 +436,9 @@ def _emit_tree(fn, path, budget, blend):
 # `-- --cypress` (dupa al doilea `--` al lui run_build): doar chiparosii. Arborele de strada,
 # hortensiile si gradinita au fost acceptate la v1 si nu se mai rescriu.
 _ONLY_CYP = "--cypress" in sys.argv
-_emit_tree(build_cypress_a, "plants/sf_cypress_a.glb", 4000, "sf_cypress_a.blend")
-_emit_tree(build_cypress_b, "plants/sf_cypress_b.glb", 4000, "sf_cypress_b.blend")
-_emit_tree(build_cypress_c, "plants/sf_cypress_c.glb", 4000, "sf_cypress_c.blend")
+_emit_tree(build_cypress_a, "plants/sf_cypress_a.glb", 5200, "sf_cypress_a.blend")
+_emit_tree(build_cypress_b, "plants/sf_cypress_b.glb", 5200, "sf_cypress_b.blend")
+_emit_tree(build_cypress_c, "plants/sf_cypress_c.glb", 5200, "sf_cypress_c.blend")
 if not _ONLY_CYP:
     _emit_tree(build_street_tree, "plants/sf_street_tree.glb", 1100, "sf_street_tree.blend")
 

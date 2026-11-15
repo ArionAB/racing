@@ -8,7 +8,9 @@ Citeste GLB-urile direct (coordonate Godot: Y sus, Blender +Y = Godot -Z), cu ci
 radacinile fara scala/rotatie/translatie (memoria scala-glb-neaplicata-la-radacina) si
 numele exacte ale nodurilor:
 
-  sf_cypress_a/b/c  (v2, arbore de polite) a si b: inaltimea 7-9 m, coroana (`Cypress_Crown`)
+  sf_cypress_a/b/c  (v3: v2 + UMPLERE >= 55 % (c: 50 %) a siluetei laterale in dreptunghiul
+                    coroanei, rasterizata la 5 cm, si ADANCIME pe Z a masei >= 6,5 m (c: 5,5))
+                    (v2, arbore de polite) a si b: inaltimea 7-9 m, coroana (`Cypress_Crown`)
                     11-13 m pe X, inaltime / latime <= 0,75; c: 6,5-8 m si 9-10 m. Cardurile
                     cel mult 1 m peste latimea maxima. APLECAREA: centrul de masa al coroanei
                     la cel putin +2,5 m pe X fata de baza (vantul vine din -X, deci un palc pus
@@ -54,9 +56,53 @@ CYP = ("sf_cypress_a", "sf_cypress_b", "sf_cypress_c")
 HYD = ("sf_hydrangea", "sf_hydrangea_blue")
 # v2 (16 nov 2026, verdictul coordonatorului: v1 citea pin niwaki): arbore de polite mai lat
 # decat inalt. Inaltimea pe toate nodurile, latimea pe masa `Cypress_Crown`.
-CYP_SPEC = {"sf_cypress_a": dict(h=(7.0, 9.0), w=(11.0, 13.0), ratio=0.75),
-            "sf_cypress_b": dict(h=(7.0, 9.0), w=(11.0, 13.0), ratio=0.75),
-            "sf_cypress_c": dict(h=(6.5, 8.0), w=(9.0, 10.0), ratio=None)}
+# v3 (acelasi zi: politele subtiri pe crengi goale citeau salcam): coroana trebuie sa fie MASA.
+# `fill` = cat din dreptunghiul coroanei (vazut din lateral) e acoperit de frunzis + crengi;
+# `depth` = intinderea masei `Cypress_Crown` pe Z (adancimea vazuta din capatul din vant).
+CYP_SPEC = {"sf_cypress_a": dict(h=(7.0, 9.0), w=(11.0, 13.0), ratio=0.75, fill=0.55, depth=6.5),
+            "sf_cypress_b": dict(h=(7.0, 9.0), w=(11.0, 13.0), ratio=0.75, fill=0.55, depth=6.5),
+            "sf_cypress_c": dict(h=(6.5, 8.0), w=(9.0, 10.0), ratio=None, fill=0.50, depth=5.5)}
+FOLIAGE = ("Cypress_Crown", "Cypress_Core", "Cypress_Leaves")
+CELL = 0.05
+
+
+def side_fill(nodes):
+    """Umplerea siluetei laterale: toate triunghiurile (frunzis + trunchi + crengi) proiectate
+    ortografic pe planul XY (privind de-a lungul lui Z), rasterizate la 5 cm; se numara
+    celulele acoperite din dreptunghiul coroanei = intinderea frunzisului pe X si pe Y (de la
+    cel mai jos frunzis in sus). Cardurile intra si ele, iar masa lor e `Cypress_Crown`."""
+    import numpy as np
+    fol = [p for n in FOLIAGE for p in nodes[n]["verts"]]
+    x0, x1 = min(p[0] for p in fol), max(p[0] for p in fol)
+    y0, y1 = min(p[1] for p in fol), max(p[1] for p in fol)
+    nx, ny = int((x1 - x0) / CELL) + 1, int((y1 - y0) / CELL) + 1
+    grid = np.zeros((ny, nx), dtype=bool)
+    for d in nodes.values():
+        V = np.array(d["verts"], dtype=np.float64)
+        if len(V) == 0:
+            continue
+        P = np.stack([(V[:, 0] - x0) / CELL, (V[:, 1] - y0) / CELL], axis=1)
+        for (i, j, k) in d["tris"]:
+            a, b, c = P[i], P[j], P[k]
+            area = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+            if abs(area) < 1e-9:
+                continue
+            lo_x = max(int(np.floor(min(a[0], b[0], c[0]))), 0)
+            hi_x = min(int(np.ceil(max(a[0], b[0], c[0]))), nx - 1)
+            lo_y = max(int(np.floor(min(a[1], b[1], c[1]))), 0)
+            hi_y = min(int(np.ceil(max(a[1], b[1], c[1]))), ny - 1)
+            if lo_x > hi_x or lo_y > hi_y:
+                continue
+            gx, gy = np.meshgrid(np.arange(lo_x, hi_x + 1) + 0.5, np.arange(lo_y, hi_y + 1) + 0.5)
+            w0 = (b[0] - a[0]) * (gy - a[1]) - (b[1] - a[1]) * (gx - a[0])
+            w1 = (c[0] - b[0]) * (gy - b[1]) - (c[1] - b[1]) * (gx - b[0])
+            w2 = (a[0] - c[0]) * (gy - c[1]) - (a[1] - c[1]) * (gx - c[0])
+            if area > 0:
+                inside = (w0 >= 0) & (w1 >= 0) & (w2 >= 0)
+            else:
+                inside = (w0 <= 0) & (w1 <= 0) & (w2 <= 0)
+            grid[lo_y:hi_y + 1, lo_x:hi_x + 1] |= inside
+    return float(grid.mean())
 NODES = {k: ["Cypress_Trunk", "Cypress_Crown", "Cypress_Core", "Cypress_Leaves"] for k in CYP}
 NODES["sf_street_tree"] = ["StreetTree_Trunk", "StreetTree_Crown", "StreetTree_Core",
                            "StreetTree_Leaves"]
@@ -130,6 +176,13 @@ def check(key, path, report=True):
         over = max(p[0] for p in top)
         if over < 3.0:
             bad.append("(surplomba) polita de sus ajunge doar la X %+.2f, cel putin +3,0" % over)
+        fill = side_fill(nodes)
+        if fill < sp["fill"]:
+            bad.append("(umplere) silueta laterala %.0f %% plina, cel putin %.0f %%"
+                       % (fill * 100, sp["fill"] * 100))
+        depth = cb[2][1] - cb[2][0]
+        if depth < sp["depth"]:
+            bad.append("(adancime) coroana %.2f m pe Z, cel putin %.1f" % (depth, sp["depth"]))
         ring = [p for p in trunk if 0.4 <= p[1] <= 0.6]
         dia = min(max(p[0] for p in ring) - min(p[0] for p in ring),
                   max(p[2] for p in ring) - min(p[2] for p in ring)) if ring else 0.0
@@ -137,8 +190,8 @@ def check(key, path, report=True):
             bad.append("(baza) diametrul la +0,5 m e %.2f m, cel putin 1,6" % dia)
         _base(bad, trunk)
         info = ("inalt %.2f  coroana X %.2f (carduri %.2f) Z %.2f  h/l %.2f  centru X %+.2f  "
-                "polita de sus pana la X %+.2f  baza O %.2f" % (
-                    y1, cw, lw, cb[2][1] - cb[2][0], ratio, cxm, over, dia))
+                "polita de sus pana la X %+.2f  baza O %.2f  umplere %.0f %%" % (
+                    y1, cw, lw, cb[2][1] - cb[2][0], ratio, cxm, over, dia, fill * 100))
     elif key == "sf_street_tree" and not any(line.startswith("(noduri)") for line in bad):
         crown = nodes["StreetTree_Crown"]["verts"]
         cb = _box(crown)
@@ -215,6 +268,20 @@ def recolor(g, blob, node_name, src, dst):
     return n > 0
 
 
+def thin_foliage(g, blob, k=0.35):
+    """Sabotajul de umplere: frunzisul (masa, miezul, cardurile) strans pe Y spre mijlocul lui
+    la `k`, cu cate un varf de card lasat sus si jos, ca dreptunghiul coroanei sa ramana acelasi."""
+    ys = []
+    for n in FOLIAGE:
+        poke_all(g, blob, n, lambda p: ys.append(p[1]) and False, lambda p: p)
+    lo, hi = min(ys), max(ys)
+    mid = (lo + hi) * 0.5
+    for n in FOLIAGE:
+        poke_all(g, blob, n, lambda p: True, lambda p: (p[0], mid + (p[1] - mid) * k, p[2]))
+    poke(g, blob, "Cypress_Leaves", lambda p: True, lambda p: (p[0], hi, p[2]))
+    return poke(g, blob, "Cypress_Leaves", lambda p: p[1] < hi - 0.01, lambda p: (p[0], lo, p[2]))
+
+
 def sabotages(key):
     first = NODES[key][0]
 
@@ -248,6 +315,13 @@ def sabotages(key):
             ("baza trunchiului mutata 0,6 m pe X", "baza",
              lambda g, b: poke_all(g, b, "Cypress_Trunk", lambda p: p[1] < 0.3,
                                    lambda p: (p[0] + 0.6, p[1], p[2])) > 0),
+        ]
+        out += [
+            ("frunzisul turtit pe Y la 35 % (polite subtiri), capetele pastrate", "umplere",
+             lambda g, b: thin_foliage(g, b)),
+            ("coroana stransa pe Z la 50 % (turn de discuri din capat)", "adancime",
+             lambda g, b: poke_all(g, b, "Cypress_Crown", lambda p: True,
+                                   lambda p: (p[0], p[1], p[2] * 0.5)) > 0),
         ]
         if CYP_SPEC[key]["ratio"] is not None:
             out.append(("coroana stransa pe X la 60 % (arbore inalt si ingust)", "proportie",

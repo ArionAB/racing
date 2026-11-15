@@ -100,9 +100,11 @@ def limb(b, pts, r0, r1, slot, segments=6, cap_end=True):
 
 
 def root_flare(b, base_r, n, slot, seed=0, height=0.95, reach=1.55, thick=0.36,
-               segments=6, skip=()):
+               segments=6, skip=(), toe=False):
     """`n` contraforturi de radacina in jurul bazei: pleaca din trunchi la `height`
-    si intra in pamant la `reach * base_r`, cu varful exact la z = 0 (raza 0)."""
+    si intra in pamant la `reach * base_r`, cu varful exact la z = 0 (raza 0).
+    `toe=True`: un inel in plus aproape de sol (raza ~0,45 din grosime, la 0,3 din ea) --
+    varful e un deget rotunjit care se culca pe sol, nu un tarus."""
     rnd = _lcg(seed * 131 + 7)
     out = set()
     for k in range(n):
@@ -115,6 +117,11 @@ def root_flare(b, base_r, n, slot, seed=0, height=0.95, reach=1.55, thick=0.36,
         p0 = Vector((ca * base_r * 0.35, sa * base_r * 0.35, height * (0.8 + 0.3 * rnd())))
         p1 = Vector((ca * base_r * 0.9, sa * base_r * 0.9, height * 0.38))
         p2 = Vector((ca * base_r * rr, sa * base_r * rr, 0.0))
+        if toe:
+            pt = Vector((ca * base_r * rr * 0.86, sa * base_r * rr * 0.86, th * 0.32))
+            out |= b.taper_sweep([p0, p1, pt, p2], [th, th * 0.82, th * 0.45, 0.0], slot,
+                                 segments=segments, cap_start=True, cap_end=False)
+            continue
         out |= b.taper_sweep([p0, p1, p2], [th, th * 0.82, 0.0], slot, segments=segments,
                              cap_start=True, cap_end=False)
     return out
@@ -181,7 +188,7 @@ def core_blob(b, center, rx, ry, rz, slot, subdiv=2):
 
 def sf_leaf_cards(b, pads, slot, count, base_hex, accent_hex=None, seed=0,
                   size=(0.85, 1.15), shell=(0.80, 1.10), spray=0.06, below=0.18,
-                  accent=0.22, radial=0.15, shade_lo=0.46, size_by_pad=False):
+                  accent=0.22, radial=0.15, shade_lo=0.46, size_by_pad=False, windward=0.0):
     """Cardurile punctate, cu lumina PE CIORCHINE (vezi docstringul modulului).
 
     Diferente fata de `leaf_cards` (kyoto_shapes):
@@ -262,7 +269,10 @@ def sf_leaf_cards(b, pads, slot, count, base_hex, accent_hex=None, seed=0,
             v = min(1.0, max(0.28, v))
             # umbra rece: rosul cade mai repede decat verdele si albastrul
             col = Vector((base[0] * v * (0.72 + 0.28 * v), base[1] * v, base[2] * v * (0.92 + 0.08 * v)))
-            if acc is not None and rnd() < accent * (0.15 + 1.6 * tl * tl * tl):
+            # `windward`: sclipirile si pe fata dinspre vant (-X) a ciorchinelui, ca straturile
+            # sa se desparta in lumina (decuparea are crestetele si fata din vant luminate)
+            wf = 1.0 + windward * max(0.0, -ux)
+            if acc is not None and rnd() < accent * (0.15 + 1.6 * tl * tl * tl) * wf:
                 v2 = max(v, 0.86)
                 col = acc * v2
             sd = Vector((rnd(), rnd(), 0.0))

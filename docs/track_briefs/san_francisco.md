@@ -1661,3 +1661,10 @@ Alte note (nu cer regenerare):
 > broad old tree with two trunks, sf_cypress_c a smaller young tree, more upright but still bent
 > by the wind. In sf_horizon replace the acacia-like trees with a few small dark wind-bent cypress
 > clumps; keep the golden hills, the grey rocks and the hazy generic city.
+
+**Corectura, rezultatul:** `sf_inventar_v01_b_chiparosi.jpg`. **Trecută:** trunchi scurt, gros și
+noduros, coroana în 4–6 pâlcuri dense pe niveluri, toate aplecate în aceeași parte, verde închis.
+Cele trei variante se deosebesc (a: un trunchi; b: bătrân, cu două trunchiuri; c: tânăr, mai drept).
+`sf_horizon` are acum chiparoși în loc de salcâmi. Pentru V1 și F2 valoarea planșa b, nu a. Notă
+pentru modelator: pâlcurile se modelează ca 4–6 volume mari (nu frunziș fin, care sclipește pe
+mobil), iar trunchiul rămâne gros cât în planșă.

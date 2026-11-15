@@ -1746,7 +1746,8 @@ if B200:
                              % (name, parent, tx, key))
 
     POD_SUB.append('[sub_resource type="StandardMaterial3D" id="Mat_pod_gri"]\nalbedo_color = Color(0.62, 0.62, 0.6, 1)\n')
-    POD_SUB.append('[sub_resource type="StandardMaterial3D" id="Mat_pod_rosu"]\nalbedo_color = Color(0.73, 0.21, 0.13, 1)\n')
+    if not POD_MODEL:   # rosul placeholder al portalurilor: cu kitul, nimic nu-l mai foloseste
+        POD_SUB.append('[sub_resource type="StandardMaterial3D" id="Mat_pod_rosu"]\nalbedo_color = Color(0.73, 0.21, 0.13, 1)\n')
     POD_NODES.append('[node name="Pod" type="Node3D" parent="."]\n')
     # parapetele exterioare + evazarile
     POD_NODES.append('[node name="Parapet" type="StaticBody3D" parent="Pod"]\n')

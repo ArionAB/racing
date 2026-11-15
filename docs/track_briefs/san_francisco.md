@@ -1763,6 +1763,28 @@ parcate (4,2 m) sunt refuzate de `BumpProp` (plafonul de 2 m), deci rămân stat
    subțire (nimic sub 0,10 m), AO pe perete ca în brief; ținta: pastel ≥ 28 % din pixelii caselor.
    Parterul de piatră din planșă rămâne la un parametru din `build_sf_row.py`.
 
+   **Pilotul v2 — ACCEPTAT (15 nov 2026, ramura `sanfrancisco/pas7b-case`).** Aceeași sondă,
+   aceleași cadre:
+
+   | | case din cod | pilot v1 | **pilot v2** | prag |
+   |---|---|---|---|---|
+   | pixeli de casă pe pastel | 31,0 % | 17,5 % | **39,8 %** | ținta ≥ 28 % |
+   | pixeli pe trim alb | 34,0 % | 38,0 % | 27,9 % | — |
+   | pixeli pe parterul de piatră | 1,8 % | 11,3 % | 0,6 % | — |
+   | ΔV soare/umbră | 0,325 | 0,392 | 0,353 | ≥ 0,28 |
+   | ΔE2000 minim | 15,0 | 15,0 | 15,0 | ≥ 10 |
+   | soare pe lanț | 85,1 % | 85,4 % | 85,4 % | ≥ 80 % |
+   | elevația fațadei (etaje + fronton): pastel / alb | — | 23,4 / 55,9 % | 45,1 / 34,3 % | ≥ 45 / ≤ 35 % |
+
+   Ce s-a schimbat: parterul și benzile frontonului pe `Row_Wall`, trim mai subțire (rame și
+   stâlpi 0,10 m, brâu 0,12, fără friză), AO-ul peretelui doar din ocluzia de deasupra (cel vechi
+   înnegrea colțurile lipite de trim și cobora toată fața la 0,62). 1.264 de triunghiuri.
+   `STYLE = STYLE_V1` în `build_sf_row.py` reface v1; `ground = "stone"` readuce parterul din
+   planșă. Kitul livrează și **`sf_row_b_canted_m.glb`**, geometrie oglindită de-adevăratelea.
+   Capturi: `img/sf_loc/pilot_v2_01…05.png` lângă `pilot_0N.png` (v1) și `loc_*.png` (cod).
+   Elevația se măsoară cu `tools/blender/measure_sf_row_facade.py` (raze orizontale din 2 în
+   2 cm, clasate pe nod și pe slot). **Celelalte șase case sunt comandate pe aceleași reguli.**
+
    **Găsit la pilot, pentru pasul 8:**
    - **oglindirea prin `scale.x = −1` merge pe instanță, NU în `MultiMesh`** (casa iese pe dos:
      `img/sf_loc/pilot_oglinda_fata.png`). `CityFill` are nevoie de mesh oglindit de-adevăratelea,

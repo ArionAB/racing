@@ -12,7 +12,8 @@ extends Node3D
 ## triplanare de 4 m, deci textura cade identic): A = nod cu pastelul, B = CityFill cu pastelul pe
 ## instanta, C = nodul fisierului `_m` cu pastelul, D = CityFill cu modelul de baza OGLINDIT.
 ## Compara pixel cu pixel A cu B si C cu D. `--sabotaj` da instantei B pastelul urmator: TREBUIE
-## sa pice. Exit 1 daca pica.
+## sa pice. `--per-clasa` opreste pastelul pe instanta (`wall_tint_per_instance = false`): CityFill
+## cade pe un sablon per clasa, iar pixelii trebuie sa iasa la fel. Exit 1 daca pica.
 
 const STEM := "sf_row_b_square"
 const DIR := "res://assets/models/sanfrancisco/buildings/"
@@ -22,11 +23,13 @@ const MAX_MEAN: float = 1.5      # diferenta medie admisa pe canal (0-255)
 const MAX_BAD: float = 0.5       # % pixeli de casa cu diferenta > 12 pe vreun canal
 
 var _sabotage := false
+var _per_class := false
 var _fails := 0
 
 
 func _ready() -> void:
 	_sabotage = "--sabotaj" in OS.get_cmdline_user_args()
+	_per_class = "--per-clasa" in OS.get_cmdline_user_args()
 	get_window().size = Vector2i(int(4.0 * STEP_M * PX_PER_M), int(15.0 * PX_PER_M))
 	get_viewport().mesh_lod_threshold = 0.0
 	get_viewport().msaa_3d = Viewport.MSAA_DISABLED
@@ -62,6 +65,7 @@ func _ready() -> void:
 		fill.models = [load(DIR + STEM + ".glb") as PackedScene]
 		fill.mirror_models = [load(DIR + STEM + "_m.glb") as PackedScene]
 		fill.wall_classes = PackedStringArray(classes)
+		fill.wall_tint_per_instance = not _per_class
 		var mir := Basis(rot.x * -1.0, rot.y, rot.z)
 		var xf := PackedFloat32Array()
 		for t: Array in [[rot, STEP_M], [mir, 3.0 * STEP_M]]:

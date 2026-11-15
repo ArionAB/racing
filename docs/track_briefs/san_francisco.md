@@ -1141,11 +1141,84 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
    - captura cu toată grila de 8 mașini;
    - alternativa de start `far0`.
 
+   **Runda 2 (15 nov 2026): capetele despărțitorului, cu main adus în ramură.** Coordonatorul a
+   tratat cele 2 ocoliri ale capetelor ca **contract picat**: dezvoltatorul cere 0 treceri pe
+   contrasens.
+
+   **Main e adus în ramură prin merge** (41 de commit-uri, între ele #729
+   `release/unelte-indici-pista` și #725 `release/verify-paralel`), fără conflicte. Ce înseamnă
+   acum `--track=` pentru Track25:
+   - ProbeRace citește `--track=` ca text. `17` e tot indexul Track25, dar e un număr ambiguu
+     (scena Track17 e Jodhpur) și sonda avertizează. `tools/sf_route_race.sh` cere acum
+     `--track=Track25`.
+   - ProbeLayout, ProbeLaneClear și snapshot iau tot numărul: `--track=17` încarcă Track25
+     (verificat pe eticheta tipărită).
+   - Track25 are acum `scenes/tracks/info/Track25.tres` (id `san_francisco`), venit din main.
+
+   **Remediul ales: zidul din S.** Am încercat întâi remediul cel mai puțin invaziv care
+   garantează rezultatul fizic. Ambele ocoliri au fost ale unor mașini LENTE, împinse larg
+   dintr-un viraj la stânga. Citirea mai devreme a AI-ului (prima variantă propusă) nu oprește o
+   mașină împinsă, iar zidul o oprește. Virajul de la baza podului a rămas R24.
+
+   Zidul: capul despărțitorului **începe în S**.
+   - E un zid moale (`soft_hit_crush`, ca atenuatorul), de 0,6 m, cu 1,3 m de coliziune peste
+     drum, pe axa podului.
+   - Are 80 m la fiecare capăt: S-ul de 60 m plus 20 m spre viraj sau balon, lipit de capul
+     despărțitorului (`Pod/CapS`, `CAP_S_EXTRA`).
+   - În S benzile sunt la 6,2–14,2 m de axă. Generatorul verifică faptul că nicio axă de bandă
+     nu trece la mai puțin de 6,0 m de zid.
+   - Gărzile sunt neschimbate: ProbeLayout OK, ProbeSfRoute −0,29 m, ProbeLaneClear 50 (exact
+     linia de bază; sabotajul dă 53).
+
+   **ProbeRace pe ramura cu main**, 8 × 16 × 250 s, cu zidul:
+
+   | lot | tur mediu | treceri pe pod | **peste despărțitor** | **frontale în coridor** | contact barieră / camion / atenuator | coada după camion | `[blocaj]` |
+   |---|---|---|---|---|---|---|---|
+   | mobil, rularea 1 | 82,9 s | 742 | **0** | **0** | 5,5 % / 0 / 0,8 % | 0 | 17 (14 în serpentine) |
+   | mobil, rularea 2 | 83,0 s | 744 | **0** | **0** | 4,6 % / 0 / 0,4 % | 0 | 15 |
+   | fără tramvaie | 82,2 s | 770 | **0** | **0** | 5,5 % / 0 / 0,5 % | 0 | 15 |
+   | FIX | 82,6 s | 758 | **0** | **0** | 1,2 % / — / 0,5 % | — | 9 |
+   | **SABOTAJ** (`--median-blind --tram-blind`) | 90,5 s | 659 | 0 | 0 | **31,6 % / 3,9 %** / 0 | **3,5 %** | **231** |
+
+   - **Contractul ține în toate loturile**: 0 treceri pe contrasens și 0 frontale în coridor, în
+     ~3.000 de treceri. Runda 1 avea 2 din ~2.300.
+   - Frontalele „oriunde” (5–7 pe lot) sunt la furcă și în serpentine (23 din 24): mașini
+     răsucite în îmbulzeala din turul 1, nu pe pod.
+   - **Sabotajul pică în continuare**: contact cu bariera 31,6 % față de 4,6–5,5 %, cu camionul
+     3,9 % față de 0, coadă 3,5 %. Tramvaiele au 85 % și 50 % contact și 231 de `[blocaj]`.
+   - Tramvaiele în cele două rulări mobile: tramvaiul 1 are 3,2 % / 2,3 % contact, tramvaiul 2 are
+     5,5 % / 3,7 %. Runda 1 dădea 1,3 % și 2,1 %, iar pasul 5 1,3–3,1 %. Pierderea mediană a
+     rămas 0,22 s și 0,8 s. Zidul nu atinge tramvaiele, deci diferența e între loturi.
+   - Lanțul: câte o ejectare în rularea 2 și în lotul FIX, 1 din ~1.530 de zboruri (~0,07 %, ca
+     pe bucla veche).
+   - Scurtătura câștigă +1,0 / +1,1 s la mediană cu tramvaie.
+
+   **Jucătorul: poate intra intenționat pe contrasens pe la capete?** Am scris o sondă nouă,
+   `tools/probe_sf_contrasens.gd` (`ProbeSfContrasens.tscn`). Un pilot scriptat ține gazul la
+   fund, cu plafon de 22 m/s, și urmează puncte de hartă care încearcă să treacă pe banda opusă.
+
+   | scenariu | cu zidul | fără zid (`--cap-s=0`) |
+   |---|---|---|
+   | A: la baza podului, tăiat prin S pe banda opusă | **blocat** (oprit de zid) | trece, 156 m pe contrasens |
+   | C: pe malul celălalt, ieșit din balon, tăiat prin S pe banda opusă | **blocat** | trece, 116 m |
+   | B: la baza podului, ocolit pe la capătul de V al zidului, peste insula dintre viraje, apoi virajul benzii spre oraș luat invers | trece (86 m, 15,7 s off-road) | trece |
+   | D: din balon, ieșirea benzii spre larg luată invers | trece (116 m) | trece |
+
+   **Prin S nu se mai poate trece pe banda opusă: zidul o împiedică fizic la ambele capete.** Pe
+   contrasens se mai ajunge doar conducând pista invers, pe o bucată de drum luată în sens opus
+   (B, D), cum se poate pe orice pistă. Asta cere ocolul de pe la capătul zidului (B: ~16 s
+   off-road) sau balonul parcurs invers. Ca să fie închis și asta, ar trebui ziduri pe marginea
+   exterioară a virajelor și a balonului. N-am pus: e decizie de design (pista cu ziduri unde
+   până acum n-avea).
+
+   `verify_local` pe ramura cu main: vezi mai jos.
+
    **De decis (dezvoltatorul):**
    1. **Turul de 82,9 s** e cu ~3 s peste fereastra de 65–80 s. Pârghiile: tablierul de 170 m
       (~−2 s) sau ocolul scurtat (decis la 1b la 400 m).
-   2. **Cele 2 treceri pe lângă capetele despărțitorului** în ~2.300 de treceri (remediile de
-      mai sus).
+   2. ~~Cele 2 treceri pe lângă capetele despărțitorului~~ — **rezolvat în runda 2** (zidul din S, 0
+      în toate loturile). Rămâne de decis doar dacă se închide și contrasensul „pista condusă
+      invers” (scenariile B, D).
    3. **Lumina pe urcare**: contra-lumina e acceptată sau se lucrează pe ea (casele, ambientul,
       fațadele luminate de jos). Soarele nu se poate muta fără să piardă lanțul.
    4. Pervazul de 3,8 m dincolo de parapet.

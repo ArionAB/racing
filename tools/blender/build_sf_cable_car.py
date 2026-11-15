@@ -101,10 +101,14 @@ RED, CREAM, WOOD_D, DARK = KERB_RED, CORAL_SAND, LOG_DARK, VOLCANIC_BLACK
 BRASS, WHITE = RUST, FOAM_WHITE
 CLOTH_A, CLOTH_B = PAINTED, WOOD
 SKIN, HAIR = SAND_MID, SAND_SHADOW
-# Acoperisul: decuparea (si descrierea coordonatorului) il au rosu-visiniu;
-# tabelul din brief §5 il pune pe coral_sand cu capetele kerb_red. Ales
-# decuparea; comutatorul e aici daca se decide altfel la integrare.
-ROOF_SLOT = KERB_RED
+# Acoperisul: decuparea il are rosu-visiniu; tabelul din brief §5 il pune pe
+# coral_sand cu capetele kerb_red. DECIS LA INTEGRARE (coordonatorul, 15 nov 2026,
+# pe cable_car_roof_ab.png): varianta din brief. Camera de joc vede vagonul de sus
+# si din spate, deci acoperisul e cea mai mare suprafata din cadru: rosu peste
+# caroseria rosie citea ca o pata dintr-o bucata; crem, cu lanternoul si capetele
+# rosii, da cele doua tonuri ale vagonului si scoate lanternoul. `KERB_RED` aici
+# reface varianta decuparii.
+ROOF_SLOT = CORAL_SAND
 
 
 # --- ajutoare locale ------------------------------------------------------------

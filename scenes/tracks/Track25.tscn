@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://scenes/hazards/MovableMedian.tscn" id="6_median"]
 [ext_resource type="Script" path="res://scenes/props/sf_hydrangea_petals.gd" id="8_petals"]
 [ext_resource type="Script" path="res://scenes/props/sf_parked_car.gd" id="7_parked"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/vehicles/cable_car.glb" id="p7_tram"]
 
 [sub_resource type="Curve3D" id="Curve3D_sf"]
 closed = true
@@ -756,6 +757,8 @@ pitch_to_ground = true
 ai_branch_reach_m = 0.0
 placeholder_color = Color(0.55, 0.55, 0.55, 1)
 placeholder_nose_color = Color(0.42, 0.42, 0.42, 1)
+model = ExtResource("p7_tram")
+model_yaw = 0.0
 
 [node name="Tramvai2" type="Path3D" parent="Tramvaie"]
 curve = SubResource("Curve3D_tram2")
@@ -776,6 +779,8 @@ pitch_to_ground = true
 ai_branch_reach_m = 35.0
 placeholder_color = Color(0.55, 0.55, 0.55, 1)
 placeholder_nose_color = Color(0.42, 0.42, 0.42, 1)
+model = ExtResource("p7_tram")
+model_yaw = 0.0
 
 [node name="Pod" type="Node3D" parent="."]
 

@@ -3744,10 +3744,16 @@ func _apply_wall_class() -> void:
 
 
 func _wall_class_of(model: Node) -> String:
+	# Urca pana la containerul `WorldProp` INCLUSIV: o metadata pusa pe nodul
+	# DecorManual insusi da pastelul tuturor caselor de sub el (masurat la
+	# pilotul de pe SfLoc: oprita la `n != self`, metadata de pe container era
+	# ignorata tacut).
 	var n: Node = model
-	while n != null and n != self:
+	while n != null:
 		if n.has_meta(WALL_CLASS_META):
 			return String(n.get_meta(WALL_CLASS_META))
+		if n == self:
+			break
 		n = n.get_parent()
 	return ""
 

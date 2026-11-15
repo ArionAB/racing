@@ -37,7 +37,9 @@ extends Node
 ##            turbo) sunt EXACT ai masinii, la start si la final, iar viteza
 ##            orizontala nu trece de plafonul ei (max_speed * speed_scale +
 ##            turbo + aspiratie) mai mult decat marja de panta.
-##   REPUNERI Bronz nu se repune mai des decat profilul implicit, peste marja:
+##   REPUNERI Bronz nu se repune DIN CONDUS mai des decat profilul implicit,
+##            peste marja (repunerile de dupa o lovitura de hazard se numara
+##            separat — zarul de hazard, vezi HAZARD_RESPAWN_WINDOW_S):
 ##            un AI „prost" care iese mereu de pe drum e un bug, nu un nivel.
 ##
 ## Sabotaje (`--sabotaj=`), fiecare trebuie sa pice contractul lui:
@@ -66,6 +68,14 @@ const SPEED_OVER_MAX: float = 0.02
 ## pista, plus o repunere pe seed (zgomotul de pe pistele cu caderi).
 const RESPAWN_FACTOR: float = 1.5
 const RESPAWN_SLACK_PER_SEED: float = 1.0
+## Zarul de hazard (`AiSkill.hazard_dice`): un pilot care trece pe nevazute
+## poate fi lovit, iar o parte din lovituri se termina cu repunere — asta e
+## nivelul, nu un bug. De aceea contractul REPUNERI judeca doar repunerile DE
+## CONDUS: cele venite la cel mult atatea secunde dupa o lovitura de hazard
+## (`_is_hazard`, ars, strivit) se numara separat (`hz_respawns`) si
+## se scad din ambele parti, si la Bronz, si la implicit. Un pilot stricat
+## (sabotajul `repuneri`) iese de pe drum fara niciun hazard, deci tot pica.
+const HAZARD_RESPAWN_WINDOW_S: float = 6.0
 
 var _track_index: int = 12
 ## `--track=` ca text: numar (indexul castiga, 12 = Monument Valley) sau, fara
@@ -98,6 +108,12 @@ var _speed_peak_ratio: Array[float] = []
 var _params0: Array = []
 var _params_ok: bool = true
 var _params_note: String = ""
+## Lovituri de hazard pe toata cursa, toate masinile (vezi `_is_hazard`).
+var _hazard_hits: int = 0
+## Per masina: cand a fost lovita ultima oara de un hazard (s de cursa).
+var _hazard_hit_at: Array[float] = []
+## Repuneri venite in HAZARD_RESPAWN_WINDOW_S dupa o lovitura de hazard.
+var _hazard_respawns: int = 0
 
 
 func _ready() -> void:
@@ -203,12 +219,26 @@ func _start() -> void:
 		_lap_marks.append([])
 		_last_laps.append(0)
 		_respawns.append(0)
+		_hazard_hit_at.append(-1.0e9)
 		_speed_samples.append(0)
 		_speed_over.append(0)
 		_speed_peak_ratio.append(0.0)
 		_params0.append(_params_of(car))
+		# Lovituri de hazard: ce plateste pilotul pentru un zar pierdut. Contact
+		# cu un corp de hazard, plus efectele lor (ars, strivit). NU si `ejected`:
+		# soferul e aruncat la orice izbitura tare, inclusiv in perete — numarat
+		# aici, pilotul stricat din sabotajul `repuneri` isi trecea toate
+		# repunerile drept „de hazard" (masurat: 22 din 23) si contractul nu pica.
+		car.impact.connect(func(_c: Car, _kind: StringName, _s: float, _n: Vector3,
+				_p: Vector3, other: Node) -> void:
+			if _is_hazard(other):
+				_hazard_hit(i))
+		car.ignited.connect(func(_c: Car, _s: float) -> void: _hazard_hit(i))
+		car.crushed.connect(func(_c: Car, _s: float) -> void: _hazard_hit(i))
 		car.respawned.connect(func(c: Car) -> void:
 			_respawns[i] += 1
+			if _elapsed - _hazard_hit_at[i] <= HAZARD_RESPAWN_WINDOW_S:
+				_hazard_respawns += 1
 			_resp_at.append("%.2f" % _race.track.frac_at(c.road_index, c.route)
 				+ ("" if c.route == 0 else "r%d" % c.route)))
 	_check_params_match_data(cars)
@@ -266,6 +296,27 @@ func _skill_for_run(level: int, cars: Array[Car]) -> Resource:
 		skill.set("straight_speed", 1.0)
 		skill.set("mistake_chance", 0.6)
 	return skill
+
+
+func _hazard_hit(i: int) -> void:
+	_hazard_hits += 1
+	_hazard_hit_at[i] = _elapsed
+
+
+## Corpul lovit tine de un hazard? Se urca pana la patru parinti: corpul de
+## coliziune e de obicei copilul nodului cu scriptul hazardului.
+func _is_hazard(node: Node) -> bool:
+	var n := node
+	for _k in 4:
+		if n == null or n is Track or n is Car:
+			return false
+		var sc := n.get_script() as Script
+		if sc != null:
+			var path := sc.resource_path.to_lower()
+			if path.contains("hazard") or path.contains("geyser") or path.contains("torrent"):
+				return true
+		n = n.get_parent()
+	return false
 
 
 func _params_of(car: Car) -> Array:
@@ -343,6 +394,10 @@ func _finish(cars: Array[Car], all_done: bool) -> void:
 	var resp := 0
 	var late := 0
 	var wide := 0
+	var hz_rolls := 0
+	var hz_blind := 0
+	var sc_rolls := 0
+	var sc_taken := 0
 	for i in cars.size():
 		var marks: Array = _lap_marks[i]
 		var car_laps: Array[float] = []
@@ -360,16 +415,27 @@ func _finish(cars: Array[Car], all_done: bool) -> void:
 		if md != null:
 			late += int(md[0])
 			wide += int(md[1])
+		# Zarul de nivel (hazard / scurtatura): cate zaruri, cate „pe nevazute",
+		# cate „o iau". Zero peste tot pe profilurile fara zar.
+		for r in ai.hazard_rolls:
+			hz_rolls += 1
+			if r > ai.skill.hazard_dice:
+				hz_blind += 1
+		for r in ai.shortcut_rolls:
+			sc_rolls += 1
+			if r <= ai.skill.shortcut_dice:
+				sc_taken += 1
 	var over_frac := float(over) / maxf(float(samples), 1.0)
 	var wall_s := float(Time.get_ticks_msec() - _t_wall0) / 1000.0
 	var line := ("AISKILL_RESULT track=%d label=%s seed=%d skill=%s sabotaj=%s "
 		+ "lap_mean=%.3f lap_med=%.3f laps=%d complete=%d respawns=%d speed_over=%.5f "
-		+ "speed_peak=%.3f params_ok=%d mistakes=%d,%d sim_s=%.1f wall_s=%.1f resp_at=%s per_car=%s") % [
+		+ "speed_peak=%.3f params_ok=%d mistakes=%d,%d dice=%d,%d,%d,%d hazard_hits=%d hz_respawns=%d sim_s=%.1f wall_s=%.1f resp_at=%s per_car=%s") % [
 		_track_index, GameState.track_label(_track_index).replace(" ", "_"), _seed,
 		_tag if not _tag.is_empty() else _skill_name,
 		_sabotage if not _sabotage.is_empty() else "-",
 		_mean(all_laps), _median(all_laps), all_laps.size(), 1 if all_done else 0, resp, over_frac,
-		peak, 1 if _params_ok else 0, late, wide, _elapsed, wall_s,
+		peak, 1 if _params_ok else 0, late, wide, hz_rolls, hz_blind, sc_rolls, sc_taken,
+		_hazard_hits, _hazard_respawns, _elapsed, wall_s,
 		",".join(PackedStringArray(_resp_at)) if not _resp_at.is_empty() else "-",
 		";".join(per_car)]
 	print(line)
@@ -445,6 +511,8 @@ func _report(path: String) -> bool:
 			"complete": int(kv.complete), "over": float(kv.speed_over),
 			"peak": float(kv.speed_peak), "params": int(kv.params_ok),
 			"sab": String(kv.get("sabotaj", "-")),
+			# Repuneri de dupa o lovitura de hazard; 0 pe liniile vechi.
+			"hz_resp": int(kv.get("hz_respawns", "0")),
 		}
 		wall_total += float(kv.wall_s)
 		runs += 1
@@ -518,17 +586,21 @@ func _report(path: String) -> bool:
 			var rb := 0
 			var ri := 0
 			var n := 0
+			var hb := 0
+			var hi_r := 0
 			for seed in by.bronz:
 				if by.implicit.has(seed):
-					rb += int(by.bronz[seed].resp)
-					ri += int(by.implicit[seed].resp)
+					rb += int(by.bronz[seed].resp) - int(by.bronz[seed].hz_resp)
+					ri += int(by.implicit[seed].resp) - int(by.implicit[seed].hz_resp)
+					hb += int(by.bronz[seed].hz_resp)
+					hi_r += int(by.implicit[seed].hz_resp)
 					n += 1
 			var cap := float(ri) * RESPAWN_FACTOR + RESPAWN_SLACK_PER_SEED * float(n)
 			var ok_r := float(rb) <= cap
-			print("    repuneri bronz %d vs implicit %d pe %d seed-uri (plafon %.0f) %s" % [
-				rb, ri, n, cap, "ok" if ok_r else "PICA"])
+			print("    repuneri din condus: bronz %d vs implicit %d pe %d seed-uri (plafon %.0f) %s  [dupa hazard: bronz %d, implicit %d]" % [
+				rb, ri, n, cap, "ok" if ok_r else "PICA", hb, hi_r])
 			if not ok_r:
-				problems.append("REPUNERI %s: bronz %d fata de implicit %d (plafon %.0f)"
+				problems.append("REPUNERI %s: din condus, bronz %d fata de implicit %d (plafon %.0f)"
 					% [labels[t], rb, ri, cap])
 	print("")
 	if problems.is_empty():

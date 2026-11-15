@@ -18721,6 +18721,21 @@ const BRANCH_LURE_RANGE: float = 70.0
 ## ~25 m, deci o masina abia trecuta de indexul furcii e inca pe ea.
 const BRANCH_LURE_GRACE_M: float = 15.0
 
+## E masina in raza de momeala a vreunei furci? Acelasi cerc ca la
+## `branch_lure` (fara ocolurile de pedeapsa, care nu se momesc), dar fara
+## scanarea benzii: e intrebat in fiecare cadru de zarul de scurtatura
+## (`AIController._shortcut_dice_tick`), care are nevoie doar de „se apropie o
+## furca", nu de punctul-tinta.
+func fork_in_range(pos: Vector3) -> bool:
+	for bi in range(1, routes.size()):
+		var b := routes[bi]
+		if b.detour or b.baked.is_empty():
+			continue
+		if pos.distance_to(b.baked[0]) <= BRANCH_LURE_RANGE:
+			return true
+	return false
+
+
 ## Punct-tinta care duce spre intrarea unei scurtaturi.
 ##
 ## Intoarce [code]Vector3.INF[/code] daca nu e nicio bifurcatie in fata — asa

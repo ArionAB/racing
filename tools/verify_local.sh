@@ -313,6 +313,11 @@ run_step "World Cup: cupe, adversari unici, puncte, cursa" world_cup.log 'VERDIC
 # pasul urmator (cursa reala) si unealta lunga tools/ai_skill_gap.sh.
 run_step "Niveluri AI: profil implicit, fir, ordine, selector" ai_skill_wiring.log 'VERDICT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeAiSkillWiring.tscn
+# Zarul de nivel: sansa de a citi un hazard si de a lua scurtatura, pe un zar
+# cu 6 fete dupa nivel (Bronz 3/1, Argint 4/2, Aur 5/3 fete). Implicitul nu da
+# cu zarul; nivelurile sunt mereu un pariu (1-5 fete), o data per trecere, iar
+# pe Kyoto zarul chiar se da in cursa reala (hazarde pe ceas + furca).
+run_step "Niveluri AI: zarul de hazard si de scurtatura" ai_dice.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeAiDice.tscn
 # CREDITS (#691): assets/CREDITS.md ajunge in export (include_filter), fiecare
 # addon / LICENSE_*.txt / font are intrare, fiecare intrare apare pe ecran cu
 # autor si licenta, motorul din API, layout la 1280x720 si pe telefon.

@@ -350,11 +350,14 @@ const CHARGE_H: float = 22.0
 ## Cat de sus de marginea de jos sta randul barii in asezarea de baza.
 const CHARGE_BOTTOM_MARGIN: float = 40.0
 
-## ASEZAREA PE ECRANE INGUSTE (#719). Canvas-ul logic are mereu 720 px
-## inaltime, iar latimea vine din aspect (stretch `expand`): 1280 la 16:9,
-## ~1558 pe telefon, dar doar 960 pe iPad (4:3). Butoanele stau lipite de
-## colturi, deci pe 4:3 se apropie de mijloc, iar bara de 300 px intra in zona
-## sagetii ▶ si a franei — o atingere pe bara vira sau franeaza.
+## RANDUL BARII FATA DE BUTOANE (#719). Butoanele stau lipite de colturile de
+## jos; daca randul barii ajunge in zona lor, o atingere pe bara vira sau
+## franeaza. Cu stretch `expand` canvas-ul logic nu e niciodata mai ingust de
+## 1280 (iPad 4:3 -> 1280x959: mai INALT, nu mai ingust), deci in cursa
+## obisnuita bara de 300 px incape pe orice ecran. Randul se lateste insa cu
+## eticheta de mod: „CHALLENGE +1: NO TUK-TUK HITS   LAP 3: 12 PLATES" il
+## impingea, pe orice canvas de 1280, in sageata ▶ (46 px) si in frana (52 px).
+## Iar un canvas mai ingust (alta baza, alt aspect) ar face asta si fara eticheta.
 ##
 ## Regula, in ordine:
 ##   1. Jos, centrat, la latimea plina — asezarea judecata pe telefon. Daca
@@ -371,10 +374,9 @@ const CHARGE_BOTTOM_MARGIN: float = 40.0
 ## voie sa intre in zona unui buton.
 const CHARGE_TOUCH_GAP: float = 16.0
 ## Sub atat (40% din lungimea plina), „pe jumatate" fata de „aproape plina" nu
-## se mai deosebesc dintr-o privire. Pe un iPad 4:3 (960 px logici) iese 133 px:
-## fizic ~3,6 cm pe iPad Pro 12,9" si ~2,9 cm pe iPad-ul de 10,2" — nu mai
-## scurta decat bara de 300 px de pe un iPhone (~2,7 cm), fiindca un px logic e
-## mult mai mare pe tableta. Pe iPad Air (2360x1640, 1036 px) iese 209 px.
+## se mai deosebesc dintr-o privire. Cu provocarea cea mai lunga, pe 1280, bara
+## iese de 153 px; pe un canvas sintetic de 960x720 (cum a fost vazut #719),
+## de 133 px.
 const CHARGE_W_MIN: float = 120.0
 ## Distanta fata de marginea ecranului cand bara urca deasupra sagetilor.
 const CHARGE_EDGE_MARGIN: float = 16.0

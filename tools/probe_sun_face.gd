@@ -18,11 +18,13 @@ var _nz: PackedFloat32Array
 var _nume: Array[String] = []
 
 func _ready() -> void:
-	var idx := 13
+	# Implicit pe id, nu cu un numar: 13 era Track13 la scriere (scena), azi INDEXUL
+	# lui e Okinawa (#718). --track= ia si "TrackNN" / id de pista.
+	var idx := TrackInfo.index_of_id(&"cappadocia")
 	var frac := 0.06
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
-			idx = GameState.resolve_track_index(int(arg.trim_prefix("--track=")))
+			idx = GameState.resolve_track_arg(arg.trim_prefix("--track="))
 		elif arg.begins_with("--frac="):
 			frac = float(arg.trim_prefix("--frac="))
 	await get_tree().process_frame

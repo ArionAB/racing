@@ -20,15 +20,17 @@ extends Node
 ##     stem de fisier.
 ##
 ## Ruleaza:
-##   godot --headless --fixed-fps 60 --path . res://tools/ProbeFiordWood.tscn -- --track=16 [--sabotage]
+##   godot --headless --fixed-fps 60 --path . res://tools/ProbeFiordWood.tscn -- --track=fiordland [--sabotage]
 
 func _ready() -> void:
 	await get_tree().process_frame
-	var idx := 16
+	# Implicit pe id, nu cu un numar: 16 era Track16 la scriere (scena), azi INDEXUL
+	# lui e Angkor (#718). --track= ia si "TrackNN" / id de pista.
+	var idx := TrackInfo.index_of_id(&"fiordland")
 	var sabotage := false
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
-			idx = GameState.resolve_track_index(int(arg.trim_prefix("--track=")))
+			idx = GameState.resolve_track_arg(arg.trim_prefix("--track="))
 		elif arg == "--sabotage":
 			sabotage = true
 

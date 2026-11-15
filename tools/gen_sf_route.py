@@ -1952,7 +1952,11 @@ if P6_PONTON:
         P6_NODES.append('[node name="Stalpi" type="StaticBody3D" parent="Ponton"]\n'
                         'metadata/soft_hit_crush = 0.5\n')
         nb = 0
-        x_ = PONT_X0 + BOLLARD_STEP * 0.5
+        # Primii BOLLARD_FROM m ai pontonului fara stalpi: acolo se varsa fluxurile de la reintalnire
+        # (ocol + scurtatura) si masinile impinse spre nord loveau primul stalp (x 43) — 2 ejectari pe
+        # lot, chiar cu contactul moale (masina atinge in acelasi tick si alt corp static, deci nu e
+        # „doar” stalpul). Fara stalp, greseala de acolo e o cadere, ca pe restul pontonului.
+        x_ = PONT_X0 + float(os.environ.get("SF_BOLLARD_FROM", "12")) + BOLLARD_STEP * 0.5
         while x_ < PONT_X1 - 2.0:
             y_ = Y_LOW + 0.4
             for nm_, typ_, res_ in (("S%d" % nb, "CollisionShape3D", 'shape = SubResource("Box_stalp")'),

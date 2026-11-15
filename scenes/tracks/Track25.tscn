@@ -925,106 +925,90 @@ material_override = SubResource("Mat_hortensie")
 metadata/soft_hit_crush = 0.5
 
 [node name="S0" type="CollisionShape3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43.000, 3.400, -460.300)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55.000, 3.400, -460.300)
 shape = SubResource("Box_stalp")
 
 [node name="S0M" type="MeshInstance3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43.000, 3.400, -460.300)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55.000, 3.400, -460.300)
 mesh = SubResource("Mesh_stalp")
 
 [node name="S1" type="CollisionShape3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.000, 3.400, -460.300)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 61.000, 3.400, -460.300)
 shape = SubResource("Box_stalp")
 
 [node name="S1M" type="MeshInstance3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.000, 3.400, -460.300)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 61.000, 3.400, -460.300)
 mesh = SubResource("Mesh_stalp")
 
 [node name="S2" type="CollisionShape3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55.000, 3.400, -460.300)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 67.000, 3.400, -460.300)
 shape = SubResource("Box_stalp")
 
 [node name="S2M" type="MeshInstance3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55.000, 3.400, -460.300)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 67.000, 3.400, -460.300)
 mesh = SubResource("Mesh_stalp")
 
 [node name="S3" type="CollisionShape3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 61.000, 3.400, -460.300)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 73.000, 3.400, -460.300)
 shape = SubResource("Box_stalp")
 
 [node name="S3M" type="MeshInstance3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 61.000, 3.400, -460.300)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 73.000, 3.400, -460.300)
 mesh = SubResource("Mesh_stalp")
 
 [node name="S4" type="CollisionShape3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 67.000, 3.400, -460.300)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 79.000, 3.400, -460.300)
 shape = SubResource("Box_stalp")
 
 [node name="S4M" type="MeshInstance3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 67.000, 3.400, -460.300)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 79.000, 3.400, -460.300)
 mesh = SubResource("Mesh_stalp")
 
 [node name="S5" type="CollisionShape3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 73.000, 3.400, -460.300)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85.000, 3.400, -460.300)
 shape = SubResource("Box_stalp")
 
 [node name="S5M" type="MeshInstance3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 73.000, 3.400, -460.300)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85.000, 3.400, -460.300)
 mesh = SubResource("Mesh_stalp")
 
 [node name="S6" type="CollisionShape3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 79.000, 3.400, -460.300)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 91.000, 3.400, -460.300)
 shape = SubResource("Box_stalp")
 
 [node name="S6M" type="MeshInstance3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 79.000, 3.400, -460.300)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 91.000, 3.400, -460.300)
 mesh = SubResource("Mesh_stalp")
 
 [node name="S7" type="CollisionShape3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85.000, 3.400, -460.300)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 97.000, 3.400, -460.300)
 shape = SubResource("Box_stalp")
 
 [node name="S7M" type="MeshInstance3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85.000, 3.400, -460.300)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 97.000, 3.400, -460.300)
 mesh = SubResource("Mesh_stalp")
 
 [node name="S8" type="CollisionShape3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 91.000, 3.400, -460.300)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 103.000, 3.400, -460.300)
 shape = SubResource("Box_stalp")
 
 [node name="S8M" type="MeshInstance3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 91.000, 3.400, -460.300)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 103.000, 3.400, -460.300)
 mesh = SubResource("Mesh_stalp")
 
 [node name="S9" type="CollisionShape3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 97.000, 3.400, -460.300)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 109.000, 3.400, -460.300)
 shape = SubResource("Box_stalp")
 
 [node name="S9M" type="MeshInstance3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 97.000, 3.400, -460.300)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 109.000, 3.400, -460.300)
 mesh = SubResource("Mesh_stalp")
 
 [node name="S10" type="CollisionShape3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 103.000, 3.400, -460.300)
-shape = SubResource("Box_stalp")
-
-[node name="S10M" type="MeshInstance3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 103.000, 3.400, -460.300)
-mesh = SubResource("Mesh_stalp")
-
-[node name="S11" type="CollisionShape3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 109.000, 3.400, -460.300)
-shape = SubResource("Box_stalp")
-
-[node name="S11M" type="MeshInstance3D" parent="Ponton/Stalpi"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 109.000, 3.400, -460.300)
-mesh = SubResource("Mesh_stalp")
-
-[node name="S12" type="CollisionShape3D" parent="Ponton/Stalpi"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 115.000, 3.400, -460.300)
 shape = SubResource("Box_stalp")
 
-[node name="S12M" type="MeshInstance3D" parent="Ponton/Stalpi"]
+[node name="S10M" type="MeshInstance3D" parent="Ponton/Stalpi"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 115.000, 3.400, -460.300)
 mesh = SubResource("Mesh_stalp")
 

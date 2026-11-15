@@ -106,6 +106,13 @@ func _zone_at(pos: Vector2) -> String:
 	# nimic — nici viraj, nici gaz.
 	return ""
 
+## Ce comanda ar da o atingere in `pos` (coordonatele controlului), fara sa
+## atinga starea. Doar citire: ProbeTouchZones verifica bara de turbo si linia
+## etichetelor de mod fata de zone intrebandu-le pe ele, nu copiind razele (#719).
+func zone_at(pos: Vector2) -> String:
+	return _zone_at(pos)
+
+
 func _refresh() -> void:
 	var steer := 0.0
 	var drift := false

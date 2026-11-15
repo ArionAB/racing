@@ -35,6 +35,10 @@ from mathutils.bvhtree import BVHTree
 HX = 3.5            # semi-latimea amprentei (X de la -3.5 la +3.5)
 YF = 6.0            # planul fatadei (Godot Z = -6.0)
 YB = -6.0           # spatele (Godot Z = +6.0)
+# Peretele din spate sta cu 5 cm in interior, ca ferestrele plate si banda de
+# streasina din spate sa nu treaca de Godot Z = +6.0 (casele se lipesc spate
+# in spate la 12,0 m, inventarul §1.2); acoperisul ramane la -6.0.
+YBW = YB + 0.05
 LEVEL = 3.2         # inaltimea unui nivel
 EAVE = 9.6          # streasina
 SKIRT = -2.4        # fundul fustei
@@ -293,8 +297,8 @@ def stone_base(h, niche=(-2.15, 1.4, 2.95), garage=(1.3, 2.6, 2.4), top=LEVEL):
             t.rect(o, XP, UP, a, b, SKIRT, top, S_STONE, YP)
     # laturile si spatele: orbe
     for sx in (-1, 1):
-        t.rect(V(sx * HX, 0, 0), YP, UP, YB, YF, SKIRT, top, S_STONE, XP * sx)
-    t.rect(V(0, YB, 0), XP, UP, -HX, HX, SKIRT, top, S_STONE, -YP)
+        t.rect(V(sx * HX, 0, 0), YP, UP, YBW, YF, SKIRT, top, S_STONE, XP * sx)
+    t.rect(V(0, YBW, 0), XP, UP, -HX, HX, SKIRT, top, S_STONE, -YP)
 
 
 def garage_door(h, gx=1.3, gw=2.6, gh=2.4, recess=0.12, boards=4):
@@ -404,10 +408,10 @@ def upper_walls(h, bay_x0, bay_x1, z0=LEVEL, z_under_bay=3.95, gable_apex=None,
     w.rect(o, XP, UP, bay_x0, bay_x1, z0, z_under_bay, S_WALL, YP)
     # laturile si spatele
     for sx in (-1, 1):
-        w.rect(V(sx * HX, 0, 0), YP, UP, YB, YF, z0, EAVE, S_WALL, XP * sx)
-    w.rect(V(0, YB, 0), XP, UP, -HX, HX, z0, EAVE, S_WALL, -YP)
+        w.rect(V(sx * HX, 0, 0), YP, UP, YBW, YF, z0, EAVE, S_WALL, XP * sx)
+    w.rect(V(0, YBW, 0), XP, UP, -HX, HX, z0, EAVE, S_WALL, -YP)
     if gable_apex is not None:
-        for y, out in ((YF, YP), (YB, -YP)):
+        for y, out in ((YF, YP), (YBW, -YP)):
             hs = HX * (gable_apex - gable_split) / (gable_apex - EAVE)
             w.face([V(-HX, y, EAVE), V(HX, y, EAVE), V(hs, y, gable_split),
                     V(-hs, y, gable_split)], S_WALL, out)
@@ -523,8 +527,8 @@ def bay(h, outline, z_cons=3.3, z_slab=(3.7, 3.95), z_mid=(6.2, 6.45),
 # --- Acoperisul cu fronton (fatada B, Queen Anne) ---------------------------------
 
 def gable_roof(h, apex=12.6, thick=0.15, over_front=0.4, over_back=0.0, verge_h=0.42,
-               bands=(9.75, 10.15, 10.55, 11.85), band_h=0.3, band_out=0.05,
-               gable_window=(11.0, 0.7)):
+               bands=(9.75, 10.15, 10.55, 11.95), band_h=0.3, band_out=0.05,
+               gable_window=(10.9, 0.9)):
     """Doua ape cu coama pe Y (Godot Z), fronton triunghiular spre strada.
 
     - apele: placi de ardezie de `thick` (vertical), cu streasina la +-3.5 (nu
@@ -589,12 +593,10 @@ def eave_cornice(h, z_frieze=(9.0, 9.3), z_corn=(9.3, 9.6), proud=0.35, modillio
 def back_face(h, xs=(-1.75, 1.75), rows=((1.0, 1.6), (4.1, 1.75), (6.95, 1.75)),
               eave_band=(9.35, 9.6)):
     """Spatele: ferestre plate (2 pe nivel) si o banda de streasina alba."""
-    c0 = V(0, YB, 0)
     for z0, ht in rows:
         for x in xs:
-            flat_window(h, V(x, YB, 0), -XP, -YP, z0, 1.0, ht)
-    h.trim.box(V(-HX, YB - 0.05, eave_band[0]), V(HX, YB, eave_band[1]), S_WHITE, skip=("+Y",))
-    del c0
+            flat_window(h, V(x, YBW, 0), -XP, -YP, z0, 1.0, ht)
+    h.trim.box(V(-HX, YB, eave_band[0]), V(HX, YBW, eave_band[1]), S_WHITE, skip=("+Y",))
 
 
 # --- Final: noduri, UV, AO -------------------------------------------------------

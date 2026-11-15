@@ -13,3 +13,5 @@ turbo_corner_cut = 0.4
 rocket_start_chance = 0.4
 mistake_chance = 0.1
 yields_to_animals = true
+hazard_dice = 4
+shortcut_dice = 2

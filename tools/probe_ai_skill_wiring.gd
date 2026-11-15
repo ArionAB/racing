@@ -26,6 +26,10 @@ const IMPLICIT_EXPECTED := {
 	"drift_severity": 0.34, "turbo_min_charge": 0.6, "turbo_corner_cut": 0.25,
 	"rocket_start_chance": 0.45, "shortcut_chance": 0.4, "overtake_reach": 1.0,
 	"mistake_chance": 0.0, "yields_to_animals": 0.0,
+	# Zarul de nivel: 0 = fara zar (citeste orice hazard, scurtatura din
+	# `shortcut_chance` o data pe cursa). Ordinea nivelurilor pe zar o judeca
+	# tools/probe_ai_dice.gd, nu C de aici (referinta n-are zar).
+	"hazard_dice": 0.0, "shortcut_dice": 0.0,
 }
 ## Sensul in care un camp face pilotul MAI BUN (+1 = mai mare e mai rapid).
 const FASTER_SIGN := {

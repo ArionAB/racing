@@ -413,6 +413,16 @@ din lumină.
 
 ## 5. Assets (schiță — lista completă după ProbeLayout)
 
+> **Foaia de assets e acum [`docs/asset_briefs/sanfrancisco_inventory.md`](../asset_briefs/sanfrancisco_inventory.md)
+> (v0.1, pasul 4, 15 nov 2026).** Ea conține verdictul pe consumatori (§5.7 de mai jos, cu
+> fișier:linie), bugetul de materiale măsurat, tabelul de frustum, inventarul pe roluri și ordinea
+> de livrare. Briefurile Blender ale primului val: `sf_cable_car.md` (**primul de dat**),
+> `sf_red_bridge.md`, `sf_painted_row_kit.md` (pilotul: o casă), `sf_median_truck.md`. Lista de
+> mai jos e schița inițială. Unde diferă, are dreptate foaia. Diferențele principale:
+> `sf_clock_tower` rămâne nefăcut până la decizia dezvoltatorului (H7), `sf_dragon_gate` e P3, iar
+> zidurile de cărămidă și zebrele se fac din cod, nu ca GLB. Foaia se ajustează după ce vine
+> diorama (§9).
+
 ### 5.1 Teren și suprafețe (cod, clase de textură)
 
 - asfalt cu zebre, marcaje și șine (decal-uri); urme pe `RoadWear`
@@ -487,6 +497,25 @@ scândurilor pe ponton. Bufnitura de aterizare există (`ImpactSound` pe semnalu
 teren înclinat? — de aici depinde dacă „casele în trepte” e kit sau cod; (3)
 suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
 `RespawnZone` pe golf vs plasa de mare existentă.
+
+**FĂCUT (15 nov 2026)**, detaliat în `sanfrancisco_inventory.md` §1:
+1. **DA.** `PathMover` are `model`, `model_node`, `model_yaw` și măsoară cutia de coliziune pe
+   AABB-ul modelului. Vagonul intră fără cod, cu condiția să aibă AABB exact 2,5 × 3,2 × 8,5 m
+   (pe cutia asta sunt măsurate toate contactele).
+2. **PARȚIAL.** `CityFill` pune fiecare casă la cota cea mai joasă a amprentei, deci treptele de
+   acoperiș ies fără cod. Soclul vizibil cere o opțiune de o linie (casa la cota de sus). **Cele cinci
+   pasteluri cer cod** (azi se cunosc doar două tente pe model, deschis / indigo) sau cinci fișiere
+   pe casă. Decizia e a dezvoltatorului. Rândul din față e `DecorManual` din generator, cu
+   coliziune-cutie.
+3. **Tenta DA, textura NU.** `TrackBranch` are `tint` propriu, dar nicio rețetă cu clasă de
+   textură: cărămida serpentinelor cere cod.
+4. **Plasa există.** `SeaRespawn` se construiește automat sub apă, iar `ViaductNet` sub tablier: nu
+   se adaugă `RespawnZone`. Scândura pontonului cere cod. **Defect găsit:** pe B200 apa golfului
+   se vede doar în strâmtoare. La N de chei e uscat (`img/sf_route/b200_cheu_gamecam.png`).
+
+Pe lângă cele patru: `MovableMedianHazard` n-are export de model (camionul și blocul cer cod),
+podul n-are consumator (se leagă din generator, coliziunea rămâne a jocului), iar mașinile
+parcate (4,2 m) sunt refuzate de `BumpProp` (plafonul de 2 m), deci rămân statice fără cod.
 
 ## 6. Bugete
 
@@ -1227,6 +1256,33 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
 
 4. **Turul de feel, capturile `--gamecam`, tabelul de frustum**; apoi planul de
    sus adnotat, dioramă, foaia de assets.
+
+   **FĂCUT (15 nov 2026), în afară de turul de feel și de dioramă.** Turul de feel rămâne al
+   dezvoltatorului, amânat la finalul pasului 8 (decizia lui din 15 nov). Diorama o generează
+   dezvoltatorul din promptul din §9. Ordinea, la cererea lui: traseu → gărzi → plan adnotat →
+   dioramă → foaie de assets. Foaia a fost scrisă în paralel, iar după dioramă se ajustează.
+   - **Planul adnotat:** `docs/asset_briefs/img/sf_route/sf_plan_adnotat.png`
+     (`tools/annotate_sf_plan.py`, peste captura ortografică reală
+     `sf_top_ortho_b200.png`; maparea e verificată pe linia de start). Promptul de dioramă e în §9.
+   - **Foaia de assets:** `docs/asset_briefs/sanfrancisco_inventory.md`. Conține trecerea de
+     contracte (§5.7), bugetul de materiale (24 măsurate azi, din care 12 sunt placeholdere care
+     dispar; proiecția e ~23–27 din 38; podul carosabil nu schimbă bugetul), inventarul pe roluri
+     și ordinea de livrare.
+   - **Tabelul de frustum:** în foaie, §4, pe zece puncte ale turului (grila, mijlocul tablierului,
+     strada tramvaiului, coama, prima muchie, muchia 4, furca, cheiul, strada de întors, podul spre
+     larg). Concluzia de modelare: **partea de sus a portalurilor (+39…+45) aproape nu intră în
+     cadru**. Identitatea podului stă în primii 30 m ai turnului și în cabluri. Insula cu far e
+     siluetă (258–344 m), iar portalurile nu se văd de pe cheu (400–490 m, dincolo de planul
+     îndepărtat).
+   - **Briefurile primului val:** `sf_cable_car.md`, `sf_red_bridge.md`,
+     `sf_painted_row_kit.md`, `sf_median_truck.md`.
+   - **Captură nouă:** `img/sf_route/b200_cheu_gamecam.png` (cheiul de nord, fără apă: defectul
+     de la §5.7).
+
+   **De decis (dezvoltatorul):** cele cinci pasteluri (cod sau fișiere); turnul cu ceas (scos sau
+   la capătul vizual al tablierului spre oraș); casele pictate de pe coamă în contra-lumină (văzute
+   din față pe urcare) sau luminate (văzute din profil); trotuarul exterior al podului peste
+   pervazul de 3,8 m; mașinile parcate ca `BumpProp` (cod) sau statice.
 5. Tramvaiele, cu A/B pe ProbeRace.
 
    > **Cifrele de la pasul 5 sunt ale BUCLEI VECHI.** Pe B200 (pasul 2b), tramvaiul 1 urcă pe
@@ -1673,8 +1729,198 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
   dezvoltatorului; până atunci, ca Ha Long, Carrara și Angkor, **doar cursă
   rapidă**.
 
-## 9. Prompt pentru ChatGPT (dioramă de referință)
+## 9. Prompt pentru ChatGPT (dioramă de referință) — v0.1, paste-ready (pasul 4, 15 nov 2026)
 
-Se scrie la pasul 4, **după** ce există `Track25` și captura reală de sus
-adnotată (memoria `diorama-din-geometria-reala`: referința e geometria din joc,
-nu un plan schematic). Până atunci, schema din §2 e doar ordinea locurilor.
+Decizia din memoria `diorama-din-geometria-reala`: imaginea dată pentru dioramă e **captura
+reală de sus din Godot**, cu legenda desenată peste ea, după ce traseul a trecut de gărzi
+(B200, pasul 2b). Se atașează **`docs/asset_briefs/img/sf_route/sf_plan_adnotat.png`**.
+
+- Captura de bază: `docs/asset_briefs/img/sf_route/sf_top_ortho_b200.png`, făcută cu
+  `godot --path . --resolution 1600x900 res://tools/Snapshot.tscn -- --track=17 --size=780`
+  (cu fereastră; eticheta tipărită: „San Francisco (Track25)”). Cadrul e forțat la 780 m pe
+  verticală, ca să intre și golful de la N de chei și malul celălalt.
+- Legenda: `python tools/annotate_sf_plan.py`. Geometria (reperele, muchiile, podul, tramvaiele,
+  golful) e citită din `tools/gen_sf_route.py` rulat în modul `SF_ROUTE_DRY=1`, deci nimic nu e
+  tastat de mână în afară de pozițiile etichetelor. Maparea pixel↔lume e cea din `snapshot.gd`,
+  verificată cu `--check` pe linia de start, pe capetele tablierului, pe `lant0`, pe furcă și pe
+  colțul de NE (crucile cad pe carosabil).
+- Orientarea: generatorul scrie direct coordonate Godot (gx = x, gz = −y), deci planul are
+  **nordul sus și estul la DREAPTA**, fără oglindire (ca la Angkor; Serengeti era oglindit
+  fiindcă harta lui avea alt semn pe x).
+- **Golful e hașurat după poligonul declarat** (`custom_lagoon`). Captura B200 arată apă doar în
+  strâmtoarea de sub pod, tăiată pe diagonală; la N de chei și între strada de întors și
+  strâmtoare e uscat (confirmat și din mașină: `b200_cheu_gamecam.png`, cheiul de nord fără apă).
+  E un defect de randare a golfului pe B200, raportat la pasul 4, de reparat în generator sau în
+  `Track`. Pentru dioramă contează poligonul.
+- **Pontonul** e marcat ca „poziție de confirmat la pasul 6”: agentul pasului 6 îl poate muta.
+
+> *Make a stylized toy-diorama of the racing track in the attached
+> top-down plan. The plan is the real geometry from the game and is
+> mandatory: keep the route, its order, the positions of P, B, C, D, E,
+> E', F and G, the bridge, the four jump crests, the hairpins, the shape
+> of the bay and the levels exactly where they are; the letters, arrows,
+> coloured lines and labels are a legend, do not paint them. The blue
+> hatched area is water. Camera: three-quarter view from the south-west,
+> high, the whole track in frame, north at the back.*
+>
+> *Place: a hilly American bay city in the spirit of San Francisco, a
+> clear late afternoon at golden hour. NO fog, no mist, no clouds, no
+> weather of any kind: deep blue sky fading to warm white at the horizon.
+> The sun is low (about 28 degrees) and warm, from the south-south-west,
+> behind the camera, so the street that plunges north toward the bay is in
+> full sun and every house casts a long shadow; sunlit facades are warm
+> pastel, shaded ones blue-grey. The bay is cold, deep, dark blue, never
+> tropical turquoise; the far shore is dry golden-straw hills. Houses are
+> Victorian wooden row houses glued side by side, two or three storeys
+> (garage at street level, two floors above), each with a three-sided bay
+> window, a white cornice, white window trims, a stoop, horizontal clapboard
+> siding and a dark grey roof; they are painted in exactly five soft
+> pastels — cream, pink, powder blue, mint and butter yellow — and nothing
+> near the road is taller than four storeys. On every slope each house
+> stands on its own grey concrete wedge plinth, so the rooftops step down
+> with the street like a staircase. Streets are dark asphalt with white
+> zebra crossings and inset cable-car rails; sidewalks are pale concrete.
+> Accents only: the red-orange of the bridge, the maroon-and-cream of the
+> cable cars, red brick, dark green wind-bent Monterey cypresses, a few
+> tall Canary palms near the water. Nothing reads as Asia, a tropical
+> island, a desert or night.*
+>
+> *P — a big red-orange suspension bridge, a generic chunky toy design
+> (not a copy of any real bridge): a 200 m deck 20 m above the strait, two
+> portal towers 45 m tall with two cross-beams each and slightly stepped
+> legs, only a few thick main cables sweeping between the towers and a
+> few thick vertical hangers, solid red parapets. The road on it is
+> two-way, cars drive on the LEFT, the two directions separated by a row
+> of low grey concrete barrier blocks that bends in a gentle S around a
+> slow grey boxy barrier-moving truck; the checkered start line is on the
+> far-shore end, next to a teardrop turnaround loop on the golden far
+> shore. B — off the bridge the road turns left and climbs south up a long
+> straight steep street lined on both sides by continuous pastel row
+> houses; an open wooden cable car, maroon and cream, with passengers
+> standing on its running boards, climbs in the middle of the street. C —
+> at the top a ridge with a small park of dark cypresses and a row of six
+> richly decorated painted Victorian houses facing the road, then the road
+> turns north. D — the signature: the street plunges north toward the bay
+> in four steps, a flat intersection then a steep block, four times; each
+> crest has a white zebra crossing and a traffic light hanging on a wire
+> high above it; cars parked perpendicular to the curb on the steep
+> blocks; toy race cars flying off the crests. E — at the bottom a flat
+> terrace where the road forks: the main road turns left onto a wide
+> boulevard around a whole city block, with a round cable-car turntable at
+> its far corner. E' — the shortcut goes straight down a narrow red-brick
+> switchback street with three tight hairpins, pink and blue hydrangeas in
+> raised beds on low brick walls inside each hairpin; at its mouth a
+> second cable car crosses. F — the north waterfront at sea level: wooden
+> pier sheds with arched gables, a plank-surfaced pontoon road along the
+> water, chunky mooring posts with gaps, crab traps and crates, sea lions
+> lying on floating rafts. G — the road turns south along the water and
+> ramps back up to the bridge for a second crossing. In the bay, straight
+> ahead of the jump street and close to the shore, a small rocky island
+> with a lighthouse; a few white sails and a small ferry.*
+>
+> *Low-poly toy look, chunky shapes, painted textures, soft ambient
+> occlusion. No text, no signs with letters, no brand names, no logos, no
+> real bridge or company names, no famous skyscrapers. No people except a
+> few tiny passengers on the cable cars.*
+
+Notă pentru noi (nu face parte din prompt): turnul cu ceas nu apare în prompt. Pe B200 latura de
+est a dispărut, iar locul lui e decizia dezvoltatorului (vezi `sanfrancisco_inventory.md`, H7).
+După ce diorama e acceptată, inventarul de assets se ajustează pe ea.
+
+### 9.1 Rezultatul: `docs/asset_briefs/img/sf_route/sf_diorama_v1.jpg` (15 nov 2026)
+
+Prima generare, adusă de dezvoltator. Verdictul complet e în `sanfrancisco_inventory.md` §3.1.
+
+**Adoptăm:**
+- podul la E, cu balonul și startul în carouri pe malul celălalt; dealurile aurii cu bolovani gri;
+- D cu semafoarele atârnate și mașinile parcate perpendicular, cu insula cu far în axul lui;
+- serpentinele de cărămidă cu hortensii; vagonul pe placa turnantă din colțul de NV;
+- magaziile de pe cheu, dar doar la V de pontoon: latura apei a pontonului rămâne deschisă;
+- cele cinci pasteluri și casele de 2–3 niveluri;
+- **casele pictate pe latura de N a coamei, cu fața spre S, luminate**: devine recomandarea pentru
+  decizia deschisă despre ele.
+
+**Nu adoptăm:**
+- **forma podului**, prea aproape de cel real: brief-ul podului rămâne generic și a fost corectat;
+- o a treia stradă N–S, care nu există în plan;
+- relieful aplatizat;
+- chiparoșii ca umbrele plate, care s-ar confunda cu salcâmii din Serengeti.
+
+**Intră nou în inventar:** arbori de stradă, grădinițe în fața caselor pictate, scări publice,
+palmieri la capul de pod și la terasă, bolovani pe malul celălalt.
+
+### 9.2 Prompt pentru ChatGPT (planșa de inventar de assets) — v0.1, paste-ready (15 nov 2026)
+
+Se dă **în aceeași conversație cu diorama v1** (`sf_diorama_v1.jpg`), ca la Angkor §9.2. Numele de
+fișier de pe planșă sunt contractul pentru `assets/models/sanfrancisco/` și pentru briefurile din
+`docs/asset_briefs/sf_*.md`. Cotele vin din inventar și din `Track25`, nu din planșă: proporțiile le
+corectează modelatorul din briefuri, nu ChatGPT.
+
+**Nu intră în planșă** ce face codul sau ce se refolosește: cărămida și straturile serpentinelor
+(K3), zebrele și șinele (K4), scândura pontonului, apa, petalele, stâlpii de amarare
+(`chongqing/props/bollard.glb`), palmierul (întâi `angkor/plants/sugar_palm.glb`), bolovanii
+(`fiordland/rocks/guard_rock.glb`), farul și insula (`okinawa/buildings/cape_lighthouse.glb`),
+feribotul (`okinawa/vehicles/island_ferry.glb`), felinarele de hârtie (`chongqing`). **Turnul cu
+ceas e scos** (decizia din 15 nov). Casele de rând se desenează **în crem**: pastelul vine din cod
+(decizia din 15 nov: un model, recolorat).
+
+> Now make an asset inventory sheet for this diorama, in the same low-poly toy style, palette and clear golden-hour light: every distinct object drawn once, isolated, on a plain light-grey background, in a neat grid, in a 3/4 view, all at the same scale (a small toy race car shown for scale in one corner), with small simple text labels under each object using exactly these file names (labels are the only text allowed). Painted wood is soft pastel with white trims, slightly worn at the edges; metal is painted and a little chipped; concrete is pale and stained. No brand names, no logos, no letters or numbers on any object, no real bridge.
+>
+> Bridge kit (a generic chunky toy suspension bridge, red-orange, NOT the famous real one: no Art Deco towers, no recessed vertical panels, no stepped legs): sf_bridge_tower (one portal tower about 45 m tall: two plain box legs that taper smoothly from bottom to top, horizontal plate seams, two simple straight cross-beams with corner gussets and ONE big thick X brace between the legs, a flat cap on each leg), sf_bridge_deck_8 (an 8 m section of deck with a thick boxy girder underneath), sf_bridge_parapet_8 (an 8 m solid red parapet), sf_bridge_walkway_8 (an 8 m narrow pedestrian sidewalk that hangs outside the parapet), sf_bridge_flares (the short widening piece where the deck meets the shore), sf_bridge_cable_main (one thick main cable segment with its cable bands), sf_bridge_cable_side (a thick vertical hanger), sf_bridge_anchor (a heavy concrete anchor block where the cables end), sf_bridge_lamp (a simple lamp post for the parapet).
+>
+> Vehicles and hazards: cable_car (an open wooden cable car, maroon and cream, with open running boards at both ends, a few tiny standing passengers, brass bells, no lettering), sf_median_truck (a slow boxy grey work truck about 10 m long with a big slanted S-shaped conveyor underneath that lifts barrier blocks, orange-and-white stripes, amber beacons), sf_median_block (one low grey concrete barrier block about 3 m long with a T-shaped top), sf_parked_sedan, sf_parked_wagon, sf_parked_van (three plain boxy toy parked cars in muted faded colours, the van no taller than a car and a half).
+>
+> Houses: sf_row_a_canted and sf_row_a_square (an Italianate row house with a flat roof and a heavy bracketed cornice), sf_row_b_canted and sf_row_b_square (a Queen Anne row house with a pointed gable), sf_row_c_canted and sf_row_c_square (a Stick-style row house) — "canted" means a three-sided bay window, "square" a squared bay window; each is three storeys, about 7 m wide, garage door at street level on one half and a recessed entry with stairs inside a niche on the other half, horizontal clapboard siding, white window trims and cornice, and a plain grey concrete skirt under the floor. Draw these six in cream, because their colour is changed later. sf_row_corner_turret (a corner house with a round turret). sf_painted_lady_a to sf_painted_lady_f (six richly decorated Victorian houses, each in two pastels: body plus a coloured trim — cream, pink, powder blue, mint, butter yellow — with turrets, double gables and fish-scale shingles). sf_front_garden (a 7 by 3 m front garden: a small lawn, a low clipped hedge and a wooden planter box with pink flowers).
+>
+> Waterfront and street: sf_pier_shed (a long wooden pier shed with an arched gable front and a big sliding door, standing on piles), sf_turntable (a round wooden cable-car turntable 10 m wide with rails and a small operator's booth beside it), sf_dragon_gate (a decorative street gate with green-tiled curved roofs and red beams, an open passage, no lettering), sf_signal_mast (a pole with a long arm reaching over the street and a traffic light hanging from it), sf_street_lamp, sf_street_props (a red fire hydrant, a mailbox with no logo, newspaper boxes, a trash can, a traffic cone), sf_trolley_pole (a tall pole with one thick overhead wire), sf_bench, sf_bike_rack, sf_crab_traps (stacked wire crab traps and wooden crates), sf_stair_lane (a white public concrete stair with thick railings between two houses on a slope).
+>
+> Nature and life: sf_cypress_a, sf_cypress_b, sf_cypress_c (Monterey cypresses bent by the wind: short thick trunk, crown leaning to one side in dense layered clumps — NOT a flat disc on a thin trunk, nothing like an African acacia), sf_hydrangea (round bushes of pink and blue hydrangea flowers), sf_street_tree (a small street tree with a round crown), sf_sea_lions (a floating wooden raft with three or four sea lions lying on it), sf_seagull, sf_parrot (a small green parrot with a red head).
+>
+> Background: sf_horizon (a long strip: dry golden-straw hills with a few dark cypresses, and a hazy generic city of plain towers, no pyramid-shaped tower, no bridge).
+
+Ce verifici la primirea planșei, înainte de orice altceva:
+1. `sf_bridge_tower` **nu** e turnul podului real: picioare-cutie netede care se îngustează,
+   traverse drepte și un X gros; fără panouri adâncite și fără trepte.
+2. `cable_car` are platformele deschise la ambele capete și nicio inscripție.
+3. `sf_cypress_*` sunt aplecați de vânt, în pâlcuri, nu discuri plate pe trunchi subțire.
+
+### 9.3 Rezultatul: planșa de inventar (15 nov 2026)
+
+`docs/asset_briefs/img/sf_route/sf_inventar_v01_a.jpg`, promptul §9.2, prima generare.
+
+Cele trei verificări:
+1. `sf_bridge_tower`: **trecută.** Picioare-cutie, traverse drepte, un singur X gros, fără panouri
+   adâncite și fără trepte. Picioarele nu se îngustează vizibil, iar soclurile sunt de piatră:
+   îngustarea și cotele le ia modelatorul din `sf_red_bridge.md`.
+2. `cable_car`: **trecută.** Capete deschise cu călători pe platforme, fără inscripții.
+3. `sf_cypress_*`: **picată.** Toți trei sunt discuri plate pe trunchi (salcâmii din Serengeti),
+   exact ce §3.1 din inventar respinge. Același salcâm apare și în `sf_horizon`.
+
+Alte note (nu cer regenerare):
+- Casele de rând au ieșit în pasteluri, nu în crem. Nu contează: modelatorul le face neutre, iar
+  culoarea vine din cod (decizia din 15 nov).
+- `sf_row_a_*` are acoperiș plat cu cornișă, `sf_row_b_*` fronton: variantele se deosebesc. Fusta
+  de beton apare ca soclu de piatră: cotele din `sf_painted_row_kit.md` bat planșa.
+- Restul pieselor se iau ca referință de formă și culoare.
+
+**Corectura** (în aceeași conversație), doar pentru chiparoși și orizont:
+
+> Redraw only sf_cypress_a, sf_cypress_b, sf_cypress_c and sf_horizon, in exactly the same style,
+> light, grey background and label style as the sheet. The cypresses are wrong: they read as
+> African acacias (a flat umbrella disc on a thin trunk). A Monterey cypress on a windy sea cliff
+> looks different: a short, very thick, gnarled trunk that splits low into a few heavy twisted
+> branches; the whole tree leans hard to one side, pushed by the sea wind; the crown is NOT flat
+> and NOT a single disc, it is a stack of four to six dense, dark blue-green, cloud-like clumps
+> at different heights, all swept to the same side and ragged on the windward side; the tree is
+> about as wide as it is tall. Dark green, almost black-green, not olive. Make the three
+> different: sf_cypress_a a single leaning tree with clumps at three heights, sf_cypress_b a
+> broad old tree with two trunks, sf_cypress_c a smaller young tree, more upright but still bent
+> by the wind. In sf_horizon replace the acacia-like trees with a few small dark wind-bent cypress
+> clumps; keep the golden hills, the grey rocks and the hazy generic city.
+
+**Corectura, rezultatul:** `sf_inventar_v01_b_chiparosi.jpg`. **Trecută:** trunchi scurt, gros și
+noduros, coroana în 4–6 pâlcuri dense pe niveluri, toate aplecate în aceeași parte, verde închis.
+Cele trei variante se deosebesc (a: un trunchi; b: bătrân, cu două trunchiuri; c: tânăr, mai drept).
+`sf_horizon` are acum chiparoși în loc de salcâmi. Pentru V1 și F2 valoarea planșa b, nu a. Notă
+pentru modelator: pâlcurile se modelează ca 4–6 volume mari (nu frunziș fin, care sclipește pe
+mobil), iar trunchiul rămâne gros cât în planșă.

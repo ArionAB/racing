@@ -347,53 +347,13 @@ func _place_detail_label() -> void:
 ## cuvant, iar in cursa nimeni nu citeste cuvinte.
 const CHARGE_W: float = 300.0
 const CHARGE_H: float = 22.0
-## Cat de sus de marginea de jos sta randul barii in asezarea de baza.
+## Cat de sus de marginea de jos sta randul barii.
 const CHARGE_BOTTOM_MARGIN: float = 40.0
-
-## RANDUL BARII FATA DE BUTOANE (#719). Butoanele stau lipite de colturile de
-## jos; daca randul barii ajunge in zona lor, o atingere pe bara vira sau
-## franeaza. Cu stretch `expand` canvas-ul logic nu e niciodata mai ingust de
-## 1280 (iPad 4:3 -> 1280x959: mai INALT, nu mai ingust), deci in cursa
-## obisnuita bara de 300 px incape pe orice ecran. Randul se lateste insa cu
-## eticheta de mod: „CHALLENGE +1: NO TUK-TUK HITS   LAP 3: 12 PLATES" il
-## impingea, pe orice canvas de 1280, in sageata ▶ (46 px) si in frana (52 px).
-## Iar un canvas mai ingust (alta baza, alt aspect) ar face asta si fara eticheta.
-##
-## Regula, in ordine:
-##   1. Jos, centrat, la latimea plina — asezarea judecata pe telefon. Daca
-##      randul barii are aerul de mai jos fata de orice zona, ramane EXACT asa.
-##   2. Altfel, tot jos si centrat, dar jgheabul se scurteaza cat sa incapa
-##      intre cele doua grupuri de butoane. Bara ramane unde o cauta ochiul, sub
-##      masina, intre degete; umplerea se citeste ca proportie la orice lungime.
-##   3. Daca ar iesi mai scurta de CHARGE_W_MIN, urca deasupra sagetilor din
-##      stanga (centrata peste ele) si isi recapata latimea cat incape.
-## Zonele se afla intreband `TouchControls.zone_at`, nu din raze copiate.
-
-## Aerul minim intre randul barii si orice punct care raspunde la atingere.
-## Peste rama de 10 px cu care turul ghidat evidentiaza bara: nici rama nu are
-## voie sa intre in zona unui buton.
-const CHARGE_TOUCH_GAP: float = 16.0
-## Sub atat (40% din lungimea plina), „pe jumatate" fata de „aproape plina" nu
-## se mai deosebesc dintr-o privire. Cu provocarea cea mai lunga, pe 1280, bara
-## iese de 153 px; pe un canvas sintetic de 960x720 (cum a fost vazut #719),
-## de 133 px.
-const CHARGE_W_MIN: float = 120.0
-## Distanta fata de marginea ecranului cand bara urca deasupra sagetilor.
-const CHARGE_EDGE_MARGIN: float = 16.0
-## Pasul cu care se intreaba zonele pe conturul randului. Zonele sunt discuri
-## de peste 80 px raza; la 4 px, o margine de disc scapata intre doua puncte ar
-## intra in rand cu sub 0,1 px.
-const CHARGE_PROBE_STEP: float = 4.0
-
-## Randul barii: fulgerul, jgheabul si etichetele de mod (SEALED, GHOST,
-## CHALLENGE). Se aseaza ca intreg — etichetele stau pe acelasi rand, deci
-## si ele trebuie sa ramana in afara zonelor.
-var _turbo_row: HBoxContainer
-var _turbo_place_queued: bool = false
+## Aerul dintre linia etichetelor de mod si randul barii, dedesubt.
+const MODE_LINE_GAP: float = 4.0
 
 func _build_turbo_bar(root: Control) -> void:
 	var holder := HBoxContainer.new()
-	_turbo_row = holder
 	holder.add_theme_constant_override("separation", 10)
 	holder.set_anchors_and_offsets_preset(
 		Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE,
@@ -402,11 +362,6 @@ func _build_turbo_bar(root: Control) -> void:
 	holder.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(holder)
-	# Se reaseaza la orice redimensionare (rotire, fereastra pe desktop) si
-	# cand o eticheta de mod apare sau isi schimba textul — nu doar la _ready.
-	root.resized.connect(_queue_turbo_place)
-	holder.minimum_size_changed.connect(_queue_turbo_place)
-	_queue_turbo_place()
 
 	_charge_bolt = _make_label(24)
 	_charge_bolt.text = "⚡"
@@ -424,6 +379,26 @@ func _build_turbo_bar(root: Control) -> void:
 	_charge_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	holder.add_child(_charge_bg)
 
+	# Etichetele de mod (SEALED, GHOST, CHALLENGE) stau pe linia LOR, deasupra
+	# barii, nu pe randul ei (#719). Pe rand, centrat cu tot cu bara, il latea
+	# simetric: „CHALLENGE +1: NO TUK-TUK HITS   LAP 3: 12 PLATES" impingea
+	# randul in zona sagetii ▶ (46 px) si a franei (52 px) pe orice canvas de
+	# 1280 — desktop si iPad — si muta bara de cate ori se schimba textul. Aici
+	# bara ramane pe pixel; linia, centrata, are cel mult 290 px (cea mai lunga
+	# provocare), mai ingusta decat randul de 341, la ~110 px de ▶ si de frana.
+	# Ancorata separat, nu intr-un VBox comun: un container ar rotunji centrarea
+	# barii cu jumatate de pixel cand linia e mai lata decat ea.
+	var mode_line := HBoxContainer.new()
+	mode_line.add_theme_constant_override("separation", 10)
+	mode_line.set_anchors_and_offsets_preset(
+		Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE,
+		int(CHARGE_BOTTOM_MARGIN + holder.get_combined_minimum_size().y
+			+ MODE_LINE_GAP))
+	mode_line.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	mode_line.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	mode_line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(mode_line)
+
 	# Contratimp: bara nu se mai incarca. Eticheta mica spune asta, ca
 	# jucatorul sa nu astepte o umplere care nu vine.
 	_sealed_label = _make_label(16)
@@ -431,21 +406,21 @@ func _build_turbo_bar(root: Control) -> void:
 	_sealed_label.modulate = Color(1.0, 0.85, 0.3)
 	_sealed_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_sealed_label.visible = false
-	holder.add_child(_sealed_label)
+	mode_line.add_child(_sealed_label)
 
 	# Contratimp cu fantoma salvata: timpul ei, ca sa stii pe cine urmaresti.
 	_ghost_label = _make_label(16)
 	_ghost_label.modulate = Color(0.75, 0.9, 1.0)
 	_ghost_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_ghost_label.visible = false
-	holder.add_child(_ghost_label)
+	mode_line.add_child(_ghost_label)
 	# Provocarea gimmick-ului (cariera): in aceeasi zona ca SEALED; cele doua
 	# moduri nu se suprapun (contratimp vs provocare).
 	_challenge_label = _make_label(16)
 	_challenge_label.modulate = Color(0.55, 0.9, 0.5)
 	_challenge_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_challenge_label.visible = false
-	holder.add_child(_challenge_label)
+	mode_line.add_child(_challenge_label)
 
 	# Umplutura e copil al jgheabului, cu 3 px de margine de jur imprejur, ca
 	# marginea intunecata sa ramana vizibila si cand bara e plina.
@@ -457,108 +432,6 @@ func _build_turbo_bar(root: Control) -> void:
 	_charge_fill.size = Vector2(0, CHARGE_H - 6.0)
 	_charge_fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_charge_bg.add_child(_charge_fill)
-
-
-## Amanat: la o redimensionare, `root` si `_touch` isi primesc marimea noua in
-## acelasi cadru, dar nu neaparat inaintea semnalului nostru.
-func _queue_turbo_place() -> void:
-	if _turbo_place_queued:
-		return
-	_turbo_place_queued = true
-	_place_turbo_bar.call_deferred()
-
-
-## Regula de la CHARGE_TOUCH_GAP, aplicata. Vezi comentariul de acolo.
-func _place_turbo_bar() -> void:
-	_turbo_place_queued = false
-	var view := _turbo_row.get_parent_control().size
-	if view.x <= 0.0 or view.y <= 0.0:
-		return
-	var row_min := _turbo_row.get_combined_minimum_size()
-	# Tot ce nu e jgheab (fulgerul, etichetele, spatiile dintre ele).
-	var extra := row_min.x - _charge_bg.custom_minimum_size.x
-	var h := row_min.y
-
-	# 1 si 2: jos, centrat — exact ancora de pe telefon, cu jgheabul cat incape.
-	var bottom := view.y - CHARGE_BOTTOM_MARGIN
-	var at_bottom := func(w: float) -> Rect2:
-		var row_w := w + extra
-		return Rect2(view.x * 0.5 - row_w * 0.5, bottom - h, row_w, h)
-	var w := _widest_clear(at_bottom)
-	if w >= CHARGE_W_MIN:
-		_charge_bg.custom_minimum_size.x = w
-		_turbo_row.set_anchors_and_offsets_preset(
-			Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE,
-			int(CHARGE_BOTTOM_MARGIN))
-		return
-
-	# 3: deasupra sagetilor din stanga, centrata peste ele. Urca de jos pana
-	# cand randul cel mai scurt iese din toate zonele, apoi se lateste la loc.
-	var steer_x := _touch.position.x + 0.5 * (
-		_touch.button_disc("left").get_center().x
-		+ _touch.button_disc("right").get_center().x)
-	var lifted := func(width: float, y_bottom: float) -> Rect2:
-		var row_w := width + extra
-		var x := clampf(steer_x - row_w * 0.5, CHARGE_EDGE_MARGIN,
-			maxf(CHARGE_EDGE_MARGIN, view.x - CHARGE_EDGE_MARGIN - row_w))
-		return Rect2(x, y_bottom - h, row_w, h)
-	var y_bottom := bottom
-	while y_bottom - h > view.y * 0.4 \
-			and _row_touches(lifted.call(CHARGE_W_MIN, y_bottom)):
-		y_bottom -= 2.0
-	var at_y := func(width: float) -> Rect2: return lifted.call(width, y_bottom)
-	w = maxf(_widest_clear(at_y), CHARGE_W_MIN)
-	_charge_bg.custom_minimum_size.x = w
-	var r: Rect2 = at_y.call(w)
-	_turbo_row.set_anchors_and_offsets_preset(
-		Control.PRESET_TOP_LEFT, Control.PRESET_MODE_MINSIZE)
-	_turbo_row.position = r.position
-
-
-## Cel mai lat jgheab (px intregi, cel mult CHARGE_W) pentru care randul dat de
-## `rect_for(latime)` nu atinge nicio zona; -1 daca nici cel de 0 px nu incape.
-## Randul creste monoton cu latimea, deci cautare binara.
-func _widest_clear(rect_for: Callable) -> float:
-	if not _row_touches(rect_for.call(CHARGE_W)):
-		return CHARGE_W
-	if _row_touches(rect_for.call(0.0)):
-		return -1.0
-	var lo := 0
-	var hi := int(CHARGE_W)
-	while hi - lo > 1:
-		var mid := (lo + hi) >> 1
-		if _row_touches(rect_for.call(float(mid))):
-			hi = mid
-		else:
-			lo = mid
-	return float(lo)
-
-
-## Raspunde vreun punct din `row` (coordonatele lui `root`), crescut cu
-## CHARGE_TOUCH_GAP, la atingere? Se intreaba doar conturul: o zona e un disc
-## mai mare decat randul, deci nu poate sta inauntru fara sa-i taie conturul.
-func _row_touches(row: Rect2) -> bool:
-	var g := row.grow(CHARGE_TOUCH_GAP)
-	g.position -= _touch.position
-	var x := g.position.x
-	while true:
-		var xc := minf(x, g.end.x)
-		if _touch.zone_at(Vector2(xc, g.position.y)) != "" \
-				or _touch.zone_at(Vector2(xc, g.end.y)) != "":
-			return true
-		if xc >= g.end.x:
-			break
-		x += CHARGE_PROBE_STEP
-	var y := g.position.y
-	while true:
-		var yc := minf(y, g.end.y)
-		if _touch.zone_at(Vector2(g.position.x, yc)) != "" \
-				or _touch.zone_at(Vector2(g.end.x, yc)) != "":
-			return true
-		if yc >= g.end.y:
-			break
-		y += CHARGE_PROBE_STEP
-	return false
 
 
 func _build_pause_panel(root: Control) -> void:

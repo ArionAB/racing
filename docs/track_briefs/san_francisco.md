@@ -1417,8 +1417,100 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
   dezvoltatorului; până atunci, ca Ha Long, Carrara și Angkor, **doar cursă
   rapidă**.
 
-## 9. Prompt pentru ChatGPT (dioramă de referință)
+## 9. Prompt pentru ChatGPT (dioramă de referință) — v0.1, paste-ready (pasul 4, 15 nov 2026)
 
-Se scrie la pasul 4, **după** ce există `Track25` și captura reală de sus
-adnotată (memoria `diorama-din-geometria-reala`: referința e geometria din joc,
-nu un plan schematic). Până atunci, schema din §2 e doar ordinea locurilor.
+Decizia din memoria `diorama-din-geometria-reala`: imaginea dată pentru dioramă e **captura
+reală de sus din Godot**, cu legenda desenată peste ea, după ce traseul a trecut de gărzi
+(B200, pasul 2b). Se atașează **`docs/asset_briefs/img/sf_route/sf_plan_adnotat.png`**.
+
+- Captura de bază: `docs/asset_briefs/img/sf_route/sf_top_ortho_b200.png`, făcută cu
+  `godot --path . --resolution 1600x900 res://tools/Snapshot.tscn -- --track=17 --size=780`
+  (cu fereastră; eticheta tipărită: „San Francisco (Track25)”). Cadrul e forțat la 780 m pe
+  verticală, ca să intre și golful de la N de chei și malul celălalt.
+- Legenda: `python tools/annotate_sf_plan.py`. Geometria (reperele, muchiile, podul, tramvaiele,
+  golful) e citită din `tools/gen_sf_route.py` rulat în modul `SF_ROUTE_DRY=1`, deci nimic nu e
+  tastat de mână în afară de pozițiile etichetelor. Maparea pixel↔lume e cea din `snapshot.gd`,
+  verificată cu `--check` pe linia de start, pe capetele tablierului, pe `lant0`, pe furcă și pe
+  colțul de NE (crucile cad pe carosabil).
+- Orientarea: generatorul scrie direct coordonate Godot (gx = x, gz = −y), deci planul are
+  **nordul sus și estul la DREAPTA**, fără oglindire (ca la Angkor; Serengeti era oglindit
+  fiindcă harta lui avea alt semn pe x).
+- **Golful e hașurat după poligonul declarat** (`custom_lagoon`). Captura B200 arată apă doar în
+  strâmtoarea de sub pod, tăiată pe diagonală; la N de chei și între strada de întors și
+  strâmtoare e uscat (confirmat și din mașină: `b200_cheu_gamecam.png`, cheiul de nord fără apă).
+  E un defect de randare a golfului pe B200, raportat la pasul 4, de reparat în generator sau în
+  `Track`. Pentru dioramă contează poligonul.
+- **Pontonul** e marcat ca „poziție de confirmat la pasul 6”: agentul pasului 6 îl poate muta.
+
+> *Make a stylized toy-diorama of the racing track in the attached
+> top-down plan. The plan is the real geometry from the game and is
+> mandatory: keep the route, its order, the positions of P, B, C, D, E,
+> E', F and G, the bridge, the four jump crests, the hairpins, the shape
+> of the bay and the levels exactly where they are; the letters, arrows,
+> coloured lines and labels are a legend, do not paint them. The blue
+> hatched area is water. Camera: three-quarter view from the south-west,
+> high, the whole track in frame, north at the back.*
+>
+> *Place: a hilly American bay city in the spirit of San Francisco, a
+> clear late afternoon at golden hour. NO fog, no mist, no clouds, no
+> weather of any kind: deep blue sky fading to warm white at the horizon.
+> The sun is low (about 28 degrees) and warm, from the south-south-west,
+> behind the camera, so the street that plunges north toward the bay is in
+> full sun and every house casts a long shadow; sunlit facades are warm
+> pastel, shaded ones blue-grey. The bay is cold, deep, dark blue, never
+> tropical turquoise; the far shore is dry golden-straw hills. Houses are
+> Victorian wooden row houses glued side by side, two or three storeys
+> (garage at street level, two floors above), each with a three-sided bay
+> window, a white cornice, white window trims, a stoop, horizontal clapboard
+> siding and a dark grey roof; they are painted in exactly five soft
+> pastels — cream, pink, powder blue, mint and butter yellow — and nothing
+> near the road is taller than four storeys. On every slope each house
+> stands on its own grey concrete wedge plinth, so the rooftops step down
+> with the street like a staircase. Streets are dark asphalt with white
+> zebra crossings and inset cable-car rails; sidewalks are pale concrete.
+> Accents only: the red-orange of the bridge, the maroon-and-cream of the
+> cable cars, red brick, dark green wind-bent Monterey cypresses, a few
+> tall Canary palms near the water. Nothing reads as Asia, a tropical
+> island, a desert or night.*
+>
+> *P — a big red-orange suspension bridge, a generic chunky toy design
+> (not a copy of any real bridge): a 200 m deck 20 m above the strait, two
+> portal towers 45 m tall with two cross-beams each and slightly stepped
+> legs, only a few thick main cables sweeping between the towers and a
+> few thick vertical hangers, solid red parapets. The road on it is
+> two-way, cars drive on the LEFT, the two directions separated by a row
+> of low grey concrete barrier blocks that bends in a gentle S around a
+> slow grey boxy barrier-moving truck; the checkered start line is on the
+> far-shore end, next to a teardrop turnaround loop on the golden far
+> shore. B — off the bridge the road turns left and climbs south up a long
+> straight steep street lined on both sides by continuous pastel row
+> houses; an open wooden cable car, maroon and cream, with passengers
+> standing on its running boards, climbs in the middle of the street. C —
+> at the top a ridge with a small park of dark cypresses and a row of six
+> richly decorated painted Victorian houses facing the road, then the road
+> turns north. D — the signature: the street plunges north toward the bay
+> in four steps, a flat intersection then a steep block, four times; each
+> crest has a white zebra crossing and a traffic light hanging on a wire
+> high above it; cars parked perpendicular to the curb on the steep
+> blocks; toy race cars flying off the crests. E — at the bottom a flat
+> terrace where the road forks: the main road turns left onto a wide
+> boulevard around a whole city block, with a round cable-car turntable at
+> its far corner. E' — the shortcut goes straight down a narrow red-brick
+> switchback street with three tight hairpins, pink and blue hydrangeas in
+> raised beds on low brick walls inside each hairpin; at its mouth a
+> second cable car crosses. F — the north waterfront at sea level: wooden
+> pier sheds with arched gables, a plank-surfaced pontoon road along the
+> water, chunky mooring posts with gaps, crab traps and crates, sea lions
+> lying on floating rafts. G — the road turns south along the water and
+> ramps back up to the bridge for a second crossing. In the bay, straight
+> ahead of the jump street and close to the shore, a small rocky island
+> with a lighthouse; a few white sails and a small ferry.*
+>
+> *Low-poly toy look, chunky shapes, painted textures, soft ambient
+> occlusion. No text, no signs with letters, no brand names, no logos, no
+> real bridge or company names, no famous skyscrapers. No people except a
+> few tiny passengers on the cable cars.*
+
+Notă pentru noi (nu face parte din prompt): turnul cu ceas nu apare în prompt. Pe B200 latura de
+est a dispărut, iar locul lui e decizia dezvoltatorului (vezi `sanfrancisco_inventory.md`, H7).
+După ce diorama e acceptată, inventarul de assets se ajustează pe ea.

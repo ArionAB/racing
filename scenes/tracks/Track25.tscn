@@ -26,7 +26,6 @@
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_a_square.glb" id="p8_sf_row_a_square"]
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_b_canted.glb" id="p8_sf_row_b_canted"]
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_corner_turret_m.glb" id="p8_sf_row_corner_turret_m"]
-[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_a_square_m.glb" id="p8_sf_row_a_square_m"]
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_b_canted_m.glb" id="p8_sf_row_b_canted_m"]
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_c_square_m.glb" id="p8_sf_row_c_square_m"]
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_a_canted_m.glb" id="p8_sf_row_a_canted_m"]
@@ -34,6 +33,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_c_square.glb" id="p8_sf_row_c_square"]
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_a_canted.glb" id="p8_sf_row_a_canted"]
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_c_canted_m.glb" id="p8_sf_row_c_canted_m"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_a_square_m.glb" id="p8_sf_row_a_square_m"]
 [ext_resource type="Script" path="res://scenes/props/world_prop.gd" id="p7_worldprop"]
 
 [sub_resource type="Curve3D" id="Curve3D_sf"]
@@ -1856,13 +1856,13 @@ metadata/wall_class = "sf_clapboard"
 metadata/sf_case = "D"
 metadata/sf_case_w = 9.0
 
-[node name="D1V_00" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_a_square_m")]
-transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 51.984, -4.500)
+[node name="D1V_00" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_corner_turret_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 52.297, -3.500)
 metadata/coliziune = "none"
 metadata/contact = "none"
 metadata/wall_class = "sf_clapboard_butter"
 metadata/sf_case = "D"
-metadata/sf_case_w = 7.0
+metadata/sf_case_w = 9.0
 
 [node name="D1V_01" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_b_canted_m")]
 transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 50.405, -11.500)
@@ -1952,13 +1952,13 @@ metadata/wall_class = "sf_clapboard_blue"
 metadata/sf_case = "D"
 metadata/sf_case_w = 9.0
 
-[node name="D2V_00" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_b_square_m")]
-transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 42.404, -76.500)
+[node name="D2V_00" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_corner_turret_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 42.691, -75.500)
 metadata/coliziune = "none"
 metadata/contact = "none"
 metadata/wall_class = "sf_clapboard_pink"
 metadata/sf_case = "D"
-metadata/sf_case_w = 7.0
+metadata/sf_case_w = 9.0
 
 [node name="D2V_01" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_c_canted_m")]
 transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 40.799, -83.500)
@@ -2048,13 +2048,13 @@ metadata/wall_class = "sf_clapboard_butter"
 metadata/sf_case = "D"
 metadata/sf_case_w = 9.0
 
-[node name="D3V_00" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_c_square_m")]
-transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 32.828, -148.500)
+[node name="D3V_00" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_corner_turret_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 33.084, -147.500)
 metadata/coliziune = "none"
 metadata/contact = "none"
 metadata/wall_class = "sf_clapboard_mint"
 metadata/sf_case = "D"
-metadata/sf_case_w = 7.0
+metadata/sf_case_w = 9.0
 
 [node name="D3V_01" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_a_canted_m")]
 transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 31.188, -155.500)
@@ -2144,13 +2144,13 @@ metadata/wall_class = "sf_clapboard_pink"
 metadata/sf_case = "D"
 metadata/sf_case_w = 9.0
 
-[node name="D4V_00" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_a_square_m")]
-transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 23.270, -220.500)
+[node name="D4V_00" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_corner_turret_m")]
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 23.496, -219.500)
 metadata/coliziune = "none"
 metadata/contact = "none"
 metadata/wall_class = "sf_clapboard"
 metadata/sf_case = "D"
-metadata/sf_case_w = 7.0
+metadata/sf_case_w = 9.0
 
 [node name="D4V_01" parent="DecorManual/CaseD" instance=ExtResource("p8_sf_row_b_canted_m")]
 transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 21.580, -227.500)
@@ -3089,8 +3089,8 @@ transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.5
 shape = SubResource("Box_casa9")
 
 [node name="Corp_D1V_00" type="CollisionShape3D" parent="CaseCorpuri"]
-transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 55.584, -4.500)
-shape = SubResource("Box_casa7")
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 55.898, -3.500)
+shape = SubResource("Box_casa9")
 
 [node name="Corp_D1V_01" type="CollisionShape3D" parent="CaseCorpuri"]
 transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 54.005, -11.500)
@@ -3137,8 +3137,8 @@ transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.5
 shape = SubResource("Box_casa9")
 
 [node name="Corp_D2V_00" type="CollisionShape3D" parent="CaseCorpuri"]
-transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 46.004, -76.500)
-shape = SubResource("Box_casa7")
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 46.291, -75.500)
+shape = SubResource("Box_casa9")
 
 [node name="Corp_D2V_01" type="CollisionShape3D" parent="CaseCorpuri"]
 transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 44.399, -83.500)
@@ -3185,8 +3185,8 @@ transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.5
 shape = SubResource("Box_casa9")
 
 [node name="Corp_D3V_00" type="CollisionShape3D" parent="CaseCorpuri"]
-transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 36.428, -148.500)
-shape = SubResource("Box_casa7")
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 36.684, -147.500)
+shape = SubResource("Box_casa9")
 
 [node name="Corp_D3V_01" type="CollisionShape3D" parent="CaseCorpuri"]
 transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 34.788, -155.500)
@@ -3233,8 +3233,8 @@ transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, 16.5
 shape = SubResource("Box_casa9")
 
 [node name="Corp_D4V_00" type="CollisionShape3D" parent="CaseCorpuri"]
-transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 26.870, -220.500)
-shape = SubResource("Box_casa7")
+transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 27.096, -219.500)
+shape = SubResource("Box_casa9")
 
 [node name="Corp_D4V_01" type="CollisionShape3D" parent="CaseCorpuri"]
 transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -16.500, 25.180, -227.500)

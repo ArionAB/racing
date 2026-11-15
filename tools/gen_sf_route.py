@@ -2173,7 +2173,9 @@ if PONT_INFO is not None:
 #     un zid invizibil la 0,9 m in fata garajului) si `contact = "none"` (discurile de contact ale
 #     caselor lipite s-ar suprapune in placa neagra, ca la zidurile din Machu Picchu).
 #   SF_CASE=0        scena de dinainte, octet cu octet
-#   SF_CASE_COLT=0   fara colturi;  =vale  doar capetele de vale;  =est  doar latura de E a lantului
+#   SF_CASE_COLT=0   fara colturi;  =vale  doar capetele de vale;  =est  doar latura de E a lantului;
+#                    =mixt  E la ambele capete, V doar la vale (87,0 % soare pe lant; implicitul,
+#                    cu ambele capete pe ambele laturi, da 83,6 %)
 # =============================================================================================
 P8_CASE = os.environ.get("SF_CASE", "1") == "1"
 P8_COLT = os.environ.get("SF_CASE_COLT", "1")
@@ -2279,8 +2281,14 @@ if B200 and P8_CASE:
     # latura de V: doar la capatul de vale. Randul de E incepe cu 1 m INAINTEA muchiei (pe platul
     # intersectiei; ultima masina parcata a blocului de dinainte e la 8,55 m), ca 9 + 4 x 7 + 9 m sa
     # se opreasca tot la 45,0 m dupa muchie.
-    _chain_colt = {"1": ("both", "t1"), "vale": ("t1", "t1"), "est": ("both", None),
-                   "0": (None, None)}.get(P8_COLT, ("both", "t1"))
+    # IMPLICIT (coordonatorul, 16 nov 2026): colt la AMBELE capete pe AMBELE laturi ale lantului.
+    # Masurat cu `ProbeSfLight --real`: 83,6 % soare pe lant (contract >= 80, tinta >= 82), fata de
+    # 87,0 % cu regula „E la ambele capete, V doar la vale" (`SF_CASE_COLT=mixt`). Cele 3,4 puncte
+    # cumpara capatul de DEAL al randurilor de V: fara colt, acolo ramanea un perete orb de
+    # 12 x 10 m chiar pe muchie, in cadrul fiecarei sarituri (p8_case_D_muchia1_gamecam.png).
+    # Un colt FARA turnulet (piesa de kit care nu exista inca) ar da inapoi marja.
+    _chain_colt = {"1": ("both", "both"), "mixt": ("both", "t1"), "vale": ("t1", "t1"),
+                   "est": ("both", None), "0": (None, None)}.get(P8_COLT, ("both", "both"))
     for b_ in range(BLOCKS):
         y_l = PTS[LIPS[b_]][1]
         for side_, nm_, colt_ in ((1.0, "E", _chain_colt[0]), (-1.0, "V", _chain_colt[1])):

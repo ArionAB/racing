@@ -1738,6 +1738,43 @@ parcate (4,2 m) sunt refuzate de `BumpProp` (plafonul de 2 m), deci rămân stat
    (`0.06`), `p7_tramvai1_gamecam.png` (`--frac=0.2025 --bus-at=26`). Randările Blender lângă
    decupări: `docs/asset_briefs/img/sf_fidelity/`.
 
+   **Pilotul casei (`buildings/sf_row_b_canted.glb`, 1.254 tri) — măsurat pe `SfLoc`, v1 PICĂ pe
+   citire, nu pe praguri.** Strada sintetică a pasului 0 are acum modul `-- --glb`
+   (`tools/sf_loc_decor.gd`; rulări păstrate cu `tools/sf_loc_pilot_runs.sh`): fiecare casă e o
+   instanță a GLB-ului, pusă pe calea reală a jocului (`WorldProp` + `wall_class`). Zgomot de
+   randare zero (3 rulări pe fiecare mod, identice la 4 zecimale).
+
+   | | case din cod (pasul 0) | pilot v1 | prag |
+   |---|---|---|---|
+   | soare pe lanț | 85,1 % | 85,4 % | ≥ 80 % |
+   | ΔV soare/umbră | 0,325 | 0,392 | ≥ 0,28 |
+   | ΔE2000 minim între pasteluri | 15,0 | 15,0 | ≥ 10 |
+   | pixeli de casă pe **pastel** | 31,0 % | **17,5 %** | — |
+   | pixeli pe trim alb | 34,0 % | 38,0 % | — |
+   | pixeli pe parterul de piatră | 1,8 % | **11,3 %** | — |
+
+   Pragurile trec, `wall_class` merge (136/136 instanțe pe pastelul cerut), iar fusta dreaptă
+   rezolvă plângerea (4) a criticului de la pasul 0 (nimic pe trotuar; rezerva sub fustă ≥ 0,16 m
+   și la casa de sub muchie, unde căderea e 2,24 m, nu 1,96). **Dar casa citește „albă cu accente
+   pastel”** (`img/sf_loc/pilot_02.png` față de `loc_05.png`): plăcile albe stau peste perete, iar
+   benzile frontonului și parterul nu sunt pe pastel. În plus, parterul de piatră (slotul 8, fețe
+   mari) ia stratul de detaliu al materialului lumii și iese vălurit. **Decizia coordonatorului:
+   v2 înainte de celelalte șase case** — parterul și câmpul frontonului pe `Row_Wall`, trim mai
+   subțire (nimic sub 0,10 m), AO pe perete ca în brief; ținta: pastel ≥ 28 % din pixelii caselor.
+   Parterul de piatră din planșă rămâne la un parametru din `build_sf_row.py`.
+
+   **Găsit la pilot, pentru pasul 8:**
+   - **oglindirea prin `scale.x = −1` merge pe instanță, NU în `MultiMesh`** (casa iese pe dos:
+     `img/sf_loc/pilot_oglinda_fata.png`). `CityFill` are nevoie de mesh oglindit de-adevăratelea,
+     deci kitul livrează variante `_m`;
+   - `CityFill._templates()` știe două tente (deschis / indigo): pentru cele cinci pasteluri
+     trebuie N variante după `WorldProp.WALL_CLASS_META`;
+   - `WorldProp.PROP_COLLISION` n-are intrări pentru `sf_row_*`: implicitul e hull, adică zidul
+     invizibil din fața garajului. Se pune `none` când generatorul scrie cutia de pe planul
+     fațadei;
+   - `wall_class` pusă pe nodul `WorldProp` însuși e ignorată (merge pe instanță sau pe un
+     container de sub el).
+
    **Abateri față de planșă, de judecat de dezvoltator:**
    - utilajul e mașinăria joasă cu două cabine și tunel din `sf_median_truck.md`, nu camionul cu
      rampă din planșă; din lateral aduce a locomotivă, din camera de joc citește „mașinărie pe

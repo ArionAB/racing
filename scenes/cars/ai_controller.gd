@@ -896,6 +896,8 @@ func _roll_d6() -> int:
 ##     `lane_floor_at`, `lane_bias_at`), muchia fara parapet, poarta ulicioarei;
 ##   - corpul care merge in SENSUL cursei (tramvaiul SF, `ai_same_direction`):
 ##     e trafic lent, se depaseste, nu se ghiceste;
+##   - despartitorul mobil de pe podul SF (`_median_line`): e parapet intre
+##     benzi, se vede si se tine pe partea lui, nu se nimereste;
 ##   - banda inchisa a unei scurtaturi (`Track.branch_is_open`: lava, vaca);
 ##   - zonele de prudenta (praful din Monument Valley) si asfaltul ud.
 func _reads_hazard(hz: Object) -> bool:

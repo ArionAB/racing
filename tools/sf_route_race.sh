@@ -14,5 +14,5 @@ export GODOT OUT SECS
 export EXTRA="$*"
 seq 1 "$SEEDS" | xargs -P "$PAR" -I{} bash -c '
   timeout 1500 "$GODOT" --headless --fixed-fps 60 --path . res://tools/ProbeRace.tscn -- \
-    --mode=race --track=17 --ai=7 --seed={} --seconds=$SECS --sf $EXTRA > "$OUT/seed{}.log" 2>&1
+    --mode=race --track=Track25 --ai=7 --seed={} --seconds=$SECS --sf $EXTRA > "$OUT/seed{}.log" 2>&1
   echo "seed {} gata: $(grep -h "TUR global" "$OUT/seed{}.log")"'

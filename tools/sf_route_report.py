@@ -7,6 +7,12 @@ lantul, scurtatura fata de ocol, restul turului; [blocaj], repuneri, ejectari, l
 Zonele se iau din POZITIA evenimentului (harta: x est, y nord = -z Godot), dupa geometria din
 tools/gen_sf_route.py: lantul pe x = 0 de la prima muchie (y 0) la terasa (y 264), furca la
 y 300, serpentinele intre furca si strada de jos (y 454), ocolul la vest de ele.
+
+Bucla B200 (implicita, podul rosu): zonele noi sunt podul (coridorul cu doua sensuri, x 234..506,
+y 214..243), capul de pod (S-urile si virajele de la baza), balonul de pe malul celalalt, PRIMUL
+VIRAJ dupa start (R30, de pe pod pe strada tramvaiului), urcarea (strada tramvaiului 1, x 144,
+spre S), coltul de sus / coama, strada de intors spre pod (x 150). `SF_LAYOUT=vechi` pentru
+loturile buclei vechi. Linia `--- PODUL` agrega observatorul podului (probe_sf_watch.gd).
 """
 import glob
 import os
@@ -15,7 +21,14 @@ import statistics as st
 import sys
 
 
+LAYOUT = os.environ.get("SF_LAYOUT", "b200")
+
+
 def zone(x, y):
+    if LAYOUT == "b200":
+        z = zone_b200(x, y)
+        if z:
+            return z
     if abs(x) < 12 and -20 <= y <= 270:
         return "lant"
     if abs(x) < 14 and 270 < y <= 312:
@@ -31,6 +44,27 @@ def zone(x, y):
     if y < -140:
         return "urcare"
     return "coama"
+
+
+def zone_b200(x, y):
+    """Zonele noi ale buclei B200 (None = zonele comune cu bucla veche: lant, serpentine...)."""
+    if 230 <= x <= 510 and 205 <= y <= 252:
+        return "pod"
+    if x > 510 and 150 <= y <= 300:
+        return "balon"
+    if 165 <= x < 230 and 205 <= y <= 252:
+        return "capul de pod"
+    if 120 <= x < 185 and 165 <= y < 215:
+        return "primul viraj"
+    if 120 <= x <= 170 and -100 <= y < 165:
+        return "urcare"
+    if 95 <= x <= 175 and -150 <= y < -100:
+        return "colt de sus"
+    if 30 <= x < 120 and -150 <= y <= -110:
+        return "coama"
+    if x >= 105 and 240 < y <= 470:
+        return "spre pod"
+    return None
 
 
 def pct(a, q):
@@ -188,7 +222,8 @@ def main():
         print(f"    [blocaj] {b[0]} t={b[1]:.0f} {b[2]} la ({b[6][0]:.0f}, {b[6][1]:.0f}) atinge {b[5]}")
 
     print("\n--- REST")
-    for zn in ("terasa/furca", "ocol", "strada de jos/chei", "faleza", "urcare", "coama"):
+    for zn in ("terasa/furca", "ocol", "strada de jos/chei", "faleza", "urcare", "coama", "pod", "balon",
+               "capul de pod", "primul viraj", "colt de sus", "spre pod", "rest"):
         r_ = [r for r in resps if r[3] == zn]
         b_ = [b for b in blocks if b[4] == zn]
         e_ = [e for e in ejects if e[3] == zn]
@@ -200,6 +235,55 @@ def main():
             for e in e_[:6]:
                 print(f"    ejectare {e[0]} t={e[1]:.0f} {e[2]} {e[4]} {e[5]:.1f} la ({e[6][0]:.0f}, {e[6][1]:.0f})")
     print(f"  TOTAL: repuneri {len(resps)}, [blocaj] {len(blocks)}, ejectari {len(ejects)}")
+    print("\n--- PODUL (observatorul probe_sf_watch.gd, treceri prin coridorul cu doua sensuri)")
+    pod = {"n": 0, "block": 0, "truck": 0, "cushion": 0, "cross": 0, "near": 0, "slow": 0, "resp": 0,
+           "eject": 0, "narrow": [], "dur": [], "incomplete": 0, "side": {}}
+    cross_rows, head_rows, summ = [], [], []
+    for p in logs:
+        txt = open(p, encoding="utf-8", errors="replace").read()
+        for m in re.finditer(r"^    \[sf pod trecere\] (.+?) side=([+-]\d) t=([\d.]+) (-?[\d.]+)s v_in=([\d.]+) "
+                             r"v_min=([\d.]+) bariera=(\d+) camion=(\d+) atenuator=(\d+) peste=(\d+) "
+                             r"ingust=([\d.]+) camion_aproape=(\d) coada=(\d) complet=(\d) repus=(\d) ejectat=(\d)",
+                             txt, re.M):
+            pod["n"] += 1
+            pod["block"] += int(m.group(7)) > 0
+            pod["truck"] += int(m.group(8)) > 0
+            pod["cushion"] += int(m.group(9)) > 0
+            pod["cross"] += int(m.group(10))
+            pod["narrow"].append(float(m.group(11)))
+            pod["near"] += int(m.group(12))
+            pod["slow"] += int(m.group(13))
+            pod["incomplete"] += m.group(14) == "0"
+            pod["resp"] += int(m.group(15))
+            pod["eject"] += int(m.group(16))
+            pod["side"][m.group(2)] = pod["side"].get(m.group(2), 0) + 1
+            if m.group(14) == "1":
+                pod["dur"].append(float(m.group(4)))
+        for m in re.finditer(r"^    \[sf pod peste\] (.*)$", txt, re.M):
+            cross_rows.append(os.path.basename(p) + " " + m.group(1))
+        for m in re.finditer(r"^    \[sf frontal\] (.*coridor=(\d).*)$", txt, re.M):
+            head_rows.append((m.group(2) == "1", os.path.basename(p) + " " + m.group(1)))
+        for m in re.finditer(r"^=== SF pod: treceri.*contacte fara trecere \(bariera/camion/atenuator\) (\d+)/(\d+)/(\d+)",
+                             txt, re.M):
+            summ.append(tuple(int(g) for g in m.groups()))
+    n = max(pod["n"], 1)
+    if pod["n"]:
+        print(f"  treceri {pod['n']} (pe sens: {pod['side']}), terminate {len(pod['dur'])}, durata med "
+              f"{st.median(pod['dur']) if pod['dur'] else -1:.1f} s; repuse {pod['resp']}, ejectate {pod['eject']}")
+        print(f"  cu contact: bariera {pod['block']} ({100.0 * pod['block'] / n:.1f}%), camion {pod['truck']} "
+              f"({100.0 * pod['truck'] / n:.1f}%), atenuator {pod['cushion']} ({100.0 * pod['cushion'] / n:.1f}%)")
+        print(f"  TRECERI PESTE DESPARTITOR: {pod['cross']}; frontale in coridor: "
+              f"{sum(1 for c, _ in head_rows if c)} (oriunde {len(head_rows)})")
+        print(f"  banda ingusta (< 10 m): {100.0 * st.mean(pod['narrow']):.0f}% din timpul pe pod; intalniri cu "
+              f"camionul {pod['near']}, coada (sub 10 m/s) {pod['slow']} ({100.0 * pod['slow'] / max(pod['near'], 1):.1f}%)")
+        if summ:
+            print(f"  contacte in afara trecerilor (bariera/camion/atenuator): "
+                  f"{sum(a for a, _, _ in summ)}/{sum(b for _, b, _ in summ)}/{sum(c for _, _, c in summ)}")
+        for row in cross_rows[:10]:
+            print("    peste: " + row)
+        for c, row in head_rows[:12]:
+            print("    frontal: " + row)
+
     print("\n--- felii (v_med medie, % lent mediu, pereti total)")
     for k in sorted(buckets):
         v, sl, w = buckets[k]

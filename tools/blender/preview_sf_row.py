@@ -349,7 +349,9 @@ def _ground_disc(z=0.0, hex_color="#BDBAB4", size=40.0):
 
 def compare(name, res_height=900):
     os.makedirs(FID_DIR, exist_ok=True)
-    crop = os.path.join(CROP_DIR, name + ".png")
+    # varianta oglindita `_m` se pune langa decuparea casei de baza (la colt, `_m` are
+    # turnuletul pe +X, ca decuparea)
+    crop = os.path.join(CROP_DIR, re.sub(r"_m$", "", name) + ".png")
     _clear()
     meshes = _import(name, PASTELS["blue"])
     ground = _ground_disc()

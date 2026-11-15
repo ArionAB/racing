@@ -85,10 +85,36 @@ if [ $DO_IMPORT -eq 1 ]; then
 	# Dupa un merge, scenele pot cere resurse inca neimportate (memoria
 	# `merge-curat-scena-stricata`). Doua treceri, ca in CI: unele resurse
 	# depind de altele.
+	#
+	# Fiecare trecere se verifica (#717). Inainte ambele coduri de iesire erau
+	# ignorate, iar testul de fum cauta in log doar erori de script/parse/load,
+	# deci un segfault al editorului headless (redeschiderea scenelor din
+	# .godot/editor/editor_layout.cfg) trecea drept import reusit.
 	printf '%-58s ' "Import resurse"
-	timeout "$STEP_TIMEOUT" "$GODOT" --headless --path . --import > "$LOGS/import.log" 2>&1
-	timeout "$STEP_TIMEOUT" "$GODOT" --headless --path . --import >> "$LOGS/import.log" 2>&1
-	echo "gata"
+	import_t0=$SECONDS
+	import_why=""
+	: > "$LOGS/import.log"
+	for import_pass in 1 2; do
+		timeout "$STEP_TIMEOUT" "$GODOT" --headless --path . --import >> "$LOGS/import.log" 2>&1
+		import_status=$?
+		if [ -z "$import_why" ]; then
+			if [ $import_status -eq 124 ]; then
+				import_why="trecerea $import_pass AGATATA (peste ${STEP_TIMEOUT}s)"
+			elif [ $import_status -ne 0 ]; then
+				import_why="trecerea $import_pass: cod de iesire $import_status"
+			fi
+		fi
+	done
+	if [ -z "$import_why" ] && grep -qE 'CrashHandlerException|signal 11' "$LOGS/import.log"; then
+		import_why="crash in log (CrashHandlerException / signal 11)"
+	fi
+	if [ -z "$import_why" ]; then
+		echo "OK   ($((SECONDS - import_t0))s)"
+		PASSED+=("Import resurse")
+	else
+		echo "PICA ($((SECONDS - import_t0))s) — $import_why — vezi $LOGS/import.log"
+		FAILED+=("Import resurse")
+	fi
 fi
 
 # Testul de fum: scena principala porneste fara erori de script/parse/load.

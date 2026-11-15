@@ -2163,15 +2163,17 @@ if PONT_INFO is not None:
 #     pasteluri prin metadata `wall_class` (vecinii difera mereu), mana cealalta prin fisierul `_m`
 #     (niciodata scale.x = -1), garajul spre capatul de VALE;
 #   - COLTURILE (`sf_row_corner_turret`, 9 m) doar la capatul de rand dinspre o intersectie reala,
-#     cu turnuletul spre ea: capetele de VALE ale blocurilor lantului (spre intersectia plata) si
-#     capatul de N al randului de V de pe strada tramvaiului 1 (strada laterala a tramvaiului).
-#     Turnuletul costa soare pe lant (pasul 7b: 85,4 -> 81,4 %): `SF_CASE_COLT=0` le scoate;
+#     cu turnuletul spre ea: pe lant capetele de VALE ale blocurilor (spre intersectia plata) pe
+#     ambele laturi si capetele de DEAL (spre intersectia de pe muchie) doar pe latura de E (umbra
+#     cade spre NE, departe de carosabil), plus capatul de N al randului de V de pe strada
+#     tramvaiului 1 (strada laterala a tramvaiului). Turnuletul costa soare pe lant (pasul 7b:
+#     85,4 -> 81,4 %), masurat aici cu `ProbeSfLight --real`;
 #   - COLIZIUNEA: o cutie pe amprenta (latimea x 12 m, de la -2,4 la +9,6), statica, FARA
 #     bovindou, sub `CaseCorpuri`; GLB-urile au `coliziune = "none"` (hull-ul implicit ar fi pus
 #     un zid invizibil la 0,9 m in fata garajului) si `contact = "none"` (discurile de contact ale
 #     caselor lipite s-ar suprapune in placa neagra, ca la zidurile din Machu Picchu).
 #   SF_CASE=0        scena de dinainte, octet cu octet
-#   SF_CASE_COLT=0   fara colturi;  SF_CASE_COLT=est  colturi doar pe latura de E a lantului
+#   SF_CASE_COLT=0   fara colturi;  =vale  doar capetele de vale;  =est  doar latura de E a lantului
 # =============================================================================================
 P8_CASE = os.environ.get("SF_CASE", "1") == "1"
 P8_COLT = os.environ.get("SF_CASE_COLT", "1")
@@ -2269,17 +2271,25 @@ def _poly_line(poly, line):
 # RANDURILE: (zona, nume, punctul de start al strazii (harta), directia ei (harta, unitara), latura
 # (+1 = la dreapta directiei, -1 = la stanga), retragerea fatadei, t0, numarul de case de rand,
 # coltul ("t0" / "t1" / None)). Casele se aseaza de la t0 in sensul directiei; coltul ia capatul
-# cerut. Pe lant blocul b incepe la muchia lui (y = 72 b): randul de la 1,0 la 45,0 m dupa muchie
-# (colt de 9 m + 5 case de 7 m), adica panta de 48 m dintre doua intersectii plate.
+# cerut. Pe lant blocul b incepe la muchia lui (y = 72 b): randul se termina la 45,0 m dupa muchie
+# (inaintea masinilor parcate), adica pe panta de 48 m dintre doua intersectii plate.
 CASE_ROWS = []
 if B200 and P8_CASE:
-    _chain_colt = {"1": ("t1", "t1"), "est": ("t1", None), "0": (None, None)}.get(P8_COLT, ("t1", "t1"))
+    # latura de E: colt la ambele capete (umbra turnuletului cade spre NE, departe de carosabil);
+    # latura de V: doar la capatul de vale. Randul de E incepe cu 1 m INAINTEA muchiei (pe platul
+    # intersectiei; ultima masina parcata a blocului de dinainte e la 8,55 m), ca 9 + 4 x 7 + 9 m sa
+    # se opreasca tot la 45,0 m dupa muchie.
+    _chain_colt = {"1": ("both", "t1"), "vale": ("t1", "t1"), "est": ("both", None),
+                   "0": (None, None)}.get(P8_COLT, ("both", "t1"))
     for b_ in range(BLOCKS):
         y_l = PTS[LIPS[b_]][1]
         for side_, nm_, colt_ in ((1.0, "E", _chain_colt[0]), (-1.0, "V", _chain_colt[1])):
             # strada spre N (0, 1): dreapta = E
+            t0_, n_ = (-1.0, 4) if colt_ == "both" else (1.0, 5 if colt_ else 6)
+            if colt_ is None:
+                n_, t0_ = 6, 3.0
             CASE_ROWS.append(("D", "D%d%s" % (b_ + 1, nm_), (0.0, y_l), (0.0, 1.0), side_, CASE_SETBACK,
-                              1.0, 5, colt_))
+                              t0_, n_, colt_))
     # strada tramvaiului 1: de la baza ei (B0) spre S (urca). Strazi transversale de 14 m la y ~ 88
     # si ~ -5 (benzile de soare ale brief-ului §2 B), aliniate pe ambele laturi; pe latura de V
     # randul de N incepe dupa strada laterala a tramvaiului (care intra la y ~ 164).
@@ -2313,9 +2323,9 @@ if CASE_ROWS:
     for idx_, (zone, rname, a_, u_, side_, setb, t0_, n_reg, colt_) in enumerate(CASE_ROWS):
         nrm = (u_[1] * side_, -u_[0] * side_)            # spre casa (dreapta directiei = (uy, -ux))
         slots = [CASE_W] * n_reg
-        if colt_ == "t0":
+        if colt_ in ("t0", "both"):
             slots = [CASE_W_CORNER] + slots
-        elif colt_ == "t1":
+        if colt_ in ("t1", "both"):
             slots = slots + [CASE_W_CORNER]
         t = t0_
         t_end = t0_ + sum(slots)
@@ -2341,8 +2351,10 @@ if CASE_ROWS:
                 samples.append(_gnd(t + k_, setb))
                 k_ += 0.5
             side_line = []
+            # coltul de la capatul t0 e primul slot; cel de la t1, ultimul
+            c_end = "t0" if (corner and i_ == 0 and colt_ in ("t0", "both")) else "t1"
             if corner:
-                te = t if colt_ == "t0" else t + w_
+                te = t if c_end == "t0" else t + w_
                 d_ = 0.0
                 while d_ <= CASE_D + 1e-6:
                     side_line.append(_gnd(te, setb + d_))
@@ -2357,7 +2369,7 @@ if CASE_ROWS:
             # +X_glb pe harta: (X[0], -X[2])
             Xm = (X[0], -X[2])
             if corner:
-                want = -1.0 if colt_ == "t0" else 1.0      # turnuletul spre capatul randului
+                want = -1.0 if c_end == "t0" else 1.0      # turnuletul spre capatul randului
                 tdir = (u_[0] * want, u_[1] * want)
                 use_m = (-Xm[0] * tdir[0] - Xm[1] * tdir[1]) < 0.0     # turnuletul de baza e pe -X
                 stem = KIT_CORNER

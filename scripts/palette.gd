@@ -210,6 +210,15 @@ static var _shared: StandardMaterial3D
 ## numaratoarea din tools/probe_decor.gd nu se misca.
 static var _detail_path: String = DETAIL_PATH
 
+## Calea activa, cu DETAIL_PATH ca rezerva (#717). In editor palette.gd nu e
+## @tool, deci initializarile `static var` nu ruleaza: `_detail_path` ramane ""
+## pana la primul `set_detail_texture`, iar un script @tool care cere materialul
+## inainte (WorldProp, RimBoulderHazard — copiii au _ready inaintea pistei)
+## incarca "res://" si scrie "Resource file not found". In joc `_detail_path`
+## nu e niciodata gol, deci aici nu se schimba nimic.
+static func _detail_now() -> String:
+	return _detail_path if _detail_path != "" else DETAIL_PATH
+
 
 ## Schimba stratul de detaliu al lumii. Se apeleaza INAINTE de prima cerere de
 ## material (Track.apply_theme), fiindca `_shared` e construit lenes o data.
@@ -309,7 +318,7 @@ static func world_material() -> StandardMaterial3D:
 		# centrul slotului — asa slotul din paleta devine si canal de intensitate:
 		# roca primeste tot, masinile nimic.
 		_shared.detail_enabled = true
-		_shared.detail_albedo = load(_detail_path)
+		_shared.detail_albedo = load(_detail_now())
 		_shared.detail_mask = load(DETAIL_MASK_PATH)
 		_shared.detail_blend_mode = BaseMaterial3D.BLEND_MODE_MUL
 		_shared.detail_uv_layer = BaseMaterial3D.DETAIL_UV_2
@@ -2399,7 +2408,7 @@ static func faded_detail_material() -> ShaderMaterial:
 	# Aceleasi obiecte de textura ca `world_material`: nimic nu se dubleaza in
 	# memoria GPU.
 	mat.set_shader_parameter("albedo_atlas", load(ATLAS_PATH))
-	mat.set_shader_parameter("detail_tex", load(_detail_path))
+	mat.set_shader_parameter("detail_tex", load(_detail_now()))
 	mat.set_shader_parameter("detail_mask_tex", load(DETAIL_MASK_PATH))
 	mat.set_shader_parameter("detail_scale", DETAIL_SCALE)
 	# Fereastra de stingere e MAI SCURTA decat pe teren (26->130 m). Nu din

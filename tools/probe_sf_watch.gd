@@ -505,6 +505,7 @@ func _physics_process(delta: float) -> void:
 		_tick_trams(i, c)
 		if _podm != null:
 			_tick_pod(i, c, delta)
+		_tick_case(i, c, p, delta)
 		if q.distance_to(p) > 8.0:
 			continue          # repunere: nu e trecere
 		_tick_tram_gates(i, c, p, q)
@@ -556,6 +557,63 @@ func _physics_process(delta: float) -> void:
 					_passes.append([i, 1 if _gate_branch[i] else 0, -1.0, _gate_resp[i],
 						_gate_bed[i], _gate_wall[i]])
 					_gate_t[i] = -1.0
+
+
+## PASUL 8b: contactele cu cutiile caselor (randul din fata `CaseCorpuri`, cel din spate
+## `CaseSpateCorpuri`) si cat de departe de axa benzii lui ajunge o masina (cele mai departate
+## pozitii, ca sa se vada daca randurile din spate fara cutie, de la 40 m, sunt la indemana).
+var _case_hits: Array = []       # [t, masina, corp, poz, v]
+var _case_last: Dictionary = {}  # (masina, corp) -> ultimul tick de contact
+var _off_max: Array = []         # per masina: [distanta, poz, t]
+var _off_s: Array[float] = [0.0, 0.0, 0.0]   # secunde-masina la > 15 / 25 / 40 m de axa
+
+
+func _tick_case(i: int, c: Car, p: Vector3, delta: float) -> void:
+	for b in c.get_colliding_bodies():
+		var nm := String((b as Node).name)
+		if nm != "CaseCorpuri" and nm != "CaseSpateCorpuri":
+			continue
+		var key := "%d|%s" % [i, nm]
+		if _t - float(_case_last.get(key, -99.0)) > 1.0:
+			_case_hits.append([_t, i, nm, p, c.horizontal_speed()])
+		_case_last[key] = _t
+	var r: TrackRoute = _race.track.route_at(c.route)
+	var best := INF
+	for k in range(-4, 5):
+		var a: Vector3 = r.baked[r.wrap_index(c.road_index + k)]
+		best = minf(best, Vector2(p.x - a.x, p.z - a.z).length())
+	while _off_max.size() <= i:
+		_off_max.append([0.0, Vector3.ZERO, 0.0])
+	if best > float(_off_max[i][0]):
+		_off_max[i] = [best, p, _t]
+	for k in 3:
+		if best > [15.0, 25.0, 40.0][k]:
+			_off_s[k] += delta
+
+
+func _report_case() -> void:
+	var cars: Array[Car] = _race.cars
+	var front := 0
+	var back := 0
+	for h in _case_hits:
+		if String(h[2]) == "CaseSpateCorpuri":
+			back += 1
+		else:
+			front += 1
+	var worst := 0.0
+	for o in _off_max:
+		worst = maxf(worst, float(o[0]))
+	print("=== SF case: contacte rand din fata %d, rand din spate %d; abaterea maxima de la axa %.1f m; secunde-masina la > 15 / 25 / 40 m: %.1f / %.1f / %.1f" % [
+		front, back, worst, _off_s[0], _off_s[1], _off_s[2]])
+	for h in _case_hits:
+		var p: Vector3 = h[3]
+		print("    [sf casa] t=%5.1fs %-18s %s v=%.1f poz=(%.0f,%.1f,%.0f)" % [float(h[0]),
+			cars[int(h[1])].pilot_name, String(h[2]), float(h[4]), p.x, p.y, p.z])
+	for i in _off_max.size():
+		var o: Array = _off_max[i]
+		var p2: Vector3 = o[1]
+		print("    [sf abatere] %-18s %.1f m t=%.1fs poz=(%.0f,%.1f,%.0f)" % [cars[i].pilot_name,
+			float(o[0]), float(o[2]), p2.x, p2.y, p2.z])
 
 
 static func _crossed(p: Vector3, q: Vector3, at: Vector3, dir: Vector3) -> bool:
@@ -740,6 +798,7 @@ func report() -> void:
 	_report_trams()
 	_report_pod()
 	_report_p6()
+	_report_case()
 
 
 func _report_pod() -> void:

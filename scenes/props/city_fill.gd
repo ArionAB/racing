@@ -225,8 +225,11 @@ func _trace(msg: String) -> void:
 func _build() -> void:
 	var track := _find_track()
 	if track == null:
-		push_warning("CityFill %s: nu gasesc pista" % name)
-		return
+		# Instantele explicite nu cer pista (doar generarea pe teren); sonda de tenta
+		# (tools/ProbeSfTenta.tscn) deseneaza umplutura pe o scena goala.
+		if explicit_xforms.is_empty():
+			push_warning("CityFill %s: nu gasesc pista" % name)
+			return
 	# Terenul trebuie sa fie in spatiul fizic inainte de raycast-uri.
 	await get_tree().physics_frame
 	var space := get_world_3d().direct_space_state

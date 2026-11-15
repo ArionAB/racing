@@ -2486,6 +2486,357 @@ if CASE_ROWS:
     P7_NODES += P8_NODES
     P6_SUB += P8_SUB
 
+# =============================================================================================
+# PASUL 8b (brief §7 pasul 8, 16 nov 2026): RANDURILE DIN SPATE. In spatele randului din fata si in
+# blocurile dintre strazi, ca un singur `CityFill` (`CaseSpate`, o singura felie: 36 de buffere) cu
+# instante explicite: generatorul stie strazile, deci randurile sunt PARALELE cu strada lor, spate
+# in spate (0,1 m intre pereti), cu strazi transversale unde le are strada din fata.
+#   - KITUL: doar casele de rand (fara colturi: turnuletul are 15 m si costa soare), amestecate cu
+#     `KIT_SEQ` (familia se schimba la fiecare vecin), cele cinci pasteluri (vecinii difera mereu),
+#     garajul spre VALE. Mana cealalta se scrie ca transformare OGLINDITA (determinant negativ);
+#     `CityFill` o deseneaza cu fisierul `_m` si transformarea refacuta pozitiva (`mirror_models`).
+#   - PODEAUA: cota cea mai inalta a terenului pe linia fatadei (ca randul din fata), din harta
+#     `tools/data/sf_spate_ground.tsv` (2 m, `ProbeSfSpate --dump-ground`). Treptele de acoperis ies
+#     singure: fiecare casa e la cota ei. Casa se respinge daca fusta (2,4 m) nu ajunge la teren pe
+#     o latura VIZIBILA (fara alta casa lipita de ea) sau daca dealul o ingroapa peste 4 m.
+#   - LIBER: parcul de pe coama (casele pictate si chiparosii vin acolo), terasa, blocul
+#     serpentinelor, cheiul / pontonul / placa turnanta, podul cu capetele lui si virajul 1, intrarea
+#     tramvaiului 1 (strada laterala de la y 164), strada laterala cu poarta de pe B (y ~40, H5).
+#   - COLIZIUNEA: orice casa din spate cu amprenta la < 40 m de axa unei benzi (bucla, scurtatura)
+#     primeste cutia ei sub `CaseSpateCorpuri` (ca `CaseCorpuri`); dincolo, niciuna (ca `CityFill`).
+#   - UMBRA: arunca doar casele la <= 50 m de o banda (cascada telefonului are 55 m de la camera);
+#     restul nu intra in bufferele de umbra.
+#   SF_SPATE=0   scena de dinainte, octet cu octet
+# =============================================================================================
+P8B = os.environ.get("SF_SPATE", "1") == "1"
+SPATE_GROUND_PATH = os.path.join(HERE, "data", "sf_spate_ground.tsv")
+SPATE_GAP = 0.1               # intre doi pereti spate in spate
+SPATE_STREET = 24.85          # intre fatadele dinspre strada din spate si perechea din mijloc (blocul D-B)
+SPATE_ALLEY = 14.0            # strada din spate, in blocurile mai inguste
+SPATE_BURY_MAX = 4.0
+SPATE_BODY_M = 40.0
+SPATE_SHADOW_M = 50.0
+SPATE_ROAD_MIN = 20.0         # amprenta fata de axa oricarei benzi (randul din fata sta la 10,5)
+SPATE_CELL = float(os.environ.get("SF_SPATE_CELL", "0"))   # 0 = o singura felie (36 de buffere); >0 = felii de atatia m (A/B)
+SPATE_TRAM_MIN = 6.0
+SPATE_HOUSES, SPATE_STATS = [], {}
+# zonele LIBERE (dreptunghiuri pe harta: x0, y0, x1, y1)
+SPATE_KEEP = [
+    ("parcul coamei", (28.0, -140.0, 106.0, -12.0)),
+    ("terasa", (-60.0, 262.0, 60.0, 306.0)),
+    ("serpentinele", (-24.0, 290.0, 62.0, 475.0)),
+    ("cheiul", (-200.0, 436.0, 200.0, 520.0)),
+    ("placa turnanta", (-165.0, 425.0, -125.0, 470.0)),
+    ("podul si virajul 1", (104.0, 166.0, 270.0, 280.0)),
+    ("intrarea tramvaiului 1", (100.0, 155.0, 144.0, 176.0)),
+    ("poarta de pe B (H5)", (150.0, 33.0, 264.0, 47.0)),
+]
+
+
+def _spate_grid():
+    g = {}
+    if os.path.exists(SPATE_GROUND_PATH):
+        for line in open(SPATE_GROUND_PATH, encoding="utf-8"):
+            tk = line.split()
+            if len(tk) == 3:
+                g[(int(tk[0]), int(tk[1]))] = float(tk[2])
+    return g
+
+
+def _spate_h(G_, mx, my):
+    """Cota terenului in punctul de HARTA (mx, my), bilinear pe grila de 2 m; None in afara ei."""
+    gx, gz = mx, -my
+    x0, z0 = int(math.floor(gx / 2.0)) * 2, int(math.floor(gz / 2.0)) * 2
+    fx, fz = (gx - x0) / 2.0, (gz - z0) / 2.0
+    try:
+        a, b = G_[(x0, z0)], G_[(x0 + 2, z0)]
+        c, d = G_[(x0, z0 + 2)], G_[(x0 + 2, z0 + 2)]
+    except KeyError:
+        return None
+    return (a * (1 - fx) + b * fx) * (1 - fz) + (c * (1 - fx) + d * fx) * fz
+
+
+def _spate_segs(spans, w=CASE_W):
+    """Sloturile de casa (centrele pe axa randului) din intervale (t0, t1): case lipite, centrate."""
+    out = []
+    for t0, t1 in spans:
+        n = int(math.floor((t1 - t0 + 1e-6) / w))
+        if n <= 0:
+            continue
+        s0 = (t0 + t1) / 2.0 - n * w / 2.0
+        out.append([s0 + w * (k + 0.5) for k in range(n)])
+    return out
+
+
+if B200 and P8B and CASE_HOUSES:
+    _GS = _spate_grid()
+    if not _GS:
+        raise SystemExit("randurile din spate: lipseste harta terenului %s — ruleaza ProbeSfSpate --dump-ground"
+                         % os.path.relpath(SPATE_GROUND_PATH, ROOT))
+    def _row_span(rn, axis):
+        hs = [h for h in CASE_HOUSES if h["row"] == rn]
+        k = 1 if axis == "y" else 0
+        v = [p[k] for h in hs for p in h["fp"]]
+        return (min(v), max(v))
+
+    _chain = [_row_span("D%dE" % (b_ + 1), "y") for b_ in range(BLOCKS)]   # (y_l - 1, y_l + 45)
+    _bv = [_row_span(r_, "y") for r_ in ("B3V", "B2V", "B1V")]
+    _be = [_row_span(r_, "y") for r_ in ("B3E", "B2E", "B1E")]
+    _gv = [_row_span(r_, "y") for r_ in ("G2V", "G1V")]
+    _ean = [_row_span("EAN", "x")]
+    _ebe = [_row_span("EBE", "y")]
+    _ebv = [_row_span("EBV", "y")]
+    _x_front_d = HW + 3.5 + CASE_D          # 22,5: spatele randului din fata de pe lant
+    _x_bv = X_T - CASE_SETBACK_PARKED - CASE_D          # 120,25: spatele randului de V de pe B
+    _x_be = X_T + CASE_SETBACK_PARKED + CASE_D          # 167,75
+    _x_gv = X_G - CASE_SETBACK - CASE_D                 # 127,5
+    _y_ean = F_Y + RB + CASE_SETBACK + CASE_D          # 337,5
+    _x_ebe = _ob[0] + CASE_SETBACK + CASE_D             # -102,2
+    _x_ebv = _ob[0] - CASE_SETBACK - CASE_D             # -147,2
+    _hd = CASE_D / 2.0
+    # COLOANELE: (zona, nume, axa randului, coordonata centrului peste axa, fata (+1 = spre + pe
+    # cealalta axa), intervalele in lungul axei). Perechile spate in spate impart aceleasi intervale.
+    _p1w = _x_front_d + SPATE_GAP + CASE_D + SPATE_STREET + _hd               # 65,45
+    _bh = []
+    _bh += [("D", "DE1", "y", _x_front_d + SPATE_GAP + _hd, 1.0, _chain),
+            ("D", "DE2", "y", _p1w, -1.0, _chain),
+            ("D", "DE3", "y", _p1w + CASE_D + SPATE_GAP, 1.0, _chain),
+            ("B", "BV1", "y", _x_bv - SPATE_GAP - _hd, -1.0, _bv),
+            ("D", "DV1", "y", -(_x_front_d + SPATE_GAP + _hd), -1.0, _chain),
+            ("D", "DV2", "y", -_p1w, 1.0, _chain),
+            ("D", "DV3", "y", -(_p1w + CASE_D + SPATE_GAP), -1.0, _chain)]
+    _be_sp = []
+    for a_, b_ in _be:
+        _be_sp += [(a_, min(b_, 33.0)), (max(a_, 47.0), b_)] if a_ < 40.0 < b_ else [(a_, b_)]
+    _be2 = _x_be + SPATE_GAP + CASE_D + SPATE_ALLEY + _hd
+    _bh += [("B", "BE1", "y", _x_be + SPATE_GAP + _hd, 1.0, _be_sp),
+            ("B", "BE2", "y", _be2, -1.0, _be_sp),
+            ("B", "BE3", "y", _be2 + CASE_D + SPATE_GAP, 1.0, _be_sp)]
+    _gv2 = _x_gv - SPATE_GAP - CASE_D - SPATE_ALLEY - _hd
+    _bh += [("G", "GV1", "y", _x_gv - SPATE_GAP - _hd, -1.0, _gv),
+            ("G", "GV2", "y", _gv2, 1.0, _gv),
+            ("G", "GV3", "y", _gv2 - CASE_D - SPATE_GAP, -1.0, _gv)]
+    # ocolul: in spatele randului de N al strazii spre V (fata spre N), in spatele celor doua laturi
+    # ale strazii spre N, si doua perechi E-V in interiorul blocului (paralele cu strada spre V)
+    _ei = (_x_ebe + SPATE_GAP + CASE_D + SPATE_ALLEY, -30.0)   # interiorul: strada in fata lui EBE1, pana la serpentine
+    _ey2 = _y_ean + SPATE_GAP + CASE_D + SPATE_ALLEY + _hd
+    _ey4 = _ey2 + CASE_D + SPATE_GAP + _hd + SPATE_ALLEY + _hd
+    _bh += [("E", "EN1", "x", _y_ean + SPATE_GAP + _hd, 1.0, [(max(_ean[0][0], _ei[0]), _ean[0][1])]),
+            ("E", "EBE1", "y", _x_ebe + SPATE_GAP + _hd, 1.0, _ebe),
+            ("E", "EN2", "x", _ey2, -1.0, [_ei]),
+            ("E", "EN3", "x", _ey2 + CASE_D + SPATE_GAP, 1.0, [_ei]),
+            ("E", "EN4", "x", _ey4, -1.0, [_ei]),
+            ("E", "EN5", "x", _ey4 + CASE_D + SPATE_GAP, 1.0, [_ei]),
+            ("E", "EBV1", "y", _x_ebv - SPATE_GAP - _hd, -1.0, _ebv)]
+    # liniile de distanta (harta)
+    _ml = list(PTS) + [PTS[0]]
+    _bl = [(g[0], -g[2]) for g in DENSE_G]
+
+    def _in_keep(poly):
+        # randurile sunt paralele cu axele hartii: amprenta (cu bovindoul) e chiar dreptunghiul ei
+        ax0, ax1 = min(p[0] for p in poly), max(p[0] for p in poly)
+        ay0, ay1 = min(p[1] for p in poly), max(p[1] for p in poly)
+        for nm_, (x0_, y0_, x1_, y1_) in SPATE_KEEP:
+            if ax0 < x1_ and ax1 > x0_ and ay0 < y1_ and ay1 > y0_:
+                return nm_
+        return None
+
+    def _far_dist(poly, line):
+        # distanta exacta si dincolo de 60 m (`_poly_line` sare segmentele departate): colturi si centru
+        pts = list(poly) + [(sum(p[0] for p in poly) / len(poly), sum(p[1] for p in poly) / len(poly))]
+        return min(_pt_seg(p, a, b) for p in pts for a, b in zip(line, line[1:]))
+
+    def _in_lagoon(p):
+        ins = False
+        n_ = len(LAGOON)
+        for i in range(n_):
+            a, b = LAGOON[i], LAGOON[(i + 1) % n_]
+            if (a[1] > p[1]) != (b[1] > p[1]) and p[0] < a[0] + (p[1] - a[1]) * (b[0] - a[0]) / (b[1] - a[1]):
+                ins = not ins
+        return ins
+
+    rej = {}
+    _placed_fp = [h["fp"] for h in CASE_HOUSES]          # amprentele (fara bovindou) deja ocupate
+    for ci_, (zone, cname, axis, cc, face, spans) in enumerate(_bh):
+        if axis == "y":
+            u_ = (0.0, 1.0)
+            f_ = (face, 0.0)
+        else:
+            u_ = (1.0, 0.0)
+            f_ = (0.0, face)
+
+        def _P(t, d, _u=u_, _f=f_, _c=cc, _ax=axis):
+            # punctul de pe harta: t in lungul randului, d spre fata casei de la centru
+            base = (_c, t) if _ax == "y" else (t, _c)
+            return (base[0] + _f[0] * d, base[1] + _f[1] * d)
+
+        for si_, seg in enumerate(_spate_segs(spans)):
+            # capatul de vale al segmentului, pe linia fatadelor
+            ga = _spate_h(_GS, *_P(seg[0], _hd))
+            gb = _spate_h(_GS, *_P(seg[-1], _hd))
+            if ga is None or gb is None:
+                rej["harta"] = rej.get("harta", 0) + len(seg)
+                continue
+            down = 1.0 if gb < ga else -1.0
+            for i_, tc in enumerate(seg):
+                ctr = _P(tc, 0.0)
+                fp = [_P(tc + du, dd) for du, dd in ((-3.5, _hd), (3.5, _hd), (3.5, -_hd), (-3.5, -_hd))]
+                fpb = [_P(tc + du, dd) for du, dd in ((-3.5, _hd + 0.9), (3.5, _hd + 0.9), (3.5, -_hd), (-3.5, -_hd))]
+                why = _in_keep(fpb)
+                if why:
+                    rej[why] = rej.get(why, 0) + 1
+                    continue
+                if any(_in_lagoon(p) for p in fpb):
+                    rej["apa"] = rej.get("apa", 0) + 1
+                    continue
+                d_road = min(_poly_line(fp, _ml), _poly_line(fp, _bl))
+                if d_road > 1e17:
+                    d_road = min(_far_dist(fp, _ml), _far_dist(fp, _bl[::4]))
+                d_tram = min(_poly_line(fpb, TRAM1_MAP), _poly_line(fpb, TRAM2_MAP))
+                if d_road < SPATE_ROAD_MIN or d_tram < SPATE_TRAM_MIN:
+                    rej["drum"] = rej.get("drum", 0) + 1
+                    continue
+                if any(math.dist(q[0], fpb[0]) < 30.0 and (any(_in_convex(p, q, 0.02) for p in fpb)
+                                                            or any(_in_convex(p, fpb, 0.02) for p in q))
+                       for q in _placed_fp):
+                    rej["suprapunere"] = rej.get("suprapunere", 0) + 1
+                    continue
+                fl = []
+                k_ = -3.5
+                while k_ <= 3.5 + 1e-6:
+                    fl.append(_spate_h(_GS, *_P(tc + k_, _hd)))
+                    k_ += 0.5
+                if any(v is None for v in fl):
+                    rej["harta"] = rej.get("harta", 0) + 1
+                    continue
+                floor_ = max(fl)
+                Z = (-f_[0], 0.0, f_[1])
+                X = (Z[2], 0.0, -Z[0])
+                Xm = (X[0], -X[2])
+                ddir = (u_[0] * down, u_[1] * down)
+                mirror = (Xm[0] * ddir[0] + Xm[1] * ddir[1]) < 0.0
+                SPATE_HOUSES.append(dict(
+                    name="%s_%02d" % (cname, len([h for h in SPATE_HOUSES if h["row"] == cname])), zone=zone,
+                    row=cname, col=ci_, seg=(ci_, si_), i=i_, tc=tc, ctr=ctr, fp=fp, fpb=fpb, f=f_, u=u_,
+                    X=X, Z=Z, mirror=mirror, floor=floor_, d_road=d_road,
+                    stem=KIT_SEQ[(i_ + 2 * ci_ + (0 if face > 0 else 1)) % len(KIT_SEQ)],
+                    pastel=(i_ * 2 + (0 if face > 0 else 3) + ci_) % len(PASTELS)))
+                _placed_fp.append(fpb)
+
+    # --- fusta si ingroparea, pe laturile VIZIBILE (fara alta casa lipita), pana se stabilizeaza:
+    # o casa scoasa descopera laturile vecinilor ei
+    def _inside_any(p, own, fps_):
+        for q in fps_:
+            if q is not own and _in_convex(p, q, 0.0):
+                return True
+        return False
+
+    while True:
+        fps_all = [h["fp"] for h in CASE_HOUSES] + [h["fp"] for h in SPATE_HOUSES]
+        bad = []
+        for h in SPATE_HOUSES:
+            fp = h["fp"]
+            near_ = [q for q in fps_all if math.dist(q[0], fp[0]) < 30.0]
+            cx_, cy_ = sum(p[0] for p in fp) / 4.0, sum(p[1] for p in fp) / 4.0
+            lo_vis, hi_vis = 1e9, -1e9
+            for i in range(4):
+                a, b = fp[i], fp[(i + 1) % 4]
+                L = math.dist(a, b)
+                ox, oy = (b[1] - a[1]) / L, -(b[0] - a[0]) / L
+                if ox * ((a[0] + b[0]) / 2.0 - cx_) + oy * ((a[1] + b[1]) / 2.0 - cy_) < 0.0:
+                    ox, oy = -ox, -oy                                     # normala spre exterior
+                n = max(1, int(round(L / 0.5)))
+                for k in range(n + 1):
+                    p = (a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n)
+                    po = (p[0] + ox * 0.3, p[1] + oy * 0.3)
+                    if _inside_any(po, fp, near_):
+                        continue
+                    g_ = _spate_h(_GS, *p)
+                    lo_vis, hi_vis = min(lo_vis, g_), max(hi_vis, g_)
+            h["drop"] = h["floor"] - lo_vis
+            h["bury"] = hi_vis - h["floor"]
+            if h["drop"] > CASE_SKIRT - 0.05:
+                bad.append((h, "fusta"))
+            elif h["bury"] > SPATE_BURY_MAX:
+                bad.append((h, "ingropata"))
+            elif lo_vis < 1.5:
+                bad.append((h, "mal"))
+        if not bad:
+            break
+        for h, why in bad:
+            rej[why] = rej.get(why, 0) + 1
+            SPATE_HOUSES.remove(h)
+    # vecinii (acelasi rand, acelasi segment, consecutivi): alta familie, alt pastel
+    for a_h, b_h in zip(SPATE_HOUSES, SPATE_HOUSES[1:]):
+        if a_h["seg"] == b_h["seg"] and b_h["i"] == a_h["i"] + 1:
+            if a_h["stem"].split("_")[2] == b_h["stem"].split("_")[2] or a_h["pastel"] == b_h["pastel"]:
+                raise SystemExit("randurile din spate: vecinii %s / %s au aceeasi familie sau acelasi pastel"
+                                 % (a_h["name"], b_h["name"]))
+    SPATE_STATS["rej"] = rej
+
+if SPATE_HOUSES:
+    _stems = list(KIT_SEQ)
+    _rids = [_p7_glb("%s/%s.glb" % (CASE_DIR, s_), "p8_" + s_) for s_ in _stems]
+    _rids_m = [_p7_glb("%s/%s_m.glb" % (CASE_DIR, s_), "p8_" + s_ + "_m") for s_ in _stems]
+    if all(_rids) and all(_rids_m):
+        P7_EXT.append('[ext_resource type="Script" path="res://scenes/props/city_fill.gd" id="p8b_cityfill"]\n')
+        xf_, wall_, sh_ = [], [], []
+        for h in SPATE_HOUSES:
+            X, Z = h["X"], h["Z"]
+            if h["mirror"]:
+                X = (-X[0], -X[1], -X[2])
+            o = (h["ctr"][0], h["floor"], -h["ctr"][1])
+            xf_ += [_stems.index(h["stem"]), X[0], X[1], X[2], 0, 1, 0, Z[0], Z[1], Z[2], o[0], o[1], o[2]]
+            wall_.append(h["pastel"])
+            h["casts"] = h["d_road"] <= SPATE_SHADOW_M
+            sh_.append(1 if h["casts"] else 0)
+
+        def _fl(v):
+            s_ = ("%.3f" % v).rstrip("0").rstrip(".")
+            return "0" if s_ in ("-0", "") else s_
+
+        P8B_NODES = ['[node name="CaseSpate" type="Node3D" parent="."]\n'
+                     'script = ExtResource("p8b_cityfill")\n'
+                     'models = Array[PackedScene]([%s])\n'
+                     'mirror_models = Array[PackedScene]([%s])\n'
+                     '%s'
+                     'wall_classes = PackedStringArray(%s)\n'
+                     'explicit_xforms = PackedFloat32Array(%s)\n'
+                     'explicit_wall = PackedInt32Array(%s)\n'
+                     'explicit_shadow = PackedInt32Array(%s)\n'
+                     '%s'
+                     'metadata/sf_spate = true\n'
+                     % (", ".join('ExtResource("%s")' % r_ for r_ in _rids),
+                        ", ".join('ExtResource("%s")' % r_ for r_ in _rids_m),
+                        ("cell_m = %.1f\n" % SPATE_CELL) if SPATE_CELL > 0.0 else "",
+                        ", ".join('"%s"' % c_ for c_ in PASTELS),
+                        ", ".join(_fl(v) for v in xf_), ", ".join(str(v) for v in wall_),
+                        ", ".join(str(v) for v in sh_), "explicit_cells = true\n" if SPATE_CELL > 0.0 else "")]
+        bodies = [h for h in SPATE_HOUSES if h["d_road"] < SPATE_BODY_M]
+        if bodies:
+            P6_SUB.append('[sub_resource type="BoxShape3D" id="Box_spate7"]\nsize = Vector3(%.1f, %.1f, %.1f)\n'
+                          % (CASE_W, CASE_SKIRT + CASE_EAVE, CASE_D))
+            P8B_NODES.append('[node name="CaseSpateCorpuri" type="StaticBody3D" parent="."]\n')
+            for h in bodies:
+                X, Z = h["X"], h["Z"]
+                yc = h["floor"] - CASE_SKIRT + (CASE_SKIRT + CASE_EAVE) / 2.0
+                P8B_NODES.append('[node name="Corp_%s" type="CollisionShape3D" parent="CaseSpateCorpuri"]\n'
+                                 'transform = Transform3D(%.5f, 0, %.5f, 0, 1, 0, %.5f, 0, %.5f, %.3f, %.3f, %.3f)\n'
+                                 'shape = SubResource("Box_spate7")\n'
+                                 % (h["name"], X[0], Z[0], X[2], Z[2], h["ctr"][0], yc, -h["ctr"][1]))
+        P7_NODES += P8B_NODES
+        from collections import Counter
+        print("randurile din spate: %d case (%s) in %d randuri, %d oglindite (fisierul _m), %d cu cutie (< %.0f m de "
+              "o banda), %d arunca umbra (<= %.0f m); respinse %s" % (
+                  len(SPATE_HOUSES), ", ".join("%s %d" % kv for kv in sorted(Counter(h["zone"] for h in SPATE_HOUSES).items())),
+                  len({h["row"] for h in SPATE_HOUSES}), sum(1 for h in SPATE_HOUSES if h["mirror"]), len(bodies),
+                  SPATE_BODY_M, sum(1 for h in SPATE_HOUSES if h["casts"]), SPATE_SHADOW_M, dict(sorted(SPATE_STATS["rej"].items()))))
+        for rn in dict.fromkeys(h["row"] for h in SPATE_HOUSES):
+            hs = [h for h in SPATE_HOUSES if h["row"] == rn]
+            print("  %-5s %2d case, podeaua %.1f..%.1f, cadere max %.2f, ingropare max %.2f, banda la >= %.1f m" % (
+                rn, len(hs), min(h["floor"] for h in hs), max(h["floor"] for h in hs), max(h["drop"] for h in hs),
+                max(h["bury"] for h in hs), min(h["d_road"] for h in hs)))
+
 if P7_NODES:
     # containerul de decor asezat din generator: `WorldProp` pune materialul lumii pe tot
     # subarborele; pista il cauta dupa nume (`DecorManual`), la radacina

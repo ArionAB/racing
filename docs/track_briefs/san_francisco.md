@@ -413,6 +413,16 @@ din lumină.
 
 ## 5. Assets (schiță — lista completă după ProbeLayout)
 
+> **Foaia de assets e acum [`docs/asset_briefs/sanfrancisco_inventory.md`](../asset_briefs/sanfrancisco_inventory.md)
+> (v0.1, pasul 4, 15 nov 2026).** Ea conține verdictul pe consumatori (§5.7 de mai jos, cu
+> fișier:linie), bugetul de materiale măsurat, tabelul de frustum, inventarul pe roluri și ordinea
+> de livrare. Briefurile Blender ale primului val: `sf_cable_car.md` (**primul de dat**),
+> `sf_red_bridge.md`, `sf_painted_row_kit.md` (pilotul: o casă), `sf_median_truck.md`. Lista de
+> mai jos e schița inițială. Unde diferă, are dreptate foaia. Diferențele principale:
+> `sf_clock_tower` rămâne nefăcut până la decizia dezvoltatorului (H7), `sf_dragon_gate` e P3, iar
+> zidurile de cărămidă și zebrele se fac din cod, nu ca GLB. Foaia se ajustează după ce vine
+> diorama (§9).
+
 ### 5.1 Teren și suprafețe (cod, clase de textură)
 
 - asfalt cu zebre, marcaje și șine (decal-uri); urme pe `RoadWear`
@@ -487,6 +497,25 @@ scândurilor pe ponton. Bufnitura de aterizare există (`ImpactSound` pe semnalu
 teren înclinat? — de aici depinde dacă „casele în trepte” e kit sau cod; (3)
 suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
 `RespawnZone` pe golf vs plasa de mare existentă.
+
+**FĂCUT (15 nov 2026)**, detaliat în `sanfrancisco_inventory.md` §1:
+1. **DA.** `PathMover` are `model`, `model_node`, `model_yaw` și măsoară cutia de coliziune pe
+   AABB-ul modelului. Vagonul intră fără cod, cu condiția să aibă AABB exact 2,5 × 3,2 × 8,5 m
+   (pe cutia asta sunt măsurate toate contactele).
+2. **PARȚIAL.** `CityFill` pune fiecare casă la cota cea mai joasă a amprentei, deci treptele de
+   acoperiș ies fără cod. Soclul vizibil cere o opțiune de o linie (casa la cota de sus). **Cele cinci
+   pasteluri cer cod** (azi se cunosc doar două tente pe model, deschis / indigo) sau cinci fișiere
+   pe casă. Decizia e a dezvoltatorului. Rândul din față e `DecorManual` din generator, cu
+   coliziune-cutie.
+3. **Tenta DA, textura NU.** `TrackBranch` are `tint` propriu, dar nicio rețetă cu clasă de
+   textură: cărămida serpentinelor cere cod.
+4. **Plasa există.** `SeaRespawn` se construiește automat sub apă, iar `ViaductNet` sub tablier: nu
+   se adaugă `RespawnZone`. Scândura pontonului cere cod. **Defect găsit:** pe B200 apa golfului
+   se vede doar în strâmtoare. La N de chei e uscat (`img/sf_route/b200_cheu_gamecam.png`).
+
+Pe lângă cele patru: `MovableMedianHazard` n-are export de model (camionul și blocul cer cod),
+podul n-are consumator (se leagă din generator, coliziunea rămâne a jocului), iar mașinile
+parcate (4,2 m) sunt refuzate de `BumpProp` (plafonul de 2 m), deci rămân statice fără cod.
 
 ## 6. Bugete
 
@@ -1227,6 +1256,33 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
 
 4. **Turul de feel, capturile `--gamecam`, tabelul de frustum**; apoi planul de
    sus adnotat, dioramă, foaia de assets.
+
+   **FĂCUT (15 nov 2026), în afară de turul de feel și de dioramă.** Turul de feel rămâne al
+   dezvoltatorului, amânat la finalul pasului 8 (decizia lui din 15 nov). Diorama o generează
+   dezvoltatorul din promptul din §9. Ordinea, la cererea lui: traseu → gărzi → plan adnotat →
+   dioramă → foaie de assets. Foaia a fost scrisă în paralel, iar după dioramă se ajustează.
+   - **Planul adnotat:** `docs/asset_briefs/img/sf_route/sf_plan_adnotat.png`
+     (`tools/annotate_sf_plan.py`, peste captura ortografică reală
+     `sf_top_ortho_b200.png`; maparea e verificată pe linia de start). Promptul de dioramă e în §9.
+   - **Foaia de assets:** `docs/asset_briefs/sanfrancisco_inventory.md`. Conține trecerea de
+     contracte (§5.7), bugetul de materiale (24 măsurate azi, din care 12 sunt placeholdere care
+     dispar; proiecția e ~23–27 din 38; podul carosabil nu schimbă bugetul), inventarul pe roluri
+     și ordinea de livrare.
+   - **Tabelul de frustum:** în foaie, §4, pe zece puncte ale turului (grila, mijlocul tablierului,
+     strada tramvaiului, coama, prima muchie, muchia 4, furca, cheiul, strada de întors, podul spre
+     larg). Concluzia de modelare: **partea de sus a portalurilor (+39…+45) aproape nu intră în
+     cadru**. Identitatea podului stă în primii 30 m ai turnului și în cabluri. Insula cu far e
+     siluetă (258–344 m), iar portalurile nu se văd de pe cheu (400–490 m, dincolo de planul
+     îndepărtat).
+   - **Briefurile primului val:** `sf_cable_car.md`, `sf_red_bridge.md`,
+     `sf_painted_row_kit.md`, `sf_median_truck.md`.
+   - **Captură nouă:** `img/sf_route/b200_cheu_gamecam.png` (cheiul de nord, fără apă: defectul
+     de la §5.7).
+
+   **De decis (dezvoltatorul):** cele cinci pasteluri (cod sau fișiere); turnul cu ceas (scos sau
+   la capătul vizual al tablierului spre oraș); casele pictate de pe coamă în contra-lumină (văzute
+   din față pe urcare) sau luminate (văzute din profil); trotuarul exterior al podului peste
+   pervazul de 3,8 m; mașinile parcate ca `BumpProp` (cod) sau statice.
 5. Tramvaiele, cu A/B pe ProbeRace.
 
    > **Cifrele de la pasul 5 sunt ale BUCLEI VECHI.** Pe B200 (pasul 2b), tramvaiul 1 urcă pe

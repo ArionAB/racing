@@ -25,7 +25,8 @@ extends Node
 ##       instantele kitului de sub `DecorManual` cu metadata `sf_case` (scrise de gen_sf_route.py),
 ##       cu un corp trimesh din geometria lor randata (fronton, cornisa, turnulet, bovindou) — ca
 ##       `tools/sf_loc_decor.gd --glb` pe strada sintetica. Plus cutiile lor (`CaseCorpuri`). Pe
-##       scena fara case (`SF_CASE=0`) da soarele pe carosabil contra terenului singur.
+##       scena fara case (`SF_CASE=0`) da soarele pe carosabil contra terenului singur. Din pasul 8b
+##       si randurile din spate (`CityFill` cu metadata `sf_spate`), cu aceeasi geometrie.
 
 const ROAD_HALF_SAMPLE: float = 6.75
 const FACADE_OFF: float = 10.5
@@ -179,6 +180,64 @@ func _real_houses() -> int:
 			cs.shape = shape
 			body.add_child(cs)
 		_houses.add_child(body)
+	return n + _real_back_houses()
+
+
+## Pasul 8b: si randurile din SPATE (`CityFill` cu metadata `sf_spate`, instante explicite scrise
+## de gen_sf_route.py), cu aceeasi geometrie randata: modelul (sau perechea lui `_m`, pentru o
+## instanta ceruta oglindit — exact ce deseneaza CityFill) sub transformarea instantei.
+func _real_back_houses() -> int:
+	var n := 0
+	for fill_n in _track.find_children("*", "CityFill", true, false):
+		var fill := fill_n as CityFill
+		if not fill.has_meta("sf_spate"):
+			continue
+		var faces_of := {}      # scena -> fetele ei in spatiul modelului
+		var f := fill.explicit_xforms
+		var i := 0
+		while i + 13 <= f.size():
+			var mi := int(f[i])
+			var b := Basis(Vector3(f[i + 1], f[i + 2], f[i + 3]), Vector3(f[i + 4], f[i + 5], f[i + 6]),
+				Vector3(f[i + 7], f[i + 8], f[i + 9]))
+			var xf := Transform3D(b, Vector3(f[i + 10], f[i + 11], f[i + 12]))
+			i += 13
+			var scene: PackedScene = fill.models[mi]
+			if b.determinant() < 0.0 and mi < fill.mirror_models.size() and fill.mirror_models[mi] != null:
+				scene = fill.mirror_models[mi]
+				xf.basis.x = -xf.basis.x
+			if not faces_of.has(scene):
+				var inst := scene.instantiate() as Node3D
+				var all := PackedVector3Array()
+				for c in inst.find_children("*", "MeshInstance3D", true, false):
+					var mi3 := c as MeshInstance3D
+					if mi3.mesh == null:
+						continue
+					var local := Transform3D.IDENTITY
+					var cur: Node = mi3
+					while cur != null and cur != inst:
+						local = (cur as Node3D).transform * local
+						cur = cur.get_parent()
+					for p in mi3.mesh.get_faces():
+						all.append(local * p)
+				inst.free()
+				faces_of[scene] = all
+			var src: PackedVector3Array = faces_of[scene]
+			var faces := PackedVector3Array()
+			faces.resize(src.size())
+			for k in src.size():
+				faces[k] = xf * src[k]
+			var shape := ConcavePolygonShape3D.new()
+			shape.backface_collision = true
+			shape.set_faces(faces)
+			var cs := CollisionShape3D.new()
+			cs.shape = shape
+			var body := StaticBody3D.new()
+			body.add_to_group("sf_light_house")
+			body.add_child(cs)
+			_houses.add_child(body)
+			n += 1
+	if n > 0:
+		print("  --real: din care %d din randurile din spate (CityFill)" % n)
 	return n
 
 

@@ -12,7 +12,8 @@ extends Node
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeSfSpate.tscn [-- --sabotaj]
 ##       GARDA, pe scena reala (terenul real, nodul `CaseSpate` construit):
 ##         1. fiecare casa din spate: terenul nu iese peste podea pe linia fatadei (> 0,05 m) si
-##            fusta (podeaua - 2,4) nu ramane in aer pe niciun punct al conturului;
+##            fusta (podeaua - 2,4) nu ramane in aer pe niciun punct VIZIBIL al conturului (fara
+##            alta casa, din fata sau din spate, lipita de el la 0,3 m);
 ##         2. nicio latura vizibila nu e ingropata peste `BURY_MAX` (4 m, ca generatorul: un etaj in deal);
 ##         3. amprenta (cu bovindoul, 7 x 12,9 m) nu atinge amprenta niciunei case din fata
 ##            (`DecorManual`, metadata `sf_case`) si a niciunei alte case din spate;

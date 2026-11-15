@@ -79,6 +79,16 @@ func _ready() -> void:
 			await RenderingServer.frame_post_draw
 		var img := get_viewport().get_texture().get_image()
 		_compare(img, classes[ci], fill.stats)
+		if ci == 0:
+			# LOD-urile partilor din MultiMesh: peretele si atlasul raman mesh-urile importului (cu
+			# LOD-urile lui), umbra unita le are generate (CLAUDE.md, „LOD-uri pe tot ce e reconstruit").
+			for c in fill.get_children():
+				var mmi := c as MultiMeshInstance3D
+				if mmi != null and mmi.multimesh != null:
+					var m := mmi.multimesh.mesh
+					print("    %-48s LOD-uri %d, %d tri la LOD0%s" % [String(mmi.name),
+						MeshCpu.surface_lods(m, 0).size(), _tris0(m),
+						" (umbra)" if mmi.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY else ""])
 		holder.queue_free()
 		await get_tree().process_frame
 	print("VERDICT: %s" % ("OK" if _fails == 0 else "PICA (%d comparatii)" % _fails))
@@ -129,6 +139,15 @@ func _compare(img: Image, cls: String, st: Dictionary) -> void:
 			mean, bad_p, _rgb(ma), _rgb(mb), "OK" if ok else "PICA"])
 	print("    CityFill: %s pe %s, oglindite pe _m %s, pe dos %s" % [str(st.get("per_wall")),
 		str(st.get("wall_mode")), str(st.get("mirrored")), str(st.get("inside_out"))])
+
+
+static func _tris0(m: Mesh) -> int:
+	var n := 0
+	for s in m.get_surface_count():
+		var arr := m.surface_get_arrays(s)
+		var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+		n += (idx.size() if idx.size() > 0 else (arr[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()) / 3
+	return n
 
 
 static func _rgb(v: Vector3) -> String:

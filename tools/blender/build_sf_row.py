@@ -103,14 +103,16 @@ sf_row_a_canted / sf_row_a_square (A, Italianate) — referinte sf_row_a_*.png
  intre etaje, montanti, ferestrele lui), plus:
  A1. Bovindoul FARA cornisa proprie: peretii lui urca pana la 10,05 (friza), iar
      cornisa grea a casei il inveleste (decuparea: cornisa trece peste bovindou).
- A2. "Sprancene" (cornise arcuite) peste FIECARE fereastra: cele doua ferestre
-     inalte de pe -X (late 0,97, arc de 0,18, groase 0,12, iesite 0,16) si
-     ferestrele bovindoului (arc 0,12, groase 0,10, iesite 0,10, ca AABB-ul sa
-     ramana la -6,9). Inlocuiesc cornisa mica comuna a perechii.
- A3. Cornisa GREA (brief §3.2: 0,7 m peste +9,6, iesita 0,45): friza pastel
-     9,6 -> 10,05 cu CONSOLE albe in volute (4-5 pe jumatatea -X, 1-2 pe +X),
-     coroana alba 10,05 -> 10,3 iesita 0,45 (peste bovindou 0,10, ca iesirea
-     totala sa ramana 0,9), cu bevel. Fara brau alb la 9,6 (vezi `A_CROWN`).
+ A2. "Sprancene" (cornise arcuite) peste cele doua ferestre inalte de pe -X (late
+     0,97, arc de 0,18, groase 0,12, iesite 0,16); inlocuiesc cornisa mica comuna
+     a perechii. Ferestrele bovindoului raman fara sprancene, ca pe decupare (si
+     ca elevatia sa tina 45 % pastel); la tesit sunt mai inguste decat la pilot
+     (`NARROW_CANTED_BAY_WINDOWS`).
+ A3. Cornisa GREA (brief §3.2: 0,7 m peste +9,6, iesita 0,45): brau alb 9,6 ->
+     9,7, friza pastel 9,7 -> 10,05 cu CONSOLE albe in volute (6-8 pe jumatatea
+     -X, 1-2 pe +X) si blocuri mici pe fetele bovindoului, coroana alba 10,05 ->
+     10,3 iesita 0,45 (peste bovindou 0,10, ca iesirea totala sa ramana 0,9), cu
+     bevel.
  A4. Acoperis PLAT ascuns: placa de ardezie la 10,05, atice laterale si din spate
      pana la 10,3 (fata interioara pe scandura, capac de ardezie: de sus, intre
      case, nu fac linii albe). Varful casei: +10,3 (garda il cere exact).
@@ -265,9 +267,9 @@ A_CONSOLES = {"canted": (-3.35, -2.9, -2.45, -2.0, -1.55, -1.1, 3.4),
 C_STUDS = (-3.26, -2.15, -1.065)
 C_PARAPET_STUDS = (-2.5, -1.45, 0.0, 1.45, 2.5)
 C_APEX = 10.65          # coama acoperisului ascuns (sub treapta de 10,8)
-# Cornisa grea (A): friza cu console 9,6 -> 10,05, coroana 10,05 -> 10,3 (0,7 m in
-# total, brief §3.2). Fara brau alb la 9,6: masurat, trecea elevatia tesitului sub 45 %
-# pastel (43,0 / 34,7 cu brau 9,6 -> 9,7 si coroana 10,0 -> 10,3).
+# Cornisa grea (A): brau 9,6 -> 9,7, friza cu console 9,7 -> 10,05, coroana 10,05 ->
+# 10,3 (0,7 m in total, brief §3.2). Prima varianta (coroana 10,0 -> 10,3, sprancene si
+# pe bovindou, ferestrele pilotului) dadea elevatia tesitului 43,0 % pastel / 34,7 % alb.
 A_CROWN = (10.05, 10.3)
 
 

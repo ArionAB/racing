@@ -3,7 +3,7 @@ extends Node
 
 func _ready() -> void:
 	await get_tree().process_frame
-	var only := GameState.resolve_track_index(7)
+	var only := TrackInfo.index_of_id(&"serengeti")
 	var track := (load(GameState.TRACK_SCENES[only]) as PackedScene).instantiate() as Track
 	get_tree().root.add_child(track)
 	await get_tree().process_frame

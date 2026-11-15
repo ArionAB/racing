@@ -288,7 +288,7 @@ run_step "Garajul: bare, masa si incadrarea vitrinei" garage.log 'probe_garage:'
 # in copaci sau stanci, nici cocotati pe ele (157 din 856 de gnu stateau asa).
 run_step "Serengeti: traversarile calca pe sol, cu fata inainte" hazard_ground.log 'VERDICT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeHazardGround.tscn -- --track=7
-run_step "Angkor: elefantul se intoarce doar vizual, cu fata inainte" hazard_ground_angkor.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeHazardGround.tscn -- --track=16
+run_step "Angkor: elefantul se intoarce doar vizual, cu fata inainte" hazard_ground_angkor.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeHazardGround.tscn -- --track=angkor
 run_step "Serengeti: animalele nu stau in copaci si stanci" animal_overlap.log 'VERDICT:|PICAT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeAnimalOverlap.tscn -- --track=7 --no-batch
 # Cariera pasul 1: config validat (cu sabotaj), persistenta pe pista, stampile
@@ -324,6 +324,12 @@ run_step "Credite: sursa in export, inventar, ecran, layout" credits.log 'VERDIC
 run_step "Quick Race: piste de lansare, fara bancuri de test" quick_race.log 'VERDICT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeQuickRace.tscn
 
+# Recordurile, cariera si fantomele jucatorilor sunt cheiate pe TrackInfo.id,
+# fara tabela de alias-uri: o pista fara .tres primeste id-ul dedus (`track25`)
+# pe vecie, iar un id schimbat lasa save-urile vechi dormante (#720).
+run_step "Id-uri de pista: explicite, unice, inghetate" track_ids.log 'VERDICT:' -- \
+	--headless --fixed-fps 60 --path . res://tools/ProbeTrackIds.tscn
+
 # Decorul asezat pe solul de la generare ramane sub teren cand terenul creste
 # dupa aceea: padurea Lerai ajunsese la 20-30 m sub peretele craterului.
 run_step "Serengeti: niciun decor ingropat sub teren" decor_buried.log 'VERDICT:|PICAT:' -- \
@@ -340,6 +346,22 @@ run_step "Torent Fiordland: CALM simtit, SURGE mai dur" torrent_b.log 'REZULTAT 
 run_step "Transfagarasan: oi si urs (hazarde animale)" tf_hazards.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeTfHazards.tscn
 # Conurile din tunel (road_works) se imprastie, nu sunt zid (#602).
 run_step "Transfagarasan: conurile din tunel se imprastie" tf_cones.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeBumpProps.tscn -- --track=21
+
+# Uneltele nu-si numesc pista cu un numar scris in cod (#718). Cu 18 piste, 12
+# e indexul Monument Valley, dar scena Track12 e Chongqing; resolve_track_index
+# da castig indexului, deci un literal incarca TACUT alta pista — 63 de unelte
+# masurau asa. In cod: calea scenei sau TrackInfo.index_of_id(&"..."); pe linia
+# de comanda: --track=Track12 / --track=chongqing (GameState.resolve_track_arg).
+printf '%-58s ' "Unelte: nicio pista numita cu numar in cod (#718)"
+track_literals=$(grep -rnE 'resolve_track_index\(\s*-?[0-9]|TRACK_SCENES\[\s*-?[0-9]' --include='*.gd' tools)
+if [ -n "$track_literals" ]; then
+	echo "PICA — pista ceruta cu numar literal:"
+	echo "$track_literals" | head -20 | sed 's/^/    /'
+	FAILED+=("Unelte: nicio pista numita cu numar in cod")
+else
+	echo "OK"
+	PASSED+=("Unelte: nicio pista numita cu numar in cod")
+fi
 
 # Nivelurile AI (#682), partea scumpa, varianta scurta: o pista de drepte
 # (Monument Valley) x 3 seed-uri x 5 profiluri = 15 curse reale, 5 in paralel

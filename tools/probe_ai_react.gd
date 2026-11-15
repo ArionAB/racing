@@ -18,7 +18,7 @@ extends Node
 
 ## Pista deschisa (Monument Valley) cu portiuni lungi si line: AI-ul nu se nimereste
 ## intr-un hairpin sau langa un perete cand masuram reactia.
-var _track_idx: int = 12
+var _track_idx: int = TrackInfo.index_of_id(&"monument_valley")
 
 var _failed: bool = false
 var _track: Track
@@ -44,7 +44,14 @@ func _ready() -> void:
 	GameState.total_laps = 99
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--track="):
-			_track_idx = int(a.substr(8))
+			# index / numar de scena, sau "Track19" / "monument_valley" (#718).
+			# Inainte era indexul brut: un numar de scena iesea din lista.
+			_track_idx = GameState.resolve_track_arg(a.substr(8))
+	if _track_idx < 0:
+		push_error("probe_ai_react: pista invalida")
+		get_tree().quit(2)
+		return
+	print("probe_ai_react: pista %s" % GameState.track_label(_track_idx))
 	GameState.selected_track = _track_idx
 	var race := (load("res://scenes/race/Race.tscn") as PackedScene).instantiate()
 	add_child(race)

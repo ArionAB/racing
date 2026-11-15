@@ -10,7 +10,7 @@ func _ready() -> void:
 		if arg.begins_with("--b="):
 			var s := arg.trim_prefix("--b=").split(","); b = Vector2(float(s[0]), float(s[1]))
 		if arg.begins_with("--steps="): steps = int(arg.trim_prefix("--steps="))
-	var scene := load(GameState.TRACK_SCENES[GameState.resolve_track_index(12)]) as PackedScene
+	var scene := load("res://scenes/tracks/Track12.tscn") as PackedScene
 	var track := scene.instantiate() as Track
 	get_tree().root.add_child(track)
 	await get_tree().process_frame

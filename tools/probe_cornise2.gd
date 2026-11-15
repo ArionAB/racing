@@ -7,7 +7,7 @@ const LOOK_AHEAD := 14.0
 const LOOK_HEIGHT := 1.2
 
 func _ready() -> void:
-	var ti := GameState.resolve_track_index(13)
+	var ti := TrackInfo.index_of_id(&"cappadocia")
 	var track := (load(GameState.TRACK_SCENES[ti]) as PackedScene).instantiate() as Track
 	add_child(track)
 	for i in range(8):

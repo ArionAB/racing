@@ -7,9 +7,10 @@ extends Node
 ## starea emitatoarelor, ca lectia din ProbeFx sa nu se repete: „emite" si „se
 ## vede" sunt intrebari diferite, iar sonda raspunde la amandoua.
 ##
-##   godot --rendering-driver vulkan --path . res://tools/ProbeSplash.tscn -- --track=14
+##   godot --rendering-driver vulkan --path . res://tools/ProbeSplash.tscn -- --track=serengeti
 ##
-## `--track=` accepta si pozitia din lista, si numarul scenei (resolve_track_index).
+## `--track=` accepta pozitia din lista, numarul scenei (resolve_track_index) si,
+## fara ambiguitate, "Track14" / id-ul pistei (resolve_track_arg, #718).
 ## `--channel=<label>` alege canalul (implicit primul cu apa proprie);
 ## `--speed=` viteza de intrare (implicit 22 m/s); `--back=` cati metri
 ## inainte de canal porneste (implicit 45).
@@ -40,10 +41,12 @@ var _tag: String = ""
 
 
 func _ready() -> void:
-	var track_arg := 14
+	# Implicit pe id (#718): 14 era Serengeti (scena Track14) la scriere, azi
+	# INDEXUL 14 e Ha Long.
+	var track_arg := "serengeti"
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
-			track_arg = int(arg.trim_prefix("--track="))
+			track_arg = arg.trim_prefix("--track=")
 		elif arg.begins_with("--speed="):
 			_speed = float(arg.trim_prefix("--speed="))
 		elif arg.begins_with("--back="):
@@ -52,9 +55,9 @@ func _ready() -> void:
 			_label = arg.trim_prefix("--channel=")
 		elif arg.begins_with("--tag="):
 			_tag = arg.trim_prefix("--tag=")
-	var resolved := GameState.resolve_track_index(track_arg)
+	var resolved := GameState.resolve_track_arg(track_arg)
 	if resolved < 0:
-		push_error("probe_splash: --track=%d nu e o pista din lista" % track_arg)
+		push_error("probe_splash: --track=%s nu e o pista din lista" % track_arg)
 		get_tree().quit(1)
 		return
 	GameState.selected_track = resolved

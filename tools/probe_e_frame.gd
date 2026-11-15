@@ -9,7 +9,7 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--frac="):
 			frac = float(a.trim_prefix("--frac="))
-	var idx := GameState.resolve_track_index(7)
+	var idx := TrackInfo.index_of_id(&"serengeti")
 	var track: Track = (load(GameState.TRACK_SCENES[idx]) as PackedScene).instantiate() as Track
 	add_child(track)
 	await get_tree().process_frame

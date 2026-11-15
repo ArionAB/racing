@@ -347,12 +347,17 @@ func _place_detail_label() -> void:
 ## cuvant, iar in cursa nimeni nu citeste cuvinte.
 const CHARGE_W: float = 300.0
 const CHARGE_H: float = 22.0
+## Cat de sus de marginea de jos sta randul barii.
+const CHARGE_BOTTOM_MARGIN: float = 40.0
+## Aerul dintre linia etichetelor de mod si randul barii, dedesubt.
+const MODE_LINE_GAP: float = 4.0
 
 func _build_turbo_bar(root: Control) -> void:
 	var holder := HBoxContainer.new()
 	holder.add_theme_constant_override("separation", 10)
 	holder.set_anchors_and_offsets_preset(
-		Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 40)
+		Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE,
+		int(CHARGE_BOTTOM_MARGIN))
 	holder.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	holder.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -374,6 +379,26 @@ func _build_turbo_bar(root: Control) -> void:
 	_charge_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	holder.add_child(_charge_bg)
 
+	# Etichetele de mod (SEALED, GHOST, CHALLENGE) stau pe linia LOR, deasupra
+	# barii, nu pe randul ei (#719). Pe rand, centrat cu tot cu bara, il latea
+	# simetric: „CHALLENGE +1: NO TUK-TUK HITS   LAP 3: 12 PLATES" impingea
+	# randul in zona sagetii ▶ (46 px) si a franei (52 px) pe orice canvas de
+	# 1280 — desktop si iPad — si muta bara de cate ori se schimba textul. Aici
+	# bara ramane pe pixel; linia, centrata, are cel mult 290 px (cea mai lunga
+	# provocare), mai ingusta decat randul de 341, la ~110 px de ▶ si de frana.
+	# Ancorata separat, nu intr-un VBox comun: un container ar rotunji centrarea
+	# barii cu jumatate de pixel cand linia e mai lata decat ea.
+	var mode_line := HBoxContainer.new()
+	mode_line.add_theme_constant_override("separation", 10)
+	mode_line.set_anchors_and_offsets_preset(
+		Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE,
+		int(CHARGE_BOTTOM_MARGIN + holder.get_combined_minimum_size().y
+			+ MODE_LINE_GAP))
+	mode_line.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	mode_line.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	mode_line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(mode_line)
+
 	# Contratimp: bara nu se mai incarca. Eticheta mica spune asta, ca
 	# jucatorul sa nu astepte o umplere care nu vine.
 	_sealed_label = _make_label(16)
@@ -381,21 +406,21 @@ func _build_turbo_bar(root: Control) -> void:
 	_sealed_label.modulate = Color(1.0, 0.85, 0.3)
 	_sealed_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_sealed_label.visible = false
-	holder.add_child(_sealed_label)
+	mode_line.add_child(_sealed_label)
 
 	# Contratimp cu fantoma salvata: timpul ei, ca sa stii pe cine urmaresti.
 	_ghost_label = _make_label(16)
 	_ghost_label.modulate = Color(0.75, 0.9, 1.0)
 	_ghost_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_ghost_label.visible = false
-	holder.add_child(_ghost_label)
+	mode_line.add_child(_ghost_label)
 	# Provocarea gimmick-ului (cariera): in aceeasi zona ca SEALED; cele doua
 	# moduri nu se suprapun (contratimp vs provocare).
 	_challenge_label = _make_label(16)
 	_challenge_label.modulate = Color(0.55, 0.9, 0.5)
 	_challenge_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_challenge_label.visible = false
-	holder.add_child(_challenge_label)
+	mode_line.add_child(_challenge_label)
 
 	# Umplutura e copil al jgheabului, cu 3 px de margine de jur imprejur, ca
 	# marginea intunecata sa ramana vizibila si cand bara e plina.

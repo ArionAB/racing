@@ -9,20 +9,22 @@ extends Node
 ## si per nod de mesh, cate MeshInstance3D au material_override == clasa
 ## wet_gneiss si cate au ramas pe materialul lumii (atlas).
 ##
-## Ruleaza si pe Track15 (--track=15) ca sa arate ca moss_boulder de-acolo (tema
+## Ruleaza si pe Track15 (--track=machu_picchu) ca sa arate ca moss_boulder de-acolo (tema
 ## "machupicchu") NU e atins de nimic scopat pe tema "fiordland" (memoria
 ## `probe-decor-numar-de-scena`: probe_decor/probe_manual iau numar de SCENA;
 ## asta ia indexul din GameState.TRACK_SCENES, ca ProbeCappClase).
 ##
-##   godot --headless --fixed-fps 60 --path . res://tools/ProbeFiordStancaClase.tscn -- --track=16
-##   godot --headless --fixed-fps 60 --path . res://tools/ProbeFiordStancaClase.tscn -- --track=15
+##   godot --headless --fixed-fps 60 --path . res://tools/ProbeFiordStancaClase.tscn -- --track=fiordland
+##   godot --headless --fixed-fps 60 --path . res://tools/ProbeFiordStancaClase.tscn -- --track=machu_picchu
 
 func _ready() -> void:
 	await get_tree().process_frame
-	var idx := 16
+	# Implicit pe id, nu cu un numar: 16 era Track16 la scriere (scena), azi INDEXUL
+	# lui e Angkor (#718). --track= ia si "TrackNN" / id de pista.
+	var idx := TrackInfo.index_of_id(&"fiordland")
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
-			idx = GameState.resolve_track_index(int(arg.trim_prefix("--track=")))
+			idx = GameState.resolve_track_arg(arg.trim_prefix("--track="))
 	var track := (load(GameState.TRACK_SCENES[idx]) as PackedScene).instantiate() as Track
 	get_tree().root.add_child(track)
 	# call_deferred pe _apply_theme_classes/_remap_model_slots cere mai multe

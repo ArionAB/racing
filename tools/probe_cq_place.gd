@@ -4,7 +4,7 @@ extends Node
 
 func _ready() -> void:
 	await get_tree().process_frame
-	var idx := GameState.resolve_track_index(12)
+	var idx := TrackInfo.index_of_id(&"chongqing")
 	var f0 := 0.44
 	var f1 := 1.0
 	var st := 0.01

@@ -38,12 +38,12 @@ var _animals: Array[Vector3] = []
 
 
 func _ready() -> void:
-	var wanted := 7
+	var wanted := "serengeti"
 	var fix := false
 	var prefix := ""
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
-			wanted = int(arg.trim_prefix("--track="))
+			wanted = arg.trim_prefix("--track=")
 		elif arg == "--fix":
 			fix = true
 		elif arg.begins_with("--prefix="):
@@ -52,11 +52,14 @@ func _ready() -> void:
 			_relocate = true
 		elif arg.begins_with("--min-y="):
 			_min_y = float(arg.trim_prefix("--min-y="))
-	var idx := GameState.resolve_track_index(wanted)
+	# `--track=`: index sau numar de scena ca pana acum, ori fara ambiguitate
+	# "Track14" / "serengeti" (#718).
+	var idx := GameState.resolve_track_arg(wanted)
 	if idx < 0:
-		push_error("ProbeDecorBuried: pista invalida %d" % wanted)
+		push_error("ProbeDecorBuried: pista invalida %s" % wanted)
 		get_tree().quit(2)
 		return
+	print("ProbeDecorBuried: pista %s" % GameState.track_arg_label(wanted, idx))
 	var track := (load(GameState.TRACK_SCENES[idx]) as PackedScene).instantiate() as Track
 	add_child(track)
 	for i in 12:

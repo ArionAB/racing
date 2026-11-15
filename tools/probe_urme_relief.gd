@@ -57,7 +57,7 @@ var _done: bool = false
 
 
 func _ready() -> void:
-	GameState.selected_track = 1
+	GameState.selected_track = TrackInfo.index_of_id(&"okinawa_manual")
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			GameState.selected_track = GameState.resolve_track_index(

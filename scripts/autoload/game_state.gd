@@ -168,13 +168,60 @@ const WORLD_CUPS: Array[Resource] = [
 ## Deci: indexul CASTIGA (orice comanda veche merge la fel), iar un numar care
 ## nu e index valid dar e numar de scena din lista se rezolva ca numar de scena,
 ## in loc sa fie retezat. Ce nu e nici una, nici alta -> -1, adica eroare la
-## apelant. Singurul numar ambiguu e 1 (index -> Track08, scena -> Track01) si
-## se rezolva ca index, ca sa nu se schimbe sub picioare comenzile existente.
+## apelant. Numerele ambigue (cu 18 piste: 1 si 8-17, de ex. 12 = index Monument
+## Valley, dar scena Track12 = Chongqing) se rezolva ca index, ca sa nu se schimbe
+## sub picioare comenzile existente. De aceea uneltele nu-si mai numesc pista cu
+## un numar scris in cod (#718: 63 de apeluri incarcau tacut alta pista): calea
+## scenei, `TrackInfo.index_of_id(&"...")` sau, de pe linia de comanda,
+## `resolve_track_arg` cu "Track12" / "chongqing". Garda: pas in verify_local.sh.
 static func resolve_track_index(n: int) -> int:
 	if n >= 0 and n < TRACK_SCENES.size():
 		return n
 	var wanted := "res://scenes/tracks/Track%02d.tscn" % n
 	return TRACK_SCENES.find(wanted)
+
+
+## Pozitia in TRACK_SCENES a unei scene numite FARA ambiguitate: "Track12",
+## "track12" sau calea intreaga. -1 daca scena nu e in lista (Track09, de
+## exemplu, sta doar pe disc). Spre deosebire de `resolve_track_index`, aici
+## nu exista doua citiri: "Track12" e Chongqing si atat (#718).
+static func index_of_scene(scene: String) -> int:
+	var s := scene.strip_edges()
+	if s.begins_with("res://"):
+		return TRACK_SCENES.find(s)
+	var low := s.to_lower().trim_suffix(".tscn")
+	if not low.begins_with("track") or not low.substr(5).is_valid_int():
+		return -1
+	return TRACK_SCENES.find("res://scenes/tracks/Track%02d.tscn" % low.substr(5).to_int())
+
+
+## Un `--track=` dat ca TEXT, pentru unelte. Un numar merge EXACT ca pana acum
+## (`resolve_track_index`: indexul castiga, deci comenzile vechi nu se schimba).
+## Formele fara ambiguitate (#718): numele scenei ("Track12") sau id-ul pistei
+## (`TrackInfo.id`: "chongqing", "monument_valley"). Necunoscut -> -1.
+static func resolve_track_arg(arg: String) -> int:
+	var s := arg.strip_edges()
+	if s.is_valid_int():
+		return resolve_track_index(s.to_int())
+	var by_scene := index_of_scene(s)
+	if by_scene >= 0:
+		return by_scene
+	return TrackInfo.index_of_id(StringName(s.to_lower()))
+
+
+## Eticheta pentru linia "pista masurata" a unei sonde: `track_label`, plus o
+## avertizare cand `--track=` a fost un numar ambiguu (index al unei piste SI
+## numar de scena al alteia), ca rezultatul sa spuna pe ce pista a fost.
+static func track_arg_label(arg: String, index: int) -> String:
+	var label := track_label(index)
+	var s := arg.strip_edges()
+	if not s.is_valid_int():
+		return label
+	var as_scene := TRACK_SCENES.find("res://scenes/tracks/Track%02d.tscn" % s.to_int())
+	if as_scene < 0 or as_scene == index:
+		return label
+	return "%s — ATENTIE: --track=%s e INDEXUL; scena Track%02d e %s (cere-o cu --track=Track%02d)" % [
+		label, s, s.to_int(), TRACK_NAMES[as_scene], s.to_int()]
 
 
 ## Numele lizibil pentru un index deja rezolvat — pentru mesajele uneltelor.

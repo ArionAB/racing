@@ -318,7 +318,8 @@ func _steer_real(track: Track) -> void:
 # --------------------------------------------------------------------- pista
 
 func _run_pista() -> void:
-	var idx := GameState.resolve_track_index(19)
+	var idx := TrackInfo.index_of_id(&"monument_valley")
+	print("probe_rim_boulder: pista %s" % GameState.track_label(idx))
 	var track := (load(GameState.TRACK_SCENES[idx]) as PackedScene).instantiate() as Track
 	add_child(track)
 	for _i in 5:

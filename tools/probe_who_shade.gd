@@ -10,7 +10,7 @@ var _cr: Array = []
 
 func _ready() -> void:
 	await get_tree().process_frame
-	var scn := load(GameState.TRACK_SCENES[GameState.resolve_track_index(7)]) as PackedScene
+	var scn := load("res://scenes/tracks/Track14.tscn") as PackedScene
 	_track = scn.instantiate()
 	get_tree().root.add_child(_track)
 	await get_tree().process_frame

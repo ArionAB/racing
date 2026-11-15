@@ -45,10 +45,17 @@ func _check(ok: bool, what: String) -> void:
 
 
 func _ready() -> void:
-	var idx := 0
+	var track_arg := "0"
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
-			idx = GameState.resolve_track_index(int(arg.trim_prefix("--track=")))
+			track_arg = arg.trim_prefix("--track=")
+	# index / numar de scena, sau fara ambiguitate "Track01" / "dunele" (#718)
+	var idx := GameState.resolve_track_arg(track_arg)
+	if idx < 0:
+		push_error("probe_upright: pista invalida %s" % track_arg)
+		get_tree().quit(2)
+		return
+	print("probe_upright: pista %s" % GameState.track_arg_label(track_arg, idx))
 	_off = "--off" in OS.get_cmdline_user_args()
 	print("")
 	print("=== Auto-upright ===")

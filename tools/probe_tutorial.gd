@@ -60,7 +60,11 @@ func _ready() -> void:
 	print("== A. layout")
 	await _check_layout(Vector2i(1280, 720), "1280x720")
 	await _check_layout(Vector2i(1558, 720), "telefon 2532x1170 -> 1558x720")
-	await _check_layout(Vector2i(960, 720), "4:3 (iPad) 960x720")
+	# 4:3 cu stretch `expand` (baza 1280x720) NU da un canvas mai ingust, ci
+	# unul mai INALT: 1280x960 (iPad 2732x2048 -> 1280x959). Un SubViewport de
+	# 960x720 descrie un canvas pe care jocul nu-l produce — din el s-a nascut
+	# alarma falsa din #719 (vezi ProbeTouchZones, care trece prin stretch).
+	await _check_layout(Vector2i(1280, 960), "4:3 (iPad) -> 1280x960")
 	print("== B. invitatia de la prima pornire")
 	await _check_invite()
 	print("== C. REPLAY TUTORIAL din SETTINGS")

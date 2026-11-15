@@ -15,7 +15,14 @@ func _ready() -> void:
 	var only := -1
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
-			only = GameState.resolve_track_index(int(arg.trim_prefix("--track=")))
+			# index / numar de scena, sau "Track13" / "cappadocia" (#718)
+			var track_arg := arg.trim_prefix("--track=")
+			only = GameState.resolve_track_arg(track_arg)
+			if only < 0:
+				push_error("probe_mesh_cpu: pista invalida %s" % track_arg)
+				get_tree().quit(2)
+				return
+			print("probe_mesh_cpu: pista %s" % GameState.track_arg_label(track_arg, only))
 	MeshCpu.verify = true
 	var bad := 0
 	var total := 0

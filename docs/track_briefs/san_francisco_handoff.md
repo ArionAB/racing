@@ -40,7 +40,16 @@ of step 8. No iOS build since #723 (build 54) — **start one only when they ask
 
 ## Next steps
 
-1. **Put the house kit on Track25.** All seven houses, each with a truly
+0. **DONE on branch `sanfrancisco/pas8-case` (16 Nov 2026): the front rows are
+   on Track25** — 156 houses in zones B, D, E, G (19 turreted corners), written
+   by `tools/gen_sf_route.py` (`SF_CASE=0` reproduces the scene without them).
+   Materials 22 (cap 38), ProbeLaneClear 50, sun on the chain 83.6 % (≥ 80 %),
+   lap 83.06 s, no car ever touched a house box. Full numbers: brief §7 "8a".
+   Still missing around the houses: pavements, back rows (`CityFill`), an end
+   house with side windows for the blank row-end walls, street furniture.
+   **The floors come from `tools/data/sf_case_ground.tsv`** (terrain sampled by
+   `ProbeSfCase --dump-ground`): regenerate it if the route or terrain changes.
+1. **(Done — kept for the rules.)** All seven houses, each with a truly
    mirrored `_m` file, are done and accepted on `sanfrancisco/pas7b-case`
    (14 GLBs; mixed kit on `SfLoc --glb=kit`: pastel 40.3 % of house pixels,
    ΔV 0.349, ΔE 15.0, 16 materials). They are on no track yet. Rules measured
@@ -140,7 +149,8 @@ of step 8. No iOS build since #723 (build 54) — **start one only when they ask
   `--track=Track25`; ProbeLayout / ProbeLaneClear / snapshot use `--track=17`;
   `probe_decor` and `probe_manual` use `--track=25`.
 - Baselines: ProbeLaneClear 50 (sabotage 53); `probe_decor --track=25` 17
-  materials (cap 38); ProbeSfRoute −0.29 m (contract ≥ −0.30).
+  materials in #740, **22 with the houses** (cap 38); ProbeSfRoute −0.29 m
+  (contract ≥ −0.30); sun on the chain 83.6 % (`ProbeSfLight --real`, ≥ 80 %).
 - SF probes: `probe_sf_crest`, `ProbeSfPonton`, `ProbeSfParked`, `ProbeBumpTall`,
   `ProbeSfPetals`, `ProbeSfLoc`, `probe_sf_watch` + `sf_route_report.py`,
   `sf_tram_report.py`.

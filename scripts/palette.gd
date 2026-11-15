@@ -1829,6 +1829,8 @@ const SMOOTH_FOLIAGE := true
 static var _smoothed_meshes: Dictionary = {}
 
 static func is_smooth_foliage(cls: String) -> bool:
+	if SMOOTH_FOLIAGE and cls == CROWN_PREFIX:
+		return true
 	return SMOOTH_FOLIAGE and CLASS_TRIPLANAR_SHARPNESS.has(cls.trim_prefix(TRI_PREFIX))
 
 ## Suprafetele unui mesh care poarta un material de coroana (gol daca
@@ -1838,6 +1840,9 @@ static func foliage_surfaces(mesh: Mesh) -> Dictionary:
 	if not SMOOTH_FOLIAGE or mesh == null:
 		return out
 	for si in mesh.get_surface_count():
+		if is_crown_material(mesh.surface_get_material(si)):
+			out[si] = true
+			continue
 		for cls in CLASS_TRIPLANAR_SHARPNESS:
 			if mesh.surface_get_material(si) == triplanar_class_material(cls):
 				out[si] = true
@@ -2126,6 +2131,65 @@ const ATLAS_PREFIX := "atlas"
 ## Cache-uit ca finish_material: ZERO materiale noi la garda (acelasi atlas,
 ## aceeasi masca, doar `detail_enabled=false` pe o copie).
 const PLAIN_PREFIX := "plain"
+
+## Prefixele "crown", "core" si "leaf" — COROANA PUNCTATA (arborii Kyoto, nov
+## 2026; cererea dezvoltatorului dupa capturile din art of rally: "imi plac
+## copacii aia fata de ce avem").
+##
+## Coroana veche era o clasa triplanara (dala `autumn_foliage` cu goluri negre):
+## pe captura de joc citea palarii de ciuperca patate. Aici culoarea e PLATA, iar
+## granulatia vine din CARDURI PUNCTATE: cateva sute de carduri pe coaja
+## coroanei, fiecare intors spre camera si decupat in puncte rotunde
+## (`assets/shaders/leaf_cards.gdshader`, `leaf_cards` in
+## tools/blender/kyoto_shapes.py). Prima incercare, o pata = un quad, dubla
+## triunghiurile din valea de artari; cardul poarta zeci de puncte pe 2 triunghiuri.
+##
+## Arborele are doua infatisari, din noduri diferite ale aceluiasi GLB:
+##   de APROAPE  `*_Core` ("core": miez mic si intunecat, doar ca sa nu se vada
+##               prin coroana) + `*_Leaves` ("leaf": cardurile, care dau silueta);
+##   de DEPARTE  `*_Crown` ("crown": coroana intreaga pe culoarea slotului),
+##               fara carduri.
+## Padurea in masa alege pe treapta de LOD (`MeshForest._species_meshes`). Un
+## arbore pus ca NOD e mereu "de aproape": WorldProp ii ascunde `*_Crown`.
+##
+## Doua materiale partajate de TOTI arborii punctati, oricate specii si culori
+## (culoarea e in slot si in varf, nu in material), in locul cate unei clase
+## triplanare per nuanta. Nicio textura noua.
+const CROWN_PREFIX := "crown"
+const CORE_PREFIX := "core"
+const LEAF_PREFIX := "leaf"
+
+static var _crown_mat: StandardMaterial3D = null
+static var _leaf_mat: ShaderMaterial = null
+
+## Masa coroanei si miezul: atlasul plat, cull normal (fete inchise).
+static func crown_material() -> StandardMaterial3D:
+	if _crown_mat == null:
+		_crown_mat = plain_material().duplicate() as StandardMaterial3D
+	return _crown_mat
+
+static func leaf_material() -> ShaderMaterial:
+	if _leaf_mat == null:
+		_leaf_mat = ShaderMaterial.new()
+		_leaf_mat.shader = load("res://assets/shaders/leaf_cards.gdshader")
+	return _leaf_mat
+
+## E `mat` materialul cardurilor / al masei de coroana? Fara sa le creeze: pe
+## pistele fara frunzis punctat nu trebuie sa apara un material in plus doar
+## fiindca s-a intrebat.
+static func is_leaf_material(mat: Material) -> bool:
+	return _leaf_mat != null and mat == _leaf_mat
+
+static func is_crown_material(mat: Material) -> bool:
+	return _crown_mat != null and mat == _crown_mat
+
+## Materialul unui prefix de coroana punctata, sau null daca `cls` nu e unul.
+static func stipple_material(cls: String) -> Material:
+	if cls == CROWN_PREFIX or cls == CORE_PREFIX:
+		return crown_material()
+	if cls == LEAF_PREFIX:
+		return leaf_material()
+	return null
 
 static var _plain_mat: StandardMaterial3D = null
 
@@ -2468,6 +2532,8 @@ static func apply_class_materials(root: Node, mapping: Dictionary) -> void:
 		var cls := _class_for(String(mi.name), mapping)
 		if cls.is_empty():
 			mi.material_override = world_material()
+		elif stipple_material(cls) != null:
+			mi.material_override = stipple_material(cls)
 		elif cls.begins_with(FINISH_PREFIX):
 			mi.material_override = finish_material(
 				cls.trim_prefix(FINISH_PREFIX))
@@ -2506,6 +2572,8 @@ static func apply_object_class_materials(root: Node, mapping: Dictionary,
 		var cls := _class_for(String(mi.name), mapping)
 		if cls.is_empty():
 			mi.material_override = world_material()
+		elif stipple_material(cls) != null:
+			mi.material_override = stipple_material(cls)
 		elif cls.begins_with(FINISH_PREFIX):
 			mi.material_override = finish_material(
 				cls.trim_prefix(FINISH_PREFIX))

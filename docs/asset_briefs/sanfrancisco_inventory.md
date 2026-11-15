@@ -97,7 +97,9 @@ Citit în `scenes/props/city_fill.gd`:
   variante, deci nu blochează pilotul.
 - Rândul din față (≤ 40 m de drum) are coliziune. Hull-ul convex implicit al `WorldProp`
   (`world_prop.gd:60–96`) ar include bovindoul, adică un zid invizibil la 0,9 m în fața garajului,
-  pe trotuar. Kitul livrează deci un proxy `_col` cutie, cu fața pe planul fațadei.
+  pe trotuar. Coliziunea rândului din față o scrie deci generatorul, ca cutie pe planul fațadei
+  (tiparul `Corp_<n>` din `tools/sf_loc_decor.gd`), cu `coliziune = "none"` pe GLB. `WorldProp`
+  nu citește proxy-uri `_col` din GLB, deci kitul nu le livrează.
 
 ### 1.3 Suprafața ramurii primește `road_tint` separat? — tenta DA, textura NU
 
@@ -289,7 +291,7 @@ culoare, coliziune, LOD și triunghiuri orientative, prioritate și val.
 |---|---|---|---|---|---|---|---|---|
 | **H1** | **`sf_red_bridge` (kit de 7–9 GLB-uri)**: turn-portal, segment de tablier de 8 m, parapet de 8 m, evazări, cablu principal, cablu lateral, ancoraj; opțional trotuarul exterior și felinarul | P / P′, 0.00–0.11 și 0.78–1.00; axa la y 228,6, tablierul x 270–470, portalurile la x 320 și 420 | generatorul (`Pod/Model`, `DecorManual`, `coliziune = none`); §1.6 | tablier 200 m × 32,8 m; portaluri de 45 m peste tablier, picioare 3 × 3 m la |z| 14,5, traverse cu fundul ≥ +13,8; parapet 1,2 × 0,5 m cu fața interioară la |z| 12,2 | `KERB_RED` 7 (oțel), `CONCRETE` 8 (pile, ancoraje) | **niciuna în GLB** | LOD obligatoriu; ~50k în total (turn ~6–8k × 2, segmentul ≤ 600 × 25, parapetul ≤ 300 × 28) | **P1 / val 1** → [`sf_red_bridge.md`](sf_red_bridge.md) |
 | **H2** | **`cable_car.glb`**: vagonul deschis, cu călători statici | tramvaiul 1 (B, x 144, y 184 → −124) și tramvaiul 2 (gura E′, y 454) | `BusHazard` (§1.1) | AABB **exact 2,5 × 3,2 × 8,5 m** | `KERB_RED` 7, `CORAL_SAND` 19, `LOG_DARK` 28, `VOLCANIC_BLACK` 20 | cutia AABB (o face codul) | LOD din import; ~8–15k, 2 instanțe | **P1 / val 1** → [`sf_cable_car.md`](sf_cable_car.md) |
-| **H3** | **`sf_median_truck.glb`** + **`sf_median_block.glb`** | pe tablier (P) | `MovableMedianHazard` (§1.5, cod lipsă) | camion în 2,6 × 3,2 × 10,0 m; bloc 3,0 × 0,6 × 0,95 m | `PAINTED_METAL` 11, dungi `KERB_RED`/`FOAM_WHITE`; blocul `CONCRETE` 8 | a hazardului | camion ~4–6k; bloc ≤ 120 × ~180 de instanțe | **P1 / val 1** → [`sf_median_truck.md`](sf_median_truck.md) |
+| **H3** | **`sf_median_truck.glb`** + **`sf_median_block.glb`** | pe tablier (P) | `MovableMedianHazard` (§1.5, cod lipsă) | camion în 2,6 × 3,2 × 10,0 m; bloc 3,0 × 0,6 × 0,95 m | `PAINTED_METAL` 11, dungi `KERB_RED`/`FOAM_WHITE`; blocul `CONCRETE` 8 | a hazardului | camion ~4–6k; bloc ≤ 120 × ~90 de instanțe (~145 cu zidurile din S) | **P1 / val 1** → [`sf_median_truck.md`](sf_median_truck.md) |
 | H4 | `sf_turntable.glb`: placa turnantă | colțul de NV al ocolului (−110, 454), +3 | `DecorManual` | disc de ⌀ 10 m la cota străzii (+0,05), cu șine, inel de lemn și o gheretă de 2 × 2 × 2,6 m alături | `WOOD_WEATHERED` 9, `PAINTED_METAL` 11, `ASPHALT_EDGE` 6 | discul: niciuna (e pe carosabil); gheretă: hull | ~1,5k | P2 / val 2 |
 | H5 | `sf_dragon_gate.glb`: poarta cu acoperișuri de țiglă verde | o stradă laterală de E a străzii tramvaiului, la ~y 40, cu fața spre stradă, **în afara benzii** | `DecorManual` | 12 m lățime × 9 m înălțime, golul de 6 m (o stradă laterală, nu cursa) | `MARBLE_GREY` 29 (stâlpi), `CACTUS_GREEN` 12 / `TROPICAL_GREEN` 21 (țiglă), `KERB_RED` 7 (grinzi) | hull pe stâlpi (mesh dacă golul trebuie liber) | ~3k | P3 / val 3. **Fără text, fără însemne** (brief §8) |
 | H6 | `sf_pier_shed.glb`: magazia de chei cu fronton arcuit (2 variante de lungime) | F, pe latura apei a cheiului (x 40–110, y 466–490); poziție legată de pontonul pasului 6 | `DecorManual` | 20 × 12 m, 9 m la cheia arcului; varianta scurtă 12 m | `WOOD_WEATHERED` 9 pereți, `PAINTED_METAL` 11 acoperiș, `FOAM_WHITE` 22 ancadramente | hull | ~2,5k | P2 / val 2. Fără firme |
@@ -307,8 +309,8 @@ tramvaiului. De pe mijlocul tablierului ar fi la ~260 m (în pâclă, siluetă),
 
 | id | piesă | unde | consumator | dimensiuni | culoare | coliziune | LOD / tri | prio / val |
 |---|---|---|---|---|---|---|---|---|
-| **K1** | **`sf_row_*` (7 GLB-uri)**: 3 fațade (Italianate cu acoperiș plat, Queen Anne cu fronton, Stick cu bovindou pătrat) × 2 bovindouri (teșit, pătrat) + colțul de intersecție cu turnuleț; **soclul inclus** (fustă de 2,4 m sub podea) | rândurile din față pe B, D, E, G (≤ 40 m de drum); rândurile din spate (> 40 m) pe tot dealul | `DecorManual` (scris de generator) + `CityFill row_mode` (§1.2) | modul **7,0 × 12,0 m**, 3 niveluri × 3,2 m = 9,6 m până la streașină; fronton +3,0; fusta până la −2,4; bovindou ieșit 0,9 m, de la +3,3 la +9,35 | perete pe clasa `sf_clapboard*` (în GLB `CORAL_SAND` 19); restul pe atlas: `FOAM_WHITE` 22, `VOLCANIC_BLACK` 20, `CONCRETE` 8, `WOOD_WEATHERED` 9, `LOG_DARK` 28 | **proxy `_col`** cutie pe planul fațadei | LOD obligatoriu; ≤ 2,5k pe casă la LOD0, sute de instanțe | **P1 / val 1** (pilotul: o casă) → [`sf_painted_row_kit.md`](sf_painted_row_kit.md) |
-| K2 | `sf_painted_lady_a..f`: șase case bogate, din același kit | C, coama (vezi §7 pentru latura de stradă și lumină) | `DecorManual` | ca K1, cu turnulețe, frontoane duble, mai multă cornișă | ca K1, cu două pasteluri pe casă (corp + ancadrament colorat) | `_col` | ≤ 5k pe casă, 6 instanțe | P2 / val 2 |
+| **K1** | **`sf_row_*` (7 GLB-uri)**: 3 fațade (Italianate cu acoperiș plat, Queen Anne cu fronton, Stick cu bovindou pătrat) × 2 bovindouri (teșit, pătrat) + colțul de intersecție cu turnuleț; **soclul inclus** (fustă de 2,4 m sub podea) | rândurile din față pe B, D, E, G (≤ 40 m de drum); rândurile din spate (> 40 m) pe tot dealul | `DecorManual` (scris de generator) + `CityFill row_mode` (§1.2) | modul **7,0 × 12,0 m**, 3 niveluri × 3,2 m = 9,6 m până la streașină; fronton +3,0; fusta până la −2,4; bovindou ieșit 0,9 m, de la +3,3 la +9,35 | perete pe clasa `sf_clapboard*` (în GLB `CORAL_SAND` 19); restul pe atlas: `FOAM_WHITE` 22, `VOLCANIC_BLACK` 20, `CONCRETE` 8, `WOOD_WEATHERED` 9, `LOG_DARK` 28 | cutie pe planul fațadei, scrisă de generator; GLB-ul cu `coliziune = none` | LOD obligatoriu; ≤ 2,5k pe casă la LOD0, sute de instanțe | **P1 / val 1** (pilotul: o casă) → [`sf_painted_row_kit.md`](sf_painted_row_kit.md) |
+| K2 | `sf_painted_lady_a..f`: șase case bogate, din același kit | C, coama (vezi §7 pentru latura de stradă și lumină) | `DecorManual` | ca K1, cu turnulețe, frontoane duble, mai multă cornișă | ca K1, cu două pasteluri pe casă (corp + ancadrament colorat) | ca K1 (cutie din generator) | ≤ 5k pe casă, 6 instanțe | P2 / val 2 |
 | K3 | zidurile joase de cărămidă, straturile de hortensii, fațadele de pe exteriorul acelor | E′ | **cod (generator)**, clasa `sf_brick` | geometria de la 1b | `sf_brick` | există (`SerpStraturi`, `SerpFatade`) | — | **nu se comandă GLB** |
 | K4 | zebrele, ax, șinele încastrate, canalul cablului | toate străzile; zebra pe platul dinaintea fiecărei muchii | **cod** (decal, ca rangoli-ul la Jodhpur) | zebră 3 m adâncime pe toată lățimea | `FOAM_WHITE` 22; șinele `PAINTED_METAL` 11 | niciuna | — | **nu se comandă GLB** |
 
@@ -353,8 +355,8 @@ tramvaiului. De pe mijlocul tablierului ar fi la ~260 m (în pâclă, siluetă),
       măsoară cu sonda tramvaielor existentă. Înlocuiește 6 materiale placeholder.
    2. **`sf_red_bridge.md`** — cea mai mare piesă și cea mai vizibilă (startul și sfârșitul
       turului). Se poate modela în paralel cu vagonul. Integrarea e date în generator.
-   3. **`sf_painted_row_kit.md`** — întâi **pilotul**: o casă (fațada A, bovindou teșit) cu soclul
-      și `_col`, măsurată pe strada sintetică a pasului 0 (`tools/SfLoc.tscn`) înainte de restul
+   3. **`sf_painted_row_kit.md`** — întâi **pilotul**: o casă (fațada B, Queen Anne, bovindou teșit) cu soclul
+      inclus, măsurată pe strada sintetică a pasului 0 (`tools/SfLoc.tscn`) înainte de restul
       de 6. Decizia cu cele cinci pasteluri (§1.2) se ia până la integrare, nu până la modelare.
    4. **`sf_median_truck.md`** — se modelează oricând; intră în joc doar după codul din §1.5.
 2. **Val 2 (după pilotul kitului):** M2 semaforul pe braț, F1 insula, V1 chiparoșii, V3

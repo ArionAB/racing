@@ -1577,26 +1577,53 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
    capturi de sus ale golfului.
 
    **Nemăsurat:** feel-ul la volan; costul unei lovituri în mașina parcată în pluton (calibrarea e
-   solo, pe teren plat); petalele (`PropDebris`) la atingerea stratului de hortensii (nefăcute:
-   hortensiile sunt doar vizuale); costul pe iPhone al celor 42 de corpuri (adormite, deci
-   aproape zero până la prima lovitură).
+   solo, pe teren plat); costul pe iPhone al celor 42 de corpuri (adormite, deci aproape zero până
+   la prima lovitură).
 
-   **De decis (dezvoltatorul):**
-   1. **Masa mașinilor parcate**: 70 kg (+0,57 s mediana unei lovituri solo, Autobuzul le aruncă,
-      Poliția pierde de ~1,7 ori mai mult, dar nu ricoșează) sau 40 kg (+0,35 s, cât ținta de
-      0,3 s, dar Poliția le aruncă aproape ca Autobuzul). „Ricoșeul” cere peste ~140 kg și ~1 s pe
-      lovitură. Tabelul de calibrare e mai sus.
-   2. **Primul stâlp de pe ponton**: 0–2 ejectări pe lot, la vărsarea fluxurilor. Variante:
-      (a) lăsat așa (ejectarea costă cât o cădere); (b) fără stâlpi pe primii ~25 m (greșeala de
-      acolo devine cădere); (c) o bordură joasă de lemn în loc de stâlpi pe primii metri (cod: un
-      parapet nou pe muchie, pe care AI-ul îl vede ca muchie).
-   3. **Plafonul de înălțime al `BumpProp` (1,8 m)**: o dubă parcată mai înaltă din foaia de
-      assets ar deveni zid static. Se poate deschide ca `max_footprint` (opțiune explicită per piesă)
-      sau duba rămâne sub 1,8 m.
-   4. **Fațada de la intrarea în serpentine** stă la 4 m de carosabil (abatere de la „fațade la
-      1 m”): kitul de case trebuie să lase acolo un trotuar sau o grădină.
-   5. **Hortensiile fără petale**: brief-ul cerea `PropDebris` când atingi stratul. Nu e făcut
-      (stratul e doar vizual); ar cere o `Area3D` pe fiecare bloc, ca perdeaua de liane din Angkor.
+   **Deciziile dezvoltatorului (15 nov 2026)** pe cele cinci întrebări ale pasului (masa mașinilor parcate, primul stâlp, plafonul de înălțime al `BumpProp`, fațada de la intrare, petalele):
+   1. Mașinile parcate rămân la **70 kg**.
+   2. Primul stâlp rămâne cum e: fără stâlpi pe primii 12 m, stâlpii de la `x` 52.
+   3. **Plafonul de înălțime al `BumpProp` se deschide per piesă** (făcut, mai jos). Nicio dubă nu
+      se pune acum.
+   4. Fațada de 4 m de la intrarea în serpentine rămâne; intră în brief-ul kitului de case.
+   5. **Petalele: da** (făcut, mai jos).
+
+   **3. `max_height` în `BumpProp.wrap`.** Opțiune nouă în `opts`, lângă `max_footprint`; fără ea,
+   plafonul rămâne 1,8 m pe toate pistele. De ce exista plafonul: e regula de mărime de la #489
+   („decor mic”), nu o limită de fizică. Ce trebuie știut pentru o piesă înaltă: stratul 9 nu e văzut
+   de razele suspensiei, de cameră și de căutarea locului de repunere, deci o dubă răsturnată poate
+   trece prin cadrul camerei, iar o repunere poate cădea lângă ea. Sonda `tools/ProbeBumpTall.tscn`:
+   o cutie de 1,9 × 2,4 × 4,2 m (duba), 70 și 140 kg, perpendiculară pe drum sau cu flancul spre el,
+   intrată 0,6 / 1,2 / 2,0 m în lățimea mașinii, lovită la 30 m/s de Poliție, Taxi, Autobuz, Buggy
+   și Monster:
+
+   | | rezultat |
+   |---|---|
+   | ejectări | **0 / 60** |
+   | duba lovită: urnită sau doar răzuită | **60 / 60**; răsturnată (≥ 45°) în 37, alunecată 0,2–104 m |
+   | duba ca zid (mașina oprită > 1 s sau la `x` 160 după > 12 s) | **0 / 60** (cel mai lent: 9,15 s, Poliția în flancul unei dube de 140 kg; normal ~4,9 s) |
+   | mașina blocată sub dubă | **0 / 60** |
+   | **sabotaj**: fără `max_height`, aceeași cutie | **refuzată** (`wrap` întoarce null), plafonul de 1,8 m neschimbat |
+
+   **5. Petalele hortensiilor.** `scenes/props/sf_hydrangea_petals.gd`, nodul
+   `SerpentineGri/HortensiiPetale`, scris de generator cu centrul feței de sus a fiecărui bloc.
+   Ascultă semnalul `Car.impact` (tipul `wall`) și reacționează doar când corpul lovit e blocul solid
+   existent (`SerpStraturi`). **Nicio coliziune nouă, nicio zonă nouă.** Petalele sunt rafalele de
+   frunze ale managerului comun `PropDebris`, roz și albastre alternativ: **3 rafale × 8 plăci,
+   același material partajat** (culoarea e pe particulă). Anti-spam pe trei niveluri: pragul și
+   pauza de 0,2 s ale impacturilor mașinii, **1 s de pauză pe fiecare strat**, 0,12 s pauza globală a
+   managerului. Managerul se cere la încărcarea pistei: creat amânat la prima cerere, ar fi pierdut
+   prima rafală. Sonda `tools/ProbeSfPetals.tscn`:
+   - o mașină reală intră în blocul acului 2: **1 rafală**, la 0,42 s;
+   - frecarea, sintetic: 30 de impacturi în 1,5 s pe același strat dau **2 rafale** (plafonul 3);
+     **sabotajul** (pauza stratului 0) dă 10 și pică;
+   - 0 corpuri de coliziune sub nodul petalelor.
+
+   `probe_decor --track=25`: **26 de materiale**, neschimbat (≤ 38). Captura, cu fereastră, cu camera
+   de joc în spatele mașinii, la 0,15 s după lovitură: `docs/asset_briefs/img/sf_route/
+   p6_petale_hortensii_gamecam.png` (`godot --path . res://tools/ProbeSfPetals.tscn --
+   --capture=res://snapshots/sf_petale.png`). Petalele se văd, dar sunt puține și mici: 8 plăci
+   de 0,42 m, cât permite managerul comun.
 7. Hero. 8. Kituri, fundal, teatru, sunet; `probe_decor`; testul de
    citire final; **verdictul dezvoltatorului la volan**.
 

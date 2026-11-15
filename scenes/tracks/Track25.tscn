@@ -6,6 +6,7 @@
 [ext_resource type="ArrayMesh" path="res://scenes/tracks/track25_serp_gri.obj" id="4_gri"]
 [ext_resource type="Script" path="res://scenes/hazards/bus_hazard.gd" id="5_bus"]
 [ext_resource type="PackedScene" path="res://scenes/hazards/MovableMedian.tscn" id="6_median"]
+[ext_resource type="Script" path="res://scenes/props/sf_hydrangea_petals.gd" id="8_petals"]
 [ext_resource type="Script" path="res://scenes/props/sf_parked_car.gd" id="7_parked"]
 
 [sub_resource type="Curve3D" id="Curve3D_sf"]
@@ -918,6 +919,10 @@ ai_reads_corridor = true
 [node name="Hortensii" type="MultiMeshInstance3D" parent="SerpentineGri"]
 multimesh = SubResource("MM_hortensii")
 material_override = SubResource("Mat_hortensie")
+
+[node name="HortensiiPetale" type="Node3D" parent="SerpentineGri"]
+script = ExtResource("8_petals")
+bed_tops = PackedVector3Array(24.440, 14.275, -336.000, 7.560, 11.518, -368.000, 24.440, 8.762, -400.000)
 
 [node name="Ponton" type="Node3D" parent="."]
 

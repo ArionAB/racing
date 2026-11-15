@@ -1921,6 +1921,18 @@ if P6_HORT:
     P6_NODES.append('[node name="Hortensii" type="MultiMeshInstance3D" parent="SerpentineGri"]\n'
                     'multimesh = SubResource("MM_hortensii")\nmaterial_override = SubResource("Mat_hortensie")\n')
     print(f"hortensii: {len(hort)} tufe pe {len(prisms_bed)} straturi solide (vizual, fara coliziune)")
+    # PETALELE (decizia dezvoltatorului, 15 nov 2026): lovitura in blocul solid (`SerpStraturi`)
+    # arunca petale roz / albastre din stratul de deasupra, prin rafalele de frunze ale PropDebris.
+    # Nicio coliziune noua; un nod cu script care asculta `Car.impact`. Centrul fetei de sus a fiecarui
+    # bloc = media conturului, la cota lui de sus.
+    tops = []
+    for outline_g, y0_, y1_ in prisms_bed:
+        tops.append(((sum(p[0] for p in outline_g) / len(outline_g)), y1_,
+                     (sum(p[2] for p in outline_g) / len(outline_g))))
+    P6_EXT.append('[ext_resource type="Script" path="res://scenes/props/sf_hydrangea_petals.gd" id="8_petals"]\n')
+    P6_NODES.append('[node name="HortensiiPetale" type="Node3D" parent="SerpentineGri"]\n'
+                    'script = ExtResource("8_petals")\nbed_tops = PackedVector3Array(%s)\n'
+                    % ", ".join("%.3f, %.3f, %.3f" % t for t in tops))
 
 # --- PONTONUL (F): cheiul de nord, spre E, de la PONT_X0 pana la inceputul coltului de NE.
 PONT_X0 = float(os.environ.get("SF_PONT_X0", "40"))

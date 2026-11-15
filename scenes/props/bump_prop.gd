@@ -68,7 +68,10 @@ var _home_pending: bool = false
 ##           (cand nicio masina nu e aproape), ca sa nu ramana blocaj pe drum;
 ##   "max_footprint"  plafonul de marime in plan (m) pentru piesa asta, in locul celor 2 m —
 ##           cerut EXPLICIT de cine stie ce face (masinile parcate din San Francisco: 3,7 m,
-##           cu masa de masina de joc). Fara cheie, regula de la #489 ramane neschimbata.
+##           cu masa de masina de joc). Fara cheie, regula de la #489 ramane neschimbata;
+##   "max_height"  la fel, plafonul de inaltime (m) in locul celor 1,8 m: duba parcata din foaia
+##           de assets San Francisco. Masurat cu tools/ProbeBumpTall.tscn (piesa de 2,4 m lovita
+##           la 30 m/s): vezi antetul sondei.
 static func wrap(model: Node3D, opts: Dictionary = {}) -> BumpProp:
 	# In editor (Track e @tool) nu: fara simulare, corpul ar fi doar zgomot in
 	# arbore, iar scriptul asta nu ruleaza acolo.
@@ -87,7 +90,8 @@ static func wrap(model: Node3D, opts: Dictionary = {}) -> BumpProp:
 	var aabb := Track.model_aabb(model)
 	model.transform = saved
 	var max_foot := float(opts.get("max_footprint", MAX_FOOTPRINT_M))
-	if aabb.size.y <= 0.01 or aabb.size.y > MAX_HEIGHT_M \
+	var max_h := float(opts.get("max_height", MAX_HEIGHT_M))
+	if aabb.size.y <= 0.01 or aabb.size.y > max_h \
 			or maxf(aabb.size.x, aabb.size.z) > max_foot:
 		return null
 	var body := BumpProp.new()

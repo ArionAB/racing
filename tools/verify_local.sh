@@ -13,20 +13,36 @@
 #   bash tools/verify_local.sh             # import + toate verificarile
 #   bash tools/verify_local.sh --no-import # sare peste import (cache proaspat)
 #
+#   bash tools/verify_local.sh --print-dirs # doar arata unde merg log-urile/save-ul
+#
 # Iese cu 0 doar daca toate verificarile trec. Log-urile raman in
-# $VERIFY_LOGS (implicit un folder temporar), numite dupa pas.
+# $VERIFY_LOGS (implicit un folder temporar al worktree-ului), numite dupa pas.
 #
 # Godot: variabila GODOT, altfel calea standard de pe masina de dezvoltare.
 
 set -uo pipefail
 
 GODOT="${GODOT:-/d/GameDev/Godot_v4.7-stable_win64_console.exe}"
-LOGS="${VERIFY_LOGS:-${TMPDIR:-/tmp}/verify_local}"
+# Log-urile si save-ul sondelor sunt ale WORKTREE-ULUI (#722): `user://` si
+# folderul temporar sunt comune tuturor worktree-urilor, iar doua verificari
+# paralele isi stergeau una alteia log-urile (`rm -f` de mai jos) si isi
+# migrau/rescriau save-ul. Cheia = numele folderului + cksum pe calea absoluta,
+# in forma Windows (`pwd -W` din Git Bash: /tmp si /c/Users/.../Temp sunt
+# acelasi folder) si cu litere mici (D:/ si d:/ la fel). Acelasi worktree ->
+# aceeasi cheie la fiecare rulare. VERIFY_LOGS si TOY_RACER_SAVE_DIR setate de
+# apelant castiga, ca inainte.
+WT_ABS="$(pwd -W 2>/dev/null || pwd -P)"
+WT_LOWER="$(printf '%s' "$WT_ABS" | tr 'A-Z' 'a-z')"
+WT_KEY="$(basename "$WT_LOWER" | tr -c 'a-z0-9_.\n-' '_')_$(printf '%s' "$WT_LOWER" | cksum | cut -d' ' -f1)"
+LOGS="${VERIFY_LOGS:-${TMPDIR:-/tmp}/verify_local_$WT_KEY}"
+SAVE_DIR="${TOY_RACER_SAVE_DIR:-user://verify_local_save_$WT_KEY/}"
 STEP_TIMEOUT="${STEP_TIMEOUT:-900}"   # secunde pe pas; un pas agatat pica, nu blocheaza
 DO_IMPORT=1
+PRINT_DIRS=0
 for a in "$@"; do
 	case "$a" in
 		--no-import) DO_IMPORT=0 ;;
+		--print-dirs) PRINT_DIRS=1 ;;
 		*) echo "argument necunoscut: $a"; exit 2 ;;
 	esac
 done
@@ -34,6 +50,12 @@ done
 if [ ! -f project.godot ]; then
 	echo "Ruleaza din radacina proiectului (unde e project.godot)."
 	exit 2
+fi
+if [ $PRINT_DIRS -eq 1 ]; then
+	echo "worktree: $WT_ABS"
+	echo "log-uri:  $LOGS"
+	echo "save:     $SAVE_DIR"
+	exit 0
 fi
 if [ ! -x "$GODOT" ] && [ ! -f "$GODOT" ]; then
 	echo "Nu gasesc Godot la $GODOT — seteaza GODOT=..."
@@ -44,7 +66,9 @@ rm -f "$LOGS"/*.log
 # Save-urile jocului (settings/records/career/fantome) merg intr-un director
 # propriu, nu in user:// real: orice sonda trece prin GameState._ready, care
 # incarca si — pe un save vechi — MIGREAZA fisierele (#690, SaveSchema).
-export TOY_RACER_SAVE_DIR="${TOY_RACER_SAVE_DIR:-user://verify_local_save/}"
+# Directorul e al worktree-ului (SAVE_DIR, sus).
+export TOY_RACER_SAVE_DIR="$SAVE_DIR"
+echo "Log-uri in $LOGS, save-ul sondelor in $TOY_RACER_SAVE_DIR"
 
 FAILED=()
 PASSED=()

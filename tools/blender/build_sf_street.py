@@ -22,20 +22,24 @@ Variantele dintr-un fisier stau toate in origine (se suprapun): jocul arata cate
 
 LISTA DE ELEMENTE -- acceptarea se face element cu element, pe randare langa decupare.
 
-M2 -- stalpul de semafor (`SignalMast`), originea la baza stalpului, bratul spre -X:
-  S1. Soclu tronconic intunecat (slot 20), 0..0,55 m, cu un inel de 0,1 m deasupra.
-  S2. Stalpul (slot 11), ⌀ 0,35 la baza, usor conic, pana la +10,2.
-  S3. Varf: capac + bila (slot 20) pana la +10,5 (decuparea: bila de pe stalp).
-  S4. Bratul GROS, drept, de 8,0 m spre -X (0,22 x 0,22 m, slot 11), cu fundul la +9,24,
-      plus capac la capat. Decuparea are un brat subtire curbat: respins de brief.
-  S5. Tirantul de deasupra (contrafisa din decupare): bara de 0,12 m de la +10,05 pe stalp
-      pana la x -5,0 pe brat, cu doi montanti verticali intre el si brat.
-  S6. Contrafisa scurta de sub brat, langa stalp (in raza de 1,0 m a axei).
+M2 -- stalpul de semafor (`SignalMast`), v2: capul SUPRADIMENSIONAT, ca in decupare (plafonul de
++9,2 din v1 a fost ridicat de coordonator: la 100 m capul de 1,1 m avea ~5 x 9 px si un singur
+punct rosu). Originea la baza stalpului, bratul spre -X:
+  S1. Soclu tronconic gros intunecat (slot 20), 0..1,0 m, cu inel de 0,14 m deasupra si al
+      doilea colier la +3,0.
+  S2. Stalpul (slot 11), ⌀ 0,35 la baza, usor conic, pana la +11,6.
+  S3. Varf: inel + bila (slot 20) pana la ~+12,1 (bila de pe stalp din decupare).
+  S4. Bratul GROS, drept, de 8,0 m spre -X (0,32 x 0,32 m, slot 11), fundul la +10,75 (axa
+      ~+10,9), cu colier la mijloc si capac la capat.
+  S5. Tirantul de deasupra (contrafisa din decupare): bara de 0,14 m de la +11,45 pe stalp pana
+      la x -4,0 pe brat, cu doi montanti verticali intre el si brat.
+  S6. Contrafisa scurta de sub brat, langa stalp (in raza de 1,0 m a axei, peste +8,0).
   S7. Colierul bratului pe stalp.
-  S8. Capul semaforului atarnat sub brat la x -7,2: carcasa intunecata (slot 20), placa de
-      fundal cu chenar alb (22, se citeste de departe), trei lentile pe FIECARE fata
-      (rosu aprins sus = slot 7; celelalte doua stinse, slot 6) cu viziere; tija scurta pana
-      la brat. Tot capul intre +8,0 si +9,2.
+  S8. Capul semaforului atarnat sub brat la x -7,2, ~1,0 x 2,4 x 0,6 m, intre +8,05 si +10,45:
+      placa de fundal cu chenar ALB (22, il desparte de cer), carcasa intunecata (slot 20),
+      trei lentile ⌀ 0,55 pe FIECARE fata, toate colorate: rosu sus (7), galben (1 sand_mid),
+      verde jos (21 tropical_green), cu vizier (acoperis + doi obraji) peste fiecare; tija pana
+      la brat. Lentilele au AO 1,0 (sunt lumini).
   S9. Nimic sub +8,0 dincolo de 1,0 m de axa stalpului (doar stalpul coboara).
 
 M1 -- masinile parcate (ParkedSedan, ParkedWagon, ParkedVan); gabarit EXACT 1,90 x 3,70 in
@@ -255,58 +259,66 @@ def _ao_override(obj, fn):
 
 # ============================================================ M2: stalpul de semafor
 ARM_LEN = 8.0
-ARM_T = 0.26
-ARM_Z0 = 9.24            # fundul bratului
+ARM_T = 0.32
+ARM_Z0 = 10.75           # fundul bratului (axa ~+10,9)
 HEAD_X = -7.2
-HEAD_Z0, HEAD_Z1 = 8.04, 9.16
-POLE_TOP = 10.3
+HEAD_Z0, HEAD_Z1 = 8.05, 10.45   # capul: 2,4 m, fundul peste +8,0 (zborul cu turbo urca la +4,0)
+POLE_TOP = 11.6
+AMBER = SAND_MID          # 1
+GREEN = TROPICAL_GREEN    # 21
+LENS_R = 0.275
 
 
 def mast_main(b):
-    # S1 soclul (gros, ca in decupare) + inelele
-    b.frustum((0, 0, 0.40), 0.34, 0.26, 0.80, DARK, segments=10)
-    b.cylinder((0, 0, 0.86), 0.24, 0.12, DARK, segments=10)
+    # S1 soclul gros + inelele
+    b.frustum((0, 0, 0.50), 0.42, 0.30, 1.00, DARK, segments=10)
+    b.cylinder((0, 0, 1.07), 0.28, 0.14, DARK, segments=10)
     # S2 stalpul, conic: 0,175 -> 0,15
-    b.frustum((0, 0, (0.80 + POLE_TOP) * 0.5), 0.175, 0.150, POLE_TOP - 0.80, BODY, segments=10)
-    b.cylinder((0, 0, 3.0), 0.20, 0.12, DARK, segments=10)
+    b.frustum((0, 0, (1.0 + POLE_TOP) * 0.5), 0.175, 0.150, POLE_TOP - 1.0, BODY, segments=10)
+    b.cylinder((0, 0, 3.0), 0.21, 0.14, DARK, segments=10)
     # S3 varful: inel + bila
-    b.cylinder((0, 0, POLE_TOP + 0.05), 0.20, 0.10, DARK, segments=10)
-    b.frustum((0, 0, POLE_TOP + 0.10 + 0.09), 0.10, 0.19, 0.18, DARK, segments=10)
-    b.frustum((0, 0, POLE_TOP + 0.28 + 0.09), 0.19, 0.08, 0.18, DARK, segments=10)
+    b.cylinder((0, 0, POLE_TOP + 0.05), 0.21, 0.10, DARK, segments=10)
+    b.frustum((0, 0, POLE_TOP + 0.10 + 0.11), 0.12, 0.23, 0.22, DARK, segments=10)
+    b.frustum((0, 0, POLE_TOP + 0.32 + 0.11), 0.23, 0.09, 0.22, DARK, segments=10)
     # S7 colierul bratului
-    b.cylinder((0, 0, ARM_Z0 + ARM_T * 0.5), 0.21, 0.46, DARK, segments=10)
-    # S4 bratul gros, drept, cu un colier la mijloc (ca in decupare) si capac la capat
+    b.cylinder((0, 0, ARM_Z0 + ARM_T * 0.5), 0.23, 0.54, DARK, segments=10)
+    # S4 bratul gros, drept, cu un colier la mijloc si capac la capat
     box_mm(b, -ARM_LEN, -0.10, -ARM_T * 0.5, ARM_T * 0.5, ARM_Z0, ARM_Z0 + ARM_T, BODY)
-    box_mm(b, -4.15, -3.85, -0.17, 0.17, ARM_Z0 - 0.04, ARM_Z0 + ARM_T + 0.04, DARK)
-    box_mm(b, -ARM_LEN - 0.04, -ARM_LEN + 0.10, -0.17, 0.17, ARM_Z0 - 0.04, ARM_Z0 + ARM_T + 0.04,
+    box_mm(b, -4.17, -3.83, -0.21, 0.21, ARM_Z0 - 0.05, ARM_Z0 + ARM_T + 0.05, DARK)
+    box_mm(b, -ARM_LEN - 0.04, -ARM_LEN + 0.12, -0.21, 0.21, ARM_Z0 - 0.05, ARM_Z0 + ARM_T + 0.05,
            DARK)
     # S5 tirantul de deasupra + montantii
     top = ARM_Z0 + ARM_T
-    t0 = 10.10
-    b.beam((-0.10, 0, t0), (-4.0, 0, top - 0.02), 0.13, BODY)
+    t0 = 11.45
+    b.beam((-0.10, 0, t0), (-4.0, 0, top - 0.02), 0.14, BODY)
     for x in (-1.4, -2.7):
         zt = t0 + (top - 0.02 - t0) * ((-x - 0.10) / 3.9)
-        b.beam((x, 0, top - 0.02), (x, 0, zt + 0.02), 0.10, BODY)
-    # S6 contrafisa scurta de sub brat (in raza de 1 m)
-    b.beam((-0.12, 0, 8.40), (-0.95, 0, ARM_Z0 + 0.02), 0.13, BODY)
+        b.beam((x, 0, top - 0.02), (x, 0, zt + 0.02), 0.11, BODY)
+    # S6 contrafisa scurta de sub brat (in raza de 1 m, peste +8,0)
+    b.beam((-0.12, 0, 9.85), (-0.95, 0, ARM_Z0 + 0.02), 0.14, BODY)
 
 
 def mast_head(b):
     x = HEAD_X
-    # tija scurta pana la brat
+    # tija pana la brat
     box_mm(b, x - 0.08, x + 0.08, -0.08, 0.08, HEAD_Z1 - 0.02, ARM_Z0 + 0.02, DARK)
     # placa de fundal: chenar alb (placa alba mai mare, subtire) + placa intunecata in fata
     box_mm(b, x - 0.50, x + 0.50, -0.05, 0.05, HEAD_Z0, HEAD_Z1, WHITE)
-    box_mm(b, x - 0.41, x + 0.41, -0.08, 0.08, HEAD_Z0 + 0.09, HEAD_Z1 - 0.09, DARK)
+    box_mm(b, x - 0.42, x + 0.42, -0.08, 0.08, HEAD_Z0 + 0.08, HEAD_Z1 - 0.08, DARK)
     # carcasa
-    box_mm(b, x - 0.27, x + 0.27, -0.21, 0.21, HEAD_Z0 + 0.03, HEAD_Z1 - 0.03, DARK)
-    # trei lentile pe fiecare fata (+Y Blender = -Z Godot si invers) + viziere
+    box_mm(b, x - 0.36, x + 0.36, -0.20, 0.20, HEAD_Z0 + 0.05, HEAD_Z1 - 0.05, DARK)
+    # trei lentile mari pe fiecare fata (+Y Blender = -Z Godot si invers) + viziere
+    zc = (HEAD_Z0 + HEAD_Z1) * 0.5
     for sy in (-1, 1):
-        for k, slot in enumerate((RED, OFF_LENS, OFF_LENS)):
-            z = HEAD_Z1 - 0.03 - 0.20 - k * 0.335
-            b.cylinder((x, sy * 0.225, z), 0.15, 0.04, slot, segments=12, axis="Y")
-            ys = sorted((sy * 0.21, sy * 0.36))
-            box_mm(b, x - 0.19, x + 0.19, ys[0], ys[1], z + 0.15, z + 0.23, DARK)
+        for k, slot in enumerate((RED, AMBER, GREEN)):
+            z = zc + (1 - k) * 0.75
+            b.cylinder((x, sy * 0.215, z), LENS_R, 0.04, slot, segments=12, axis="Y")
+            ys = sorted((sy * 0.20, sy * 0.30))
+            # acoperisul vizierului + doi obraji (vizierul in U intors din decupare)
+            box_mm(b, x - 0.34, x + 0.34, ys[0], ys[1], z + LENS_R + 0.01, z + LENS_R + 0.09, DARK)
+            for sx in (-1, 1):
+                xs = sorted((x + sx * 0.26, x + sx * 0.34))
+                box_mm(b, xs[0], xs[1], ys[0], ys[1], z - 0.05, z + LENS_R + 0.01, DARK)
 
 
 def build_mast():
@@ -315,6 +327,15 @@ def build_mast():
         (mast_head, 0.0, 40.0, 40.0),
     ], dict(samples=32, dist=1.0, gradient="vertical", low=0.70, high=1.00, power=0.6,
             floor=0.35), origin="base_axis")
+    # lentilele sunt lumini: fara umbra de AO
+    uv = obj.data.uv_layers.active
+    ca = obj.data.color_attributes["AO"]
+    lit = set()
+    for poly in obj.data.polygons:
+        if int(uv.data[poly.loop_indices[0]].uv[0] * 32) in (RED, AMBER, GREEN):
+            lit.update(poly.vertices)
+    for i in lit:
+        ca.data[i].color = (1.0, 1.0, 1.0, 1.0)
     return obj
 
 

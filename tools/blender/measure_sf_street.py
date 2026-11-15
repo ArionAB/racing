@@ -15,11 +15,13 @@ Citeste GLB-urile direct, in coordonate Godot (cititorul si unealta de sabotaj v
         contactele de la pasul 6 sunt masurate pe cutiile astea. Botul pe -Z: farurile (slot 22)
         stau la Z < -1,6 si stopurile (slot 7) la Z > +1,6. Vopseaua pe slotul 11 si DOAR
         caroseria pe el: >= 30 % din triunghiuri pe 11 (jocul il recoloreaza).
-  sf_signal_mast
+  sf_signal_mast (v2, capul supradimensionat)
         un nod `SignalMast`; sub +8,0 nimic mai departe de 1,0 m de axa stalpului (doar stalpul
-        coboara: masinile zboara pana la +4,0 peste creasta); bratul ajunge la x <= -7,9; capul
-        semaforului (sloturile 20/7/6/22 dincolo de x -6) intre +8,0 si +9,2; lentila rosie
-        (slot 7) exista pe ambele fete; stalpul are ⌀ 0,35 (+-0,02) intre +1 si +7.
+        coboara: masinile zboara pana la +4,0 peste creasta); bratul ajunge la x <= -7,9 si are
+        >= 0,30 m grosime; capul (sloturile 20/22/7/1/21 la |x + 7,2| <= 0,55, fara tija; fereastra |x + 7,2| <= 0,65 la masurare) cu
+        fundul >= +8,0, inalt 2,2..2,6 si lat 0,9..1,1; pe AMBELE fete trei lentile colorate in
+        ordinea rosu (7) / galben (1) / verde (21) de sus in jos; stalpul ⌀ 0,35 (+-0,02),
+        masurat pe sectiunea de la +2,0.
   sf_street_lamp
         un nod `StreetLamp`; inalt 5,50 (+-0,03); stalpul ⌀ 0,25 (+-0,02) la +2,0; centrat.
   sf_street_props
@@ -68,6 +70,8 @@ TRAPS = ("TrapStack", "Crate", "RopeCoil")
 SINGLE = {"sf_signal_mast": "SignalMast", "sf_street_lamp": "StreetLamp", "sf_bollard": "Bollard",
           "sf_bench": "Bench", "sf_bike_rack": "BikeRack"}
 FORBIDDEN = {14, 15, 16, 30}
+LENS = (7, 1, 21)                     # rosu, galben (sand_mid), verde (tropical_green)
+HEAD_SLOTS = (20, 22) + LENS
 
 
 def _box(ps):
@@ -171,21 +175,39 @@ def check(key, path, report=True):
                        % (len(low), tuple(round(v, 2) for v in low[0])))
         if min(p[0] for p in ps) > -7.9:
             bad.append("(brat) bratul ajunge doar la x %.2f, contract -8,0" % min(p[0] for p in ps))
-        # fereastra capului: |x - (-7,2)| <= 0,55, sloturile capului; tija de prindere (0,16 x 0,16,
-        # deasupra lui +9,13) nu e cap: leaga capul de brat
+        # fereastra capului: |x - (-7,2)| <= 0,55, sloturile capului; tija de prindere (0,16 x 0,16
+        # pe axa capului) nu e cap: leaga capul de brat
         def stem(p):
-            return abs(p[0] + 7.2) <= 0.081 and abs(p[2]) <= 0.081 and p[1] >= 9.13
-        head = [p for p, k in zip(ps, s) if abs(p[0] + 7.2) <= 0.55 and k in (20, 7, 6, 22)
+            return abs(p[0] + 7.2) <= 0.081 and abs(p[2]) <= 0.081
+        # 0,65: incape un chenar prea lat, dar nu si capacul bratului (|dx| >= 0,68)
+        head = [p for p, k in zip(ps, s) if abs(p[0] + 7.2) <= 0.65 and k in HEAD_SLOTS
                 and not stem(p)]
         if not head:
-            bad.append("(cap) niciun cap de semafor dincolo de x -6")
+            bad.append("(cap) niciun cap de semafor la x -7,2")
         else:
             lo, hi = min(p[1] for p in head), max(p[1] for p in head)
-            if lo < 8.0 - 1e-3 or hi > 9.2 + 1e-3:
-                bad.append("(cap) capul intre +%.3f si +%.3f, contract +8,0..+9,2" % (lo, hi))
-        red = [p for p, k in zip(ps, s) if k == 7]
-        if not any(p[2] < -0.1 for p in red) or not any(p[2] > 0.1 for p in red):
-            bad.append("(cap) lentila rosie lipseste pe o fata")
+            w = max(p[0] for p in head) - min(p[0] for p in head)
+            if lo < 8.0 - 1e-3:
+                bad.append("(cap) fundul capului la +%.3f, sub +8,0" % lo)
+            if not 2.2 <= hi - lo <= 2.6:
+                bad.append("(cap) capul are %.3f m inaltime, contract 2,2..2,6" % (hi - lo))
+            if not 0.9 <= w <= 1.1:
+                bad.append("(cap) capul are %.3f m latime, contract 0,9..1,1" % w)
+        # lentilele: rosu (7) sus, galben (1) la mijloc, verde (21) jos, pe AMBELE fete
+        for face, sgn in (("-Z", -1), ("+Z", 1)):
+            ys = {}
+            for k in LENS:
+                pts = [p for p, kk in zip(ps, s) if kk == k and sgn * p[2] > 0.1]
+                if pts:
+                    ys[k] = sum(p[1] for p in pts) / len(pts)
+            if len(ys) < 3:
+                bad.append("(lentile) fata %s are doar sloturile %s din %s" % (face, sorted(ys), list(LENS)))
+            elif not ys[7] > ys[1] > ys[21]:
+                bad.append("(lentile) fata %s: ordinea nu e rosu-galben-verde de sus in jos" % face)
+        arm = [p for p, k in zip(ps, s) if k == 11 and p[0] < -4.5 and p[1] > 9.5]
+        if not arm or max(p[1] for p in arm) - min(p[1] for p in arm) < 0.30 - 1e-3:
+            bad.append("(brat) bratul are %.3f m grosime, contract >= 0,30"
+                       % ((max(p[1] for p in arm) - min(p[1] for p in arm)) if arm else 0))
         dia = _section_diameter(d, 2.0)
         if abs(dia - 0.35) > 0.02:
             bad.append("(stalp) diametrul stalpului la +2,0: %.3f, contract 0,35" % dia)
@@ -290,14 +312,29 @@ def sabotages(key):
             ("un varf al bratului coborat la +7,0 (x -4)", "sub8",
              lambda g, b: poke(g, b, node0(g), lambda p: p[0] < -3.5 and p[1] > 9.0,
                                lambda p: (p[0], 7.0, p[2]))),
-            ("capul urcat cu 0,3 m (peste +9,2)", "cap",
-             lambda g, b: poke_all(g, b, node0(g), lambda p: p[0] < -6.5 and 8.0 <= p[1] < 9.2,
-                                   lambda p: (p[0], p[1] + 0.3, p[2])) > 0),
+            ("capul coborat cu 0,3 m (sub +8,0)", "cap",
+             lambda g, b: poke_all(g, b, node0(g), lambda p: abs(p[0] + 7.2) <= 0.55 and p[1] < 10.5,
+                                   lambda p: (p[0], p[1] - 0.3, p[2])) > 0),
+            ("capul intins cu 0,4 m in sus (2,8 m)", "cap",
+             lambda g, b: poke_all(g, b, node0(g), lambda p: abs(p[0] + 7.2) <= 0.55 and 10.3 < p[1] < 10.5,
+                                   lambda p: (p[0], p[1] + 0.4, p[2])) > 0),
+            ("chenarul latit cu 0,12 m", "cap",
+             lambda g, b: poke_all(g, b, node0(g), lambda p: -7.71 < p[0] < -7.69 and p[1] < 10.5,
+                                   lambda p: (p[0] - 0.12, p[1], p[2])) > 0),
+            ("lentila verde de pe +Z stinsa (slot 6)", "lentile",
+             lambda g, b: _uv_where(g, b, node0(g), lambda p, k: k == 21 and p[2] > 0.1, 6.5 / 32)),
+            ("rosu si verde inversate pe -Z", "lentile",
+             lambda g, b: _uv_where(g, b, node0(g), lambda p, k: k == 7 and p[2] < -0.1, 99.0)  # marcaj temporar
+             and _uv_where(g, b, node0(g), lambda p, k: k == 21 and p[2] < -0.1, 7.5 / 32)
+             and _uv_where(g, b, node0(g), lambda p, k: k == 99 * 32, 21.5 / 32)),
+            ("bratul subtiat la 0,17 m", "brat",
+             lambda g, b: poke_all(g, b, node0(g), lambda p: -8.01 < p[0] < -7.99 and p[1] > 11.0,
+                                   lambda p: (p[0], p[1] - 0.15, p[2])) > 0),
             ("bratul scurtat la 7 m", "brat",
              lambda g, b: poke_all(g, b, node0(g), lambda p: p[0] < -7.0,
                                    lambda p: (-7.0 + (p[0] + 7.0) * 0.01, p[1], p[2])) > 0),
             ("stalpul ingrosat cu 5 cm", "stalp",
-             lambda g, b: poke_all(g, b, node0(g), lambda p: 0.7 < p[1] < 0.9 and math.hypot(p[0], p[2]) < 0.18,
+             lambda g, b: poke_all(g, b, node0(g), lambda p: 0.95 < p[1] < 1.05 and math.hypot(p[0], p[2]) < 0.18,
                                    lambda p: (p[0] * 1.3, p[1], p[2] * 1.3)) > 0),
         ]
     elif key == "sf_street_lamp":
@@ -336,6 +373,23 @@ def sabotages(key):
              lambda g, b: poke(g, b, node0(g), lambda p: p[0] > 0.6, lambda p: (2.3, p[1], p[2]))),
         ]
     return out
+
+
+def _uv_where(g, blob, node_name, pred, u):
+    """Muta pe `u` UV-urile varfurilor pentru care pred(pozitie, slot) e adevarat."""
+    import struct
+    from measure_sf_bridge import _accessor_slots
+    pos = list(_accessor_slots(g, node_name, "POSITION"))
+    tex = list(_accessor_slots(g, node_name, "TEXCOORD_0"))
+    n = 0
+    for (pa, pb, ps_, _k), (ta, tb, ts, _k2) in zip(pos, tex):
+        for i in range(pa["count"]):
+            p = struct.unpack_from("<fff", blob, pb + i * ps_)
+            uu = struct.unpack_from("<ff", blob, tb + i * ts)[0]
+            if pred(p, int(math.floor(uu * 32))):
+                struct.pack_into("<ff", blob, tb + i * ts, u, 0.5)
+                n += 1
+    return n > 0
 
 
 def _all_uv(g, blob, node_name, u):

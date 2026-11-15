@@ -1834,9 +1834,10 @@ if B200:
         _pod_piece("anchor", "AncorajV", 0.0)
         _pod_piece("anchor", "AncorajE", DECK, flip=True)
         if POD_KIT["lamp"]:
-            # felinarele pe trotuarul exterior (fata lui la +0,20), la 24 m, pe ambele parti,
-            # decalate de tiranti (din 10 in 10 m) si de turnuri (x 50 / 150)
-            for k_, xl in enumerate(range(16, int(DECK), 24)):
+            # felinarele pe trotuarul exterior (fata lui la +0,20), la 20 m, pe ambele parti, la
+            # x 5, 25, ..., 195: exact intre doi tiranti (care stau din 10 in 10 m) si la 5 m de
+            # turnuri (x 50 / 150). La 24 m pas, doua cadeau lipite de cate un tirant (x 40, 160).
+            for k_, xl in enumerate(range(5, int(DECK), 20)):
                 for side, nm in ((-1, "N"), (1, "S")):
                     _pod_piece("lamp", "Felinar%s%02d" % (nm, k_), float(xl), z=side * 13.6, y=0.20)
         print(f"podul: kitul de modele asezat ({len(P7_NODES) - 1} piese sub DecorManual/Pod); "

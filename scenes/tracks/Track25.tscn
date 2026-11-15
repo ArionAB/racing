@@ -1707,65 +1707,81 @@ transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 470.000, 20.000, -228.626)
 metadata/coliziune = "none"
 
 [node name="FelinarN00" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 286.000, 20.200, -242.226)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 275.000, 20.200, -242.226)
 metadata/coliziune = "none"
 
 [node name="FelinarS00" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 286.000, 20.200, -215.026)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 275.000, 20.200, -215.026)
 metadata/coliziune = "none"
 
 [node name="FelinarN01" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 310.000, 20.200, -242.226)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 295.000, 20.200, -242.226)
 metadata/coliziune = "none"
 
 [node name="FelinarS01" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 310.000, 20.200, -215.026)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 295.000, 20.200, -215.026)
 metadata/coliziune = "none"
 
 [node name="FelinarN02" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 334.000, 20.200, -242.226)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 315.000, 20.200, -242.226)
 metadata/coliziune = "none"
 
 [node name="FelinarS02" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 334.000, 20.200, -215.026)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 315.000, 20.200, -215.026)
 metadata/coliziune = "none"
 
 [node name="FelinarN03" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 358.000, 20.200, -242.226)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 335.000, 20.200, -242.226)
 metadata/coliziune = "none"
 
 [node name="FelinarS03" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 358.000, 20.200, -215.026)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 335.000, 20.200, -215.026)
 metadata/coliziune = "none"
 
 [node name="FelinarN04" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 382.000, 20.200, -242.226)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 355.000, 20.200, -242.226)
 metadata/coliziune = "none"
 
 [node name="FelinarS04" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 382.000, 20.200, -215.026)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 355.000, 20.200, -215.026)
 metadata/coliziune = "none"
 
 [node name="FelinarN05" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 406.000, 20.200, -242.226)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 375.000, 20.200, -242.226)
 metadata/coliziune = "none"
 
 [node name="FelinarS05" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 406.000, 20.200, -215.026)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 375.000, 20.200, -215.026)
 metadata/coliziune = "none"
 
 [node name="FelinarN06" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 430.000, 20.200, -242.226)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 395.000, 20.200, -242.226)
 metadata/coliziune = "none"
 
 [node name="FelinarS06" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 430.000, 20.200, -215.026)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 395.000, 20.200, -215.026)
 metadata/coliziune = "none"
 
 [node name="FelinarN07" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 454.000, 20.200, -242.226)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 415.000, 20.200, -242.226)
 metadata/coliziune = "none"
 
 [node name="FelinarS07" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 454.000, 20.200, -215.026)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 415.000, 20.200, -215.026)
+metadata/coliziune = "none"
+
+[node name="FelinarN08" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 435.000, 20.200, -242.226)
+metadata/coliziune = "none"
+
+[node name="FelinarS08" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 435.000, 20.200, -215.026)
+metadata/coliziune = "none"
+
+[node name="FelinarN09" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 455.000, 20.200, -242.226)
+metadata/coliziune = "none"
+
+[node name="FelinarS09" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 455.000, 20.200, -215.026)
 metadata/coliziune = "none"

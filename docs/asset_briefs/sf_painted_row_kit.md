@@ -208,6 +208,12 @@ Kitul corectează (4): fusta e la fața peretelui, iar scara e în nișă, nu pe
 
 ## 12. Abateri și dependențe
 
+- **Fațada de la intrarea în serpentine (E') stă la 4 m de carosabil, nu la 1 m** (pasul 6,
+  PR #735; decizia dezvoltatorului, 15 nov 2026). Acolo erau 4 din 7 ejectări din serpentine,
+  pe exteriorul primului viraj de 90°. Kitul nu se schimbă: la plasare, generatorul lasă în fața
+  acelei case **trotuar lat sau o grădină** (strat ridicat de hortensii, ca în serpentine), nu
+  gol de teren.
+
 - **Fusta dreaptă în loc de soclul-pană care se scalează cu panta** (brief §5.3): același efect
   vizual, fără scalare neuniformă. Terenul și trotuarul taie pana singure, iar o singură piesă
   merge pe orice pantă până la ~30 %.

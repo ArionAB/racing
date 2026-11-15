@@ -162,7 +162,7 @@ Citit în `scenes/props/city_fill.gd`:
   (|z| < 12,2 până la +13,8 peste tablier), parapete vizuale mai groase decât cutia de coliziune,
   picioare mai late decât cutiile lor (3 × 3 m), orice sub +13,8 între picioare.
 
-### 1.7 Mașinile parcate și `BumpProp` — CONFLICT
+### 1.7 Mașinile parcate și `BumpProp` — REZOLVAT la pasul 6 (15 nov 2026)
 
 `scenes/props/bump_prop.gd:29–30`: `MAX_FOOTPRINT_M = 2,0`, `MAX_HEIGHT_M = 1,8`. La `:86–88`,
 `wrap()` refuză orice piesă mai mare, iar `WorldProp` cade pe hull static. O mașină parcată (4,2 m)
@@ -170,6 +170,11 @@ devine deci zid. Opțiunea `mass` există (`:64–66`, `:125`; tuk-tuk-urile din
 de mărime nu se poate ocoli. Brief §3 („masa aleasă ca Autobuzul să le arunce”) **cere cod**: o
 opțiune de mărime per model (`opts["max_size"]`). Plafonul de 64 de corpuri pe pistă (`:34`)
 rămâne. **Relevant pentru pasul 6**, care pune acum mașinile parcate.
+
+**Rezolvat (PR #735, pasul 6):** `opts["max_footprint"]` per piesă; mașina parcată cere 4,5 m și
+cântărește 70 kg (decizia dezvoltatorului, calibrată: ~0,57 s pe lovitură la 30 m/s). Plafonul de
+**înălțime** de 1,8 m se ridică tot per piesă (`opts["max_height"]`, decizia dezvoltatorului din
+15 nov 2026), ca duba din M1 să fie împinsă, nu zid static.
 
 ### 1.8 Fundalul, stolurile, decorul manual
 
@@ -392,7 +397,8 @@ punctul din §4 unde piesa e cea mai aproape.
    urcare).
 4. **Trotuarul exterior al podului** (piesa opțională `Bridge_Walkway_8`) acoperă pervazul de
    3,8 m de asfalt dincolo de parapet (2b, punctul 4) fără cod. Se folosește sau nu.
-5. **Mașinile parcate ca `BumpProp`** cer codul din §1.7; altfel rămân statice.
+5. ~~**Mașinile parcate ca `BumpProp`** cer codul din §1.7~~ — **decis**: codul e la pasul 6
+   (`max_footprint`, `max_height`), 70 kg; duba intră și ea ca `BumpProp`.
 6. Scândura pontonului și cărămida serpentinelor: interval de suprafață cu clasă (cod) sau
    punte GLB peste carosabil (§1.3, §1.4).
 

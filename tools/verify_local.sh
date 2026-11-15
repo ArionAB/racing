@@ -258,6 +258,12 @@ run_step "Credite: sursa in export, inventar, ecran, layout" credits.log 'VERDIC
 run_step "Quick Race: piste de lansare, fara bancuri de test" quick_race.log 'VERDICT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeQuickRace.tscn
 
+# Recordurile, cariera si fantomele jucatorilor sunt cheiate pe TrackInfo.id,
+# fara tabela de alias-uri: o pista fara .tres primeste id-ul dedus (`track25`)
+# pe vecie, iar un id schimbat lasa save-urile vechi dormante (#720).
+run_step "Id-uri de pista: explicite, unice, inghetate" track_ids.log 'VERDICT:' -- \
+	--headless --fixed-fps 60 --path . res://tools/ProbeTrackIds.tscn
+
 # Decorul asezat pe solul de la generare ramane sub teren cand terenul creste
 # dupa aceea: padurea Lerai ajunsese la 20-30 m sub peretele craterului.
 run_step "Serengeti: niciun decor ingropat sub teren" decor_buried.log 'VERDICT:|PICAT:' -- \

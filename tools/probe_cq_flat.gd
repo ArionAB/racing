@@ -6,7 +6,7 @@ func _ready() -> void:
 	var R := 70.0
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--reach="): R = float(a.trim_prefix("--reach="))
-	var track := (load(GameState.TRACK_SCENES[GameState.resolve_track_index(12)])
+	var track := (load("res://scenes/tracks/Track12.tscn")
 		as PackedScene).instantiate() as Track
 	add_child(track)
 	await get_tree().process_frame

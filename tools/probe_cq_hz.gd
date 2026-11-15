@@ -7,7 +7,7 @@ func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--fracs="):
 			for s in arg.trim_prefix("--fracs=").split(","): fracs.append(float(s))
-	var scene := load(GameState.TRACK_SCENES[GameState.resolve_track_index(12)]) as PackedScene
+	var scene := load("res://scenes/tracks/Track12.tscn") as PackedScene
 	var track := scene.instantiate() as Track
 	get_tree().root.add_child(track)
 	await get_tree().process_frame

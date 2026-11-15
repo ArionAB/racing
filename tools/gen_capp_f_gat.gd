@@ -65,7 +65,7 @@ const SPANS := [
 
 func _ready() -> void:
 	await get_tree().process_frame
-	var track := (load(GameState.TRACK_SCENES[GameState.resolve_track_index(13)])
+	var track := (load("res://scenes/tracks/Track13.tscn")
 		as PackedScene).instantiate() as Track
 	add_child(track)
 	for _i in 8:

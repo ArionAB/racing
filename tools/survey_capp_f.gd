@@ -6,7 +6,7 @@ extends Node
 ## 0.63-0.79, ca sălile sa fie sapate pe drumul care exista, nu pe cel din brief.
 func _ready() -> void:
 	await get_tree().process_frame
-	var track := (load(GameState.TRACK_SCENES[GameState.resolve_track_index(13)])
+	var track := (load("res://scenes/tracks/Track13.tscn")
 		as PackedScene).instantiate() as Track
 	add_child(track)
 	for _i in 10:

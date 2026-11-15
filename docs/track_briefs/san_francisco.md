@@ -1133,6 +1133,8 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
 
    Planul e `sf_route_plan.png`. Capturile au o singură mașină (snapshot-ul nu pune grila).
 
+   `bash tools/verify_local.sh` pe ramură: **OK, 75 de pași**.
+
    **Nemăsurat:**
    - feel-ul la volan;
    - costul pe iPhone (100 de corpuri + camionul pe Track25);

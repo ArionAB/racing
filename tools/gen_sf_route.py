@@ -1717,6 +1717,34 @@ if B200:
             # Basis(UP, yaw) pe RANDURI (sonda 1d: Transform3D din .tscn e scris pe randuri)
             _box("flare", "Evazare%s%s" % (nm, end), "Pod/Parapet", (flare_l, 1.2, 0.5),
                  (c_, 0, s_, 0, 1, 0, -s_, 0, c_, cxf, DECK_Y + 0.55, czf))
+    # CAPETELE DESPARTITORULUI MUTATE IN S (runda 2, 15 nov 2026). Masurat pe B200 (8 x 16 x 250 s,
+    # patru loturi): 2 treceri pe contrasens in ~2.300 — de fiecare data o masina LENTA, iesita larg
+    # din virajul la stanga de dinaintea S-ului (R24 la baza podului, balonul pe malul celalalt),
+    # care a trecut PE LANGA capul despartitorului si a intrat pe banda opusa (o data 21 s pe
+    # contrasens, pana la o frontala). Contractul e 0. Remediul: un zid moale (meta
+    # `soft_hit_crush`, ca atenuatorul) pe AXA podului, prin tot S-ul de la fiecare capat, lipit de
+    # capul despartitorului: in S benzile sunt la 6,2..14,2 m de axa, deci zidul sta in afara
+    # carosabilului (pe ultimii metri atinge marginea, ca despartitorul insusi). O masina iesita larg
+    # din viraj loveste zidul, nu mai poate trece pe banda cealalta. `CAP_S_EXTRA` m dincolo de S,
+    # spre viraj / balon (verificat: niciun punct al soselei la mai putin de semilatime + 1 m).
+    CAP_S_EXTRA = float(os.environ.get("CAP_S_EXTRA", "20"))
+    CAP_S = os.environ.get("CAP_S", "1") == "1"
+    if CAP_S:
+        POD_NODES.append('[node name="CapS" type="StaticBody3D" parent="Pod"]\nmetadata/soft_hit_crush = 1.0\n')
+        cap_h = 4.3                      # de la +17 la +21,3 (coliziunea blocului: 1,3 m peste drum)
+        for nm, xa, xb in (("Baza", MK["pod0"][2] - SPLIT_L - CAP_S_EXTRA, MK["pod0"][2]),
+                           ("MalulCelalalt", MK["far0"][2], MK["far0"][2] + SPLIT_L + CAP_S_EXTRA)):
+            _box("cap_%s" % nm.lower(), "Cap%s" % nm, "Pod/CapS", (xb - xa, cap_h, 0.6),
+                 (1, 0, 0, 0, 1, 0, 0, 0, 1, (xa + xb) * 0.5, DECK_Y + 1.3 - cap_h * 0.5, GZ))
+            # garda de geometrie: axa fiecarei benzi ramane la >= LANE_Z - 0,2 m de zid (ca pe coridor,
+            # unde axa e la 6,2 m de despartitor); marginea soselei atinge zidul doar spre capul
+            # despartitorului, unde benzile oricum se suprapun
+            for k in range(0, int(xb - xa) + 1, 2):
+                x_ = xa + k
+                near = min(math.dist((x_, AXIS_Y), PTS[i]) for i in range(N))
+                if near < LANE_Z - 0.2:
+                    raise SystemExit(f"CapS {nm}: la x {x_:.0f} axa soselei e la {near:.1f} m de zid")
+        print(f"capetele despartitorului mutate in S: zid moale pe axa, {SPLIT_L + CAP_S_EXTRA:.0f} m la fiecare capat")
     # portalurile: picioarele de la apa (-10) pana la varful turnului (+20 + 45)
     POD_NODES.append('[node name="Turnuri" type="StaticBody3D" parent="Pod"]\n')
     tower_h = 45.0

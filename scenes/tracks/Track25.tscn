@@ -91,6 +91,20 @@ size = Vector3(10.000, 1.200, 0.500)
 size = Vector3(10.000, 1.200, 0.500)
 material = SubResource("Mat_pod_gri")
 
+[sub_resource type="BoxShape3D" id="Box_pod_cap_baza"]
+size = Vector3(80.000, 4.300, 0.600)
+
+[sub_resource type="BoxMesh" id="Mesh_pod_cap_baza"]
+size = Vector3(80.000, 4.300, 0.600)
+material = SubResource("Mat_pod_gri")
+
+[sub_resource type="BoxShape3D" id="Box_pod_cap_malulcelalalt"]
+size = Vector3(80.000, 4.300, 0.600)
+
+[sub_resource type="BoxMesh" id="Mesh_pod_cap_malulcelalalt"]
+size = Vector3(80.000, 4.300, 0.600)
+material = SubResource("Mat_pod_gri")
+
 [sub_resource type="BoxShape3D" id="Box_pod_leg"]
 size = Vector3(3.000, 75.000, 3.000)
 
@@ -774,6 +788,25 @@ shape = SubResource("Box_pod_flare")
 [node name="EvazareSudEM" type="MeshInstance3D" parent="Pod/Parapet"]
 transform = Transform3D(0.93969, 0.00000, -0.34202, 0.00000, 1.00000, 0.00000, 0.34202, 0.00000, 0.93969, 486.69846, 20.55000, -214.46631)
 mesh = SubResource("Mesh_pod_flare")
+
+[node name="CapS" type="StaticBody3D" parent="Pod"]
+metadata/soft_hit_crush = 1.0
+
+[node name="CapBaza" type="CollisionShape3D" parent="Pod/CapS"]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 194.00000, 19.15000, -228.62641)
+shape = SubResource("Box_pod_cap_baza")
+
+[node name="CapBazaM" type="MeshInstance3D" parent="Pod/CapS"]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 194.00000, 19.15000, -228.62641)
+mesh = SubResource("Mesh_pod_cap_baza")
+
+[node name="CapMalulCelalalt" type="CollisionShape3D" parent="Pod/CapS"]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 546.00000, 19.15000, -228.62641)
+shape = SubResource("Box_pod_cap_malulcelalalt")
+
+[node name="CapMalulCelalaltM" type="MeshInstance3D" parent="Pod/CapS"]
+transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 546.00000, 19.15000, -228.62641)
+mesh = SubResource("Mesh_pod_cap_malulcelalalt")
 
 [node name="Turnuri" type="StaticBody3D" parent="Pod"]
 

@@ -13,7 +13,7 @@ func _ready() -> void:
 		await _clip_sheet()
 		get_tree().quit(0)
 		return
-	var idx := GameState.resolve_track_index(7)
+	var idx := TrackInfo.index_of_id(&"serengeti")
 	var t := (load(GameState.TRACK_SCENES[idx]) as PackedScene).instantiate() as Track
 	add_child(t)
 	for i in 10:

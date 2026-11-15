@@ -14,8 +14,7 @@ const NAMES := ["poarta_hornuri_gemene43", "hornEst6"]
 
 func _ready() -> void:
 	await get_tree().process_frame
-	var scene := load(GameState.TRACK_SCENES[
-		GameState.resolve_track_index(6)]) as PackedScene
+	var scene := load("res://scenes/tracks/Track13.tscn") as PackedScene
 	var track := scene.instantiate() as Track
 	get_tree().root.add_child(track)
 	await get_tree().process_frame

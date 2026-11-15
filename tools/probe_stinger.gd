@@ -118,7 +118,7 @@ func _test_race_wiring() -> void:
 	print("")
 	print("-- 3. cablaj in Race --")
 	GameState.total_laps = 99
-	GameState.selected_track = 12
+	GameState.selected_track = TrackInfo.index_of_id(&"monument_valley")
 	var race := (load("res://scenes/race/Race.tscn") as PackedScene).instantiate()
 	add_child(race)
 	var guard := 0

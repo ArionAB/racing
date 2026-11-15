@@ -56,7 +56,7 @@ var _expect_tube := false
 
 func _ready() -> void:
 	await get_tree().process_frame
-	var idx := GameState.resolve_track_index(9)
+	var idx := TrackInfo.index_of_id(&"fiordland")
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			idx = GameState.resolve_track_index(int(arg.trim_prefix("--track=")))

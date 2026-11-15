@@ -47,7 +47,7 @@ var _impacts := 0
 
 
 func _ready() -> void:
-	GameState.selected_track = 2
+	GameState.selected_track = TrackInfo.index_of_id(&"transfagarasan")
 	GameState.champ_active = false
 	GameState.total_laps = 99
 	GameState.ai_count = 0

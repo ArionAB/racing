@@ -16,7 +16,7 @@ extends Node
 
 func _ready() -> void:
 	await get_tree().process_frame
-	var idx := GameState.resolve_track_index(18)
+	var idx := TrackInfo.index_of_id(&"kyoto")
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			idx = GameState.resolve_track_index(int(arg.trim_prefix("--track=")))

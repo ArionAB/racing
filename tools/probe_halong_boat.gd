@@ -35,7 +35,7 @@ func _ready() -> void:
 
 func _go() -> void:
 	var sabotage := "--sabotaj" in OS.get_cmdline_user_args()
-	var t := (load(GameState.TRACK_SCENES[14]) as PackedScene).instantiate()
+	var t := (load("res://scenes/tracks/Track22.tscn") as PackedScene).instantiate()
 	if sabotage:
 		(t.get_node("Hazarduri/JoncaCanal") as HazardMarker).on_water = false
 	get_tree().root.add_child(t)

@@ -5,7 +5,7 @@ extends Node
 ##   godot --headless --path . res://tools/ProbeKyotoRapa.tscn
 func _ready() -> void:
 	await get_tree().process_frame
-	var idx := GameState.resolve_track_index(18)
+	var idx := TrackInfo.index_of_id(&"kyoto")
 	var track := (load(GameState.TRACK_SCENES[idx]) as PackedScene).instantiate() as Track
 	get_tree().root.add_child(track)
 	await get_tree().process_frame

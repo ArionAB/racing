@@ -45,7 +45,7 @@ var _sabotage: bool = false
 
 func _ready() -> void:
 	_sabotage = "--sabotaj" in OS.get_cmdline_user_args()
-	var idx := GameState.resolve_track_index(19)
+	var idx := TrackInfo.index_of_id(&"monument_valley")
 	_track = (load(GameState.TRACK_SCENES[idx]) as PackedScene).instantiate() as Track
 	add_child(_track)
 	for _i in 3:

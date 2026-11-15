@@ -5,7 +5,7 @@ extends Node
 ## Un gol real inseamna teren care nu urca la sosea (defect de lume), nu shading.
 
 func _ready() -> void:
-	var scene := load(GameState.TRACK_SCENES[7]) as PackedScene
+	var scene := load("res://scenes/tracks/Track14.tscn") as PackedScene
 	var track := scene.instantiate() as Track
 	get_tree().root.add_child(track)
 	await get_tree().process_frame

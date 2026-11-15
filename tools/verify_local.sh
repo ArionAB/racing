@@ -180,6 +180,22 @@ for scene in $(awk '/const TRACK_SCENES/,/^]/' scripts/autoload/game_state.gd \
 	fi
 done
 
+# Ce intra in build-ul de magazin (#716): presetul exporta all_resources, asa
+# ca orice demo de addon sau poza de referinta neignorata ajunge in pachet fara
+# sa observe cineva (road_demos/, postere Okinawa, r27_ref.jpeg). Garda pica la
+# un folder nou de top sau la o cale de demo/referinta, si tipareste marimea pe
+# folder ca cifra sa se vada la fiecare verificare.
+printf '%-58s ' "Continutul exportului (fara demo-uri si referinte)"
+if bash tools/export_inventory.sh > "$LOGS/export_inventory.log" 2>&1; then
+	echo "OK"
+	PASSED+=("Continutul exportului")
+else
+	echo "PICA — vezi $LOGS/export_inventory.log"
+	grep '^PICA' "$LOGS/export_inventory.log" | head -10 | sed 's/^/    /'
+	FAILED+=("Continutul exportului")
+fi
+grep '^export ' "$LOGS/export_inventory.log" | sed 's/^/    /'
+
 # Restul pasilor sunt aceiasi ca in vechiul ci.yml; motivarea fiecaruia e in
 # sonda respectiva.
 run_step "Garda de draw call-uri (materiale per pista)" probe_decor.log 'VERDICT:' -- \

@@ -161,20 +161,33 @@ func _ready() -> void:
 # ------------------------------------------------- HUD-ul fata de zone (#719)
 #
 # A CINCEA GARDA: bara de turbo nu are voie sa stea in zona de atingere a unui
-# buton. Pe 4:3 (iPad) statea peste sageata ▶ si peste frana — gasita de sonda
-# turului ghidat, nu de asta, fiindca aici totul rula la o singura marime.
-# Acum: HUD-ul REAL si TouchControls REAL, intr-un SubViewport de marimea
-# canvas-ului logic (baza 1280x720, stretch `expand`: ecranul mai ingust da
-# un canvas mai ingust, nu unul micsorat). Zonele se citesc din `_zone_at`
+# buton. HUD-ul REAL si TouchControls REAL; zonele se citesc din `_zone_at`
 # punct cu punct, nu din raze copiate — daca un buton se muta, sonda il vede.
+#
+# ATENTIE la ce inseamna „4:3". Cu stretch `canvas_items` + `expand` si baza
+# 1280x720, Godot NU ingusteaza canvas-ul pe un ecran mai patrat: pastreaza
+# latimea 1280 si il INALTA (iPad 2732x2048 -> 1280x959). Canvas-ul logic nu
+# coboara niciodata sub 1280x720. #719 a fost vazut intr-un SubViewport de
+# 960x720 (sonda turului ghidat), care sare peste stretch. De aceea:
+#   - DEVICE_SIZES: rezolutii FIZICE puse pe fereastra radacina; canvas-ul il
+#     calculeaza stretch-ul real, exact ca pe telefon/tableta.
+#   - SYNTHETIC_CANVASES: canvas-uri mai inguste decat baza, intr-un
+#     SubViewport. In joc nu apar azi; tin regula de asezare a barii sub garda
+#     pentru ziua in care se schimba baza sau aspectul.
 
-## Marimile LOGICE (inaltimea e mereu 720, latimea = 720 x aspect).
-const LAYOUT_SIZES := [
-	[Vector2i(1280, 720), "1280x720 (baza, 16:9)"],
-	[Vector2i(1558, 720), "telefon 2532x1170"],
-	[Vector2i(1036, 720), "iPad Air 2360x1640"],
-	[Vector2i(960, 720), "4:3 (iPad, 2732x2048)"],
-	[Vector2i(900, 720), "5:4 (fereastra desktop)"],
+## Rezolutii FIZICE (fereastra radacina, stretch-ul proiectului).
+const DEVICE_SIZES := [
+	[Vector2i(1280, 720), "desktop 1280x720 (baza, 16:9)"],
+	[Vector2i(2532, 1170), "iPhone 12 Pro 2532x1170"],
+	[Vector2i(2732, 2048), "iPad Pro 12,9\" 2732x2048 (4:3)"],
+	[Vector2i(2360, 1640), "iPad Air 2360x1640"],
+	[Vector2i(960, 720), "fereastra desktop 960x720 (4:3)"],
+]
+## Canvas-uri LOGICE mai inguste decat baza (SubViewport, fara stretch).
+const SYNTHETIC_CANVASES := [
+	[Vector2i(1036, 720), "sintetic 1036x720"],
+	[Vector2i(960, 720), "sintetic 960x720 (cum a fost vazut #719)"],
+	[Vector2i(900, 720), "sintetic 900x720"],
 ]
 ## Aerul minim intre bara si orice punct care raspunde la atingere. Peste
 ## rama de 10 px cu care turul ghidat evidentiaza bara (ProbeTutorial): rama
@@ -243,16 +256,26 @@ func _measured_radius(tc: TouchControls, zone: String, dir: Vector2) -> float:
 	return r
 
 
-func _make_hud(vp_size: Vector2i) -> Array:
-	var vp := SubViewport.new()
-	vp.size = vp_size
-	vp.disable_3d = true
-	add_child(vp)
+## Un HUD nou intr-un caz: `[fizic, marime]`. Fizic: fereastra radacina ia
+## rezolutia si HUD-ul sta in ea (stretch-ul real); altfel un SubViewport de
+## marimea canvas-ului. Intoarce [gazda de sters, hud].
+func _make_hud(physical: bool, px: Vector2i) -> Array:
+	var host: Node
+	if physical:
+		get_tree().root.size = px
+		host = Node.new()
+		add_child(host)
+	else:
+		var vp := SubViewport.new()
+		vp.size = px
+		vp.disable_3d = true
+		add_child(vp)
+		host = vp
 	var hud := RaceHUD.new()
-	vp.add_child(hud)
+	host.add_child(hud)
 	hud.set_info(5, 6, 1, 3, 142.0, "00:05.5", "00:56.7")
 	hud.set_turbo(0.6, false)
-	return [vp, hud]
+	return [host, hud]
 
 
 ## Elementele care conteaza: bara insasi (jgheabul pe care il evidentiaza
@@ -276,9 +299,10 @@ const BAR_STATES := ["cursa", "fantoma", "provocare"]
 
 ## Bara de pe telefon si de pe 1280x720, judecata pe device: aici nu are voie
 ## sa se miste nici un pixel (masurata inainte de #719).
+## Cheia e rezolutia FIZICA (2532x1170 da canvas-ul 1558x720).
 const JUDGED_ON_DEVICE := {
 	Vector2i(1280, 720): Rect2(510.5, 654.0, 300.0, 22.0),
-	Vector2i(1558, 720): Rect2(649.5, 654.0, 300.0, 22.0),
+	Vector2i(2532, 1170): Rect2(649.5, 654.0, 300.0, 22.0),
 }
 
 
@@ -305,67 +329,77 @@ func _guard_bar(tc: TouchControls, what: String, r: Rect2) -> int:
 
 func _check_hud_layout() -> int:
 	var fail := 0
+	var root_size0 := get_tree().root.size
 	print("")
-	print("== HUD fata de zonele de atingere, la marimile logice (#719)")
+	print("== HUD fata de zonele de atingere (#719)")
 	print("   (aer minim %.0f px; „nicio zona in raza\" = peste %.0f px)" % [
 		MIN_GAP, MIN_GAP + 28.0])
 	var fresh := {}
-	for entry in LAYOUT_SIZES:
-		var px: Vector2i = entry[0]
-		var made := _make_hud(px)
-		var vp: SubViewport = made[0]
-		var hud: RaceHUD = made[1]
-		await _frames(3)
-		var tc := hud.touch_controls()
-		print("")
-		print("-- %dx%d  %s" % [px.x, px.y, entry[1]])
-		var radii := []
-		for zr in [["left", Vector2.UP], ["right", Vector2.UP], ["brake", Vector2.LEFT],
-				["gas", Vector2.DOWN], ["turbo", Vector2.UP], ["drift", Vector2.UP]]:
-			var disc := tc.button_disc(zr[0])
-			radii.append("%s (%.0f,%.0f) r%.0f/%.0f" % [zr[0],
-				disc.get_center().x, disc.get_center().y, disc.size.x * 0.5,
-				_measured_radius(tc, zr[0], zr[1])])
-		print("   zone (centru, raza desenata/de atingere): " + "; ".join(radii))
-		for state: String in BAR_STATES:
-			_set_bar_state(hud, state)
+	for physical in [true, false]:
+		for entry in (DEVICE_SIZES if physical else SYNTHETIC_CANVASES):
+			var px: Vector2i = entry[0]
+			var made := _make_hud(physical, px)
+			var hud: RaceHUD = made[1]
 			await _frames(3)
-			var bars := _bar_rects(hud)
-			if state == "cursa":
-				fresh[px] = bars.jgheab
-			fail += _guard_bar(tc, "%s: bara (jgheab)" % state, bars.jgheab)
-			fail += _guard_bar(tc, "%s: randul barii" % state, bars.rand)
-		if JUDGED_ON_DEVICE.has(px):
-			var want: Rect2 = JUDGED_ON_DEVICE[px]
-			var got: Rect2 = fresh[px]
-			var same := got.position.is_equal_approx(want.position) 				and got.size.is_equal_approx(want.size)
-			if not same:
-				fail += 1
-			print("   bara ca pe device: %s (astept %s) %s" % [_fmt_rect(got),
-				_fmt_rect(want), "OK" if same else "<<< S-A MUTAT"])
-		vp.queue_free()
+			var tc := hud.touch_controls()
+			print("")
+			print("-- %s -> canvas logic %s" % [entry[1], str(tc.size)])
+			var radii := []
+			for zr in [["left", Vector2.UP], ["right", Vector2.UP], ["brake", Vector2.LEFT],
+					["gas", Vector2.DOWN], ["turbo", Vector2.UP], ["drift", Vector2.UP]]:
+				var disc := tc.button_disc(zr[0])
+				radii.append("%s (%.0f,%.0f) r%.0f/%.0f" % [zr[0],
+					disc.get_center().x, disc.get_center().y, disc.size.x * 0.5,
+					_measured_radius(tc, zr[0], zr[1])])
+			print("   zone (centru, raza desenata/de atingere): " + "; ".join(radii))
+			for state: String in BAR_STATES:
+				_set_bar_state(hud, state)
+				await _frames(3)
+				var bars := _bar_rects(hud)
+				if state == "cursa":
+					fresh[[physical, px]] = bars.jgheab
+				fail += _guard_bar(tc, "%s: bara (jgheab)" % state, bars.jgheab)
+				fail += _guard_bar(tc, "%s: randul barii" % state, bars.rand)
+			if physical and JUDGED_ON_DEVICE.has(px):
+				var want: Rect2 = JUDGED_ON_DEVICE[px]
+				var got: Rect2 = fresh[[physical, px]]
+				var same := got.position.is_equal_approx(want.position) 					and got.size.is_equal_approx(want.size)
+				if not same:
+					fail += 1
+				print("   bara ca pe device: %s (astept %s) %s" % [_fmt_rect(got),
+					_fmt_rect(want), "OK" if same else "<<< S-A MUTAT"])
+			(made[0] as Node).queue_free()
+			await _frames(1)
 
 	# Redimensionarea (rotire, fereastra trasa pe desktop): ACELASI HUD trecut
 	# prin toate marimile trebuie sa ajunga unde ajunge unul nou-nascut acolo.
-	# Altfel bara s-ar aseza bine doar la pornire.
+	# Altfel bara s-ar aseza bine doar la pornire. O data prin fereastra
+	# radacina (stretch-ul real), o data prin SubViewport (canvas-urile inguste).
 	print("")
-	var made := _make_hud(LAYOUT_SIZES[0][0])
-	var vp: SubViewport = made[0]
-	var hud: RaceHUD = made[1]
-	await _frames(3)
-	var order: Array[Vector2i] = [Vector2i(960, 720), Vector2i(1558, 720),
-		Vector2i(900, 720), Vector2i(1036, 720), Vector2i(1280, 720)]
-	for px in order:
-		vp.size = px
+	for physical in [true, false]:
+		var list: Array = DEVICE_SIZES if physical else SYNTHETIC_CANVASES
+		var order: Array = list.map(func(e: Array) -> Vector2i: return e[0])
+		order.reverse()
+		var made := _make_hud(physical, Vector2i(1280, 720))
+		var hud: RaceHUD = made[1]
 		await _frames(3)
-		var got := hud.turbo_bar_rect()
-		var want: Rect2 = fresh[px]
-		var same := got.position.is_equal_approx(want.position) 			and got.size.is_equal_approx(want.size)
-		if not same:
-			fail += 1
-		print("   redimensionat la %dx%d: %s %s" % [px.x, px.y, _fmt_rect(got),
-			"OK" if same else "<<< difera de HUD-ul nou (%s)" % _fmt_rect(want)])
-	vp.queue_free()
+		for px: Vector2i in order:
+			if physical:
+				get_tree().root.size = px
+			else:
+				(made[0] as SubViewport).size = px
+			await _frames(3)
+			var got := hud.turbo_bar_rect()
+			var want: Rect2 = fresh[[physical, px]]
+			var same := got.position.is_equal_approx(want.position) 				and got.size.is_equal_approx(want.size)
+			if not same:
+				fail += 1
+			print("   redimensionat (%s) la %dx%d: %s %s" % [
+				"fereastra" if physical else "subviewport", px.x, px.y, _fmt_rect(got),
+				"OK" if same else "<<< difera de HUD-ul nou (%s)" % _fmt_rect(want)])
+		(made[0] as Node).queue_free()
+		await _frames(1)
+	get_tree().root.size = root_size0
 	return fail
 
 

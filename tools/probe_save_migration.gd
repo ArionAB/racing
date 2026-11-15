@@ -7,8 +7,9 @@ extends Node
 ## Rulare:
 ##   Godot --headless --path . res://tools/ProbeSaveMigration.tscn
 ##
-## NU atinge save-ul real: fixture-urile stau in `user://probe_tmp/save_migration/`
-## si GameState / Career sunt redirectionate acolo inainte de orice load facut de
+## NU atinge save-ul real: fixture-urile stau in folderul procesului,
+## `user://probe_tmp/save_migration_<pid>/` (ProbeTmp, #722 — doua rulari
+## paralele pe un nume fix picau amandoua, 20 din 20), si GameState / Career sunt redirectionate acolo inainte de orice load facut de
 ## sonda. Load-ul din `GameState._ready` (autoload, ruleaza INAINTEA sondei) se
 ## redirectioneaza doar cu variabila de mediu `TOY_RACER_SAVE_DIR`
 ## (SaveSchema.dir_override) — verify_local.sh o seteaza.
@@ -17,7 +18,7 @@ extends Node
 ## "Monument Valley" = monument_valley): asa o tabela inghetata stricata in
 ## SaveSchema pica aici, in loc sa fie comparata cu ea insasi.
 
-const DIR := "user://probe_tmp/save_migration/"
+const ProbeTmp := preload("res://tools/probe_tmp.gd")
 const MIN_CHECKS := 150
 
 ## Ce insemna un index v0 din `[game] selected_car` (CAR_DATA din oct 2026).
@@ -45,6 +46,7 @@ var _real_settings: String
 var _real_records: String
 var _real_career: String
 var _real_ghosts: String
+var _dir: String = ""
 
 
 func _ready() -> void:
@@ -55,12 +57,11 @@ func _ready() -> void:
 	print("probe_save_migration: autoload-ul a citit %s (%s)" % [_real_settings,
 		"REDIRECTIONAT" if _real_settings != GameState.SETTINGS_PATH else "calea reala"])
 	var keep := _snapshot_state()
-	_clean()
-	DirAccess.make_dir_recursive_absolute(DIR)
-	GameState.settings_path = DIR + "settings.cfg"
-	GameState.records_path = DIR + "records.cfg"
-	Career.save_path = DIR + "career.cfg"
-	Career.ghost_dir = DIR + "ghosts/"
+	_dir = ProbeTmp.make("save_migration")
+	GameState.settings_path = _dir + "settings.cfg"
+	GameState.records_path = _dir + "records.cfg"
+	Career.save_path = _dir + "career.cfg"
+	Career.ghost_dir = _dir + "ghosts/"
 
 	_check_ids()
 	_check_settings_migration()
@@ -122,14 +123,15 @@ func _rm(path: String) -> void:
 
 
 func _clean() -> void:
-	for sub in [DIR + "ghosts/", DIR]:
-		var d := DirAccess.open(sub)
-		if d == null:
-			continue
-		for f in d.get_files():
-			d.remove(f)
-	DirAccess.remove_absolute(ProjectSettings.globalize_path(DIR + "ghosts/"))
-	DirAccess.remove_absolute(ProjectSettings.globalize_path(DIR))
+	if _dir == "":
+		return
+	ProbeTmp.remove(_dir)
+	_dir = ""
+
+
+## Si pe iesirile care nu trec prin capatul lui `_ready`.
+func _exit_tree() -> void:
+	_clean()
 
 
 ## Starea din memorie pe care sonda o calca (selectia, recordurile, setarile).

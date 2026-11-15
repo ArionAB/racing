@@ -11,7 +11,10 @@ extends Node
 ## rotita pe tangenta. Cu ea se vede (1) ca acumulatorul da 20 Hz, (2) ca
 ## serializarea nu pierde nimic, (3) ca interpolarea nu taie colturi.
 
-const TMP_DIR := "user://probe_ghosts_tmp/"
+## Fantomele sondei stau in folderul procesului (`user://probe_tmp/ghosts_<pid>/`):
+## pe numele fix de dinainte, doua rulari paralele isi stergeau fisierele una
+## alteia (10 din 20 picate, #722).
+const ProbeTmp := preload("res://tools/probe_tmp.gd")
 const MIN_CHECKS := 60
 const RADIUS := 50.0
 const LAP_S := 20.0
@@ -21,6 +24,7 @@ const TRACK := &"probe_track"
 var _fails: Array[String] = []
 var _checks: int = 0
 var _real_dir: String
+var _tmp_dir: String = ""
 
 
 func _check(ok: bool, what: String) -> void:
@@ -39,8 +43,8 @@ func _truth(t: float) -> Transform3D:
 
 func _ready() -> void:
 	_real_dir = Career.ghost_dir
-	Career.ghost_dir = TMP_DIR
-	_clean()
+	_tmp_dir = ProbeTmp.make("ghosts")
+	Career.ghost_dir = _tmp_dir
 
 	var data := await _record()
 	_check_roundtrip(data)
@@ -152,7 +156,7 @@ func _read(path: String) -> PackedByteArray:
 func _check_files(data: GhostData) -> void:
 	print("=== FISIER ===")
 	var path := Career.ghost_path(TRACK)
-	_check(path == TMP_DIR + "probe_track.bin", "ghost_path = ghost_dir/<id>.bin (%s)" % path)
+	_check(path == _tmp_dir + "probe_track.bin", "ghost_path = ghost_dir/<id>.bin (%s)" % path)
 	_check(Career.load_ghost(TRACK) == null, "fara fisier => load_ghost null")
 	_check(Career.save_ghost_if_best(TRACK, data, 60000, 0), "prima cursa (best 0) scrie")
 	_check(FileAccess.file_exists(path), "fisierul exista")
@@ -225,8 +229,12 @@ func _check_ghost_car(data: GhostData) -> void:
 
 
 func _clean() -> void:
-	var dir := DirAccess.open(TMP_DIR)
-	if dir != null:
-		for file in dir.get_files():
-			dir.remove(file)
-	DirAccess.remove_absolute(TMP_DIR)
+	if _tmp_dir == "":
+		return
+	ProbeTmp.remove(_tmp_dir)
+	_tmp_dir = ""
+
+
+## Si pe iesirile care nu trec prin capatul lui `_ready`.
+func _exit_tree() -> void:
+	_clean()

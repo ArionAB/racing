@@ -171,6 +171,39 @@ rece** de golf, **auriu-pai** de deal uscat, **verde-închis** de chiparos,
 
 ## 2. Traseul și punctele de interes (POI)
 
+> **Traseul de acum: bucla B200, construită în jurul podului roșu (decizia dezvoltatorului
+> din 15 nov 2026, §7 pasul 2b).** Planul: `docs/asset_briefs/img/sf_route/sf_route_plan.png`.
+> Tot ce urmează după acest chenar (schema, tabelul POI, cotele faleză/cheu) descrie **bucla
+> veche** (pașii 2–5). Lanțul, scurtătura, ocolul, tramvaiul 2 și cheiul de nord au rămas în
+> aceleași coordonate. Latura de est (faleza A/G) și turnul cu ceas din axul ei au dispărut.
+>
+> ```
+>             N  (golful)
+>   ┌── [F] cheiul de nord (+3) ──────────┐
+>   │ [E′] serpentine   [E] ocolul 400 m   │ [G] strada de întors spre pod (+3 → +20)
+>   │ ── terasa / furca (+14,6) ──         ↓
+>   │ [D] LANȚUL, 4 muchii, spre N         └→ ═══ PODUL ROȘU, +20, tablier 200 m ═══ ⟳ balonul
+>   │  ↑                                   ┌← ═══ START / SOSIRE pe banda spre oraș ═══   (malul
+>   │ [C] coama (+53): brațul de 84 m spre V ↓ primul viraj (R30)                       celălalt)
+>   │  ↑ elanul de 96 m                     [B] strada tramvaiului 1, spre S (+20 → +53)
+>   └─────────── coama ←── colțul de sus ←──┘
+> ```
+>
+> | # | frac | POI | ce se întâmplă |
+> |---|---|---|---|
+> | **P** | 0.00–0.11 | **Podul, spre oraș** — grila pe palierul de pe malul celălalt, banda spre oraș (sud). 36 m de palier, tablierul de 200 m la +20 cu despărțitorul mobil, palierul de la baza podului, S-ul de 60 m. **Circulație pe stânga.** | dreapta de îmbrânceală la start (~330 m până la primul viraj), banda îngustă sau lată după camion |
+> | **B** | 0.11–0.26 | **Primul viraj** (90°, R30, la stânga), apoi **strada tramvaiului 1 spre S**: 292 m la 11,4 %, +20 → +52, cu tramvaiul pe ax | corp pe bandă; **urcarea merge spre soare** (§4, pasul 2b: la soare, dar în contra-lumină) |
+> | **C** | 0.26–0.33 | **Colțul de sus** (R24, la dreapta), brațul coamei de 84 m spre V (+53), virajul R36 spre N, elanul de 96 m | respiro; tramvaiul 1 iese drept înainte la colț |
+> | **D** | 0.33–0.49 | **Lanțul**, neschimbat: patru muchii spre N, +53 → +14,6 | semnătura |
+> | **E / E′** | 0.49–0.65 | Terasa și furca; **ocolul de 400 m** sau **serpentinele**; tramvaiul 2 în gura scurtăturii, neschimbat | decizia |
+> | **F** | 0.65–0.68 | **Cheiul de nord**, spre E, la +3 (scurtat: se termină la x 120) | |
+> | **G** | 0.68–0.78 | Colțul de NE, apoi **strada de întors spre pod**, spre S, care urcă +3 → +20 pe 172 m (11,5 %, racorduri de 24 m) | |
+> | **P′** | 0.78–1.00 | Virajul de 90° la stânga spre pod (R24), S-ul de 60 m, **podul spre larg** (banda de nord), **întoarcerea-balon** pe malul celălalt (R40–R20–R40, S-uri de 60 m), sosirea | al doilea pasaj peste pod, cu bariera mutată de camion între timp |
+>
+> Lungimea: **2.571 m** pe curba coaptă (2.563 m pe poligon; planul de hârtie dădea 2.571 m). Tur
+> mediu **82,9 s** în ProbeRace (8 × 16 × 250 s), minim 77,3 s: cu ~3 s **peste** fereastra de
+> 65–80 s (estimarea de pe hârtie: ~82 s).
+
 Lungime țintă **~2,35 km** (tur ~76–78 s, 3 tururi ≈ 3:50 — fereastra Ignition
 65–80 s; a crescut de la ~2,2 km când ocolul scurtăturii s-a lungit la 400 m,
 sonda 1b). Sens: **orar**, cu dealul în interiorul buclei; golful la nord și la
@@ -359,7 +392,8 @@ din lumină.
   **rece și mic** (`BCCCE8`-ish, ~0,40; raport soare/ambient ≥ 3 — cifrele
   Carrarei, după corecția de cyan). **Umbre pornite**; pe telefon, profilul
   ieftin (`GameState.SHADOW_DISTANCE_MOBILE`, 55 m) acoperă umbre de 19 m.
-- **Urcarea e în umbră, și e bine**: pe axa est–vest casele de pe partea de sud
+- **(Bucla veche. Pe B200 urcarea merge spre S, adică spre soare: e la soare, dar în contra-lumină,
+  88,6 % față de 19,5 %. Vezi §7 pasul 2b.)** **Urcarea e în umbră, și e bine**: pe axa est–vest casele de pe partea de sud
   umbresc strada. E râpa de umbră care face coama să pară lumină — dar cere
   **benzile de soare** de la intersecții și fațadele de nord luminate, altfel e
   un tunel. Pe cheu și pe faleză, clădirile de pe partea de sud stau la ≥ 20 m
@@ -427,9 +461,16 @@ din lumină.
 
 ### 5.5 Fundal (`horizon_class`)
 
-- `effects/sf_horizon.glb` — **podul roșu** la nord-vest (turn 45 m), **insula
-  cu far** la nord (aproape, ~80 m de țărm), dealurile aurii dincolo de golf,
-  un pod gri și un oraș generic de turnuri la est și sud-est
+- `effects/sf_horizon.glb` — **insula cu far** la nord (aproape, ~80 m de țărm), dealurile
+  aurii dincolo de golf, un pod gri și un oraș generic de turnuri la sud și sud-vest
+- **Fără pod de fundal în NV** (decizia dezvoltatorului din 15 nov 2026: B200, nu „B200 + pod de
+  fundal”). Podul roșu e acum **carosabil** (§7 pasul 2b), deci nu mai stă pe inel. Consecința
+  acceptată: de pe muchii podul nu se mai vede din față. De pe muchia 1 tablierul e la 358–525 m,
+  la +49° (dreapta), deci în ceață și în afara axului. De pe muchia 4 e la 271–470 m, la +86°.
+- **Inelul de orizont trece dincolo de malul celălalt.** La E de tablier e acum uscat (dealurile
+  aurii, cu întoarcerea-balon la +20), iar zidul lumii e la 475 m de centroid. Siluetele de pe
+  inel (dealuri, orașul generic) stau dincolo de mal, sub `fog_end`, nu peste strâmtoarea de sub
+  pod. Pe fosta latură de est e acum golf deschis spre S.
 
 ### 5.6 Sunet
 
@@ -709,6 +750,155 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
      să vireze la dreapta. De verificat pe Track25.
    - Ciclul: ~66 s, pe toată urcarea (decizia din §2, „Ceasuri”).
 
+   **1d. Podul roșu carosabil (dus-întors, despărțitor mobil) — SONDĂ FĂCUTĂ (13 nov
+   2026), mecanismul ține; legarea în Track25 rămâne de decis.** Decizia
+   dezvoltatorului din 13 nov: podul roșu din fundal (§5.5) devine **carosabil**, dus-întors
+   pe același tablier, cu un **despărțitor de beton mobil** între sensuri. Un camion lent
+   mută bariera pe diagonală, ca mașinile care mută despărțitorul pe podurile reale, deci
+   banda ta se îngustează sau se lărgește după unde e camionul. Numele real al podului nu
+   se folosește nicăieri.
+
+   Unelte:
+   - `scenes/hazards/movable_median_hazard.gd` + `MovableMedian.tscn` (`MovableMedianHazard`,
+     hazard nou);
+   - `tools/gen_sf_pod.py` scrie strada sintetică `tools/SondaSfPod*.tscn` (`Fix` = bariera
+     fixă la axă, `Cap` = faza pentru captură);
+   - sonda `tools/probe_sf_pod.gd` (`--mode=race|solo`, `--config=mobil|fix|orb|static`);
+   - loturile `sf_pod_race.sh` / `sf_pod_solo.sh`, tabelele `sf_pod_report.py` /
+     `sf_pod_solo_report.py`, capturile `sf_pod_capture.sh`.
+
+   **Forma sondei.** Un „os de câine” de 1.626 m: două benzi paralele, axele la 12,4 m
+   (`half_width` 6). Rampa de acces urcă 11 m la 11,5%. Tablierul are **300 m**, la +23 m
+   peste apă, cu palier de 36 m la fiecare capăt. Parapetele exterioare sunt verticale, de
+   1,2 m, la |z| = 12,2, deci tablierul are 24,4 m. Turnurile sunt portaluri roșii cu
+   picioarele în afara tablierului și traversa la +15 m (la +10 m tăia camera). La capete
+   sunt baloane de întoarcere, la raza 20 / 40. Plasa viaductului stă sub tablier, iar
+   SeaRespawn sub apă.
+
+   Pe pod, benzile au `half_width` **9,8** (6 + 3,5 + jumătatea blocului): fiecare bandă
+   trebuie să fie „pe drum” până la fața barierei când aceasta e pe partea cealaltă.
+   Altfel, `is_on_road` ar taxa lățimea câștigată ca iarbă (45%). Deci pe pod cele două
+   șosele **se suprapun** pe 7,6 m la mijloc, despărțite fizic de barieră. ProbeLayout
+   măsoară pe `half_width`-ul de bază și trece: rază minimă 18,8 m, pantă maximă 12,7%
+   (racordurile rampei), apropiere 12,5 m. Suprapunerea e voită. Marginea șoselei late
+   iese 3,8 m dincolo de parapet, un pervaz la care nu ajunge nimeni.
+
+   **Despărțitorul** e o funcție de poziția camionului, nu o stare ascunsă:
+   `offset(s) = 3,5 · racord(s) · (2·smoothstep(S de 30 m centrat pe camion) − 1)`.
+   - În spatele camionului bariera e la −3,5 m, în fața lui la +3,5 m. Când trece, o
+     întoarce.
+   - Racordul fix are 30 m la fiecare capăt, de la axă (unde continuă despărțitorul fix) la
+     poziția mobilă. Fiecare bandă se îngustează la ieșirea de pe pod.
+   - Banda îngustă are **8,4 m**, cea largă **15,4 m**.
+   - Camionul (cutie gri de 2,6 × 3,2 × 10 m, rotită după S) face naveta pe 210 m, la
+     4 m/s, cu 6 s de oprire la capete. Ciclul e de **117 s**, adică 2,3 tururi de sondă.
+   - Blocurile sunt **100 × `AnimatableBody3D`**, mișcate doar în fereastra S-ului (cel mult
+     11 pe tick, o singură scriere de transform). Vizual sunt un singur MultiMesh.
+   - Coliziunea blocului are **1,3 m**, iar vizualul 0,95 m. Cu 0,95 m, un Buggy îmbrâncit
+     a urcat pe muchie și a trecut pe sensul opus.
+   - Blocurile mobile și camionul au **contact moale** (`soft_hit_crush`): strivire, fără
+     ejectarea șoferului.
+   - Capul despărțitorului fix e un atenuator de impact, tot moale.
+   - Totul e în export vars.
+
+   **AI onest.** `AIController._median_line`, în spatele `MovableMedianHazard.ai_reads_corridor`
+   (implicit stins). Linia se strânge între fața barierei de **acum** (sau a camionului) și
+   parapet, cu cea mai strânsă față din fereastra pe care o vede în față (1,3 s de drum,
+   12–50 m). Nu citește faza camionului. Fereastra prinde și capul despărțitorului fix: cu
+   citirea pornită abia pe despărțitor, o mașină care depășea pe stânga a intrat în cap și a
+   ajuns pe sensul opus. Cu flagul stins, funcția iese la prima linie.
+
+   Pistele existente rămân neschimbate, verificat cu ProbeRace × 150 s, același cod față de
+   main (0daeb26e):
+   - **Carrara** (`--track=15`): 4/4 seed-uri **identice cifră cu cifră** (repuneri,
+     `[blocaj]`, ejectări, tur mediu).
+   - **Machu Picchu** (`--track=8`): 7/8 identice. Al optulea (seed 4) e bimodal din
+     Jolt: rulat de două ori pe ramură, a dat o dată cifrele din main și o dată altele.
+
+   **Solo** (pilot scriptat cu gazul la fund, 10 mașini × 4 faze ale camionului, un tur =
+   trecerea pe dus și pe întors):
+
+   | pilot | treceri | contacte cu bariera / camionul | treceri peste despărțitor | ejectări / repuneri |
+   |---|---|---|---|---|
+   | `hug` (freacă bariera, intră în fiecare S) | 80 | 335 / 45 | **0** | **0 / 0** |
+   | `line` (linie fixă la z 2,5, pe care bariera o taie) | 80 | 0 / 80 (camionul, la 31,9 m/s) | **0** | **0 / 0** |
+   | `hug` cu blocuri **dure** (prima formă) | 92 | 339 / 49 | 0 | **12 / 12** (dv 27–40, toate în S-ul care vine spre mașină) |
+
+   Un zid care se mișcă spre tine nu e un zid pe care l-ai ratat: de aici contactul moale.
+   Pilotul iese pe axa benzii după contact, ca un om.
+
+   **ProbeRace pe sondă** (8 mașini × 16 seed-uri × 200 s, ~1.030 de treceri peste pod pe
+   variantă). Pierderea e față de mediana trecerii cu bariera fixă, per mașină și sens:
+
+   | variantă | `[blocaj]` | repuneri | ejectări | treceri peste despărțitor | frontale pe coridor | treceri cu contact barieră / camion | pierdere / trecere med / p90 / max |
+   |---|---|---|---|---|---|---|---|
+   | fix (bariera la axă, fără camion) | 0 | 0 | 0 | 0 | 0 | 1,3% / — | 0,00 / 0,30 / 0,65 s |
+   | **mobil** | **0** | **0** | **0** | **0** | **0** | **8,9% / 1,1%** | **0,00 / 0,31 / 7,6 s** |
+   | SABOTAJ `orb` (AI-ul nu citește bariera) | 0 | 3 | 2 | **3** | 0 | **31,7% / 12,6%** | 0,03 / 0,76 / 5,1 s |
+   | SABOTAJ `static` (citește bariera de la t = 0) | 0 | 0 | 0 | 0 | 0 | **20,7% / 6,3%** | 0,02 / 0,48 / 4,8 s |
+
+   Alte cifre, pe varianta mobilă:
+   - turul mediu e 50,0 s, la fel ca la cea fixă;
+   - o trecere peste pod durează 9,1 s;
+   - **49% din timpul pe tablier** banda e îngustă (< 10 m);
+   - pe tablier sunt 21,6 depășiri / seed, **45% dintre ele în banda îngustă**;
+   - coada din spatele camionului: 0,2% din întâlniri coboară sub 10 m/s;
+   - pierderea pe o trecere cu contact cu bariera e de 0,22 s mediană, 0,75 s p90; cu
+     camionul, 0,63 / 0,78 s.
+
+   **Sabotajul pică**, dar trebuie spus pe ce: **pe contacte și pe treceri, nu pe
+   `[blocaj]`**.
+   - Fără citire, contactele cresc de 3,6 ori cu bariera și de 11 ori cu camionul.
+   - Apar 3 treceri peste despărțitor: două mașini urcate pe barieră în S, una pe lângă
+     capul despărțitorului fix.
+   - Contactul moale și S-ul blând (19°) nu opresc pe nimeni, deci `[blocaj]` rămâne 0 în
+     toate variantele. Garda acestui hazard e procentul de treceri cu contact, nu
+     `[blocaj]`.
+
+   **Ce a picat pe drum (sonda, nu podul):**
+   - **Ieșirea din balon lipită de capul despărțitorului.** Trasa de cursă (apex înăuntru,
+     ieșire în afară) ducea mașinile spre despărțitor. Au fost 4 ejectări pe latura lui și 3
+     treceri pe lângă cap, la fel și cu bariera fixă. S-a rezolvat cu un S de 60 m în care
+     benzile se despart cu 8 m înainte de balon.
+   - **Transform3D în `.tscn` e scris pe RÂNDURI.** Rampa despărțitorului și evazările
+     parapetului au ieșit oglindite: un Buggy s-a oprit de pe 32 m/s în vârful evazării.
+   - **Racordul rapei.** `RAVINE_FADE_FRAC` sapă înaintea capătului declarat. Cu rapa până la
+     10 m de capete, palierul stătea pe gol.
+
+   **Regula pentru traseu:** coridorul cu două sensuri începe cu **≥ 60 m drepți** după
+   ultimul viraj. Capul despărțitorului e atenuator moale, iar AI-ul îl citește din timp.
+
+   Capturi `--gamecam`: `docs/asset_briefs/img/sf_pod/pod_tablier_camion_gamecam.png`
+   (tablierul, cu camionul și S-ul în față) și `pod_ac_gamecam.png` (din întoarcere, spre
+   pod).
+
+   Ca s-o conduci:
+   `godot --path . res://tools/DriveScene.tscn -- --scene=res://tools/SondaSfPod.tscn --ai=3`.
+   Verdictul de feel e al dezvoltatorului.
+
+   **Ce rămâne de decis (dezvoltatorul):** *(punctele 1 și 2 sunt închise: decizia din 15 nov 2026 e
+   B200, pasul 2b; ciclul camionului e de 63 s.)*
+   1. **Unde se leagă în Track25 și cât costă turul.** Pe sondă, dus-întorsul de la capătul
+      podului la capătul podului ia **~28 s**: 9,1 s + 9,9 s de întoarcere + 9,1 s.
+      - Pe Track25 (2.424 m, ~77 s), o ramificație dus-întors adaugă ~900 m (2 × 372 m de
+        pod cu paliere, plus întoarcerea), deci **~+25–28 s → tur ~103–105 s**. Asta e mult
+        peste fereastra de 65–80 s.
+      - Variante: tablier mai scurt (200 m = −6 s), podul în locul unei bucăți existente
+        din tur (de ex. latura de est, pe care o înlocuiește), sau doar dus pe pod.
+      - Planul din memorie: final de tur, înainte de sosire.
+   2. **Ciclul camionului pe Track25:** cu turul de ~105 s, 117 s e aproape un tur întreg
+      (regula „ceasuri care nu împart turul”). Se alege după lungimea finală (de ex.
+      ~80 s sau ~150 s).
+   3. **Pervazul de 3,8 m** dincolo de parapet (artefact al benzilor late): pe Track25,
+      parapetul pe marginea șoselei înseamnă alt mod de a declara suprapunerea (lățime
+      asimetrică), cod în `Track`.
+   4. **Mobil:**
+      - 100 de corpuri statice, din care ≤ 11 mișcate pe tick;
+      - scriptul hazardului costă 80 µs median / 125 µs p99 pe tick pe desktop;
+      - un MultiMesh pentru blocuri.
+
+      De măsurat pe iPhone cu ProbePerf când intră în Track25.
+
 2. **Scena**: `Track25.tscn` din `TrackFromPath` prin `tools/gen_sf_route.py`
    (pas de control 12 m, uniform — pasul mixt supraîncarcă spline-ul); tema
    `sanfrancisco` doar cu lumină, cer, pâclă și sol. ProbeLayout: pantă < 13% în
@@ -719,6 +909,9 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
    probe_manual) și în `EXCLUDED` din `tools/probe_world_cup.gd`.
 3. **ProbeRace devreme** (memoria `proberace-la-inceput-nu-la-final`): 8 mașini
    × 16 seed-uri; se citesc `[blocaj]`, lent și invers, nu doar repunerile.
+
+   > **Cifrele de la pașii 2–3 sunt ale BUCLEI VECHI** (faleza de est, startul la turn). Bucla
+   > de acum e B200 (pasul 2b), iar gărzile și ProbeRace-ul ei sunt refăcute acolo.
 
    **Pașii 2–3 — FĂCUȚI (11 nov 2026).** `tools/gen_sf_route.py` scrie
    `scenes/tracks/Track25.tscn`, geometria gri a serpentinelor
@@ -746,9 +939,298 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
    - **Latura de est:** după decizia dezvoltatorului (11 nov), e spartă în trei gesturi: colțul de NE la R30, cotul piațetei (2 × 45° la R36, deplasare de 29,6 m spre V) și devierea de pe faleză (2 × 30° la R50). Dreptele au 172, 172 și 242 m, cu 202 m de îmbrânceală după grilă. În prima variantă era o dreaptă de ~540 m.
    - **Soarele:** strada lanțului merge pe azimut 0° (spre N), deci `custom_sun_rotation_deg = (−28, −12, 0)`.
    - **De urmărit:** pâcla temei (`fog_max` 0,55, aproape albă) arată a ceață pe captura de pe muchia 1, fără inelul de fundal. Se reduce când intră fundalul și se arată dezvoltatorului.
+2b. **Bucla reconstruită în jurul podului (B200) — FĂCUTĂ (15 nov 2026), gărzile trec; feel-ul
+   rămâne de judecat.** **Decizia dezvoltatorului (15 nov 2026):** Track25 se reconstruiește
+   exact ca în planul `docs/asset_briefs/img/sf_pod_plan/sf_pod_plan_B200.png`, **fără pod de
+   fundal** (§5.5). Acceptat de la început: din față, de pe muchii, podul nu se mai vede.
+
+   **Unelte:**
+   - `tools/gen_sf_route.py` scrie bucla B200 implicit. `SF_LAYOUT=vechi` păstrează bucla veche
+     ca istoric: scrie doar cu `SF_LAYOUT_WRITE=1` sau `SF_OUT=`, iar `gen_sf_pod_plan.py` o
+     folosește. `SF_START=far0` dă startul alternativ.
+   - Hărțile coapte sunt `tools/data/sf_route_fracmap.tsv` (B200) și
+     `sf_route_vechi_fracmap.tsv`. Hărțile sunt pe buclă și pe linia de start.
+   - `Track.world_half_extent_m` e un export nou, implicit 420. Track25 îl are la 475.
+   - `MovableMedianHazard.cushion_near_m`: atenuator și la capătul −X al coridorului, implicit 0.
+   - Observatorul `tools/probe_sf_watch.gd` (ProbeRace `--sf`) măsoară acum și podul. Steaguri:
+     `--median-fix` (A/B), `--median-blind` și `--median-static` (sabotaje).
+     `tools/sf_route_report.py` are secțiunea `--- PODUL` și zonele noi.
+   - `tools/probe_sf_light.gd` (`ProbeSfLight.tscn`): soarele pe traseul real, cu case-cutie.
+   - Sonda oglindită `tools/SondaSfPodStanga.tscn`: `MIRROR=1` în `gen_sf_pod.py`.
+   - ProbeLayout are excepția numită `metadata/two_way_corridors`.
+
+   **Forma.** Bucla are 2.571 m și e orară. Startul e pe pod. Vezi tabelul POI din §2. Cotele:
+   podul și capetele lui la +20, strada tramvaiului 1 urcă de la +20 la +53, lanțul și restul
+   au rămas cum erau, strada de întors urcă de la +3 la +20.
+
+   Podul pe pistă păstrează geometria sondei 1d:
+   - axele benzilor sunt la 12,4 m, iar semilățimea pe tablier e de 9,8 m;
+   - parapetele sunt verticale, de 1,2 m, la 12,2 m de axă, cu evazări la capete;
+   - portalurile roșii au traversele la +15 și +39, fără coliziune;
+   - rapele de sub tablier sunt viaduct (adâncime 60, podeaua la −8), cu plasa viaductului (marja
+     12) sub tablier și SeaRespawn sub apă (apa e la +0,02);
+   - **despărțitorul**: un nod `MovableMedianHazard`, fix pe palierele de 36 m și mobil pe cei
+     200 m de tablier, cu **atenuator moale la ambele capete**;
+   - **`plus_dir_side = −1`, deci circulație pe stânga**;
+   - `ai_reads_corridor` e aprins. Track25 e singura pistă cu acest nod.
+
+   Placeholder gri peste tot, în afară de portaluri.
+
+   **Abateri față de planul B200, cu motive:**
+   1. **Zidul lumii (420 m, fix în cod) e acum un export pe pistă.** Se măsoară de la centroid,
+      deci mutarea buclei nu ajută: centroidul se mută cu ea. Singura alternativă era să
+      reformez bucla (tablier mai scurt sau balonul mai la V), adică să schimb planul aprobat.
+      Exportul are o linie de cod. Pe celelalte piste rămâne 420, deci sunt neschimbate.
+      Pe Track25 marginea cea mai depărtată e la 449 m, iar zidul e la 475 m.
+   2. **Golful.** Malul orașului e la x 190 în dreptul străzii de întors. Mai la S e la capul
+      podului (x 264), ca dealul străzii tramvaiului 1 să aibă flanc de E. Strâmtoarea de sub
+      pod merge până la malul celălalt (x 476), iar dincolo e uscat cu dealurile aurii, până la
+      110 m N de axa podului. Pe fosta latură de est e golf deschis.
+   3. **Planul punea linia de start „pe banda spre oraș imediat după întoarcere”.** Linia e
+      exact acolo, la capul despărțitorului de pe malul celălalt (`far1`). Grila stă la 8–32 m
+      în spate, pe ieșirea din S. ProbeRace n-a arătat nicio problemă acolo sau la primul viraj
+      (mai jos), deci **alternativa `far0` n-a fost necesară și n-a fost rulată**. E în
+      generator.
+   4. **Camionul**: 4 m/s, cu 4 s de oprire la capete, pe o navetă de 110 m. Ciclul e de 63 s,
+      nu 117 s ca în sondă. Faza: la verde camionul e la capătul de E, deci banda spre oraș e
+      lată pe aproape tot tablierul.
+   5. **Pervazul de 3,8 m** (asfaltul benzii late dincolo de parapet) a rămas ca la sondă. Se
+      vede în captură.
+
+   **Gărzi:**
+
+   | gardă | rezultat |
+   |---|---|
+   | ProbeLayout `--track=17` | OK. Raza minimă 13,5 m, panta maximă 12,7 % la 0.76 (racordul rampei de întors spre pod; < 13). Apropierea în afara coridoarelor e 15,3 m. Cele două sensuri ale podului sunt la 12,3 m: **excepție numită** (`two_way_corridors`, coridorul plus S-urile) |
+   | ProbeSfRoute (acostamentul virajelor ramurii) | OK: minim −0,29 m (contract ≥ −0,30); apa la +0,02 |
+   | ProbeLaneClear `--track=17` | 50, identic în 2 rulări (linia de bază 6 → 50). 38 sunt blocurile despărțitorului și camionul, pe firul lateral de +3,3 m, unde bariera îngustează banda prin design. 9 sunt tramvaiul 1 pe strada rotită, 3 tramvaiul 2. **Sabotajul pică: 53 > 50** |
+   | sonda oglindită (circulație pe stânga), 8 × 16 × 200 s | 0 `[blocaj]`, **0 treceri peste despărțitor, 0 frontale**. Contact cu bariera 9,7 % (pe dreapta: 8,9 %), cu camionul 0,4 % (1,1 %). O ejectare a unui Hot rod pe despărțitorul fix dur al rampei sondei (nu există pe Track25). **Hazardul și `_median_line` merg oglindit fără nicio schimbare de cod**: `plus_dir_side` le acoperă pe amândouă |
+
+   **ProbeRace, 8 mașini × 16 seed-uri × 250 s, `--track=17 --sf`.** `bash tools/sf_route_race.sh <dir>
+   [--no-tram | --median-fix | --median-blind --tram-blind]`, apoi `python tools/sf_route_report.py <dir>`
+   și `python tools/sf_tram_report.py <dir_no_tram> <etichetă>=<dir> ...`.
+
+   | lot | tur mediu / minim | `[blocaj]` (zone) | repuneri | ejectări | pe lanț (ejectări / zboruri) |
+   |---|---|---|---|---|---|
+   | **B200, despărțitor mobil, tramvaie** | **82,9 / 77,3 s** | 15 (toate în serpentine) | 8 (serpentine) | 5 (serpentine) | **0 / 1.528** |
+   | fără tramvaie | 82,1 / 76,8 s | 19 (serpentine) | 10 (9 serpentine, 1 cheu) | 6 (serpentine) | 0 / 1.532 |
+   | despărțitor FIX (A/B) | 83,0 / 77,4 s | 7 (serpentine 4, **pod 2**, ocol 1) | 5 (serpentine 4, **pod 1**) | 3 (serpentine) | 0 / 1.534 |
+   | **SABOTAJ** (`--median-blind --tram-blind`) | 89,6 / 77,0 s | **252** (urcare 207, colțul de sus 26, pod 12, strada de jos 6) | 5 | 3 | 0 / 1.435 |
+
+   La **primul viraj** după start și pe pod nu există niciun `[blocaj]` și nicio repunere în
+   loturile cu despărțitor mobil. Felia 0.10–0.15 (primul viraj) are 31,7 m/s și 0 % lent.
+
+   **Podul.** O trecere înseamnă capul despărțitorului → capul celălalt, ~8,3 s.
+
+   | lot | treceri | cu contact barieră / camion / atenuator | **peste despărțitor** | **frontale în coridor** | bandă îngustă (< 10 m) | coada după camion (< 10 m/s) |
+   |---|---|---|---|---|---|---|
+   | **mobil, tramvaie** | 753 | **3,9 % / 0 % / 0,1 %** | **0** | **0** | 31 % din timp | 0 |
+   | mobil, fără tramvaie | 769 | 6,4 % / 0,3 % / 0,4 % | **1** | **1** | 31 % | 0,3 % |
+   | FIX | 754 | 2,1 % / — / 0,4 % | **1** | 0 | 0 % | — |
+   | **SABOTAJ** (AI-ul nu citește bariera) | 667 | **29,8 % / 3,1 %** / 0,7 % | 0 | **2** | 29 % | **3,6 %** |
+
+   - **Contractul „0 treceri, 0 frontale” ține în lotul principal, dar NU în toate loturile.**
+     - Lotul fără tramvaie (despărțitor mobil): un Robo (Poliția) intră în coridor pe la capul
+       de la baza podului, cu 9,7 m/s. Venea încet din virajul de 90° (R24, la stânga), prin S, și
+       a trecut pe partea greșită a capului. A mers apoi 21 s pe banda spre oraș, în sens opus,
+       atingând bariera de 3 ori, camionul de 2 ori și atenuatorul o dată. Frontala e a lui, cu
+       pachetul turului 2.
+     - Lotul FIX: un ocol pe lângă capul de pe malul celălalt, cu 6,4 m/s, după balon.
+     - Ambele sunt la **capetele** coridorului, la viteză mică, după un viraj la stânga a cărui
+       ieșire largă duce spre axă. E exact lecția sondei 1d (ieșirea din balon spre capul
+       despărțitorului). Frecvența: 2 din ~2.300 de treceri.
+     - Remedii posibile, nefăcute (de decis):
+       - capul despărțitorului început mai devreme, în S, ca o insulă care desparte;
+       - virajul de la baza podului mai larg (R24 → R36);
+       - AI-ul să citească și capul pe partea lui când vine din viraj.
+   - **Sabotajul pică clar pe contacte**: bariera 29,8 % față de 3,9 %, camionul 3,1 % față de
+     0 %, coada 3,6 % față de 0, plus 2 frontale. Nu pică pe treceri. La sondă era la fel:
+     contactul moale nu urcă pe nimeni peste barieră.
+   - **A/B fix–mobil**: turul e identic (83,0 față de 82,9 s). Despărțitorul fix are mai puține
+     contacte (2,1 %), dar a dat 2 `[blocaj]` și o repunere pe pod: o Poliție lipită de blocurile
+     de la axă. Cel mobil n-a dat niciunul. Banda e îngustă 31 % din timp, contra 49 % la sondă,
+     pentru că tablierul e mai scurt.
+
+   **Tramvaiele** (aceeași definiție ca la pasul 5; pierderea e față de lotul fără tramvaie):
+
+   | | tramvaiul 1 (strada rotită, spre S) | tramvaiul 2 (gura) | camionul despărțitorului |
+   |---|---|---|---|
+   | curbă / viteză / ciclu | 328 m, 5,0 m/s, **66 s** | 106 m, 4,5 m/s, **29 s** | navetă 110 m, 4 m/s + 2 × 4 s, **63 s** |
+   | **tur (82,9 s) / ciclu** | **1,26** | **2,86** | **1,32** |
+   | faza | 0,130 (era 0,196: plutonul ajunge cu ~4,3 s mai târziu la baza urcării) | 0,568 (era 0,564) | 0,387 (la verde, oprit la capătul de E) |
+   | întâlniri / cu contact | 301 / **1,3 %** (pasul 5: 2,2–2,7 %) | 190 / **2,1 %** (1,3–3,1 %) | 753 / 0 % |
+   | coadă < 10 m/s | 0,7 % | 2,1 % | 0 % |
+   | pierdere med / p90 / max | 0,22 / 0,76 / 3,8 s | 0,79 / 2,41 / 9,9 s | — |
+   | contacte după loc | colțul de sus 1, intrare 1, pe ax 2 | pe ax 9, ieșire 2, gura 1 | — |
+   | turul 1 | 128 de întâlniri, 2 cu contact | 81, 0 cu contact | — |
+   | **SABOTAJ** | **79,2 %** contact, coadă 76 %, 207 + 26 `[blocaj]` | **55,6 %**, coadă 49 % | 3,1 % contact (AI-ul orb) |
+   | FIX (martor) | 1,3 % | 2,6 % | — |
+
+   Niciun ceas nu împarte turul: 1,26, 2,86 și 1,32 stau departe de numerele întregi și de
+   jumătăți. Viteza tramvaiului 1 rămâne 5,0 m/s. La 4,5 m/s ciclul ar fi ~73 s, deci turul / ciclul
+   ar fi 1,14, prea aproape de 1. Pe strada rotită depășirea se împarte 43 % pe stânga, 57 % pe
+   dreapta.
+
+   **Scurtătura față de ocol** (porțile de la pasul 3, furcă → gură + 20 m):
+
+   | lot | mediană | cele mai bune | serpentine: repuneri / `[blocaj]` din treceri |
+   |---|---|---|---|
+   | fără tramvaie | +0,14 s | +1,34 s | 4,5 % / 9,5 % |
+   | **cu tramvaie** | **+1,27 s** | +1,32 s | 4,8 % / 9,1 % |
+   | FIX | +1,29 s | +1,43 s | 2,4 % / 2,4 % |
+   | pasul 5 (bucla veche), cu tramvaie | +0,57 / +0,71 s | +1,3 / +1,65 s | — |
+
+   - Scurtătura câștigă în toate loturile.
+   - Cu tramvaiul 2, cine vine pe ocol îl ajunge pe ax, de aceea mediana crește.
+   - **Serpentinele au de ~2 ori mai multe `[blocaj]` decât la pasul 3 (4,8 %).** Aproape toate
+     sunt în turul 1, la t ≈ 50 s: pachetul ajunge acolo mai strâns după startul pe pod. Lotul
+     FIX a dat doar 2,4 %, deci variația dintre loturi e mare.
+   - **Ejectările pe lanț**: 0 în ~6.000 de zboruri, pe toate loturile (bucla veche: ~0,05 %).
+
+   **Lumina** (`ProbeSfLight`; case-cutie cu gabaritul de la pasul 0: fațada la 10,5 m, 10,5 m
+   înălțime, străzi transversale la 72 m; soarele pistei 28° / −12°). Modelul reproduce pasul 0:
+   lanțul are aici 87 %, iar pe strada sintetică avea 85,1 %.
+
+   | stradă | bucla veche | **B200** | unghi mers – soare (B200) | fațadele străzii (N·L) |
+   |---|---|---|---|---|
+   | lanțul | 87,2 % | **87,0 %** | 168° (soarele din spate) | ±0,18 |
+   | urcarea (strada tramvaiului 1) | **19,5 %** (spre V: în umbră, ca în §4) | **88,6 %** | **12°: 100 % contra-lumină** | **±0,18** (amândouă razante) |
+   | brațul coamei | 12,8 % | 26,9 % | 78° | ±0,86 |
+
+   Urcarea spre S **nu mai e râpa de umbră din §4**. E la soare, dar în contra-lumină: camera
+   vede fețele umbrite. Ambele rânduri de case primesc soarele razant, deci fațadele urcării
+   pierd contrastul soare/umbră. Am măsurat și alte azimuturi, cu `--sun=28,AZ`:
+
+   | soarele | lanțul | urcarea | contra-lumină pe urcare |
+   |---|---|---|---|
+   | −12 (actual) | 87,0 % | 88,6 % | 100 % |
+   | −30 | 41,6 % | 49,7 % | 100 % |
+   | −50 | 23,4 % | 23,7 % | 100 % |
+
+   Lanțul și urcarea sunt antiparalele: orice soare care luminează lanțul din spate bate în fața
+   urcării. **Soarele n-a fost schimbat**, e decizie de artă. Contractul „≥ 80 % pe lanț” cere
+   soarele de acum.
+
+   **Carrara și Machu Picchu: neschimbate.** ProbeRace × 150 s, ramura față de main e3a0f0bd,
+   dintr-un worktree temporar al lui main; `--track=15` = Carrara, `--track=8` = Machu Picchu.
+   - Carrara: seed-urile 1 și 3 identice cifră cu cifră.
+   - Machu Picchu: seed-urile 2 și 4 identice.
+   - Seed-urile care difereau (Carrara 2, 4; Machu Picchu 1, 3) au rulat de 3 ori pe fiecare
+     parte. Fiecare rezultat al ramurii apare și pe main:
+     - Carrara seed 4: 72,32 / 71,88 s pe ambele părți;
+     - Machu Picchu seed 3: 77,82 s, 7 repuneri, 2 `[blocaj]`, pe ambele părți;
+     - Machu Picchu seed 1: 74,34 s, 4 repuneri, pe ramură la a treia rulare.
+
+     E bimodalitatea Jolt, nu o regresie (memoria `proberace-nedeterminism`).
+   - Carrara: 0 repuneri, 0 `[blocaj]` pe ambele părți.
+
+   **Capturi `--gamecam`** (`docs/asset_briefs/img/sf_route/`):
+   - `b200_grila_pod_gamecam.png`: din spatele grilei. Se vede linia, capul despărțitorului,
+     portalul și tablierul.
+   - `b200_tablier_camion_gamecam.png`: pe tablier, spre oraș. Se văd S-ul barierei și camionul.
+   - `b200_muchia1_gamecam.png`: prima muchie.
+   - `b200_tramvai1_gamecam.png`: strada rotită, cu tramvaiul pe ax, `--bus-at=26`.
+
+   Planul e `sf_route_plan.png`. Capturile au o singură mașină (snapshot-ul nu pune grila).
+
+   `bash tools/verify_local.sh` pe ramură: **OK, 75 de pași**.
+
+   **Nemăsurat:**
+   - feel-ul la volan;
+   - costul pe iPhone (100 de corpuri + camionul pe Track25);
+   - captura cu toată grila de 8 mașini;
+   - alternativa de start `far0`.
+
+   **Runda 2 (15 nov 2026): capetele despărțitorului, cu main adus în ramură.** Coordonatorul a
+   tratat cele 2 ocoliri ale capetelor ca **contract picat**: dezvoltatorul cere 0 treceri pe
+   contrasens.
+
+   **Main e adus în ramură prin merge** (41 de commit-uri, între ele #729
+   `release/unelte-indici-pista` și #725 `release/verify-paralel`), fără conflicte. Ce înseamnă
+   acum `--track=` pentru Track25:
+   - ProbeRace citește `--track=` ca text. `17` e tot indexul Track25, dar e un număr ambiguu
+     (scena Track17 e Jodhpur) și sonda avertizează. `tools/sf_route_race.sh` cere acum
+     `--track=Track25`.
+   - ProbeLayout, ProbeLaneClear și snapshot iau tot numărul: `--track=17` încarcă Track25
+     (verificat pe eticheta tipărită).
+   - Track25 are acum `scenes/tracks/info/Track25.tres` (id `san_francisco`), venit din main.
+
+   **Remediul ales: zidul din S.** Am încercat întâi remediul cel mai puțin invaziv care
+   garantează rezultatul fizic. Ambele ocoliri au fost ale unor mașini LENTE, împinse larg
+   dintr-un viraj la stânga. Citirea mai devreme a AI-ului (prima variantă propusă) nu oprește o
+   mașină împinsă, iar zidul o oprește. Virajul de la baza podului a rămas R24.
+
+   Zidul: capul despărțitorului **începe în S**.
+   - E un zid moale (`soft_hit_crush`, ca atenuatorul), de 0,6 m, cu 1,3 m de coliziune peste
+     drum, pe axa podului.
+   - Are 80 m la fiecare capăt: S-ul de 60 m plus 20 m spre viraj sau balon, lipit de capul
+     despărțitorului (`Pod/CapS`, `CAP_S_EXTRA`).
+   - În S benzile sunt la 6,2–14,2 m de axă. Generatorul verifică faptul că nicio axă de bandă
+     nu trece la mai puțin de 6,0 m de zid.
+   - Gărzile sunt neschimbate: ProbeLayout OK, ProbeSfRoute −0,29 m, ProbeLaneClear 50 (exact
+     linia de bază; sabotajul dă 53).
+
+   **ProbeRace pe ramura cu main**, 8 × 16 × 250 s, cu zidul:
+
+   | lot | tur mediu | treceri pe pod | **peste despărțitor** | **frontale în coridor** | contact barieră / camion / atenuator | coada după camion | `[blocaj]` |
+   |---|---|---|---|---|---|---|---|
+   | mobil, rularea 1 | 82,9 s | 742 | **0** | **0** | 5,5 % / 0 / 0,8 % | 0 | 17 (14 în serpentine) |
+   | mobil, rularea 2 | 83,0 s | 744 | **0** | **0** | 4,6 % / 0 / 0,4 % | 0 | 15 |
+   | fără tramvaie | 82,2 s | 770 | **0** | **0** | 5,5 % / 0 / 0,5 % | 0 | 15 |
+   | FIX | 82,6 s | 758 | **0** | **0** | 1,2 % / — / 0,5 % | — | 9 |
+   | **SABOTAJ** (`--median-blind --tram-blind`) | 90,5 s | 659 | 0 | 0 | **31,6 % / 3,9 %** / 0 | **3,5 %** | **231** |
+
+   - **Contractul ține în toate loturile**: 0 treceri pe contrasens și 0 frontale în coridor, în
+     ~3.000 de treceri. Runda 1 avea 2 din ~2.300.
+   - Frontalele „oriunde” (5–7 pe lot) sunt la furcă și în serpentine (23 din 24): mașini
+     răsucite în îmbulzeala din turul 1, nu pe pod.
+   - **Sabotajul pică în continuare**: contact cu bariera 31,6 % față de 4,6–5,5 %, cu camionul
+     3,9 % față de 0, coadă 3,5 %. Tramvaiele au 85 % și 50 % contact și 231 de `[blocaj]`.
+   - Tramvaiele în cele două rulări mobile: tramvaiul 1 are 3,2 % / 2,3 % contact, tramvaiul 2 are
+     5,5 % / 3,7 %. Runda 1 dădea 1,3 % și 2,1 %, iar pasul 5 1,3–3,1 %. Pierderea mediană a
+     rămas 0,22 s și 0,8 s. Zidul nu atinge tramvaiele, deci diferența e între loturi.
+   - Lanțul: câte o ejectare în rularea 2 și în lotul FIX, 1 din ~1.530 de zboruri (~0,07 %, ca
+     pe bucla veche).
+   - Scurtătura câștigă +1,0 / +1,1 s la mediană cu tramvaie.
+
+   **Jucătorul: poate intra intenționat pe contrasens pe la capete?** Am scris o sondă nouă,
+   `tools/probe_sf_contrasens.gd` (`ProbeSfContrasens.tscn`). Un pilot scriptat ține gazul la
+   fund, cu plafon de 22 m/s, și urmează puncte de hartă care încearcă să treacă pe banda opusă.
+
+   | scenariu | cu zidul | fără zid (`--cap-s=0`) |
+   |---|---|---|
+   | A: la baza podului, tăiat prin S pe banda opusă | **blocat** (oprit de zid) | trece, 156 m pe contrasens |
+   | C: pe malul celălalt, ieșit din balon, tăiat prin S pe banda opusă | **blocat** | trece, 116 m |
+   | B: la baza podului, ocolit pe la capătul de V al zidului, peste insula dintre viraje, apoi virajul benzii spre oraș luat invers | trece (86 m, 15,7 s off-road) | trece |
+   | D: din balon, ieșirea benzii spre larg luată invers | trece (116 m) | trece |
+
+   **Prin S nu se mai poate trece pe banda opusă: zidul o împiedică fizic la ambele capete.** Pe
+   contrasens se mai ajunge doar conducând pista invers, pe o bucată de drum luată în sens opus
+   (B, D), cum se poate pe orice pistă. Asta cere ocolul de pe la capătul zidului (B: ~16 s
+   off-road) sau balonul parcurs invers. Ca să fie închis și asta, ar trebui ziduri pe marginea
+   exterioară a virajelor și a balonului. N-am pus: e decizie de design (pista cu ziduri unde
+   până acum n-avea).
+
+   `bash tools/verify_local.sh` pe ramura cu main și cu zidul: **OK, 79 de pași**.
+
+   **De decis (dezvoltatorul):**
+   1. **Turul de 82,9 s** e cu ~3 s peste fereastra de 65–80 s. Pârghiile: tablierul de 170 m
+      (~−2 s) sau ocolul scurtat (decis la 1b la 400 m).
+   2. ~~Cele 2 treceri pe lângă capetele despărțitorului~~ — **rezolvat în runda 2** (zidul din S, 0
+      în toate loturile). Rămâne de decis doar dacă se închide și contrasensul „pista condusă
+      invers” (scenariile B, D).
+   3. **Lumina pe urcare**: contra-lumina e acceptată sau se lucrează pe ea (casele, ambientul,
+      fațadele luminate de jos). Soarele nu se poate muta fără să piardă lanțul.
+   4. Pervazul de 3,8 m dincolo de parapet.
+   5. Startul `far1` (planul), păstrat. Alternativa există, dacă grila pe ieșirea din balon nu
+      se simte bine la volan.
+
 4. **Turul de feel, capturile `--gamecam`, tabelul de frustum**; apoi planul de
    sus adnotat, dioramă, foaia de assets.
 5. Tramvaiele, cu A/B pe ProbeRace.
+
+   > **Cifrele de la pasul 5 sunt ale BUCLEI VECHI.** Pe B200 (pasul 2b), tramvaiul 1 urcă pe
+   > strada rotită spre S, cu faza refăcută. Tramvaiul 2 a rămas pe loc. Tabelele noi sunt la 2b.
 
    **FĂCUT (12–13 nov 2026) — PASS după runda 2.** Runda 1 (mai jos, păstrată ca istoric) a lăsat
    tramvaiul 2 pe unirea fluxurilor, cu 14–22% contact. Runda 2, pe decizia dezvoltatorului, l-a

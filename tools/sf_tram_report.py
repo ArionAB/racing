@@ -22,7 +22,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from sf_route_report import zone  # noqa: E402
 
-TRAM1_LEN = 328.0
+TRAM1_LEN = 328.0   # (informativ)
 TRAM2_LEN = 128.0
 
 
@@ -104,7 +104,8 @@ def ct_place(c):
     if c["tram"] == 1:
         if c["tram_d"] < 40.0:
             return "intrare"
-        if c["x"] < -70.0:
+        # coltul de sus: bucla veche la V (x < -70), B200 la S (strada rotita, y < -85)
+        if (c["x"] < -70.0) if os.environ.get("SF_LAYOUT", "b200") == "vechi" else (c["y"] < -85.0):
             return "colt de sus"
         return "pe ax"
     # dupa pozitia masinii (harta): strada de jos are axul la y = 454

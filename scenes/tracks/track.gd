@@ -17852,15 +17852,24 @@ func _chevron_spot_clear(stand: Vector3, at: int,
 				return false
 	return true
 
+## Jumatatea laturii peretilor invizibili ai lumii, de la CENTROIDUL traseului (m). Implicit 420,
+## cifra de pe toate pistele; o pista o ridica doar cand bucla trece de ea (vezi mai jos).
+@export var world_half_extent_m: float = 420.0
+
 ## Marginea LUMII: patru pereti INVIZIBILI care opresc masina sa iasa din
 ## harta. Inainte era rama de scanduri a unei lazi de nisip (tema "jucarii in
 ## sandbox"); tema desert a devenit canion, iar o rama de placaj la 380m
 ## contrazicea direct citirea. Coliziunea ramane — doar decorul dispare.
 ## Bariera sta DINCOLO de silueta de la orizont, ca sa nu se loveasca de ea
 ## nimeni in mod normal: e plasa de siguranta, nu element de pista.
+##
+## [member world_half_extent_m] muta peretii mai departe pe O pista anume: San Francisco B200
+## (podul rosu, nov 2026) are malul celalalt cu intoarcerea-balon la ~449 m de centroid (memoria
+## `ziduri-invizibile-ale-lumii`: peretele se masoara de la CENTROID, deci mutarea buclei nu ajuta —
+## centroidul se muta cu ea).
 func _build_world_bounds() -> void:
 	var centroid := _centroid()
-	var half_extent := 420.0
+	var half_extent := world_half_extent_m
 	for side_idx in 4:
 		var outward := [Vector3(0, 0, -1), Vector3(1, 0, 0),
 			Vector3(0, 0, 1), Vector3(-1, 0, 0)][side_idx] as Vector3

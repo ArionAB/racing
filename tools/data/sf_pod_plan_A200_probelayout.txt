@@ -1,0 +1,16 @@
+=== SondaSfPodPlanA200 — SF pod plan A200 (half_width 7.0) ===
+  ruta 0  principal            3744.8 m  1839 puncte
+      raza minima        13.5 m la frac 0.34
+      panta maxima       12.7 % la frac 0.85
+      creste de saritura declarate: 4, panta maxima in ele 33.0 % (exceptie numita)
+      apropiere de sine  12.4 m la frac 0.71  <-- sub 14.0 m
+  ruta 1  Serpentine            265.9 m   136 puncte
+      raza minima        11.4 m la frac 0.44
+      panta maxima        5.2 % la frac 0.42
+      apropiere de sine  31.7 m la frac 0.37
+      racord intrare     0.00 m  iesire 0.00 m
+      capete: (0, 14.6, -300) -> (22, 3.0, -454)
+      coarda directa      156 m
+      ocoleste 413 m, are 266 m -> castig 148 m (36%)
+  PISTA SondaSfPodPlanA200: PROBLEMA
+VERDICT: PROBLEMA pe pista ceruta

@@ -19,6 +19,15 @@ extends Node
 ##     Steaguri (A/B, sabotaj): `--no-tram` scoate ambele tramvaie, `--tram-only=1|2` doar unul,
 ##     `--tram-blind` le scoate din grupul AI (sabotajul `ai_reads_lane` stins), toate INAINTE de
 ##     startul cursei. Raportul: tools/sf_tram_report.py.
+##   - PODUL ROSU (Track25 B200, brief §7 pasul 2b): daca pista are un `MovableMedianHazard`, fiecare
+##     TRECERE prin coridorul cu doua sensuri (capul despartitorului -> capul celalalt): contactele cu
+##     bariera / cu camionul / cu atenuatoarele de la capete, trecerile peste despartitor (centrul
+##     masinii pe partea gresita a barierei de ACUM, ca la sonda 1d), cat din trecere banda a fost
+##     ingusta (< 10 m), intalnirea cu camionul (pe latura proprie, 30 m in spatele lui) si coada (sub
+##     10 m/s acolo); ciocnirile FRONTALE intre masini de sensuri opuse (in coridor si oriunde).
+##     Steaguri: `--median-blind` scoate hazardul din grupul AI (SABOTAJ: `ai_reads_corridor` stins),
+##     `--median-static` il face sa citeasca bariera de la t = 0, `--median-fix` il ingheata la axa
+##     fara camion (A/B-ul cu despartitorul clasic). Raportul: tools/sf_route_report.py.
 
 const MIN_AIR_S: float = 0.25
 const LIP_BEFORE: float = 6.0
@@ -65,6 +74,21 @@ var _gate2_branch: Array[bool] = []
 var _gate2_resp: Array[bool] = []
 var _passes2: Array = []         # [masina, ruta, t_in, secunde, repusa]
 var _tram_d0: Array = []         # distanta pe curba la startul cursei (faza efectiva)
+# --- podul ---
+const POD_NARROW_M: float = 10.0
+const POD_TRUCK_NEAR_M: float = 30.0
+const POD_GAP_S: float = 0.5
+var _podm: MovableMedianHazard = null
+var _pod_open: Array[int] = []           # per masina: indexul trecerii deschise (-1)
+var _pod_wrong: Array[bool] = []
+var _pod_bl: Array[float] = []           # ultimul contact cu bariera / camionul / atenuatorul
+var _pod_tl: Array[float] = []
+var _pod_cl: Array[float] = []
+var _pod_passes: Array = []              # dict-uri
+var _pod_cross: Array = []               # [t, masina, s, z, offset, v]
+var _pod_headon: Array = []              # [t, a, b, s, z, in_corridor]
+var _pod_headon_last: Dictionary = {}
+var _pod_outside: Array[int] = [0, 0, 0] # contacte bariera / camion / atenuator FARA trecere deschisa
 
 
 func setup(race: Node) -> void:
@@ -82,8 +106,14 @@ func setup(race: Node) -> void:
 	if track.has_meta("sf_gate_out2"):
 		_gate_out2 = track.get_meta("sf_gate_out2")
 	_setup_trams(track)
+	_setup_pod(track)
 	var cars: Array[Car] = race.cars
 	for i in cars.size():
+		_pod_open.append(-1)
+		_pod_wrong.append(false)
+		_pod_bl.append(-99.0)
+		_pod_tl.append(-99.0)
+		_pod_cl.append(-99.0)
 		_climb_t.append(-1.0)
 		_climb_resp.append(false)
 		_gate2_t.append(-1.0)
@@ -142,7 +172,150 @@ func _setup_trams(track: Track) -> void:
 		_tram_d0.append(-1.0)
 
 
+## Podul: hazardul si sabotajele lui (inainte de startul cursei).
+func _setup_pod(track: Track) -> void:
+	for n in track.find_children("*", "MovableMedianHazard", true, false):
+		_podm = n as MovableMedianHazard
+	if _podm == null:
+		return
+	for arg in OS.get_cmdline_user_args():
+		if arg == "--median-blind":
+			_podm.ai_reads_corridor = false
+			_podm.remove_from_group(MovableMedianHazard.AI_GROUP)
+			print("=== SF pod: SABOTAJ, despartitorul scos din grupul AI (ai_reads_corridor stins)")
+		elif arg == "--median-static":
+			_podm.ai_static_read = true
+			print("=== SF pod: SABOTAJ, AI-ul citeste bariera de la t = 0")
+		elif arg == "--median-fix":
+			# A/B: despartitorul FIX la axa, fara camion (ca SondaSfPodFix), fara sa regeneram scena:
+			# blocurile se pun la offset 0, camionul dispare.
+			_podm.static_center = true
+			_podm.truck_enabled = false
+			var tb := _podm.truck_body()
+			if tb != null:
+				tb.get_parent().remove_child(tb)
+				tb.free()
+				_podm.set("_truck", null)
+			for k in int(_podm.call("_block_count")):
+				_podm.call("_place_block", k, (float(k) + 0.5) * _podm.block_len, 0.0, true)
+			print("=== SF pod: A/B, despartitor FIX la axa, fara camion")
+	print("=== SF pod: despartitor %s, tablier %.0f m, paliere %.0f m, ciclu camion %.1f s, faza %.3f, plus_dir_side %d, ai_reads_corridor %s" % [
+		"FIX" if _podm.static_center else "MOBIL", _podm.deck_length, _podm.approach_m, _podm.cycle_s(),
+		_podm.phase, _podm.plus_dir_side, str(_podm.is_in_group(MovableMedianHazard.AI_GROUP))])
+
+
+func _pod_local(p: Vector3) -> Vector3:
+	return _podm.global_transform.affine_inverse() * p
+
+
+## In coridorul cu doua sensuri (despartitorul fix + mobil, cap la cap)?
+func _in_corridor(l: Vector3) -> bool:
+	return l.x >= -_podm.approach_m - 1.0 and l.x <= _podm.deck_length + _podm.approach_m + 1.0 \
+		and absf(l.z) < _podm.deck_half_width + 1.5 and l.y > -4.0 and l.y < 6.0
+
+
+## Latura PROPRIE a masinii: dupa sensul soselei la indexul ei (sonda 1d, `_own_side`).
+func _pod_side(c: Car) -> float:
+	var tk: Track = _race.track
+	var r := tk.route_at(c.route)
+	var d: Vector3 = r.baked[r.wrap_index(c.road_index + 1)] - r.baked[r.wrap_index(c.road_index)]
+	var dl: Vector3 = _podm.global_transform.basis.inverse() * d
+	return float(_podm.plus_dir_side) * (1.0 if dl.x >= 0.0 else -1.0)
+
+
+func _tick_pod(i: int, c: Car, _delta: float) -> void:
+	var l := _pod_local(c.global_position)
+	var inside := _in_corridor(l)
+	var v := c.horizontal_speed()
+	var hit_b := false
+	var hit_t := false
+	var hit_c := false
+	for b in c.get_colliding_bodies():
+		if b == _podm.truck_body():
+			hit_t = true
+		elif _podm.is_block(b):
+			if String((b as Node).name) == "Atenuator":
+				hit_c = true
+			else:
+				hit_b = true
+	if inside and _pod_open[i] < 0:
+		var side := _pod_side(c)
+		_pod_passes.append({"car": i, "side": side, "t_in": _t, "t_out": -1.0, "v_in": v, "v_min": v,
+			"block": 0, "truck": 0, "cushion": 0, "cross": 0, "narrow": 0, "n": 0, "truck_near": false,
+			"truck_slow": false, "resp": false, "eject": false, "complete": false, "s_in": l.x})
+		_pod_open[i] = _pod_passes.size() - 1
+		_pod_wrong[i] = false
+	var k := _pod_open[i]
+	if k < 0:
+		if hit_b and _t - _pod_bl[i] > POD_GAP_S:
+			_pod_outside[0] += 1
+		if hit_t and _t - _pod_tl[i] > POD_GAP_S:
+			_pod_outside[1] += 1
+		if hit_c and _t - _pod_cl[i] > POD_GAP_S:
+			_pod_outside[2] += 1
+	else:
+		var p: Dictionary = _pod_passes[k]
+		var side: float = p.side
+		p.v_min = minf(float(p.v_min), v)
+		if hit_b and _t - _pod_bl[i] > POD_GAP_S:
+			p.block = int(p.block) + 1
+		if hit_t and _t - _pod_tl[i] > POD_GAP_S:
+			p.truck = int(p.truck) + 1
+		if hit_c and _t - _pod_cl[i] > POD_GAP_S:
+			p.cushion = int(p.cushion) + 1
+		if inside:
+			p.n = int(p.n) + 1
+			if l.x >= 0.0 and l.x <= _podm.deck_length and _podm.lane_width_at(l.x, side) < POD_NARROW_M:
+				p.narrow = int(p.narrow) + 1
+			var wrong := side * (l.z - _podm.offset_at(l.x)) < 0.0
+			if wrong and not _pod_wrong[i]:
+				p.cross = int(p.cross) + 1
+				_pod_cross.append([_t, i, l.x, l.z, _podm.offset_at(l.x), v])
+			_pod_wrong[i] = wrong
+			if _podm.truck_body() != null:
+				var dt := (l.x - _podm.truck_s) * (1.0 if side * float(_podm.plus_dir_side) > 0.0 else -1.0)
+				if dt > -POD_TRUCK_NEAR_M and dt < 6.0 and side * l.z > 0.0:
+					p.truck_near = true
+					if v < 10.0:
+						p.truck_slow = true
+		else:
+			p.t_out = _t
+			p.complete = (side * float(_podm.plus_dir_side) > 0.0 and l.x > _podm.deck_length) \
+				or (side * float(_podm.plus_dir_side) < 0.0 and l.x < 0.0)
+			_pod_open[i] = -1
+	if hit_b:
+		_pod_bl[i] = _t
+	if hit_t:
+		_pod_tl[i] = _t
+	if hit_c:
+		_pod_cl[i] = _t
+
+
+## Ciocniri frontale intre masini (directii la > 107 de grade, ca la sonda 1d).
+func _tick_pod_pairs(cars: Array[Car]) -> void:
+	for i in cars.size():
+		var a := cars[i]
+		for b in a.get_colliding_bodies():
+			var cb := b as Car
+			if cb == null:
+				continue
+			var j := cars.find(cb)
+			if j <= i:
+				continue
+			var fa := -a.global_transform.basis.z
+			var fb := -cb.global_transform.basis.z
+			if Vector2(fa.x, fa.z).normalized().dot(Vector2(fb.x, fb.z).normalized()) >= -0.3:
+				continue
+			var key := i * 100 + j
+			if _t - float(_pod_headon_last.get(key, -99.0)) > 1.0:
+				var la := _pod_local(a.global_position)
+				_pod_headon.append([_t, i, j, la.x, la.z, _in_corridor(la), a.global_position])
+			_pod_headon_last[key] = _t
+
+
 func _zone(p: Vector3) -> String:
+	if _podm != null and _in_corridor(_pod_local(p)):
+		return "pod"
 	if not _lips.is_empty() and absf(p.x - _lips[0].x) < CHAIN_HALF \
 			and p.z <= _lips[0].z + 20.0 and p.z >= _lips[_lips.size() - 1].z - 60.0:
 		return "lant"
@@ -153,6 +326,11 @@ func _zone(p: Vector3) -> String:
 
 
 func _on_respawn(c: Car, i: int) -> void:
+	if _podm != null and i < _pod_open.size() and _pod_open[i] >= 0:
+		var pp: Dictionary = _pod_passes[_pod_open[i]]
+		pp.resp = true
+		pp.t_out = _t
+		_pod_open[i] = -1
 	if _gate_t[i] >= 0.0:
 		_gate_resp[i] = true
 	if _climb_t[i] >= 0.0:
@@ -163,6 +341,8 @@ func _on_respawn(c: Car, i: int) -> void:
 
 
 func _on_eject(c: Car, _rag: Node3D, i: int) -> void:
+	if _podm != null and i < _pod_open.size() and _pod_open[i] >= 0:
+		(_pod_passes[_pod_open[i]] as Dictionary).eject = true
 	_ejects.append([_t, i, _zone(c.global_position), String(c.last_eject_cause),
 		float(c.last_eject_value), c.global_position])
 
@@ -183,12 +363,16 @@ func _physics_process(delta: float) -> void:
 		if float(_tram_d0[j]) < 0.0:
 			_tram_d0[j] = (_trams[j] as BusHazard).distance()
 	var cars: Array[Car] = _race.cars
+	if _podm != null:
+		_tick_pod_pairs(cars)
 	for i in cars.size():
 		var c := cars[i]
 		var p := c.global_position
 		var q := _prev[i]
 		_prev[i] = p
 		_tick_trams(i, c)
+		if _podm != null:
+			_tick_pod(i, c, delta)
 		if q.distance_to(p) > 8.0:
 			continue          # repunere: nu e trecere
 		_tick_tram_gates(i, c, p, q)
@@ -404,6 +588,45 @@ func report() -> void:
 		print("    [sf poarta] %-18s ruta=%d %.2fs%s" % [cars[int(ps[0])].pilot_name, int(ps[1]),
 			float(ps[2]), " REPUSA" if bool(ps[3]) else ""])
 	_report_trams()
+	_report_pod()
+
+
+func _report_pod() -> void:
+	if _podm == null:
+		return
+	var cars: Array[Car] = _race.cars
+	var n := 0
+	var bl := 0
+	var tr := 0
+	var cu := 0
+	var cr := 0
+	for p: Dictionary in _pod_passes:
+		if float(p.t_out) < 0.0:
+			continue
+		n += 1
+		bl += 1 if int(p.block) > 0 else 0
+		tr += 1 if int(p.truck) > 0 else 0
+		cu += 1 if int(p.cushion) > 0 else 0
+		cr += int(p.cross)
+		print("    [sf pod trecere] %s side=%+d t=%.2f %.2fs v_in=%.1f v_min=%.1f bariera=%d camion=%d atenuator=%d peste=%d ingust=%.2f camion_aproape=%d coada=%d complet=%d repus=%d ejectat=%d" % [
+			cars[int(p.car)].car_name, int(p.side), float(p.t_in), float(p.t_out) - float(p.t_in),
+			float(p.v_in), float(p.v_min), int(p.block), int(p.truck), int(p.cushion), int(p.cross),
+			float(p.narrow) / maxf(float(p.n), 1.0), 1 if bool(p.truck_near) else 0,
+			1 if bool(p.truck_slow) else 0, 1 if bool(p.complete) else 0, 1 if bool(p.resp) else 0,
+			1 if bool(p.eject) else 0])
+	for x in _pod_cross:
+		print("    [sf pod peste] t=%.2f %s s=%.1f z=%.2f bariera=%.2f v=%.1f" % [float(x[0]),
+			cars[int(x[1])].pilot_name, float(x[2]), float(x[3]), float(x[4]), float(x[5])])
+	var hc := 0
+	for h in _pod_headon:
+		var gp: Vector3 = h[6]
+		if bool(h[5]):
+			hc += 1
+		print("    [sf frontal] t=%.2f %s x %s coridor=%d s=%.1f z=%.1f poz=(%.0f,%.1f,%.0f)" % [float(h[0]),
+			cars[int(h[1])].pilot_name, cars[int(h[2])].pilot_name, 1 if bool(h[5]) else 0,
+			float(h[3]), float(h[4]), gp.x, gp.y, gp.z])
+	print("=== SF pod: treceri %d, cu contact bariera %d, camion %d, atenuator %d; treceri peste despartitor %d; frontale in coridor %d (oriunde %d); contacte fara trecere (bariera/camion/atenuator) %d/%d/%d" % [
+		n, bl, tr, cu, cr, hc, _pod_headon.size(), _pod_outside[0], _pod_outside[1], _pod_outside[2]])
 
 
 ## Brute pentru tools/sf_tram_report.py (cheia masinii = car_name: lineup-ul difera pe seed).

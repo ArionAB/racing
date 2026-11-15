@@ -2,7 +2,7 @@
 """Statisticile testului de loc San Francisco (brief §7 pasul 0), din iesirea sondei
 `tools/ProbeSfLoc.tscn` (rulata CU fereastra si `--frames`):
 
-    python tools/sf_loc_stats.py
+    python tools/sf_loc_stats.py [folder]      (implicit snapshots/)
 
 Citeste snapshots/sf_loc_meas.json si perechile snapshots/sf_loc_meas_<k>_{cadru,id}.png.
 In cadrul de identitate fetele de scandura au R = 30 + 45*pastel, G = 250 (spre soare,
@@ -20,6 +20,14 @@ N.L >= 0,25) / 125 (razant) / 0 (cu spatele), B = 128; restul e negru. Scoate:
      dE2000 minim intre perechi; tinta >= 10 (perechea cea mai apropiata se distinge
      ca alta culoare, nu ca alta lumina pe aceeasi culoare).
   3. soarele pe carosabil si materialele, copiate din json.
+
+Pasul 7 (pilotul kitului, sonda cu `--glb`), daca exista cadrele noi:
+  4. umbra ARUNCATA pe fatade: raportul pixel cu pixel cadru / cadru fara umbra de case
+     (`_noshade`), pe pixelii de scandura spre soare si razanti; umbrit = raport < 0,8.
+  5. CLASELE pixelilor caselor (`_cls`): ponderea pastel / alb / sticla / acoperis / parter de
+     piatra / fusta / usi / altele si V-ul lor median in cadrul normal (sticla: cata e "gaura
+     neagra", V < 0,15).
+Scrie si <folder>/sf_loc_summary.json (cifrele din REZUMAT), pentru tabelele de comparatie.
 """
 import json
 import math
@@ -31,6 +39,7 @@ from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SNAP = os.path.join(ROOT, "snapshots")
+CATS = ["pastel", "alb", "sticla", "acoperis", "parter", "fusta", "usi", "altele"]
 TEX = os.path.join(ROOT, "assets", "textures", "classes", "sf_clapboard.png")
 
 
@@ -117,6 +126,9 @@ def pair_table(names, labs, title):
 
 
 def main():
+    global SNAP
+    if len(sys.argv) > 1:
+        SNAP = os.path.abspath(sys.argv[1])
     meas = json.load(open(os.path.join(SNAP, "sf_loc_meas.json"), encoding="utf-8"))
     names = meas["pastel_names"]
     tints = meas["tints"]
@@ -205,6 +217,74 @@ def main():
     print("\n2b. Pastelurile pe CADRU (mediana fetelor spre soare, dupa lumina)")
     w_fr = pair_table(names, labs, "dE2000 pe cadru:")
     out["de_frame_min"] = w_fr[0]
+    # ---- 4. umbra aruncata pe fatade (cadru / cadru fara umbra de case)
+    sh = {"lit": [], "graze": []}
+    shv = {"lit": [[], []], "graze": [[], []]}
+    have_ns = False
+    for kk in range(k):
+        fn = os.path.join(SNAP, "sf_loc_meas_%d_noshade.png" % kk)
+        if not os.path.exists(fn):
+            continue
+        have_ns = True
+        img = np.asarray(Image.open(os.path.join(SNAP, "sf_loc_meas_%d_cadru.png" % kk)).convert("RGB")).astype(np.float64) / 255.0
+        ns = np.asarray(Image.open(fn).convert("RGB")).astype(np.float64) / 255.0
+        idm = np.asarray(Image.open(os.path.join(SNAP, "sf_loc_meas_%d_id.png" % kk)).convert("RGB")).astype(np.int32)
+        clap = (np.abs(idm[..., 2] - 128) < 14)
+        g = idm[..., 1]
+        v, vn = img.max(2), ns.max(2)
+        for c, m in (("lit", clap & (g > 190)), ("graze", clap & (g > 60) & (g <= 190))):
+            m = m & (vn > 0.03)
+            r = v[m] / vn[m]
+            sh[c].append(r)
+            shv[c][0].append(v[m][r < 0.8])
+            shv[c][1].append(v[m][r >= 0.8])
+    if have_ns:
+        print("\n4. Umbra ARUNCATA de case pe scandura (cadru / cadru fara umbra de case; umbrit = raport < 0,8)")
+        for c in ("lit", "graze"):
+            r = np.concatenate(sh[c]) if sh[c] else np.zeros(0)
+            if len(r) == 0:
+                continue
+            a = np.concatenate(shv[c][0])
+            b = np.concatenate(shv[c][1])
+            frac = float((r < 0.8).mean())
+            print("    %-6s %7d px: umbrit %5.1f%%, raport median in umbra %.2f; V median umbrit %.3f / neumbrit %.3f -> contrast %.3f" % (
+                c, len(r), frac * 100, float(np.median(r[r < 0.8])) if (r < 0.8).any() else float("nan"),
+                md(a), md(b), md(b) - md(a)))
+            out["cast_" + c] = frac
+            out["cast_contrast_" + c] = md(b) - md(a)
+    # ---- 5. clasele pixelilor caselor
+    cnt = np.zeros(len(CATS))
+    vals = {i: [] for i in range(len(CATS))}
+    have_cls = False
+    for kk in range(k):
+        fn = os.path.join(SNAP, "sf_loc_meas_%d_cls.png" % kk)
+        if not os.path.exists(fn):
+            continue
+        have_cls = True
+        img = np.asarray(Image.open(os.path.join(SNAP, "sf_loc_meas_%d_cadru.png" % kk)).convert("RGB")).astype(np.float64) / 255.0
+        cm = np.asarray(Image.open(fn).convert("RGB")).astype(np.int32)
+        house = (np.abs(cm[..., 2] - 200) < 14) & (np.abs(cm[..., 1] - 77) < 14)
+        ci = np.clip(np.round((cm[..., 0] - 20) / 28.0), 0, len(CATS) - 1).astype(int)
+        v = img.max(2)
+        for i in range(len(CATS)):
+            m = house & (ci == i)
+            cnt[i] += m.sum()
+            vals[i].append(v[m])
+    if have_cls:
+        tot = cnt.sum()
+        vert = tot - cnt[CATS.index("acoperis")]
+        print("\n5. Clasele pixelilor caselor (%d px pe %d cadre); %% din casa / %% fara acoperis; V median (p10) in cadru" % (tot, k))
+        out["cls"] = {}
+        for i, nm in enumerate(CATS):
+            vv = np.concatenate(vals[i]) if vals[i] else np.zeros(0)
+            extra = ""
+            if nm == "sticla" and len(vv):
+                extra = "   V < 0,15: %.1f%%" % (100 * float((vv < 0.15).mean()))
+                out["glass_dark"] = float((vv < 0.15).mean())
+            print("    %-9s %5.1f%%  %5.1f%%   V %.3f (p10 %.3f)%s" % (
+                nm, 100 * cnt[i] / max(tot, 1), 100 * cnt[i] / max(vert, 1) if nm != "acoperis" else float("nan"),
+                md(vv), float(np.percentile(vv, 10)) if len(vv) else float("nan"), extra))
+            out["cls"][nm] = {"frac": float(cnt[i] / max(tot, 1)), "V": md(vv)}
     print("\n3. Materiale unice in scena: %d" % meas["materials"])
     print("\nREZUMAT")
     print("    soare pe lant            %5.1f%%   tinta >= 80%%   %s" % (chain * 100, "PASS" if chain >= 0.8 else "FAIL"))
@@ -213,6 +293,15 @@ def main():
     print("    dE2000 min albedo        %5.1f    tinta >= 10    %s" % (w_alb[0], "PASS" if w_alb[0] >= 10 else "FAIL"))
     print("    dE2000 min cadru         %5.1f    tinta >= 10    %s" % (w_fr[0], "PASS" if w_fr[0] >= 10 else "FAIL"))
     print("    materiale                %5d    plafon 38      %s" % (meas["materials"], "PASS" if meas["materials"] <= 38 else "FAIL"))
+    out["materials"] = meas["materials"]
+    out["mode"] = meas.get("mode", "cod")
+    out["house_tris"] = meas.get("house_tris")
+    out["de_frame_worst"] = w_fr[1]
+    out["de_albedo_worst"] = w_alb[1]
+    out["per_pastel"] = {n: {"lit": md(np.concatenate(per[i]["lit"])), "graze": md(np.concatenate(per[i]["graze"])),
+                             "shade": md(np.concatenate(per[i]["shade"]))} for i, n in enumerate(names)}
+    out["px"] = {c: int(sum(len(a) for a in acc[c])) for c in acc}
+    json.dump(out, open(os.path.join(SNAP, "sf_loc_summary.json"), "w"), indent=2)
 
 
 if __name__ == "__main__":

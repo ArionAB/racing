@@ -22,6 +22,16 @@ extends Node3D
 ## Orientarea se socoteste fata de soarele TEMEI (`sun_rotation_deg`), nu e scrisa de mana.
 ##
 ## Nord = -Z, est = +X. Strada coboara spre nord pe x = 0 (vezi tools/gen_sf_loc.py).
+##
+## MODUL GLB (pasul 7, pilotul kitului, `-- --glb` pe linia de comanda): FIECARE casa e o
+## instanta din `sf_row_b_canted.glb`, pusa dupa ACEEASI regula ca in cod (podeaua la cota
+## trotuarului din capatul de sus + bordura, planul fatadei pe linia fatadei din cod, fata spre
+## strada, garajul spre capatul de JOS ca la casele din cod), cu pastelurile in aceeasi ordine.
+## Calea e a jocului: un container `WorldProp` (fara coliziune automata) si metadata
+## `wall_class` pe instanta (`WorldProp._apply_wall_class`). Latura de VEST (s = -1) e
+## OGLINDITA (scale.x = -1 in cadrul casei), ca garajul sa ramana spre capatul de jos.
+## Corpul de coliziune (soare pe carosabil, camera) e trimesh din geometria randata, ca la
+## casele din cod (`Corp_<n>`). Fara `--glb`, comportamentul e cel de la pasul 0, neschimbat.
 
 const PASTELS: Array[String] = ["sf_clapboard", "sf_clapboard_pink", "sf_clapboard_blue",
 	"sf_clapboard_mint", "sf_clapboard_butter"]
@@ -68,6 +78,21 @@ var _cur_pastel: int = 0
 ## pe strazile transversale refolosesc acelasi constructor.
 var _xf: Transform3D = Transform3D.IDENTITY
 
+## Modul GLB (vezi antetul).
+const ROW_GLB := "res://assets/models/sanfrancisco/buildings/sf_row_b_canted.glb"
+## Fata casei in cadrul GLB-ului (kit §3.1): planul fatadei la Z = -6, privind spre -Z.
+const GLB_FRONT_Z: float = -6.0
+const GLB_SKIRT: float = 2.4
+var glb_mode: bool = false
+var _glb_prop: WorldProp
+var _glb_packed: PackedScene
+## O intrare pe casa, pentru sonda (ambele moduri; nu schimba nimic la randare):
+## facade_o = punctul de pe planul fatadei, la podea, la mijlocul casei (lume); n = normala
+## fatadei spre strada; u = axa in lungul fatadei, spre capatul de SUS; yf = podeaua; za/zb =
+## capetele sus/jos pe strada; kind = "main"/"back"/"cross"; body = corpul de coliziune.
+var houses: Array = []
+var _last_body: StaticBody3D
+
 
 func _ready() -> void:
 	call_deferred("_build")
@@ -84,6 +109,12 @@ func _build() -> void:
 	_collect_street()
 	_hide_start_line()
 	_build_street_furniture()
+	glb_mode = "--glb" in OS.get_cmdline_user_args()
+	if glb_mode:
+		_glb_packed = load(ROW_GLB) as PackedScene
+		_glb_prop = WorldProp.new()
+		_glb_prop.name = "CaseGlb"
+		_glb_prop.auto_collision = false
 	var idx := 0
 	for row: Array in ROWS:
 		var s: int = row[0]
@@ -95,10 +126,10 @@ func _build() -> void:
 			var p := (i * 2 + (0 if s > 0 else 3) + idx) % PASTELS.size()
 			var roof := "gable" if ((i + idx + (1 if s > 0 else 0)) % 3) != 1 else "flat"
 			_xf = Transform3D.IDENTITY
-			_build_house(s, za, p, roof)
+			_house(s, za, p, roof, NAN, "main")
 			# randul din SPATE (aceeasi cota), ca deasupra acoperisurilor sa fie oras, nu iarba
 			_xf = Transform3D(Basis.IDENTITY, Vector3(float(s) * (HOUSE_D + 0.5), 0.0, 0.0))
-			_build_house(s, za, (p + 2) % PASTELS.size(), "flat" if roof == "gable" else "gable")
+			_house(s, za, (p + 2) % PASTELS.size(), "flat" if roof == "gable" else "gable", NAN, "back")
 		idx += 1
 	# Randurile de pe STRAZILE TRANSVERSALE (plate): cadrul local are strada pe z, deci
 	# z local -> x lumii, x local -> -z lumii; casele incep dincolo de colturile randurilor
@@ -113,16 +144,20 @@ func _build() -> void:
 					var za := (23.0 + HOUSE_W * float(i + 1)) if e > 0.0 else -(23.0 + HOUSE_W * float(i))
 					var p := (i * 3 + (1 if s > 0 else 4) + (2 if e > 0.0 else 0) + idx) % PASTELS.size()
 					var roof := "gable" if (i + idx) % 3 != 2 else "flat"
-					_build_house(s, za, p, roof, yflat)
+					_house(s, za, p, roof, yflat, "cross")
 				idx += 1
 	_xf = Transform3D.IDENTITY
+	if glb_mode:
+		# Metadata e pe instante INAINTE de intrarea in arbore: `WorldProp._ready` le citeste.
+		add_child(_glb_prop)
 	_hide_chevrons()
 	_build_parked_car()
 	_build_bridge()
 	_build_island()
 	_build_hills()
-	print("sf_loc_decor: %d case, soare spre (%.3f, %.3f, %.3f)"
-		% [_house_n, _to_sun.x, _to_sun.y, _to_sun.z])
+	print("sf_loc_decor: %d case%s, soare spre (%.3f, %.3f, %.3f)"
+		% [_house_n, " (GLB %s)" % ROW_GLB.get_file() if glb_mode else "", _to_sun.x, _to_sun.y,
+		_to_sun.z])
 
 
 # --------------------------------------------------------------------- strada
@@ -277,6 +312,83 @@ func _build_street_furniture() -> void:
 
 
 # ---------------------------------------------------------------------- casele
+
+## O casa, in modul ales (cod sau GLB), plus inregistrarea ei pentru sonda.
+func _house(s: int, za: float, pastel: int, roof: String, flat_y: float, kind: String) -> void:
+	var yf := (road_y(za) if is_nan(flat_y) else flat_y) + CURB_H
+	if glb_mode:
+		_glb_house(s, za, pastel, yf)
+	else:
+		_build_house(s, za, pastel, roof, flat_y)
+	houses.append({
+		"facade_o": _xf * Vector3(float(s) * FACADE_X, yf, za - HOUSE_W * 0.5),
+		"n": _xf.basis * Vector3(-float(s), 0, 0),
+		"u": _xf.basis * Vector3(0, 0, 1),
+		"yf": yf, "za": za, "zb": za - HOUSE_W, "s": s, "kind": kind,
+		"flat": not is_nan(flat_y), "pastel": pastel, "body": _last_body,
+	})
+
+
+## Casa din GLB, in cadrul LOCAL al strazii (ca `_build_house`), asezata prin `_xf`.
+## Cadrul GLB: fatada la Z = -6 privind spre -Z, garajul pe +X, originea in centrul amprentei,
+## la podea. Aici: -Z_glb -> normala fatadei (-s, 0, 0); +X_glb -> -z (capatul de JOS, ca garajul
+## caselor din cod); Y sus. Pe latura de est (s = +1) asta e o rotatie; pe vest (s = -1) rotatia
+## ar pune garajul spre capatul de sus, deci instanta se OGLINDESTE (scale.x = -1).
+func _glb_house(s: int, za: float, pastel: int, yf: float) -> void:
+	_house_n += 1
+	var fs := float(s)
+	var zcol := Vector3(fs, 0, 0) # +Z_glb = spatele casei, dinspre strada
+	var rot := Basis(Vector3.UP.cross(zcol), Vector3.UP, zcol)
+	var mirror := s < 0
+	var basis := rot * Basis.from_scale(Vector3(-1, 1, 1)) if mirror else rot
+	var origin := Vector3(fs * (FACADE_X - GLB_FRONT_Z), yf, za - HOUSE_W * 0.5)
+	var local := _xf * Transform3D(basis, origin)
+	var inst := _glb_packed.instantiate() as Node3D
+	inst.name = "Casa_%d" % _house_n
+	inst.transform = local
+	inst.set_meta(WorldProp.WALL_CLASS_META, PASTELS[pastel])
+	inst.set_meta("sf_pastel", pastel)
+	inst.set_meta("sf_mirror", mirror)
+	for c in inst.get_children():
+		var mi := c as MeshInstance3D
+		if mi == null:
+			continue
+		if String(mi.name).begins_with("Row_Wall"):
+			mi.set_meta("sf_pastel", pastel)
+			mi.add_to_group("sf_clap_glb")
+		else:
+			mi.add_to_group("sf_trim_glb")
+		mi.set_meta("sf_floor_y", yf)
+	_glb_prop.add_child(inst)
+	# Corp: trimesh din geometria randata (ambele noduri), in coordonatele decorului — fara
+	# scara negativa pe forma (transformarea e copta in vertecsi).
+	var body := StaticBody3D.new()
+	body.name = "Corp_%d" % _house_n
+	body.collision_layer = 1 | Track.CAMERA_BLOCKER_LAYER
+	body.add_to_group("sf_house_body")
+	for c in inst.get_children():
+		var mi := c as MeshInstance3D
+		if mi == null or mi.mesh == null:
+			continue
+		var faces := mi.mesh.get_faces()
+		var xf := local * mi.transform
+		for i in faces.size():
+			faces[i] = xf * faces[i]
+		# Instanta oglindita: transformarea copta intoarce ordinea vertecsilor, deci fetele ar
+		# privi INAUNTRU (o raza din afara trece prin perete). Se reface ordinea.
+		if xf.basis.determinant() < 0.0:
+			for i in range(0, faces.size(), 3):
+				var t := faces[i + 1]
+				faces[i + 1] = faces[i + 2]
+				faces[i + 2] = t
+		var shape := ConcavePolygonShape3D.new()
+		shape.set_faces(faces)
+		var cs := CollisionShape3D.new()
+		cs.shape = shape
+		body.add_child(cs)
+	add_child(body)
+	_last_body = body
+
 
 func _build_house(s: int, za: float, pastel: int, roof: String, flat_y: float = NAN) -> void:
 	_house_n += 1
@@ -444,6 +556,9 @@ func _commit_house(s: int, za: float) -> void:
 	am.name = "Atlas_%d" % _house_n
 	am.mesh = _st_atlas.commit()
 	am.material_override = Palette.world_material()
+	# pentru cadrul de CLASE al sondei (fara efect la randare)
+	am.add_to_group("sf_house_atlas")
+	am.set_meta("sf_floor_y", _ao_base)
 	add_child(am)
 	# Corp: peretii + soclul (casele umbresc strada in sonda de soare si opresc camera).
 	var body := StaticBody3D.new()
@@ -455,6 +570,7 @@ func _commit_house(s: int, za: float) -> void:
 		cs.shape = m.create_trimesh_shape()
 		body.add_child(cs)
 	add_child(body)
+	_last_body = body
 
 
 # ------------------------------------------------------------- primitive de fata

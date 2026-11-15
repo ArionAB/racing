@@ -60,6 +60,11 @@ extends Node3D
 ## (corp moale, meta `soft_hit_crush`): acolo se termina despartitorul, cu capul
 ## spre traficul care vine din intoarcere. 0 = beton pana la capat.
 @export var cushion_far_m: float = 0.0
+## La fel la capatul -X (s < 0): pe Track25 coridorul cu doua sensuri are DOUA capete cu fata
+## spre trafic (intoarcerea-balon de pe malul celalalt si virajul de la baza podului), deci ambele
+## capete sunt atenuatoare. 0 = beton pana la capat (sonda 1d: atenuatorul de acolo era construit
+## separat, in scena).
+@export var cushion_near_m: float = 0.0
 ## Cat de departe de capete CITESTE AI-ul despartitorul (m inainte de s=0 si dupa
 ## deck_length). Negativ = `approach_m`. Pe o pista cu despartitor fix construit
 ## separat (rampa sondei), lungimea lui intreaga: AI-ul trebuie sa vada si capul
@@ -246,7 +251,7 @@ func _build() -> void:
 	fixed.physics_material_override = pmat
 	add_child(fixed)
 	var cushion: StaticBody3D = null
-	if cushion_far_m > 0.0:
+	if cushion_far_m > 0.0 or cushion_near_m > 0.0:
 		cushion = StaticBody3D.new()
 		cushion.name = "Atenuator"
 		cushion.set_meta(&"soft_hit_crush", soft_crush_s)
@@ -259,7 +264,8 @@ func _build() -> void:
 			var cs := CollisionShape3D.new()
 			cs.shape = shape
 			cs.position = Vector3(s, block_collision_height * 0.5 - 0.05, 0.0)
-			if cushion != null and side > 0.0 and s > deck_length + approach_m - cushion_far_m:
+			if cushion != null and ((side > 0.0 and s > deck_length + approach_m - cushion_far_m)
+					or (side < 0.0 and s < -approach_m + cushion_near_m)):
 				cushion.add_child(cs)
 			else:
 				fixed.add_child(cs)

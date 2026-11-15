@@ -43,6 +43,12 @@ pana la palier, si continua in nodul hazardului (care face palierele + podul).
   SUFIX=Orb AI=0 python tools/gen_sf_pod.py        # SABOTAJ: AI-ul orb la bariera
   SUFIX=Static STATIC=1 python tools/gen_sf_pod.py # SABOTAJ: citeste bariera de la t=0
   SUFIX=Cap PHASE=0.25 python tools/gen_sf_pod.py  # faza pentru captura
+  SUFIX=Stanga MIRROR=1 python tools/gen_sf_pod.py # CIRCULATIE PE STANGA (oglinda in z, Track25 B200)
+
+MIRROR=1 oglindeste toata strada in z (punctele, cutiile statice, rapele pe fractii): banda DUS
+(+X) sta pe -Z, deci se circula pe STANGA, iar hazardul primeste `plus_dir_side = -1`. Asa se
+verifica, pe aceeasi sonda, ca bariera si `AIController._median_line` merg oglindit (Track25 B200
+circula pe stanga pe pod: pe dreapta, drumul care vine pe pod ar fi taiat banda de intors).
 
 Variabile: DECK (300), OFFSET (3.5), TRANS (30), TAPER (30), TRUCK_SPEED (4.0),
 DWELL (6.0), PHASE (0.0), R (20), GRADE (0.115), Y0 (12), FIX, AI (1), STATIC, SUFIX.
@@ -92,6 +98,8 @@ FIX = os.environ.get("FIX", "0") == "1"
 AI = os.environ.get("AI", "1") == "1"
 STATIC = os.environ.get("STATIC", "0") == "1"
 SUFIX = os.environ.get("SUFIX", "")
+MIRROR = os.environ.get("MIRROR", "0") == "1"
+MS = -1.0 if MIRROR else 1.0     # semnul lui z: banda DUS sta pe MS * LANE_Z
 
 # Segmentele drepte, in ordinea benzii DUS: (lungime, panta)
 SEGS = [
@@ -196,7 +204,7 @@ def build():
     t.straight(X_START)                     # dreapta de grila
     last = t.pts.pop()
     assert abs(last[0] - X_START) < 0.05 and abs(last[1] - LANE_Z) < 0.05, last
-    pts = [(x, y_of_x(min(max(x, 0.0), X_F)), z) for x, z in t.pts]
+    pts = [(x, y_of_x(min(max(x, 0.0), X_F)), MS * z) for x, z in t.pts]
     return pts, theta
 
 
@@ -222,7 +230,7 @@ def frac_of(pts, cum, x, lane_sign):
     """Fractia (pe lungimea poligonului) la abscisa x pe banda data (+1 dus, -1 intors)."""
     best, bi = 1e9, 0
     for i, p in enumerate(pts):
-        if (p[2] > 0) != (lane_sign > 0) or abs(abs(p[2]) - LANE_Z) > 0.05:
+        if (MS * p[2] > 0) != (lane_sign > 0) or abs(abs(p[2]) - LANE_Z) > 0.05:
             continue
         d = abs(p[0] - x)
         if d < best:
@@ -403,6 +411,7 @@ def main():
         "truck_enabled = %s" % ("false" if FIX else "true"),
         "ai_reads_corridor = %s" % ("true" if AI else "false"),
         "ai_static_read = %s" % ("true" if STATIC else "false"),
+    ] + (["plus_dir_side = -1"] if MIRROR else []) + [
         "",
         '[node name="Static" type="Node3D" parent="."]', "",
     ] + nodes

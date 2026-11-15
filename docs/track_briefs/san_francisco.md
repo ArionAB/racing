@@ -1111,7 +1111,18 @@ suprafața unei ramuri poate primi `road_tint` separat de bucla principală? (4)
    urcării. **Soarele n-a fost schimbat**, e decizie de artă. Contractul „≥ 80 % pe lanț” cere
    soarele de acum.
 
-   **Carrara și Machu Picchu**: vezi tabelul de mai jos (ProbeRace față de main e3a0f0bd).
+   **Carrara și Machu Picchu: neschimbate.** ProbeRace × 150 s, ramura față de main e3a0f0bd,
+   dintr-un worktree temporar al lui main; `--track=15` = Carrara, `--track=8` = Machu Picchu.
+   - Carrara: seed-urile 1 și 3 identice cifră cu cifră.
+   - Machu Picchu: seed-urile 2 și 4 identice.
+   - Seed-urile care difereau (Carrara 2, 4; Machu Picchu 1, 3) au rulat de 3 ori pe fiecare
+     parte. Fiecare rezultat al ramurii apare și pe main:
+     - Carrara seed 4: 72,32 / 71,88 s pe ambele părți;
+     - Machu Picchu seed 3: 77,82 s, 7 repuneri, 2 `[blocaj]`, pe ambele părți;
+     - Machu Picchu seed 1: 74,34 s, 4 repuneri, pe ramură la a treia rulare.
+
+     E bimodalitatea Jolt, nu o regresie (memoria `proberace-nedeterminism`).
+   - Carrara: 0 repuneri, 0 `[blocaj]` pe ambele părți.
 
    **Capturi `--gamecam`** (`docs/asset_briefs/img/sf_route/`):
    - `b200_grila_pod_gamecam.png`: din spatele grilei. Se vede linia, capul despărțitorului,

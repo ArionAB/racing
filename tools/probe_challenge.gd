@@ -25,7 +25,10 @@ extends Node
 ## Ruleaza CA SCENA: godot --headless --path . res://tools/ProbeChallenge.tscn
 
 const CAR_SCENE: String = "res://scenes/cars/Car.tscn"
-const TMP_PATH: String = "user://probe_challenge.cfg"
+## Salvarea carierei sondei sta in folderul procesului (`user://probe_tmp/
+## challenge_<pid>/`): pe numele fix de dinainte, doua rulari paralele isi
+## stergeau fisierul una alteia (2 din 20 picate, #722).
+const ProbeTmp := preload("res://tools/probe_tmp.gd")
 ## Sub plafon un refactor care sare peste jumatate din verificari pica.
 const MIN_CHECKS := 170
 const EXPECTED := {
@@ -51,12 +54,16 @@ var _fails: Array[String] = []
 var _checks: int = 0
 var _real_save_path: String
 var _real_config: CareerConfig
+var _tmp_dir: String = ""
+var _tmp_path: String = ""
 
 
 func _ready() -> void:
 	_real_save_path = Career.save_path
 	_real_config = Career.config
-	Career.save_path = TMP_PATH
+	_tmp_dir = ProbeTmp.make("challenge")
+	_tmp_path = _tmp_dir + "career.cfg"
+	Career.save_path = _tmp_path
 	_remove_tmp()
 	Career.load_progress()
 
@@ -72,7 +79,7 @@ func _ready() -> void:
 	Career.save_path = _real_save_path
 	Career.race_starter = Callable()
 	Career.leave()
-	_remove_tmp()
+	_remove_tmp_dir()
 	if _checks < MIN_CHECKS:
 		_fails.append("doar %d verificari (< %d): sonda a sarit peste ceva" % [_checks, MIN_CHECKS])
 	for f in _fails:
@@ -89,9 +96,21 @@ func _expect(cond: bool, msg: String) -> void:
 
 
 func _remove_tmp() -> void:
-	var abs_path := ProjectSettings.globalize_path(TMP_PATH)
+	var abs_path := ProjectSettings.globalize_path(_tmp_path)
 	if FileAccess.file_exists(abs_path):
 		DirAccess.remove_absolute(abs_path)
+
+
+## Tot folderul procesului; si din `_exit_tree`, pentru iesirile timpurii.
+func _remove_tmp_dir() -> void:
+	if _tmp_dir == "":
+		return
+	ProbeTmp.remove(_tmp_dir)
+	_tmp_dir = ""
+
+
+func _exit_tree() -> void:
+	_remove_tmp_dir()
 
 
 func _collect(node: Node, out: Array[Node]) -> void:

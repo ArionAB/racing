@@ -927,6 +927,13 @@ const ACCENT_HOLDS_CLASS := {
 ## biserica siberiana — masurat, Track10 lua un material in plus si biserica de
 ## lemn ar fi primit tencuiala mediteraneana.
 ##
+## Casa de rand San Francisco (toate cele 7 fisiere ale kitului): peretele pe
+## dala de scandura, restul pe atlas.
+const SF_ROW_CLASSES := {
+	"Row_Wall": Palette.TRI_PREFIX + "sf_clapboard",
+	"Row_Trim": Palette.ATLAS_PREFIX,
+}
+
 ## Cheia e numele fisierului .glb (fara extensie); valoarea, o mapare
 ## nume-de-parte -> clasa, aplicata DOAR instantelor modelului aluia.
 const CLASSES_BY_MODEL := {
@@ -1864,6 +1871,18 @@ const CLASSES_BY_MODEL := {
 	# ziua, emisie calda legata de `dusk_lamps` (DuskCycle) spre noapte, cu
 	# prag per cladire (assets/shaders/jod_window.gdshader,
 	# jodhpur_masuratori.md §9).
+	# --- San Francisco: kitul casei de rand (sf_painted_row_kit.md) ----------
+	#
+	# Doua noduri pe casa: `Row_Wall` (doar peretii de scandura) pe dala
+	# `sf_clapboard`, `Row_Trim` (ancadramente, cornise, acoperis, soclu) pe
+	# atlas, scris explicit ca nicio mapare globala de prefix sa nu-l prinda.
+	# Tenta implicita e crema; celelalte patru pasteluri se aleg PE INSTANTA cu
+	# metadata `wall_class` (vezi WALL_CLASS_META): un model pe casa, recolorat
+	# in cod (decizia dezvoltatorului, 15 nov 2026).
+	"sf_row_a_canted": SF_ROW_CLASSES, "sf_row_a_square": SF_ROW_CLASSES,
+	"sf_row_b_canted": SF_ROW_CLASSES, "sf_row_b_square": SF_ROW_CLASSES,
+	"sf_row_c_canted": SF_ROW_CLASSES, "sf_row_c_square": SF_ROW_CLASSES,
+	"sf_row_corner_turret": SF_ROW_CLASSES,
 	"blue_house_a": {
 		"House_Wall": Palette.TRI_PREFIX + "blue_lime_light",
 		"House_Rail": Palette.ATLAS_PREFIX, "House_Trim": Palette.ATLAS_PREFIX,
@@ -3213,6 +3232,7 @@ func _ready() -> void:
 	Palette.apply_class_materials(self, prop_classes())
 	_apply_model_classes()
 	_apply_lime_indigo()
+	_apply_wall_class()
 	_fade_tuff_detail()
 	_apply_tint()
 	_apply_glow()
@@ -3675,6 +3695,61 @@ func _apply_lime_indigo() -> void:
 				if String(mi.name).begins_with(part):
 					mi.material_override = mat
 					break
+
+
+## Metadata care alege PASTELUL unei case de rand (San Francisco): numele unei
+## clase din `WALL_CLASSES`, pe instanta casei SAU pe un container — se
+## mosteneste in jos, ca `indigo`. Fara ea, peretele ramane pe clasa din
+## CLASSES_BY_MODEL (crema). Generalizarea lui LIME_INDIGO_META la N tente: o
+## tenta = un material pe pista, oricate case o poarta (inventarul SF §2: +5).
+## Doar partile mapate pe clasa de BAZA (`sf_clapboard`) se muta; `Row_Trim`
+## ramane pe atlas.
+const WALL_CLASS_META := "wall_class"
+const WALL_CLASS_BASE := "sf_clapboard"
+const WALL_CLASSES: Array[String] = ["sf_clapboard", "sf_clapboard_pink",
+	"sf_clapboard_blue", "sf_clapboard_mint", "sf_clapboard_butter"]
+
+
+func _apply_wall_class() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var cls := _wall_class_of(model)
+		if cls.is_empty() or cls == WALL_CLASS_BASE:
+			continue
+		if not WALL_CLASSES.has(cls):
+			push_warning("WorldProp: wall_class necunoscut '%s' pe %s" % [cls, model.name])
+			continue
+		var stem := model.scene_file_path.get_file().get_basename()
+		var mapping: Dictionary = CLASSES_BY_MODEL.get(stem, {})
+		var parts: Array[String] = []
+		for part: String in mapping:
+			if String(mapping[part]) == Palette.TRI_PREFIX + WALL_CLASS_BASE:
+				parts.append(part)
+		if parts.is_empty():
+			continue
+		var mat := Palette.triplanar_class_material(cls)
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null or String(mi.name).ends_with(Palette.ACCENT_SUFFIX):
+				continue
+			for part in parts:
+				if String(mi.name).begins_with(part):
+					mi.material_override = mat
+					break
+
+
+func _wall_class_of(model: Node) -> String:
+	var n: Node = model
+	while n != null and n != self:
+		if n.has_meta(WALL_CLASS_META):
+			return String(n.get_meta(WALL_CLASS_META))
+		n = n.get_parent()
+	return ""
 
 
 func _wants_indigo(model: Node) -> bool:

@@ -1,6 +1,8 @@
 # San Francisco (Track25) — handoff for the next session
 
-Updated 15 Nov 2026, at the end of the session that did step 7 (hero assets).
+Updated 16 Nov 2026, after step 8d (pavements, solid poles, sheds, stairs).
+Open PRs, stacked, none merged: #740 ⊂ #741 ⊂ #742 ⊂ #743 ⊂ #744 (wave 3), and
+step 8d on top of #744 from branch `sanfrancisco/pas8d-trotuare`.
 Read this first, then the brief (`docs/track_briefs/san_francisco.md`; §7 is the
 step plan, and "pasul 7" there has the full results). Project rules are in
 `CLAUDE.md`; the running memory is `san-francisco-track-project.md` in the
@@ -91,8 +93,32 @@ of step 8. No iOS build since #723 (build 54) — **start one only when they ask
    - Barrier contact on the bridge ranged 4.4–7.4 % over nine batches with
      identical bridge collision: the step-2b band (4.6–5.5 %) is narrower than
      batch noise.
-   Still missing: pavements (needs a design answer: do they drive like road or
-   slow like grass?), the gate (H5), the garden of the switchback-entrance
+   **Also DONE, on branch `sanfrancisco/pas8d-trotuare` (16 Nov 2026) — step 8d,
+   the developer's five decisions after wave 3** (brief §7 "8d" has the numbers):
+   - **Pavements drive like road** (decided). Flush concrete strips from the
+     carriageway to the house fronts in zones B, C, D, E, G, through the new
+     `paved_level_zones` export of `track.gd` (`is_on_road` counts them); own
+     material, so 23 materials. Houses were raised onto the slab. Guard
+     `ProbeSfTrotuar`. `SF_PAS8D=0` reproduces the pre-8d scene.
+   - **Poles are solid** (decided): masts, lamps and street trees collide.
+     The y 102 mast moved to 11.0 m off the axis, the crest masts to 9.5 m.
+     Guard `ProbeSfStalp`; the race batch counts contacts per pole.
+   - **Pier sheds** are weathered grey-brown (scheme K6 in `build_sf_struct.py`;
+     wall saturation 0.895 → 0.339). The orange was the slot colour (the sand
+     slot) pushed warmer by the sun, not a class material.
+   - **Public stairs** rebuilt as a solid concrete flight and placed on the
+     terrain by rule (they had been buried 0.6–1.3 m). Guard `ProbeSfScari`.
+   - **Haze stays `fog_max` 0.40**; 0.28 is for the developer to try at the wheel.
+   - **Race batches on SF: use `--seed-ai-prefs` and confirm any A/B difference
+     on seeds it was not first seen on.** ProbeRace did not seed the AI's
+     shortcut dice, and lap 1 repeats per scene on the same seed, so repeated
+     batches on the same seeds are one sample (this produced a false "solid
+     poles cause respawns" signal; it vanished on 32 new seeds).
+   - Reported, not fixed: the per-slot detail mask seems to have no effect on
+     the shared world material (the mask stores strength in alpha; a builder saw
+     full grain on a zero-strength slot). Project-wide, unverified, the
+     developer's call.
+   Still missing: the gate (H5), the garden of the switchback-entrance
    house, gulls/parrots, sails and the ferry, sound.
 1. **(Done — kept for the rules.)** All seven houses, each with a truly
    mirrored `_m` file, are done and accepted on `sanfrancisco/pas7b-case`

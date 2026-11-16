@@ -138,13 +138,14 @@ echo "== valul 3: structurile, fundalul, scara, leii de mare (inventar §5.1, §
 # Exceptii declarate:
 #   --origin=assembly   placa turnanta: doua noduri (discul, ghereta), ambele cu baza la Y = 0.
 #   --origin=waterline  magaziile (puntea la Y = 0, pilonii pana la -6), insula (stanca la nivelul
-#                       apei, fusta la -3) si leii (pluta incaleca apa): geometria INCALECA Y = 0.
+#                       apei, fusta la -3), leii (pluta incaleca apa) si scara (pas 8d: fusta pana
+#                       la -1,8 sub palier, ca sa intre in panta): geometria INCALECA Y = 0.
 check "structures/sf_turntable.glb" 1500 --origin=assembly
 check "structures/sf_pier_shed.glb" 2500 --origin=waterline
 check "structures/sf_pier_shed_short.glb" 2000 --origin=waterline
 check "structures/sf_island_light.glb" 3000 --origin=waterline
 check "structures/sf_horizon.glb" 1600
-check "props/sf_stair_lane.glb" 400
+check "props/sf_stair_lane.glb" 400 --origin=waterline
 check "animals/sf_sea_lions.glb" 1800 --origin=waterline
 
 echo

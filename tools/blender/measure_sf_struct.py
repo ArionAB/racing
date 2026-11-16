@@ -28,9 +28,10 @@ Citeste GLB-urile direct, in coordonate Godot (cititorul si uneltele de sabotaj 
                     >= 1,4x mai late decat inalte, trunchiul gol de sub ele <= 25 % din arbore; la orase NICIO fata inclinata
                     (doar verticale si orizontale: fara piramide, turle, acoperisuri in panta) si
                     fiecare volum are capacul >= 15 % din talpa (fara varf de piramida).
-  sf_stair_lane     un nod StairLane, <= 400 tri; 2,50 (+-0,01) lat, centrat; Y de la 0; Z de la
-                    0 la +5,0 (urca spre +Z); urcarea treptelor 3,0 (+-0,05) de la palierul de jos;
-                    zidurile (slot 8 la |x| > 0,95) >= 0,20 groase pe ambele parti.
+  sf_stair_lane     un nod StairLane, <= 400 tri; 2,50 (+-0,01) lat, centrat; Z de la 0 la +5,0
+                    (urca spre +Z); urcarea treptelor 3,0 (+-0,05) de la palierul de jos; zidurile
+                    (slot 8 la |x| > 0,95) >= 0,20 groase pe ambele parti; pas 8d: fusta pana la
+                    <= -1,5 pe toate cele patru laturi si 16 contratrepte pe slotul 29 spre -Z.
   sf_sea_lions      UN nod SeaLions (FlockProp: un mesh); pluta (scandurile, sloturile 23/9)
                     4,0 x 3,0 (+-0,05) centrata, incaleca Y 0; leii (sloturile 2/4) >= 25 % din
                     triunghiuri; <= 1800 tri.
@@ -62,6 +63,7 @@ SHEDS = {"sf_pier_shed": ("PierShed", 20.0), "sf_pier_shed_short": ("PierShed_Sh
 HILLS = ("Hill_A", "Hill_B", "Hill_C")
 CITIES = ("City_A", "City_B")
 FORBIDDEN = {14, 15, 16, 30}
+STAIR_SKIRT = 1.5            # pas 8d: cat trebuie sa coboare fusta scarii (masurat pe cele 4 asezari)
 
 
 def _box(ps):
@@ -362,7 +364,20 @@ def check_stair(bad, nodes):
     (x0, x1), (y0, y1), (z0, z1) = _box(d["verts"])
     _near(bad, "gabarit", "latimea", x1 - x0, 2.5, 0.01)
     _near(bad, "gabarit", "centrul X", (x0 + x1) * 0.5, 0.0, 0.01)
-    _near(bad, "gabarit", "baza", y0, 0.0, 0.005)
+    # pas 8d: fusta pana la cel putin STAIR_SKIRT sub origine, pe TOATE cele patru laturi (zidurile,
+    # fata palierului de jos, spatele palierului de sus), ca rampa sa intre in panta
+    if y0 > -STAIR_SKIRT + 1e-3:
+        bad.append("(fusta) baza la %.3f, contract <= %.2f" % (y0, -STAIR_SKIRT))
+    sides = {
+        "zidul din stanga": lambda p: p[0] < -1.24,
+        "zidul din dreapta": lambda p: p[0] > 1.24,
+        "fata (Z 0)": lambda p: abs(p[2]) < 0.005 and abs(p[0]) <= 1.0,
+        "spatele (Z 5)": lambda p: abs(p[2] - 5.0) < 0.005 and abs(p[0]) <= 1.0,
+    }
+    for label, pred in sides.items():
+        ys = [p[1] for p in d["verts"] if pred(p)]
+        if not ys or min(ys) > -STAIR_SKIRT + 1e-3:
+            bad.append("(fusta) %s coboara doar la %s" % (label, "%.3f" % min(ys) if ys else "-"))
     _near(bad, "gabarit", "muchia din fata (Z minim)", z0, 0.0, 0.01)
     _near(bad, "gabarit", "capatul de sus (Z maxim)", z1, 5.0, 0.02)
     # treptele si palierele: triunghiurile orizontale cu fata in sus, pe slotul 8, in latimea
@@ -378,8 +393,17 @@ def check_stair(bad, nodes):
         _near(bad, "urcare", "urcarea de la palierul de jos", rise, 3.0, 0.05)
     else:
         bad.append("(urcare) nicio treapta pe slotul 8")
+    # contratreptele: 16 fete verticale spre -Z (spre vale), pe slotul 29 (mai inchis decat treptele)
+    risers = 0
+    for t, k in zip(d["tris"], ts):
+        n, area = _tri_geo(d, t)
+        if k == 29 and n[2] < -0.98 and area > 0.05:
+            risers += 1
+    if risers < 2 * 16:
+        bad.append("(contratrepte) %d triunghiuri pe slotul 29 spre -Z, contract >= 32 (16 trepte)" % risers)
     for side, sg in (("stanga", -1), ("dreapta", 1)):
-        w = _pts(d, {8}, lambda p, s=sg: s * p[0] > 0.95)
+        # pe rampa (Z 0,5..4,5), fara pilele de capat (mai groase, 0,29)
+        w = _pts(d, {8}, lambda p, s=sg: s * p[0] > 0.95 and 0.5 < p[2] < 4.5)
         th = (max(abs(p[0]) for p in w) - min(abs(p[0]) for p in w)) if w else 0.0
         if th < 0.20 - 1e-3:
             bad.append("(zid) zidul din %s are %.3f m, contract >= 0,20" % (side, th))
@@ -576,6 +600,12 @@ def sabotages(key):
              _mv(N, lambda p: abs(p[0]) < 1.001 and p[2] > 4.39 and p[1] > 3.0, lambda p: (p[0], p[1] + 0.5, p[2]))),
             ("zidul din dreapta subtiat la 0,10", "zid",
              _mv(N, lambda p: abs(p[0] - 1.0) < 0.001, lambda p: (1.15, p[1], p[2]))),
+            ("fusta taiata la Y 0 (scara 8c)", "fusta",
+             _mv(N, lambda p: p[1] < -0.01, lambda p: (p[0], 0.0, p[2]))),
+            ("fusta din dreapta scurtata la -0,5", "fusta",
+             _mv(N, lambda p: p[0] > 1.24 and p[1] < -0.01, lambda p: (p[0], -0.5, p[2]))),
+            ("contratreptele pe slotul treptelor (8)", "contratrepte",
+             lambda g, b: _uv_where(g, b, N, lambda p, k: k == 29, 8.5 / 32)),
         ]
     elif key == "sf_sea_lions":
         N = "SeaLions"

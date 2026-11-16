@@ -118,12 +118,14 @@ inchis lizibil din orice azimut (inelul il roteste).
 N1 -- scara publica (`sf_stair_lane.png`). Originea in centrul muchiei din fata a palierului de
 jos, la sol; urca spre +Z Godot (-Y Blender). Modul: 2,5 m lat, 5,0 m adancime, +3,0 m; urmatorul
 modul se pune la (0, +3,0, +5,0) si palierul lui de jos continua palierul de sus al acestuia.
+Pas 8d: rampa PLINA, cu fusta pana la -1,8 sub origine pe tot conturul.
   N1. Palierul de jos (0..0,6 m, fata la +0,15) si palierul de sus (4,4..5,0 m, fata la +3,15).
   N2. 16 trepte de 0,1875 x 0,253, intre ziduri (2,0 m liber): fetele de calcare CONCRETE 8,
-      contratreptele MARBLE_GREY 29; masa plina pana la sol.
-  N3. Zidurile laterale pline de 0,25 m (CONCRETE 8), paralele cu panta, ~0,95 m peste trepte.
-  N4. Copertina alba (FOAM_WHITE 22) pe ziduri, in trei bucati (plat jos, panta, plat sus).
-  N5. Patru pile patrate albe (22) cu capac: doua jos, doua sus.
+      contratreptele MARBLE_GREY 29 coborat cu o tenta in vertex colors; masa plina pana la -1,8.
+  N3. Zidurile-parapet pline de 0,25 m (CONCRETE 8), de la -1,8 pana la 0,90 peste paliere,
+      paralele cu panta.
+  N4. Copertina alba (FOAM_WHITE 22) de 0,08, dintr-o bucata (plat jos, panta, plat sus).
+  N5. Patru pile pline (beton, capac alb) la capete: doua jos, doua sus.
 
 T1 -- leii de mare pe pluta (`sf_sea_lions.png`). UN nod `SeaLions`; originea in centrul plutei,
 la apa (Y 0).
@@ -905,53 +907,97 @@ def build_horizon():
 
 
 # ============================================================ N1: scara publica
+# Pas 8d (16 nov 2026): rescrisa ca rampa PLINA de beton. Prima versiune (8c) avea zidurile si
+# pilele subtiri si nimic sub Y 0; in joc se vedeau doar stalpii albi (`p8_val3_scari_liber.png`).
+# Contractul modulului NU s-a schimbat: 2,5 m lat, 5,0 m adancime (Z Godot 0 -> +5), +3,0 m,
+# originea in centrul muchiei din fata a palierului de jos, la sol; urmatorul modul la (0, +3, +5).
+# Nou: FUSTA pana la -ST_SKIRT pe tot conturul (laturi, fata, spate), ca rampa sa intre in panta
+# oriunde terenul cade sub ea; treptele CONCRETE 8, contratreptele MARBLE_GREY 29 coborat cu o
+# tenta (dungi lizibile de departe); parapet plin de 0,25 cu copertina alba groasa; pile pline la
+# capete (la imbinarea a doua module pilele de sus + de jos fac un bloc de 0,64 m).
 ST_D, ST_H = 5.0, 3.0
 ST_L0 = 0.15
 ST_N = 16
 ST_RISE = ST_H / ST_N
 ST_TREAD = (ST_D - 1.2) / (ST_N - 1)
 ST_IN, ST_OUT = 1.0, 1.25
+ST_SKIRT = 1.8              # cat coboara fusta sub originea modulului (vezi raportul de la 8d)
+ST_PARA = 0.50              # parapetul peste palier (copertina +0,08): la 0,90 ascundea treptele din drum
+ST_COPE = 0.08
+ST_PIER = 0.32              # lungimea pilei de capat
+ST_RISER_TINT = (0.62, 0.62, 0.64)   # contratreapta: marmura gri inchisa cu ~1/4 in sRGB
+R_RISER = 106
 
 
 def stair_fn(b):
-    # N1 + N2: profilul (y, z) cu paliere si trepte, extrudat pe latimea libera
-    pts = [(0.0, 0.0), (0.0, ST_L0)]
+    S = -ST_SKIRT
+    # N1 + N2: masa plina, profilul (y, z) extrudat pe latimea libera. Capacele raman (sunt in
+    # ziduri, nu se vad): fara ele fasia e deschisa si `recalc_face_normals` a intors o contratreapta
+    # (masurat: 15 din 16 spre vale, una culeasa).
+    pts = [(0.0, S), (0.0, ST_L0)]
     y, z = -0.6, ST_L0
     for k in range(ST_N):
         pts.append((y, z))
         z += ST_RISE
         pts.append((y, z))
         y -= ST_TREAD
-    pts += [(-ST_D, ST_L0 + ST_H), (-ST_D, 0.0)]
+    pts += [(-ST_D, ST_L0 + ST_H), (-ST_D, S)]
     faces = prism_yz(b, pts, -ST_IN, ST_IN, CONCRETE)
+    bmesh.ops.recalc_face_normals(b.bm, faces=list(faces))
+    risers = []
     for f in faces:
         f.normal_update()
-        if abs(f.normal.y) > 0.9 and f.calc_center_median().z > 0.05 and f.calc_center_median().y < -0.01:
-            f[b.slot] = STONE                                    # contratreptele
-    # N3-N5: pe fiecare latura, soclu plin + banda de balustrada umbrita + stalpi + mana curenta,
-    # intre doua pile patrate (jos si sus). Soclul are 0,25 m: zidul cerut >= 0,20.
-    n0, n1 = ST_L0, ST_L0 + ST_H
+        c = f.calc_center_median()
+        if f.normal.y > 0.9 and c.z > ST_L0 and -ST_D + 0.01 < c.y < -0.01:
+            f[b.slot] = R_RISER                                  # contratreapta (spre vale)
+            risers.append(f)
+    # contratreptele cu varfuri proprii: tenta din vertex colors nu curge pe trepte
+    bmesh.ops.split(b.bm, geom=risers, use_only_faces=False)
+    n0, n1 = ST_L0 + ST_PARA, ST_L0 + ST_H + ST_PARA
     ya, yb = -0.6, -(ST_D - 0.6)
     for s in (-1, 1):
         xs = sorted((s * ST_IN, s * ST_OUT))
-        prism_yz(b, [(ya, 0.0), (ya, n0 + 0.30), (yb, n1 + 0.30), (yb, 0.0)], xs[0], xs[1], CONCRETE)
-        xi = sorted((s * (ST_IN + 0.05), s * (ST_OUT - 0.05)))
-        prism_yz(b, [(ya, n0 + 0.29), (ya, n0 + 0.86), (yb, n1 + 0.86), (yb, n1 + 0.29)], xi[0], xi[1],
-                 STONE)
-        xc = s * (ST_IN + ST_OUT) * 0.5
-        b.beam((xc, ya, n0 + 0.91), (xc, yb, n1 + 0.91), (0.25, 0.12), WHITE)
-        for t in (0.25, 0.5, 0.75):
-            yy = ya + (yb - ya) * t
-            zz = n0 + (n1 - n0) * t
-            box_mm(b, xs[0], xs[1], yy - 0.09, yy + 0.09, zz + 0.25, zz + 0.88, WHITE)
-        xp = sorted((s * 0.92, s * ST_OUT))
-        box_mm(b, xp[0], xp[1], -0.6, 0.0, 0.0, n0 + 1.25, WHITE)
-        box_mm(b, xp[0], xp[1], -ST_D, yb, 0.0, n1 + 1.25, WHITE)
+        # N3 zidul-parapet plin, de la fusta pana la 0,90 peste palier, paralel cu panta
+        prism_yz(b, [(0.0, S), (0.0, n0), (ya, n0), (yb, n1), (-ST_D, n1), (-ST_D, S)], xs[0], xs[1],
+                 CONCRETE)
+        # N4 copertina alba: o singura bucata (plat, panta, plat), 0,08 groasa, 2 cm spre interior
+        xc = sorted((s * (ST_IN - 0.02), s * ST_OUT))
+        c = ST_COPE
+        prism_yz(b, [(0.0, n0), (0.0, n0 + c), (ya, n0 + c), (yb, n1 + c), (-ST_D, n1 + c), (-ST_D, n1),
+                     (yb, n1), (ya, n0)], xc[0], xc[1], WHITE)
+        # N5 pilele de capat: corp de beton pana la +0,25 peste copertina, capac alb
+        xp = sorted((s * (ST_IN - 0.04), s * ST_OUT))
+        for y0, y1, top in ((0.0, -ST_PIER, n0 + c), (-ST_D + ST_PIER, -ST_D, n1 + c)):
+            box_mm(b, xp[0], xp[1], y1, y0, S, top + 0.17, CONCRETE)
+            box_mm(b, xp[0], xp[1], y1, y0, top + 0.17, top + 0.27, WHITE)
 
 
 def build_stair():
-    return make("StairLane", stair_fn, dict(samples=24, dist=1.2, gradient="vertical", low=0.80,
-                                            high=1.0, power=0.8, floor=0.50, strength=0.6))
+    b = Builder()
+    stair_fn(b)
+    o = b.to_object("StairLane")
+    attr = o.data.attributes["slot"]
+    riser = set()
+    for poly in o.data.polygons:
+        if int(attr.data[poly.index].value) == R_RISER:
+            attr.data[poly.index].value = STONE
+            riser.update(poly.vertices)
+            # dupa `split` fiecare contratreapta e o insula deschisa, iar `recalc_face_normals` din
+            # `to_object` o orienteaza la intamplare (masurat: una din 16 intoarsa, deci culeasa)
+            if poly.normal.y < 0.0:
+                poly.flip()
+    o.data.update()
+    uv_from_slots(o)
+    o.data.materials.clear()
+    o.data.materials.append(atlas_material())
+    zs = [v.co.z for v in o.data.vertices]
+    bake_ao(o, samples=24, dist=1.2, gradient="vertical", low=0.80, high=1.0, power=0.8, floor=0.50,
+            strength=0.6, z_range=(min(zs), max(zs)))
+    ca = o.data.color_attributes["AO"]
+    for vi in riser:
+        c = ca.data[vi].color
+        ca.data[vi].color = (c[0] * ST_RISER_TINT[0], c[1] * ST_RISER_TINT[1], c[2] * ST_RISER_TINT[2], 1.0)
+    return o
 
 
 # ============================================================ T1: leii de mare pe pluta

@@ -10,9 +10,17 @@ extends Node
 ##       ca sa aseze podeaua fiecarei case pe teren (Track25 n-are trotuar: podeaua = cota cea mai
 ##       inalta a terenului pe linia fatadei, adica capatul de SUS al casei pe strada in panta).
 ##
+##   godot --headless --fixed-fps 60 --path . res://tools/ProbeSfCase.tscn -- ##       --dump-baked=res://tools/data/sf_route_baked.tsv
+##       Punctele coapte ale buclei (ruta 0, x y z Godot, in ordinea indicilor). Generatorul (pasul
+##       8d) le citeste ca sa puna ferestrele trotuarelor pe punctele coapte si sa stie cota EXACTA a
+##       trotuarului (placa la cota buzei asfaltului, liniara intre doua puncte coapte). Se reface
+##       odata cu harta de fractii, adica doar daca se muta traseul.
+##
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeSfCase.tscn [-- --sabotaj]
 ##       GARDA, pe scena reala (coliziunea reala a terenului, curbele coapte):
 ##         1. pe linia fatadei terenul nu iese peste podea (> 0,05 m = casa ingropata in fata);
+##            (pasul 8d) „terenul" e suprafata de sus: trotuarul, unde exista, altfel terenul — deci si
+##            trotuarul ridicat peste prag ingroapa usa si pica garda;
 ##         2. fusta (podeaua - 2,4) nu ramane in aer nicaieri pe fatada si pe laturile LIBERE
 ##            (capetele de rand) — altfel se vede golul de sub casa;
 ##         3. cutia de coliziune (amprenta) sta la >= semilatimea + 1,5 m de axa soselei si a
@@ -48,6 +56,7 @@ const GROUND_RECTS: Array[Rect2] = [
 ]
 
 var _dump := ""
+var _dump_baked := ""
 var _sabotage := false
 var _sabotage_end := false
 var _space: PhysicsDirectSpaceState3D
@@ -61,6 +70,8 @@ func _ready() -> void:
 			path = a.trim_prefix("--scene=")
 		elif a.begins_with("--dump-ground="):
 			_dump = a.trim_prefix("--dump-ground=")
+		elif a.begins_with("--dump-baked="):
+			_dump_baked = a.trim_prefix("--dump-baked=")
 		elif a == "--sabotaj":
 			_sabotage = true
 		elif a == "--sabotaj-capat":
@@ -76,11 +87,31 @@ func _ready() -> void:
 		_dump_ground()
 		get_tree().quit(0)
 		return
+	if not _dump_baked.is_empty():
+		var f := FileAccess.open(_dump_baked, FileAccess.WRITE)
+		for p: Vector3 in track.baked:
+			f.store_line("%.4f %.4f %.4f" % [p.x, p.y, p.z])
+		f.close()
+		print("bucla coapta: %d puncte -> %s" % [track.baked.size(), _dump_baked])
+		get_tree().quit(0)
+		return
 	get_tree().quit(_check(track))
 
 
 ## Cota terenului (primul `TerrainBody` sub punct, trecand prin orice altceva), sau NAN.
 func _ground(x: float, z: float) -> float:
+	return _first(x, z, ["TerrainBody"])
+
+
+## Cota SUPRAFETEI pe care sta casa: terenul sau, unde exista, trotuarul (pasul 8d: placa
+## `paved_level_zones` din banda `Shoulders`, la cota buzei asfaltului). Ce se vede in fata casei e
+## suprafata cea mai de sus dintre ele; terenul de sub trotuar e ascuns. Trotuarul e in `Shoulders`
+## sau, cu `paved_level_color`, in corpul lui (`Trotuar`).
+func _surface(x: float, z: float) -> float:
+	return _first(x, z, ["TerrainBody", "Shoulders", "Trotuar"])
+
+
+func _first(x: float, z: float, names: Array) -> float:
 	var excl: Array[RID] = []
 	for _k in 8:
 		var q := PhysicsRayQueryParameters3D.create(Vector3(x, 160.0, z), Vector3(x, -60.0, z))
@@ -89,7 +120,7 @@ func _ground(x: float, z: float) -> float:
 		if hit.is_empty():
 			return NAN
 		var col := hit["collider"] as Node
-		if col != null and String(col.name) == "TerrainBody":
+		if col != null and String(col.name) in names:
 			return float((hit["position"] as Vector3).y)
 		excl.append(hit["rid"])
 	return NAN
@@ -263,7 +294,7 @@ func _check(track: Track) -> int:
 		var skirt := INF
 		while x <= w * 0.5 + 0.001:
 			var p := xf * Vector3(x, 0.0, -6.0)
-			var g := _ground(p.x, p.z)
+			var g := _surface(p.x, p.z)
 			if not is_nan(g):
 				poke = maxf(poke, g - floor_y)
 				skirt = minf(skirt, g - (floor_y - SKIRT))
@@ -285,14 +316,14 @@ func _check(track: Track) -> int:
 			var zz := -6.0
 			while zz <= 6.001:
 				var p := xf * Vector3(sx * w * 0.5, 0.0, zz)
-				var g := _ground(p.x, p.z)
+				var g := _surface(p.x, p.z)
 				if not is_nan(g):
 					skirt = minf(skirt, g - (floor_y - SKIRT))
 				zz += 0.5
 		x = -w * 0.5
 		while x <= w * 0.5 + 0.001:
 			var p := xf * Vector3(x, 0.0, 6.0)
-			var g := _ground(p.x, p.z)
+			var g := _surface(p.x, p.z)
 			if not is_nan(g):
 				back = maxf(back, g - floor_y)
 				back_skirt = minf(back_skirt, g - (floor_y - SKIRT))

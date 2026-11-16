@@ -15753,11 +15753,49 @@ const SHOULDER_ZONE_RAMP: float = 12.0
 ## piatra incintei.
 @export var level_shoulder_tint: Color = Color(0.82, 0.82, 0.84)
 
+## TROTUARUL PE O LATURA, la cota asfaltului, care e DRUM: (frac_de_la,
+## frac_pana_la, latime_m, latura), latura +1 = dreapta sensului de mers, -1 =
+## stanga, 0 = ambele. Fractia e de LUNGIME (`_dists[i] / total`, ca la
+## `level_shoulder_zones`). Gol (implicit) = nimic schimbat, pe orice pista.
+##
+## [b]De ce.[/b] San Francisco (Track25, pasul 8d): intre carosabil si fatadele
+## caselor fasia era teren (nisip). Decizia dezvoltatorului: trotuarul se
+## conduce ca drumul. Mecanismul de tema (`shoulder_width_zones` +
+## `shoulder_zones_are_road`, Jodhpur) nu se potriveste: e pe AMBELE laturi
+## (pe SF casele stau adesea pe una singura) si e umarul care COBOARA spre
+## teren, nu o placa la nivel. Asta e pragul plat de mai sus
+## (`level_shoulder_zones`: aceeasi banda `Shoulders`, acelasi material, nicio
+## coliziune noua), pe latura, si numarat de `is_on_road`.
+##
+## Capetele: rampa de [member paved_zone_ramp_m] m (0 = latimea plina pe tot
+## punctul copt din fereastra, iar coborarea se face pe UN segment copt, ~3 m:
+## generatorul pune capetele ferestrei pe punctele coapte pe care le vrea).
+@export var paved_level_zones: Array[Vector4] = []
+@export var paved_zone_ramp_m: float = 3.0
+## Nuanta (vertex color, doar intuneca) a trotuarului si a bordurii de la
+## buza: o fasie de [member paved_kerb_band_m] m mai deschisa marcheaza
+## marginea carosabilului fara nicio treapta.
+@export var paved_level_tint: Color = Color(0.82, 0.82, 0.84)
+@export var paved_kerb_tint: Color = Color(1.0, 1.0, 1.0)
+@export var paved_kerb_band_m: float = 0.0
+## Treapta trotuarului peste buza asfaltului (m), cu fata verticala de bordura.
+## 0 = la nivel (SF). Exista ca garda sa poata fi SABOTATA pe geometria reala
+## (tools/probe_sf_trotuar.gd o ridica la 0,3 m si trebuie sa pice).
+@export var paved_lift_m: float = 0.0
+## Culoarea materialului trotuarului (albedo peste textura de umar a temei). Alpha 0 (implicit) =
+## trotuarul sta in banda `Shoulders`, cu materialul ei. Altfel are plasa, materialul si corpul lui
+## (`Trotuar`): +1 material. Pe SF umarul temei (CONCRETE x dala de beton, x 0,82 pe buza) iese
+## maro-bej (~0,45 pe ecran), la fel de inchis ca nisipul; trotuarul cere beton DESCHIS fara sa
+## schimbe umerii de pe restul pistei. Componente > 1 sunt voite: dala are media ~0,63.
+@export var paved_level_color: Color = Color(0, 0, 0, 0)
+
 
 ## Latimea pragului plat la un index (0 in afara ferestrelor), cu rampa
-## neteda la capete. Vezi [member level_shoulder_zones].
-func _level_shoulder_at(i: int) -> float:
-	if level_shoulder_zones.is_empty():
+## neteda la capete. Vezi [member level_shoulder_zones]. Cu `side_sign` +-1 se
+## adauga trotuarul de pe latura aceea (`paved_level_zones`); 0 (implicit) =
+## doar pragurile pe ambele laturi, exact ca inainte.
+func _level_shoulder_at(i: int, side_sign: float = 0.0) -> float:
+	if level_shoulder_zones.is_empty() and paved_level_zones.is_empty():
 		return 0.0
 	var n := baked.size()
 	var total := _dists[n] if _dists.size() > n else 0.0
@@ -15768,6 +15806,43 @@ func _level_shoulder_at(i: int) -> float:
 	for z in level_shoulder_zones:
 		var k := TrackSideSampler._ring_window(frac, z.x, z.y,
 			SHOULDER_ZONE_RAMP / total)
+		out = maxf(out, z.z * smoothstep(0.0, 1.0, k))
+	if side_sign == 0.0:
+		return out
+	return maxf(out, _paved_level_at(i, side_sign))
+
+
+## Latimea trotuarului pe latura (`paved_level_zones`) la un index; 0 in afara.
+## Cache per (index, latura): `is_on_road` o cere de cateva ori pe cadru per masina.
+var _pl_cache := PackedFloat32Array()
+var _pl_n := -1
+
+func _paved_level_at(i: int, side_sign: float = 0.0) -> float:
+	if paved_level_zones.is_empty():
+		return 0.0
+	var n := baked.size()
+	var total := _dists[n] if _dists.size() > n else 0.0
+	if total <= 0.0:
+		return 0.0
+	if side_sign != 0.0:
+		if _pl_n != n:
+			_pl_n = n
+			_pl_cache.resize(n * 2)
+			for k in n:
+				_pl_cache[k * 2] = _paved_level_raw(k, -1.0, n, total)
+				_pl_cache[k * 2 + 1] = _paved_level_raw(k, 1.0, n, total)
+		return _pl_cache[posmod(i, n) * 2 + (1 if side_sign > 0.0 else 0)]
+	return _paved_level_raw(i, 0.0, n, total)
+
+
+func _paved_level_raw(i: int, side_sign: float, n: int, total: float) -> float:
+	var frac := _dists[posmod(i, n)] / total
+	var out := 0.0
+	for z in paved_level_zones:
+		if side_sign != 0.0 and z.w != 0.0 and signf(z.w) != signf(side_sign):
+			continue
+		var k := TrackSideSampler._ring_window(frac, z.x, z.y,
+			maxf(paved_zone_ramp_m, 0.0001) / total)
 		out = maxf(out, z.z * smoothstep(0.0, 1.0, k))
 	return out
 
@@ -15808,6 +15883,13 @@ func _build_shoulders() -> void:
 	# de lespezi vrea pietre mai mari decat pietrisul — vezi SHOULDER_TILE despre
 	# ce supravietuieste mipmap-ului pe o banda ingusta.
 	var tile := float(theme_flag("shoulder_tile", SHOULDER_TILE))
+	# Trotuarul pe latura (`paved_level_zones`) in plasa lui, cand pista ii da culoare proprie.
+	var st_pav := st
+	var pav_own := paved_level_color.a > 0.0 and not paved_level_zones.is_empty()
+	var pav_any := false
+	if pav_own:
+		st_pav = SurfaceTool.new()
+		st_pav.begin(Mesh.PRIMITIVE_TRIANGLES)
 	# Latimea per (punct, latura), coapta INAINTE de emitere: doua segmente
 	# vecine trebuie sa foloseasca exact aceeasi valoare in punctul comun, altfel
 	# banda se rupe si fisura devine o capcana de coliziune.
@@ -15857,10 +15939,50 @@ func _build_shoulders() -> void:
 			# ating pe o muchie comuna, nu se suprapun.
 			var inner0 := baked[i] + s0 * width_at_index(i) * side_sign
 			var inner1 := baked[j] + s1 * width_at_index(j) * side_sign
+			# TROTUARUL PE LATURA (`paved_level_zones`): acelasi prag plat, dar
+			# pe o singura latura, cu bordura deschisa la buza si (doar pentru
+			# sabotajul gărzii) o treapta. Fara zone, nimic de aici nu ruleaza
+			# si ramura de mai jos e exact cea de dinainte.
+			var pv0 := _paved_level_at(i, side_sign)
+			var pv1 := _paved_level_at(j, side_sign)
+			if pv0 > 0.01 or pv1 > 0.01:
+				var plv0 := maxf(pv0, lv0)
+				var plv1 := maxf(pv1, lv1)
+				var lift0 := Vector3.UP * (paved_lift_m if pv0 > 0.01 else 0.0)
+				var lift1 := Vector3.UP * (paved_lift_m if pv1 > 0.01 else 0.0)
+				var pp0 := _shoulder_patch(i, side_sign)
+				var pp1 := _shoulder_patch(j, side_sign)
+				if paved_lift_m > 0.001:
+					# fata bordurii, verticala, spre carosabil
+					var kc := INNER_SHADE_SKIRT
+					_paved_quad(st_pav, side_sign, inner0, inner0 + lift0, inner1, inner1 + lift1,
+						kc, kc, kc, kc, 0.0, paved_lift_m / tile, v0, v1)
+				var kb0 := minf(paved_kerb_band_m, plv0)
+				var kb1 := minf(paved_kerb_band_m, plv1)
+				var a0 := inner0 + lift0
+				var a1 := inner1 + lift1
+				if kb0 > 0.01 or kb1 > 0.01:
+					var k0 := a0 + s0 * kb0 * side_sign
+					var k1 := a1 + s1 * kb1 * side_sign
+					_paved_quad(st_pav, side_sign, a0, k0, a1, k1,
+						paved_kerb_tint * pp0, paved_kerb_tint * pp0,
+						paved_kerb_tint * pp1, paved_kerb_tint * pp1,
+						0.0, paved_kerb_band_m / tile, v0, v1)
+					a0 = k0
+					a1 = k1
+				var e0 := inner0 + lift0 + s0 * plv0 * side_sign
+				var e1 := inner1 + lift1 + s1 * plv1 * side_sign
+				pav_any = true
+				_paved_quad(st_pav, side_sign, a0, e0, a1, e1,
+					paved_level_tint * pp0, paved_level_tint * pp0,
+					paved_level_tint * pp1, paved_level_tint * pp1,
+					paved_kerb_band_m / tile, maxf(plv0, plv1) / tile, v0, v1)
+				inner0 = e0
+				inner1 = e1
 			# PRAGUL PLAT (`level_shoulder_zones`): o fasie orizontala la cota
 			# buzei, apoi umarul obisnuit porneste de la marginea ei. Zero in
 			# afara ferestrelor, deci nimic nu se emite si `inner` ramane buza.
-			if lv0 > 0.01 or lv1 > 0.01:
+			elif lv0 > 0.01 or lv1 > 0.01:
 				var l0 := inner0 + s0 * lv0 * side_sign
 				var l1 := inner1 + s1 * lv1 * side_sign
 				var ul := maxf(lv0, lv1) / tile
@@ -16028,6 +16150,38 @@ func _build_shoulders() -> void:
 		_tex(String(theme_flag("shoulder_texture",
 			"res://assets/textures/surface_gravel.png"))), 1.0, 0.5,
 		BaseMaterial3D.CULL_BACK, null, null, true, null, "Shoulders")
+	if pav_own and pav_any:
+		st_pav.index()
+		st_pav.generate_normals()
+		var pc := paved_level_color
+		pc.a = 1.0
+		_add_mesh_with_collision(st_pav.commit(), pc,
+			_tex(String(theme_flag("shoulder_texture",
+				"res://assets/textures/surface_gravel.png"))), 1.0, 0.5,
+			BaseMaterial3D.CULL_BACK, null, null, true, null, "Trotuar")
+
+
+## Un patrulater al trotuarului (`paved_level_zones`): `a0`/`a1` marginea dinspre
+## carosabil, `b0`/`b1` cea dinspre case, la indicii i / j. Winding-ul ca la
+## pragul plat (fata in sus pe ambele laturi). Aceeasi ordine da si fata
+## verticala a bordurii (a = jos, b = sus) vizibila dinspre carosabil.
+static func _paved_quad(st: SurfaceTool, side_sign: float, a0: Vector3, b0: Vector3,
+		a1: Vector3, b1: Vector3, ca0: Color, cb0: Color, ca1: Color, cb1: Color,
+		ua: float, ub: float, v0: float, v1: float) -> void:
+	if side_sign < 0.0:
+		st.set_color(ca0); st.set_uv(Vector2(ua, v0)); st.add_vertex(a0)
+		st.set_color(cb0); st.set_uv(Vector2(ub, v0)); st.add_vertex(b0)
+		st.set_color(ca1); st.set_uv(Vector2(ua, v1)); st.add_vertex(a1)
+		st.set_color(cb0); st.set_uv(Vector2(ub, v0)); st.add_vertex(b0)
+		st.set_color(cb1); st.set_uv(Vector2(ub, v1)); st.add_vertex(b1)
+		st.set_color(ca1); st.set_uv(Vector2(ua, v1)); st.add_vertex(a1)
+	else:
+		st.set_color(ca0); st.set_uv(Vector2(ua, v0)); st.add_vertex(a0)
+		st.set_color(ca1); st.set_uv(Vector2(ua, v1)); st.add_vertex(a1)
+		st.set_color(cb0); st.set_uv(Vector2(ub, v0)); st.add_vertex(b0)
+		st.set_color(cb0); st.set_uv(Vector2(ub, v0)); st.add_vertex(b0)
+		st.set_color(ca1); st.set_uv(Vector2(ua, v1)); st.add_vertex(a1)
+		st.set_color(cb1); st.set_uv(Vector2(ub, v1)); st.add_vertex(b1)
 
 
 ## Cat de lat trebuie sa fie umarul intr-un punct ca panta lui sa ramana sub
@@ -16077,8 +16231,9 @@ func _shoulder_width(i: int, side_sign: float) -> float:
 			if ramp > 0.0:
 				w_min = maxf(w_min, lerpf(w_min, z.z, ramp))
 	var w := w_min
-	# Pragul plat (`level_shoulder_zones`) muta inceputul pantei in afara.
-	var lvl := _level_shoulder_at(i)
+	# Pragul plat (`level_shoulder_zones`) muta inceputul pantei in afara; la
+	# fel trotuarul de pe latura asta (`paved_level_zones`).
+	var lvl := _level_shoulder_at(i, side_sign)
 	for _pass in 2:
 		var p := base + lat * (width_at_index(i) + lvl + w)
 		# Acelasi plafon ca la emitere: latimea se calculeaza pentru caderea
@@ -18669,6 +18824,12 @@ func is_on_road(index: int, pos: Vector3, route: int = 0) -> bool:
 	# se adauga la latimea „pe drum". Fara cheia asta `paved` e 0 si ramurile de
 	# mai jos sunt EXACT cele de dinainte (dovedit cu tools/sv_on_road_diff.gd).
 	var paved := _paved_shoulder_at(index) if route == 0 else 0.0
+	# TROTUARUL PE LATURA (`paved_level_zones`, San Francisco): latura o da
+	# semnul pozitiei fata de ax. Fara zone, `paved` ramane exact cel de sus.
+	if route == 0 and not paved_level_zones.is_empty() and baked.size() > 1:
+		var bi := posmod(index, baked.size())
+		var lat_s := (pos - baked[bi]).dot(_side_at(bi))
+		paved = maxf(paved, _paved_level_at(bi, 1.0 if lat_s >= 0.0 else -1.0))
 	if route != 0 or (_width_profile().is_empty() and paved <= 0.0):
 		return r.is_on_road(index, pos)
 	if paved > 0.0:

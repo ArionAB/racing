@@ -1957,6 +1957,21 @@ V2_HORT = _v2_flag("SF_V2_HORTENSII")         # G: hortensiile pe modele
 V2_CHIPAROS = _v2_flag("SF_V2_CHIPAROS")      # H: parcul cu chiparosi + doua palcuri
 V2_ARBORI = _v2_flag("SF_V2_ARBORI")          # I: arborii de strada (B, G)
 V2_ARBORI_LANT = V2_ARBORI and _v2_flag("SF_V2_ARBORI_LANT")   # I: si pe lant (latura de E)
+# PASUL 8d (17 nov 2026): STALPII SOLIZI. Semafoarele, felinarele si arborii de strada primesc cilindrul
+# `trunk` al WorldProp (`coliziune = "trunk"`, raza fusului din `WorldProp.TRUNK_RADIUS`): corpuri
+# STATICE, nu BumpProp (plafonul de 64 ramane neatins). Semaforul de pe strada tramvaiului de la y ~102
+# (traversat de masini in turul 1, pana la 34 m/s) se muta intai: stalpul la SEMAFOR_B1_LAT m de ax.
+#   SF_STALPI=0          stalpii fara coliziune (ca la valul 2), restul pasului 8d neschimbat
+#   SF_STALPI_SABOTAJ=1  cate un stalp din fiecare familie, solid, pe dreapta de start (contorul TREBUIE sa-i
+#                        numere: dovada ca zero-urile din lot sunt masurate)
+#   SF_SEMAFOR_B1=0      semaforul de la y ~102 ramane la 8,5 m (A/B)
+#   SF_PAS8D=0           tot pasul 8d stins (trotuare, stalpi, semaforul): scena de dinainte, octet cu octet
+P8D_ALL = os.environ.get("SF_PAS8D", "1") == "1"
+P8D_STALPI = P8D_ALL and VAL2 and os.environ.get("SF_STALPI", "1") == "1"
+P8D_STALPI_SAB = P8D_ALL and VAL2 and os.environ.get("SF_STALPI_SABOTAJ", "0") == "1"
+P8D_SEM_B1 = P8D_ALL and VAL2 and os.environ.get("SF_SEMAFOR_B1", "1") == "1"
+SEMAFOR_B1_LAT = 11.0
+POLE_COLL = "trunk" if P8D_STALPI else "none"
 
 # =============================================================================================
 # PASUL 6 (brief §7 pasul 6, 15 nov 2026): serpentinele (caramida + hortensii pe blocul solid),
@@ -2391,6 +2406,259 @@ if B200 and P8_CASE:
     CASE_ROWS.append(("E", "EBE", _ob, (0.0, 1.0), 1.0, CASE_SETBACK, 16.0, 11, None))
     CASE_ROWS.append(("E", "EBV", _ob, (0.0, 1.0), -1.0, CASE_SETBACK, 20.0, 10, None))
 
+# =============================================================================================
+# PASUL 8d (17 nov 2026): TROTUARELE. Decizia dezvoltatorului: fasia dintre carosabil si fatade
+# devine trotuar, iar o masina pe el are viteza de drum, nu plafonul de offroad. Doar unde strada
+# are case (randurile din fata B, D, E, G si sirul caselor pictate de pe coama, C), doar pe latura
+# cu case, de la buza asfaltului pana SUB fatada (+PAVE_OVER: fusta acopera muchia, fara fasie de
+# nisip intre trotuar si casa).
+#   - GEOMETRIA nu e aici: Track25 declara zonele (`paved_level_zones`, Vector4(de_la, pana_la,
+#     latime, latura), fractii de LUNGIME pe bucla) si track.gd le construieste ca prag PLAT la cota
+#     buzei, in banda `Shoulders` (acelasi material de beton al temei, aceeasi coliziune), iar
+#     `is_on_road` le numara ca drum. La nivel, fara treapta (brief §5.1: un prag > 0,3 m e zid);
+#     marginea carosabilului e o fasie de bordura mai deschisa (`paved_kerb_band_m`).
+#   - CAPETELE: placa se ingusteaza pe PAVE_RAMP m (`paved_zone_ramp_m`, smoothstep) DINCOLO de
+#     capatul randului. Prima varianta cobora pe un singur segment copt (1,5-3 m): o masina care
+#     venea pe nisip, la 9-10 m de ax, dadea in capatul placii ca intr-un prag de 0,3 m pe 0,5 m
+#     (masurat: o ejectare la 29 m/s, `lovit=Trotuar`, la intrarea pe ocol). Pe 8 m panta vazuta din
+#     mers e ~9 grade. Capatul se scurteaza (cu cate 0,5 m) cat timp rampa ar trece la < 2 m de axa
+#     unui tramvai sau ar lua pe jumatate o masina parcata.
+#   - LANTUL: pe fiecare latura O singura placa, de la primul rand pana dupa ultima masina parcata a
+#     ultimului bloc (masinile parcate „perpendicular pe trotuar", brief §3): intre coltul de jos al
+#     unui rand si prima masina parcata sunt 0,65 m, deci acolo nu incape nicio rampa. Latimea pe
+#     lant acopera si capatul dinspre case al masinilor parcate (11,1 m de ax).
+#   - COTA: placa e la cota buzei, liniara intre doua puncte coapte. Generatorul o stie exact din
+#     `tools/data/sf_route_baked.tsv` (`ProbeSfCase --dump-baked`, punctele coapte ale buclei) si
+#     aseaza pe ea tot ce sta pe fasie: podeaua caselor (PAVE_FLOOR_OVER peste trotuarul de la
+#     capatul de SUS al fatadei, cat permite fusta), felinarele, arborii, semafoarele, bancile,
+#     gradinitele (prin `v2_ground`). Masinile parcate si mobilierul mic se aseaza singure (raza la
+#     pornire).
+#   SF_TROTUAR=0  fara trotuare (restul pasului 8d, stalpii solizi, ramane); SF_PAS8D=0 = scena de
+#                 dinainte, octet cu octet (comutatoarele stalpilor: blocul VALUL 2, langa `V2_ARBORI_LANT`)
+# =============================================================================================
+P8D = P8D_ALL and B200 and P8_CASE and os.environ.get("SF_TROTUAR", "1") == "1"
+PAVE_OVER = 0.30          # trotuarul intra sub fatada
+PAVE_KERB_BAND = 0.30     # bordura deschisa de la buza (vertex color plin; restul PAVE_TINT)
+PAVE_TINT = (0.80, 0.80, 0.81)
+# Culoarea materialului (peste dala `concrete.png` a temei, media ~0,66 / 0,63 / 0,57): beton DESCHIS,
+# cu material propriu (+1). Umarul temei (CONCRETE pe aceeasi dala) iese maro-bej pe ecran.
+PAVE_COLOR = (1.30, 1.28, 1.30)
+PAVE_FLOOR_OVER = 0.10    # podeaua peste trotuarul de la capatul de sus al fatadei (pragul usii)
+PAVE_FLOOR_MIN = 0.03     # minimul, cand fusta n-ar mai ajunge pe trotuarul de la capatul de jos
+PAVE_RAMP = 8.0           # m de ingustare la capetele placii (dincolo de capatul randului)
+PAVE_CAR_GAP = 0.15       # o masina parcata e ori toata pe placa, ori la atat de ea
+PAVE_TRAM_GAP = 2.0       # rampa nu trece la mai putin de atat de axa unui tramvai
+BAKED_PATH = os.path.join(HERE, "data", "sf_route_baked.tsv")
+PB, PB_S, PB_SIDE = [], [], []
+PB_TOTAL = 0.0
+PB_CELLS = {}
+PB_CELL = 8.0
+PAVE_ZONES = []           # dict: name, zone, side (latura pe bucla), W, a, b (fereastra, m pe bucla), s0, s1 (randul)
+PAVE_W = {}               # (k, latura) -> latimea trotuarului in punctul copt k
+
+if P8D:
+    if not os.path.exists(BAKED_PATH):
+        raise SystemExit("trotuarele: lipseste %s — ruleaza ProbeSfCase --dump-baked=res://tools/data/"
+                         "sf_route_baked.tsv" % os.path.relpath(BAKED_PATH, ROOT))
+    for _l in open(BAKED_PATH, encoding="utf-8"):
+        _tk = _l.split()
+        if len(_tk) == 3:
+            PB.append(tuple(float(v) for v in _tk))
+    _n = len(PB)
+    PB_S = [0.0]
+    for _k in range(_n):
+        _a, _b = PB[_k], PB[(_k + 1) % _n]
+        PB_S.append(PB_S[-1] + math.dist(_a, _b))
+    PB_TOTAL = PB_S[_n]
+    for _k in range(_n):
+        _a, _b = PB[_k], PB[(_k + 1) % _n]
+        _dx, _dz = _b[0] - _a[0], _b[2] - _a[2]
+        _L = math.hypot(_dx, _dz) or 1.0
+        PB_SIDE.append((-_dz / _L, _dx / _L))          # (dir x UP), in XZ Godot: dreapta sensului
+        for _cx in range(int(math.floor(min(_a[0], _b[0]) / PB_CELL)), int(math.floor(max(_a[0], _b[0]) / PB_CELL)) + 1):
+            for _cz in range(int(math.floor(min(_a[2], _b[2]) / PB_CELL)), int(math.floor(max(_a[2], _b[2]) / PB_CELL)) + 1):
+                PB_CELLS.setdefault((_cx, _cz), []).append(_k)
+    # harta veche? punctele de control trebuie sa stea pe curba coapta
+    _worst = max(min((p[0] - g[0]) ** 2 + (p[2] - g[2]) ** 2 for p in PB) for g in MAIN_G[::7])
+    if _worst > 1.0:
+        raise SystemExit("trotuarele: %s e VECHE (un punct de control la %.1f m de curba coapta) — refa-o"
+                         % (os.path.relpath(BAKED_PATH, ROOT), math.sqrt(_worst)))
+
+
+def pb_proj(gx, gz, reach=2):
+    """Proiectia punctului Godot (gx, gz) pe bucla coapta: (k, t, s, lateral cu semn, cota) sau None."""
+    cx, cz = int(math.floor(gx / PB_CELL)), int(math.floor(gz / PB_CELL))
+    best = None
+    seen = set()
+    for ix in range(cx - reach, cx + reach + 1):
+        for iz in range(cz - reach, cz + reach + 1):
+            for k in PB_CELLS.get((ix, iz), ()):
+                if k in seen:
+                    continue
+                seen.add(k)
+                a, b = PB[k], PB[(k + 1) % len(PB)]
+                sx, sz = b[0] - a[0], b[2] - a[2]
+                L2 = sx * sx + sz * sz
+                t = max(0.0, min(1.0, ((gx - a[0]) * sx + (gz - a[2]) * sz) / max(L2, 1e-9)))
+                d2 = (a[0] + sx * t - gx) ** 2 + (a[2] + sz * t - gz) ** 2
+                if best is None or d2 < best[0]:
+                    best = (d2, k, t)
+    if best is None:
+        return None
+    _d2, k, t = best
+    a, b = PB[k], PB[(k + 1) % len(PB)]
+    sd = PB_SIDE[k]
+    lat = (gx - a[0]) * sd[0] + (gz - a[2]) * sd[1]
+    return k, t, PB_S[k] + (PB_S[k + 1] - PB_S[k]) * t, lat, a[1] + (b[1] - a[1]) * t
+
+
+def pave_y(mx, my):
+    """Cota trotuarului in punctul de HARTA (mx, my), sau None in afara lui."""
+    if not PAVE_W:
+        return None
+    pr = pb_proj(mx, -my)
+    if pr is None:
+        return None
+    k, t, _s, lat, y = pr
+    sg = 1 if lat >= 0.0 else -1
+    w = PAVE_W.get((k, sg), 0.0) * (1.0 - t) + PAVE_W.get(((k + 1) % len(PB), sg), 0.0) * t
+    if w < 0.01 or not (HW - 0.01 <= abs(lat) <= HW + w):
+        return None
+    return y
+
+
+def _ss(x):
+    x = max(0.0, min(1.0, x))
+    return x * x * (3.0 - 2.0 * x)
+
+
+def _pave_rebuild():
+    """Latimea in fiecare punct copt, exact ca `Track._paved_level_raw` (fereastra cu rampa PAVE_RAMP)."""
+    PAVE_W.clear()
+    for z in PAVE_ZONES:
+        for k in range(len(PB)):
+            sk = PB_S[k]
+            if z["a"] < sk < z["b"]:
+                w = z["W"] * _ss(min(sk - z["a"], z["b"] - sk) / PAVE_RAMP)
+                key = (k, z["side"])
+                PAVE_W[key] = max(PAVE_W.get(key, 0.0), w)
+
+
+def _pave_span(a_, u_, t_start, t_end):
+    p0 = (a_[0] + u_[0] * t_start, a_[1] + u_[1] * t_start)
+    p1 = (a_[0] + u_[0] * t_end, a_[1] + u_[1] * t_end)
+    pr0, pr1 = pb_proj(p0[0], -p0[1]), pb_proj(p1[0], -p1[1])
+    if pr0 is None or pr1 is None or abs(pr0[3]) > 1.0 or abs(pr1[3]) > 1.0:
+        raise SystemExit("trotuarele: randul nu sta pe bucla coapta (%s, %s)" % (pr0, pr1))
+    if pr1[2] <= pr0[2]:
+        raise SystemExit("trotuarele: randul merge invers sensului buclei")
+    return pr0[2], pr1[2], p0, p1
+
+
+def _pave_side(u_, side_, p0, p1):
+    nrm = (u_[1] * side_, -u_[0] * side_)
+    km = pb_proj((p0[0] + p1[0]) / 2.0, -(p0[1] + p1[1]) / 2.0)[0]
+    sd = PB_SIDE[km]
+    return 1 if nrm[0] * sd[0] + (-nrm[1]) * sd[1] > 0.0 else -1
+
+
+def pave_add_row(name, zone, a_, u_, side_, setb, t_start, t_end, W=None, s_end=None):
+    """Zona de trotuar a unui rand de case: strada (harta) a_ + u_ t, casele pe latura side_ (+1 = la
+    dreapta lui u_), fatada la setb de ax, de la t_start la t_end. `s_end` prelungeste placa pana la acel
+    punct al buclei (lantul: dupa masinile parcate)."""
+    s0, s1, p0, p1 = _pave_span(a_, u_, t_start, t_end)
+    if s_end is not None:
+        s1 = max(s1, s_end)
+    sg = _pave_side(u_, side_, p0, p1)
+    PAVE_ZONES.append(dict(name=name, zone=zone, side=sg, W=(W if W is not None else setb - HW + PAVE_OVER),
+                           a=s0 - PAVE_RAMP, b=s1 + PAVE_RAMP, s0=s0, s1=s1, setb=setb))
+    _pave_rebuild()
+    pave_clip(PAVE_ZONES[-1])
+
+
+def _rect_pts(cx, cy, hx, hy, n=4):
+    return [(cx + hx * (2.0 * i / n - 1.0), cy + hy * (2.0 * j / n - 1.0)) for i in range(n + 1) for j in range(n + 1)]
+
+
+def _car_cover(c):
+    mx, my = c[0], c[1]
+    pts = _rect_pts(mx, my, PARK_LEN / 2.0 + PAVE_CAR_GAP, PARK_W / 2.0 + PAVE_CAR_GAP)
+    ins = [pave_y(px_, py_) is not None for px_, py_ in pts]
+    return all(ins), any(ins)
+
+
+def _end_bad(z, end):
+    """Rampa de la capatul `end` (0 = inceput, 1 = sfarsit) a zonei atinge un tramvai sau ia pe jumatate o
+    masina parcata?"""
+    lo, hi = (z["a"], z["s0"]) if end == 0 else (z["s1"], z["b"])
+    for k in range(len(PB)):
+        if not (lo - 0.5 <= PB_S[k] <= hi + 0.5):
+            continue
+        w = PAVE_W.get((k, z["side"]), 0.0)
+        if w < 0.05:
+            continue
+        sd = PB_SIDE[k]
+        lat = HW
+        while lat <= HW + w + 1e-6:
+            gx, gz = PB[k][0] + sd[0] * lat * z["side"], PB[k][2] + sd[1] * lat * z["side"]
+            for tm in (TRAM1_MAP, TRAM2_MAP):
+                if len(tm) > 1 and min(_pt_seg((gx, -gz), a, b) for a, b in zip(tm, tm[1:])) < PAVE_TRAM_GAP:
+                    return "tramvai"
+            lat += 0.5
+    for c in parked:
+        pr = pb_proj(c[0], -c[1])
+        if pr is None or not (lo - 4.0 <= pr[2] <= hi + 4.0):
+            continue
+        full, anyp = _car_cover(c)
+        if anyp and not full:
+            return "masina parcata"
+    return None
+
+
+def pave_clip(z):
+    z.setdefault("clip", [0.0, 0.0])
+    for end in (0, 1):
+        while True:
+            why = _end_bad(z, end)
+            if why is None:
+                break
+            ext = (z["s0"] - z["a"]) if end == 0 else (z["b"] - z["s1"])
+            if ext <= 0.5:
+                raise SystemExit("trotuarele: capatul %d al zonei %s nu se poate scurta destul (%s)" % (end, z["name"], why))
+            if end == 0:
+                z["a"] += 0.5
+            else:
+                z["b"] -= 0.5
+            z["clip"][end] += 0.5
+            z.setdefault("clip_why", set()).add(why)
+            _pave_rebuild()
+
+
+if P8D:
+    _dsides = {}
+    for (zone, rname, a_, u_, side_, setb, t0_, n_reg, colt_) in CASE_ROWS:
+        _w = CASE_W * n_reg + CASE_W_CORNER * ((1 if colt_ in ("t0", "t1") else 0) + (2 if colt_ == "both" else 0))
+        if zone == "D":
+            # lantul: o placa pe latura (vezi antetul); se aduna intai capetele randurilor
+            s0_, s1_, p0_, p1_ = _pave_span(a_, u_, t0_, t0_ + _w)
+            _dsides.setdefault(side_, []).append((a_, t0_, t0_ + _w, s0_, s1_))
+            continue
+        pave_add_row(rname, zone, a_, u_, side_, setb, t0_, t0_ + _w)
+    for side_, rows_ in sorted(_dsides.items()):
+        first = min(rows_, key=lambda r_: r_[3])
+        last = max(rows_, key=lambda r_: r_[4])
+        # capatul: dupa ultima masina parcata de pe latura asta a lantului
+        _cars_l = [c for c in parked if c[5].startswith("lant") and c[2] == side_]
+        s_cars = (max(pb_proj(c[0], -c[1])[2] for c in _cars_l) + PARK_W / 2.0 + PAVE_CAR_GAP) if _cars_l else last[4]
+        # randurile lantului au acelasi `a_` pe bloc, deci capatul ultimului rand se ia pe bucla (`s_end`)
+        pave_add_row("D" + ("E" if side_ > 0 else "V"), "D", first[0], (0.0, 1.0), side_, CASE_SETBACK,
+                     first[1], first[2], W=PARK_LAT + PARK_LEN / 2.0 + 0.3 - HW, s_end=max(last[4], s_cars))
+    _on = sum(1 for c in parked if _car_cover(c)[0])
+    _off = sum(1 for c in parked if not _car_cover(c)[1])
+    if _on + _off != len(parked):
+        raise SystemExit("trotuarele: %d masini parcate stau pe jumatate pe trotuar" % (len(parked) - _on - _off))
+    PAVE_CARS = (_on, _off)
+
 CASE_HOUSES = []      # dict-uri: nume, zona, fisier, pastel, w, origine (godot), X, Z (godot), podea, ...
 if CASE_ROWS:
     _G = _case_ground_grid()
@@ -2438,6 +2706,20 @@ if CASE_ROWS:
                     d_ += 0.5
             floor_ = max(samples + side_line)
             low = min(samples + side_line)
+            if P8D:
+                # PASUL 8d: pe linia fatadei suprafata e trotuarul (la cota buzei), nu terenul de sub el
+                pv = []
+                k_ = 0.0
+                while k_ <= w_ + 1e-6:
+                    pv.append(pave_y(*_fl(t + k_, setb)))
+                    k_ += 0.5
+                pvs = [v for v in pv if v is not None]
+                if pvs:
+                    surf = [p_ if p_ is not None else g_ for p_, g_ in zip(pv, samples)]
+                    low = min(surf + side_line)
+                    pmax = max(pvs)
+                    floor_ = max(max(surf + side_line), pmax + PAVE_FLOOR_MIN,
+                                 min(pmax + PAVE_FLOOR_OVER, low + CASE_SKIRT - 0.05))
             if floor_ - low > CASE_SKIRT - 0.05:
                 raise SystemExit("casele: %s/%d cade %.2f m pe fatada (fusta %.1f)" % (rname, i_, floor_ - low, CASE_SKIRT))
             ctr = _fl(tc, setb + CASE_D / 2.0)
@@ -2566,11 +2848,11 @@ if CASE_ROWS:
                             'shape = SubResource("Box_casa%d")\n'
                             % (h["name"], X[0], Z[0], X[2], Z[2], o[0], yc, o[2], int(h["w"])))
         from collections import Counter
-        print("casele de rand: %d (%s), colturi %d; fisiere %d; podeaua pe teren (fara trotuar), caderea maxima "
+        print("casele de rand: %d (%s), colturi %d; fisiere %d; podeaua pe %s, caderea maxima "
               "pe o fatada %.2f m (fusta %.1f)" % (
                   len(_placed), ", ".join("%s %d" % kv for kv in sorted(Counter(h["zone"] for h in _placed).items())),
                   sum(1 for h in _placed if h["corner"]), len({h["file"] for h in _placed}),
-                  max(h["drop"] for h in _placed), CASE_SKIRT))
+                  "trotuar (pasul 8d)" if P8D else "teren (fara trotuar)", max(h["drop"] for h in _placed), CASE_SKIRT))
         print("casele: amprenta la >= %.2f m de axa buclei (poligon), %.2f de scurtatura, %.2f de tramvaie, "
               "%.2f de masinile parcate, %.2f de serpentine" % (worst["road"], worst["branch"], worst["tram"],
                                                                  worst["car"], worst["serp"]))
@@ -3061,6 +3343,11 @@ if VAL2 and B200:
 
 
 def v2_ground(mx, my):
+    if P8D:
+        # PASUL 8d: pe trotuar suprafata e placa (la cota buzei), nu terenul de sub ea
+        pv = pave_y(mx, my)
+        if pv is not None:
+            return pv
     v = _case_ground(_V2G1, mx, -my)
     return v if v is not None else _spate_h(_V2G2, mx, my)
 
@@ -3126,7 +3413,8 @@ if V2_SEMAFOR and B200 and _p7_glb("props/sf_signal_mast.glb", "v2_mast"):
     for k_, (up_e, up_w) in enumerate((("B1E", "B1V"), ("B2E", "B2V"))):
         if up_e in _bs and up_w in _bs:
             y_ = min(min(p[1] for h in _bs[r_] for p in h["fp"]) for r_ in (up_e, up_w)) - 1.0
-            masts.append(("Strada%d" % (k_ + 1), X_T - MAST_LAT, y_, 180.0,
+            lat_ = SEMAFOR_B1_LAT if (k_ == 0 and P8D_SEM_B1) else MAST_LAT
+            masts.append(("Strada%d" % (k_ + 1), X_T - lat_, y_, 180.0,
                           road_at(X_T, y_)[1] + MAST_ROAD_KICK, "B"))
     _mb = []
     for nm_, mx, my, yaw, ry, zn in masts:
@@ -3142,12 +3430,13 @@ if V2_SEMAFOR and B200 and _p7_glb("props/sf_signal_mast.glb", "v2_mast"):
         if head - ry < MAST_CLEAR - 1e-6:
             raise SystemExit("valul 2: semaforul %s: capul la %.2f m peste drum" % (nm_, head - ry))
         _v2_inst("Semafoare", nm_, "props/sf_signal_mast.glb", "v2_mast", _v2_xf(yaw, MAST_SCALE, (mx, base, -my)),
-                 extra='metadata/sf_mast_road = %.3f\n' % (ry - MAST_ROAD_KICK))
+                 coll=POLE_COLL, extra='metadata/sf_mast_road = %.3f\n' % (ry - MAST_ROAD_KICK))
         V2_POLES.setdefault("semafor", []).append((mx, base, -my))
         V2_PLACED.append(("semafor", mx, my))
         hx = mx + (-1.0 if yaw == 0.0 else 1.0) * MAST_HEAD_X * MAST_SCALE
-        print("semafor %-8s stalp (%.1f, %.1f) talpa %.2f, capul la x %.2f (%.2f m de axa), fundul la %.2f = "
-              "%.2f m peste drum (%.2f + %.2f de siguranta)" % (nm_, mx, my, base, hx, abs(hx - (mx - MAST_LAT if yaw == 0.0 else mx + MAST_LAT)),
+        ax_ = PTS[LIPS[0]][0] if yaw == 0.0 else X_T
+        print("semafor %-8s stalp (%.1f, %.1f) la %.2f m de ax, talpa %.2f, capul la x %.2f (%.2f m de axa), fundul la %.2f = "
+              "%.2f m peste drum (%.2f + %.2f de siguranta)" % (nm_, mx, my, abs(mx - ax_), base, hx, abs(hx - ax_),
                                                                   head, head - ry, ry - MAST_ROAD_KICK, MAST_ROAD_KICK))
     print("semafoare: %d, scara %.2f (bratul %.2f m, inalt %.1f m)" % (len(masts), MAST_SCALE, 8.0 * MAST_SCALE,
                                                                       12.14 * MAST_SCALE))
@@ -3188,7 +3477,7 @@ if V2_FELINAR and B200 and CASE_HOUSES and _p7_glb("props/sf_street_lamp.glb", "
     for k_, (rn, zone, mx, my) in enumerate(V2_LAMPS):
         base, _sl = v2_base(mx, my, 0.35, "felinarul %d" % k_)
         _v2_inst("Felinare", "F%s_%02d" % (rn, k_), "props/sf_street_lamp.glb", "v2_lamp",
-                 _v2_xf(0.0, 1.0, (mx, base - 0.05, -my)))
+                 _v2_xf(0.0, 1.0, (mx, base - 0.05, -my)), coll=POLE_COLL)
         V2_POLES.setdefault("felinar", []).append((mx, base - 0.05, -my))
     from collections import Counter
     print("felinare: %d (%s); respinse %s" % (len(V2_LAMPS), ", ".join(
@@ -3254,7 +3543,7 @@ if V2_ARBORI and B200 and CASE_HOUSES and _p7_glb("plants/sf_street_tree.glb", "
         yaw = 360.0 * _v2_hash(mx, my, 3.0)
         s_ = 0.95 + 0.1 * _v2_hash(my, mx, 5.0)
         _v2_inst("Arbori", "A%s_%02d" % (tag, k_), "plants/sf_street_tree.glb", "v2_tree",
-                 _v2_xf(yaw, s_, (mx, g_ - 0.15, -my)), extra="metadata/sf_shade = true\n")
+                 _v2_xf(yaw, s_, (mx, g_ - 0.15, -my)), coll=POLE_COLL, extra="metadata/sf_shade = true\n")
         V2_POLES.setdefault("arbore", []).append((mx, g_ - 0.15, -my))
     from collections import Counter
     print("arbori de strada: %d (%s); respinsi %s" % (len(V2_TREES), ", ".join(
@@ -3422,6 +3711,19 @@ if V2_CHIPAROS and B200 and _p7_glb("plants/sf_cypress_a.glb", "v2_cyp_a"):
         if cs_:
             print("  palcul %s: %s" % (grp, ", ".join("(%.0f, %.0f)" % (c[1], c[2]) for c in cs_)))
 
+if P8D_STALPI_SAB and V2_POLES:
+    # cate un stalp solid din fiecare familie pe dreapta de start, in banda (x scade spre V): contorul de
+    # contacte trebuie sa-i numere intr-un seed scurt
+    _sx0, _sy0 = MK["far1"][2], MK["far1"][3]
+    for k_, (fam, rel_, rid_, dir_) in enumerate((("semafor", "props/sf_signal_mast.glb", "v2_mast", "Semafoare"),
+                                                  ("felinar", "props/sf_street_lamp.glb", "v2_lamp", "Felinare"),
+                                                  ("arbore", "plants/sf_street_tree.glb", "v2_tree", "Arbori"))):
+        x_ = _sx0 - 40.0 - 12.0 * k_
+        y_ = _sy0 + (-1.5 + 1.5 * k_)
+        ry_ = road_at(x_, y_)[1]
+        if _v2_inst(dir_, "Sabotaj_%s" % fam, rel_, rid_, _v2_xf(0.0, 1.0, (x_, ry_ - 0.05, -y_)), coll="trunk"):
+            V2_POLES[fam].append((x_, ry_ - 0.05, -y_))
+    print("SABOTAJ: cate un stalp solid din fiecare familie pe dreapta de start")
 if V2_POLES:
     meta.append("metadata/sf_poles = {%s}" % ", ".join(
         '"%s": PackedVector3Array(%s)' % (fam, ", ".join("%.3f, %.3f, %.3f" % p for p in ps))
@@ -3561,11 +3863,18 @@ if V3_PICTATE and B200 and _p7_glb("buildings/sf_painted_lady_a.glb", "v3_lady_a
     slots = [("capatE", "sf_row_end_b", 4, 0.0)] + [("PL_" + k, "sf_painted_lady_" + k, LADY_PASTEL[k], LADY_PORCH[k])
                                                     for k in LADY_ORDER] + [("capatV", "sf_row_end_c_m", 3, 0.0)]
     x_e = LADY_X_MID + len(slots) * CASE_W / 2.0
+    if P8D:
+        # PASUL 8d: trotuarul coamei, de la buza pana sub fatada (peste gradinite: stau pe el). Bratul
+        # coamei e parcurs spre V, deci randul merge de la capatul de E (x_e) spre V.
+        pave_add_row("C", "C", (x_e, Y_COAMA), (-1.0, 0.0), 1.0, LADY_SETBACK, 0.0, len(slots) * CASE_W)
     ladies = []
     for k_, (nm_, file_, pastel_, porch_) in enumerate(slots):
         xc = x_e - CASE_W * (k_ + 0.5)
         floor_ = max(v2_ground(xc + dx, y_f) for dx in (-3.5, -1.75, 0.0, 1.75, 3.5))
         low_ = min(v2_ground(xc + dx, y_f + dz) for dx in (-3.5, 0.0, 3.5) for dz in (0.0, 6.0, 12.0))
+        if P8D and pave_y(xc, y_f) is not None:
+            pm_ = max(v for v in (pave_y(xc + dx, y_f) for dx in (-3.5, -1.75, 0.0, 1.75, 3.5)) if v is not None)
+            floor_ = max(floor_, pm_ + PAVE_FLOOR_MIN, min(pm_ + PAVE_FLOOR_OVER, low_ + CASE_SKIRT - 0.05))
         if floor_ - low_ > CASE_SKIRT - 0.05:
             raise SystemExit("valul 3: casa pictata %s cade %.2f m (fusta %.1f)" % (nm_, floor_ - low_, CASE_SKIRT))
         o = (xc, floor_, -(y_f + CASE_D / 2.0))
@@ -3615,8 +3924,15 @@ if V3_PICTATE and B200 and _p7_glb("buildings/sf_painted_lady_a.glb", "v3_lady_a
                  X_, Z_, _v3_local(o, X_, Z_, 0.0, -CASE_SKIRT + (CASE_SKIRT + CASE_EAVE) / 2.0, zc))
         V3_HOUSE_FPS.append(h["fp"])
         if h["file"].startswith("sf_painted_lady_"):
+            gy_ = -0.02
+            if P8D:
+                # pasul 8d: gradinita sta pe trotuar (cea mai joasa cota a lui sub ea), nu la podeaua casei
+                _gp = [_v3_local(o, X_, Z_, lx_, 0.0, GARDEN_Z + lz_) for lx_ in (-3.5, 0.0, 3.5) for lz_ in (-1.5, 1.5)]
+                _gv = [pave_y(p_[0], -p_[2]) for p_ in _gp]
+                if all(v is not None for v in _gv):
+                    gy_ = min(_gv) - 0.02 - o[1]
             _v3_inst("Gradinite", "G_" + h["name"], "props/sf_front_garden.glb", "v3_garden",
-                     _v3_xf(X_, Z_, _v3_local(o, X_, Z_, 0.0, -0.02, GARDEN_Z)))
+                     _v3_xf(X_, Z_, _v3_local(o, X_, Z_, 0.0, gy_, GARDEN_Z)))
     V3_STATS["pictate"] = (len(ladies), y_f, d_min, cyp_gap, max(h["drop"] for h in ladies), ladies[0]["floor"])
     print("casele pictate: %d (6 pictate + 2 capete) pe x %.1f..%.1f, fatada la y %.1f (%.1f m de axa, gradinita "
           "pana la %.1f m, marginea carosabilului la %.1f); podeaua %.2f, cadere max %.2f; amprenta la >= %.2f m de axa "
@@ -3812,6 +4128,26 @@ if V3_SABOTAJ:
     print("SABOTAJ: cutiile corpurilor noi pe dreapta de start")
 P7_NODES += V3_NODES + V3_ROOT_NODES
 P6_SUB += V3_SUB
+
+# --- PASUL 8d: zonele de trotuar pe radacina pistei (fractii de LUNGIME pe bucla coapta)
+if P8D and PAVE_ZONES:
+    _zs = []
+    for z in sorted(PAVE_ZONES, key=lambda z_: z_["a"]):
+        _zs.append("Vector4(%.6f, %.6f, %.2f, %d)" % (z["a"] / PB_TOTAL, z["b"] / PB_TOTAL, z["W"], z["side"]))
+        print("trotuar %-4s latura %+d, lat %.2f m (fatada la %.2f), randul s %.1f..%.1f, placa s %.1f..%.1f "
+              "(rampele %.1f / %.1f m%s)" % (
+                  z["name"], z["side"], z["W"], z["setb"], z["s0"], z["s1"], z["a"], z["b"],
+                  min(PAVE_RAMP, z["s0"] - z["a"]), min(PAVE_RAMP, z["b"] - z["s1"]),
+                  (", scurtate pentru: " + ", ".join(sorted(z["clip_why"]))) if z.get("clip_why") else ""))
+    meta.append("paved_level_zones = Array[Vector4]([%s])" % ", ".join(_zs))
+    meta.append("paved_zone_ramp_m = %.1f" % PAVE_RAMP)
+    meta.append("paved_level_tint = Color(%.2f, %.2f, %.2f, 1)" % PAVE_TINT)
+    meta.append("paved_kerb_band_m = %.2f" % PAVE_KERB_BAND)
+    meta.append("paved_level_color = Color(%.2f, %.2f, %.2f, 1)" % PAVE_COLOR)
+    _on, _off = PAVE_CARS
+    print("trotuarele: %d zone (%s), %.0f m de trotuar cu latime plina; masini parcate pe trotuar %d, pe teren %d" % (
+        len(PAVE_ZONES), ", ".join("%s %d" % (zn, sum(1 for z in PAVE_ZONES if z["zone"] == zn)) for zn in "BCDEG"),
+        sum(z["s1"] - z["s0"] for z in PAVE_ZONES), _on, _off))
 
 if P7_NODES:
     # containerul de decor asezat din generator: `WorldProp` pune materialul lumii pe tot

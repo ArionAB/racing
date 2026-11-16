@@ -349,6 +349,66 @@ def main():
               f"aterizare (primii 45 m dupa muchie); aterizari la < 8 m de o piesa urnita {pk['land_near']}, "
               f"ejectari langa una {pk['ej_near']}")
 
+    # --- PASUL 8b / VALUL 2: casele, stalpii fara coliziune, mobilierul mic (probe_sf_watch.gd)
+    case_f = case_b = 0
+    case_rows = []
+    pole_n = {}
+    pole_rows = []
+    mob = {"n": 0, "hits": 0, "road": 0.0, "land": 0.0, "lost": 0, "seeds": 0}
+    mob_rows = []
+    for p in logs:
+        txt = open(p, encoding="utf-8", errors="replace").read()
+        m = re.search(r"^=== SF case: contacte rand din fata (\d+), rand din spate (\d+)", txt, re.M)
+        if m:
+            case_f += int(m.group(1))
+            case_b += int(m.group(2))
+        for m in re.finditer(r"^    \[sf casa\] (.*)$", txt, re.M):
+            case_rows.append(os.path.basename(p) + " " + m.group(1))
+        for m in re.finditer(r"^=== SF stalpi (\S+): (\d+) stalpi", txt, re.M):
+            pole_n[m.group(1)] = int(m.group(2))
+        for m in re.finditer(r"^    \[sf stalp\] t=\s*([\d.]+)s (\S+) #(\d+) (.+?)\s+v=([\d.]+) (\S+) poz=\((.*)\)$",
+                             txt, re.M):
+            pole_rows.append((m.group(2), int(m.group(3)), float(m.group(5)), m.group(6), m.group(7),
+                              os.path.basename(p), m.group(4).strip()))
+        m = re.search(r"^=== SF mobilier: piese=(\d+) urnite=(\d+) pe_carosabil=([\d.]+)s "
+                      r"in_zona_de_aterizare=([\d.]+)s pierdute=(\d+)", txt, re.M)
+        if m:
+            mob["seeds"] += 1
+            mob["n"] = int(m.group(1))
+            mob["hits"] += int(m.group(2))
+            mob["road"] += float(m.group(3))
+            mob["land"] += float(m.group(4))
+            mob["lost"] += int(m.group(5))
+        for m in re.finditer(r"^    \[sf mobilier\] t=\s*([\d.]+)s (\S+) (.+?)\s+v=([\d.]+)$", txt, re.M):
+            mob_rows.append((m.group(2), m.group(3).strip(), float(m.group(4))))
+    print("\n--- CASELE SI VALUL 2")
+    print(f"  CASE: contacte cu randul din fata {case_f}, cu randul din spate {case_b}")
+    for row in case_rows[:10]:
+        print("    casa: " + row)
+    for fam in sorted(pole_n):
+        rows = [r for r in pole_rows if r[0] == fam]
+        vs = sorted(r[2] for r in rows)
+        per_pole = {}
+        for r in rows:
+            per_pole[(r[1], r[4])] = per_pole.get((r[1], r[4]), 0) + 1
+        air = sum(1 for r in rows if r[3] == "zbor")
+        print(f"  STALPI {fam}: {pole_n[fam]} fara coliziune; treceri PRIN volum {len(rows)} "
+              f"({len(rows) / max(lap_n, 1):.4f} pe tur-masina), in zbor {air}"
+              + (f", v med {st.median(vs):.1f} max {max(vs):.1f} m/s" if vs else ""))
+        for (k, pz), c in sorted(per_pole.items(), key=lambda kv: -kv[1])[:8]:
+            vk = sorted(r[2] for r in rows if r[1] == k)
+            print(f"    #{k} la ({pz}): {c} treceri, v med {st.median(vk):.1f} max {max(vk):.1f}")
+    if mob["seeds"]:
+        by_tag = {}
+        for tag, car, v in mob_rows:
+            by_tag[tag] = by_tag.get(tag, 0) + 1
+        print(f"  MOBILIER MIC: {mob['n']} piese; urnite {mob['hits']} in {mob['seeds']} seed-uri "
+              f"({mob['hits'] / mob['seeds']:.1f} pe cursa), pe zone {by_tag}; pe carosabil {mob['road']:.1f} "
+              f"s-piesa, din care {mob['land']:.1f} s in zona de aterizare; pierdute (cazute din lume) {mob['lost']}")
+        vs = [v for _, _, v in mob_rows]
+        if vs:
+            print(f"    viteza celui care loveste: med {st.median(vs):.1f} m/s, max {max(vs):.1f}")
+
     print("\n--- felii (v_med medie, % lent mediu, pereti total)")
     for k in sorted(buckets):
         v, sl, w = buckets[k]

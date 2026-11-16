@@ -34,6 +34,9 @@ extends Node
 ##     cat sta pe carosabil, cat din timpul asta in zona de aterizare a unei muchii (primii 45 m),
 ##     si zborurile / ejectarile care aterizeaza la < 8 m de o piesa urnita (resturile strica
 ##     aterizarea urmatorilor?).
+##   - VALUL 2: trecerile masinilor PRIN volumul stalpilor si trunchiurilor fara coliziune
+##     (`metadata/sf_poles`: semafoare, felinare, arbori de strada) si mobilierul mic BumpProp (grupul
+##     `sf_street_bodies`): urnite, secunde pe carosabil, din care in zona de aterizare.
 
 const MIN_AIR_S: float = 0.25
 # --- pasul 6: pontonul si masinile parcate ---
@@ -137,6 +140,7 @@ func setup(race: Node) -> void:
 	_setup_pod(track)
 	if track.has_meta("sf_ponton"):
 		_pont = PackedVector3Array(track.get_meta("sf_ponton"))
+	_setup_poles(track)
 	var cars: Array[Car] = race.cars
 	for i in cars.size():
 		_pod_open.append(-1)
@@ -497,6 +501,7 @@ func _physics_process(delta: float) -> void:
 	if _podm != null:
 		_tick_pod_pairs(cars)
 	_tick_parked(cars, delta)
+	_tick_street(cars, delta)
 	for i in cars.size():
 		var c := cars[i]
 		var p := c.global_position
@@ -506,6 +511,8 @@ func _physics_process(delta: float) -> void:
 		if _podm != null:
 			_tick_pod(i, c, delta)
 		_tick_case(i, c, p, delta)
+		if not _poles.is_empty():
+			_tick_poles(i, c, p)
 		if q.distance_to(p) > 8.0:
 			continue          # repunere: nu e trecere
 		_tick_tram_gates(i, c, p, q)
@@ -557,6 +564,154 @@ func _physics_process(delta: float) -> void:
 					_passes.append([i, 1 if _gate_branch[i] else 0, -1.0, _gate_resp[i],
 						_gate_bed[i], _gate_wall[i]])
 					_gate_t[i] = -1.0
+
+
+## VALUL 2: TRECERILE PRIN STALPI. Semafoarele, felinarele si arborii de strada n-au coliziune la
+## prima trecere (gen_sf_route.py, blocul VALUL 2); fiecare e in `metadata/sf_poles` (familia ->
+## talpile, Godot) cu raza in `metadata/sf_pole_r`. O trecere = centrul masinii intra in cilindrul de
+## raza (raza stalpului + jumatate din latimea masinii), intre talpa - 1 m si talpa + 4 m: cu un stalp
+## tare, masina l-ar fi lovit. Se numara intrarile (masina x stalp, cel mult una pe secunda), cu
+## viteza de la intrare si daca masina era in zbor.
+var _poles: Array = []           # [familie, pozitie, raza]
+var _pole_in: Dictionary = {}    # "masina|stalp" -> t ultimei intrari
+var _pole_hits: Array = []       # [t, masina, stalp, v, in_aer]
+## VALUL 2: MOBILIERUL MIC (grupul `sf_street_bodies`, BumpProp): urnite, secunde pe carosabil (centrul
+## piesei la < semilatimea drumului de axa benzii celei mai apropiate), din care in zona de aterizare.
+var _street: Array[RigidBody3D] = []
+var _street_home: Array[Vector3] = []
+var _street_moved: Array[bool] = []
+var _street_hits: Array = []     # [t, eticheta, masina, v]
+var _street_road_s: float = 0.0
+var _street_land_s: float = 0.0
+var _street_lost: int = 0
+
+
+func _setup_poles(track: Track) -> void:
+	if not track.has_meta("sf_poles"):
+		return
+	var fams: Dictionary = track.get_meta("sf_poles")
+	var radii: Dictionary = track.get_meta("sf_pole_r", {})
+	for fam: String in fams:
+		for p: Vector3 in PackedVector3Array(fams[fam]):
+			_poles.append([fam, p, float(radii.get(fam, 0.3))])
+	print("=== SF stalpi fara coliziune: %d (%s)" % [_poles.size(), ", ".join(fams.keys().map(
+		func(f: String) -> String: return "%s %d" % [f, PackedVector3Array(fams[f]).size()]))])
+
+
+func _tick_poles(i: int, c: Car, p: Vector3) -> void:
+	var half := (c.data.body_width * 0.5) if c.data != null else 0.9
+	for k in _poles.size():
+		var q: Vector3 = _poles[k][1]
+		if p.y < q.y - 1.0 or p.y > q.y + 4.0:
+			continue
+		if Vector2(p.x - q.x, p.z - q.z).length() >= float(_poles[k][2]) + half:
+			continue
+		var key := "%d|%d" % [i, k]
+		if _t - float(_pole_in.get(key, -99.0)) > 1.0:
+			_pole_hits.append([_t, i, k, c.horizontal_speed(), not c.is_on_floor()])
+		_pole_in[key] = _t
+
+
+func _tick_street(cars: Array[Car], delta: float) -> void:
+	if _street.is_empty():
+		for b in get_tree().get_nodes_in_group(&"sf_street_bodies"):
+			var rb := b as RigidBody3D
+			_street.append(rb)
+			_street_home.append(rb.global_position)
+			_street_moved.append(false)
+		if not _street.is_empty():
+			print("=== SF mobilier mic: %d piese (BumpProp; corpuri BumpProp pe pista: %d)" % [
+				_street.size(), get_tree().get_nodes_in_group(&"bump_props").size()])
+		else:
+			_street.append(null)
+		return
+	var track: Track = _race.track
+	for j in _street.size():
+		var rb := _street[j]
+		if rb == null:
+			continue
+		if not is_instance_valid(rb):
+			_street[j] = null
+			_street_lost += 1
+			continue
+		var p := rb.global_position
+		if p.distance_to(_street_home[j]) < PARK_MOVED_M:
+			_street_moved[j] = false
+			continue
+		if not _street_moved[j]:
+			_street_moved[j] = true
+			var who := -1
+			var bd := 6.0
+			for i in cars.size():
+				var d := cars[i].global_position.distance_to(p)
+				if d < bd:
+					bd = d
+					who = i
+			_street_hits.append([_t, String(rb.get_parent().get_meta("sf_tag", "?")), who,
+				cars[who].horizontal_speed() if who >= 0 else 0.0])
+		# pe carosabil: cel mai apropiat punct copt al oricarei benzi
+		var best := INF
+		for r in track.routes:
+			var rr: TrackRoute = r
+			var n := rr.baked.size()
+			var step := maxi(1, n / 400)
+			var bi := 0
+			for k in range(0, n, step):
+				var d2 := Vector2(rr.baked[k].x - p.x, rr.baked[k].z - p.z).length_squared()
+				if d2 < best:
+					best = d2
+					bi = k
+			for k in range(bi - step, bi + step + 1):
+				var a: Vector3 = rr.baked[rr.wrap_index(k)]
+				best = minf(best, Vector2(a.x - p.x, a.z - p.z).length_squared())
+		if sqrt(best) < track.half_width:
+			_street_road_s += delta
+			for L in _lips:
+				if absf(p.x - L.x) < CHAIN_HALF and p.z <= L.z and p.z >= L.z - 45.0:
+					_street_land_s += delta
+					break
+
+
+func _report_v2() -> void:
+	var cars: Array[Car] = _race.cars
+	if not _poles.is_empty():
+		var by_fam := {}
+		for h in _pole_hits:
+			var fam: String = _poles[int(h[2])][0]
+			if not by_fam.has(fam):
+				by_fam[fam] = []
+			(by_fam[fam] as Array).append(h)
+		var fams := {}
+		for pl in _poles:
+			fams[pl[0]] = int(fams.get(pl[0], 0)) + 1
+		for fam: String in fams:
+			var hs: Array = by_fam.get(fam, [])
+			var vs: Array = hs.map(func(h: Array) -> float: return float(h[3]))
+			vs.sort()
+			var poles_hit := {}
+			var air := 0
+			for h in hs:
+				poles_hit[int(h[2])] = true
+				if bool(h[4]):
+					air += 1
+			print("=== SF stalpi %s: %d stalpi, treceri prin volum %d (stalpi atinsi %d, in zbor %d), v med %.1f max %.1f m/s" % [
+				fam, int(fams[fam]), hs.size(), poles_hit.size(), air,
+				float(vs[vs.size() / 2]) if not vs.is_empty() else 0.0, float(vs[vs.size() - 1]) if not vs.is_empty() else 0.0])
+		for h in _pole_hits:
+			var pl: Array = _poles[int(h[2])]
+			var q: Vector3 = pl[1]
+			print("    [sf stalp] t=%5.1fs %s #%d %-18s v=%.1f %s poz=(%.0f,%.1f,%.0f)" % [float(h[0]), String(pl[0]),
+				int(h[2]), cars[int(h[1])].pilot_name, float(h[3]), "zbor" if bool(h[4]) else "sol", q.x, q.y, q.z])
+	var n := 0
+	for rb in _street:
+		if rb != null:
+			n += 1
+	if n > 0 or _street_lost > 0:
+		print("=== SF mobilier: piese=%d urnite=%d pe_carosabil=%.1fs in_zona_de_aterizare=%.1fs pierdute=%d" % [
+			n + _street_lost, _street_hits.size(), _street_road_s, _street_land_s, _street_lost])
+		for h in _street_hits:
+			print("    [sf mobilier] t=%5.1fs %s %-18s v=%.1f" % [float(h[0]), String(h[1]),
+				cars[int(h[2])].car_name if int(h[2]) >= 0 else "-", float(h[3])])
 
 
 ## PASUL 8b: contactele cu cutiile caselor (randul din fata `CaseCorpuri`, cel din spate
@@ -799,6 +954,7 @@ func report() -> void:
 	_report_pod()
 	_report_p6()
 	_report_case()
+	_report_v2()
 
 
 func _report_pod() -> void:

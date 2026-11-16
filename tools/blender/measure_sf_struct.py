@@ -20,8 +20,10 @@ Citeste GLB-urile direct, in coordonate Godot (cititorul si uneltele de sabotaj 
   sf_island_light   nodurile Island_Rock + Island_Light; stanca 55-70 x 35-48 m, varful +9..+11,
                     fusta la -3,0 (+-0,01); farul are 15,0 m (+-0,3) peste stanca de sub el.
   sf_horizon        exact Hill_A/B/C + City_A/B, toate radacini, fiecare cu baza la Y 0 (+-0,01) si
-                    centrat in XZ (+-0,5); dealurile 200-300 m lungi si 30-60 m inalte; orasele
-                    150-250 m late, turnul cel mai inalt 40-80 m; la orase NICIO fata inclinata
+                    centrat in XZ (+-0,5); dealurile 200-300 m lungi; orasele
+                    150-250 m late, turnul cel mai inalt 40-80 m; v2: relieful dealurilor
+                    (sloturile 0/13) 30-38 m si nimic peste 38; pâlcurile de chiparos (slot 21)
+                    >= 1,4x mai late decat inalte, trunchiul gol de sub ele <= 25 % din arbore; la orase NICIO fata inclinata
                     (doar verticale si orizontale: fara piramide, turle, acoperisuri in panta) si
                     fiecare volum are capacul >= 15 % din talpa (fara varf de piramida).
   sf_stair_lane     un nod StairLane, <= 400 tri; 2,50 (+-0,01) lat, centrat; Y de la 0; Z de la
@@ -249,9 +251,12 @@ def check_horizon(bad, nodes):
         if abs(x0 + x1) * 0.5 > 0.5 or abs(z0 + z1) * 0.5 > 0.5:
             bad.append("(baza) %s necentrat in XZ (%.2f, %.2f)" % (name, (x0 + x1) * 0.5, (z0 + z1) * 0.5))
         if name in HILLS:
-            if not 200.0 <= x1 - x0 <= 300.0 or not 30.0 <= y1 <= 60.0:
-                bad.append("(deal) %s: %.0f m lung, %.1f m inalt; contract 200-300 / 30-60"
-                           % (name, x1 - x0, y1))
+            terr = _pts(d, {0, 13})
+            ty = max(p[1] for p in terr) if terr else 0.0
+            if not 200.0 <= x1 - x0 <= 300.0 or not 30.0 <= ty <= 38.0 or y1 > 38.0:
+                bad.append("(deal) %s: %.0f m lung, relieful %.1f m, cu arborii %.1f m; contract "
+                           "200-300 / relieful 30-38 / nimic peste 38" % (name, x1 - x0, ty, y1))
+            check_cypress(bad, name, d)
         if name in CITIES:
             if not 150.0 <= x1 - x0 <= 250.0 or not 40.0 <= y1 <= 80.0 + 1e-3:
                 bad.append("(oras) %s: %.0f m lat, turnul cel mai inalt %.1f m; contract 150-250 / 40-80"
@@ -278,6 +283,52 @@ def check_horizon(bad, nodes):
                     bad.append("(piramida) %s: un volum de %.1f m are capacul %.0f %% din talpa"
                                % (name, ymax - ymin, 100.0 * top / base))
                     break
+
+
+def check_cypress(bad, name, d):
+    """Pâlcurile de chiparos de pe deal: frunzisul (slot 21) grupat pe arbori (insule cu amprentele
+    XZ suprapuse), trunchiul (slot 28) legat de pâlcul de deasupra lui. Fiecare pâlc: latimea
+    orizontala >= 1,4 x inaltimea frunzisului; la cei cu trunchi, trunchiul gol de sub frunzis
+    <= 25 % din inaltimea arborelui (talpa trunchiului -> crestet). Silueta de chiparos de
+    Monterey, nu umbrela de salcam pe un bat (§3.1)."""
+    ts = _tri_slots(d)
+    isl = _islands(d)
+    fol, trunks = [], []
+    for g in isl:
+        ks = {ts[ti] for ti in g}
+        ps = [d["verts"][i] for ti in g for i in d["tris"][ti]]
+        if ks == {21}:
+            fol.append(_box(ps))
+        elif ks == {28}:
+            trunks.append(_box(ps))
+    clumps = []
+    for bx in fol:
+        hit = [c for c in clumps if bx[0][0] < c[0][1] + 0.5 and c[0][0] < bx[0][1] + 0.5
+               and bx[2][0] < c[2][1] + 0.5 and c[2][0] < bx[2][1] + 0.5]
+        merged = [list(bx[0]), list(bx[1]), list(bx[2])]
+        for c in hit:
+            clumps.remove(c)
+            for a in range(3):
+                merged[a] = [min(merged[a][0], c[a][0]), max(merged[a][1], c[a][1])]
+        clumps.append([tuple(m) for m in merged])
+    trees = 0
+    for c in clumps:
+        fw = max(c[0][1] - c[0][0], c[2][1] - c[2][0])
+        fh = c[1][1] - c[1][0]
+        if fw < 1.4 * fh:
+            bad.append("(chiparos) %s: un pâlc are %.1f m latime la %.1f m inaltime (< 1,4x)" % (name, fw, fh))
+        for t in trunks:
+            tx, tz = (t[0][0] + t[0][1]) * 0.5, (t[2][0] + t[2][1]) * 0.5
+            if c[0][0] <= tx <= c[0][1] and c[2][0] <= tz <= c[2][1]:
+                trees += 1
+                total = c[1][1] - t[1][0]
+                bare = c[1][0] - t[1][0]
+                if bare > 0.25 * total:
+                    bad.append("(chiparos) %s: trunchi gol de %.1f m sub frunzis, %.0f %% din %.1f m"
+                               % (name, bare, 100.0 * bare / total, total))
+                break
+    if trees == 0:
+        bad.append("(chiparos) %s: niciun chiparos cu trunchi" % name)
 
 
 def check_stair(bad, nodes):
@@ -388,6 +439,38 @@ def _uv_where(g, blob, node_name, pred, u):
     return n > 0
 
 
+def _poke_slot(g, blob, node_name, slots, pred, move):
+    """Muta varfurile nodului care au slotul in `slots` si satisfac `pred`."""
+    import struct
+    from measure_sf_bridge import _accessor_slots
+    pos = list(_accessor_slots(g, node_name, "POSITION"))
+    tex = list(_accessor_slots(g, node_name, "TEXCOORD_0"))
+    n = 0
+    for (pa, pb, ps_, _k), (_ta, tb, ts, _k2) in zip(pos, tex):
+        for i in range(pa["count"]):
+            p = struct.unpack_from("<fff", blob, pb + i * ps_)
+            uu = struct.unpack_from("<ff", blob, tb + i * ts)[0]
+            if int(math.floor(uu * 32)) in slots and pred(p):
+                struct.pack_into("<fff", blob, pb + i * ps_, *move(p))
+                n += 1
+    return n > 0
+
+
+def _sab_tree(g, blob, node, stretch):
+    """Primul chiparos al nodului (talpa celui mai jos trunchi): `stretch` intinde frunzisul in sus
+    (coroana mai inalta decat lata); altfel ridica frunzisul cu 8 m (umbrela pe un bat)."""
+    _g, _b, nodes = load_from(g, blob)
+    d = nodes[node]
+    s = _slots(d)
+    base = min((p for p, k in zip(d["verts"], s) if k == 28), key=lambda p: p[1])
+    near = lambda p: math.hypot(p[0] - base[0], p[2] - base[2]) < 22.0
+    fol = [p[1] for p, k in zip(d["verts"], s) if k == 21 and near(p)]
+    y0 = min(fol)
+    if stretch:
+        return _poke_slot(g, blob, node, {21}, near, lambda p: (p[0], y0 + 3.0 * (p[1] - y0), p[2]))
+    return _poke_slot(g, blob, node, {21}, near, lambda p: (p[0], p[1] + 8.0, p[2]))
+
+
 def _mv(node, pred, move):
     return lambda g, b: poke_all(g, b, node, pred, move) > 0
 
@@ -446,8 +529,12 @@ def sabotages(key):
     elif key == "sf_horizon":
         out += [
             ("Hill_B ridicat cu 3 m", "baza", _mv("Hill_B", lambda p: True, lambda p: (p[0], p[1] + 3.0, p[2]))),
-            ("Hill_A intins la 80 m inaltime", "deal",
-             _mv("Hill_A", lambda p: p[1] > 40.0, lambda p: (p[0], p[1] + 30.0, p[2]))),
+            ("Hill_A ridicat la 50 m", "deal",
+             _mv("Hill_A", lambda p: p[1] > 25.0, lambda p: (p[0], p[1] + 15.0, p[2]))),
+            ("chiparosul intins in sus (frunzisul de 3x mai inalt)", "chiparos",
+             lambda g, b: _sab_tree(g, b, "Hill_B", stretch=True)),
+            ("chiparosul ridicat pe un bat (frunzisul +8 m)", "chiparos",
+             lambda g, b: _sab_tree(g, b, "Hill_C", stretch=False)),
             ("City_A ingustat la 120 m", "oras", _mv("City_A", lambda p: True, lambda p: (p[0] * 0.5, p[1], p[2]))),
             ("varful unui turn tras in centru (piramida)", "piramida",
              lambda g, b: _pyramid(g, b, "City_B")),

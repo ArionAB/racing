@@ -91,15 +91,19 @@ centrul stancii, la nivelul apei (Y 0); fusta pana la -3.
 F2 -- fundalul (`sf_horizon.png`). Fiecare nod centrat pe originea lui, la baza (Z min = 0), volum
 inchis lizibil din orice azimut (inelul il roteste).
   Hill_A/B/C:
-  D1. Corpul: camp de cocoase gaussiene rotunjite (maxim moale) pe o elipsa, grila de ~11 m,
-      inchis cu poala si evantai la baza. A: 260 x 110 m, 45 m; B: 220 x 96 m, 34 m (doua
-      cocoase); C: 300 x 120 m, 58 m.
+  D1. Corpul: camp de cocoase gaussiene rotunjite (maxim moale) pe o elipsa, grila de 12,5 m,
+      inchis cu poala si evantai la baza. v2: JOASE si lungi (vârful 30-38 m), ca orasele de pe
+      inelul din spate (40-80 m) sa iasa peste ele din camera de joc. A: 260 x 110 m, 3 cocoase;
+      B: 220 x 96 m, 2 cocoase; C: 300 x 120 m, 3 cocoase.
   D2. Culorile: DRY_VEGETATION 13 (paiul uscat) pe tot corpul, SAND_LIGHT 0 (auriul deschis) pe
       crestele luminate de peste ~50 % din inaltime; limita urmeaza cota (o banda).
   D3. Aflorimente de granit gri (MARBLE_GREY 29): 2-3 grupuri de bolovani mari la poale si pe un
       flanc, pe jur imprejur.
-  D4. 2-3 chiparosi aplecati de vant (trunchi LOG_DARK 28 inclinat, coroana TROPICAL_GREEN 21 in
-      2-3 straturi plate impinse sub vant) + 2-3 tufe joase intunecate.
+  D4. v2: 2 chiparosi de Monterey pe deal, ca silueta de aproape (`sf_cypress_silhouettes.png`):
+      masa grea de frunzis (TROPICAL_GREEN 21) din 3 lobi suprapusi, MAI LATA decat inalta
+      (>= 1,4x), asezata jos (sub ea doar o pana de trunchi LOG_DARK 28, <= 25 % din inaltime),
+      toti aplecati spre +X; plus 2 tufe joase, late. NU umbrela plata pe trunchi subtire
+      (salcamul Serengetiului, §3.1).
   City_A (230 x 60 m) / City_B (180 x 52 m):
   C1. Turnuri de 40-80 m, cutii CU ACOPERIS PLAT, unele in trepte (2-3 tronsoane, fiecare
       >= 0,55 din aria celui de dedesubt); NICIO piramida, nicio turla, niciun reper recognoscibil.
@@ -610,7 +614,7 @@ def build_island():
 
 # ============================================================ F2: fundalul
 HZ_CELL = 12.5
-HZ_TOP = 56.0
+HZ_TOP = 37.5             # plafonul nodului (v2: dealurile 30-38 m, ca orasele sa iasa peste ele)
 
 
 def hill_field(L, W, humps, seed):
@@ -667,48 +671,50 @@ def _heightfield(b, L, W, zf, seed):
     return faces
 
 
-def wind_tree(b, zf, x, y, h, lean_deg, seed):
-    """Chiparos de Monterey aplecat de vant (decuparea `sf_horizon.png`, inventarul V1/§3.1):
-    trunchi SCURT si gros, bifurcat, si o coroana DENSA din 5 pâlcuri suprapuse pe mai multe
-    niveluri, impinse sub vant. NU disc plat pe trunchi subtire (silueta salcamului din
-    Serengeti, pe care §3.1 o interzice)."""
+CYP_LOBES = (  # (deplasare sub vant, lateral, cota centrului, raza pe vant, raza laterala, semi-grosime)
+    (0.22, 0.00, 0.26, 0.56, 0.40, 0.19),      # lobul de jos: lat, aproape de deal
+    (0.00, 0.08, 0.44, 0.46, 0.36, 0.18),      # lobul de mijloc, putin contra vantului
+    (0.34, -0.04, 0.62, 0.40, 0.30, 0.16),     # lobul de sus, pieptanat sub vant
+    # lobii se suprapun pe ~40 % din grosime: o singura masa grea, nu o stiva de clatite
+)
+
+
+def wind_tree(b, zf, x, y, h, seed):
+    """Chiparos de Monterey la 300 m (v2, silueta din `sf_cypress_silhouettes.png`, randul de
+    sus): o MASA de frunzis grea, mai lata decat inalta, aplecata spre +X, asezata JOS pe un
+    trunchi scurt si masiv aproape ascuns. Trei lobi suprapusi, cu talpa plata si crestetul
+    pieptanat sub vant; sub masa se vede doar o pana de trunchi (<= 25 % din inaltime).
+    `h` = inaltimea crestetului peste deal. Toti arborii se apleaca spre +X (vantul piesei)."""
     rnd = _lcg(seed)
-    z0 = zf(x, y) - 1.0
-    h = min(h, (HZ_TOP - z0) / 0.95)            # coroana nu trece de plafonul crestei
-    dx, dy = math.cos(math.radians(lean_deg)), math.sin(math.radians(lean_deg))
-    lx, ly = -dy, dx
-
-    def at(off, lat, z):
-        return (x + dx * off * h + lx * lat * h, y + dy * off * h + ly * lat * h, z0 + z * h)
-
-    loft(b, [at(0, 0, 0), at(0.08, 0, 0.30), at(0.14, -0.06, 0.46)],
-         [0.09 * h, 0.07 * h, 0.045 * h], LOG_DARK, side=(lx, ly, 0.0), segments=5)
-    loft(b, [at(0.08, 0, 0.28), at(0.26, 0.07, 0.50)], [0.05 * h, 0.035 * h], LOG_DARK,
-         side=(lx, ly, 0.0), segments=5)
-    for (off, lat, z, rx, th) in ((0.10, -0.12, 0.52, 0.26, 0.20), (0.30, 0.10, 0.58, 0.30, 0.22),
-                                  (0.48, -0.04, 0.64, 0.25, 0.19), (0.22, 0.00, 0.78, 0.24, 0.18),
-                                  (0.02, 0.14, 0.68, 0.20, 0.17)):
-        cx_, cy_, cz_ = at(off, lat, z)
+    z0 = zf(x, y)
+    h = min(h, (HZ_TOP - z0) / 0.82)
+    # trunchiul: pana scurta si groasa, aplecata sub vant, care intra in masa
+    loft(b, [(x - 0.04 * h, y, max(z0 - 0.25, 0.0)), (x + 0.06 * h, y, z0 + 0.20 * h), (x + 0.16 * h, y, z0 + 0.36 * h)],
+         [0.11 * h, 0.075 * h, 0.05 * h], LOG_DARK, side=(0.0, 1.0, 0.0), segments=5)
+    for (off, lat, zc, rx, ry, hh) in CYP_LOBES:
+        cx_, cy_, cz_ = x + off * h, y + lat * h, z0 + zc * h
         pts = []
-        for i in range(7):
-            a = 2 * math.pi * (i + rnd() * 0.3) / 7
+        n = 8
+        for i in range(n):
+            a = 2 * math.pi * (i + 0.25 * rnd()) / n
             ca, sa = math.cos(a), math.sin(a)
-            r = rx * h * (0.85 + 0.3 * rnd())
-            px = cx_ + (ca * dx + sa * lx * 0.8) * r
-            py = cy_ + (ca * dy + sa * ly * 0.8) * r
-            pts.append((px, py, cz_ - th * h * 0.45))
-            pts.append((cx_ + (px - cx_) * 0.65, cy_ + (py - cy_) * 0.65, cz_ + th * h * 0.55))
+            j = 0.92 + 0.16 * rnd()
+            # talpa plata, mijlocul cel mai lat, crestetul strans si impins sub vant (+X)
+            pts.append((cx_ + ca * rx * h * 0.86 * j, cy_ + sa * ry * h * 0.86 * j, cz_ - hh * h))
+            pts.append((cx_ + ca * rx * h * j, cy_ + sa * ry * h * j, cz_ - 0.15 * hh * h))
+            pts.append((cx_ + 0.18 * rx * h + ca * rx * h * 0.62 * j, cy_ + sa * ry * h * 0.6 * j,
+                        cz_ + hh * h))
         hull(b, pts, TROPICAL_GREEN)
 
 
 def shrub(b, zf, x, y, r, seed):
     rnd = _lcg(seed)
-    z0 = zf(x, y) - 0.8
+    z0 = max(zf(x, y) - 0.8, 0.0)
     pts = []
     for i in range(6):
         a = 2 * math.pi * (i + rnd() * 0.4) / 6
         pts.append((x + math.cos(a) * r, y + math.sin(a) * r * 0.8, z0))
-        pts.append((x + math.cos(a + 0.5) * r * 0.6, y + math.sin(a + 0.5) * r * 0.5, z0 + r * (0.7 + 0.3 * rnd())))
+        pts.append((x + math.cos(a + 0.5) * r * 0.6, y + math.sin(a + 0.5) * r * 0.5, z0 + 0.8 + r * (0.40 + 0.15 * rnd())))
     hull(b, pts, TROPICAL_GREEN)
 
 
@@ -718,8 +724,10 @@ def outcrop(b, zf, x, y, size, seed):
         s = size * (1.0 - 0.18 * k) * (0.85 + 0.3 * rnd())
         ox = x + (rnd() - 0.5) * size * 1.1
         oy = y + (rnd() - 0.5) * size * 0.8
-        z = zf(ox, oy)
-        b.boulder((ox, oy, z + s * 0.12), (s, s * 0.8, s * 0.72), STONE, seed=seed + k * 13,
+        # talpa bolovanului nu coboara sub baza piesei (Y 0): altfel `set_origin_base` ar ridica
+        # TOT dealul cu adancimea lui (memoria origin-base-ridica-tot-obiectul)
+        z = max(zf(ox, oy) + s * 0.12, s * 0.36 + 0.02)
+        b.boulder((ox, oy, z), (s, s * 0.8, s * 0.72), STONE, seed=seed + k * 13,
                   segments=6, rings=3, deviation=0.16)
 
 
@@ -739,8 +747,8 @@ def hill(name, L, W, humps, seed, outcrops, trees, shrubs):
             f[b.slot] = SAND_LIGHT if lit else GRASS
         for (ax, ay, sz) in outcrops:
             outcrop(b, zf, ax * L * 0.5, ay * W * 0.5, sz * 1.6, seed + int(ax * 100) + 500)
-        for k, (tx, ty, th, lean) in enumerate(trees):
-            wind_tree(b, zf, tx * L * 0.5, ty * W * 0.5, th * 2.0, lean, seed + 40 + k)
+        for k, (tx, ty, th) in enumerate(trees):
+            wind_tree(b, zf, tx * L * 0.5, ty * W * 0.5, th, seed + 40 + k)
         for k, (sx, sy, r) in enumerate(shrubs):
             shrub(b, zf, sx * L * 0.5, sy * W * 0.5, r, seed + 80 + k)
     return fn
@@ -796,21 +804,20 @@ CITY_AO = dict(samples=10, dist=14.0, gradient="vertical", low=0.70, high=1.0, p
 def build_horizon():
     pieces = [
         ("Hill_A", hill("Hill_A", 260.0, 110.0,
-                        [(-62, 6, 45, 62, 42), (18, -8, 38, 52, 40), (84, 10, 30, 44, 38)], 3101,
-                        outcrops=[(-0.62, -0.62, 15.0), (0.30, 0.72, 13.0), (0.78, -0.40, 12.0)],
-                        trees=[(-0.20, -0.30, 15.0, 15.0), (0.48, 0.10, 13.0, 25.0)],
-                        shrubs=[(-0.45, 0.30, 5.0), (0.10, -0.50, 4.5), (0.70, 0.25, 4.0)]), HZ_AO, 50.0),
+                        [(-62, 6, 32, 78, 46), (22, -8, 27, 70, 44), (90, 10, 23, 56, 40)], 3101,
+                        outcrops=[(-0.62, -0.62, 12.0), (0.30, 0.72, 11.0), (0.78, -0.40, 10.0)],
+                        trees=[(-0.30, -0.55, 19.0), (0.50, 0.50, 17.0)],
+                        shrubs=[(-0.45, 0.30, 5.0), (0.70, 0.25, 4.5)]), HZ_AO, 50.0),
         ("Hill_B", hill("Hill_B", 220.0, 96.0,
-                        [(-46, -4, 34, 50, 36), (52, 6, 30, 46, 34)], 3202,
-                        outcrops=[(-0.70, 0.50, 13.0), (0.15, -0.70, 14.0)],
-                        trees=[(-0.40, 0.05, 14.0, 10.0), (0.40, -0.15, 12.0, 20.0),
-                               (0.0, 0.40, 10.0, 15.0)],
-                        shrubs=[(-0.15, -0.35, 4.5), (0.62, 0.40, 4.0)]), HZ_AO, 50.0),
+                        [(-46, -4, 30, 66, 40), (54, 6, 26, 60, 38)], 3202,
+                        outcrops=[(-0.70, 0.50, 11.0), (0.15, -0.70, 12.0)],
+                        trees=[(-0.42, -0.50, 18.0), (0.40, 0.52, 16.0)],
+                        shrubs=[(-0.10, 0.40, 4.5), (0.62, 0.40, 4.0)]), HZ_AO, 50.0),
         ("Hill_C", hill("Hill_C", 300.0, 120.0,
-                        [(-30, 4, 55, 70, 46), (70, -10, 40, 56, 40), (-104, 8, 26, 40, 36)], 3303,
-                        outcrops=[(-0.55, 0.65, 16.0), (0.55, 0.62, 14.0), (0.10, -0.70, 15.0)],
-                        trees=[(0.30, -0.20, 15.0, 18.0), (-0.70, -0.25, 12.0, 12.0)],
-                        shrubs=[(-0.30, -0.45, 5.0), (0.62, 0.05, 4.5), (-0.05, 0.42, 4.0)]), HZ_AO, 50.0),
+                        [(-30, 4, 34, 90, 50), (76, -10, 27, 72, 44), (-108, 8, 20, 52, 38)], 3303,
+                        outcrops=[(-0.55, 0.65, 13.0), (0.55, 0.62, 12.0), (0.10, -0.70, 12.0)],
+                        trees=[(0.30, -0.55, 20.0), (-0.62, 0.50, 17.0)],
+                        shrubs=[(-0.30, -0.45, 5.0), (0.62, 0.05, 4.5)]), HZ_AO, 50.0),
         ("City_A", city("City_A", 230.0, 60.0, 4101, 20, 0), CITY_AO, None),
         ("City_B", city("City_B", 180.0, 52.0, 4202, 15, 0), CITY_AO, None),
     ]

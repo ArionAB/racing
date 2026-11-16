@@ -3289,6 +3289,10 @@ if SPATE_HOUSES:
 #   _BOLARD / _HORTENSII / _CHIPAROS / _ARBORI / _ARBORI_LANT = 0  stinge cate o familie.
 # =============================================================================================
 MAST_LAT = 8.5            # stalpul fata de axa strazii (inventar M2)
+# PASUL 8d: cu stalpii solizi, semafoarele de pe muchii si `Strada2` trec la 9,5 m (pragul lui
+# probe_manual pentru o piesa solida: semilatimea + 2 m); SF_SEMAFOR_LAT=0 le lasa la 8,5.
+if os.environ.get("SF_PAS8D", "1") == "1" and os.environ.get("SF_SEMAFOR_LAT", "1") == "1":
+    MAST_LAT = 9.5
 MAST_HEAD_BOTTOM = 8.05   # fundul capului peste talpa (build_sf_street.py S8)
 MAST_HEAD_X = 7.2         # capul, pe bratul spre -X
 MAST_CLEAR = 8.0          # contractul: capul >= 8 m peste drum (zborul cu turbo urca la +4)
@@ -3782,6 +3786,21 @@ ISLAND_AT = (0.0, 546.0)
 ISLAND_YAW = 180.0            # farul (pe +X) spre V: in cadrul lantului insula sta in stanga, podul in dreapta
 SEA_Y = 0.0
 STAIRS = [(185.0, 276.0, 255.0), (219.0, 276.0, 310.0), (249.0, 275.0, 255.0), (187.0, 336.0, 145.0)]
+# PASUL 8d: asezarea scarilor pe profilul modulului refacut (tools/blender/build_sf_struct.py N1:
+# palierul de jos 0..0,6 m la +0,15, 16 trepte de 0,1875 x 0,2533, palierul de sus 4,4..5,0 la +3,15;
+# treptele intre zidurile de la |x| = 1,0; fusta pana la -1,8 pe tot conturul de 2,5 x 5 m).
+# SF_SCARI_ASEZARE=0 = asezarea de dinainte (`sink`, care le ingropa).
+P8D_SCARI = os.environ.get("SF_PAS8D", "1") == "1" and os.environ.get("SF_SCARI_ASEZARE", "1") == "1"
+STAIR_IN, STAIR_SKIRT, STAIR_MARGIN = 1.0, 1.8, 0.10   # marja: harta de teren (grila de 1-2 m) vs terenul real, masurat pana la 0,07
+STAIR_FIT = []            # (scara, ridicarea fata de terenul de la origine, adancimea de fusta folosita)
+
+
+def stair_tread(lz):
+    """Cota fetei de calcare la adancimea lz (0..5) in modul, fata de originea lui."""
+    if lz < 0.6:
+        return 0.15
+    k = min(15, int((lz - 0.6) / (3.8 / 15.0)))
+    return 0.15 + (k + 1) * 3.0 / 16.0
 V3_NODES, V3_ROOT_NODES, V3_SUB = [], [], []
 V3_DIRS = []
 V3_STATS = {}
@@ -4025,6 +4044,29 @@ if V3_SCARI and B200 and _p7_glb("props/sf_stair_lane.glb", "v3_stair"):
                 g_ = v2_ground(sx + d_[0] * t_ + lat[0] * s_, sy + d_[1] * t_ + lat[1] * s_)
                 gap = max(gap, (h0 + 6.0 * t_ / 10.0) - g_)
         sink = min(gap, 0.4) + 0.05
+        if P8D_SCARI:
+            # PASUL 8d: originea din profilul REAL al treptelor (modulul refacut, rampa plina cu fusta
+            # pana la -1,8): cea mai mica cota la care nicio treapta (|x| <= 1,0) a celor doua module nu
+            # intra in teren, + STAIR_MARGIN; apoi fusta (conturul, |x| <= 1,25, la -1,8 sub fiecare
+            # modul) trebuie sa ajunga in teren peste tot. Inlocuieste `sink` (care cobora scara).
+            need, skirt_lim = -1e9, 1e9
+            for m_ in range(2):
+                for iz in range(21):
+                    lz = 0.25 * iz
+                    for ix in range(11):
+                        lx = -1.25 + 0.25 * ix
+                        t_ = 5.0 * m_ + lz
+                        g_ = v2_ground(sx + d_[0] * t_ + lat[0] * lx, sy + d_[1] * t_ + lat[1] * lx)
+                        if abs(lx) <= STAIR_IN + 1e-6:
+                            need = max(need, g_ - stair_tread(lz) - 3.0 * m_)
+                        if abs(lx) >= 1.25 - 1e-6 or iz in (0, 20):
+                            skirt_lim = min(skirt_lim, g_ + STAIR_SKIRT - 3.0 * m_)
+            oy = need + STAIR_MARGIN
+            if oy > skirt_lim:
+                raise SystemExit("valul 3: scara %d: fusta (%.1f m) nu ajunge in teren: origine %.2f > %.2f"
+                                 % (k_, STAIR_SKIRT, oy, skirt_lim))
+            sink = h0 - oy
+            STAIR_FIT.append((k_, -sink, oy - (skirt_lim - STAIR_SKIRT)))
         o = (sx, h0 - sink, -sy)
         for m_ in range(2):
             _v3_inst("Scari", "Scara%d_%d" % (k_, m_), "props/sf_stair_lane.glb", "v3_stair",
@@ -4034,6 +4076,9 @@ if V3_SCARI and B200 and _p7_glb("props/sf_stair_lane.glb", "v3_stair"):
             raise SystemExit("valul 3: scara %d la %.1f m de axa" % (k_, dr))
         st_rows.append((k_, sx, sy, ang, h0, rise, sink, dr))
     V3_STATS["scari"] = st_rows
+    for k_, up_, sk_ in STAIR_FIT:
+        print("scara %d (pasul 8d): originea la %+.2f m fata de terenul de sub ea, fusta folosita %.2f din %.1f m"
+              % (k_, up_, sk_, STAIR_SKIRT))
     print("scarile: %d x 2 module: %s" % (len(st_rows), "; ".join(
         "(%.0f, %.0f) spre %.0f gr, talpa %.2f, terenul urca %.2f pe 10 m (scara 6,0), coborata %.2f, %.0f m de axa" % r_[1:]
         for r_ in st_rows)))

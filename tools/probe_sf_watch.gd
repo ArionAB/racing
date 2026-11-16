@@ -1001,6 +1001,20 @@ static func _med(a: Array) -> float:
 
 func report() -> void:
 	var cars: Array[Car] = _race.cars
+	# PASUL 8d: preferinta de scurtatura a fiecarei masini (cea de la final; cu zarul de nivel stins
+	# `prefers_shortcut` se trage o data, la `configure`) si ruta pe care a trecut efectiv la furca.
+	for i in cars.size():
+		var ai := cars[i].controller as AIController
+		var r0 := 0
+		var r1 := 0
+		for ps in _passes:
+			if int(ps[0]) == i:
+				if int(ps[1]) == 1:
+					r1 += 1
+				else:
+					r0 += 1
+		print("=== SF pref %d %s: scurtatura=%s treceri ocol=%d serpentine=%d" % [i, cars[i].pilot_name,
+			("da" if ai.prefers_shortcut else "nu") if ai != null else "?", r0, r1])
 	print("=== SF lant: %d muchii" % _lips.size())
 	for k in _lips.size():
 		var vs: Array = _lip_v[k]

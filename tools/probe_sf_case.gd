@@ -59,6 +59,8 @@ var _dump := ""
 var _dump_baked := ""
 var _sabotage := false
 var _sabotage_end := false
+## `--spate`: tipareste fiecare casa cu fusta din spate in aer > 0,3 m (pasul 8d, informativ).
+var _detail_back := false
 var _space: PhysicsDirectSpaceState3D
 var _fails := 0
 
@@ -74,6 +76,8 @@ func _ready() -> void:
 			_dump_baked = a.trim_prefix("--dump-baked=")
 		elif a == "--sabotaj":
 			_sabotage = true
+		elif a == "--spate":
+			_detail_back = true
 		elif a == "--sabotaj-capat":
 			_sabotage_end = true
 	var track := (load(path) as PackedScene).instantiate() as Track
@@ -391,6 +395,10 @@ func _check(track: Track) -> int:
 				var lc := xf.affine_inverse() * c
 				if Vector2(lc.x, lc.z + porch * 0.5).length() > 0.02 or absf(c.y - bx.size.y * 0.5 - (xf.origin.y - SKIRT)) > 0.02:
 					why.append("cutia e mutata fata de casa")
+		if _detail_back and back_skirt < -0.3:
+			var bc := xf * Vector3(0.0, 0.0, 6.0)
+			print("  spate in aer %-10s %+.2f m, mijlocul spatelui la (%.1f, %.1f, %.1f)" % [h.name, back_skirt,
+				bc.x, xf.origin.y - SKIRT, bc.z])
 		z["poke"] = maxf(z["poke"], poke)
 		z["skirt"] = minf(z["skirt"], skirt)
 		z["back"] = maxf(z["back"], back)

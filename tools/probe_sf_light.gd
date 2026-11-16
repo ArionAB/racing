@@ -26,7 +26,8 @@ extends Node
 ##       cu un corp trimesh din geometria lor randata (fronton, cornisa, turnulet, bovindou) — ca
 ##       `tools/sf_loc_decor.gd --glb` pe strada sintetica. Plus cutiile lor (`CaseCorpuri`). Pe
 ##       scena fara case (`SF_CASE=0`) da soarele pe carosabil contra terenului singur. Din pasul 8b
-##       si randurile din spate (`CityFill` cu metadata `sf_spate`), cu aceeasi geometrie.
+##       si randurile din spate (`CityFill` cu metadata `sf_spate`), cu aceeasi geometrie. Din valul 2
+##       si copacii cu metadata `sf_shade` (arborii de strada, chiparosii): trunchi + coroana plina.
 
 const ROAD_HALF_SAMPLE: float = 6.75
 const FACADE_OFF: float = 10.5
@@ -41,6 +42,7 @@ var _sun_over := Vector3.ZERO
 var _real := false
 var _track: Track
 var _houses: Node3D
+var _trees: int = 0
 
 
 func _ready() -> void:
@@ -90,6 +92,7 @@ func _ready() -> void:
 			_build_rows(r, idx)
 	if _real:
 		print("  --real: %d case reale (trimesh din geometria randata)" % _real_houses())
+		print("  --real: %d copaci (metadata sf_shade: trunchi + coroana plina, fara cardurile de frunze)" % _trees)
 	for _i in 4:
 		await get_tree().physics_frame
 	var space := get_viewport().world_3d.direct_space_state
@@ -160,14 +163,23 @@ func _real_houses() -> int:
 		var nd: Node = stack.pop_back()
 		for c in nd.get_children():
 			stack.append(c)
-		if not (nd is Node3D and nd.has_meta("sf_case")):
+		var tree := nd is Node3D and nd.has_meta("sf_shade")
+		if not (nd is Node3D and (nd.has_meta("sf_case") or tree)):
 			continue
-		n += 1
+		if tree:
+			_trees += 1
+		else:
+			n += 1
 		var body := StaticBody3D.new()
 		body.add_to_group("sf_light_house")
 		for c in nd.find_children("*", "MeshInstance3D", true, false):
 			var mi := c as MeshInstance3D
 			if mi.mesh == null:
+				continue
+			# Valul 2: copacii (metadata `sf_shade`: arbori de strada, chiparosi) umbresc prin
+			# trunchi + masa coroanei (`*_Crown`, ascunsa de aproape dar plina: plafonul de sus
+			# al umbrei) + miez; cardurile de frunze (`*_Leaves`, quad-uri cu alpha) nu intra.
+			if tree and String(mi.name).contains("_Leaves"):
 				continue
 			var faces := mi.mesh.get_faces()
 			var xf := mi.global_transform

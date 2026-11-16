@@ -27,6 +27,17 @@ extends Node3D
 		color_slot = v
 		if is_inside_tree():
 			_build()
+## Valul 2 (nov 2026): caroseria e modelul `sf_parked_{sedan,wagon,van}.glb` (scris de
+## tools/gen_sf_route.py), recolorat pe instanta: fetele cu UV pe slotul 11 (vopseaua, singurul
+## lucru de pe 11 in model) trec pe `color_slot`. Un mesh per (caroserie, slot), cu LOD-urile
+## importului (aceiasi indici -> `MeshCpu.surface_lods`), pe materialul lumii: zero materiale noi.
+## COLIZIUNEA ramane cea a placeholderului (gabaritul lui, prin optiunea `box` a BumpProp), ca
+## toate contactele masurate la pasul 6 sa ramana valabile; stins = placeholderul din cutii.
+@export var use_glb: bool = false:
+	set(v):
+		use_glb = v
+		if is_inside_tree():
+			_build()
 ## Masa (kg). Masinile de joc: 100 x mass_factor (Politia 90, Buggy 100, Autobuzul 260).
 @export var mass_kg: float = 140.0
 ## Se intoarce la locul ei dupa ce s-a oprit (BumpProp `home`).
@@ -42,8 +53,18 @@ const LENGTH: float = 3.7
 ## masurat fara rotatia radacinii).
 const FOOTPRINT_M: float = 4.5
 const SNAP_REACH_M: float = 4.0
+## Modelele valului 2, pe `body_kind` (0 sedan, 1 break, 2 duba). Botul pe -Z, ca placeholderul.
+const MODELS: Array[String] = [
+	"res://assets/models/sanfrancisco/vehicles/sf_parked_sedan.glb",
+	"res://assets/models/sanfrancisco/vehicles/sf_parked_wagon.glb",
+	"res://assets/models/sanfrancisco/vehicles/sf_parked_van.glb",
+]
+## Slotul vopselei in GLB (measure_sf_street.py: caroseria toata pe 11, nimic altceva pe el).
+const BODY_SLOT: int = Palette.PAINTED_METAL
 
 static var _meshes: Dictionary = {}
+static var _glb_meshes: Dictionary = {}
+static var _glb_src: Dictionary = {}
 
 var _mi: MeshInstance3D
 
@@ -60,7 +81,8 @@ func _build() -> void:
 		_mi.free()
 	_mi = MeshInstance3D.new()
 	_mi.name = "Body"
-	_mi.mesh = mesh_for(body_kind, color_slot)
+	var glb: ArrayMesh = glb_mesh_for(body_kind, color_slot) if use_glb else null
+	_mi.mesh = glb if glb != null else mesh_for(body_kind, color_slot)
 	_mi.material_override = Palette.world_material()
 	add_child(_mi)
 
@@ -82,8 +104,9 @@ func _activate() -> void:
 			if fwd.length_squared() > 0.5 and n.y > 0.7:
 				global_transform = Transform3D(Basis.looking_at(fwd, n), hit["position"])
 	add_to_group(&"sf_parked_cars")
+	# Gabaritul de coliziune e MEREU al placeholderului (vezi `use_glb`).
 	var body := BumpProp.wrap(_mi, {"mass": mass_kg, "home": go_home,
-		"max_footprint": FOOTPRINT_M})
+		"max_footprint": FOOTPRINT_M, "box": mesh_for(body_kind, color_slot).get_aabb()})
 	if body != null:
 		body.add_to_group(&"sf_parked_bodies")
 		body.set_meta("sf_parked_home", body.global_position)
@@ -127,6 +150,51 @@ static func mesh_for(kind: int, slot: int) -> ArrayMesh:
 	st.generate_normals()
 	var mesh := st.commit()
 	_meshes[key] = mesh
+	return mesh
+
+
+## Mesh-ul modelului GLB al caroseriei `kind`, recolorat pe `slot` (partajat intre instantele cu
+## aceeasi caroserie si culoare). Pe slotul vopselei din model se intoarce chiar mesh-ul importat;
+## altfel o copie cu ACEIASI indici (doar UV-ul mutat pe slotul nou, cu acelasi decalaj in slot),
+## care poarta LOD-urile importului. Null daca modelul lipseste (ramane placeholderul).
+static func glb_mesh_for(kind: int, slot: int) -> ArrayMesh:
+	var key := "%d_%d" % [kind, slot]
+	if _glb_meshes.has(key):
+		return _glb_meshes[key]
+	var src := _glb_source(clampi(kind, 0, MODELS.size() - 1))
+	if src == null:
+		return null
+	if slot == BODY_SLOT:
+		_glb_meshes[key] = src
+		return src
+	var shift := float(slot - BODY_SLOT) / float(Palette.SLOTS)
+	var out := ArrayMesh.new()
+	for s in src.get_surface_count():
+		var arrays := MeshCpu.surface_arrays(src, s)
+		var uvs: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV]
+		for i in uvs.size():
+			var u := uvs[i]
+			if int(floor(u.x * float(Palette.SLOTS))) == BODY_SLOT:
+				u.x += shift
+				uvs[i] = u
+		arrays[Mesh.ARRAY_TEX_UV] = uvs
+		MeshCpu.add_surface(out, arrays, MeshCpu.surface_lods(src, s))
+	_glb_meshes[key] = out
+	return out
+
+
+## Mesh-ul importat al caroseriei (singurul MeshInstance3D din GLB, la origine).
+static func _glb_source(kind: int) -> ArrayMesh:
+	if _glb_src.has(kind):
+		return _glb_src[kind]
+	var mesh: ArrayMesh = null
+	if ResourceLoader.exists(MODELS[kind]):
+		var inst := (load(MODELS[kind]) as PackedScene).instantiate()
+		for c in inst.find_children("*", "MeshInstance3D", true, false):
+			mesh = (c as MeshInstance3D).mesh as ArrayMesh
+			break
+		inst.free()
+	_glb_src[kind] = mesh
 	return mesh
 
 

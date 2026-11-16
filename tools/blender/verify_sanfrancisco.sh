@@ -27,6 +27,8 @@
 # Garzile de cote (pe GLB, coordonate Godot, cu selftest pe copii sabotate):
 #   measure_sf_bridge.py   gabaritul liber al podului (brief §3)
 #   measure_sf_gabarit.py  cutiile pe care le citeste fizica: vagon, utilaj, bloc, casa
+#   measure_sf_street.py   mobilierul valului 2 (masinile parcate, semaforul, felinarul, piesele mici)
+#   measure_sf_plants.py   vegetatia valului 2 (chiparosii, arborele de strada, hortensiile, gradinita)
 
 set -u
 cd "$(dirname "$0")/../.." || exit 1
@@ -94,6 +96,31 @@ check "buildings/sf_row_corner_turret.glb" 3500 --origin=waterline
 check "buildings/sf_row_corner_turret_m.glb" 3500 --origin=waterline
 
 echo
+echo "== valul 2: mobilierul de strada si vegetatia (inventar §5.3-§5.4) =="
+# Bugetele sunt cele din inventar / din garzile constructorilor (measure_sf_street.py, measure_sf_plants.py).
+# Exceptii declarate:
+#   --origin=assembly   arborii (chiparosii, arborele de strada): patru noduri (trunchi, coroana, miez,
+#                       carduri); doar trunchiul atinge Y = 0, coroana incepe la +1,8..+3,3 prin constructie.
+#   --allow-slots=31    hortensiile si gradinita: florile pe FLAMINGO_PINK (inventar §5, V3/N2).
+check "vehicles/sf_parked_sedan.glb" 2500
+check "vehicles/sf_parked_wagon.glb" 2500
+check "vehicles/sf_parked_van.glb" 2500
+check "props/sf_signal_mast.glb" 1000
+check "props/sf_street_lamp.glb" 400
+check "props/sf_street_props.glb" 1500
+check "props/sf_bollard.glb" 200
+check "props/sf_crab_traps.glb" 900
+check "props/sf_bench.glb" 400
+check "props/sf_bike_rack.glb" 400
+check "plants/sf_cypress_a.glb" 6000 --origin=assembly
+check "plants/sf_cypress_b.glb" 6000 --origin=assembly
+check "plants/sf_cypress_c.glb" 6000 --origin=assembly
+check "plants/sf_street_tree.glb" 1200 --origin=assembly
+check "plants/sf_hydrangea.glb" 600 --allow-slots=31
+check "plants/sf_hydrangea_blue.glb" 600 --allow-slots=31
+check "props/sf_front_garden.glb" 400 --allow-slots=31
+
+echo
 echo "== garzile de cote =="
 python tools/blender/measure_sf_bridge.py || fail=1
 st=$(python tools/blender/measure_sf_bridge.py --selftest 2>&1); rc=$?
@@ -103,6 +130,16 @@ python tools/blender/measure_sf_gabarit.py || fail=1
 st=$(python tools/blender/measure_sf_gabarit.py --selftest 2>&1); rc=$?
 printf '%s\n' "$st" | grep -E "ASTEPTAT|PICA|SELFTEST"
 [ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei de gabarit a esuat"; fail=1; }
+python tools/blender/measure_sf_street.py || fail=1
+st=$(python tools/blender/measure_sf_street.py --selftest 2>&1); rc=$?
+printf '%s
+' "$st" | grep -E "SELFTEST"
+[ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei de strada a esuat"; fail=1; }
+python tools/blender/measure_sf_plants.py || fail=1
+st=$(python tools/blender/measure_sf_plants.py --selftest 2>&1); rc=$?
+printf '%s
+' "$st" | grep -E "SELFTEST"
+[ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei de vegetatie a esuat"; fail=1; }
 
 echo
 echo "== GLB-uri nedeclarate (verificate fara exceptii) =="

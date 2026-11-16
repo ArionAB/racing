@@ -9,6 +9,8 @@ clase — pastel (nodul `Row_Wall`) / alb (slot 22) / sticla (slot 20 vertical) 
         [--face=-x|+x]     (a doua fatada a coltului: raze dinspre -X / +X, `x0..x1` = Godot -Z..
                             spre spate, adica Blender Y de la +x1 la -x0; implicit fata -Z)
         [--top=12.7]       (sus-ul zonei `etaje+fronton`; coltul: 15,0)
+        [--accent=31[,11]] (casele pictate: sloturile de ACCENT din Row_Trim se numara separat,
+                            clasa `accent`; fara optiune, iesirea e cea de dinainte)
 
 Cum se calculeaza: raster ORTOGRAFIC de vizibilitate, din fata (Godot -Z, Blender +Y),
 cu pasul `--step` (implicit 2 cm) pe X in [-3,5, +3,5] si pe inaltime in [`--z0`, 12,7];
@@ -30,6 +32,7 @@ from mathutils import Vector
 from mathutils.bvhtree import BVHTree
 
 S_WHITE, S_DARK = 22, 20
+ACCENT = set()          # `--accent=`: sloturile de accent ale casei pictate
 
 
 def _args():
@@ -41,6 +44,8 @@ def _args():
             opts["png_dir"] = x[6:]
         elif x.startswith("--face="):
             opts["face"] = x[7:]
+        elif x.startswith("--accent="):
+            ACCENT.update(int(s) for s in x[9:].split(",") if s.strip())
         elif x.startswith("--") and "=" in x:
             k, v = x[2:].split("=", 1)
             opts[k] = float(v)
@@ -71,6 +76,8 @@ def _load(path):
             n = (nm @ lt.normal).normalized()
             if is_wall:
                 cls = "pastel"
+            elif slot in ACCENT:
+                cls = "accent"
             elif slot == S_WHITE:
                 cls = "alb"
             elif slot == S_DARK:
@@ -82,7 +89,8 @@ def _load(path):
 
 
 COLORS = {"pastel": (0.71, 0.78, 0.86), "alb": (0.96, 0.96, 0.94), "sticla": (0.12, 0.12, 0.14),
-          "acoperis": (0.35, 0.33, 0.36), "altele": (0.78, 0.62, 0.45)}
+          "acoperis": (0.35, 0.33, 0.36), "altele": (0.78, 0.62, 0.45),
+          "accent": (0.62, 0.30, 0.42)}
 
 
 RANGE = {"x0": -3.5, "x1": 3.5, "face": None}
@@ -144,10 +152,15 @@ def _fmt(label, cnt):
     tot = sum(cnt.values())
     nr = tot - cnt.get("acoperis", 0)
     parts = []
-    for c in ("pastel", "alb", "sticla", "altele"):
+    cls = ("pastel", "accent", "alb", "sticla", "altele") if ACCENT else \
+        ("pastel", "alb", "sticla", "altele")
+    for c in cls:
         parts.append("%s %5.1f%%" % (c, 100.0 * cnt.get(c, 0) / max(nr, 1)))
+    if ACCENT:
+        parts.append("pastel+accent %5.1f%%" % (100.0 * (cnt.get("pastel", 0) +
+                                                         cnt.get("accent", 0)) / max(nr, 1)))
     wr = ", ".join("%s %.1f%%" % (c, 100.0 * cnt.get(c, 0) / max(tot, 1))
-                   for c in ("pastel", "alb", "sticla", "acoperis", "altele"))
+                   for c in cls[:-1] + ("acoperis", "altele"))
     return "  %-14s %s   (cu acoperis: %s; %d px)" % (label, "  ".join(parts), wr, tot)
 
 

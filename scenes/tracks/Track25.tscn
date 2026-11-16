@@ -34,6 +34,12 @@
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_a_canted.glb" id="p8_sf_row_a_canted"]
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_c_canted_m.glb" id="p8_sf_row_c_canted_m"]
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_a_square_m.glb" id="p8_sf_row_a_square_m"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_end_c_m.glb" id="p8_sf_row_end_c_m"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_end_b.glb" id="p8_sf_row_end_b"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_end_b_m.glb" id="p8_sf_row_end_b_m"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_end_c.glb" id="p8_sf_row_end_c"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_end_a_m.glb" id="p8_sf_row_end_a_m"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_end_a.glb" id="p8_sf_row_end_a"]
 [ext_resource type="Script" path="res://scenes/props/city_fill.gd" id="p8b_cityfill"]
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/props/sf_signal_mast.glb" id="v2_mast"]
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/props/sf_street_lamp.glb" id="v2_lamp"]
@@ -47,6 +53,24 @@
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/plants/sf_cypress_a.glb" id="v2_cyp_a"]
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/plants/sf_cypress_b.glb" id="v2_cyp_b"]
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/plants/sf_cypress_c.glb" id="v2_cyp_c"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_painted_lady_a.glb" id="v3_lady_a"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_end_b.glb" id="v3_sf_row_end_b"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_painted_lady_a.glb" id="v3_sf_painted_lady_a"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/props/sf_front_garden.glb" id="v3_garden"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_painted_lady_b.glb" id="v3_sf_painted_lady_b"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_painted_lady_c.glb" id="v3_sf_painted_lady_c"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_painted_lady_d.glb" id="v3_sf_painted_lady_d"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_painted_lady_e.glb" id="v3_sf_painted_lady_e"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_painted_lady_f.glb" id="v3_sf_painted_lady_f"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/buildings/sf_row_end_c_m.glb" id="v3_sf_row_end_c_m"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/structures/sf_turntable.glb" id="v3_turntable"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/structures/sf_pier_shed.glb" id="v3_shed"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/structures/sf_pier_shed_short.glb" id="v3_shed_s"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/animals/sf_sea_lions.glb" id="v3_lions"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/structures/sf_island_light.glb" id="v3_island"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/props/sf_stair_lane.glb" id="v3_stair"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/props/sf_bench.glb" id="v3_bench"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/props/sf_bike_rack.glb" id="v3_rack"]
 [ext_resource type="Script" path="res://scenes/props/world_prop.gd" id="p7_worldprop"]
 
 [sub_resource type="Curve3D" id="Curve3D_sf"]
@@ -116,9 +140,6 @@ size = Vector3(0.40, 2.10, 1.99)
 [sub_resource type="BoxShape3D" id="Box_fatada6"]
 size = Vector3(0.40, 2.10, 1.82)
 
-[sub_resource type="StandardMaterial3D" id="Mat_pod_gri"]
-albedo_color = Color(0.62, 0.62, 0.6, 1)
-
 [sub_resource type="BoxShape3D" id="Box_pod_parapet"]
 size = Vector3(224.000, 1.200, 0.500)
 
@@ -128,16 +149,8 @@ size = Vector3(10.000, 1.200, 0.500)
 [sub_resource type="BoxShape3D" id="Box_pod_cap_baza"]
 size = Vector3(80.000, 4.300, 0.600)
 
-[sub_resource type="BoxMesh" id="Mesh_pod_cap_baza"]
-size = Vector3(80.000, 4.300, 0.600)
-material = SubResource("Mat_pod_gri")
-
 [sub_resource type="BoxShape3D" id="Box_pod_cap_malulcelalalt"]
 size = Vector3(80.000, 4.300, 0.600)
-
-[sub_resource type="BoxMesh" id="Mesh_pod_cap_malulcelalalt"]
-size = Vector3(80.000, 4.300, 0.600)
-material = SubResource("Mat_pod_gri")
 
 [sub_resource type="BoxShape3D" id="Box_pod_leg"]
 size = Vector3(3.000, 75.000, 3.000)
@@ -156,6 +169,24 @@ size = Vector3(9.0, 12.0, 12.0)
 
 [sub_resource type="BoxShape3D" id="Box_spate7"]
 size = Vector3(7.0, 12.0, 12.0)
+
+[sub_resource type="BoxShape3D" id="Box_v3_7_00_12_00_12_00"]
+size = Vector3(7.00, 12.00, 12.00)
+
+[sub_resource type="BoxShape3D" id="Box_v3_7_00_12_00_13_20"]
+size = Vector3(7.00, 12.00, 13.20)
+
+[sub_resource type="BoxShape3D" id="Box_v3_2_00_2_60_2_00"]
+size = Vector3(2.00, 2.60, 2.00)
+
+[sub_resource type="BoxShape3D" id="Box_v3_2_50_3_20_8_50"]
+size = Vector3(2.50, 3.20, 8.50)
+
+[sub_resource type="BoxShape3D" id="Box_v3_12_00_9_00_20_00"]
+size = Vector3(12.00, 9.00, 20.00)
+
+[sub_resource type="BoxShape3D" id="Box_v3_12_00_9_00_12_00"]
+size = Vector3(12.00, 9.00, 12.00)
 
 [node name="Track25" type="Node3D"]
 script = ExtResource("1_track")
@@ -827,17 +858,9 @@ metadata/soft_hit_crush = 1.0
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 194.00000, 19.15000, -228.62641)
 shape = SubResource("Box_pod_cap_baza")
 
-[node name="CapBazaM" type="MeshInstance3D" parent="Pod/CapS"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 194.00000, 19.15000, -228.62641)
-mesh = SubResource("Mesh_pod_cap_baza")
-
 [node name="CapMalulCelalalt" type="CollisionShape3D" parent="Pod/CapS"]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 546.00000, 19.15000, -228.62641)
 shape = SubResource("Box_pod_cap_malulcelalalt")
-
-[node name="CapMalulCelalaltM" type="MeshInstance3D" parent="Pod/CapS"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 546.00000, 19.15000, -228.62641)
-mesh = SubResource("Mesh_pod_cap_malulcelalalt")
 
 [node name="Turnuri" type="StaticBody3D" parent="Pod"]
 
@@ -2185,7 +2208,7 @@ metadata/sf_case_w = 9.0
 
 [node name="CaseB" type="Node3D" parent="DecorManual"]
 
-[node name="B1E_00" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_square")]
+[node name="B1E_00" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_end_c_m")]
 transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 21.302, -162.526)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -2249,7 +2272,7 @@ metadata/wall_class = "sf_clapboard"
 metadata/sf_case = "B"
 metadata/sf_case_w = 7.0
 
-[node name="B1E_08" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_square")]
+[node name="B1E_08" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_end_b")]
 transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 27.620, -106.526)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -2257,7 +2280,7 @@ metadata/wall_class = "sf_clapboard_blue"
 metadata/sf_case = "B"
 metadata/sf_case_w = 7.0
 
-[node name="B2E_00" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_square")]
+[node name="B2E_00" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_end_b_m")]
 transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 30.017, -85.526)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -2337,7 +2360,7 @@ metadata/wall_class = "sf_clapboard"
 metadata/sf_case = "B"
 metadata/sf_case_w = 7.0
 
-[node name="B2E_10" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_square")]
+[node name="B2E_10" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_end_c")]
 transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 38.005, -15.526)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -2345,7 +2368,7 @@ metadata/wall_class = "sf_clapboard_blue"
 metadata/sf_case = "B"
 metadata/sf_case_w = 7.0
 
-[node name="B3E_00" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_square")]
+[node name="B3E_00" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_end_a_m")]
 transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 40.402, 5.474)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -2433,7 +2456,7 @@ metadata/wall_class = "sf_clapboard_mint"
 metadata/sf_case = "B"
 metadata/sf_case_w = 7.0
 
-[node name="B3E_11" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_canted")]
+[node name="B3E_11" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_end_c")]
 transform = Transform3D(-0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, -0.00000, 161.750, 49.176, 82.474)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -2489,7 +2512,7 @@ metadata/wall_class = "sf_clapboard_pink"
 metadata/sf_case = "B"
 metadata/sf_case_w = 7.0
 
-[node name="B1V_06" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_canted_m")]
+[node name="B1V_06" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_end_b_m")]
 transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 27.621, -106.526)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -2497,7 +2520,7 @@ metadata/wall_class = "sf_clapboard_mint"
 metadata/sf_case = "B"
 metadata/sf_case_w = 7.0
 
-[node name="B2V_00" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_a_canted_m")]
+[node name="B2V_00" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_end_a")]
 transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 30.017, -85.526)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -2577,7 +2600,7 @@ metadata/wall_class = "sf_clapboard"
 metadata/sf_case = "B"
 metadata/sf_case_w = 7.0
 
-[node name="B2V_10" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_canted_m")]
+[node name="B2V_10" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_end_b_m")]
 transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 38.005, -15.526)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -2585,7 +2608,7 @@ metadata/wall_class = "sf_clapboard_blue"
 metadata/sf_case = "B"
 metadata/sf_case_w = 7.0
 
-[node name="B3V_00" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_c_canted_m")]
+[node name="B3V_00" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_end_c")]
 transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 40.402, 5.474)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -2673,7 +2696,7 @@ metadata/wall_class = "sf_clapboard_mint"
 metadata/sf_case = "B"
 metadata/sf_case_w = 7.0
 
-[node name="B3V_11" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_b_square_m")]
+[node name="B3V_11" parent="DecorManual/CaseB" instance=ExtResource("p8_sf_row_end_b_m")]
 transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 126.250, 49.203, 82.474)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -2683,7 +2706,7 @@ metadata/sf_case_w = 7.0
 
 [node name="CaseG" type="Node3D" parent="DecorManual"]
 
-[node name="G1V_00" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_b_canted_m")]
+[node name="G1V_00" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_end_b")]
 transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 5.421, -406.500)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -2747,7 +2770,7 @@ metadata/wall_class = "sf_clapboard_mint"
 metadata/sf_case = "G"
 metadata/sf_case_w = 7.0
 
-[node name="G1V_08" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_a_canted_m")]
+[node name="G1V_08" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_end_a_m")]
 transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 11.860, -350.500)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -2755,7 +2778,7 @@ metadata/wall_class = "sf_clapboard"
 metadata/sf_case = "G"
 metadata/sf_case_w = 7.0
 
-[node name="G2V_00" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_a_canted_m")]
+[node name="G2V_00" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_end_a")]
 transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 14.273, -329.500)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -2803,7 +2826,7 @@ metadata/wall_class = "sf_clapboard"
 metadata/sf_case = "G"
 metadata/sf_case_w = 7.0
 
-[node name="G2V_06" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_a_canted_m")]
+[node name="G2V_06" parent="DecorManual/CaseG" instance=ExtResource("p8_sf_row_end_a_m")]
 transform = Transform3D(0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, 0.00000, 133.500, 18.690, -287.500)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -2813,7 +2836,7 @@ metadata/sf_case_w = 7.0
 
 [node name="CaseE" type="Node3D" parent="DecorManual"]
 
-[node name="EAN_00" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_c_canted")]
+[node name="EAN_00" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_end_c")]
 transform = Transform3D(-1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, -1.00000, -33.500, 13.180, -331.500)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -2877,7 +2900,7 @@ metadata/wall_class = "sf_clapboard"
 metadata/sf_case = "E"
 metadata/sf_case_w = 7.0
 
-[node name="EAN_08" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_b_canted")]
+[node name="EAN_08" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_end_b_m")]
 transform = Transform3D(-1.00000, 0, 0.00000, 0, 1, 0, -0.00000, 0, -1.00000, -89.500, 11.536, -331.500)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -2885,7 +2908,7 @@ metadata/wall_class = "sf_clapboard_blue"
 metadata/sf_case = "E"
 metadata/sf_case_w = 7.0
 
-[node name="EBE_00" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_b_canted")]
+[node name="EBE_00" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_end_b")]
 transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 9.754, -349.500)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -2965,7 +2988,7 @@ metadata/wall_class = "sf_clapboard"
 metadata/sf_case = "E"
 metadata/sf_case_w = 7.0
 
-[node name="EBE_10" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_c_canted")]
+[node name="EBE_10" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_end_c_m")]
 transform = Transform3D(0.00000, 0, 1.00000, 0, 1, 0, -1.00000, 0, 0.00000, -108.157, 7.673, -419.500)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -2973,7 +2996,7 @@ metadata/wall_class = "sf_clapboard_blue"
 metadata/sf_case = "E"
 metadata/sf_case_w = 7.0
 
-[node name="EBV_00" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_b_square_m")]
+[node name="EBV_00" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_end_b_m")]
 transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 9.609, -353.500)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -3045,7 +3068,7 @@ metadata/wall_class = "sf_clapboard_blue"
 metadata/sf_case = "E"
 metadata/sf_case_w = 7.0
 
-[node name="EBV_09" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_b_canted_m")]
+[node name="EBV_09" parent="DecorManual/CaseE" instance=ExtResource("p8_sf_row_end_b")]
 transform = Transform3D(-0.00000, 0, -1.00000, 0, 1, 0, 1.00000, 0, -0.00000, -141.157, 7.780, -416.500)
 metadata/coliziune = "none"
 metadata/contact = "none"
@@ -3681,10 +3704,10 @@ shape = SubResource("Box_casa7")
 
 [node name="CaseSpate" type="Node3D" parent="."]
 script = ExtResource("p8b_cityfill")
-models = Array[PackedScene]([ExtResource("p8_sf_row_a_canted"), ExtResource("p8_sf_row_b_square"), ExtResource("p8_sf_row_c_canted"), ExtResource("p8_sf_row_a_square"), ExtResource("p8_sf_row_b_canted"), ExtResource("p8_sf_row_c_square")])
-mirror_models = Array[PackedScene]([ExtResource("p8_sf_row_a_canted_m"), ExtResource("p8_sf_row_b_square_m"), ExtResource("p8_sf_row_c_canted_m"), ExtResource("p8_sf_row_a_square_m"), ExtResource("p8_sf_row_b_canted_m"), ExtResource("p8_sf_row_c_square_m")])
+models = Array[PackedScene]([ExtResource("p8_sf_row_a_canted"), ExtResource("p8_sf_row_b_square"), ExtResource("p8_sf_row_c_canted"), ExtResource("p8_sf_row_a_square"), ExtResource("p8_sf_row_b_canted"), ExtResource("p8_sf_row_c_square"), ExtResource("p8_sf_row_end_a"), ExtResource("p8_sf_row_end_b"), ExtResource("p8_sf_row_end_c")])
+mirror_models = Array[PackedScene]([ExtResource("p8_sf_row_a_canted_m"), ExtResource("p8_sf_row_b_square_m"), ExtResource("p8_sf_row_c_canted_m"), ExtResource("p8_sf_row_a_square_m"), ExtResource("p8_sf_row_b_canted_m"), ExtResource("p8_sf_row_c_square_m"), ExtResource("p8_sf_row_end_a_m"), ExtResource("p8_sf_row_end_b_m"), ExtResource("p8_sf_row_end_c_m")])
 wall_classes = PackedStringArray("sf_clapboard", "sf_clapboard_pink", "sf_clapboard_blue", "sf_clapboard_mint", "sf_clapboard_butter")
-explicit_xforms = PackedFloat32Array(0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 50.327, -4.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 49.391, -11.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 48.331, -18.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 47.223, -25.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 46.153, -32.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 45.179, -39.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 40.926, -76.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 39.901, -83.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 38.792, -90.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 37.653, -97.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 36.569, -104.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 35.589, -111.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 31.33, -148.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 30.301, -155.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 29.192, -162.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 28.063, -169.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 26.973, -176.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 25.989, -183.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 21.741, -220.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 20.721, -227.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 19.62, -234.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 18.513, -241.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 17.48, -248.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 16.582, -255.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 65.45, 21.549, -220.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 65.45, 20.667, -227.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 65.45, 19.76, -234.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 65.45, 18.861, -241.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 65.45, 18.01, -248.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 65.45, 17.247, -255.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 39.523, -4.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 38.757, -11.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 37.987, -18.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 37.217, -25.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 36.439, -32.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 35.669, -39.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 31.608, -76.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 30.831, -83.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 30.056, -90.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 29.281, -97.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 28.503, -104.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 27.733, -111.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 23.944, -148.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 23.328, -155.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 22.765, -162.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 22.267, -169.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 21.839, -176.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 21.481, -183.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 20.436, -220.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 20.287, -227.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 20.115, -234.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 19.85, -241.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 19.506, -248.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 19.194, -255.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 50.038, 82.474, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 49.085, 75.474, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 48.111, 68.474, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 47.138, 61.474, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 46.204, 54.474, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 45.32, 47.474, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 44.466, 40.474, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 43.632, 33.474, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 42.817, 26.474, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 42.011, 19.474, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 41.207, 12.474, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 40.407, 5.474, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 38.007, -15.526, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 37.212, -22.526, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 36.407, -29.526, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 35.612, -36.526, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 34.817, -43.526, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 34.012, -50.526, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 33.217, -57.526, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 32.417, -64.526, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 31.617, -71.526, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 30.822, -78.526, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 30.017, -85.526, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 27.517, -107.526, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 26.722, -114.526, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 25.936, -121.526, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 25.156, -128.526, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 24.386, -135.526, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 23.641, -142.526, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 22.937, -149.526, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 50.328, -4.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 49.384, -11.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 48.322, -18.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 47.216, -25.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 46.154, -32.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 45.182, -39.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 40.929, -76.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 39.897, -83.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 38.778, -90.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 37.649, -97.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 36.569, -104.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 35.589, -111.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 31.333, -148.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 30.294, -155.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 29.178, -162.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 28.049, -169.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 26.974, -176.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 25.999, -183.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 21.723, -220.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 20.674, -227.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 19.535, -234.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 18.38, -241.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 17.285, -248.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 16.297, -255.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 37.096, -97.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 36.152, -104.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 35.24, -111.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 30.773, -148.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 29.849, -155.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 28.885, -162.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 27.921, -169.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 26.973, -176.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 26.065, -183.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 21.464, -220.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 20.368, -227.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 19.142, -234.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 17.835, -241.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 16.519, -248.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 15.306, -255.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 40.599, -18.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 39.938, -25.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 39.264, -32.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 38.611, -39.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 35.316, -76.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 34.648, -83.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 33.962, -90.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 33.275, -97.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 32.595, -104.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 31.946, -111.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 28.643, -148.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 27.975, -155.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 27.288, -162.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 26.602, -169.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 25.925, -176.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 25.268, -183.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 21.075, -220.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 19.585, -227.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 17.873, -234.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 16.021, -241.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 14.314, -248.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 13.082, -255.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 49.758, 82.474, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 49.038, 75.474, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 48.07, 68.474, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 46.989, 61.474, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 45.987, 54.474, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 45.182, 47.474, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 44.387, 40.474, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 43.592, 33.474, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 42.797, 26.474, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 42.002, 19.474, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 41.197, 12.474, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 40.402, 5.474, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 37.606, -19.013, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 36.811, -26.013, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 34.013, -50.513, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 33.218, -57.513, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 32.413, -64.513, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 31.618, -71.513, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 30.813, -78.513, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 30.018, -85.513, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 27.919, -106.526, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 27.369, -113.526, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 26.723, -120.526, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 25.919, -127.526, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 24.927, -134.526, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 23.878, -141.526, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 22.926, -148.526, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 22.13, -155.526, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 50.031, 82.474, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 45.929, 54.474, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 45.059, 47.474, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 44.269, 40.474, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 43.484, 33.474, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 42.689, 26.474, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 41.899, 19.474, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 41.108, 12.474, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 40.313, 5.474, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 37.535, -19.013, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 36.735, -26.013, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 33.955, -50.513, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 33.16, -57.513, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 32.365, -64.513, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 31.569, -71.513, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 30.774, -78.513, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 29.979, -85.513, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 29.117, -106.526, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 29.021, -113.526, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 28.601, -120.526, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 27.716, -127.526, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 26.383, -134.526, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 24.851, -141.526, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 23.331, -148.526, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 22.063, -155.526, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 45.293, 82.474, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 44.727, 75.474, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 43.9, 68.474, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 42.945, 61.474, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 42.05, 54.474, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 41.364, 47.474, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 40.719, 40.474, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 40.063, 33.474, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 39.408, 26.474, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 38.743, 19.474, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 38.087, 12.474, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 37.422, 5.474, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 35.104, -19.013, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 34.448, -26.013, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 32.13, -50.513, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 31.464, -57.513, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 30.809, -64.513, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 30.143, -71.513, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 29.478, -78.513, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 28.823, -85.513, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 28.714, -106.526, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 28.635, -113.526, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 28.258, -120.526, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 27.38, -127.526, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 25.995, -134.526, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 24.349, -141.526, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 22.693, -148.526, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 21.298, -155.526, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 18.131, -287.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 17.644, -294.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 17.074, -301.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 16.425, -308.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 15.727, -315.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 14.983, -322.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 14.22, -329.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 11.849, -350.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 11.04, -357.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 10.223, -364.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 9.397, -371.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 8.554, -378.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 7.691, -385.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 6.83, -392.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 5.969, -399.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 5.129, -406.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 17.987, -287.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 17.519, -294.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 16.98, -301.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 16.365, -308.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 15.693, -315.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 14.985, -322.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 14.243, -329.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 11.896, -350.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 11.076, -357.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 10.218, -364.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 9.327, -371.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 8.38, -378.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 7.389, -385.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 6.371, -392.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 5.386, -399.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 4.512, -406.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 17.639, -287.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 17.392, -294.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 17.133, -301.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 16.819, -308.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 16.455, -315.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 16.036, -322.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 15.563, -329.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 13.714, -350.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 12.861, -357.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 11.787, -364.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 10.54, -371.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 9.251, -378.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 7.725, -385.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 5.791, -392.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 4.235, -399.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 3.306, -406.5, 2, -1, 0, 0, 0, 1, 0, 0, 0, 1, -70.529, 11.801, -343.6, 3, -1, 0, 0, 0, 1, 0, 0, 0, 1, -63.529, 12.107, -343.6, 4, -1, 0, 0, 0, 1, 0, 0, 0, 1, -56.529, 12.388, -343.6, 5, -1, 0, 0, 0, 1, 0, 0, 0, 1, -49.529, 12.631, -343.6, 0, -1, 0, 0, 0, 1, 0, 0, 0, 1, -42.529, 12.842, -343.6, 1, -1, 0, 0, 0, 1, 0, 0, 0, 1, -35.529, 13.186, -343.6, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 10.737, -349.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 10.347, -356.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 9.937, -363.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 9.528, -370.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 9.139, -377.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 8.775, -384.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 8.411, -391.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 8.061, -398.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 7.682, -405.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 7.283, -412.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 6.873, -419.5, 1, -1, 0, 0, 0, 1, 0, 0, 0, -1, -70.529, 11.169, -369.6, 2, -1, 0, 0, 0, 1, 0, 0, 0, -1, -63.529, 11.628, -369.6, 3, -1, 0, 0, 0, 1, 0, 0, 0, -1, -56.529, 12.02, -369.6, 4, -1, 0, 0, 0, 1, 0, 0, 0, -1, -49.529, 12.343, -369.6, 5, -1, 0, 0, 0, 1, 0, 0, 0, -1, -42.529, 12.603, -369.6, 0, -1, 0, 0, 0, 1, 0, 0, 0, -1, -35.529, 12.703, -369.6, 2, -1, 0, 0, 0, 1, 0, 0, 0, 1, -70.529, 8.59, -381.7, 3, -1, 0, 0, 0, 1, 0, 0, 0, 1, -63.529, 9.04, -381.7, 4, -1, 0, 0, 0, 1, 0, 0, 0, 1, -56.529, 9.162, -381.7, 5, -1, 0, 0, 0, 1, 0, 0, 0, 1, -49.529, 9.212, -381.7, 0, -1, 0, 0, 0, 1, 0, 0, 0, 1, -42.529, 9.056, -381.7, 1, -1, 0, 0, 0, 1, 0, 0, 0, 1, -35.529, 8.888, -381.7, 5, 1, 0, 0, 0, 1, 0, 0, 0, -1, -70.529, 6.969, -407.7, 0, 1, 0, 0, 0, 1, 0, 0, 0, -1, -63.529, 6.605, -407.7, 1, 1, 0, 0, 0, 1, 0, 0, 0, -1, -56.529, 6.12, -407.7, 2, 1, 0, 0, 0, 1, 0, 0, 0, -1, -49.529, 5.677, -407.7, 3, 1, 0, 0, 0, 1, 0, 0, 0, -1, -42.529, 5.301, -407.7, 4, 1, 0, 0, 0, 1, 0, 0, 0, -1, -35.529, 4.98, -407.7, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, -70.529, 5.508, -419.8, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, -63.529, 5.212, -419.8, 2, 1, 0, 0, 0, 1, 0, 0, 0, 1, -56.529, 4.945, -419.8, 3, 1, 0, 0, 0, 1, 0, 0, 0, 1, -49.529, 4.7, -419.8, 4, 1, 0, 0, 0, 1, 0, 0, 0, 1, -42.529, 4.474, -419.8, 5, 1, 0, 0, 0, 1, 0, 0, 0, 1, -35.529, 4.253, -419.8, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, -153.257, 9.564, -353.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, -153.257, 9.382, -360.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, -153.257, 9.19, -367.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, -153.257, 8.997, -374.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, -153.257, 8.8, -381.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, -153.257, 8.59, -388.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, -153.257, 8.39, -395.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, -153.257, 8.19, -402.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, -153.257, 7.996, -409.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, -153.257, 7.803, -416.5)
+explicit_xforms = PackedFloat32Array(6, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 50.327, -4.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 49.391, -11.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 48.331, -18.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 47.223, -25.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 46.153, -32.5, 8, 0, 0, 1, 0, 1, 0, -1, 0, 0, 28.6, 45.179, -39.5, 6, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 40.926, -76.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 39.901, -83.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 38.792, -90.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 37.653, -97.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 36.569, -104.5, 8, 0, 0, 1, 0, 1, 0, -1, 0, 0, 28.6, 35.589, -111.5, 6, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 31.33, -148.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 30.301, -155.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 29.192, -162.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 28.063, -169.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 26.973, -176.5, 8, 0, 0, 1, 0, 1, 0, -1, 0, 0, 28.6, 25.989, -183.5, 6, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 21.741, -220.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 20.721, -227.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 19.62, -234.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 18.513, -241.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 28.6, 17.48, -248.5, 8, 0, 0, 1, 0, 1, 0, -1, 0, 0, 28.6, 16.582, -255.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 65.45, 21.549, -220.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 65.45, 20.667, -227.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 65.45, 19.76, -234.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 65.45, 18.861, -241.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 65.45, 18.01, -248.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 65.45, 17.247, -255.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 39.523, -4.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 38.757, -11.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 37.987, -18.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 37.217, -25.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 36.439, -32.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 35.669, -39.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 31.608, -76.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 30.831, -83.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 30.056, -90.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 29.281, -97.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 28.503, -104.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 27.733, -111.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 23.944, -148.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 23.328, -155.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 22.765, -162.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 22.267, -169.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 21.839, -176.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 21.481, -183.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 20.436, -220.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 20.287, -227.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 20.115, -234.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 19.85, -241.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 19.506, -248.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 77.55, 19.194, -255.5, 7, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 50.038, 82.474, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 49.085, 75.474, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 48.111, 68.474, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 47.138, 61.474, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 46.204, 54.474, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 45.32, 47.474, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 44.466, 40.474, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 43.632, 33.474, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 42.817, 26.474, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 42.011, 19.474, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 41.207, 12.474, 6, 0, 0, 1, 0, 1, 0, 1, 0, 0, 114.15, 40.407, 5.474, 7, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 38.007, -15.526, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 37.212, -22.526, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 36.407, -29.526, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 35.612, -36.526, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 34.817, -43.526, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 34.012, -50.526, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 33.217, -57.526, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 32.417, -64.526, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 31.617, -71.526, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 30.822, -78.526, 8, 0, 0, 1, 0, 1, 0, 1, 0, 0, 114.15, 30.017, -85.526, 7, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 27.517, -107.526, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 26.722, -114.526, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 25.936, -121.526, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 25.156, -128.526, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 24.386, -135.526, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 114.15, 23.641, -142.526, 7, 0, 0, 1, 0, 1, 0, 1, 0, 0, 114.15, 22.937, -149.526, 6, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 50.328, -4.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 49.384, -11.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 48.322, -18.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 47.216, -25.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 46.154, -32.5, 8, 0, 0, 1, 0, 1, 0, 1, 0, 0, -28.6, 45.182, -39.5, 6, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 40.929, -76.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 39.897, -83.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 38.778, -90.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 37.649, -97.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 36.569, -104.5, 8, 0, 0, 1, 0, 1, 0, 1, 0, 0, -28.6, 35.589, -111.5, 6, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 31.333, -148.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 30.294, -155.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 29.178, -162.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 28.049, -169.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 26.974, -176.5, 8, 0, 0, 1, 0, 1, 0, 1, 0, 0, -28.6, 25.999, -183.5, 6, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 21.723, -220.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 20.674, -227.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 19.535, -234.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 18.38, -241.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, -28.6, 17.285, -248.5, 8, 0, 0, 1, 0, 1, 0, 1, 0, 0, -28.6, 16.297, -255.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 37.096, -97.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 36.152, -104.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 35.24, -111.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 30.773, -148.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 29.849, -155.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 28.885, -162.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 27.921, -169.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 26.973, -176.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 26.065, -183.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 21.464, -220.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 20.368, -227.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 19.142, -234.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 17.835, -241.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 16.519, -248.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, -65.45, 15.306, -255.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 40.599, -18.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 39.938, -25.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 39.264, -32.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 38.611, -39.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 35.316, -76.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 34.648, -83.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 33.962, -90.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 33.275, -97.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 32.595, -104.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 31.946, -111.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 28.643, -148.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 27.975, -155.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 27.288, -162.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 26.602, -169.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 25.925, -176.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 25.268, -183.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 21.075, -220.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 19.585, -227.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 17.873, -234.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 16.021, -241.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 14.314, -248.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, -77.55, 13.082, -255.5, 8, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 49.758, 82.474, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 49.038, 75.474, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 48.07, 68.474, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 46.989, 61.474, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 45.987, 54.474, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 45.182, 47.474, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 44.387, 40.474, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 43.592, 33.474, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 42.797, 26.474, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 42.002, 19.474, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 41.197, 12.474, 7, 0, 0, 1, 0, 1, 0, -1, 0, 0, 173.85, 40.402, 5.474, 8, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 37.606, -19.013, 6, 0, 0, 1, 0, 1, 0, -1, 0, 0, 173.85, 36.811, -26.013, 8, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 34.013, -50.513, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 33.218, -57.513, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 32.413, -64.513, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 31.618, -71.513, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 30.813, -78.513, 7, 0, 0, 1, 0, 1, 0, -1, 0, 0, 173.85, 30.018, -85.513, 8, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 27.919, -106.526, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 27.369, -113.526, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 26.723, -120.526, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 25.919, -127.526, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 24.927, -134.526, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 23.878, -141.526, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 173.85, 22.926, -148.526, 6, 0, 0, 1, 0, 1, 0, -1, 0, 0, 173.85, 22.13, -155.526, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 50.031, 82.474, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 45.929, 54.474, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 45.059, 47.474, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 44.269, 40.474, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 43.484, 33.474, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 42.689, 26.474, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 41.899, 19.474, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 41.108, 12.474, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 40.313, 5.474, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 37.535, -19.013, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 36.735, -26.013, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 33.955, -50.513, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 33.16, -57.513, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 32.365, -64.513, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 31.569, -71.513, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 30.774, -78.513, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 29.979, -85.513, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 29.117, -106.526, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 29.021, -113.526, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 28.601, -120.526, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 27.716, -127.526, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 26.383, -134.526, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 24.851, -141.526, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 23.331, -148.526, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 199.85, 22.063, -155.526, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 45.293, 82.474, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 44.727, 75.474, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 43.9, 68.474, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 42.945, 61.474, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 42.05, 54.474, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 41.364, 47.474, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 40.719, 40.474, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 40.063, 33.474, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 39.408, 26.474, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 38.743, 19.474, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 38.087, 12.474, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 37.422, 5.474, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 35.104, -19.013, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 34.448, -26.013, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 32.13, -50.513, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 31.464, -57.513, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 30.809, -64.513, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 30.143, -71.513, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 29.478, -78.513, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 28.823, -85.513, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 28.714, -106.526, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 28.635, -113.526, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 28.258, -120.526, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 27.38, -127.526, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 25.995, -134.526, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 24.349, -141.526, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 22.693, -148.526, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 211.95, 21.298, -155.526, 6, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 18.131, -287.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 17.644, -294.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 17.074, -301.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 16.425, -308.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 15.727, -315.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 14.983, -322.5, 6, 0, 0, 1, 0, 1, 0, 1, 0, 0, 121.4, 14.22, -329.5, 6, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 11.849, -350.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 11.04, -357.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 10.223, -364.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 9.397, -371.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 8.554, -378.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 7.691, -385.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 6.83, -392.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 121.4, 5.969, -399.5, 8, 0, 0, 1, 0, 1, 0, 1, 0, 0, 121.4, 5.129, -406.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 17.987, -287.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 17.519, -294.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 16.98, -301.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 16.365, -308.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 15.693, -315.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 14.985, -322.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 14.243, -329.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 11.896, -350.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 11.076, -357.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 10.218, -364.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 9.327, -371.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 8.38, -378.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 7.389, -385.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 6.371, -392.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 5.386, -399.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, 95.4, 4.512, -406.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 17.639, -287.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 17.392, -294.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 17.133, -301.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 16.819, -308.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 16.455, -315.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 16.036, -322.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 15.563, -329.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 13.714, -350.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 12.861, -357.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 11.787, -364.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 10.54, -371.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 9.251, -378.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 7.725, -385.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 5.791, -392.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 4.235, -399.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, 83.3, 3.306, -406.5, 8, 1, 0, 0, 0, 1, 0, 0, 0, 1, -70.529, 11.801, -343.6, 3, -1, 0, 0, 0, 1, 0, 0, 0, 1, -63.529, 12.107, -343.6, 4, -1, 0, 0, 0, 1, 0, 0, 0, 1, -56.529, 12.388, -343.6, 5, -1, 0, 0, 0, 1, 0, 0, 0, 1, -49.529, 12.631, -343.6, 0, -1, 0, 0, 0, 1, 0, 0, 0, 1, -42.529, 12.842, -343.6, 7, -1, 0, 0, 0, 1, 0, 0, 0, 1, -35.529, 13.186, -343.6, 7, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 10.737, -349.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 10.347, -356.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 9.937, -363.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 9.528, -370.5, 2, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 9.139, -377.5, 3, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 8.775, -384.5, 4, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 8.411, -391.5, 5, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 8.061, -398.5, 0, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 7.682, -405.5, 1, 0, 0, -1, 0, 1, 0, -1, 0, 0, -96.057, 7.283, -412.5, 8, 0, 0, 1, 0, 1, 0, -1, 0, 0, -96.057, 6.873, -419.5, 1, -1, 0, 0, 0, 1, 0, 0, 0, -1, -70.529, 11.169, -369.6, 2, -1, 0, 0, 0, 1, 0, 0, 0, -1, -63.529, 11.628, -369.6, 3, -1, 0, 0, 0, 1, 0, 0, 0, -1, -56.529, 12.02, -369.6, 4, -1, 0, 0, 0, 1, 0, 0, 0, -1, -49.529, 12.343, -369.6, 5, -1, 0, 0, 0, 1, 0, 0, 0, -1, -42.529, 12.603, -369.6, 0, -1, 0, 0, 0, 1, 0, 0, 0, -1, -35.529, 12.703, -369.6, 2, -1, 0, 0, 0, 1, 0, 0, 0, 1, -70.529, 8.59, -381.7, 3, -1, 0, 0, 0, 1, 0, 0, 0, 1, -63.529, 9.04, -381.7, 4, -1, 0, 0, 0, 1, 0, 0, 0, 1, -56.529, 9.162, -381.7, 5, -1, 0, 0, 0, 1, 0, 0, 0, 1, -49.529, 9.212, -381.7, 0, -1, 0, 0, 0, 1, 0, 0, 0, 1, -42.529, 9.056, -381.7, 1, -1, 0, 0, 0, 1, 0, 0, 0, 1, -35.529, 8.888, -381.7, 5, 1, 0, 0, 0, 1, 0, 0, 0, -1, -70.529, 6.969, -407.7, 0, 1, 0, 0, 0, 1, 0, 0, 0, -1, -63.529, 6.605, -407.7, 1, 1, 0, 0, 0, 1, 0, 0, 0, -1, -56.529, 6.12, -407.7, 2, 1, 0, 0, 0, 1, 0, 0, 0, -1, -49.529, 5.677, -407.7, 3, 1, 0, 0, 0, 1, 0, 0, 0, -1, -42.529, 5.301, -407.7, 4, 1, 0, 0, 0, 1, 0, 0, 0, -1, -35.529, 4.98, -407.7, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, -70.529, 5.508, -419.8, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, -63.529, 5.212, -419.8, 2, 1, 0, 0, 0, 1, 0, 0, 0, 1, -56.529, 4.945, -419.8, 3, 1, 0, 0, 0, 1, 0, 0, 0, 1, -49.529, 4.7, -419.8, 4, 1, 0, 0, 0, 1, 0, 0, 0, 1, -42.529, 4.474, -419.8, 5, 1, 0, 0, 0, 1, 0, 0, 0, 1, -35.529, 4.253, -419.8, 6, 0, 0, -1, 0, 1, 0, 1, 0, 0, -153.257, 9.564, -353.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, -153.257, 9.382, -360.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, -153.257, 9.19, -367.5, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, -153.257, 8.997, -374.5, 1, 0, 0, -1, 0, 1, 0, 1, 0, 0, -153.257, 8.8, -381.5, 2, 0, 0, -1, 0, 1, 0, 1, 0, 0, -153.257, 8.59, -388.5, 3, 0, 0, -1, 0, 1, 0, 1, 0, 0, -153.257, 8.39, -395.5, 4, 0, 0, -1, 0, 1, 0, 1, 0, 0, -153.257, 8.19, -402.5, 5, 0, 0, -1, 0, 1, 0, 1, 0, 0, -153.257, 7.996, -409.5, 6, 0, 0, 1, 0, 1, 0, 1, 0, 0, -153.257, 7.803, -416.5)
 explicit_wall = PackedInt32Array(0, 2, 4, 1, 3, 0, 0, 2, 4, 1, 3, 0, 0, 2, 4, 1, 3, 0, 0, 2, 4, 1, 3, 0, 4, 1, 3, 0, 2, 4, 2, 4, 1, 3, 0, 2, 2, 4, 1, 3, 0, 2, 2, 4, 1, 3, 0, 2, 2, 4, 1, 3, 0, 2, 1, 3, 0, 2, 4, 1, 3, 0, 2, 4, 1, 3, 1, 3, 0, 2, 4, 1, 3, 0, 2, 4, 1, 1, 3, 0, 2, 4, 1, 3, 2, 4, 1, 3, 0, 2, 2, 4, 1, 3, 0, 2, 2, 4, 1, 3, 0, 2, 2, 4, 1, 3, 0, 2, 1, 3, 0, 0, 2, 4, 1, 3, 0, 0, 2, 4, 1, 3, 0, 3, 0, 2, 4, 4, 1, 3, 0, 2, 4, 4, 1, 3, 0, 2, 4, 4, 1, 3, 0, 2, 4, 2, 4, 1, 3, 0, 2, 4, 1, 3, 0, 2, 4, 2, 4, 2, 4, 1, 3, 0, 2, 2, 4, 1, 3, 0, 2, 4, 1, 1, 4, 1, 3, 0, 2, 4, 1, 3, 1, 3, 1, 3, 0, 2, 4, 1, 1, 3, 0, 2, 4, 1, 3, 0, 4, 1, 3, 0, 2, 4, 1, 3, 0, 2, 4, 1, 4, 1, 4, 1, 3, 0, 2, 4, 4, 1, 3, 0, 2, 4, 1, 3, 3, 0, 2, 4, 1, 3, 0, 3, 0, 2, 4, 1, 3, 0, 2, 4, 1, 3, 0, 2, 4, 1, 3, 1, 3, 0, 2, 4, 1, 3, 0, 2, 0, 2, 4, 1, 3, 0, 2, 0, 2, 4, 1, 3, 0, 2, 4, 1, 3, 0, 2, 4, 1, 3, 4, 1, 3, 0, 2, 4, 1, 3, 0, 2, 4, 3, 0, 2, 4, 1, 3, 1, 3, 0, 2, 4, 1, 0, 2, 4, 1, 3, 0, 3, 0, 2, 4, 1, 3, 2, 4, 1, 3, 0, 2, 4, 1, 3, 0)
 explicit_shadow = PackedInt32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
 metadata/sf_spate = true
@@ -5050,3 +5073,478 @@ script = ExtResource("p8b_cityfill")
 models = Array[PackedScene]([ExtResource("v2_hyd"), ExtResource("v2_hyd_b")])
 explicit_xforms = PackedFloat32Array(0, 0.527, 0, -0.839, 0, 0.991, 0, 0.839, 0, 0.527, 12.013, 14.225, -336.687, 1, -0.819, 0, -0.391, 0, 0.908, 0, 0.391, 0, -0.819, 11.51, 14.225, -335.168, 0, 0.809, 0, 0.713, 0, 1.078, 0, -0.713, 0, 0.809, 12.798, 14.225, -337.037, 1, -0.692, 0, 0.904, 0, 1.138, 0, -0.904, 0, -0.692, 12.916, 14.225, -335.778, 1, 0.588, 0, 0.739, 0, 0.945, 0, -0.739, 0, 0.588, 12.827, 14.225, -334.081, 1, -0.894, 0, 0.333, 0, 0.954, 0, -0.333, 0, -0.894, 14.421, 14.225, -338.943, 0, -0.846, 0, 0.103, 0, 0.852, 0, -0.103, 0, -0.846, 13.958, 14.225, -337.726, 1, 0.622, 0, 0.476, 0, 0.783, 0, -0.476, 0, 0.622, 14.135, 14.225, -336.113, 1, -0.773, 0, -0.172, 0, 0.792, 0, 0.172, 0, -0.773, 14.461, 14.225, -334.802, 1, 0.386, 0, -1.066, 0, 1.134, 0, 1.066, 0, 0.386, 14.461, 14.225, -333.502, 1, 1.032, 0, 0.313, 0, 1.078, 0, -0.313, 0, 1.032, 15.64, 14.225, -339.887, 0, 0.193, 0, -0.783, 0, 0.806, 0, 0.783, 0, 0.193, 14.989, 14.225, -338.149, 0, 1.043, 0, -0.444, 0, 1.134, 0, 0.444, 0, 1.043, 15.078, 14.225, -337.266, 0, -0.318, 0, -0.83, 0, 0.889, 0, 0.83, 0, -0.318, 15.236, 14.225, -335.444, 1, 0.551, 0, -0.698, 0, 0.889, 0, 0.698, 0, 0.551, 15.325, 14.225, -334.405, 1, -0.433, 0, -0.664, 0, 0.792, 0, 0.664, 0, -0.433, 15.088, 14.225, -333.168, 1, 0.914, 0, 0.518, 0, 1.051, 0, -0.518, 0, 0.914, 15.098, 14.225, -331.711, 1, 0.905, 0, 0.651, 0, 1.115, 0, -0.651, 0, 0.905, 16.218, 14.225, -340.483, 0, 0.615, 0, 0.902, 0, 1.092, 0, -0.902, 0, 0.615, 16.406, 14.225, -338.796, 0, 0.66, 0, -0.739, 0, 0.991, 0, 0.739, 0, 0.66, 16.711, 14.225, -337.674, 0, 0.834, 0, -0.091, 0, 0.838, 0, 0.091, 0, 0.834, 16.1, 14.225, -336.614, 0, 0.003, 0, -1.157, 0, 1.157, 0, 1.157, 0, 0.003, 16.603, 14.225, -335.126, 1, -0.233, 0, 0.925, 0, 0.954, 0, -0.925, 0, -0.233, 16.524, 14.225, -334.066, 1, 0.144, 0, 0.859, 0, 0.871, 0, -0.859, 0, 0.144, 16.415, 14.225, -332.777, 1, 1.057, 0, -0.513, 0, 1.175, 0, 0.513, 0, 1.057, 16.425, 14.225, -330.975, 1, 0.926, 0, -0.033, 0, 0.926, 0, 0.033, 0, 0.926, 17.94, 14.225, -342.331, 1, -0.135, 0, 1.075, 0, 1.083, 0, -1.075, 0, -0.135, 17.575, 14.225, -340.843, 0, -0.315, 0, 0.712, 0, 0.778, 0, -0.712, 0, -0.315, 17.378, 14.225, -339.428, 0, -0.576, 0, -1.014, 0, 1.166, 0, 1.014, 0, -0.576, 17.704, 14.225, -338.211, 0, -1.052, 0, 0.257, 0, 1.083, 0, -0.257, 0, -1.052, 17.625, 14.225, -337.319, 0, 0.706, 0, -0.682, 0, 0.982, 0, 0.682, 0, 0.706, 17.704, 14.225, -335.496, 0, 0.242, 0, 0.894, 0, 0.926, 0, -0.894, 0, 0.242, 17.615, 14.225, -334.311, 1, -0.787, 0, -0.711, 0, 1.06, 0, 0.711, 0, -0.787, 17.822, 14.225, -332.834, 1, -0.752, 0, -0.483, 0, 0.894, 0, 0.483, 0, -0.752, 17.842, 14.225, -332.119, 1, -0.886, 0, 0.53, 0, 1.032, 0, -0.53, 0, -0.886, 17.546, 14.225, -330.672, 1, -0.006, 0, -0.935, 0, 0.935, 0, 0.935, 0, -0.006, 18.903, 14.225, -342.665, 0, 0.874, 0, -0.662, 0, 1.097, 0, 0.662, 0, 0.874, 19.07, 14.225, -341.689, 0, -0.278, 0, -0.984, 0, 1.023, 0, 0.984, 0, -0.278, 18.459, 14.225, -340.483, 0, -0.732, 0, -0.978, 0, 1.222, 0, 0.978, 0, -0.732, 18.597, 14.225, -339.34, 0, 1.056, 0, 0.437, 0, 1.143, 0, -0.437, 0, 1.056, 18.844, 14.225, -337.716, 0, -0.783, 0, -0.193, 0, 0.806, 0, 0.193, 0, -0.783, 18.893, 14.225, -336.614, 0, -0.546, 0, 0.782, 0, 0.954, 0, -0.782, 0, -0.546, 18.923, 14.225, -335.126, 0, -0.152, 0, -1.002, 0, 1.014, 0, 1.002, 0, -0.152, 18.499, 14.225, -334.14, 1, -0.761, 0, -0.751, 0, 1.069, 0, 0.751, 0, -0.761, 18.597, 14.225, -332.328, 1, 0.336, 0, 0.833, 0, 0.898, 0, -0.833, 0, 0.336, 18.607, 14.225, -331.487, 1, 0.663, 0, 0.443, 0, 0.797, 0, -0.443, 0, 0.663, 18.982, 14.225, -329.874, 1, -0.66, 0, 0.447, 0, 0.797, 0, -0.447, 0, -0.66, 18.627, 14.225, -328.689, 1, -0.783, 0, -0.005, 0, 0.783, 0, 0.005, 0, -0.783, 20.22, 14.225, -343.328, 0, -0.671, 0, -0.942, 0, 1.157, 0, 0.942, 0, -0.671, 20.033, 14.225, -342.372, 0, -0.774, 0, 0.618, 0, 0.991, 0, -0.618, 0, -0.774, 19.816, 14.225, -340.937, 0, 0.095, 0, -1.19, 0, 1.194, 0, 1.19, 0, 0.095, 20.23, 14.225, -339.428, 0, 0.182, 0, -0.842, 0, 0.862, 0, 0.842, 0, 0.182, 20.142, 14.225, -338.493, 0, -0.986, 0, -0.092, 0, 0.991, 0, 0.092, 0, -0.986, 19.954, 14.225, -337.34, 0, -1.057, 0, 0.077, 0, 1.06, 0, -0.077, 0, -1.057, 19.678, 14.225, -335.904, 0, -0.537, 0, 0.576, 0, 0.788, 0, -0.576, 0, -0.537, 19.954, 14.225, -334.186, 0, -0.227, 0, 1.134, 0, 1.157, 0, -1.134, 0, -0.227, 19.757, 14.225, -333.011, 0, -0.738, 0, -0.504, 0, 0.894, 0, 0.504, 0, -0.738, 20.082, 14.225, -331.607, 1, 0.925, 0, 0.212, 0, 0.949, 0, -0.212, 0, 0.925, 19.826, 14.225, -330.735, 1, -0.854, 0, 0.249, 0, 0.889, 0, -0.249, 0, -0.854, 20.132, 14.225, -329.195, 1, 0.715, 0, -0.996, 0, 1.226, 0, 0.996, 0, 0.715, 19.58, 14.225, -327.895, 1, -0.808, 0, 0.453, 0, 0.926, 0, -0.453, 0, -0.808, 21.104, 14.225, -344.393, 0, 1.001, 0, -0.572, 0, 1.152, 0, 0.572, 0, 1.001, 20.769, 14.225, -342.947, 0, 0.82, 0, -0.231, 0, 0.852, 0, 0.231, 0, 0.82, 21.144, 14.225, -341.511, 0, 0.937, 0, -0.178, 0, 0.954, 0, 0.178, 0, 0.937, 21.272, 14.225, -340.41, 0, 0.921, 0, 0.013, 0, 0.922, 0, -0.013, 0, 0.921, 20.897, 14.225, -338.953, 0, -0.749, 0, -0.537, 0, 0.922, 0, 0.537, 0, -0.749, 20.838, 14.225, -337.465, 0, 1.207, 0, -0.025, 0, 1.208, 0, 0.025, 0, 1.207, 20.828, 14.225, -336.416, 0, 0.176, 0, 1.125, 0, 1.138, 0, -1.125, 0, 0.176, 20.749, 14.225, -335.178, 0, 0.563, 0, 0.747, 0, 0.935, 0, -0.747, 0, 0.563, 21.321, 14.225, -334.108, 0, -0.261, 0, -1.16, 0, 1.189, 0, 1.16, 0, -0.261, 21.114, 14.225, -332.808, 0, 0.841, 0, -0.54, 0, 1, 0, 0.54, 0, 0.841, 20.779, 14.225, -331.059, 1, -0.844, 0, -0.147, 0, 0.857, 0, 0.147, 0, -0.844, 21.085, 14.225, -329.884, 1, 0.865, 0, -0.433, 0, 0.968, 0, 0.433, 0, 0.865, 20.779, 14.225, -328.354, 0, 0.72, 0, 0.846, 0, 1.111, 0, -0.846, 0, 0.72, 20.818, 14.225, -327.19, 0, 0.429, 0, 0.72, 0, 0.838, 0, -0.72, 0, 0.429, 22.077, 14.225, -343.819, 0, 0.524, 0, -1.078, 0, 1.198, 0, 1.078, 0, 0.524, 22.294, 14.225, -341.986, 0, -0.857, 0, -0.838, 0, 1.198, 0, 0.838, 0, -0.857, 21.968, 14.225, -340.644, 0, 0.787, 0, 0.262, 0, 0.829, 0, -0.262, 0, 0.787, 22.353, 14.225, -339.908, 0, -0.106, 0, -0.808, 0, 0.815, 0, 0.808, 0, -0.106, 22.087, 14.225, -338.263, 0, -0.54, 0, 0.677, 0, 0.866, 0, -0.677, 0, -0.54, 22.343, 14.225, -336.796, 0, 0.971, 0, -0.469, 0, 1.078, 0, 0.469, 0, 0.971, 21.949, 14.225, -335.883, 0, -0.961, 0, -0.377, 0, 1.032, 0, 0.377, 0, -0.961, 22.442, 14.225, -334.698, 0, 0.222, 0, -0.842, 0, 0.871, 0, 0.842, 0, 0.222, 22.067, 14.225, -333.189, 0, -0.687, 0, 0.527, 0, 0.866, 0, -0.527, 0, -0.687, 22.501, 14.225, -331.983, 0, 0.996, 0, 0.189, 0, 1.014, 0, -0.189, 0, 0.996, 22.047, 14.225, -330.265, 0, 0.081, 0, -0.923, 0, 0.926, 0, 0.923, 0, 0.081, 22.018, 14.225, -329.446, 0, -0.718, 0, 0.57, 0, 0.917, 0, -0.57, 0, -0.718, 21.968, 14.225, -328.093, 1, -1.114, 0, 0.212, 0, 1.134, 0, -0.212, 0, -1.114, 23.128, 14.225, -344.54, 0, -0.263, 0, -1.155, 0, 1.185, 0, 1.155, 0, -0.263, 23.592, 14.225, -343.229, 0, 0.824, 0, 0.027, 0, 0.825, 0, -0.027, 0, 0.824, 23.148, 14.225, -341.887, 0, 0.95, 0, -0.082, 0, 0.954, 0, 0.082, 0, 0.95, 23.177, 14.225, -340.347, 0, -1.141, 0, 0.45, 0, 1.226, 0, -0.45, 0, -1.141, 23.128, 14.225, -338.713, 0, -0.395, 0, -0.739, 0, 0.838, 0, 0.739, 0, -0.395, 23.483, 14.225, -337.737, 0, 1.021, 0, 0.061, 0, 1.023, 0, -0.061, 0, 1.021, 23.089, 14.225, -336.437, 0, 0.606, 0, -0.546, 0, 0.815, 0, 0.546, 0, 0.606, 23.631, 14.225, -335.105, 0, 0.624, 0, 0.969, 0, 1.152, 0, -0.969, 0, 0.624, 23.197, 14.225, -333.857, 0, -0.435, 0, 0.786, 0, 0.898, 0, -0.786, 0, -0.435, 23.296, 14.225, -332.39, 0, -0.378, 0, -1.084, 0, 1.148, 0, 1.084, 0, -0.378, 23.483, 14.225, -331.383, 1, -0.203, 0, 0.937, 0, 0.958, 0, -0.937, 0, -0.203, 23.493, 14.225, -329.968, 0, 0.028, 0, -1.143, 0, 1.143, 0, 1.143, 0, 0.028, 23.306, 14.225, -328.929, 1, -0.789, 0, 0.255, 0, 0.829, 0, -0.255, 0, -0.789, 24.475, 14.225, -343.516, 0, -0.685, 0, 0.408, 0, 0.797, 0, -0.408, 0, -0.685, 24.219, 14.225, -342.362, 0, -0.55, 0, -1.091, 0, 1.222, 0, 1.091, 0, -0.55, 24.337, 14.225, -341.24, 0, 0.557, 0, 0.94, 0, 1.092, 0, -0.94, 0, 0.557, 24.446, 14.225, -339.313, 0, -0.93, 0, -0.764, 0, 1.203, 0, 0.764, 0, -0.93, 24.308, 14.225, -338.493, 0, -0.532, 0, -0.599, 0, 0.802, 0, 0.599, 0, -0.532, 24.673, 14.225, -337.329, 0, -1.061, 0, -0.237, 0, 1.088, 0, 0.237, 0, -1.061, 24.673, 14.225, -335.663, 0, 0.416, 0, 1.084, 0, 1.162, 0, -1.084, 0, 0.416, 24.771, 14.225, -334.259, 0, 0.051, 0, -1.017, 0, 1.018, 0, 1.017, 0, 0.051, 24.15, 14.225, -333.105, 0, 0.803, 0, -0.678, 0, 1.051, 0, 0.678, 0, 0.803, 24.751, 14.225, -332.035, 1, 0.324, 0, 0.828, 0, 0.889, 0, -0.828, 0, 0.324, 24.396, 14.225, -330.463, 1, 0.368, 0, -0.96, 0, 1.028, 0, 0.96, 0, 0.368, 24.318, 14.225, -329.038, 0, 0.139, 0, 0.841, 0, 0.852, 0, -0.841, 0, 0.139, 25.832, 14.225, -341.825, 0, -0.364, 0, 0.693, 0, 0.783, 0, -0.693, 0, -0.364, 25.32, 14.225, -340.201, 0, -0.158, 0, -1.128, 0, 1.138, 0, 1.128, 0, -0.158, 25.576, 14.225, -338.995, 0, 1.188, 0, -0.262, 0, 1.217, 0, 0.262, 0, 1.188, 25.487, 14.225, -337.465, 0, 1.114, 0, 0.402, 0, 1.185, 0, -0.402, 0, 1.114, 25.369, 14.225, -336.625, 0, -0.282, 0, -1.055, 0, 1.092, 0, 1.055, 0, -0.282, 25.408, 14.225, -334.802, 0, -0.91, 0, -0.477, 0, 1.028, 0, 0.477, 0, -0.91, 25.576, 14.225, -333.575, 0, -0.32, 0, 1.078, 0, 1.125, 0, -1.078, 0, -0.32, 25.379, 14.225, -332.516, 1, 0.069, 0, 1.104, 0, 1.106, 0, -1.104, 0, 0.069, 25.951, 14.225, -331.163, 1, -1.093, 0, 0.197, 0, 1.111, 0, -0.197, 0, -1.093, 25.694, 14.225, -329.571, 0, -0.431, 0, -0.943, 0, 1.037, 0, 0.943, 0, -0.431, 27.101, 14.225, -340.634, 0, -0.607, 0, 0.875, 0, 1.065, 0, -0.875, 0, -0.607, 27.091, 14.225, -339.584, 0, 0.479, 0, 0.648, 0, 0.806, 0, -0.648, 0, 0.479, 26.746, 14.225, -338.389, 0, -1.11, 0, -0.358, 0, 1.166, 0, 0.358, 0, -1.11, 26.667, 14.225, -337.172, 0, 0.859, 0, 0.144, 0, 0.871, 0, -0.144, 0, 0.859, 26.608, 14.225, -336.05, 0, -1.169, 0, -0.161, 0, 1.18, 0, 0.161, 0, -1.169, 26.539, 14.225, -334.06, 1, -1.129, 0, -0.309, 0, 1.171, 0, 0.309, 0, -1.129, 26.637, 14.225, -333.189, 1, 0.328, 0, -0.93, 0, 0.986, 0, 0.93, 0, 0.328, 26.943, 14.225, -332.025, 1, 0.912, 0, -0.503, 0, 1.042, 0, 0.503, 0, 0.912, 26.815, 14.225, -330.411, 0, 0.003, 0, -1.143, 0, 1.143, 0, 1.143, 0, 0.003, 27.768, 14.225, -339.266, 0, 0.772, 0, 0.441, 0, 0.889, 0, -0.441, 0, 0.772, 27.669, 14.225, -337.716, 0, 0.973, 0, -0.643, 0, 1.166, 0, 0.643, 0, 0.973, 27.915, 14.225, -336.06, 0, 1.184, 0, -0.036, 0, 1.185, 0, 0.036, 0, 1.184, 27.807, 14.225, -334.928, 1, -0.59, 0, 0.796, 0, 0.991, 0, -0.796, 0, -0.59, 27.787, 14.225, -333.899, 1, 0.744, 0, -0.886, 0, 1.157, 0, 0.886, 0, 0.744, 27.985, 14.225, -332.296, 0, 0.654, 0, 0.669, 0, 0.935, 0, -0.669, 0, 0.654, 2.889, 11.468, -368.008, 0, -0.107, 0, 0.962, 0, 0.968, 0, -0.962, 0, -0.107, 4.01, 11.468, -372.243, 0, -0.723, 0, -0.289, 0, 0.778, 0, 0.289, 0, -0.723, 4.118, 11.468, -371.151, 0, 0.299, 0, 0.998, 0, 1.042, 0, -0.998, 0, 0.299, 4.128, 11.468, -369.695, 0, -0.87, 0, 0.512, 0, 1.009, 0, -0.512, 0, -0.87, 4.641, 11.468, -368.144, 0, 1.053, 0, -0.34, 0, 1.106, 0, 0.34, 0, 1.053, 4.148, 11.468, -367.084, 0, 0.105, 0, -1.106, 0, 1.111, 0, 1.106, 0, 0.105, 4.177, 11.468, -366.14, 0, 0.782, 0, 0.216, 0, 0.811, 0, -0.216, 0, 0.782, 4.286, 11.468, -364.192, 0, -0.738, 0, 0.445, 0, 0.862, 0, -0.445, 0, -0.738, 5.258, 11.468, -373.219, 0, -0.478, 0, 1.084, 0, 1.185, 0, -1.084, 0, -0.478, 5.495, 11.468, -371.741, 0, -0.134, 0, -1.172, 0, 1.18, 0, 1.172, 0, -0.134, 5.544, 11.468, -370.274, 0, -1.046, 0, -0.14, 0, 1.055, 0, 0.14, 0, -1.046, 5.15, 11.468, -368.681, 0, -0.95, 0, -0.701, 0, 1.18, 0, 0.701, 0, -0.95, 5.544, 11.468, -367.883, 0, 0.79, 0, 0.161, 0, 0.806, 0, -0.161, 0, 0.79, 5.189, 11.468, -366.625, 0, -0.141, 0, 0.976, 0, 0.986, 0, -0.976, 0, -0.141, 5.278, 11.468, -365.022, 0, 0.895, 0, -0.082, 0, 0.898, 0, 0.082, 0, 0.895, 5.722, 11.468, -363.941, 0, -0.553, 0, 0.861, 0, 1.023, 0, -0.861, 0, -0.553, 5.239, 11.468, -362.192, 1, -0.634, 0, -0.901, 0, 1.102, 0, 0.901, 0, -0.634, 6.813, 11.468, -374.79, 0, -0.387, 0, -0.972, 0, 1.046, 0, 0.972, 0, -0.387, 6.477, 11.468, -373.354, 0, 0.363, 0, -0.746, 0, 0.829, 0, 0.746, 0, 0.363, 6.99, 11.468, -372.504, 0, 0.607, 0, -0.625, 0, 0.871, 0, 0.625, 0, 0.607, 6.744, 11.468, -370.901, 0, -0.149, 0, -1.115, 0, 1.125, 0, 1.115, 0, -0.149, 6.566, 11.468, -369.966, 0, -0.152, 0, 1.068, 0, 1.078, 0, -1.068, 0, -0.152, 6.665, 11.468, -368.196, 0, 0.699, 0, -0.455, 0, 0.834, 0, 0.455, 0, 0.699, 6.655, 11.468, -367.272, 0, 0.85, 0, 0.165, 0, 0.866, 0, -0.165, 0, 0.85, 6.468, 11.468, -366.025, 0, 0.075, 0, 0.881, 0, 0.885, 0, -0.881, 0, 0.075, 6.694, 11.468, -364.516, 0, 0.692, 0, -0.431, 0, 0.815, 0, 0.431, 0, 0.692, 6.576, 11.468, -362.923, 1, 0.958, 0, -0.302, 0, 1.005, 0, 0.302, 0, 0.958, 6.477, 11.468, -361.843, 1, 0.62, 0, 0.802, 0, 1.014, 0, -0.802, 0, 0.62, 8.002, 11.468, -375.234, 1, 1.025, 0, -0.157, 0, 1.037, 0, 0.157, 0, 1.025, 7.726, 11.468, -374.519, 1, 0.742, 0, -0.776, 0, 1.074, 0, 0.776, 0, 0.742, 7.588, 11.468, -372.592, 0, -0.077, 0, -1.168, 0, 1.171, 0, 1.168, 0, -0.077, 7.529, 11.468, -371.584, 0, -1.022, 0, 0.263, 0, 1.055, 0, -0.263, 0, -1.022, 7.558, 11.468, -370.587, 0, -0.039, 0, 1.013, 0, 1.014, 0, -1.013, 0, -0.039, 8.091, 11.468, -368.828, 0, 0.418, 0, -0.657, 0, 0.778, 0, 0.657, 0, 0.418, 7.618, 11.468, -368.05, 0, 0.399, 0, -0.658, 0, 0.769, 0, 0.658, 0, 0.399, 7.519, 11.468, -366.196, 0, -0.262, 0, -0.989, 0, 1.023, 0, 0.989, 0, -0.262, 7.489, 11.468, -364.792, 0, -1.139, 0, 0.093, 0, 1.143, 0, -0.093, 0, -1.139, 7.884, 11.468, -364.014, 1, -0.601, 0, -0.649, 0, 0.885, 0, 0.649, 0, -0.601, 7.726, 11.468, -362.349, 1, 0.927, 0, 0.295, 0, 0.972, 0, -0.295, 0, 0.927, 7.677, 11.468, -361.435, 1, 0.753, 0, -0.766, 0, 1.074, 0, 0.766, 0, 0.753, 8.649, 11.468, -375.975, 1, 0.524, 0, 0.969, 0, 1.102, 0, -0.969, 0, 0.524, 8.689, 11.468, -374.654, 1, -0.523, 0, 0.649, 0, 0.834, 0, -0.649, 0, -0.523, 9.261, 11.468, -373.783, 1, -0.33, 0, 0.791, 0, 0.857, 0, -0.791, 0, -0.33, 9.261, 11.468, -372.399, 0, 0.193, 0, -0.806, 0, 0.829, 0, 0.806, 0, 0.193, 8.63, 11.468, -371.068, 0, 0.901, 0, 0.251, 0, 0.935, 0, -0.251, 0, 0.901, 9.221, 11.468, -369.496, 0, 0.559, 0, -0.761, 0, 0.945, 0, 0.761, 0, 0.559, 8.915, 11.468, -368.29, 0, 0.354, 0, -0.96, 0, 1.023, 0, 0.96, 0, 0.354, 9.182, 11.468, -366.959, 0, 0.372, 0, -0.879, 0, 0.954, 0, 0.879, 0, 0.372, 8.935, 11.468, -365.91, 0, 0.911, 0, -0.456, 0, 1.018, 0, 0.456, 0, 0.911, 9.054, 11.468, -364.349, 1, -0.458, 0, 0.751, 0, 0.88, 0, -0.751, 0, -0.458, 8.994, 11.468, -363.205, 1, 0.291, 0, 0.782, 0, 0.834, 0, -0.782, 0, 0.291, 9.251, 11.468, -361.905, 1, -0.423, 0, -0.756, 0, 0.866, 0, 0.756, 0, -0.423, 8.718, 11.468, -360.354, 1, -0.686, 0, -0.358, 0, 0.774, 0, 0.358, 0, -0.686, 10.401, 11.468, -375.223, 1, -0.796, 0, -0.037, 0, 0.797, 0, 0.037, 0, -0.796, 10.164, 11.468, -374.372, 1, 0.79, 0, 0.635, 0, 1.014, 0, -0.635, 0, 0.79, 9.947, 11.468, -372.56, 1, -0.193, 0, -0.925, 0, 0.945, 0, 0.925, 0, -0.193, 9.839, 11.468, -371.553, 0, -0.847, 0, -0.133, 0, 0.857, 0, 0.133, 0, -0.847, 9.809, 11.468, -370.253, 0, -0.984, 0, -0.475, 0, 1.092, 0, 0.475, 0, -0.984, 9.918, 11.468, -368.671, 0, -0.917, 0, 0.026, 0, 0.917, 0, -0.026, 0, -0.917, 10.164, 11.468, -367.434, 0, 1.009, 0, -0.442, 0, 1.102, 0, 0.442, 0, 1.009, 10.135, 11.468, -366.541, 0, 0.924, 0, 0.382, 0, 1, 0, -0.382, 0, 0.924, 10.233, 11.468, -364.771, 1, -0.7, 0, 0.41, 0, 0.811, 0, -0.41, 0, -0.7, 9.898, 11.468, -364.14, 1, -0.364, 0, 0.951, 0, 1.018, 0, -0.951, 0, -0.364, 10.273, 11.468, -362.484, 1, -0.441, 0, -0.691, 0, 0.82, 0, 0.691, 0, -0.441, 10.302, 11.468, -361.205, 1, -0.967, 0, 0.038, 0, 0.968, 0, -0.038, 0, -0.967, 10.292, 11.468, -360.156, 1, 1.172, 0, 0.359, 0, 1.226, 0, -0.359, 0, 1.172, 10.949, 11.468, -376.153, 1, -0.027, 0, 0.898, 0, 0.898, 0, -0.898, 0, -0.027, 11.077, 11.468, -375.01, 1, -0.758, 0, 0.63, 0, 0.986, 0, -0.63, 0, -0.758, 11.225, 11.468, -373.762, 1, 1.035, 0, 0.333, 0, 1.088, 0, -0.333, 0, 1.035, 10.9, 11.468, -371.96, 1, -0.261, 0, -0.893, 0, 0.931, 0, 0.893, 0, -0.261, 11.087, 11.468, -370.984, 1, -0.237, 0, 0.838, 0, 0.871, 0, -0.838, 0, -0.237, 11.383, 11.468, -369.799, 0, -0.982, 0, -0.287, 0, 1.023, 0, 0.287, 0, -0.982, 11.314, 11.468, -368.656, 0, -0.653, 0, -0.805, 0, 1.037, 0, 0.805, 0, -0.653, 11.048, 11.468, -366.792, 1, -0.88, 0, 0.648, 0, 1.092, 0, -0.648, 0, -0.88, 10.92, 11.468, -365.649, 1, -0.615, 0, 0.98, 0, 1.157, 0, -0.98, 0, -0.615, 11.008, 11.468, -364.474, 1, 0.864, 0, -0.169, 0, 0.88, 0, 0.169, 0, 0.864, 11.373, 11.468, -363.153, 1, 0.678, 0, -0.401, 0, 0.788, 0, 0.401, 0, 0.678, 11.285, 11.468, -362.208, 1, 0.346, 0, -1.104, 0, 1.157, 0, 1.104, 0, 0.346, 10.9, 11.468, -360.375, 1, -0.498, 0, -0.824, 0, 0.963, 0, 0.824, 0, -0.498, 11.018, 11.468, -359.149, 1, -0.092, 0, 0.847, 0, 0.852, 0, -0.847, 0, -0.092, 12.523, 11.468, -375.61, 1, 1.083, 0, 0.456, 0, 1.175, 0, -0.456, 0, 1.083, 12.089, 11.468, -374.007, 1, 1.084, 0, -0.299, 0, 1.125, 0, 0.299, 0, 1.084, 12.543, 11.468, -372.654, 1, -0.249, 0, 0.878, 0, 0.912, 0, -0.878, 0, -0.249, 12.553, 11.468, -371.459, 1, -0.737, 0, -0.221, 0, 0.769, 0, 0.221, 0, -0.737, 12.346, 11.468, -370.295, 1, -0.79, 0, -0.399, 0, 0.885, 0, 0.399, 0, -0.79, 12.257, 11.468, -368.681, 0, -1.027, 0, -0.571, 0, 1.175, 0, 0.571, 0, -1.027, 12.444, 11.468, -367.946, 1, 0.473, 0, 0.63, 0, 0.788, 0, -0.63, 0, 0.473, 12.277, 11.468, -366.625, 1, -0.614, 0, 0.824, 0, 1.028, 0, -0.824, 0, -0.614, 12.622, 11.468, -365.199, 1, -0.059, 0, 0.878, 0, 0.88, 0, -0.878, 0, -0.059, 12.513, 11.468, -363.534, 1, 0.843, 0, -0.604, 0, 1.037, 0, 0.604, 0, 0.843, 12.523, 11.468, -362.693, 1, 1.001, 0, -0.375, 0, 1.069, 0, 0.375, 0, 1.001, 12.632, 11.468, -361.446, 1, 0.265, 0, -0.761, 0, 0.806, 0, 0.761, 0, 0.265, 12.129, 11.468, -360.114, 1, -0.422, 0, 0.845, 0, 0.945, 0, -0.845, 0, -0.422, 13.417, 11.468, -374.634, 1, -0.745, 0, -0.646, 0, 0.986, 0, 0.646, 0, -0.745, 13.437, 11.468, -373.292, 1, 0.761, 0, -0.777, 0, 1.088, 0, 0.777, 0, 0.761, 13.663, 11.468, -372.19, 1, -0.864, 0, 0.622, 0, 1.065, 0, -0.622, 0, -0.864, 13.624, 11.468, -370.754, 1, -0.904, 0, -0.241, 0, 0.935, 0, 0.241, 0, -0.904, 13.22, 11.468, -370.019, 1, 0.515, 0, -0.638, 0, 0.82, 0, 0.638, 0, 0.515, 13.437, 11.468, -368.269, 1, 0.619, 0, -0.78, 0, 0.995, 0, 0.78, 0, 0.619, 13.348, 11.468, -366.823, 1, 0.979, 0, -0.205, 0, 1, 0, 0.205, 0, 0.979, 13.683, 11.468, -365.669, 1, -0.956, 0, -0.556, 0, 1.106, 0, 0.556, 0, -0.956, 13.693, 11.468, -364.651, 1, -0.825, 0, 0.451, 0, 0.94, 0, -0.451, 0, -0.825, 13.654, 11.468, -362.881, 1, -1.018, 0, -0.26, 0, 1.051, 0, 0.26, 0, -1.018, 13.851, 11.468, -362.24, 1, -0.699, 0, 0.968, 0, 1.194, 0, -0.968, 0, -0.699, 14.961, 11.468, -373.114, 1, 1.214, 0, 0.174, 0, 1.226, 0, -0.174, 0, 1.214, 14.439, 11.468, -371.605, 1, -0.884, 0, 0.467, 0, 1, 0, -0.467, 0, -0.884, 14.35, 11.468, -370.023, 1, -0.777, 0, 0.423, 0, 0.885, 0, -0.423, 0, -0.777, 14.942, 11.468, -368.692, 0, 0.833, 0, 0.097, 0, 0.838, 0, -0.097, 0, 0.833, 14.744, 11.468, -367.434, 1, -0.026, 0, -1.046, 0, 1.046, 0, 1.046, 0, -0.026, 14.596, 11.468, -366.228, 1, -1.199, 0, 0.096, 0, 1.203, 0, -0.096, 0, -1.199, 14.912, 11.468, -365.032, 1, 0.018, 0, 1.198, 0, 1.198, 0, -1.198, 0, 0.018, 14.537, 11.468, -363.951, 1, -0.921, 0, 0.137, 0, 0.931, 0, -0.137, 0, -0.921, 14.873, 11.468, -362.338, 1, -1.048, 0, -0.292, 0, 1.088, 0, 0.292, 0, -1.048, 16.013, 11.468, -372.493, 1, -0.634, 0, 0.534, 0, 0.829, 0, -0.534, 0, -0.634, 16.17, 11.468, -370.817, 0, 0.432, 0, 0.993, 0, 1.083, 0, -0.993, 0, 0.432, 15.608, 11.468, -369.632, 0, 1.109, 0, -0.159, 0, 1.12, 0, 0.159, 0, 1.109, 16.092, 11.468, -368.113, 0, 1.13, 0, -0.175, 0, 1.143, 0, 0.175, 0, 1.13, 15.983, 11.468, -367.45, 0, -0.864, 0, -0.615, 0, 1.06, 0, 0.615, 0, -0.864, 15.835, 11.468, -366.066, 1, 0.719, 0, -0.675, 0, 0.986, 0, 0.675, 0, 0.719, 15.618, 11.468, -364.484, 1, -1.069, 0, -0.02, 0, 1.069, 0, 0.02, 0, -1.069, 15.865, 11.468, -362.892, 1, 0.628, 0, 0.754, 0, 0.982, 0, -0.754, 0, 0.628, 16.887, 11.468, -371.605, 0, 0.401, 0, -0.901, 0, 0.986, 0, 0.901, 0, 0.401, 16.67, 11.468, -370.013, 0, 0.175, 0, -1.167, 0, 1.18, 0, 1.167, 0, 0.175, 17.123, 11.468, -368.995, 0, -0.646, 0, 1.021, 0, 1.208, 0, -1.021, 0, -0.646, 16.956, 11.468, -367.538, 0, 0.475, 0, 0.937, 0, 1.051, 0, -0.937, 0, 0.475, 17.271, 11.468, -366.249, 0, -0.681, 0, 0.572, 0, 0.889, 0, -0.572, 0, -0.681, 16.995, 11.468, -365.22, 0, -1.139, 0, 0.29, 0, 1.175, 0, -0.29, 0, -1.139, 18.362, 11.468, -369.737, 0, -0.285, 0, 0.823, 0, 0.871, 0, -0.823, 0, -0.285, 18.411, 11.468, -368.51, 0, 1.116, 0, 0.173, 0, 1.129, 0, -0.173, 0, 1.116, 18.204, 11.468, -366.865, 0, 0.93, 0, 0.029, 0, 0.931, 0, -0.029, 0, 0.93, 17.899, 11.468, -365.805, 0, -0.869, 0, 0.32, 0, 0.926, 0, -0.32, 0, -0.869, 19.463, 11.468, -368.869, 0, -0.78, 0, -0.14, 0, 0.792, 0, 0.14, 0, -0.78, 19.206, 11.468, -367.705, 0, -0.14, 0, -0.855, 0, 0.866, 0, 0.855, 0, -0.14, 19.512, 11.468, -366.635, 0, 0.683, 0, -0.462, 0, 0.825, 0, 0.462, 0, 0.683, 20.79, 11.468, -368.353, 1, -0.434, 0, -0.932, 0, 1.028, 0, 0.932, 0, -0.434, 11.687, 8.712, -400.249, 0, 0.976, 0, -0.22, 0, 1, 0, 0.22, 0, 0.976, 11.579, 8.712, -399.325, 1, 0.549, 0, 0.717, 0, 0.903, 0, -0.717, 0, 0.549, 12.906, 8.712, -400.943, 1, 0.718, 0, 0.994, 0, 1.226, 0, -0.994, 0, 0.718, 12.827, 8.712, -400.029, 0, 0.854, 0, -0.739, 0, 1.129, 0, 0.739, 0, 0.854, 12.946, 8.712, -398.384, 1, 0.656, 0, 0.551, 0, 0.857, 0, -0.551, 0, 0.656, 13.869, 8.712, -403.246, 1, 0.846, 0, -0.669, 0, 1.078, 0, 0.669, 0, 0.846, 14.175, 8.712, -401.695, 1, -0.041, 0, 0.995, 0, 0.995, 0, -0.995, 0, -0.041, 14.303, 8.712, -400.249, 1, -1.197, 0, -0.267, 0, 1.226, 0, 0.267, 0, -1.197, 14.106, 8.712, -398.907, 1, -0.211, 0, 0.992, 0, 1.014, 0, -0.992, 0, -0.211, 13.987, 8.712, -397.774, 1, 1.067, 0, 0.434, 0, 1.152, 0, -0.434, 0, 1.067, 15.394, 8.712, -403.95, 1, -0.123, 0, 0.857, 0, 0.866, 0, -0.857, 0, -0.123, 15.068, 8.712, -402.462, 1, -0.846, 0, -0.524, 0, 0.995, 0, 0.524, 0, -0.846, 15.522, 8.712, -401.266, 0, 0.492, 0, 0.746, 0, 0.894, 0, -0.746, 0, 0.492, 15.226, 8.712, -399.956, 0, 0.744, 0, -0.212, 0, 0.774, 0, 0.212, 0, 0.744, 15.029, 8.712, -398.102, 0, -0.987, 0, -0.499, 0, 1.106, 0, 0.499, 0, -0.987, 15.285, 8.712, -397.304, 1, -0.692, 0, 0.892, 0, 1.129, 0, -0.892, 0, -0.692, 15.364, 8.712, -395.638, 1, 0.109, 0, 0.771, 0, 0.778, 0, -0.771, 0, 0.109, 16.297, 8.712, -404.295, 1, 0.309, 0, -1.038, 0, 1.083, 0, 1.038, 0, 0.309, 16.287, 8.712, -402.89, 1, 1.143, 0, 0.144, 0, 1.152, 0, -0.144, 0, 1.143, 16.13, 8.712, -401.507, 0, 0.854, 0, -0.309, 0, 0.908, 0, 0.309, 0, 0.854, 16.218, 8.712, -400.468, 0, 0.469, 0, 0.987, 0, 1.092, 0, -0.987, 0, 0.469, 16.396, 8.712, -398.928, 0, 0.657, 0, -0.475, 0, 0.811, 0, 0.475, 0, 0.657, 16.287, 8.712, -397.534, 0, 1.157, 0, -0.028, 0, 1.157, 0, 0.028, 0, 1.157, 16.583, 8.712, -396.746, 1, -0.904, 0, 0.124, 0, 0.912, 0, -0.124, 0, -0.904, 16.642, 8.712, -395.007, 1, 0.224, 0, 0.827, 0, 0.857, 0, -0.827, 0, 0.224, 17.684, 8.712, -406.122, 1, 0.681, 0, -0.614, 0, 0.917, 0, 0.614, 0, 0.681, 17.802, 8.712, -404.56, 1, -0.249, 0, -0.902, 0, 0.935, 0, 0.902, 0, -0.249, 17.901, 8.712, -403.825, 1, 0.323, 0, -0.733, 0, 0.802, 0, 0.733, 0, 0.323, 17.694, 8.712, -402.169, 0, -0.7, 0, 0.331, 0, 0.774, 0, -0.331, 0, -0.7, 17.595, 8.712, -400.66, 0, -0.751, 0, -0.812, 0, 1.106, 0, 0.812, 0, -0.751, 17.556, 8.712, -399.737, 0, -0.416, 0, 0.828, 0, 0.926, 0, -0.828, 0, -0.416, 17.832, 8.712, -398.52, 0, -0.346, 0, -1.021, 0, 1.078, 0, 1.021, 0, -0.346, 17.664, 8.712, -397.21, 0, -0.782, 0, -0.247, 0, 0.82, 0, 0.247, 0, -0.782, 17.289, 8.712, -395.753, 1, -0.742, 0, -0.303, 0, 0.802, 0, 0.303, 0, -0.742, 17.92, 8.712, -394.307, 1, -0.823, 0, 0.697, 0, 1.078, 0, -0.697, 0, -0.823, 19.021, 8.712, -407.041, 1, -0.714, 0, 0.568, 0, 0.912, 0, -0.568, 0, -0.714, 18.646, 8.712, -405.94, 1, 1.178, 0, -0.121, 0, 1.185, 0, 0.121, 0, 1.178, 18.982, 8.712, -404.64, 1, 0.797, 0, 0.086, 0, 0.802, 0, -0.086, 0, 0.797, 18.587, 8.712, -402.681, 0, -0.006, 0, 0.912, 0, 0.912, 0, -0.912, 0, -0.006, 18.942, 8.712, -401.59, 0, -0.701, 0, -0.978, 0, 1.203, 0, 0.978, 0, -0.701, 18.706, 8.712, -400.217, 0, -1.071, 0, -0.296, 0, 1.111, 0, 0.296, 0, -1.071, 18.854, 8.712, -399.032, 0, 0.423, 0, 0.901, 0, 0.995, 0, -0.901, 0, 0.423, 18.627, 8.712, -397.471, 0, 0.616, 0, -0.879, 0, 1.074, 0, 0.879, 0, 0.616, 18.824, 8.712, -396.254, 0, -0.077, 0, 1.177, 0, 1.18, 0, -1.177, 0, -0.077, 18.883, 8.712, -394.934, 1, 0.886, 0, 0.269, 0, 0.926, 0, -0.269, 0, 0.886, 19.08, 8.712, -393.602, 1, 0.646, 0, -0.757, 0, 0.995, 0, 0.757, 0, 0.646, 18.844, 8.712, -392.772, 1, -0.05, 0, 0.855, 0, 0.857, 0, -0.855, 0, -0.05, 19.865, 8.712, -407.213, 1, 0.6, 0, -1.01, 0, 1.175, 0, 1.01, 0, 0.6, 19.767, 8.712, -406.31, 1, -0.072, 0, -0.84, 0, 0.843, 0, 0.84, 0, -0.072, 20.033, 8.712, -404.863, 0, 0.739, 0, 0.245, 0, 0.778, 0, -0.245, 0, 0.739, 19.649, 8.712, -403.898, 0, 0.568, 0, -0.566, 0, 0.802, 0, 0.566, 0, 0.568, 19.57, 8.712, -402.149, 0, -0.507, 0, -0.802, 0, 0.949, 0, 0.802, 0, -0.507, 19.688, 8.712, -400.796, 0, 0.714, 0, -0.394, 0, 0.815, 0, 0.394, 0, 0.714, 19.737, 8.712, -399.601, 0, -0.971, 0, 0.105, 0, 0.977, 0, -0.105, 0, -0.971, 20.161, 8.712, -398.228, 0, -0.56, 0, 0.738, 0, 0.926, 0, -0.738, 0, -0.56, 20.132, 8.712, -396.99, 0, 0.805, 0, -0.528, 0, 0.963, 0, 0.528, 0, 0.805, 19.895, 8.712, -395.523, 0, -0.549, 0, 0.572, 0, 0.792, 0, -0.572, 0, -0.549, 19.846, 8.712, -394.474, 0, 0.963, 0, 0.001, 0, 0.963, 0, -0.001, 0, 0.963, 19.649, 8.712, -393.466, 1, -1.058, 0, -0.232, 0, 1.083, 0, 0.232, 0, -1.058, 20.053, 8.712, -392.177, 0, -0.56, 0, -0.749, 0, 0.935, 0, 0.749, 0, -0.56, 21.203, 8.712, -408.393, 1, -0.966, 0, 0.22, 0, 0.991, 0, -0.22, 0, -0.966, 20.858, 8.712, -407.041, 1, -1.003, 0, 0.372, 0, 1.069, 0, -0.372, 0, -1.003, 20.927, 8.712, -405.344, 0, 0.181, 0, -1.105, 0, 1.12, 0, 1.105, 0, 0.181, 21.282, 8.712, -404.222, 0, 0.6, 0, 0.957, 0, 1.129, 0, -0.957, 0, 0.6, 20.769, 8.712, -403.214, 0, 0.052, 0, 0.786, 0, 0.788, 0, -0.786, 0, 0.052, 20.897, 8.712, -401.632, 0, -0.93, 0, 0.727, 0, 1.18, 0, -0.727, 0, -0.93, 20.828, 8.712, -400.332, 0, 0.488, 0, -1.049, 0, 1.157, 0, 1.049, 0, 0.488, 20.996, 8.712, -399.189, 0, 0.531, 0, -0.606, 0, 0.806, 0, 0.606, 0, 0.531, 20.71, 8.712, -398.108, 0, 0.956, 0, 0.068, 0, 0.958, 0, -0.068, 0, 0.956, 21.223, 8.712, -396.526, 0, -0.977, 0, -0.234, 0, 1.005, 0, 0.234, 0, -0.977, 21.006, 8.712, -395.268, 0, 1.148, 0, 0.011, 0, 1.148, 0, -0.011, 0, 1.148, 21.223, 8.712, -393.968, 0, -0.313, 0, 1.023, 0, 1.069, 0, -1.023, 0, -0.313, 21.134, 8.712, -392.438, 1, 0.822, 0, -0.3, 0, 0.875, 0, 0.3, 0, 0.822, 21.341, 8.712, -391.378, 0, -0.906, 0, -0.514, 0, 1.042, 0, 0.514, 0, -0.906, 22.136, 8.712, -407.338, 1, -0.527, 0, 1.04, 0, 1.166, 0, -1.04, 0, -0.527, 22.52, 8.712, -406.257, 0, -0.034, 0, -0.889, 0, 0.889, 0, 0.889, 0, -0.034, 22.225, 8.712, -404.78, 0, -0.923, 0, 0.077, 0, 0.926, 0, -0.077, 0, -0.923, 22.491, 8.712, -403.657, 0, 0.926, 0, 0.605, 0, 1.106, 0, -0.605, 0, 0.926, 22.53, 8.712, -402.002, 0, 0.184, 0, 0.851, 0, 0.871, 0, -0.851, 0, 0.184, 22.264, 8.712, -401.12, 0, 0.79, 0, 0.22, 0, 0.82, 0, -0.22, 0, 0.79, 22.195, 8.712, -400.008, 0, -0.952, 0, -0.697, 0, 1.18, 0, 0.697, 0, -0.952, 21.919, 8.712, -398.092, 0, -0.107, 0, -1.022, 0, 1.028, 0, 1.022, 0, -0.107, 22.481, 8.712, -397.147, 0, 0.133, 0, -0.889, 0, 0.898, 0, 0.889, 0, 0.133, 22.304, 8.712, -395.638, 0, 0.027, 0, 0.935, 0, 0.935, 0, -0.935, 0, 0.027, 22.442, 8.712, -394.714, 0, -0.413, 0, 0.803, 0, 0.903, 0, -0.803, 0, -0.413, 22.175, 8.712, -393.205, 0, 0.634, 0, 0.815, 0, 1.032, 0, -0.815, 0, 0.634, 21.939, 8.712, -391.56, 0, -0.576, 0, 0.922, 0, 1.088, 0, -0.922, 0, -0.576, 23.542, 8.712, -408.038, 0, -0.487, 0, -0.889, 0, 1.014, 0, 0.889, 0, -0.487, 23.523, 8.712, -406.905, 1, 0.811, 0, -0.838, 0, 1.166, 0, 0.838, 0, 0.811, 23.582, 8.712, -405.543, 0, 1.137, 0, 0.055, 0, 1.138, 0, -0.055, 0, 1.137, 23.454, 8.712, -404.368, 0, 0.855, 0, -0.694, 0, 1.102, 0, 0.694, 0, 0.855, 23.01, 8.712, -403.005, 0, -0.674, 0, 0.83, 0, 1.069, 0, -0.83, 0, -0.674, 23.039, 8.712, -401.716, 0, 0.623, 0, 0.975, 0, 1.157, 0, -0.975, 0, 0.623, 23.611, 8.712, -400.468, 0, 0.527, 0, -0.973, 0, 1.106, 0, 0.973, 0, 0.527, 23.227, 8.712, -399.251, 0, 0.62, 0, 0.882, 0, 1.078, 0, -0.882, 0, 0.62, 23.266, 8.712, -397.983, 0, -0.981, 0, -0.377, 0, 1.051, 0, 0.377, 0, -0.981, 23.601, 8.712, -396.85, 0, -0.463, 0, 1.03, 0, 1.129, 0, -1.03, 0, -0.463, 23.69, 8.712, -395.446, 0, -0.56, 0, 0.789, 0, 0.968, 0, -0.789, 0, -0.56, 23.503, 8.712, -394.083, 0, 0.16, 0, 0.959, 0, 0.972, 0, -0.959, 0, 0.16, 23.513, 8.712, -392.302, 1, -0.152, 0, -0.871, 0, 0.885, 0, 0.871, 0, -0.152, 24.288, 8.712, -407.171, 1, 1.095, 0, -0.255, 0, 1.125, 0, 0.255, 0, 1.095, 24.643, 8.712, -405.975, 1, 0.384, 0, 1.067, 0, 1.134, 0, -1.067, 0, 0.384, 24.702, 8.712, -404.759, 0, 0.841, 0, 0.559, 0, 1.009, 0, -0.559, 0, 0.841, 24.604, 8.712, -403.866, 0, 1.07, 0, -0.26, 0, 1.102, 0, 0.26, 0, 1.07, 24.199, 8.712, -402.065, 0, 0.195, 0, 0.995, 0, 1.014, 0, -0.995, 0, 0.195, 24.702, 8.712, -401.047, 0, -0.754, 0, -0.65, 0, 0.995, 0, 0.65, 0, -0.754, 24.268, 8.712, -399.935, 0, -0.304, 0, -0.742, 0, 0.802, 0, 0.742, 0, -0.304, 24.436, 8.712, -398.259, 0, -0.043, 0, -1.207, 0, 1.208, 0, 1.207, 0, -0.043, 24.564, 8.712, -397.21, 0, 0.48, 0, 1.058, 0, 1.162, 0, -1.058, 0, 0.48, 24.653, 8.712, -395.743, 0, -0.264, 0, -0.864, 0, 0.903, 0, 0.864, 0, -0.264, 24.643, 8.712, -394.61, 0, -0.793, 0, -0.53, 0, 0.954, 0, 0.53, 0, -0.793, 24.643, 8.712, -393.404, 1, 0.84, 0, -0.142, 0, 0.852, 0, 0.142, 0, 0.84, 25.832, 8.712, -405.438, 1, 0.795, 0, -0.543, 0, 0.963, 0, 0.543, 0, 0.795, 25.734, 8.712, -403.981, 0, -0.402, 0, 0.956, 0, 1.037, 0, -0.956, 0, -0.402, 25.97, 8.712, -402.995, 0, -0.535, 0, 0.812, 0, 0.972, 0, -0.812, 0, -0.535, 25.389, 8.712, -401.36, 0, -0.254, 0, 1.171, 0, 1.198, 0, -1.171, 0, -0.254, 25.477, 8.712, -400.175, 0, 0.225, 0, 1.026, 0, 1.051, 0, -1.026, 0, 0.225, 25.714, 8.712, -398.917, 0, -0.674, 0, -0.572, 0, 0.885, 0, 0.572, 0, -0.674, 25.418, 8.712, -398.14, 0, -0.106, 0, 1.036, 0, 1.042, 0, -1.036, 0, -0.106, 25.537, 8.712, -396.265, 0, 0.698, 0, 0.616, 0, 0.931, 0, -0.616, 0, 0.698, 25.842, 8.712, -395.237, 0, 1.083, 0, 0.392, 0, 1.152, 0, -0.392, 0, 1.083, 25.961, 8.712, -393.926, 1, -0.339, 0, -0.721, 0, 0.797, 0, 0.721, 0, -0.339, 26.805, 8.712, -404.895, 1, -0.725, 0, -0.735, 0, 1.032, 0, 0.735, 0, -0.725, 26.923, 8.712, -403.532, 0, 0.017, 0, 1.111, 0, 1.111, 0, -1.111, 0, 0.017, 26.894, 8.712, -402.211, 0, -0.933, 0, 0.676, 0, 1.152, 0, -0.676, 0, -0.933, 26.48, 8.712, -400.734, 0, 0.783, 0, 0.545, 0, 0.954, 0, -0.545, 0, 0.783, 27.012, 8.712, -399.987, 0, -0.753, 0, 0.499, 0, 0.903, 0, -0.499, 0, -0.753, 27.13, 8.712, -398.416, 0, 0.315, 0, 0.842, 0, 0.898, 0, -0.842, 0, 0.315, 26.726, 8.712, -396.99, 0, -0.652, 0, -0.527, 0, 0.838, 0, 0.527, 0, -0.652, 26.539, 8.712, -395.753, 1, -0.114, 0, -0.914, 0, 0.922, 0, 0.914, 0, -0.114, 26.795, 8.712, -394.234, 1, -0.178, 0, -0.993, 0, 1.009, 0, 0.993, 0, -0.178, 27.876, 8.712, -402.922, 1, 0.78, 0, -0.491, 0, 0.922, 0, 0.491, 0, 0.78, 28.024, 8.712, -402.008, 0, -1.049, 0, 0.179, 0, 1.065, 0, -0.179, 0, -1.049, 27.649, 8.712, -400.656, 0, 0.109, 0, 1.203, 0, 1.208, 0, -1.203, 0, 0.109, 27.649, 8.712, -399.45, 0, 0.273, 0, 0.924, 0, 0.963, 0, -0.924, 0, 0.273, 27.718, 8.712, -398.15, 0, 0.091, 0, -0.834, 0, 0.838, 0, 0.834, 0, 0.091, 27.827, 8.712, -396.557)
 metadata/sf_hortensii = true
+
+[node name="CasePictate" type="Node3D" parent="DecorManual"]
+
+[node name="capatE" parent="DecorManual/CasePictate" instance=ExtResource("v3_sf_row_end_b")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 100.500, 52.655, 112.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "C"
+metadata/sf_case_w = 7.0
+metadata/sf_case_capat = true
+
+[node name="PL_a" parent="DecorManual/CasePictate" instance=ExtResource("v3_sf_painted_lady_a")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 93.500, 52.672, 112.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_pink"
+metadata/sf_case = "C"
+metadata/sf_case_w = 7.0
+metadata/sf_case_porch = 1.20
+
+[node name="Gradinite" type="Node3D" parent="DecorManual"]
+
+[node name="G_PL_a" parent="DecorManual/Gradinite" instance=ExtResource("v3_garden")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 93.500, 52.652, 121.200)
+metadata/coliziune = "none"
+
+[node name="PL_b" parent="DecorManual/CasePictate" instance=ExtResource("v3_sf_painted_lady_b")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 86.500, 52.682, 112.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "C"
+metadata/sf_case_w = 7.0
+metadata/sf_case_porch = 1.20
+
+[node name="G_PL_b" parent="DecorManual/Gradinite" instance=ExtResource("v3_garden")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 86.500, 52.662, 121.200)
+metadata/coliziune = "none"
+
+[node name="PL_c" parent="DecorManual/CasePictate" instance=ExtResource("v3_sf_painted_lady_c")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 79.500, 52.690, 112.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "C"
+metadata/sf_case_w = 7.0
+metadata/sf_case_porch = 1.20
+
+[node name="G_PL_c" parent="DecorManual/Gradinite" instance=ExtResource("v3_garden")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 79.500, 52.670, 121.200)
+metadata/coliziune = "none"
+
+[node name="PL_d" parent="DecorManual/CasePictate" instance=ExtResource("v3_sf_painted_lady_d")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 72.500, 52.696, 112.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_butter"
+metadata/sf_case = "C"
+metadata/sf_case_w = 7.0
+
+[node name="G_PL_d" parent="DecorManual/Gradinite" instance=ExtResource("v3_garden")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 72.500, 52.676, 121.200)
+metadata/coliziune = "none"
+
+[node name="PL_e" parent="DecorManual/CasePictate" instance=ExtResource("v3_sf_painted_lady_e")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 65.500, 52.700, 112.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard"
+metadata/sf_case = "C"
+metadata/sf_case_w = 7.0
+metadata/sf_case_porch = 1.20
+
+[node name="G_PL_e" parent="DecorManual/Gradinite" instance=ExtResource("v3_garden")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 65.500, 52.680, 121.200)
+metadata/coliziune = "none"
+
+[node name="PL_f" parent="DecorManual/CasePictate" instance=ExtResource("v3_sf_painted_lady_f")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 58.500, 52.700, 112.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_blue"
+metadata/sf_case = "C"
+metadata/sf_case_w = 7.0
+metadata/sf_case_porch = 1.20
+
+[node name="G_PL_f" parent="DecorManual/Gradinite" instance=ExtResource("v3_garden")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 58.500, 52.680, 121.200)
+metadata/coliziune = "none"
+
+[node name="capatV" parent="DecorManual/CasePictate" instance=ExtResource("v3_sf_row_end_c_m")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 51.500, 52.700, 112.500)
+metadata/coliziune = "none"
+metadata/contact = "none"
+metadata/wall_class = "sf_clapboard_mint"
+metadata/sf_case = "C"
+metadata/sf_case_w = 7.0
+metadata/sf_case_capat = true
+
+[node name="PlacaTurnanta" type="Node3D" parent="DecorManual"]
+
+[node name="Placa" parent="DecorManual/PlacaTurnanta" instance=ExtResource("v3_turntable")]
+transform = Transform3D(0.27472, 0, -0.96152, 0, 1.00000, 0, 0.96152, 0, 0.27472, -144.000, 7.242, -430.000)
+metadata/coliziune = "none"
+
+[node name="VagonParcat" parent="DecorManual/PlacaTurnanta" instance=ExtResource("p7_tram")]
+transform = Transform3D(0.27472, 0, -0.96152, 0, 1.00000, 0, 0.96152, 0, 0.27472, -144.000, 7.342, -430.000)
+metadata/coliziune = "none"
+
+[node name="Magazii" type="Node3D" parent="DecorManual"]
+
+[node name="Magazia0" parent="DecorManual/Magazii" instance=ExtResource("v3_shed")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, -92.700, 5.617, -484.720)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(0, 0, -12.42)
+
+[node name="Magazia1" parent="DecorManual/Magazii" instance=ExtResource("v3_shed_s")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, -74.300, 5.107, -480.720)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(0, 0, -8.42)
+
+[node name="Magazia2" parent="DecorManual/Magazii" instance=ExtResource("v3_shed")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, -49.800, 4.420, -484.720)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(0, 0, -12.42)
+
+[node name="Magazia3" parent="DecorManual/Magazii" instance=ExtResource("v3_shed_s")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, -31.400, 3.905, -480.720)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(0, 0, -8.42)
+
+[node name="LeiDeMare" type="Node3D" parent="DecorManual"]
+
+[node name="Pluta" parent="DecorManual/LeiDeMare" instance=ExtResource("v3_lions")]
+transform = Transform3D(-0.93969, 0, -0.34202, 0, 1.00000, 0, 0.34202, 0, -0.93969, -62.000, 0.000, -490.000)
+metadata/coliziune = "none"
+
+[node name="Insula" type="Node3D" parent="DecorManual"]
+
+[node name="InsulaFar" parent="DecorManual/Insula" instance=ExtResource("v3_island")]
+transform = Transform3D(-1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, -1.00000, 0.000, 0.000, -546.000)
+metadata/coliziune = "none"
+
+[node name="Scari" type="Node3D" parent="DecorManual"]
+
+[node name="Scara0_0" parent="DecorManual/Scari" instance=ExtResource("v3_stair")]
+transform = Transform3D(0.96593, 0, -0.25882, 0, 1.00000, 0, 0.25882, 0, 0.96593, 185.000, 11.634, -276.000)
+metadata/coliziune = "none"
+
+[node name="Scara0_1" parent="DecorManual/Scari" instance=ExtResource("v3_stair")]
+transform = Transform3D(0.96593, 0, -0.25882, 0, 1.00000, 0, 0.25882, 0, 0.96593, 183.706, 14.634, -271.170)
+metadata/coliziune = "none"
+
+[node name="Scara1_0" parent="DecorManual/Scari" instance=ExtResource("v3_stair")]
+transform = Transform3D(0.76604, 0, 0.64279, 0, 1.00000, 0, -0.64279, 0, 0.76604, 219.000, 8.095, -276.000)
+metadata/coliziune = "none"
+
+[node name="Scara1_1" parent="DecorManual/Scari" instance=ExtResource("v3_stair")]
+transform = Transform3D(0.76604, 0, 0.64279, 0, 1.00000, 0, -0.64279, 0, 0.76604, 222.214, 11.095, -272.170)
+metadata/coliziune = "none"
+
+[node name="Scara2_0" parent="DecorManual/Scari" instance=ExtResource("v3_stair")]
+transform = Transform3D(0.96593, 0, -0.25882, 0, 1.00000, 0, 0.25882, 0, 0.96593, 249.000, 9.462, -275.000)
+metadata/coliziune = "none"
+
+[node name="Scara2_1" parent="DecorManual/Scari" instance=ExtResource("v3_stair")]
+transform = Transform3D(0.96593, 0, -0.25882, 0, 1.00000, 0, 0.25882, 0, 0.96593, 247.706, 12.462, -270.170)
+metadata/coliziune = "none"
+
+[node name="Scara3_0" parent="DecorManual/Scari" instance=ExtResource("v3_stair")]
+transform = Transform3D(-0.57358, 0, -0.81915, 0, 1.00000, 0, 0.81915, 0, -0.57358, 187.000, 1.365, -336.000)
+metadata/coliziune = "none"
+
+[node name="Scara3_1" parent="DecorManual/Scari" instance=ExtResource("v3_stair")]
+transform = Transform3D(-0.57358, 0, -0.81915, 0, 1.00000, 0, 0.81915, 0, -0.57358, 182.904, 4.365, -338.868)
+metadata/coliziune = "none"
+
+[node name="Mobilier" type="Node3D" parent="DecorManual"]
+
+[node name="BancaCoama1" parent="DecorManual/Mobilier" instance=ExtResource("v3_bench")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 62.000, 52.670, 123.800)
+metadata/coliziune = "none"
+
+[node name="BancaCoama2" parent="DecorManual/Mobilier" instance=ExtResource("v3_bench")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 90.500, 52.669, 123.800)
+metadata/coliziune = "none"
+
+[node name="RastelCoama" parent="DecorManual/Mobilier" instance=ExtResource("v3_rack")]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 76.000, 52.670, 123.800)
+metadata/coliziune = "none"
+
+[node name="BancaChei1" parent="DecorManual/Mobilier" instance=ExtResource("v3_bench")]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, 1.00000, 30.000, 2.606, -446.600)
+metadata/coliziune = "none"
+
+[node name="BancaChei2" parent="DecorManual/Mobilier" instance=ExtResource("v3_bench")]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, 1.00000, 44.000, 2.728, -446.600)
+metadata/coliziune = "none"
+
+[node name="RastelChei" parent="DecorManual/Mobilier" instance=ExtResource("v3_rack")]
+transform = Transform3D(1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, 1.00000, 37.000, 2.688, -446.600)
+metadata/coliziune = "none"
+
+[node name="PodZidMoale" type="Node3D" parent="DecorManual"]
+
+[node name="Baza00" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 155.538, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza01" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 158.615, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza02" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 161.692, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza03" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 164.769, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza04" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 167.846, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza05" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 170.923, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza06" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 174.000, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza07" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 177.077, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza08" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 180.154, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza09" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 183.231, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza10" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 186.308, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza11" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 189.385, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza12" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 192.462, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza13" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 195.538, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza14" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 198.615, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza15" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 201.692, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza16" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 204.769, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza17" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 207.846, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza18" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 210.923, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza19" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 214.000, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza20" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 217.077, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza21" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 220.154, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza22" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 223.231, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza23" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 226.308, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza24" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 229.385, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="Baza25" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 232.462, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt00" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 507.538, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt01" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 510.615, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt02" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 513.692, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt03" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 516.769, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt04" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 519.846, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt05" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 522.923, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt06" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 526.000, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt07" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 529.077, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt08" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 532.154, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt09" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 535.231, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt10" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 538.308, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt11" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 541.385, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt12" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 544.462, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt13" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 547.538, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt14" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 550.615, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt15" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 553.692, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt16" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 556.769, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt17" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 559.846, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt18" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 562.923, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt19" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 566.000, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt20" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 569.077, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt21" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 572.154, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt22" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 575.231, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt23" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 578.308, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt24" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 581.385, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="MalulCelalalt25" parent="DecorManual/PodZidMoale" instance=ExtResource("p7_bloc")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 584.462, 19.680, -228.626)
+metadata/coliziune = "none"
+
+[node name="CasePictateCorpuri" type="StaticBody3D" parent="."]
+
+[node name="Corp_capatE" type="CollisionShape3D" parent="CasePictateCorpuri"]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 100.500, 56.255, 112.500)
+shape = SubResource("Box_v3_7_00_12_00_12_00")
+
+[node name="Corp_PL_a" type="CollisionShape3D" parent="CasePictateCorpuri"]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 93.500, 56.273, 113.100)
+shape = SubResource("Box_v3_7_00_12_00_13_20")
+
+[node name="Corp_PL_b" type="CollisionShape3D" parent="CasePictateCorpuri"]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 86.500, 56.282, 113.100)
+shape = SubResource("Box_v3_7_00_12_00_13_20")
+
+[node name="Corp_PL_c" type="CollisionShape3D" parent="CasePictateCorpuri"]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 79.500, 56.290, 113.100)
+shape = SubResource("Box_v3_7_00_12_00_13_20")
+
+[node name="Corp_PL_d" type="CollisionShape3D" parent="CasePictateCorpuri"]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 72.500, 56.296, 112.500)
+shape = SubResource("Box_v3_7_00_12_00_12_00")
+
+[node name="Corp_PL_e" type="CollisionShape3D" parent="CasePictateCorpuri"]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 65.500, 56.300, 113.100)
+shape = SubResource("Box_v3_7_00_12_00_13_20")
+
+[node name="Corp_PL_f" type="CollisionShape3D" parent="CasePictateCorpuri"]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 58.500, 56.300, 113.100)
+shape = SubResource("Box_v3_7_00_12_00_13_20")
+
+[node name="Corp_capatV" type="CollisionShape3D" parent="CasePictateCorpuri"]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, 51.500, 56.300, 112.500)
+shape = SubResource("Box_v3_7_00_12_00_12_00")
+
+[node name="PlacaCorpuri" type="StaticBody3D" parent="."]
+
+[node name="Corp_Ghereta" type="CollisionShape3D" parent="PlacaCorpuri"]
+transform = Transform3D(0.27472, 0, -0.96152, 0, 1.00000, 0, 0.96152, 0, 0.27472, -142.310, 8.542, -424.087)
+shape = SubResource("Box_v3_2_00_2_60_2_00")
+
+[node name="Corp_Vagon" type="CollisionShape3D" parent="PlacaCorpuri"]
+transform = Transform3D(0.27472, 0, -0.96152, 0, 1.00000, 0, 0.96152, 0, 0.27472, -144.000, 8.942, -430.000)
+shape = SubResource("Box_v3_2_50_3_20_8_50")
+
+[node name="MagaziiCorpuri" type="StaticBody3D" parent="."]
+
+[node name="Corp_Magazia0" type="CollisionShape3D" parent="MagaziiCorpuri"]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, -92.700, 10.117, -484.720)
+shape = SubResource("Box_v3_12_00_9_00_20_00")
+
+[node name="Corp_Magazia1" type="CollisionShape3D" parent="MagaziiCorpuri"]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, -74.300, 9.607, -480.720)
+shape = SubResource("Box_v3_12_00_9_00_12_00")
+
+[node name="Corp_Magazia2" type="CollisionShape3D" parent="MagaziiCorpuri"]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, -49.800, 8.920, -484.720)
+shape = SubResource("Box_v3_12_00_9_00_20_00")
+
+[node name="Corp_Magazia3" type="CollisionShape3D" parent="MagaziiCorpuri"]
+transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, -31.400, 8.405, -480.720)
+shape = SubResource("Box_v3_12_00_9_00_12_00")

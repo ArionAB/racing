@@ -1655,6 +1655,28 @@ def _p7_glb(rel, rid, flag="1"):
 
 TRAM_MODEL = _p7_glb("vehicles/cable_car.glb", "p7_tram", os.environ.get("SF_TRAM_MODEL", "1"))
 
+# Comutatoarele VALULUI 3 (blocul „VALUL 3", dupa valul 2); definite aici fiindca doua familii schimba
+# blocuri de mai sus: casele de capat (randurile din fata si din spate) si zidurile moi ale podului.
+VAL3 = os.environ.get("SF_VAL3", "1") == "1"
+
+
+def _v3_flag(name):
+    return VAL3 and os.environ.get(name, "1") == "1"
+
+
+V3_CAPAT = _v3_flag("SF_V3_CAPAT")            # B: casele de capat (randurile din fata si din spate)
+V3_PICTATE = _v3_flag("SF_V3_PICTATE")        # C: casele pictate pe coama, cu gradinitele
+V3_PLACA = _v3_flag("SF_V3_PLACA")            # D: placa turnanta cu vagonul parcat
+V3_MAGAZII = _v3_flag("SF_V3_MAGAZII")        # E: magaziile de pe cheiul de nord
+V3_LEI = _v3_flag("SF_V3_LEI")                # E: pluta cu lei de mare
+V3_INSULA = _v3_flag("SF_V3_INSULA")          # F: insula cu far
+V3_SCARI = _v3_flag("SF_V3_SCARI")            # H: scarile publice
+V3_MOBILIER = _v3_flag("SF_V3_MOBILIER")      # H: bancile si rastelele
+V3_CAPS = _v3_flag("SF_V3_CAPS")              # I: zidurile moi ale podului pe blocuri de beton
+# Sabotajul contoarelor (`probe_sf_watch.gd`, valul 3): cate o cutie a fiecarui corp nou pe carosabil,
+# pe dreapta de start; o cursa scurta TREBUIE sa numere contacte pe toate trei. Niciodata comis asa.
+V3_SABOTAJ = VAL3 and os.environ.get("SF_V3_SABOTAJ", "0") == "1"
+
 
 def _tram_node(name, curve_id, speed, period, phase, reach=0.0):
     b = "true" if TRAM_AI else "false"
@@ -1733,7 +1755,7 @@ if B200:
         if sid not in _sub:
             _sub[sid] = ('[sub_resource type="BoxShape3D" id="%s"]\nsize = Vector3(%.3f, %.3f, %.3f)\n'
                          % (sid, size[0], size[1], size[2]))
-            if not (POD_MODEL and key in _POD_KIT_BOXES):
+            if mesh and not (POD_MODEL and key in _POD_KIT_BOXES):
                 _sub["Mesh_pod_" + key] = ('[sub_resource type="BoxMesh" id="Mesh_pod_%s"]\n'
                                            'size = Vector3(%.3f, %.3f, %.3f)\nmaterial = SubResource("%s")\n'
                                            % (key, size[0], size[1], size[2], mat))
@@ -1745,7 +1767,8 @@ if B200:
             POD_NODES.append('[node name="%sM" type="MeshInstance3D" parent="%s"]\n%smesh = SubResource("Mesh_pod_%s")\n'
                              % (name, parent, tx, key))
 
-    POD_SUB.append('[sub_resource type="StandardMaterial3D" id="Mat_pod_gri"]\nalbedo_color = Color(0.62, 0.62, 0.6, 1)\n')
+    if not (POD_MODEL and V3_CAPS):   # cu kitul si cu blocurile pe zidurile moi nimic nu mai e gri
+        POD_SUB.append('[sub_resource type="StandardMaterial3D" id="Mat_pod_gri"]\nalbedo_color = Color(0.62, 0.62, 0.6, 1)\n')
     if not POD_MODEL:   # rosul placeholder al portalurilor: cu kitul, nimic nu-l mai foloseste
         POD_SUB.append('[sub_resource type="StandardMaterial3D" id="Mat_pod_rosu"]\nalbedo_color = Color(0.73, 0.21, 0.13, 1)\n')
     POD_NODES.append('[node name="Pod" type="Node3D" parent="."]\n')
@@ -1778,13 +1801,18 @@ if B200:
     # spre viraj / balon (verificat: niciun punct al soselei la mai putin de semilatime + 1 m).
     CAP_S_EXTRA = float(os.environ.get("CAP_S_EXTRA", "20"))
     CAP_S = os.environ.get("CAP_S", "1") == "1"
+    CAPS_SPANS = []
     if CAP_S:
         POD_NODES.append('[node name="CapS" type="StaticBody3D" parent="Pod"]\nmetadata/soft_hit_crush = 1.0\n')
         cap_h = 4.3                      # de la +17 la +21,3 (coliziunea blocului: 1,3 m peste drum)
         for nm, xa, xb in (("Baza", MK["pod0"][2] - SPLIT_L - CAP_S_EXTRA, MK["pod0"][2]),
                            ("MalulCelalalt", MK["far0"][2], MK["far0"][2] + SPLIT_L + CAP_S_EXTRA)):
+            # Valul 3 (I): vizualul cutiei gri devine un sir de blocuri `sf_median_block.glb` (blocul
+            # VALUL 3); cutia de coliziune ramane exact cum e.
             _box("cap_%s" % nm.lower(), "Cap%s" % nm, "Pod/CapS", (xb - xa, cap_h, 0.6),
-                 (1, 0, 0, 0, 1, 0, 0, 0, 1, (xa + xb) * 0.5, DECK_Y + 1.3 - cap_h * 0.5, GZ))
+                 (1, 0, 0, 0, 1, 0, 0, 0, 1, (xa + xb) * 0.5, DECK_Y + 1.3 - cap_h * 0.5, GZ),
+                 mesh=not V3_CAPS)
+            CAPS_SPANS.append((nm, xa, xb))
             # garda de geometrie: axa fiecarei benzi ramane la >= LANE_Z - 0,2 m de zid (ca pe coridor,
             # unde axa e la 6,2 m de despartitor); marginea soselei atinge zidul doar spre capul
             # despartitorului, unde benzile oricum se suprapun
@@ -2481,6 +2509,32 @@ if CASE_ROWS:
         fam = lambda f: f.replace("_m", "").split("_")[2]    # noqa: E731  (a / b / c / corner)
         if fam(a_h["file"]) == fam(b_h["file"]) or a_h["pastel"] == b_h["pastel"]:
             raise SystemExit("casele: vecinii %s / %s au aceeasi familie sau acelasi pastel" % (a_h["name"], b_h["name"]))
+    # --- VALUL 3 (B): CASELE DE CAPAT. Orice capat de rand fara colt cu turnulet, cu latura LIBERA (fara
+    # alta casa lipita), primeste casa de capat a ACELEIASI familii (`sf_row_end_<a|b|c>`), cu latura
+    # finisata spre exterior: fisierul de baza o are pe -X, `_m` pe +X. Pastelul si cutia raman.
+    if V3_CAPAT:
+        _fp_all = [h["fp"] for h in CASE_HOUSES]
+        for rn in dict.fromkeys(h["row"] for h in CASE_HOUSES):
+            hs = [h for h in CASE_HOUSES if h["row"] == rn]
+            _z, _n, _a, u_, _s, _sb, _t0, _nr, _c = CASE_ROWS[hs[0]["row_idx"]]
+            for h, sg in ((hs[0], -1.0), (hs[-1], 1.0)):
+                if h["corner"]:
+                    continue
+                d_ = (u_[0] * sg, u_[1] * sg)
+                cx_ = sum(p[0] for p in h["fp"]) / 4.0
+                cy_ = sum(p[1] for p in h["fp"]) / 4.0
+                po = (cx_ + d_[0] * (h["w"] / 2.0 + 0.5), cy_ + d_[1] * (h["w"] / 2.0 + 0.5))
+                if any(f is not h["fp"] and _in_convex(po, f) for f in _fp_all):
+                    continue
+                Xm = (h["X"][0], -h["X"][2])
+                base_ok = (-Xm[0] * d_[0] - Xm[1] * d_[1]) > 0.0       # latura finisata a bazei e pe -X
+                letter = h["file"].replace("_m", "").split("_")[2]
+                h["file_regular"] = h["file"]
+                h["file"] = "sf_row_end_%s%s" % (letter, "" if base_ok else "_m")
+                h["end_dir"] = d_
+        print("casele de capat (randul din fata): %d, %s" % (
+            sum(1 for h in CASE_HOUSES if h.get("end_dir")),
+            ", ".join("%s %s" % (h["name"], h["file"].replace("sf_row_", "")) for h in CASE_HOUSES if h.get("end_dir"))))
     # --- nodurile: casele sub DecorManual/Case<zona>, cutiile sub CaseCorpuri (radacina)
     _zones_done = []
     for h in CASE_HOUSES:
@@ -2815,9 +2869,42 @@ if B200 and P8B and CASE_HOUSES:
                 raise SystemExit("randurile din spate: vecinii %s / %s au aceeasi familie sau acelasi pastel"
                                  % (a_h["name"], b_h["name"]))
     SPATE_STATS["rej"] = rej
+    # --- VALUL 3 (B): casele de CAPAT si in randurile din spate. O latura LIBERA (fara casa lipita la
+    # 0,3 m) care priveste spre soseaua buclei (punctul de la 6 m in afara ei e la <= V3_END_BACK_M m
+    # de axa) e un perete orb in cadru: pe muchiile lantului, langa colturile cu turnulet, si la
+    # golurile strazilor transversale de pe B si G. Casa ia fisierul de capat al familiei ei, cu mana
+    # aleasa ca latura finisata sa iasa spre exterior (in `CityFill`: oglindit = fisierul `_m`).
+    V3_END_BACK_M = 32.0
+    if V3_CAPAT:
+        _fp_all = [h["fp"] for h in CASE_HOUSES] + [h["fp"] for h in SPATE_HOUSES]
+        for h in SPATE_HOUSES:
+            cands = []
+            for sg in (-1.0, 1.0):
+                d_ = (h["u"][0] * sg, h["u"][1] * sg)
+                c_ = h["ctr"]
+                po = (c_[0] + d_[0] * 3.8, c_[1] + d_[1] * 3.8)
+                if any(f is not h["fp"] and math.dist(f[0], c_) < 30.0 and _in_convex(po, f) for f in _fp_all):
+                    continue
+                p6 = (c_[0] + d_[0] * 9.5, c_[1] + d_[1] * 9.5)
+                dr = road_at(*p6)[0]
+                if dr <= V3_END_BACK_M:
+                    cands.append((dr, d_))
+            if not cands:
+                continue
+            dr, d_ = min(cands)
+            Xm = (h["X"][0], -h["X"][2])
+            # nu oglindit: latura finisata (-X) spre -Xm; oglindit (`_m`): spre +Xm
+            h["mirror"] = (Xm[0] * d_[0] + Xm[1] * d_[1]) > 0.0
+            h["stem_regular"] = h["stem"]
+            h["stem"] = "sf_row_end_" + h["stem"].split("_")[2]
+            h["end_dir"] = d_
+            h["end_both"] = len(cands) > 1
+        _eb = [h for h in SPATE_HOUSES if h.get("end_dir")]
+        print("casele de capat (randurile din spate): %d (%s); cu ambele laturi libere %d" % (
+            len(_eb), ", ".join(sorted({h["row"] for h in _eb})), sum(1 for h in _eb if h["end_both"])))
 
 if SPATE_HOUSES:
-    _stems = list(KIT_SEQ)
+    _stems = list(KIT_SEQ) + sorted({h["stem"] for h in SPATE_HOUSES if h["stem"] not in KIT_SEQ})
     _rids = [_p7_glb("%s/%s.glb" % (CASE_DIR, s_), "p8_" + s_) for s_ in _stems]
     _rids_m = [_p7_glb("%s/%s_m.glb" % (CASE_DIR, s_), "p8_" + s_ + "_m") for s_ in _stems]
     if all(_rids) and all(_rids_m):
@@ -3341,6 +3428,390 @@ if V2_POLES:
         for fam, ps in V2_POLES.items()))
     meta.append("metadata/sf_pole_r = {%s}" % ", ".join('"%s": %.2f' % (f, V2_POLE_R[f]) for f in V2_POLES))
 P7_NODES += V2_NODES + V2_ROOT_NODES
+
+# =============================================================================================
+# VALUL 3 (pasul 8c, 16 nov 2026): STRUCTURILE, CASELE PICTATE SI TEATRUL din foaia de assets
+# (inventar §3.1, §5.1-§5.5), modelate si acceptate (tools/blender/build_sf_row.py,
+# build_sf_struct.py; garzile measure_sf_gabarit.py / measure_sf_struct.py). Un GLB intra doar daca
+# fisierul exista (`_p7_glb`); fiecare familie are comutatorul ei (definite langa `TRAM_MODEL`).
+#   B  CASELE DE CAPAT: in blocurile PASUL 8 / 8b (randurile din fata si din spate), nu aici.
+#   C  CASELE PICTATE (`sf_painted_lady_a..f`, K2): sirul de sase pe latura de N a bratului coamei,
+#      cu fata spre S (spre drum si spre soare), fiecare cu gradinita ei (`sf_front_garden`, N2) de la
+#      1,2 m in fata fatadei (nimic sub pridvor). La ambele capete cate o casa de CAPAT a kitului, cu
+#      latura finisata spre exterior: altfel capetele sirului ar arata cate un perete orb de 12 x 12 m
+#      chiar in cadrul de la iesirea din coltul de sus. Fatada la LADY_SETBACK m de axa: gradinita
+#      (3 m) + 1,2 m pana la ea + o fasie de trotuar de >= 2 m pana la marginea carosabilului.
+#      Coliziunea: o cutie pe casa sub `CasePictateCorpuri` (amprenta + adancimea pridvorului unde
+#      exista), GLB-ul cu `coliziune = "none"`, ca randurile din fata.
+#   D  PLACA TURNANTA (`sf_turntable`, H4) cu vagonul parcat (`cable_car.glb`, decor static), in afara
+#      coltului de NV al ocolului, pe uscat, pe locul cel mai plat (teren +-0,2 m pe disc); sinele
+#      spre strada tramvaiului 2 (cheiul). Coliziune doar pe ghereta si pe vagon (cutii sub
+#      `PlacaCorpuri`).
+#   E  MAGAZIILE (`sf_pier_shed(_short)`, H6): pe latura apei a cheiului de nord, DOAR la V de peticul
+#      tramvaiului 2 (x -100 -> -15); frontonul cu usa spre drum, muchia -Z a puntii pe muchia
+#      cheiului (unde terenul incepe sa cada spre apa), cota puntii = cota cheiului acolo. Pontonul
+#      (x 40 -> 120) ramane deschis spre golf. Coliziune: cutia corpului (12 x 9 x 20 / 12) sub
+#      `MagaziiCorpuri`. LEII DE MARE (T1): o pluta in golul dintre doua magazii, fara coliziune.
+#   F  INSULA CU FAR (F1) la ~(0, 546), in axul lantului, originea la apa, fara coliziune, fara umbra
+#      (`WorldProp.NO_SHADOW_MODELS`).
+#   H  SCARILE PUBLICE (`sf_stair_lane`, N1, cate doua module): doar unde terenul urca ~6 m pe 10 m —
+#      malul golfului de la capul de pod (strazile transversale de pe B sunt PLATE pe E-V: 0,0 m pe
+#      100 m, deci acolo o scara n-ar avea pe ce urca). BANCILE si RASTELELE: decor fara coliziune,
+#      pe trotuarul din fata gradinitelor si pe latura de S a cheiului.
+#   I  ZIDURILE MOI ALE PODULUI (`Pod/CapS`): vizualul gri devine un sir de blocuri `sf_median_block`
+#      (3,0 x 0,95 x 0,6) asezate pe teren (+19,7, cu 0,3 m sub carosabil: fara soclu); cutia de
+#      coliziune (4,3 m, de la +17 la +21,3) ramane exact cum e.
+#   SF_VAL3=0  scena de dinainte, octet cu octet;  SF_V3_CAPAT / _PICTATE / _PLACA / _MAGAZII / _LEI /
+#   _INSULA / _SCARI / _MOBILIER / _CAPS = 0  stinge cate o familie (fundalul F2 e in tema, track.gd).
+# =============================================================================================
+LADY_SETBACK = 13.5           # fatada caselor pictate fata de axa bratului coamei
+LADY_ORDER = ["a", "b", "c", "d", "e", "f"]                    # de la E (coltul de sus) spre V
+LADY_PASTEL = {"a": 1, "b": 2, "c": 3, "d": 4, "e": 0, "f": 2}  # roz, albastru, menta, unt, crem, albastru
+LADY_PORCH = {"a": 1.2, "b": 1.2, "c": 1.2, "d": 0.0, "e": 1.2, "f": 1.2}   # pridvorul pana la Z -7,18
+LADY_X_MID = 76.0             # mijlocul sirului (8 x 7 m: capat + 6 + capat), pe bratul x 36 -> 120
+GARDEN_Z = -8.7               # centrul gradinitei (7 x 3) in cadrul casei: Z -7,2 .. -10,2
+TT_CENTER = (-144.0, 430.0)   # placa turnanta: locul cel mai plat in afara coltului de NV (cautat)
+TT_BOOTH_X = 6.15             # ghereta: x 5,15 .. 7,15, 2 x 2,6 x 2 (measure_sf_struct)
+SHED_EDGE_Y = 472.0           # muchia cheiului de nord (de aici terenul cade spre apa, ~0 la y 481)
+SHED_PLAN = [("L", -92.7), ("S", -74.3), ("L", -49.8), ("S", -31.4)]    # (lunga/scurta, x centru)
+SHED_DIM = {"L": ("sf_pier_shed", 20.0, 12.72), "S": ("sf_pier_shed_short", 12.0, 8.72)}  # fisier, lungimea corpului, muchia -Z a puntii
+LIONS_AT = (-62.0, 490.0)
+ISLAND_AT = (0.0, 546.0)
+ISLAND_YAW = 180.0            # farul (pe +X) spre V: in cadrul lantului insula sta in stanga, podul in dreapta
+SEA_Y = 0.0
+STAIRS = [(185.0, 276.0, 255.0), (219.0, 276.0, 310.0), (249.0, 275.0, 255.0), (187.0, 336.0, 145.0)]
+V3_NODES, V3_ROOT_NODES, V3_SUB = [], [], []
+V3_DIRS = []
+V3_STATS = {}
+# Terenul de dincolo de hartile orasului (cheiul de nord pana in golf, malul celalalt al zidului moale):
+# `ProbeSfSpate --dump-ground=... --rect=-120,-500,124,60` si `--rect=496,-252,100,48`, pas 2 m.
+V3_GROUND_PATH = os.path.join(HERE, "data", "sf_v3_ground.tsv")
+_V3G = {}
+if VAL3 and B200 and os.path.exists(V3_GROUND_PATH):
+    for _l in open(V3_GROUND_PATH, encoding="utf-8"):
+        _tk = _l.split()
+        if len(_tk) == 3:
+            _V3G[(int(_tk[0]), int(_tk[1]))] = float(_tk[2])
+
+
+def v3_ground(mx, my):
+    """Cota terenului in punctul de HARTA: hartile valului 2, apoi cea a valului 3; None in afara lor."""
+    v = v2_ground(mx, my)
+    return v if v is not None else _spate_h(_V3G, mx, my)
+
+
+def _v3_dir(name):
+    if name not in V3_DIRS:
+        V3_DIRS.append(name)
+        V3_NODES.append('[node name="%s" type="Node3D" parent="DecorManual"]\n' % name)
+
+
+def _v3_frame(f):
+    """(X, Z) Godot pentru o piesa cu fata (-Z local) spre directia de harta `f` (unitara)."""
+    Z = (-f[0], 0.0, f[1])
+    return (Z[2], 0.0, -Z[0]), Z
+
+
+def _v3_xf(X, Z, o, s=1.0):
+    return "Transform3D(%.5f, 0, %.5f, 0, %.5f, 0, %.5f, 0, %.5f, %.3f, %.3f, %.3f)" % (
+        X[0] * s, Z[0] * s, s, X[2] * s, Z[2] * s, o[0], o[1], o[2])
+
+
+def _v3_inst(dirname, name, rel, rid, xf, coll="none", extra=""):
+    r = _p7_glb(rel, rid)
+    if r is None:
+        return False
+    _v3_dir(dirname)
+    V3_NODES.append('[node name="%s" parent="DecorManual/%s" instance=ExtResource("%s")]\ntransform = %s\n'
+                    'metadata/coliziune = "%s"\n%s' % (name, dirname, r, xf, coll, extra))
+    return True
+
+
+def _v3_body(body, name, size, X, Z, c):
+    """O cutie de coliziune `size` (x, y, z local) cu centrul `c` (Godot), sub corpul static `body`."""
+    sid = "Box_v3_%.2f_%.2f_%.2f" % size
+    sid = sid.replace(".", "_")
+    if not any(('id="%s"' % sid) in s_ for s_ in V3_SUB):
+        V3_SUB.append('[sub_resource type="BoxShape3D" id="%s"]\nsize = Vector3(%.2f, %.2f, %.2f)\n' % ((sid,) + size))
+    if not any(('[node name="%s" type="StaticBody3D"' % body) in n_ for n_ in V3_ROOT_NODES):
+        V3_ROOT_NODES.append('[node name="%s" type="StaticBody3D" parent="."]\n' % body)
+    V3_ROOT_NODES.append('[node name="%s" type="CollisionShape3D" parent="%s"]\ntransform = %s\nshape = SubResource("%s")\n'
+                         % (name, body, _v3_xf(X, Z, c), sid))
+
+
+def _v3_local(o, X, Z, lx, ly, lz):
+    """Punctul local (lx, ly, lz) al unei piese cu originea `o` si axele X, Z (Godot)."""
+    return (o[0] + X[0] * lx + Z[0] * lz, o[1] + ly, o[2] + X[2] * lx + Z[2] * lz)
+
+
+def _v3_fp(o, X, Z, x0, x1, z0, z1):
+    """Amprenta pe harta (4 colturi) a dreptunghiului local [x0, x1] x [z0, z1]."""
+    out = []
+    for lx, lz in ((x0, z0), (x1, z0), (x1, z1), (x0, z1)):
+        p = _v3_local(o, X, Z, lx, 0.0, lz)
+        out.append((p[0], -p[2]))
+    return out
+
+
+V3_HOUSE_FPS = []     # amprentele (harta) ale caselor noi, pentru garzile de mai jos
+# --- C: casele pictate si gradinitele ---
+if V3_PICTATE and B200 and _p7_glb("buildings/sf_painted_lady_a.glb", "v3_lady_a"):
+    X_, Z_ = _v3_frame((0.0, -1.0))                     # fata spre S; +X local spre V
+    y_f = Y_COAMA + LADY_SETBACK
+    slots = [("capatE", "sf_row_end_b", 4, 0.0)] + [("PL_" + k, "sf_painted_lady_" + k, LADY_PASTEL[k], LADY_PORCH[k])
+                                                    for k in LADY_ORDER] + [("capatV", "sf_row_end_c_m", 3, 0.0)]
+    x_e = LADY_X_MID + len(slots) * CASE_W / 2.0
+    ladies = []
+    for k_, (nm_, file_, pastel_, porch_) in enumerate(slots):
+        xc = x_e - CASE_W * (k_ + 0.5)
+        floor_ = max(v2_ground(xc + dx, y_f) for dx in (-3.5, -1.75, 0.0, 1.75, 3.5))
+        low_ = min(v2_ground(xc + dx, y_f + dz) for dx in (-3.5, 0.0, 3.5) for dz in (0.0, 6.0, 12.0))
+        if floor_ - low_ > CASE_SKIRT - 0.05:
+            raise SystemExit("valul 3: casa pictata %s cade %.2f m (fusta %.1f)" % (nm_, floor_ - low_, CASE_SKIRT))
+        o = (xc, floor_, -(y_f + CASE_D / 2.0))
+        ladies.append(dict(name=nm_, file=file_, pastel=pastel_, porch=porch_, o=o,
+                           fp=_v3_fp(o, X_, Z_, -3.5, 3.5, -6.0 - porch_, 6.0), floor=floor_, drop=floor_ - low_))
+    # vecinii: alt pastel; capetele cu latura finisata spre exterior (baza: -X = E; `_m`: +X = V)
+    for a_h, b_h in zip(ladies, ladies[1:]):
+        if a_h["pastel"] == b_h["pastel"]:
+            raise SystemExit("valul 3: casele pictate %s / %s au acelasi pastel" % (a_h["name"], b_h["name"]))
+    # garzile: soseaua (poligonul de control), chiparosii parcului (trunchiul + coroana aplecata spre ENE)
+    _ml = list(PTS) + [PTS[0]]
+    d_min = min(_poly_line(h["fp"], _ml) for h in ladies)
+    if d_min < CASE_ROAD_MIN:
+        raise SystemExit("valul 3: casele pictate la %.2f m de axa (prag %.2f)" % (d_min, CASE_ROAD_MIN))
+    cyp_hit, cyp_gap = [], 1e9
+    for c in (cyps if V2_CHIPAROS and "cyps" in globals() else []):
+        _grp, cx_, cy_, _v, s_, yaw_ = c
+        a_ = math.radians(yaw_)
+        # coroana (cadrul modelului, X -4,4 .. 8,4 si Z +-3,7, la scara), rotita cu yaw in jurul lui Y
+        crown = []
+        for lx, lz in ((-4.4, -3.7), (8.4, -3.7), (8.4, 3.7), (-4.4, 3.7)):
+            gx = math.cos(a_) * lx * s_ + math.sin(a_) * lz * s_
+            gz = -math.sin(a_) * lx * s_ + math.cos(a_) * lz * s_
+            crown.append((cx_ + gx, cy_ - gz))
+        for h in ladies:
+            d_ = _poly_poly(h["fp"], crown)
+            cyp_gap = min(cyp_gap, d_)
+            if d_ <= 0.0:
+                cyp_hit.append((round(cx_, 1), round(cy_, 1), h["name"]))
+    if cyp_hit:
+        raise SystemExit("valul 3: chiparosi peste casele pictate: %s" % cyp_hit)
+    for h in ladies:
+        rid = _p7_glb("buildings/%s.glb" % h["file"], "v3_" + h["file"])
+        if rid is None:
+            continue
+        extra = ('metadata/contact = "none"\nmetadata/wall_class = "%s"\nmetadata/sf_case = "C"\nmetadata/sf_case_w = 7.0\n'
+                 % PASTELS[h["pastel"]])
+        if h["porch"] > 0.0:
+            extra += "metadata/sf_case_porch = %.2f\n" % h["porch"]
+        if h["file"].startswith("sf_row_end_"):
+            extra += 'metadata/sf_case_capat = true\n'
+        _v3_inst("CasePictate", h["name"], "buildings/%s.glb" % h["file"], "v3_" + h["file"], _v3_xf(X_, Z_, h["o"]),
+                 extra=extra)
+        o = h["o"]
+        zc = -h["porch"] / 2.0
+        _v3_body("CasePictateCorpuri", "Corp_%s" % h["name"], (CASE_W, CASE_SKIRT + CASE_EAVE, CASE_D + h["porch"]),
+                 X_, Z_, _v3_local(o, X_, Z_, 0.0, -CASE_SKIRT + (CASE_SKIRT + CASE_EAVE) / 2.0, zc))
+        V3_HOUSE_FPS.append(h["fp"])
+        if h["file"].startswith("sf_painted_lady_"):
+            _v3_inst("Gradinite", "G_" + h["name"], "props/sf_front_garden.glb", "v3_garden",
+                     _v3_xf(X_, Z_, _v3_local(o, X_, Z_, 0.0, -0.02, GARDEN_Z)))
+    V3_STATS["pictate"] = (len(ladies), y_f, d_min, cyp_gap, max(h["drop"] for h in ladies), ladies[0]["floor"])
+    print("casele pictate: %d (6 pictate + 2 capete) pe x %.1f..%.1f, fatada la y %.1f (%.1f m de axa, gradinita "
+          "pana la %.1f m, marginea carosabilului la %.1f); podeaua %.2f, cadere max %.2f; amprenta la >= %.2f m de axa "
+          "(poligon); cel mai apropiat chiparos (coroana) la %.2f m" % (
+              len(ladies), x_e - len(ladies) * CASE_W, x_e, y_f, LADY_SETBACK, LADY_SETBACK - 1.2 - 3.0, HW,
+              ladies[0]["floor"], max(h["drop"] for h in ladies), d_min, cyp_gap))
+
+# --- D: placa turnanta cu vagonul parcat ---
+if V3_PLACA and B200 and _p7_glb("structures/sf_turntable.glb", "v3_turntable") and TRAM_MODEL:
+    cx_, cy_ = TT_CENTER
+    # sinele (Z local) spre capatul cheiului pe care intra tramvaiul 2; ghereta (+X) spre SSE (deal)
+    tx_, ty_ = TRAM2_MAP[0][0], QUAY_Y
+    L_ = math.hypot(tx_ - cx_, ty_ - cy_)
+    d_ = (-(tx_ - cx_) / L_, -(ty_ - cy_) / L_)
+    Z_ = (d_[0], 0.0, -d_[1])
+    X_ = (Z_[2], 0.0, -Z_[0])
+    samples = [v2_ground(cx_ + r * math.cos(math.radians(a)), cy_ + r * math.sin(math.radians(a)))
+               for r in (0.0, 2.5, 5.0) for a in range(0, 360, 30)]
+    floor_ = (max(samples) + min(samples)) / 2.0
+    o = (cx_, floor_, -cy_)
+    _v3_inst("PlacaTurnanta", "Placa", "structures/sf_turntable.glb", "v3_turntable", _v3_xf(X_, Z_, o))
+    _v3_inst("PlacaTurnanta", "VagonParcat", "vehicles/cable_car.glb", "p7_tram",
+             _v3_xf(X_, Z_, (o[0], o[1] + 0.10, o[2])))
+    _v3_body("PlacaCorpuri", "Corp_Ghereta", (2.0, 2.6, 2.0), X_, Z_, _v3_local(o, X_, Z_, TT_BOOTH_X, 1.3, 0.0))
+    _v3_body("PlacaCorpuri", "Corp_Vagon", (2.5, 3.2, 8.5), X_, Z_, _v3_local(o, X_, Z_, 0.0, 0.10 + 1.6, 0.0))
+    booth = _v3_local(o, X_, Z_, TT_BOOTH_X, 0.0, 0.0)
+    dr_disc = road_at(cx_, cy_)[0] - 5.0
+    dr_booth = road_at(booth[0], -booth[2])[0] - 1.42
+    if min(dr_disc, dr_booth) < HW + 3.0:
+        raise SystemExit("valul 3: placa turnanta la %.1f m de axa" % min(dr_disc, dr_booth))
+    V3_HOUSE_FPS.append(_v3_fp(o, X_, Z_, -5.0, TT_BOOTH_X + 1.0, -5.0, 5.0))
+    V3_STATS["placa"] = (cx_, cy_, floor_, max(samples) - min(samples), dr_disc, dr_booth)
+    print("placa turnanta: centrul (%.1f, %.1f), podeaua %.2f (teren %.2f..%.2f pe disc), sinele spre (%.0f, %.0f); "
+          "discul la %.1f m de axa, ghereta la %.1f m; cutii: ghereta + vagon" % (
+              cx_, cy_, floor_, min(samples), max(samples), tx_, ty_, dr_disc, dr_booth))
+
+# --- E: magaziile de pe chei si leii de mare ---
+if V3_MAGAZII and B200 and _p7_glb("structures/sf_pier_shed.glb", "v3_shed"):
+    X_, Z_ = _v3_frame((0.0, -1.0))                     # usa (-Z) spre drum (S)
+    sheds = []
+    for k_, (kind, xc) in enumerate(SHED_PLAN):
+        file_, body_l, edge_ = SHED_DIM[kind]
+        if not (-100.0 <= xc - 7.22 and xc + 7.22 <= -15.0):
+            raise SystemExit("valul 3: magazia %d iese din x -100 .. -15" % k_)
+        deck = max(v3_ground(xc + dx, SHED_EDGE_Y) for dx in (-7.2, -3.6, 0.0, 3.6, 7.2)) + 0.03
+        yc = SHED_EDGE_Y + edge_
+        o = (xc, deck, -yc)
+        rid = "v3_shed" if kind == "L" else "v3_shed_s"
+        # `ancora_sol` (probe_manual): baza vizibila e muchia puntii de pe chei, nu originea (peste apa)
+        _v3_inst("Magazii", "Magazia%d" % k_, "structures/%s.glb" % file_, rid, _v3_xf(X_, Z_, o),
+                 extra="metadata/ancora_sol = Vector3(0, 0, %.2f)\n" % (-edge_ + 0.3))
+        _v3_body("MagaziiCorpuri", "Corp_Magazia%d" % k_, (12.0, 9.0, body_l), X_, Z_, _v3_local(o, X_, Z_, 0.0, 4.5, 0.0))
+        dr = road_at(xc, SHED_EDGE_Y)[0]
+        sheds.append((kind, xc, deck, dr))
+        V3_HOUSE_FPS.append(_v3_fp(o, X_, Z_, -7.22, 7.22, -edge_, 7.22 if kind == "S" else 11.22))
+    V3_STATS["magazii"] = sheds
+    print("magaziile: %d (%s), muchia puntii pe y %.1f (carosabilul pana la %.1f), puntea la %s" % (
+        len(sheds), " ".join("%s@x%.1f" % (k, x) for k, x, _, _ in sheds), SHED_EDGE_Y, QUAY_Y + HW_QUAY,
+        ", ".join("%.2f" % d for _, _, d, _ in sheds)))
+if V3_LEI and B200 and _p7_glb("animals/sf_sea_lions.glb", "v3_lions"):
+    _v3_inst("LeiDeMare", "Pluta", "animals/sf_sea_lions.glb", "v3_lions",
+             _v2_xf(200.0, 1.0, (LIONS_AT[0], SEA_Y, -LIONS_AT[1])))
+    g_ = v3_ground(*LIONS_AT)
+    if g_ is not None and g_ > SEA_Y - 0.5:
+        raise SystemExit("valul 3: pluta leilor pe uscat (teren %.2f)" % g_)
+    print("leii de mare: pluta la (%.1f, %.1f), apa %.2f, fundul %.2f, %.0f m de axa cheiului" % (
+        LIONS_AT[0], LIONS_AT[1], SEA_Y, g_ if g_ is not None else float("nan"), LIONS_AT[1] - QUAY_Y))
+
+# --- F: insula cu far ---
+if V3_INSULA and B200 and _p7_glb("structures/sf_island_light.glb", "v3_island"):
+    _v3_inst("Insula", "InsulaFar", "structures/sf_island_light.glb", "v3_island",
+             _v2_xf(ISLAND_YAW, 1.0, (ISLAND_AT[0], SEA_Y, -ISLAND_AT[1])))
+    print("insula cu far: (%.0f, %.0f), %.0f m de muchia 4, farul spre %s; fara coliziune, fara umbra" % (
+        ISLAND_AT[0], ISLAND_AT[1], ISLAND_AT[1] - PTS[LIPS[-1]][1], "V" if ISLAND_YAW == 180.0 else "E"))
+
+# --- H: scarile publice ---
+if V3_SCARI and B200 and _p7_glb("props/sf_stair_lane.glb", "v3_stair"):
+    st_rows = []
+    for k_, (sx, sy, ang) in enumerate(STAIRS):
+        d_ = (math.cos(math.radians(ang)), math.sin(math.radians(ang)))     # spre deal (+Z local)
+        Z_ = (d_[0], 0.0, -d_[1])
+        X_ = (Z_[2], 0.0, -Z_[0])
+        lat = (-d_[1], d_[0])
+        h0 = v2_ground(sx, sy)
+        rise = v2_ground(sx + d_[0] * 10.0, sy + d_[1] * 10.0) - h0
+        # cat iese talpa in aer pe laturi: terenul sub profilul liniar al scarii, pe ambele ziduri
+        gap = 0.0
+        for t_ in (0.0, 2.5, 5.0, 7.5, 10.0):
+            for s_ in (-1.25, 1.25):
+                g_ = v2_ground(sx + d_[0] * t_ + lat[0] * s_, sy + d_[1] * t_ + lat[1] * s_)
+                gap = max(gap, (h0 + 6.0 * t_ / 10.0) - g_)
+        sink = min(gap, 0.4) + 0.05
+        o = (sx, h0 - sink, -sy)
+        for m_ in range(2):
+            _v3_inst("Scari", "Scara%d_%d" % (k_, m_), "props/sf_stair_lane.glb", "v3_stair",
+                     _v3_xf(X_, Z_, _v3_local(o, X_, Z_, 0.0, 3.0 * m_, 5.0 * m_)))
+        dr = min(road_at(sx + d_[0] * t_, sy + d_[1] * t_)[0] for t_ in (0.0, 5.0, 10.0))
+        if dr < HW + 3.0:
+            raise SystemExit("valul 3: scara %d la %.1f m de axa" % (k_, dr))
+        st_rows.append((k_, sx, sy, ang, h0, rise, sink, dr))
+    V3_STATS["scari"] = st_rows
+    print("scarile: %d x 2 module: %s" % (len(st_rows), "; ".join(
+        "(%.0f, %.0f) spre %.0f gr, talpa %.2f, terenul urca %.2f pe 10 m (scara 6,0), coborata %.2f, %.0f m de axa" % r_[1:]
+        for r_ in st_rows)))
+
+# --- H: bancile si rastelele ---
+if V3_MOBILIER and B200 and _p7_glb("props/sf_bench.glb", "v3_bench") and _p7_glb("props/sf_bike_rack.glb", "v3_rack"):
+    y_r = Y_COAMA + HW + 1.2                    # pe coama: fasia de trotuar dintre carosabil si gradinite
+    y_q = QUAY_Y - HW_QUAY - 1.4                # pe chei: latura de S, ca lazile valului 2
+    furn = [("BancaCoama1", "props/sf_bench.glb", "v3_bench", (62.0, y_r), (0.0, -1.0)),
+            ("BancaCoama2", "props/sf_bench.glb", "v3_bench", (90.5, y_r), (0.0, -1.0)),
+            ("RastelCoama", "props/sf_bike_rack.glb", "v3_rack", (76.0, y_r), (0.0, -1.0)),
+            ("BancaChei1", "props/sf_bench.glb", "v3_bench", (30.0, y_q), (0.0, 1.0)),
+            ("BancaChei2", "props/sf_bench.glb", "v3_bench", (44.0, y_q), (0.0, 1.0)),
+            ("RastelChei", "props/sf_bike_rack.glb", "v3_rack", (37.0, y_q), (0.0, 1.0))]
+    for nm_, rel_, rid_, (mx, my), f_ in furn:
+        why = v2_clear(mx, my, "mobilier", road_min=HW + 0.8 if my < 0 else HW_QUAY + 0.8, chain_ok=True)
+        if why:
+            raise SystemExit("valul 3: %s la (%.1f, %.1f): %s" % (nm_, mx, my, why))
+        g_, _sl = v2_base(mx, my, 0.9, nm_)
+        X_, Z_ = _v3_frame(f_)
+        _v3_inst("Mobilier", nm_, rel_, rid_, _v3_xf(X_, Z_, (mx, g_ - 0.03, -my)))
+    print("banci si rastele: %d (coama 3, chei 3), fara coliziune" % len(furn))
+
+# --- I: zidurile moi ale podului pe blocuri ---
+if V3_CAPS and B200 and CAPS_SPANS and _p7_glb("props/sf_median_block.glb", "p7_bloc"):
+    for nm, xa, xb in CAPS_SPANS:
+        n_ = int(math.floor((xb - xa) / 3.0))
+        pitch = (xb - xa) / n_
+        for k_ in range(n_):
+            x_ = xa + pitch * (k_ + 0.5)
+            g_ = v3_ground(x_, AXIS_Y)
+            if g_ is None:
+                raise SystemExit("valul 3: zidul moale %s la x %.1f iese din hartile de teren" % (nm, x_))
+            _v3_inst("PodZidMoale", "%s%02d" % (nm, k_), "props/sf_median_block.glb", "p7_bloc",
+                     _v2_xf(0.0, 1.0, (x_, g_ - 0.02, GZ)))
+        print("zidul moale %s: %d blocuri la %.3f m (goluri de %.2f m), pe teren; cutia de coliziune neschimbata" % (
+            nm, n_, pitch, pitch - 3.0))
+
+# --- garzile comune: casele noi (pictate, placa, magazii) nu se suprapun cu nicio casa din fata / din spate
+if V3_HOUSE_FPS:
+    _others = [h["fp"] for h in CASE_HOUSES] + [h["fpb"] for h in SPATE_HOUSES]
+    for fp in V3_HOUSE_FPS:
+        for q in _others:
+            if math.dist(q[0], fp[0]) < 40.0 and (any(_in_convex(p, q, 0.02) for p in fp)
+                                                    or any(_in_convex(p, fp, 0.02) for p in q)):
+                raise SystemExit("valul 3: o piesa noua se suprapune cu o casa existenta la (%.1f, %.1f)" % fp[0])
+# --- casele de capat: iesirea cornisei peste latura (A 0,45, B/C 0,35, peste +9) nu atinge alta casa sau un stalp
+V3_END_OVER = {"a": 0.45, "b": 0.35, "c": 0.35}
+if V3_CAPAT:
+    _ends = []
+    for h in CASE_HOUSES:
+        if h.get("end_dir"):
+            _ends.append((h["name"], h["fp"], h["end_dir"], h["file"].replace("_m", "").split("_")[-1]))
+    for h in SPATE_HOUSES:
+        if h.get("end_dir"):
+            _ends.append((h["name"], h["fp"], h["end_dir"], h["stem"].split("_")[-1]))
+    _all_fp = [h["fp"] for h in CASE_HOUSES] + [h["fp"] for h in SPATE_HOUSES] + V3_HOUSE_FPS
+    _poles = [(p[0], -p[2], V2_POLE_R[f]) for f, ps in V2_POLES.items() for p in ps]
+    worst_end = 1e9
+    for nm_, fp, d_, fam_ in _ends:
+        ov = V3_END_OVER[fam_]
+        # fasia cornisei: latura libera impinsa cu `ov` spre exterior
+        side = sorted(fp, key=lambda p: -(p[0] * d_[0] + p[1] * d_[1]))[:2]
+        strip = [side[0], side[1], (side[1][0] + d_[0] * ov, side[1][1] + d_[1] * ov),
+                 (side[0][0] + d_[0] * ov, side[0][1] + d_[1] * ov)]
+        cx_, cy_ = sum(p[0] for p in strip) / 4.0, sum(p[1] for p in strip) / 4.0
+        strip = sorted(strip, key=lambda p: math.atan2(p[1] - cy_, p[0] - cx_))
+        for q in _all_fp:
+            if q is fp or math.dist(q[0], fp[0]) > 30.0:
+                continue
+            gap_ = _poly_poly(strip, q)
+            worst_end = min(worst_end, gap_)
+            if gap_ <= 0.0:
+                raise SystemExit("valul 3: cornisa casei de capat %s intra in alta casa" % nm_)
+        for px, py, r_ in _poles:
+            if math.hypot(px - cx_, py - cy_) < 15.0:
+                gap_ = min(_pt_seg((px, py), strip[i], strip[(i + 1) % 4]) for i in range(4)) - r_
+                worst_end = min(worst_end, gap_)
+                if _in_convex((px, py), strip) or gap_ <= 0.0:
+                    raise SystemExit("valul 3: cornisa casei de capat %s atinge un stalp" % nm_)
+    print("casele de capat: %d (fata %d, spate %d); cornisa intoarsa la >= %.2f m de alta casa / stalp" % (
+        len(_ends), sum(1 for h in CASE_HOUSES if h.get("end_dir")), sum(1 for h in SPATE_HOUSES if h.get("end_dir")),
+        worst_end))
+
+# --- sabotajul contoarelor: cate o cutie pe carosabil, pe dreapta de start, sub fiecare corp nou
+if V3_SABOTAJ:
+    for k_, body in enumerate(("CasePictateCorpuri", "PlacaCorpuri", "MagaziiCorpuri")):
+        if any(('[node name="%s" type="StaticBody3D"' % body) in n_ for n_ in V3_ROOT_NODES):
+            x_ = MK["far1"][2] - 14.0 - 9.0 * k_
+            _v3_body(body, "Sabotaj", (1.5, 1.5, 1.5), (1.0, 0.0, 0.0), (0.0, 0.0, 1.0),
+                     (x_, road_at(x_, MK["far1"][3])[1] + 0.75, -MK["far1"][3] - (-1.5 + 3.0 * k_ % 6.0)))
+    print("SABOTAJ: cutiile corpurilor noi pe dreapta de start")
+P7_NODES += V3_NODES + V3_ROOT_NODES
+P6_SUB += V3_SUB
 
 if P7_NODES:
     # containerul de decor asezat din generator: `WorldProp` pune materialul lumii pe tot

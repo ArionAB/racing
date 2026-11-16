@@ -351,6 +351,9 @@ def main():
 
     # --- PASUL 8b / VALUL 2: casele, stalpii fara coliziune, mobilierul mic (probe_sf_watch.gd)
     case_f = case_b = 0
+    v3c = {"pictate": 0, "placa": 0, "magazii": 0}
+    v3_seeds = 0
+    v3_present = set()
     case_rows = []
     pole_n = {}
     pole_rows = []
@@ -362,6 +365,14 @@ def main():
         if m:
             case_f += int(m.group(1))
             case_b += int(m.group(2))
+        m = re.search(r"^=== SF val3: contacte case pictate (\d+), placa turnanta (\d+), magazii (\d+); "
+                      r"corpuri in scena: (.*)$", txt, re.M)
+        if m:
+            v3_seeds += 1
+            v3c["pictate"] += int(m.group(1))
+            v3c["placa"] += int(m.group(2))
+            v3c["magazii"] += int(m.group(3))
+            v3_present |= {x for x in m.group(4).split(",") if x}
         for m in re.finditer(r"^    \[sf casa\] (.*)$", txt, re.M):
             case_rows.append(os.path.basename(p) + " " + m.group(1))
         for m in re.finditer(r"^=== SF stalpi (\S+): (\d+) stalpi", txt, re.M):
@@ -383,6 +394,12 @@ def main():
             mob_rows.append((m.group(2), m.group(3).strip(), float(m.group(4))))
     print("\n--- CASELE SI VALUL 2")
     print(f"  CASE: contacte cu randul din fata {case_f}, cu randul din spate {case_b}")
+    if v3_seeds:
+        print(f"  VALUL 3 ({v3_seeds} seed-uri cu contor; corpuri in scena: {', '.join(sorted(v3_present)) or '-'}): "
+              f"contacte case pictate {v3c['pictate']}, placa turnanta (ghereta + vagon) {v3c['placa']}, "
+              f"magazii {v3c['magazii']}")
+    else:
+        print("  VALUL 3: fara contor in jurnale (lot dinaintea valului 3) — contactele cu corpurile noi sunt NEMASURATE")
     for row in case_rows[:10]:
         print("    casa: " + row)
     for fam in sorted(pole_n):

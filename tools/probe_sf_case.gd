@@ -20,7 +20,14 @@ extends Node
 ##         4. casele nu se suprapun (amprentele, cu 2 cm toleranta);
 ##         5. fiecare casa are cutia ei (`CaseCorpuri/Corp_<nume>`), cu amprenta casei.
 ##       Informativ: cat se ingroapa spatele casei in deal, fusta pe spate.
+##         6. (pasul 8c) nicio latura LIBERA (fara casa lipita la 0,5 m) a unei case care nu e colt nu
+##            e perete orb: e latura finisata a unei case de CAPAT (`sf_row_end_*`: baza pe -X, `_m`
+##            pe +X), iar latura finisata a unei case de capat e libera. Casele pictate de pe coama
+##            (zona C, cutiile sub `CasePictateCorpuri`) au cutia cu adancimea pridvorului
+##            (metadata `sf_case_porch`).
 ##       `--sabotaj` coboara podeaua masurata cu 1 m: garda TREBUIE sa pice (punctul 1).
+##       `--sabotaj-capat` le trateaza pe casele de capat ca pe case de rand: garda TREBUIE sa pice
+##       (punctul 6, peretii orbi).
 ## Exit 1 daca pica ceva sau daca n-a masurat nicio casa.
 
 const SKIRT: float = 2.4
@@ -42,6 +49,7 @@ const GROUND_RECTS: Array[Rect2] = [
 
 var _dump := ""
 var _sabotage := false
+var _sabotage_end := false
 var _space: PhysicsDirectSpaceState3D
 var _fails := 0
 
@@ -55,6 +63,8 @@ func _ready() -> void:
 			_dump = a.trim_prefix("--dump-ground=")
 		elif a == "--sabotaj":
 			_sabotage = true
+		elif a == "--sabotaj-capat":
+			_sabotage_end = true
 	var track := (load(path) as PackedScene).instantiate() as Track
 	add_child(track)
 	for _i in 3:
@@ -181,6 +191,7 @@ static func _poly_line_dist(poly: PackedVector2Array, line: PackedVector2Array) 
 func _check(track: Track) -> int:
 	var dm := track.get_node_or_null(^"DecorManual")
 	var corp := track.get_node_or_null(^"CaseCorpuri")
+	var corp_pl := track.get_node_or_null(^"CasePictateCorpuri")
 	if dm == null:
 		print("FARA DecorManual")
 		return 1
@@ -260,6 +271,7 @@ func _check(track: Track) -> int:
 		# laturile libere (fara vecin la 0,5 m) si spatele
 		var back := -INF
 		var back_skirt := INF
+		var free_sides: Array[float] = []
 		for sx: float in [-1.0, 1.0]:
 			var probe_out := xf * Vector3(sx * (w * 0.5 + 0.5), 0.0, 0.0)
 			var free := true
@@ -269,6 +281,7 @@ func _check(track: Track) -> int:
 					break
 			if not free:
 				continue
+			free_sides.append(sx)
 			var zz := -6.0
 			while zz <= 6.001:
 				var p := xf * Vector3(sx * w * 0.5, 0.0, zz)
@@ -284,6 +297,18 @@ func _check(track: Track) -> int:
 				back = maxf(back, g - floor_y)
 				back_skirt = minf(back_skirt, g - (floor_y - SKIRT))
 			x += 0.5
+		# 6: peretii orbi. Casa de capat: latura finisata pe -X (baza) sau +X (`_m`).
+		var stem := h.scene_file_path.get_file().get_basename()
+		var is_end := stem.begins_with("sf_row_end_") and not _sabotage_end
+		var fin := (1.0 if stem.ends_with("_m") else -1.0) if is_end else 0.0
+		if is_end:
+			z["end"] = int(z.get("end", 0)) + 1
+		if w <= 8.0:
+			for sx in free_sides:
+				if sx != fin:
+					why.append("perete orb spre exterior (latura %s)" % ("+X" if sx > 0.0 else "-X"))
+			if is_end and not (fin in free_sides):
+				why.append("latura finisata a casei de capat e lipita de alta casa")
 		if poke > POKE_MAX:
 			why.append("teren peste podea pe fatada %+.2f m" % poke)
 		if skirt < 0.0:
@@ -317,18 +342,23 @@ func _check(track: Track) -> int:
 			if ov:
 				why.append("se suprapune cu %s" % houses[hj].name)
 		# 5: cutia
-		var body := corp.get_node_or_null(NodePath("Corp_%s" % h.name)) if corp != null else null
+		var body: Node = null
+		for cb: Node in [corp, corp_pl]:
+			if cb != null and body == null:
+				body = cb.get_node_or_null(NodePath("Corp_%s" % h.name))
+		# casele pictate: cutia are si adancimea pridvorului (spre -Z, in fata fatadei)
+		var porch := float(h.get_meta("sf_case_porch", 0.0))
 		if body == null:
 			why.append("fara cutie de coliziune")
 		else:
 			var cs := body as CollisionShape3D
 			var bx := cs.shape as BoxShape3D if cs != null else null
-			if bx == null or absf(bx.size.x - w) > 0.01 or absf(bx.size.z - 12.0) > 0.01:
+			if bx == null or absf(bx.size.x - w) > 0.01 or absf(bx.size.z - 12.0 - porch) > 0.01:
 				why.append("cutia nu are amprenta casei")
 			else:
 				var c := cs.global_transform.origin
 				var lc := xf.affine_inverse() * c
-				if Vector2(lc.x, lc.z).length() > 0.02 or absf(c.y - bx.size.y * 0.5 - (xf.origin.y - SKIRT)) > 0.02:
+				if Vector2(lc.x, lc.z + porch * 0.5).length() > 0.02 or absf(c.y - bx.size.y * 0.5 - (xf.origin.y - SKIRT)) > 0.02:
 					why.append("cutia e mutata fata de casa")
 		z["poke"] = maxf(z["poke"], poke)
 		z["skirt"] = minf(z["skirt"], skirt)
@@ -348,8 +378,14 @@ func _check(track: Track) -> int:
 		print("%-6s %5d %6d %+15.2fm %+15.2fm %+13.2fm %+13.2fm %11.2fm %11.2fm %7.1fm%s" % [k, z["n"],
 			z["corner"], z["poke"], z["skirt"], z["back"], z["back_skirt"], z["road"], z["car"],
 			z["tram"], ("   PICA %d" % z["bad"]) if z["bad"] > 0 else ""])
+	var n_end := 0
+	for k in keys:
+		n_end += int((zones[k] as Dictionary).get("end", 0))
+	print("case de capat: %d (cu latura finisata libera, fara pereti orbi la capetele fara colt)%s" % [n_end,
+		" [sabotaj: capetele tratate ca case de rand]" if _sabotage_end else ""])
 	if corp != null:
-		print("cutii de coliziune: %d (case %d)" % [corp.get_child_count(), houses.size()])
+		print("cutii de coliziune: %d + %d sub CasePictateCorpuri (case %d)" % [corp.get_child_count(),
+			corp_pl.get_child_count() if corp_pl != null else 0, houses.size()])
 	print("VERDICT: %s%s" % ["PICA (%d case)" % _fails if _fails > 0 else "OK",
 		" [sabotaj: podeaua -1 m]" if _sabotage else ""])
 	return 1 if _fails > 0 else 0

@@ -37,6 +37,9 @@ extends Node
 ##   - VALUL 2: trecerile masinilor PRIN volumul stalpilor si trunchiurilor fara coliziune
 ##     (`metadata/sf_poles`: semafoare, felinare, arbori de strada) si mobilierul mic BumpProp (grupul
 ##     `sf_street_bodies`): urnite, secunde pe carosabil, din care in zona de aterizare.
+##   - VALUL 3: contactele cu corpurile noi (casele pictate `CasePictateCorpuri`, placa turnanta
+##     `PlacaCorpuri` = gheretă + vagonul parcat, magaziile de chei `MagaziiCorpuri`), pe acelasi
+##     tipar ca la case (un contact = o masina care atinge corpul, cu cel putin 1 s intre doua).
 
 const MIN_AIR_S: float = 0.25
 # --- pasul 6: pontonul si masinile parcate ---
@@ -717,6 +720,10 @@ func _report_v2() -> void:
 ## PASUL 8b: contactele cu cutiile caselor (randul din fata `CaseCorpuri`, cel din spate
 ## `CaseSpateCorpuri`) si cat de departe de axa benzii lui ajunge o masina (cele mai departate
 ## pozitii, ca sa se vada daca randurile din spate fara cutie, de la 40 m, sunt la indemana).
+## Corpurile numarate de `_tick_case` (randurile din fata si din spate; valul 3: casele pictate,
+## placa turnanta, magaziile).
+const CASE_BODIES: Array[String] = ["CaseCorpuri", "CaseSpateCorpuri", "CasePictateCorpuri", "PlacaCorpuri",
+	"MagaziiCorpuri"]
 var _case_hits: Array = []       # [t, masina, corp, poz, v]
 var _case_last: Dictionary = {}  # (masina, corp) -> ultimul tick de contact
 var _off_max: Array = []         # per masina: [distanta, poz, t]
@@ -726,7 +733,7 @@ var _off_s: Array[float] = [0.0, 0.0, 0.0]   # secunde-masina la > 15 / 25 / 40 
 func _tick_case(i: int, c: Car, p: Vector3, delta: float) -> void:
 	for b in c.get_colliding_bodies():
 		var nm := String((b as Node).name)
-		if nm != "CaseCorpuri" and nm != "CaseSpateCorpuri":
+		if not (nm in CASE_BODIES):
 			continue
 		var key := "%d|%s" % [i, nm]
 		if _t - float(_case_last.get(key, -99.0)) > 1.0:
@@ -750,9 +757,13 @@ func _report_case() -> void:
 	var cars: Array[Car] = _race.cars
 	var front := 0
 	var back := 0
+	var v3 := {"CasePictateCorpuri": 0, "PlacaCorpuri": 0, "MagaziiCorpuri": 0}
 	for h in _case_hits:
-		if String(h[2]) == "CaseSpateCorpuri":
+		var nm := String(h[2])
+		if nm == "CaseSpateCorpuri":
 			back += 1
+		elif v3.has(nm):
+			v3[nm] += 1
 		else:
 			front += 1
 	var worst := 0.0
@@ -760,6 +771,13 @@ func _report_case() -> void:
 		worst = maxf(worst, float(o[0]))
 	print("=== SF case: contacte rand din fata %d, rand din spate %d; abaterea maxima de la axa %.1f m; secunde-masina la > 15 / 25 / 40 m: %.1f / %.1f / %.1f" % [
 		front, back, worst, _off_s[0], _off_s[1], _off_s[2]])
+	# valul 3: corpurile au contor chiar daca pista nu le are (linia spune ce exista in scena)
+	var present: Array[String] = []
+	for nm: String in v3:
+		if _race.track.get_node_or_null(NodePath(nm)) != null:
+			present.append(nm)
+	print("=== SF val3: contacte case pictate %d, placa turnanta %d, magazii %d; corpuri in scena: %s" % [
+		v3["CasePictateCorpuri"], v3["PlacaCorpuri"], v3["MagaziiCorpuri"], ",".join(present)])
 	for h in _case_hits:
 		var p: Vector3 = h[3]
 		print("    [sf casa] t=%5.1fs %-18s %s v=%.1f poz=(%.0f,%.1f,%.0f)" % [float(h[0]),

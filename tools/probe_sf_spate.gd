@@ -22,7 +22,11 @@ extends Node
 ##         5. nicio casa in apa (podeaua sub `WATER_Y`) si niciuna oglindita in buffer
 ##            (determinant negativ = casa pe dos in MultiMesh);
 ##         6. `CityFill.stats`: case construite = case cerute, buffere > 0 (masuratoare vie).
+##         7. (pasul 8c) peretii orbi: o latura LIBERA (fara casa lipita la 0,3 m) care priveste spre
+##            soseaua buclei (punctul de la 6 m in afara ei la <= `END_ROAD_M` m de axa) e latura
+##            finisata a unei case de CAPAT (`sf_row_end_*`: baza pe -X, oglindita = `_m` pe +X).
 ##       `--sabotaj` coboara podeaua masurata cu 1 m: garda TREBUIE sa pice (punctul 1).
+##       `--sabotaj-capat` le trateaza pe casele de capat ca pe case de rand: TREBUIE sa pice (7).
 ## Exit 1 daca pica ceva sau daca n-a masurat nicio casa.
 
 const SKIRT: float = 2.4
@@ -39,7 +43,14 @@ const GROUND_RECT := Rect2(-260.0, -470.0, 530.0, 620.0)
 const GROUND_STEP: float = 2.0
 
 var _dump := ""
+## `--rect=x0,z0,latime,adancime` (Godot): alta zona pentru `--dump-ground` (valul 3: capatul de pe
+## malul celalalt al zidului moale `Pod/CapS`, in afara hartii orasului).
+var _rect := GROUND_RECT
 var _sabotage := false
+var _sabotage_end := false
+## Pragul punctului 7 (generatorul converteste pana la 32 m pe poligonul de control; aici, pe curba
+## coapta, se cere doar pana la 31, ca diferenta dintre cele doua linii sa nu dea alarme false).
+const END_ROAD_M: float = 31.0
 var _space: PhysicsDirectSpaceState3D
 var _fails := 0
 
@@ -51,8 +62,13 @@ func _ready() -> void:
 			path = a.trim_prefix("--scene=")
 		elif a.begins_with("--dump-ground="):
 			_dump = a.trim_prefix("--dump-ground=")
+		elif a.begins_with("--rect="):
+			var v := a.trim_prefix("--rect=").split_floats(",")
+			_rect = Rect2(v[0], v[1], v[2], v[3])
 		elif a == "--sabotaj":
 			_sabotage = true
+		elif a == "--sabotaj-capat":
+			_sabotage_end = true
 	var track := (load(path) as PackedScene).instantiate() as Track
 	add_child(track)
 	for _i in 3:
@@ -90,7 +106,7 @@ func _dump_ground() -> void:
 		return
 	var n := 0
 	var miss := 0
-	var r := GROUND_RECT
+	var r := _rect
 	var x := r.position.x
 	while x <= r.end.x + 0.01:
 		var z := r.position.y
@@ -183,17 +199,25 @@ func _check(track: Track) -> int:
 	# citi inapoi headless, memoria `multimesh-masuratoare-moarta`)
 	var f := fill.explicit_xforms
 	var xfs: Array[Transform3D] = []
+	var fins: Array[float] = []      # latura finisata (pe X local, dupa refacerea pozitiva): 0 = casa de rand
 	var neg := 0
 	var i := 0
 	while i + 13 <= f.size():
 		var b := Basis(Vector3(f[i + 1], f[i + 2], f[i + 3]), Vector3(f[i + 4], f[i + 5], f[i + 6]),
 			Vector3(f[i + 7], f[i + 8], f[i + 9]))
 		var xf := Transform3D(b, Vector3(f[i + 10], f[i + 11], f[i + 12]))
+		var mi := int(f[i])
+		var is_end := mi < fill.models.size() and fill.models[mi] != null 			and fill.models[mi].resource_path.get_file().begins_with("sf_row_end_") and not _sabotage_end
+		var fin := 0.0
 		if b.determinant() < 0.0:
 			neg += 1
 			# imaginea e aceeasi cu casa oglindita `_m` sub transformarea pozitiva
 			xf.basis.x = -xf.basis.x
+			fin = 1.0 if is_end else 0.0
+		else:
+			fin = -1.0 if is_end else 0.0
 		xfs.append(xf)
+		fins.append(fin)
 		i += 13
 	print("case din spate: %d (cerute oglindit: %d); din fata: %d" % [xfs.size(), neg, front.size()])
 	if xfs.is_empty():
@@ -231,6 +255,9 @@ func _check(track: Track) -> int:
 	var all_fp: Array[PackedVector2Array] = front.duplicate()
 	all_fp.append_array(back)
 	var worst := {"poke": -INF, "skirt": INF, "bury": -INF, "road": INF, "tram": INF, "floor": INF}
+	var main_line: PackedVector2Array = lines[0][1]
+	var n_end := 0
+	var n_blank_far := 0
 	var n_body := 0
 	var n_near := 0
 	for hi in xfs.size():
@@ -282,6 +309,31 @@ func _check(track: Track) -> int:
 			why.append("fusta in aer %.2f m" % -skirt)
 		if bury > BURY_MAX:
 			why.append("ingropata %.2f m" % bury)
+		# 7. peretii orbi spre bucla
+		if fins[hi] != 0.0:
+			n_end += 1
+		for sx: float in [-1.0, 1.0]:
+			var o3 := xf * Vector3(sx * 3.8, 0.0, 0.0)
+			var po := Vector2(o3.x, o3.z)
+			var free := true
+			for q in all_fp.size():
+				if all_fp[q] != fp and absf(all_fp[q][0].x - po.x) < 30.0 and absf(all_fp[q][0].y - po.y) < 30.0 						and _inside(po, all_fp[q], 0.0):
+					free = false
+					break
+			if not free:
+				if fins[hi] == sx:
+					why.append("latura finisata a casei de capat e lipita de alta casa")
+				continue
+			var p6 := xf * Vector3(sx * 9.5, 0.0, 0.0)
+			var dmain := INF
+			for j in main_line.size() - 1:
+				dmain = minf(dmain, _seg_dist(Vector2(p6.x, p6.z), main_line[j], main_line[j + 1]))
+			if fins[hi] == sx:
+				continue
+			if dmain <= END_ROAD_M:
+				why.append("perete orb spre bucla (latura %s, %.1f m de axa)" % ["+X" if sx > 0.0 else "-X", dmain])
+			else:
+				n_blank_far += 1
 		# 4. benzile si cutia
 		var d_road := INF
 		var d_tram := INF
@@ -361,6 +413,8 @@ func _check(track: Track) -> int:
 		worst["poke"], worst["skirt"], worst["bury"]])
 	print("banda min %.1f m | tramvai min %.1f m | podeaua min %.2f | la < %.0f m de banda: %d, cu cutie: %d (cutii %d)" % [
 		worst["road"], worst["tram"], worst["floor"], ROAD_FREE, n_near, n_body, boxes.size()])
+	print("case de capat: %d; pereti orbi ramasi departe de bucla (> %.0f m): %d%s" % [n_end, END_ROAD_M,
+		n_blank_far, " [sabotaj: capetele tratate ca case de rand]" if _sabotage_end else ""])
 	print("VERDICT: %s%s" % ["PICA (%d case)" % _fails if _fails > 0 else "OK",
 		" [sabotaj: podeaua -1 m]" if _sabotage else ""])
 	return 1 if _fails > 0 else 0

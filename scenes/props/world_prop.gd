@@ -2615,6 +2615,8 @@ const CLASSES_BY_THEME := {
 const NO_SHADOW_MODELS := {
 	"lengai": true, "crater_far_wall": true, "kyoto_horizon": true,
 	"horizon_mesas": true,
+	# San Francisco, valul 3 (F1): insula cu far din axul lantului, la ~330 m de muchia 4.
+	"sf_island_light": true,
 }
 
 

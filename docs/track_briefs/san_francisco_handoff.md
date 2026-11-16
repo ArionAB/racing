@@ -69,11 +69,31 @@ of step 8. No iOS build since #723 (build 54) — **start one only when they ask
      counts car passes through them (`metadata/sf_poles`). Crest masts: never
      touched. The mast on the tram street at y 102: passed through twice in lap 1
      at up to 34 m/s — move it before making poles solid.
+   **Also DONE, on branch `sanfrancisco/pas8c-val3` (17 Nov 2026) — wave 3:**
+   61 end houses with windowed sides at row ends and next to the turreted
+   corners; the six painted ladies with their gardens on the ridge (flanked by
+   two end houses); the turntable with a parked wagon at (−144, 430); four pier
+   sheds and the sea-lion raft west of the pontoon; the island with the
+   lighthouse; the horizon ring (in the theme, `track.gd`); stairs, benches;
+   block rows over the bridge's soft walls. Theme haze `fog_max` 0.55 → 0.40.
+   Materials 22 (cap 38), sun on the chain 83.6 %, lap ~82.8 s. The new bodies
+   (painted ladies, turntable, sheds) have contact counters, proven live: 0
+   contacts in two batches.
+   - Baselines changed: `probe_decor_overlap` is now 73 pieces over the asphalt
+     (12 are the block rows at the soft walls' ends — the visual of a collision
+     that was already there).
+   - `ProbeSfTenta` fails its strict pixel threshold on the richer new houses
+     (0.9–3.1 % vs 0.5 %); the pastel does reach them. Cause not established.
+   - **One head-on inside the bridge corridor in the second wave-3 batch** (seed
+     5): not wrong-way traffic — a car spun after hitting the barrier machine on
+     its own side and the next car ran into it. First of its kind in ~11
+     batches; nothing on the bridge changed in wave 3. Watch it.
+   - Barrier contact on the bridge ranged 4.4–7.4 % over nine batches with
+     identical bridge collision: the step-2b band (4.6–5.5 %) is narrower than
+     batch noise.
    Still missing: pavements (needs a design answer: do they drive like road or
-   slow like grass?), an end house with side windows (blank walls at row ends,
-   now also next to the turreted corners on the crests), the painted ladies and
-   front gardens, the turntable, pier sheds, the island with the lighthouse, the
-   horizon ring, the gate, sound; the soft walls on the bridge are still grey.
+   slow like grass?), the gate (H5), the garden of the switchback-entrance
+   house, gulls/parrots, sails and the ferry, sound.
 1. **(Done — kept for the rules.)** All seven houses, each with a truly
    mirrored `_m` file, are done and accepted on `sanfrancisco/pas7b-case`
    (14 GLBs; mixed kit on `SfLoc --glb=kit`: pastel 40.3 % of house pixels,
@@ -174,7 +194,8 @@ of step 8. No iOS build since #723 (build 54) — **start one only when they ask
   `--track=Track25`; ProbeLayout / ProbeLaneClear / snapshot use `--track=17`;
   `probe_decor` and `probe_manual` use `--track=25`.
 - Baselines: ProbeLaneClear 50 (sabotage 53); `probe_decor --track=25` 17
-  materials in #740, 22 with the houses, **23 with wave 2** (cap 38);
+  materials in #740, 22 with the houses, 23 with wave 2, **22 with wave 3**
+  (cap 38);
   ProbeSfRoute −0.29 m (contract ≥ −0.30); sun on the chain 83.6 %
   (`ProbeSfLight --real`, ≥ 80 %; it now counts houses, back rows and trees).
 - SF probes: `probe_sf_crest`, `ProbeSfPonton`, `ProbeSfParked`, `ProbeBumpTall`,

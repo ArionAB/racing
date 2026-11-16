@@ -14,8 +14,12 @@ extends Node3D
 ## Compara pixel cu pixel A cu B si C cu D. `--sabotaj` da instantei B pastelul urmator: TREBUIE
 ## sa pice. `--per-clasa` opreste pastelul pe instanta (`wall_tint_per_instance = false`): CityFill
 ## cade pe un sablon per clasa, iar pixelii trebuie sa iasa la fel. Exit 1 daca pica.
+## `--stem=<fisier>` (pasul 8c) alege casa (implicit `sf_row_b_square`): casele de capat si cele
+## pictate. Pe langa A = B, sonda cere ca media casei A sa DIFERE intre cele cinci pasteluri (un
+## fisier fara intrare in `WorldProp.CLASSES_BY_MODEL` ar lasa peretele pe atlas: A = B ar trece,
+## dar toate pastelurile ar iesi la fel).
 
-const STEM := "sf_row_b_square"
+var STEM := "sf_row_b_square"
 const DIR := "res://assets/models/sanfrancisco/buildings/"
 const STEP_M: float = 12.0
 const PX_PER_M: float = 30.0
@@ -25,11 +29,15 @@ const MAX_BAD: float = 0.5       # % pixeli de casa cu diferenta > 12 pe vreun c
 var _sabotage := false
 var _per_class := false
 var _fails := 0
+var _means: Array[Vector3] = []
 
 
 func _ready() -> void:
 	_sabotage = "--sabotaj" in OS.get_cmdline_user_args()
 	_per_class = "--per-clasa" in OS.get_cmdline_user_args()
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--stem="):
+			STEM = a.substr(7)
 	get_window().size = Vector2i(int(4.0 * STEP_M * PX_PER_M), int(15.0 * PX_PER_M))
 	get_viewport().mesh_lod_threshold = 0.0
 	get_viewport().msaa_3d = Viewport.MSAA_DISABLED
@@ -95,6 +103,16 @@ func _ready() -> void:
 						" (umbra)" if mmi.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY else ""])
 		holder.queue_free()
 		await get_tree().process_frame
+	# pastelul chiar ajunge pe perete: media casei A difera intre clase (cel mai apropiat cuplu)
+	var spread := 1e9
+	for i in _means.size():
+		for j in range(i + 1, _means.size()):
+			spread = minf(spread, (_means[i] - _means[j]).length() * 255.0)
+	var spread_ok := _means.size() < 2 or spread >= 3.0
+	print("  pastelurile pe casa A: cea mai mica distanta intre doua medii %.1f / 255 (prag 3,0)  %s"
+		% [spread, "OK" if spread_ok else "PICA: peretele nu ia pastelul"])
+	if not spread_ok:
+		_fails += 1
 	print("VERDICT: %s" % ("OK" if _fails == 0 else "PICA (%d comparatii)" % _fails))
 	get_tree().quit(1 if _fails > 0 else 0)
 
@@ -139,6 +157,8 @@ func _compare(img: Image, cls: String, st: Dictionary) -> void:
 			_fails += 1
 		ma /= maxf(float(n), 1.0)
 		mb /= maxf(float(n), 1.0)
+		if int(pair[0]) == 0:
+			_means.append(ma)
 		print("  %-20s %-30s pixeli %6d  dif. medie %.2f  >12: %.2f%%  media A %s / B %s  %s" % [cls, pair[1], n,
 			mean, bad_p, _rgb(ma), _rgb(mb), "OK" if ok else "PICA"])
 	print("    CityFill: %s pe %s, oglindite pe _m %s, pe dos %s" % [str(st.get("per_wall")),

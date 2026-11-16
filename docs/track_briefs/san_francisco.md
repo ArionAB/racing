@@ -1903,10 +1903,19 @@ parcate (4,2 m) sunt refuzate de `BumpProp` (plafonul de 2 m), deci rămân stat
    | repuneri / ejectări / `[blocaj]` | 9 / 7 / 7 | 5 / 2 / 13 | 8 / 6 / 20 | 8 / 6 / 18 |
    | ponton: căderi | 0,52 % | 0,26 % | 0,26 % | 0,26 % |
 
-   Niciun jurnal de cursă nu înregistrează un contact cu `CaseCorpuri`. Incidentele sunt în
-   serpentine și pe ponton (îngrămădeala din turul 1), plus ejectările cunoscute din racordul de la
-   baza lanțului (`lovit=RoadTop`, 3 în lotul final), la ≥ 28 m de orice casă. Contactul cu
-   bariera de pe pod a revenit în bandă (4,8–5,5 %) în toate cele trei loturi ale pasului 8.
+   **Corecție (16 nov 2026):** aici scria că niciun jurnal de cursă nu înregistrează un contact cu
+   `CaseCorpuri`. Era adevărat doar fiindcă **loturile de la 8a n-aveau contor de contacte cu
+   casele**: afirmația nu era măsurată. Contorul a intrat la 8b (`probe_sf_watch.gd`,
+   `_tick_case`) și a numărat, pe aceleași case din față, **7 contacte în 16 seed-uri** (~0,3 % din
+   tururile-mașină): 5 pe lanț, cu mașina la 9–10 m de ax (hartă y 36, 174, 237, 248), și 2 la
+   începutul ocolului (−28, 332), la 11–28 m/s. Sunt mașini ieșite deja 2–3 m de pe carosabil;
+   repunerile și ejectările rămân în zgomotul lotului de control fără case. Lotul valului 2 a
+   numărat 1 contact.
+
+   Incidentele raportate sunt în serpentine și pe ponton (îngrămădeala din turul 1), plus
+   ejectările cunoscute din racordul de la baza lanțului (`lovit=RoadTop`, 3 în lotul final).
+   Contactul cu bariera de pe pod a revenit în bandă (4,8–5,5 %) în toate cele trei loturi ale
+   pasului 8a.
 
    **Capturi** (`docs/asset_briefs/img/sf_route/p8_case_*.png`): B cu vagonul, prima muchie,
    mijlocul lanțului, furca, ocolul (2), strada de întors.
@@ -1924,6 +1933,50 @@ parcate (4,2 m) sunt refuzate de `BumpProp` (plafonul de 2 m), deci rămân stat
    - latura de S a străzii de ocol spre V e goală (fațadele ar fi cu spatele la soare);
    - `probe_decor_overlap --manual` măsoară zero piese fără `--no-manual-batch` (coacerea ascunde
      nodurile).
+
+   **8b. Rândurile din spate — FĂCUT (16 nov 2026)**, ramura `sanfrancisco/pas8b-val2`. **325 de
+   case** prin `CityFill` (nodul `CaseSpate`, scris de `tools/gen_sf_route.py`; `SF_SPATE=0`
+   reface scena de dinainte octet cu octet): D 115, B 111, G 48, E 51, în rânduri paralele cu
+   străzile lor, spate în spate, fiecare casă la cota ei, deci acoperișurile coboară în trepte.
+   Doar casele de rând, fără colțuri.
+
+   - **`CityFill` a primit N tente și kitul oglindit.** `wall_classes` + `explicit_wall`: clasele
+     `sf_clapboard*` diferă doar prin tentă, deci peretele fiecărui model e **un singur buffer**,
+     iar pastelul vine din culoarea instanței: zero materiale noi și de 5 ori mai puține buffere
+     decât cu un material pe pastel. `mirror_models`: mâna cealaltă se desenează cu fișierul `_m`
+     și cu transformare de determinant pozitiv (164 de case pe `_m`, niciuna pe dos).
+     `ProbeSfTenta` arată că o casă pusă ca nod și una din `CityFill` dau aceiași pixeli pe toate
+     cele cinci pasteluri (diferența medie 0,47 / 255; sabotajul pică la 11–20).
+   - **Jodhpur și Kyoto** (ceilalți utilizatori ai `CityFill`) ies identic: `probe_decor`, liniile
+     de statistici ale umpluturii și capturile.
+   - **Lăsate libere** (`SPATE_KEEP`): parcul coamei, terasa, blocul serpentinelor, cheiul și
+     pontonul, podul cu capetele lui, intrarea tramvaiului 1, strada laterală a porții (H5).
+   - **Coliziune:** cutie doar pe casele la mai puțin de 40 m de axa unei benzi (160, sub
+     `CaseSpateCorpuri`), ca pe Jodhpur. Abaterea maximă a unei mașini de la axă în lot: 25,2 m.
+     **Contacte cu casele din spate: 0.**
+   - **Umbră:** aruncă doar casele la cel mult 50 m de o bandă (226 din 325).
+
+   | | înainte | cu rândurile din spate | prag |
+   |---|---|---|---|
+   | materiale (`probe_decor --track=25`) | 22 | 22 | ≤ 38 |
+   | desene / triunghiuri pe toată pista | 290 / 475k | 326 / 1,21M | — |
+   | soare pe lanț (`ProbeSfLight --real`, cu toate casele) | 83,6 % | 83,6 % | ≥ 80 % |
+   | `ProbeLaneClear --track=17` | 50 | 50 | 50 |
+   | ProbePerf desktop: desene medie / vârf | 100 / 208 | 121 / 232 | — |
+   | buffere MultiMesh pe pistă | ~205 | ~241 | buget iPhone 2.500 |
+   | tur mediu (8 × 16 × 250 s) | 83,06 s | 82,87 s | — |
+   | repuneri / ejectări / `[blocaj]` | 8 / 6 / 18 | 7 / 6 / 7 | — |
+
+   **Ce se vede și ce nu.** Din camera de joc, de pe stradă, rândurile din spate aproape nu intră
+   în cadru: le acoperă rândul din față. Orașul se citește de sus, de pe chei și în vederile oblice
+   (`img/sf_route/p8_spate_trepte_liber.png`, `p8_spate_intors_gamecam.png`). Pe muchii au apărut
+   **pereți orbi** lângă colțurile cu turnuleț (capătul rândului din spate,
+   `p8_spate_muchia1_gamecam.png`): îi rezolvă casa de capăt cu ferestre pe latură, piesă care
+   lipsește din kit. Străzile din spate sunt teren, fără asfalt. Rândurile de pe flanc (DE2, DV2)
+   sunt incomplete: terenul a respins casele cu fusta prea scurtă.
+
+   Hărțile de teren `tools/data/sf_spate_ground.tsv` și `sf_case_ground.tsv` se refac dacă se
+   schimbă traseul sau terenul (`ProbeSfSpate --dump-ground=…`, `ProbeSfCase --dump-ground`).
 
    **8b, valul 2: mobilierul și vegetația pe Track25 (16 nov 2026)**, ramura
    `sanfrancisco/pas8b-val2`, blocul „VALUL 2” din `tools/gen_sf_route.py`. `SF_VAL2=0` reface
@@ -1949,6 +2002,27 @@ parcate (4,2 m) sunt refuzate de `BumpProp` (plafonul de 2 m), deci rămân stat
    serpentine), ponton 0,26 %, case 1 / 0; prin stâlpi: semaforul de pe B la y 102 de 2 ori (turul 1,
    până la 34 m/s), un felinar și un arbore o dată (o mașină rătăcită, sub 11 m/s). Capturi:
    `docs/asset_briefs/img/sf_route/p8_val2_*.png`.
+
+   **Piesele valului 2** (Blender, `tools/blender/build_sf_street.py` și `build_sf_plants.py`, cu
+   gărzile `measure_sf_street.py` / `measure_sf_plants.py`; toate în `verify_sanfrancisco.sh`):
+   - **semaforul** e la a doua versiune: capul supradimensionat (1,0 × 2,4 m, trei lentile
+     colorate pe ambele fețe), fiindcă primul, la scară reală, nu se vedea de la 100 m;
+   - **chiparoșii** sunt la a treia: v1 semăna cu pinii tunși din Kyoto, v2 cu salcâmii din
+     Serengeti (plăci subțiri pe crengi goale). v3 are coroane dese, mai late decât înalte,
+     pieptănate într-o parte, pe trunchi masiv; garda măsoară umplerea siluetei (≥ 55 %);
+   - **mașinile parcate** au vopseaua pe un singur slot, recolorat pe instanță în
+     `sf_parked_car.gd` (o plasă pe pereche caroserie × culoare, cu LOD-urile sursei).
+
+   **De decis după valul 2:**
+   - **stâlpii solizi.** Semafoarele de pe muchii n-au fost atinse niciodată în 16 seed-uri, dar cel
+     de pe B de la y 102 a fost traversat de două ori în turul 1, până la 34 m/s. Dacă stâlpii
+     devin solizi (`coliziune = "trunk"`), acela se mută întâi;
+   - **semafoarele sunt scalate ×1,14**, ca baza capului să rămână la ≥ 8,0 m peste drum (umărul e
+     cu ~0,7 m sub carosabil la muchie);
+   - **cutia de coliziune a mașinilor parcate** e a placeholderului; break-ul desenat e cu 0,15 m
+     mai lung la fiecare capăt.
+
+   **Nepuse încă din ce e modelat:** grădinițele (casa lor nu există), băncile și rastelul.
 
 ## 8. Lecții aplicate anticipat, și ce a fost respins
 

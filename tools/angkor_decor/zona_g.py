@@ -144,6 +144,16 @@ for k in range(40):
 add("Rest0", REST, 112, WALL_LAT + 4.0, 80, 0)
 add("Rest1", REST, 160, WALL_LAT + 4.0, 100, 0)
 
+# 5b) Copacii perdelei de liane (`Hazarduri/PerdeaLiane`, vine_curtain.gd). Creanga din care atarna perdeaua se
+#     terminase in aer, cu capetele taiate drept: pe telefon citea „copac cazut cu ciot gri” (feedback 16 nov 2026).
+#     Acum creanga e scoarta si intra in cate un trunchi de tetrameles la +-8,5 m de axa. Fara coliziune: ca toata
+#     jungla de langa drum (MeshForest), si ca sa nu schimbe culoarul AI-ului (regula de 18 m din contract).
+#     Pozitiile sunt din transformarea perdelei in Track24.tscn (158,57; -57,78; axa X locala (-0,467; -0,884)),
+#     adica CURTAIN_AFTER_FORK = 40 din gen_angkor_route.py; daca perdeaua se muta, se muta si astea.
+for k, (tx, tz, yw) in enumerate([(154.60, -65.29, 35.0), (162.54, -50.27, 200.0)]):
+    ITEMS.append((f"G_PerdeaCopac{k}", "plants/tetrameles_a.glb", 0.0, 0.0, yw,
+                  {"world": (tx, tz), "dy": -0.6, "scale": 0.72, "scufundat": True, "coliziune": "none"}))
+
 # 6) Liane peste zid.
 for k, ss in enumerate((58, 70, 90, 120, 138, 170, 218, 232, 258)):
     add(f"Liane{k}", VINE, ss, WALL_LAT + 0.4, 90, 2.9, **LOW)

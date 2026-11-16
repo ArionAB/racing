@@ -45,8 +45,18 @@ const PropDebris := preload("res://scenes/props/prop_debris.gd")
 @export var strand_width: float = 0.30
 ## Ce fractie din suvite sunt radacini aeriene argintii (restul liane verzi).
 @export_range(0.0, 1.0, 0.01) var root_share: float = 0.12
-## Grosimea crengii de sus (m) — trunchiul argintiu din care atarna totul.
+## Grosimea crengii de sus (m) in mijloc; spre trunchiuri se ingroasa (`branch_root_thick`).
 @export var branch_thick: float = 0.55
+## Grosimea crengii la capete, unde intra in trunchiuri (m).
+@export var branch_root_thick: float = 0.95
+## Cat de departe de axa ajunge creanga (m) — acolo stau trunchiurile (`G_PerdeaCopac*` din
+## tools/angkor_decor/zona_g.py). Feedback de pe telefon (16 nov 2026): grinda patrata argintie care se
+## oprea la 1 m dincolo de suvite citea „copac cazut cu ciot gri”. Creanga e acum scoarta (LOG_DARK, ca
+## trunchiurile remapate ale junglei Angkor), octogonala, ingrosata la capete si cu sageata in mijloc,
+## si se termina IN trunchiul unui copac, nu in aer.
+@export var branch_reach: float = 8.5
+## Cat coboara creanga in mijloc fata de capete (m).
+@export var branch_sag: float = 0.45
 @export var seed_salt: int = 70
 
 @export_group("Declansator")
@@ -91,10 +101,9 @@ func _build_strands() -> void:
 			var zz := z + rng.randf_range(-0.25, 0.25)
 			# Usoara inclinare (vant, crestere): varful se abate cu cativa cm.
 			var lean := Vector3(rng.randf_range(-0.12, 0.12), 0.0, rng.randf_range(-0.15, 0.15))
-			_ribbon(st, Vector3(x, top, zz), Vector3(x, tip, zz) + lean, w, slot)
-	# Creanga de sus: o grinda argintie peste toata latimea, umbrita.
-	_beam(st, Vector3(-half - 1.0, top + branch_thick * 0.3, 0.0),
-		Vector3(half + 1.0, top + branch_thick * 0.3, 0.0), branch_thick, Palette.CORAL_SAND)
+			_ribbon(st, Vector3(x, _branch_y(x) + 0.1, zz), Vector3(x, tip, zz) + lean, w, slot)
+	# Creanga de sus: scoarta, de la un trunchi la celalalt (vezi `branch_reach`).
+	_branch(st)
 	st.generate_normals()
 	var mi := MeshInstance3D.new()
 	mi.name = "Suvite"
@@ -120,23 +129,44 @@ func _ribbon(st: SurfaceTool, a: Vector3, b: Vector3, w: float, slot: int) -> vo
 			st.add_vertex(quad[k])
 
 
-## O grinda patrata (creanga) intre `a` si `b`.
-func _beam(st: SurfaceTool, a: Vector3, b: Vector3, t: float, slot: int) -> void:
-	var uv := Palette.uv(slot)
-	var h := t * 0.5
-	var c: Array[Vector3] = [
-		Vector3(0, -h, -h), Vector3(0, h, -h), Vector3(0, h, h), Vector3(0, -h, h)]
-	for f in 4:
-		var p0 := a + c[f]
-		var p1 := a + c[(f + 1) % 4]
-		var p2 := b + c[(f + 1) % 4]
-		var p3 := b + c[f]
-		var shade := 0.85 if f == 1 else 0.6
-		for tri: Array in [[0, 1, 2], [0, 2, 3], [0, 2, 1], [0, 3, 2]]:
-			for k: int in tri:
-				st.set_uv(uv)
-				st.set_color(Color(shade, shade, shade))
-				st.add_vertex([p0, p1, p2, p3][k])
+## Cota axei crengii la `x` (m, local): capetele la `top + branch_thick * 0.3`, mijlocul cu
+## `branch_sag` mai jos (parabola), ca o creanga grea, nu ca o grinda.
+func _branch_y(x: float) -> float:
+	var u := clampf(x / maxf(branch_reach, 0.01), -1.0, 1.0)
+	return top + branch_thick * 0.3 - branch_sag * (1.0 - u * u)
+
+
+## Creanga: un tub octogonal pe segmente, gros la capete si subtire in mijloc, pe slotul de scoarta.
+## Fata de sus e mai luminoasa (lumina de sus), cea de jos intunecata (umbra coronamentului).
+func _branch(st: SurfaceTool) -> void:
+	var uv := Palette.uv(Palette.LOG_DARK)
+	const SEGS := 10
+	const SIDES := 8
+	var rings: Array = []
+	for k in SEGS + 1:
+		var x := lerpf(-branch_reach, branch_reach, float(k) / float(SEGS))
+		var u := absf(x) / maxf(branch_reach, 0.01)
+		var r := lerpf(branch_thick, branch_root_thick, u * u) * 0.5
+		var ring: Array[Vector3] = []
+		for a in SIDES:
+			var ang := TAU * float(a) / float(SIDES)
+			# Usor turtita pe verticala si cu noduri: nu un cilindru de strung.
+			var bump := 1.0 + 0.08 * sin(float(k) * 2.3 + float(a) * 1.7)
+			ring.append(Vector3(x, _branch_y(x) + sin(ang) * r * 0.85 * bump, cos(ang) * r * bump))
+		rings.append(ring)
+	for k in SEGS:
+		var r0: Array[Vector3] = rings[k]
+		var r1: Array[Vector3] = rings[k + 1]
+		for a in SIDES:
+			var b := (a + 1) % SIDES
+			var mid_ang := TAU * (float(a) + 0.5) / float(SIDES)
+			var shade := lerpf(0.42, 0.95, 0.5 + 0.5 * sin(mid_ang))
+			var quad: Array[Vector3] = [r0[a], r0[b], r1[b], r1[a]]
+			for tri: Array in [[0, 1, 2], [0, 2, 3], [0, 2, 1], [0, 3, 2]]:
+				for q: int in tri:
+					st.set_uv(uv)
+					st.set_color(Color(shade, shade, shade))
+					st.add_vertex(quad[q])
 
 
 func _build_trigger() -> void:

@@ -1925,6 +1925,31 @@ parcate (4,2 m) sunt refuzate de `BumpProp` (plafonul de 2 m), deci rămân stat
    - `probe_decor_overlap --manual` măsoară zero piese fără `--no-manual-batch` (coacerea ascunde
      nodurile).
 
+   **8b, valul 2: mobilierul și vegetația pe Track25 (16 nov 2026)**, ramura
+   `sanfrancisco/pas8b-val2`, blocul „VALUL 2” din `tools/gen_sf_route.py`. `SF_VAL2=0` reface
+   scena de dinainte octet cu octet; `SF_V2_<FAMILIE>=0` stinge câte o familie.
+
+   | familie | câte | unde / regula |
+   |---|---|---|
+   | semafoare (`sf_signal_mast`) | 6 | pe fiecare muchie, stâlpul pe E la 8,5 m de ax, capul peste benzi pe linia muchiei; câte unul la cele două străzi transversale de pe B (stâlpul pe V, dreapta mersului). Lângă muchie umărul e cu ~0,7 m sub drum, deci toate sunt scalate uniform ×1,14: capul la 8,07–8,11 m peste drum pe muchii, 8,54 pe B |
+   | mașini parcate | 42 | modelele GLB, recolorate pe instanță (șase culori stinse), gabaritul de coliziune al placeholderului (opțiunea `box` a `BumpProp`) |
+   | felinare | 31 | B 16, E 7, G 4, D 4: la granițele dintre case, la ~26 m, la 1,2 m în fața fațadelor; pe lanț rândurile sunt toate în zona de aterizare, deci doar câte unul pe colțul de sus al rândului de V |
+   | arbori de stradă | 34 | B 13 și G 7 pe trotuarul de E, D 14 (7 pe elan, 7 în golurile dintre mașinile parcate), la 2 m dincolo de margine |
+   | mobilier mic (`BumpProp`) | 16 + 6 | hidranți, coșuri, automate, cutii, conuri pe B / D / G; capcane, lăzi, colac pe latura de S a cheiului. Cu mașinile: 64 de corpuri, plafonul |
+   | stâlpii pontonului | 11 | vizualul pe `sf_bollard.glb`, cutiile moi neschimbate |
+   | hortensii | 409 | modelele roz / albastre într-un `CityFill` (4 buffere); sferele și materialul lor au ieșit |
+   | chiparoși | 36 | parcul coamei 28 (y ≥ −100, fâșia caselor pictate liberă), pâlcul de la capătul de V al coamei (−26, −122) și cel de pe malul golfului la E de G (~172, 324); toți aplecați spre ENE ±12° |
+
+   Semafoarele, felinarele și arborii de stradă **n-au coliziune** la prima trecere; `probe_sf_watch`
+   numără trecerile mașinilor prin volumul lor (`metadata/sf_poles`). Gărzi: materiale 22 → 23
+   (+miez, +cardurile de frunze, −materialul hortensiilor placeholder); soare pe lanț 83,6 % cu și
+   fără arborii de pe lanț (umbra lor cade spre NE); ProbeLaneClear 50; ProbeSfParked identic cifră
+   cu cifră pe toate trei caroseriile. Lotul (8 × 16 × 250 s): tur 82,75 s, tramvai 1,0 / 1,7 %,
+   pod 0 / 0, barieră 4,4 %, repuneri / ejectări / `[blocaj]` 7 / 6 / 13 (toate blocajele în
+   serpentine), ponton 0,26 %, case 1 / 0; prin stâlpi: semaforul de pe B la y 102 de 2 ori (turul 1,
+   până la 34 m/s), un felinar și un arbore o dată (o mașină rătăcită, sub 11 m/s). Capturi:
+   `docs/asset_briefs/img/sf_route/p8_val2_*.png`.
+
 ## 8. Lecții aplicate anticipat, și ce a fost respins
 
 - **Săritura s-a măsurat înaintea traseului**, nu după decor: profilul blocului

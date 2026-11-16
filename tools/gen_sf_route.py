@@ -2113,6 +2113,10 @@ PARK_LAT = HW + PARK_GAP + PARK_LEN / 2.0
 PARK_SLOTS = [46.6, 49.5, 56.0, 62.5]           # metri dupa muchie (zona de aterizare: < 45)
 PARK_SLOTS_LAST = [46.6, 49.5, 56.0]             # dupa muchia 4: terasa, pana inainte de furca
 PARK_COLORS = [11, 19, 8]                        # PAINTED_METAL, CORAL_SAND, CONCRETE (stinse)
+# Valul 2 (modelele GLB): crem si bej se citeau la fel din camera, deci sase culori stinse, vecinii
+# diferiti: PAINTED_METAL, CORAL_SAND, KERB_RED, SEA_DEEP, CONCRETE, petrolul inchis (25). Niciun slot
+# de masina de joc (14-16).
+PARK_COLORS_V2 = [11, 19, 7, 18, 8, 25]
 parked = []                                      # (x, y harta, latura, varianta, slot, eticheta)
 if P6_PARKED:
     kk = 0
@@ -2121,7 +2125,8 @@ if P6_PARKED:
         for u in (PARK_SLOTS if b < len(LIPS) - 1 else PARK_SLOTS_LAST):
             assert u - PARK_W / 2.0 >= 45.0
             for side in (-1.0, 1.0):
-                parked.append((lx + side * PARK_LAT, ly + u, side, kk % 3, PARK_COLORS[(kk * 7 + b) % 3],
+                parked.append((lx + side * PARK_LAT, ly + u, side, kk % 3,
+                               PARK_COLORS_V2[(kk * 5 + 2 * b) % 6] if V2_PARCATE else PARK_COLORS[(kk * 7 + b) % 3],
                                "lant%d" % (b + 1)))
                 kk += 1
     # strada tramvaiului 1 (spre S, x = X_T): doua grupuri pe fiecare parte, departe de intrarea
@@ -2130,7 +2135,8 @@ if P6_PARKED:
         for j in range(3):
             for side in (-1.0, 1.0):
                 parked.append((X_T + side * PARK_LAT, y0_ - j * 2.9 - (0.0 if side < 0 else 1.4), side,
-                               kk % 3, PARK_COLORS[(kk * 5) % 3], "urcare"))
+                               kk % 3, PARK_COLORS_V2[(kk * 5 + 1) % 6] if V2_PARCATE else PARK_COLORS[(kk * 5) % 3],
+                               "urcare"))
                 kk += 1
     P6_EXT.append('[ext_resource type="Script" path="res://scenes/props/sf_parked_car.gd" id="7_parked"]\n')
     P6_NODES.append('[node name="MasiniParcate" type="Node3D" parent="."]\n')

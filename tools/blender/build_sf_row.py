@@ -20,6 +20,11 @@ doua noduri, transformari identitate; vezi `MIRRORED`). Doar unele case:
 
     ... --python tools/blender/run_build.py -- build_sf_row.py -- sf_row_a_canted
 
+Pasul 8c adauga (functii NOI la coada, cele 14 GLB-uri de mai sus ies octet cu octet):
+  - casele de CAPAT `sf_row_end_{a,b,c}` (+ `_m`): fatada familiei (bovindou tesit) si latura
+    -X finisata ca fatada a doua (`end_side`); vezi blocul "Casele de capat";
+  - cele sase case PICTATE `sf_painted_lady_{a..f}` (+ `_m`); vezi blocul "Casele pictate".
+
 Pilotul `sf_row_b_canted` (lista de mai jos) e acceptat si iese byte-identic; cele
 sase case noi au listele lor DUPA el (A, B patrat, C, colt), pe aceleasi reguli v2.
 

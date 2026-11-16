@@ -29,6 +29,20 @@ Moduri (prin run_build.py, argumentele dupa al doilea `--`):
                     liniile acoperisurilor: elevatie ortografica din strada si o vedere din
                     spate-sus -> sf_row_kit_rooflines.png
 
+  --end <nume>      casa de capat (pasul 8c): 3/4 din coltul laturii finisate | elevatia
+                    laterala (dinspre -X) -> <nume>.png
+  --crest <capat> <obisnuita>
+                    rand pe 28 % care se termina la deal in casa de capat, din camera de joc,
+                    punctul camerei la 40 m in amonte de capatul randului (platoul muchiei plat
+                    pana la X = -14), langa aceeasi vedere cu casa obisnuita pe acelasi loc
+                    -> sf_row_end_crest_gamecam.png
+  --compare sf_painted_lady_<x>
+                    decupare | randare, corpul in tenta decuparii (`LADY_TINT`)
+  --ladies          cele sase case pictate in rand (cinci pasteluri, albastrul repetat), cu
+                    gradinita de 7 x 3 m in fata fiecareia (de la Godot Z -7,2, dupa
+                    pridvoare), strada plata la 16 m de fatade, soarele din fata: 3/4 de la
+                    50 m, acelasi unghi de la 30 m, razant -> sf_painted_ladies_row_gamecam.png
+
     D:/Blender/blender.exe --background --factory-startup \\
         --python tools/blender/run_build.py -- preview_sf_row.py -- --row sf_row_b_canted
 

@@ -94,6 +94,18 @@ done
 # coltul: 9 x 12 m, doua fatade si turnuletul (brief §8: <= 3.500)
 check "buildings/sf_row_corner_turret.glb" 3500 --origin=waterline
 check "buildings/sf_row_corner_turret_m.glb" 3500 --origin=waterline
+# casele de capat (pasul 8c): ca o casa de rand (<= 2.500), cu latura -X (`_m`: +X) finisata
+for h in sf_row_end_a sf_row_end_b sf_row_end_c; do
+  check "buildings/$h.glb" 2500 --origin=waterline
+  check "buildings/${h}_m.glb" 2500 --origin=waterline
+done
+# casele pictate (K2, inventar: <= 5.000, sase instante). Exceptie declarata:
+#   --allow-slots=31    doar `a`: accentul ei e FLAMINGO_PINK (benzile, coloanele, turnuletul)
+for k in a b c d e f; do
+  fl=""; [ "$k" = a ] && fl="--allow-slots=31"
+  check "buildings/sf_painted_lady_$k.glb" 5000 --origin=waterline $fl
+  check "buildings/sf_painted_lady_${k}_m.glb" 5000 --origin=waterline $fl
+done
 
 echo
 echo "== valul 2: mobilierul de strada si vegetatia (inventar §5.3-§5.4) =="

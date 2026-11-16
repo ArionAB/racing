@@ -2048,7 +2048,7 @@ parcate (4,2 m) sunt refuzate de `BumpProp` (plafonul de 2 m), deci rămân stat
    **Gărzi** (înainte → după): materiale 23 → **22** (a dispărut griul zidurilor de pe pod, nimic
    nou); `ProbeLaneClear` 50; soare pe lanț 83,6 % → 83,6 %; `ProbeSfCase` / `ProbeSfSpate` cunosc
    casele de capăt (sabotajul `--sabotaj-capat` pică); `verify_sanfrancisco.sh` OK cu toate cele
-   52 de GLB-uri; tabelul `probe_decor` al celorlalte piste identic. ProbePerf desktop: desene
+   68 de GLB-uri; tabelul `probe_decor` al celorlalte piste identic. ProbePerf desktop: desene
    medie / vârf 142 / 268 → 164 / 302; buffere MultiMesh 287 → 355 (buget iPhone 2.500).
 
    Două abateri, raportate ca atare:

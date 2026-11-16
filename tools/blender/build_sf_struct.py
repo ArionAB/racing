@@ -50,6 +50,9 @@ H4 -- placa turnanta (`sf_turntable.png`). Originea in centrul discului, la sol 
 
 H6 -- magazia de chei (`sf_pier_shed.png`). Originea in centrul amprentei, la cota puntii (Y 0 =
 fata de sus a puntii); frontonul arcuit pe -Z Godot (+Y Blender). Lunga: 20 m pe Z, scurta 12.
+  Lemnul (pas 8d): gri-maro de chei batut de sare, schema `SH_SCHEME` (vezi SH_SCHEMES; azi K6:
+  peretii MARBLE_GREY 29 abia incalziti, sipcile / canatele / puntea / stalpii pe ASPHALT_EDGE 6 sau
+  MARBLE_GREY 29 cu tenta coapta in vertex colors). Sloturile de mai jos sunt cele de dinainte.
   S1. Corpul: contur de fronton (pereti de 5,4 m, arc de cerc pana la +8,8) extrudat pe lungime,
       12 m lat, WOOD_WEATHERED 9.
   S2. Scandurile verticale (sipci de 0,12 m, iesite 0,05, LARCH_RUST 27) pe ambele frontoane si
@@ -333,9 +336,44 @@ PILE_R = 0.25
 PILE_BOT = -6.0
 DECK_M = 1.0                # puntea iese 1 m pe laturi si in spate
 DECK_FRONT = 2.5            # si 2,5 m in fata (platforma din decupare)
-SH_WALL = SAND_MID          # 1: lemn de brad deschis (decuparea)
-SH_BATTEN = WOOD            # 9: sipcile, mai inchise
 SH_ROOF = ASPHALT_EDGE      # 6: tabla gri-inchis (decuparea)
+# Lemnul magaziei (pas 8d, 16 nov 2026). Pana la 8c peretii erau pe SAND_MID 1 si sipcile, usa,
+# puntea si stalpii de amarare pe WOOD 9: in joc magaziile ieseau cel mai saturat lucru din cadru
+# (S 0,64 / 0,61 in atlas, nisipul terenului si lemnul nou), mai aprinse decat rosul podului.
+# Lemnul de chei e batut de sare: gri-maroniu. Peretii stau acum pe sloturi aproape neutre, iar
+# nuanta vine dintr-o TENTA coapta in vertex colors peste AO (mecanismul din `tint_gradient` /
+# `_tint_lichen`: zero materiale, zero texturi). Rolurile se marcheaza in build cu sloturi
+# fictive (>= 100) si se rezolva in `build_shed` dupa schema aleasa (SH_SCHEMES).
+R_WALL, R_BATTEN, R_DOOR, R_DECK, R_POST = 101, 102, 103, 104, 105
+SH_WALL = R_WALL            # peretii (scandurile mari)
+SH_BATTEN = R_BATTEN        # sipcile verticale
+# schema: rol -> (slot, tenta liniara pe RGB sau None). "azi" = 8c, neschimbat (iese octet cu octet).
+# Masurat in cadrul de chei (`--track=17 --frac=0.598 --gamecam`, mastile din `masca`): soarele cald
+# FFD2A0 adauga ~+0,25 saturatie pe un albedo neutru (marmura gri, S 0,07 in atlas, iese 0,30 pe
+# pereti), deci un albedo "gri-maro" (S ~0,27) iesea tot maro-portocaliu (0,52-0,55; schemele k2-k5,
+# scoase). Peretii trebuie sa stea aproape neutri; caldura o pune lumina. Plansa:
+# docs/asset_briefs/img/sf_route/p8d_magazii_variante.png.
+SH_SCHEMES = {
+    "azi": {R_WALL: (SAND_MID, None), R_BATTEN: (WOOD, None), R_DOOR: (WOOD, None),
+            R_DECK: (WOOD, None), R_POST: (WOOD, None)},
+    # K1 argintiu: doar sloturi, fara tenta (marmura gri 29 + gri-inchis 6). Pereti S 0,298, L +11 %
+    "k1": {R_WALL: (MARBLE_GREY, None), R_BATTEN: (ASPHALT_EDGE, None), R_DOOR: (ASPHALT_EDGE, None),
+           R_DECK: (MARBLE_GREY, (0.80, 0.78, 0.74)), R_POST: (ASPHALT_EDGE, None)},
+    # K6 gri-maro (ALEASA): marmura abia incalzita; sipci, usa si stalpi gri-inchis (6) incalzit spre
+    # maro. Pereti S 0,339, L +9 %; contrastul pereti/sipci 1,48 (azi 1,26)
+    "k6": {R_WALL: (MARBLE_GREY, (1.0, 0.97, 0.93)), R_BATTEN: (ASPHALT_EDGE, (1.0, 0.85, 0.70)),
+           R_DOOR: (ASPHALT_EDGE, (1.0, 0.85, 0.70)), R_DECK: (MARBLE_GREY, (0.80, 0.77, 0.72)),
+           R_POST: (ASPHALT_EDGE, (1.0, 0.85, 0.70))},
+    # K7 albit: cremul 19 adus spre neutru-rece, sipci gri-maro deschise. Pereti S 0,349, L +14 %
+    "k7": {R_WALL: (CORAL_SAND, (0.64, 0.65, 0.76)), R_BATTEN: (MARBLE_GREY, (0.42, 0.38, 0.34)),
+           R_DOOR: (MARBLE_GREY, (0.42, 0.38, 0.34)), R_DECK: (MARBLE_GREY, (0.80, 0.77, 0.72)),
+           R_POST: (MARBLE_GREY, (0.42, 0.38, 0.34))},
+    # DOAR pentru masurare (masca de pixeli in captura): sloturile de masina, interzise in decor --
+    # garda le pica, deci nu poate ajunge in repo din greseala
+    "masca": {R_WALL: (CAR_BLUE, None), R_BATTEN: (CAR_YELLOW, None), R_DOOR: (CAR_YELLOW, None),
+              R_DECK: (WOOD, None), R_POST: (WOOD, None)},
+}
+SH_SCHEME = "k6"
 
 
 def _gable_z(x):
@@ -419,7 +457,7 @@ def shed_fn(L, n_side_win):
             xs = sorted((sx * 2.6, sx * 2.85))
             box_mm(b, xs[0], xs[1], y, y + 0.10, 0.0, 4.6, WHITE)                # tocul
             xa, xb = sorted((sx * 0.03, sx * 2.58))
-            box_mm(b, xa, xb, y, y + 0.14, 0.05, 4.58, WOOD)                     # canatul
+            box_mm(b, xa, xb, y, y + 0.14, 0.05, 4.58, R_DOOR)                   # canatul
             for xv in (0.85, 1.7):
                 box_mm(b, sx * xv - 0.05, sx * xv + 0.05, y + 0.14, y + 0.17, 0.10, 4.50, LOG_DARK)
         box_mm(b, -2.85, 5.6, y + 0.10, y + 0.28, 4.88, 5.06, DARK)               # sina de glisare
@@ -457,7 +495,7 @@ def shed_fn(L, n_side_win):
                 box_mm(b, xs[0], xs[1], yy - bt, yy + bt, 0.35, SH_EAVE - 0.28, SH_BATTEN)
         # S9 puntea + grinda de bordura (in fata, +Y Blender, platforma de 2,5 m)
         dx, y_front, y_back = SH_W2 + DECK_M, hl + DECK_FRONT, -hl - DECK_M
-        box_mm(b, -dx, dx, y_back, y_front, -0.15, 0.0, WOOD)
+        box_mm(b, -dx, dx, y_back, y_front, -0.15, 0.0, R_DECK)
         for sx in (-1, 1):
             xs = sorted((sx * (dx - 0.15), sx * (dx + 0.08)))
             box_mm(b, xs[0], xs[1], y_back - 0.08, y_front + 0.08, -0.50, -0.12, LOG_DARK)
@@ -485,7 +523,7 @@ def shed_fn(L, n_side_win):
         for (xx, yy) in sorted(piles):
             top = 1.0 if (xx, yy) in tall else -0.15
             b.cylinder((xx, yy, (PILE_BOT + top) * 0.5), PILE_R, top - PILE_BOT,
-                       WOOD if top > 0 else LOG_DARK, segments=6)
+                       R_POST if top > 0 else LOG_DARK, segments=6)
             if top > 0:
                 b.cylinder((xx, yy, top + 0.06), PILE_R + 0.04, 0.12, LOG_DARK, segments=6)
         # S11 clestele de la -2,2
@@ -499,14 +537,43 @@ def shed_fn(L, n_side_win):
     return fn
 
 
-def build_shed(L, name, n_win):
-    o = make(name, shed_fn(L, n_win), dict(samples=20, dist=3.0, gradient="none", floor=0.30))
+def build_shed(L, name, n_win, scheme=None):
+    sch = SH_SCHEMES[scheme or SH_SCHEME]
+    b = Builder()
+    shed_fn(L, n_win)(b)
+    o = b.to_object(name)
+    # rolurile (sloturi fictive >= 100) -> slotul schemei; rolul fiecarei fete ramane pentru tenta
+    attr = o.data.attributes["slot"]
+    role_of = {}
+    for poly in o.data.polygons:
+        s = int(attr.data[poly.index].value)
+        if s >= 100:
+            role_of[poly.index] = s
+            attr.data[poly.index].value = sch[s][0]
+    uv_from_slots(o)
+    o.data.materials.clear()
+    o.data.materials.append(atlas_material())
+    zs = [v.co.z for v in o.data.vertices]
+    bake_ao(o, samples=20, dist=3.0, gradient="none", floor=0.30, z_range=(min(zs), max(zs)))
 
     def ramp(co):
         if co.z < 0.0:
             return 0.55 + 0.20 * (co.z - PILE_BOT) / -PILE_BOT
         return 0.80 + 0.20 * min(1.0, co.z / 9.0) ** 0.7
     ao_mul(o, ramp)
+    # tenta pe rol, inmultita peste AO (o data pe varf: primitivele nu-si impart varfurile)
+    ca = o.data.color_attributes["AO"]
+    done = set()
+    for pi, r in role_of.items():
+        tint = sch[r][1]
+        if tint is None:
+            continue
+        for vi in o.data.polygons[pi].vertices:
+            if vi in done:
+                continue
+            done.add(vi)
+            c = ca.data[vi].color
+            ca.data[vi].color = (c[0] * tint[0], c[1] * tint[1], c[2] * tint[2], 1.0)
     return o
 
 
@@ -974,9 +1041,12 @@ def build_lions():
 # ============================================================ main
 def main():
     only = None
+    scheme = None
     for a in sys.argv:
         if a.startswith("--only="):
             only = set(a.split("=", 1)[1].split(","))
+        if a.startswith("--shed-scheme="):
+            scheme = a.split("=", 1)[1]
 
     def want(k):
         return only is None or k in only
@@ -985,10 +1055,10 @@ def main():
     if want("turntable"):
         export(build_turntable(), "sanfrancisco/structures/sf_turntable.glb", "sf_turntable.blend")
     if want("shed"):
-        export([build_shed(20.0, "PierShed", 4)], "sanfrancisco/structures/sf_pier_shed.glb",
+        export([build_shed(20.0, "PierShed", 4, scheme)], "sanfrancisco/structures/sf_pier_shed.glb",
                "sf_pier_shed.blend")
-        export([build_shed(12.0, "PierShed_Short", 2)], "sanfrancisco/structures/sf_pier_shed_short.glb",
-               "sf_pier_shed_short.blend")
+        export([build_shed(12.0, "PierShed_Short", 2, scheme)],
+               "sanfrancisco/structures/sf_pier_shed_short.glb", "sf_pier_shed_short.blend")
     if want("island"):
         export(build_island(), "sanfrancisco/structures/sf_island_light.glb", "sf_island_light.blend")
     if want("horizon"):

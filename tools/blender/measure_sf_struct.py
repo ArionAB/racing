@@ -14,9 +14,11 @@ Citeste GLB-urile direct, in coordonate Godot (cititorul si uneltele de sabotaj 
                     (+-0,01) intre fetele interioare, capul la +0,10; ghereta 2 x 2 x 2,6 (+-0,02),
                     de la Y 0, cu TOATE varfurile in afara discului (r > 5,0).
   sf_pier_shed(_short)
-                    un nod (PierShed / PierShed_Short); peretii (slot 1) 12,0 x 20,0 / 12,0 (+-0,05),
+                    un nod (PierShed / PierShed_Short); peretii (slot 29, pas 8d) 12,0 x 20,0 / 12,0 (+-0,05),
                     centrati; cheia la +9,0 (+-0,02); puntea cu fata la Y 0 (+-0,005); pilonii pana la
-                    Y -6,0 (+-0,01); usa (scandurile slot 28 la |x| < 3) DOAR pe fata -Z.
+                    Y -6,0 (+-0,01); usa (scandurile slot 28 la |x| < 3) DOAR pe fata -Z; pas 8d:
+                    fetele mari ale peretilor lungi doar pe slotul 29 si nicio fata a corpului pe un
+                    slot cald-saturat (0-3, 9, 10, 23, 27: lemnul de chei e gri-maro, nu portocaliu).
   sf_island_light   nodurile Island_Rock + Island_Light; stanca 55-70 x 35-48 m, varful +9..+11,
                     fusta la -3,0 (+-0,01); farul are 15,0 m (+-0,3) peste stanca de sub el.
   sf_horizon        exact Hill_A/B/C + City_A/B, toate radacini, fiecare cu baza la Y 0 (+-0,01) si
@@ -191,11 +193,16 @@ def check_turntable(bad, nodes):
                        % (len(inside), tuple(round(v, 2) for v in inside[0])))
 
 
+SHED_WALL_SLOT = 29          # pas 8d: lemnul gri-maro de chei (MARBLE_GREY, tenta in vertex colors)
+SHED_DECK_SLOT = 29
+SHED_ORANGE = {0, 1, 2, 3, 9, 10, 23, 27}   # sloturile calde/saturate care au facut magazia portocalie
+
+
 def check_shed(bad, nodes, name, L):
     d = nodes.get(name)
     if not d:
         return
-    walls = _pts(d, {1})
+    walls = _pts(d, {SHED_WALL_SLOT}, lambda p: p[1] > 0.3)
     if walls:
         (x0, x1), (_y0, _y1), (z0, z1) = _box(walls)
         _near(bad, "amprenta", "latimea peretilor", x1 - x0, 12.0, 0.05)
@@ -203,13 +210,28 @@ def check_shed(bad, nodes, name, L):
         _near(bad, "amprenta", "centrul X", (x0 + x1) * 0.5, 0.0, 0.05)
         _near(bad, "amprenta", "centrul Z", (z0 + z1) * 0.5, 0.0, 0.05)
     else:
-        bad.append("(amprenta) niciun perete pe slotul 1")
+        bad.append("(amprenta) niciun perete pe slotul %d" % SHED_WALL_SLOT)
+    # lemnul: fetele mari ale peretilor lungi (planul |x| = 6,0, > 1 m2) stau pe slotul peretelui,
+    # iar nicio fata a corpului (peste punte) nu e pe un slot cald-saturat
+    ts = _tri_slots(d)
+    big = set()
+    for t, k in zip(d["tris"], ts):
+        n, area = _tri_geo(d, t)
+        if area > 1.0 and abs(n[0]) > 0.99 and all(abs(abs(d["verts"][i][0]) - 6.0) < 0.005 for i in t):
+            big.add(k)
+    big.discard(22)              # braul alb de streasina (fata lui interioara sta in acelasi plan)
+    if big != {SHED_WALL_SLOT}:
+        bad.append("(lemn) peretii lungi pe sloturile %s, contract {%d}" % (sorted(big), SHED_WALL_SLOT))
+    hot = sorted({k for t, k in zip(d["tris"], ts) if k in SHED_ORANGE
+                  and min(d["verts"][i][1] for i in t) > 0.05})
+    if hot:
+        bad.append("(lemn) corpul foloseste sloturile calde %s (lemnul de chei e gri-maro)" % hot)
     (_a, _b), (y0, y1), (_c, _d) = _box(d["verts"])
     _near(bad, "cheia", "varful acoperisului", y1, 9.0, 0.02)
     roof = _pts(d, {6}, lambda p: abs(p[0]) < 0.5)
     if not roof or max(p[1] for p in roof) < 9.0 - 0.02:
         bad.append("(cheia) acoperisul (slot 6) nu urca la +9,0 deasupra axei")
-    deck = _pts(d, {9}, lambda p: abs(p[0]) > 6.1 and -0.5 < p[1] < 0.5)
+    deck = _pts(d, {SHED_DECK_SLOT}, lambda p: abs(p[0]) > 6.1 and -0.5 < p[1] < 0.5)
     if not deck:
         bad.append("(punte) nicio scandura de punte langa pereti")
     else:
@@ -517,6 +539,11 @@ def sabotages(key):
              _mv(name, lambda p: abs(p[1]) < 0.001 and abs(p[0]) > 6.5, lambda p: (p[0], 0.10, p[2]))),
             ("pilonii scurtati la -4", "piloni", _mv(name, lambda p: p[1] < -5.9, lambda p: (p[0], -4.0, p[2]))),
             ("magazia intoarsa (usa pe +Z)", "fronton", _mv(name, lambda p: True, lambda p: (-p[0], p[1], -p[2]))),
+            ("peretii inapoi pe SAND_MID 1 (portocaliul de la 8c)", "lemn",
+             lambda g, b: _uv_where(g, b, name, lambda p, k: k == SHED_WALL_SLOT and p[1] > 0.3, 1.5 / 32)),
+            ("sipcile inapoi pe WOOD 9", "lemn",
+             lambda g, b: _uv_where(g, b, name, lambda p, k: k == 6 and 0.3 < p[1] < 5.2
+                                    and abs(abs(p[0]) - 6.0) < 0.06, 9.5 / 32)),
         ]
     elif key == "sf_island_light":
         out += [

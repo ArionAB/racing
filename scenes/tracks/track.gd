@@ -4568,7 +4568,11 @@ static func themes() -> Dictionary:
 		"fog_begin": 170.0,
 		"fog_end": 360.0,
 		"fog_curve": 1.4,
-		"fog_max": 0.55,
+		# Valul 3 (16 nov 2026): 0,55 -> 0,40, cu inelul de fundal pus. La 0,55 malul celalalt si
+		# orasul de dincolo de pod citeau ceata; la 0,40 inelul si insula ies ca DEPARTARE, iar la
+		# planul indepartat (380 m) geometria mai poarta 40 % pacla (la 0,28, pe capturi statice, nu
+		# s-a vazut o muchie, dar marginea lumii devine transparenta la 72 %: de judecat in miscare).
+		"fog_max": 0.40,
 		"shadows": true,
 		"shadow_opacity": 0.70,
 		"shadow_distance": 120.0,
@@ -4595,10 +4599,31 @@ static func themes() -> Dictionary:
 		# implicit: prima captura a strazii sintetice citea "desert".
 		"savanna_grass_w": 1.0,
 		"savanna_grass_tint": Color.html("B9A45E"),
-		# Fara siluetele de orizont implicite (butte-uri de desert): fundalul il face scena
-		# (podul, insula, dealurile din Marin). Un model valid cu ZERO inele = nimic pus.
-		"horizon_model": "res://assets/models/carrara/effects/carrara_horizon.glb",
-		"horizon_rings": [],
+		# FUNDALUL (inventar F2, valul 3): dealuri aurii joase (`Hill_A/B/C`, 30-38 m) si doua
+		# orase generice de turnuri (`City_A/B`, 76-80 m) din `sf_horizon.glb`, ca la Carrara: un
+		# inel per piesa, pozitie FIXA (`at`, lume; harta y = -z), fara pod. Arcul: dincolo de
+		# malul celalalt spre E (vazut de pe pod spre larg si din balon) si spre S-SV, la capatul
+		# stramtorii (vazut de pe strada tramvaiului 1, la urcare). Niciuna in lume (x > 644 sau
+		# y < -268, `world_half_extent_m` 475) si niciuna in axul capatului de E al podului
+		# (y 228; orasul de la E sta la y 140, la ~420 m de capatul de E: dincolo de planul indepartat
+		# din orice punct al podului). Dealurile au acelasi yaw (+X = ENE, ca chiparosii parcului: palcurile de pe
+		# ele se apleaca la fel); orasele tangente la privire, la scara 0,6 (~47 m: din camera de
+		# joc, la ~340 m, cadrul vede ~47 m din piesa). Peste apa `dy` ridica baza la nivelul
+		# marii (fundul golfului e la -8). Cotele legate: inel <= ~350 m de privire < fog_end 360
+		# < FAR_PLANE 380 (memoria `efecte-de-fundal-cote-legate`).
+		"horizon_model": "res://assets/models/sanfrancisco/structures/sf_horizon.glb",
+		"horizon_rings": [
+			{"count": 1, "near": 250.0, "far": 350.0, "clear": 150.0, "scale": 1.0, "picks": ["Hill_C"],
+				"at": Vector2(780.0, -380.0), "yaw_deg": 22.5, "dy": 10.0},
+			{"count": 1, "near": 250.0, "far": 350.0, "clear": 150.0, "scale": 1.0, "picks": ["Hill_A"],
+				"at": Vector2(790.0, -150.0), "yaw_deg": 22.5, "dy": 0.0},
+			{"count": 1, "near": 250.0, "far": 350.0, "clear": 150.0, "scale": 0.6, "picks": ["City_A"],
+				"at": Vector2(880.0, -140.0), "yaw_deg": 90.0, "dy": 0.0},
+			{"count": 1, "near": 250.0, "far": 350.0, "clear": 150.0, "scale": 1.15, "picks": ["Hill_B"],
+				"at": Vector2(170.0, 400.0), "yaw_deg": 22.5, "dy": 0.0},
+			{"count": 1, "near": 250.0, "far": 350.0, "clear": 150.0, "scale": 0.8, "picks": ["City_B"],
+				"at": Vector2(95.0, 450.0), "yaw_deg": 0.0, "dy": 0.0},
+		],
 		"horizon_class": "",
 		# Umerii soselei = trotuarul de beton (CONCRETE 8), nu praf colorat.
 		"shoulder_color": Palette.color(Palette.CONCRETE),

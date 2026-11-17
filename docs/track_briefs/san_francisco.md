@@ -2526,6 +2526,116 @@ parcate (4,2 m) sunt refuzate de `BumpProp` (plafonul de 2 m), deci rămân stat
    felinarele −9, arborii de stradă −27, semafoarele −1. **Buffere MultiMesh pe pistă: 367** (buget
    iPhone 2.500).
 
+   **8e, a doua trecere: curtea porții și păsările unde se văd (17 nov 2026)**, aceeași ramură,
+   blocul „CURTEA PORTII” din `gen_sf_route.py` plus schimbările din blocurile păsărilor și ale
+   sunetului. Decizia dezvoltatorului: o poartă e o intrare, deci îi trebuie ceva în spate; iar
+   papagalii și pescărușii stăteau unde camera nu se uită. **`SF_8E_CURTE=0` reface scena comisă a
+   primei treceri (1c88a4dc) octet cu octet; `SF_PAS8E=0` reface în continuare scena de dinainte
+   de 8e** (verificate amândouă după ultima regenerare). Arborii de stradă de pe B și bufnitura de
+   aterizare au rămas neatinși.
+
+   | ce | cât | unde / cum |
+   |---|---|---|
+   | pavaj (curtea + ulița) | 806 triunghiuri, 18,6 × 45 m | de la 3 m dincolo de marginea carosabilului colțului, prin poartă, încă 32 m după ea (hartă y −132,7 … −178), pe teren + 0,08 m. **Materialul trotuarului** (aceleași argumente de material, deci același obiect: tot 23), în plasa și corpul LUI, `TrotuarCurte` (`Track.paved_patches`, nou în `track.gd`). **Nu e drum**: `is_on_road` citește doar `paved_level_zones` |
+   | case din kit (`sf_row_end_*`) | 4, două pe latură | fațadele la 11,5 m de axa uliței, de la 18 la 32 m după poartă (end_a_m, end_b / end_b, end_c_m), cutii de coliziune sub `CurtePoartaCorpuri`, numărate de `probe_sf_watch` (`=== SF curte`) |
+   | ghirlande (`sf_lantern_string`) | 2 × 3 module | peste uliță, între fațade, prinse la +6 m peste pavaj (cel mai jos punct la 4,45 m) |
+   | felinare (`sf_street_lamp`), bănci, arbori de stradă | 2 / 2 / 2 | felinarele și băncile pe marginea pavajului, arborii de o parte și de alta a curții, în afara lățimii porții |
+   | papagali cocoțați | 28 (16 → 28) | **poarta** (coama, colțurile ridicate, capacele stâlpilor exteriori), cablul ghirlandelor de pe B, brațele semafoarelor (muchia 1 și capătul străzii tramvaiului), capetele felinarelor uliței; cei de pe bănci au rămas; scara 1,6–1,8 |
+   | papagali în mișcare (`PathMover`, fără coliziune) | 4 | o buclă îngustă care traversează strada coamei (x 80–89, ±11 m de axă), la 4,5–6,3 m peste drum, 9 m/s; cei 5 statici de deasupra caselor pictate au ieșit |
+   | pescăruși cocoțați | 28 | capetele felinarelor tablierului (8), primii stâlpi ai parapetului unde intră camera pe pod (4: la V pe latura de N, la E pe cea de S), magaziile și pontonul ca înainte; **parapetul de la capul de V a ieșit** |
+   | pescăruși în mișcare | 6 | două bucle de 224 × 20 m, cu latura dinspre pod la ~13,5 m de axa benzii (7 m în afara parapetului), la cota tablierului + 2…3,2 m, pe fondul apei, mergând în sensul benzii de lângă ea; trei pe buclă, fazele la o treime; scara 2,0; 13 m/s. Cei 3 statici de peste strâmtoare au ieșit |
+   | sunet | 8 locuri (6 → 8) | noi: „papagali poarta”, „pescarusi tablier”; „papagali parc S” (fără nicio pasăre la mai puțin de 59 m) mutat pe ghirlandele de pe B; ritmul neschimbat |
+
+   **Casele și silueta porții** (`img/sf_route/p8e_poarta_imbracata_drumul.png`, de pe linia de cursă
+   la 120 / 60 / 40 / 26 m, înainte și după; `…_detaliu.png` arată și așezarea respinsă). Prima
+   așezare (fațadele la 9 m, trei case pe latură de la 12 m) **strica**: la 120 m casa roz din
+   dreapta stătea lipită de acoperișul lateral al porții, la 60 și 40 m ambele case atingeau
+   streașina. **Le-am mutat înapoi (de la 18 m) și în laturi (fațadele la 11,5 m) și am scos câte una
+   pe latură.** Mai departe nu se poate: terenul cade spre E și casa E1 ar ieși din fustă (2,5 m la
+   20 m sau la 12 m de axă; plafonul e fusta). Acum creasta în trepte a porții stă pe cer de la toate
+   cele patru distanțe; la 120 m casa roz e în dreapta ei, cu cer între ele, iar la 26 m poarta e
+   oricum în afara cadrului. La capătul uliței **terenul nu e plat** (cade ~17 % după 29 m, prea puțin
+   pentru o scară), deci ulița se termină la ultimele case.
+
+   **Ce se citește** (`img/sf_route/p8e_pasari_vizibile_*.png`, camera de joc):
+   - papagalii de pe poartă: **da**, de la 40 m, corp verde și cap roșu, pe coamă și pe colțuri
+     (`…_poarta`); stau pe creastă, cu cerul în spate, deci verdele lor nu se pierde pe acoperișul
+     verde și n-a fost nevoie de mutat pe capace;
+   - papagalii în mișcare de pe coamă: **se văd și se mișcă** (secvența 0 / 1 / 2 s, `…_coama`), dar
+     mici: la 25–35 m sunt păsări de 10–15 px; în cursă trec pe deasupra camerei în ~1 s;
+   - pescărușii de pe felinarele tablierului: **da**, albi pe capacul felinarului (`…_pod`);
+   - pescărușii în mișcare: la scara 1,1 erau un punct de câțiva pixeli; **la 2,0 se citesc ca
+     pescăruși pe fondul dealului și al apei**, la 30–60 m în față (`…_pod`, secvența de la x 350,
+     3,4 / 4,4 / 5,4 s). Nu în fiecare cadru: șase păsări pe două bucle de ~450 m; cadrele de la
+     x 290 și x 420 nu prind niciunul aproape;
+   - **picioarele turnurilor n-au poliță la cota tablierului**: soclul de beton e la 16 m sub el
+     (măsurat pe `sf_bridge_tower.glb`) și nu se vede de pe pod, deci acolo n-am pus nimic. În locul
+     lor, primii stâlpi ai parapetului.
+
+   **Gărzi** (pe scena finală; „înainte” = prima trecere 8e):
+
+   | | înainte | după | prag |
+   |---|---|---|---|
+   | `probe_decor --track=25`: materiale | 23 | **23** | ≤ 38 |
+   | desene statice / triunghiuri (pista întreagă) | 472 / 2 016 366 | 485 / 2 033 281 | — |
+   | `ProbeLaneClear --track=17` | 50 | 50 | 50 |
+   | soare pe lanț (`ProbeSfLight --real`) | 82,0 % | 82,0 % | ≥ 80 % |
+   | `probe_decor_overlap --manual` (peste asfalt) | 73 | 73, aceleași piese | 73 |
+   | `ProbeSfRoute`, `ProbeSfCase`, `ProbeSfSpate`, `ProbeSfTrotuar`, `ProbeSfStalp`, `ProbeSfScari`, `probe_manual --track=25` | OK | OK | — |
+   | `ProbeSfSunet` | OK (6 locuri) | OK (8 locuri; nou: fiecare loc de pescăruși / papagali are păsări cocoțate la ≤ 45 m, cel mai departe 29,6 m) | — |
+   | `ProbeSfTeatru` | OK, 4 sabotaje | OK, **6 sabotaje, toate pică** | — |
+
+   `ProbeSfTeatru`, nou în a doua trecere: **curtea** — niciun centru de triunghi de pavaj pe drum
+   (`is_on_road`), prima suprafață sub fiecare e `TrotuarCurte` (nu nisip), colțurile caselor (pe
+   cutiile de coliziune, 0,5 m înăuntru) la ≥ 3 m de marginea oricărei benzi (cel mai aproape 26,4 m)
+   și nu pe trotuar, ghirlandele uliței la ≥ 4 m peste pavaj (4,45); **buclele în zbor** — fiecare
+   punct la ≥ 1 m peste suprafața vizuală de sub el (apa inclusă), pescărușii la ≥ 12 m de orice
+   bandă (13,4–13,7), papagalii (singurii marcați să treacă peste carosabil) la ≥ 4 m peste drum
+   (≥ 4,5) și niciodată în fereastra unei muchii (0 puncte). Sabotaje noi: `curte` (pavajul și casele
+   cu 20 m spre N, pe carosabilul colțului: 86 de triunghiuri pe drum) și `zbor` (buclele cu 4 m mai
+   jos: pică toate 10); `pasari`, `barci`, `poarta`, `lampioane` pică în continuare. **Capcană găsită
+   pe drum:** lipite în plasa `Trotuar`, plăcile curții îi lărgeau cutia și Jolt cuantiza altfel
+   vârfurile: o cusătură dintre două patrulatere de pe B (z 7,11) se deschidea cu ~0,25 mm, iar
+   `ProbeSfTrotuar` vedea „nisip peste placă” pe 34 de puncte. Cu plasa și corpul lor separate,
+   `Trotuar` e exact cel de dinainte.
+
+   **Lotul** (8 × 16 × 250 s, seed-uri noi 113–128, `--seed-ai-prefs`, aceeași zi; control =
+   `SF_8E_CURTE=0`):
+
+   | | control (prima trecere 8e) | scena finală |
+   |---|---|---|
+   | tur mediu | 82,79 s | 83,07 s |
+   | tramvaiul 1 / 2, cu contact | 1,9 / 3,4 % | 2,0 / 1,1 % |
+   | pod: peste despărțitor / frontale în coridor / barieră | 0 / 0 / 3,1 % | 0 / 0 / 4,3 % |
+   | repuneri / ejectări / `[blocaj]` | 8 / 5 / 16 | 5 / 2 / 15 |
+   | ponton: căderi | 1,03 % | 0 % |
+   | contacte case din față / din spate | 5 / 0 | 3 / 0 |
+   | **contacte cu casele uliței** | — | **0** |
+   | **contacte cu poarta** | 0 | **0** |
+   | stâlpi: contacte semafor / felinar / arbore | 0 / 1 / 6 | 0 / 0 / 2 |
+   | treceri serpentine / ocol | 204 / 180 | 195 / 189 |
+
+   Nimic din curte nu e atins (nici casele, nici felinarele și arborii ei, care au trunchi solid);
+   urcarea spre poartă n-are niciun incident în lotul final. Diferențele dintre coloane sunt istorii
+   diferite de tur 1 (corpurile în plus schimbă numeric simularea), nu curtea; frontalele „oriunde”
+   (2 → 8) sunt toate la furca serpentinelor, iar loturile de până acum au dat 4–6. Lotul final a
+   rulat pe scena dinaintea ultimei schimbări a pescărușilor în mișcare (patru, la 16 m, scara 1,1 →
+   șase, la 13,5 m, scara 2,0): păsări fără coliziune, deci nimic din ce măsoară lotul.
+
+   **Costul pe profilul de telefon** (`ProbePerf --track=17 --mobile --phone-shadow --lod-bias=1.0`,
+   desktop, aceeași rulare pe ambele scene; **un proxy, nu o măsurătoare pe iPhone**):
+
+   | | desene medie / vârf | triunghiuri medie | buffere MultiMesh | GPU ms mediană |
+   |---|---|---|---|---|
+   | prima trecere 8e (`SF_8E_CURTE=0`) | 169 / 306 | 236k | 367 | 0,39 |
+   | curtea + păsările | 173 / 307 | 237k | 369 | 0,39 |
+
+   Atribuirea: păsările în mișcare 3 desene în medie, stolurile cocoțate câte 1; curtea se coace în
+   `DecorManual` (aceeași limită ca la prima trecere: atribuirea pe nume după coacere iese 0).
+
+   Unelte noi: `snapshot --mover-time=S` (fiecare `PathMover` la S secunde din faza lui, pentru
+   secvențe); `ProbeSfTrotuar`, `ProbeSfCase` și `ProbeSfTeatru` știu de `TrotuarCurte`.
+
 ## 8. Lecții aplicate anticipat, și ce a fost respins
 
 - **Săritura s-a măsurat înaintea traseului**, nu după decor: profilul blocului

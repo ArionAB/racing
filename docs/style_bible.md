@@ -173,21 +173,53 @@ Ce e permis:
   > ⚠️ Patch-urile texturate din atlas **nu se văd pe prop-uri**. UV-urile lor
   > sunt colapsate pe un punct, deci derivata e zero și fața citește un singur
   > texel. Măsurat: faleza avea deviație **0.76** cu atlas texturat cu tot.
-  > Detaliul vine din stratul de mai jos, nu de aici.
+  > Pe obiecte nu mai vine nici din stratul de mai jos: e stins (17 nov 2026).
 
-- **Stratul de detaliu triplanar** — sursa reală a texturii de suprafață.
-  `detail_albedo` + `uv2_triplanar` în `Palette.world_material()`. Triplanarul își
-  calculează coordonatele din poziția și normala vârfului, deci **nu citește
-  niciun UV**: assets-urile rămân neatinse și materialul rămâne unul singur.
-  `uv2_scale = 0.35` → o repetiție la **2.86 m**.
+- **Stratul de detaliu triplanar pe obiecte — STINS** (decizia dezvoltatorului,
+  17 nov 2026: granulația „arăta ca zgomot, foarte fals”; o vrea cât mai puțin
+  sau deloc). Obiectele de pe materialul lumii (`Palette.world_material()` și
+  copiile lui: tentă, finisaj, glow, frunziș, mașinile) și tuful Cappadociei
+  (`prop_detail_fade.gdshader`) stau pe **culoarea slotului plus umbrirea coaptă
+  în vertex color**, fără nicio textură peste. Comutatorul e o singură constantă,
+  `Palette.DETAIL_GLOBAL_STRENGTH = 0.0`; la 0 stratul nici nu se plătește
+  (`detail_enabled = false` pe materialul lumii, `detail_on = false` în shaderul
+  de tuf, care sare peste cele patru eșantionări).
 
-  **Masca per slot** (`detail_mask.png`, 32×1 RGBA) face din slot un canal de
-  autorat: nisip/rocă/bazalt 1.00 · lemn 0.85 · beton 0.75 · rugină 0.70 ·
-  asfalt 0.55 · olane 0.55 · vegetație 0.45 · bordură 0.35 · metal vopsit 0.30 ·
-  apă 0.25–0.30 · spumă 0.20 · **accente mașini 0.00**
-  (§1 — mașinile rămân cele mai curate suprafețe din cadru).
-  Apa și spuma stau jos deliberat: stratul de detaliu e o textură de *rocă*, iar
-  la intensitate mare face marea să arate ca noroi.
+  **Ce rămâne texturat** — nu trece prin stratul ăsta și nu e atins: șoseaua
+  (`road_detail_fade`), terenul (`terrain_splat`), apa (`water.gdshader`) și
+  materialele de clasă (trim sheet-ul de rocă și celelalte din
+  `Palette.CLASS_TEXTURES`), care își aduc texturile lor.
+
+  **Mecanismul rămâne întreg, dacă se vrea înapoi.** Masca per slot
+  (`detail_mask.png`, 32×1) e tabelul desenat (`STRENGTH` din
+  `tools/generate_palette_atlas.gd`: rocă/nisip/bazalt 1.00 · lemn 0.85 · beton
+  0.75 · rugină 0.70 · asfalt 0.55 · olane 0.55 · vegetație 0.45 · bordură 0.35 ·
+  metal vopsit 0.30 · apă 0.25–0.30 · spumă 0.20 · lavă 0.15 · accente mașini
+  0.00) **înmulțit cu tăria globală**, deci la 0 e neagră. Ca să urci granulația:
+  pui o valoare > 0 în constantă și regenerezi masca
+  (`_write_detail_mask`, octet cu octet). Pentru UN singur rol, nu pentru toată
+  lumea, se coboară celelalte sloturi din `STRENGTH` (o tărie per slot), nu se
+  urcă constanta — și se verifică cine mai folosește slotul
+  (`tools/probe_detail_census.gd`), fiindcă sloturile se reutilizează între piste.
+
+  **Tăria stă în toate cele patru canale (R = G = B = A).** `StandardMaterial3D`
+  citește **roșul** măștii (`mix(ALBEDO.rgb, detail, detail_mask_tex.r)` în codul
+  generat de Godot 4.7), iar `prop_detail_fade.gdshader` citește alfa. Până în
+  nov 2026 tăria stătea doar în alfa, deci pe materialul lumii a fost 1.00 pe
+  toate sloturile din ziua în care a apărut stratul — inclusiv pe mașini.
+  **Importul măștii nu se schimbă înapoi:** fără compresie, fără mipmap-uri,
+  `fix_alpha_border = false`. Comprimată (BC3), textura de 32×1 nu se creează
+  deloc pe D3D12 (`CreateResource failed 0x80070057`, iar shaderul cade pe alb);
+  mipmap-urile ar amesteca sloturile vecine; `fix_alpha_border` umple RGB-ul
+  sloturilor cu alfa 0 (14–16) cu valorile vecinilor. Garda:
+  `tools/probe_detail_mask.gd` (cu fereastră) — pică dacă granulația reapare cât
+  timp constanta e 0, și verifică în memorie că masca urmează tabelul când
+  constanta e urcată.
+
+  Stratul întuneca tot ce acoperea (textura are media ~0.9): stins, obiectele
+  sunt cu câteva puncte mai luminoase decât înainte. Albul curat (salina
+  Serengeti) se ține sub plafon prin tonul plăcii (`Flock.disc_tone`), nu prin
+  textură.
 
 - **Apa răspunde la lumină, nu doar la culoare** (v12, sep 2026,
   `water.gdshader` § „STRAT ILUMINAT"). Opacă și unshaded rămâne (contractele

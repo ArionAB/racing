@@ -640,6 +640,9 @@ func _crust(poly: PackedVector2Array, cx: float, cz: float, sea: float) -> void:
 		return
 	_out.append('[node name="E_CrustaSare" type="MultiMeshInstance3D" parent="%s"]' % ZONE)
 	_out.append('script = ExtResource("flock")')
+	# Ton sub alb (centru 0.65, margine 0.55): fara stratul de detaliu (stins pe
+	# 17 nov 2026) salina iesea 98% la plafon. Vezi Flock.disc_tone.
+	_out.append("disc_tone = Vector2(0.65, 0.55)")
 	_out.append("disc_slot = 22")
 	_out.append("disc_radius = 7.0")
 	_out.append("scale_min = 0.75")

@@ -16,10 +16,26 @@ extends RefCounted
 ## pe [code]Palette.uv(slot)[/code], aici se citeste aceeasi valoare.
 
 const ATLAS_PATH: String = "res://assets/textures/palette_atlas.png"
-## Stratul de detaliu de suprafata, aplicat triplanar peste toata lumea.
+## Stratul de detaliu de suprafata, triplanar pe obiecte. STINS din 17 nov 2026,
+## vezi DETAIL_GLOBAL_STRENGTH.
 const DETAIL_PATH: String = "res://assets/textures/detail_rock.png"
-## Cat de tare bate detaliul pe fiecare slot (alfa per slot, 32x1).
+## Cat de tare bate detaliul pe fiecare slot (32x1; taria in R=G=B=A, fiindca
+## materialul lumii citeste R, iar prop_detail_fade.gdshader citeste A).
 const DETAIL_MASK_PATH: String = "res://assets/textures/detail_mask.png"
+## TARIA GLOBALA a stratului de detaliu pe obiecte: 0 = STINS. Decizia
+## dezvoltatorului, 17 nov 2026: granulatia triplanara "arata ca zgomot, foarte
+## fals"; obiectele raman pe culoarea slotului si umbrirea coapta in vertex color.
+## Controleaza ambele cai care citesc masca de slot: `world_material()` (si toate
+## copiile lui: atint, finish, glow, foliage, masinile) si `faded_detail_material()`
+## (prop_detail_fade.gdshader, tuful Cappadociei). La 0 stratul nu se plateste:
+## materialul lumii are `detail_enabled = false`, iar shaderul de tuf sare peste
+## esantionari. NU atinge soseaua, terenul, apa sau materialele de clasa
+## (trim sheet-ul de roca si celelalte): au texturile lor, separate.
+## Pentru a-l urca: o valoare > 0 aici, apoi se regenereaza masca
+## (`tools/generate_palette_atlas.gd`, `_write_detail_mask`): masca scrisa e
+## tabelul desenat per slot (`STRENGTH`) x factorul asta. Garda:
+## tools/probe_detail_mask.gd.
+const DETAIL_GLOBAL_STRENGTH: float = 0.0
 ## Scara detaliului: 1 / 0.35 = o repetitie la 2.86 m.
 const DETAIL_SCALE: float = 0.35
 ## Trim sheet-ul COLOR al clasei de roca (vezi rock_material()).
@@ -314,10 +330,25 @@ static func world_material() -> StandardMaterial3D:
 		# capata detaliu de suprafata fara unwrap, fara re-export si, esential,
 		# FARA MATERIAL NOU: garda de draw call-uri nu se misca.
 		#
-		# Masca (32x1 RGBA, alfa per slot) se esantioneaza pe UV1, adica pe
+		# Masca (32x1, taria slotului in R=G=B=A) se esantioneaza pe UV1, adica pe
 		# centrul slotului — asa slotul din paleta devine si canal de intensitate:
-		# roca primeste tot, masinile nimic.
-		_shared.detail_enabled = true
+		# roca primeste tot, masinile nimic. StandardMaterial3D citeste ROSUL
+		# mastii (`mix(ALBEDO.rgb, detail, detail_mask_tex.r)` in codul generat de
+		# Godot 4.7); pana in nov 2026 taria statea doar in alfa, deci aici era 1.0
+		# pe toate sloturile. Vezi tools/generate_palette_atlas.gd
+		# (_write_detail_mask) si tools/probe_detail_mask.gd.
+		# Importul mastii ramane FARA compresie, FARA mipmap-uri si fara
+		# fix_alpha_border: comprimata, textura de 32x1 nu se creeaza pe D3D12
+		# (shaderul cade pe alb = 1.0 peste tot), mipmap-urile amesteca sloturile
+		# vecine, iar fix_alpha_border umple sloturile cu alfa 0 (14..16) cu
+		# culoarea vecinilor. Un slot coborat se si LUMINEAZA: detaliul are media
+		# ~0.9 si intuneca tot ce acopera (style_bible §4).
+		#
+		# STINS din 17 nov 2026 (DETAIL_GLOBAL_STRENGTH = 0, decizia
+		# dezvoltatorului): fara `detail_enabled`, shaderul generat nu mai
+		# esantioneaza nici textura de detaliu, nici masca. Restul configuratiei
+		# ramane, ca urcarea constantei sa repuna mecanismul intreg.
+		_shared.detail_enabled = DETAIL_GLOBAL_STRENGTH > 0.0
 		_shared.detail_albedo = load(_detail_now())
 		_shared.detail_mask = load(DETAIL_MASK_PATH)
 		_shared.detail_blend_mode = BaseMaterial3D.BLEND_MODE_MUL
@@ -2499,6 +2530,8 @@ static func faded_detail_material() -> ShaderMaterial:
 	mat.set_shader_parameter("detail_tex", load(_detail_now()))
 	mat.set_shader_parameter("detail_mask_tex", load(DETAIL_MASK_PATH))
 	mat.set_shader_parameter("detail_scale", DETAIL_SCALE)
+	# Stins cu totul cat timp taria globala e 0 (vezi DETAIL_GLOBAL_STRENGTH).
+	mat.set_shader_parameter("detail_on", DETAIL_GLOBAL_STRENGTH > 0.0)
 	# Fereastra de stingere e MAI SCURTA decat pe teren (26->130 m). Nu din
 	# gust: terenul se vede razant si se intinde pana in ceata, deci are nevoie
 	# de o tranzitie lunga ca sa nu apara un inel. Un horn e un obiect cu

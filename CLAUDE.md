@@ -197,8 +197,13 @@ res://
   mai mici de coacere NU ajută (măsurat: adaugă triunghiuri și desene — vezi
   nota de la `TrackDecorBatch.CELL_M`).
 - **Texturi: materiale de clasă, nu per asset.** Culoarea vine dintr-un atlas
-  de paletă, detaliul de suprafață dintr-un strat triplanar partajat
-  (`Palette.world_material()`). Un asset nu aduce NICIODATĂ texturi proprii —
+  de paletă (`Palette.world_material()`), cu AO și tente în vertex colors.
+  **Stratul triplanar de detaliu de pe obiecte e STINS** (decizia
+  dezvoltatorului, 17 nov 2026: granulația arăta a zgomot, fals):
+  `Palette.DETAIL_GLOBAL_STRENGTH = 0`. Nu se readuce ca remediu la „arată
+  plat”; o suprafață care iese stricată fără el (arsă spre alb, confundată cu
+  vecina) se repară din culoare sau tentă. Drumul, terenul, apa și materialele
+  de clasă își păstrează texturile lor. Un asset nu aduce NICIODATĂ texturi proprii —
   dar o *clasă* de assets poate primi un material partajat deliberat (trim
   sheet de rocă, decal-uri de urme), decis explicit, nu strecurat. Asta e ce
   ține draw call-urile jos: garda numără totalul de materiale per pistă.

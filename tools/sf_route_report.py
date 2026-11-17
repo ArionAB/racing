@@ -453,6 +453,14 @@ def main():
         if vs:
             print(f"    viteza celui care loveste: med {st.median(vs):.1f} m/s, max {max(vs):.1f}")
 
+    c_n, c_seen = 0, 0
+    for p in logs:
+        m = re.search(r"^=== SF curte: contacte case ulitei portii (\d+)", open(p, encoding="utf-8", errors="replace").read(), re.M)
+        if m:
+            c_seen += 1
+            c_n += int(m.group(1))
+    if c_seen:
+        print(f"  CURTEA PORTII (pasul 8e): contacte cu casele ulitei {c_n} in {c_seen} seed-uri cu contor")
     g_n, g_seen, g_rows = 0, 0, []
     for p in logs:
         txt = open(p, encoding="utf-8", errors="replace").read()

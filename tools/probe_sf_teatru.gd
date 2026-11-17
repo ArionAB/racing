@@ -24,6 +24,8 @@ extends Node
 ##         5. gradinita: pe teren (|baza - teren| <= 0,15).
 ##       `--sabotaj=pasari` coboara pasarile cocotate cu 0,3 m, `barci` muta un punct pe ponton,
 ##       `poarta` ridica poarta cu 0,4 m, `lampioane` le coboara cu 2,5 m: fiecare TREBUIE sa pice.
+##         6. (a doua trecere) curtea portii si pasarile in miscare: vezi `_check_curte` si
+##            `_check_movers`; sabotajele `curte` si `zbor`.
 ## Exit 1 daca pica ceva sau daca n-a gasit nimic de masurat.
 
 const REQ_PATH := "res://tools/data/sf_8e_perch_req.tsv"
@@ -76,6 +78,8 @@ func _ready() -> void:
 	n += _check_gate()
 	n += _check_lanterns()
 	n += _check_garden()
+	n += _check_curte()
+	n += _check_movers()
 	if n == 0:
 		_fails += 1
 		print("nimic de masurat (scena fara pasul 8e?)")
@@ -83,13 +87,13 @@ func _ready() -> void:
 	get_tree().quit(1 if _fails > 0 else 0)
 
 
-## Toate MeshInstance3D vizibile ale pistei, cu triunghiurile lor (fara barci: se misca).
+## Toate MeshInstance3D vizibile ale pistei, cu triunghiurile lor (fara barci si pasarile in zbor: se misca).
 func _collect_meshes() -> void:
 	var stack: Array[Node] = [_track]
 	var cache := {}
 	while not stack.is_empty():
 		var nd: Node = stack.pop_back()
-		if String(nd.name) == "Barci":
+		if String(nd.name) in ["Barci", "PasariZbor"]:
 			continue
 		for c in nd.get_children():
 			stack.append(c)
@@ -343,4 +347,150 @@ func _check_garden() -> int:
 	if bad:
 		_fails += 1
 	print("  gradinita: %d module, baza - teren cel mai departe %+.2f m [prag 0,15]%s" % [n, worst, "   PICA" if bad else ""])
+	return n
+
+
+## PASUL 8e, a doua trecere: CURTEA PORTII. Pavajul (`Track.paved_patches`) NU e drum (`is_on_road` fals
+## in centrul fiecarui triunghi) si e suprafata de deasupra (prima suprafata de rulare e `Trotuar`, nu
+## nisip peste el); casele ulitei (`DecorManual/CurtePoarta`, metadata `sf_case`) au amprenta in afara
+## carosabilului si a trotuarului; ghirlandele ulitei la >= CURTE_CLEAR peste pavaj.
+## `--sabotaj=curte` muta pavajul si casele cu 20 m spre N (pe carosabilul coltului): TREBUIE sa pice.
+const CURTE_CLEAR: float = 4.0
+const CURTE_ROAD_GAP: float = 3.0
+
+
+func _walk_name(x: float, z: float) -> String:
+	var excl: Array[RID] = []
+	for _k in 12:
+		var q := PhysicsRayQueryParameters3D.create(Vector3(x, 300.0, z), Vector3(x, -100.0, z))
+		q.exclude = excl
+		var hit := _space.intersect_ray(q)
+		if hit.is_empty():
+			return ""
+		var col := hit["collider"] as Node
+		var nm := String(col.name) if col != null else ""
+		if nm in ["Trotuar", "TerrainBody", "RoadTop", "RoadSides", "Shoulders"]:
+			return nm
+		excl.append(hit["rid"])
+	return ""
+
+
+func _check_curte() -> int:
+	var pp := _track.paved_patches
+	if pp.size() < 3:
+		return 0
+	var on_road := 0
+	var sand := 0
+	var n := 0
+	for k in range(0, pp.size() - 2, 3):
+		var c := (pp[k] + pp[k + 1] + pp[k + 2]) / 3.0
+		if _sabotage == "curte":
+			c.z -= 20.0
+		n += 1
+		var bi := _track.closest_index_global(c)
+		if _track.is_on_road(bi, c + Vector3.UP * 0.5):
+			on_road += 1
+		if _sabotage != "curte" and _walk_name(c.x, c.z) != "Trotuar":
+			sand += 1
+	# casele: amprenta cutiilor de coliziune (`CurtePoartaCorpuri`), colturile bazei cu 0,5 m inauntru;
+	# fiecare la >= half_width + CURTE_ROAD_GAP de axul oricarei benzi si nu pe trotuarul/pavajul de sub ele
+	var houses := 0
+	var h_bad := 0
+	var min_gap := INF
+	var body := _track.get_node_or_null(^"CurtePoartaCorpuri")
+	if body != null:
+		for cs in body.get_children():
+			var box := (cs as CollisionShape3D).shape as BoxShape3D
+			if box == null:
+				continue
+			houses += 1
+			var xf := (cs as Node3D).global_transform
+			var hx := box.size.x * 0.5 - 0.5
+			var hz := box.size.z * 0.5 - 0.5
+			for c2: Vector2 in [Vector2(-hx, -hz), Vector2(hx, -hz), Vector2(hx, hz), Vector2(-hx, hz)]:
+				var p := xf * Vector3(c2.x, -box.size.y * 0.5, c2.y)
+				if _sabotage == "curte":
+					p.z -= 20.0
+				for r: TrackRoute in _track.routes:
+					var bi := r.closest_index_global(p)
+					var dh := Vector2(r.baked[bi].x - p.x, r.baked[bi].z - p.z).length() - _track.half_width
+					min_gap = minf(min_gap, dh)
+					if dh < CURTE_ROAD_GAP:
+						h_bad += 1
+				if _walk_name(p.x, p.z) == "Trotuar":
+					h_bad += 1
+	var low := INF
+	var d := _track.get_node_or_null(^"DecorManual/CurtePoarta")
+	if d != null:
+		for h in d.get_children():
+			var h3 := h as Node3D
+			if h3.has_meta("sf_curte_ghirlanda"):
+				low = minf(low, h3.global_position.y - LANTERN_SAG - float(h3.get_meta("sf_curte_ghirlanda")))
+	var bad := on_road > 0 or sand > 0 or h_bad > 0 or (low < CURTE_CLEAR)
+	if bad:
+		_fails += 1
+	print("  curtea portii: %d triunghiuri de pavaj, pe drum %d, nisip peste pavaj %d; %d case, cel mai aproape de marginea drumului %.1f m [prag %.1f], colturi prea aproape/pe trotuar %d; ghirlandele ulitei la %.2f m peste pavaj [prag %.1f]%s"
+		% [n, on_road, sand, houses, min_gap, CURTE_ROAD_GAP, h_bad, low, CURTE_CLEAR, "   PICA" if bad else ""])
+	return n
+
+
+## PASUL 8e, a doua trecere: PASARILE IN MISCARE (`PasariZbor/*`, PathMover). Fiecare punct al buclei:
+## nu intra in nimic (>= MOVER_SOLID peste suprafata vizuala), iar fata de benzi: cele marcate
+## `sf_8e_zbor = true` (papagalii care traverseaza strada coamei) pot trece peste carosabil doar la
+## >= MOVER_ROAD_H peste el si niciodata in fereastra unei muchii (`jump_crests`, unde masinile zboara);
+## restul stau la >= MOVER_LANE m de orice punct al oricarei benzi (pescarusii de langa tablier).
+## `--sabotaj=zbor` coboara toate buclele cu 4 m: TREBUIE sa pice.
+const MOVER_SOLID: float = 1.0
+const MOVER_ROAD_H: float = 4.0
+const MOVER_LANE: float = 12.0
+
+
+func _check_movers() -> int:
+	var root := _track.get_node_or_null(^"PasariZbor")
+	if root == null:
+		return 0
+	var crests: Array = _track.get_meta("jump_crests", [])
+	var n := 0
+	for pm in root.get_children():
+		var pts: PackedVector3Array = pm.get("points")
+		var xf := (pm as Node3D).global_transform
+		var over_ok := bool(pm.get_meta("sf_8e_zbor", false))
+		var min_solid := INF
+		var min_lane := INF
+		var min_road_h := INF
+		var in_crest := 0
+		var worst := Vector3.ZERO
+		for lp in pts:
+			var p := xf * lp
+			if _sabotage == "zbor":
+				p.y -= 4.0
+			var s: Array = _visual_top(p.x, p.z)
+			var surf := maxf(float(s[0]) if not is_nan(float(s[0])) else -INF, WATER_Y)
+			if p.y - surf < min_solid:
+				min_solid = p.y - surf
+				worst = p
+			for ri in _track.routes.size():
+				var r: TrackRoute = _track.routes[ri]
+				var bi := r.closest_index_global(p)
+				var dh := Vector2(r.baked[bi].x - p.x, r.baked[bi].z - p.z).length()
+				min_lane = minf(min_lane, dh)
+				if dh < _track.half_width + 2.0:
+					min_road_h = minf(min_road_h, p.y - r.baked[bi].y)
+					if ri == 0:
+						var f := float(bi) / float(r.baked.size())
+						for cw: Vector2 in crests:
+							if f >= cw.x and f <= cw.y:
+								in_crest += 1
+		n += 1
+		var bad := min_solid < MOVER_SOLID
+		if over_ok:
+			bad = bad or (min_road_h < MOVER_ROAD_H) or in_crest > 0
+		else:
+			bad = bad or min_lane < MOVER_LANE
+		if bad:
+			_fails += 1
+		print("  in zbor %-14s %2d puncte: peste suprafata >= %.1f m (la %.0f, %.1f, %.0f), cea mai apropiata banda %.1f m%s, viteza %.1f m/s%s"
+			% [pm.name, pts.size(), min_solid, worst.x, worst.y, worst.z, min_lane,
+				(", peste carosabil la >= %.1f m, in ferestrele muchiilor %d" % [min_road_h, in_crest]) if over_ok else "",
+				float(pm.get("speed")), "   PICA" if bad else ""])
 	return n

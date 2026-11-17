@@ -15788,6 +15788,11 @@ const SHOULDER_ZONE_RAMP: float = 12.0
 ## maro-bej (~0,45 pe ecran), la fel de inchis ca nisipul; trotuarul cere beton DESCHIS fara sa
 ## schimbe umerii de pe restul pistei. Componente > 1 sunt voite: dala are media ~0,63.
 @export var paved_level_color: Color = Color(0, 0, 0, 0)
+## PLACI de pavaj in afara traseului (triunghiuri in coordonate de lume, cate trei puncte), desenate
+## in plasa si cu corpul trotuarului (`Trotuar`, acelasi material) cand pista ii da culoare
+## (`paved_level_color`). NU sunt drum: `is_on_road` citeste doar `paved_level_zones`. Nascute pe SF
+## (pasul 8e): curtea si ulita portii de la capatul strazii tramvaiului. Gol = nimic schimbat.
+@export var paved_patches: PackedVector3Array = PackedVector3Array()
 
 
 ## Latimea pragului plat la un index (0 in afara ferestrelor), cu rampa
@@ -16150,6 +16155,15 @@ func _build_shoulders() -> void:
 		_tex(String(theme_flag("shoulder_texture",
 			"res://assets/textures/surface_gravel.png"))), 1.0, 0.5,
 		BaseMaterial3D.CULL_BACK, null, null, true, null, "Shoulders")
+	if pav_own and paved_patches.size() >= 3:
+		# placile din afara traseului: aceeasi nuanta ca trotuarul, UV-uri plane (x, z) / dala
+		var pt := paved_level_tint
+		for k in range(0, paved_patches.size() - 2, 3):
+			for v: Vector3 in [paved_patches[k], paved_patches[k + 1], paved_patches[k + 2]]:
+				st_pav.set_color(pt)
+				st_pav.set_uv(Vector2(v.x, v.z) / tile)
+				st_pav.add_vertex(v)
+		pav_any = true
 	if pav_own and pav_any:
 		st_pav.index()
 		st_pav.generate_normals()

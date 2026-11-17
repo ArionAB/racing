@@ -825,7 +825,7 @@ func _report_v2() -> void:
 ## Corpurile numarate de `_tick_case` (randurile din fata si din spate; valul 3: casele pictate,
 ## placa turnanta, magaziile).
 const CASE_BODIES: Array[String] = ["CaseCorpuri", "CaseSpateCorpuri", "CasePictateCorpuri", "PlacaCorpuri",
-	"MagaziiCorpuri"]
+	"MagaziiCorpuri", "CurtePoartaCorpuri"]
 var _case_hits: Array = []       # [t, masina, corp, poz, v]
 var _case_last: Dictionary = {}  # (masina, corp) -> ultimul tick de contact
 var _off_max: Array = []         # per masina: [distanta, poz, t]
@@ -859,7 +859,7 @@ func _report_case() -> void:
 	var cars: Array[Car] = _race.cars
 	var front := 0
 	var back := 0
-	var v3 := {"CasePictateCorpuri": 0, "PlacaCorpuri": 0, "MagaziiCorpuri": 0}
+	var v3 := {"CasePictateCorpuri": 0, "PlacaCorpuri": 0, "MagaziiCorpuri": 0, "CurtePoartaCorpuri": 0}
 	for h in _case_hits:
 		var nm := String(h[2])
 		if nm == "CaseSpateCorpuri":
@@ -880,6 +880,8 @@ func _report_case() -> void:
 			present.append(nm)
 	print("=== SF val3: contacte case pictate %d, placa turnanta %d, magazii %d; corpuri in scena: %s" % [
 		v3["CasePictateCorpuri"], v3["PlacaCorpuri"], v3["MagaziiCorpuri"], ",".join(present)])
+	if _race.track.get_node_or_null(^"CurtePoartaCorpuri") != null:
+		print("=== SF curte: contacte case ulitei portii %d" % v3["CurtePoartaCorpuri"])
 	for h in _case_hits:
 		var p: Vector3 = h[3]
 		print("    [sf casa] t=%5.1fs %-18s %s v=%.1f poz=(%.0f,%.1f,%.0f)" % [float(h[0]),

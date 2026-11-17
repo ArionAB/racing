@@ -2414,6 +2414,118 @@ parcate (4,2 m) sunt refuzate de `BumpProp` (plafonul de 2 m), deci rămân stat
    sună a pescăruși. Pentru ureche: `godot --path . res://tools/AscultaSfSunet.tscn` (cu fereastră)
    le cântă pe rând, la nivelurile din joc; fișierele sunt în `assets/audio/`.
 
+   **8e. Teatrul: ultimele modele, așezate (17 nov 2026)**, aceeași ramură, blocul „PASUL 8e” din
+   `tools/gen_sf_route.py`, după valul 3 și înaintea sunetului. `SF_PAS8E=0` reface scena de dinainte
+   (cu sunet) octet cu octet; `SF_8E_POARTA`, `_LAMPIOANE`, `_PESCARUSI`, `_PAPAGALI`, `_BARCI`,
+   `_GRADINA = 0` sting câte o familie. Modelele vin de pe `sanfrancisco/pas8e-modele` (unită aici).
+
+   | familie | câte | unde |
+   |---|---|---|
+   | poarta (`sf_dragon_gate`, H5) | 1 | **drept înainte la capătul străzii tramvaiului 1**, după colțul spre coamă: (152, 146) pe hartă, cu fața spre N, spre camera care urcă; podeaua 52,33 (soclul de pe partea înaltă intră 0,15 m); amprenta la 20,8 m de axa buclei, la 2,0 m de traseul tramvaiului care iese drept înainte. Coliziunea implicită a `WorldProp` (hull pe stâlpi și pe cadru) |
+   | lampioane (`sf_lantern_string`, M9) | 6 module, 2 șiruri | peste strada tramvaiului la y −58 și −76, între fațadele lui B3 (23,5 m: 3 module întinse ×1,12), prinse la +8 m; cel mai jos punct la 6,45 m peste drum. Se văd în același cadru cu poarta, de la ~120 m |
+   | pescăruși cocotați | 22 | crestele acoperișurilor celor patru magazii (10), stâlpii pontonului (6), parapetul capului de V al podului (6) |
+   | pescăruși în zbor | 9 | jos peste apă (3,8–6,5 m) la N de magazii și de ponton, și peste strâmtoare la N de pod (7–10,5 m) |
+   | papagali cocotați | 16 | coamele, cornișele și pridvoarele caselor pictate și băncile din fața grădinițelor; **scara 1,6–1,8** |
+   | papagali în zbor | 5 | deasupra caselor pictate, la 15–16,5 m (2,3 m peste coame) |
+   | veliere (`sf_sailboat`, T3) | 3 | bucle eliptice lente (2,2–2,6 m/s): două în strâmtoare la N de pod (centre (347, 329), (412, 396)), una în golful de N (233, 555) |
+   | feribotul (`okinawa/island_ferry`, refolosit) | 1 | o elipsă lungă, 3,2 m/s, în golful de N (centrul (180, 650), ±260 m pe E–V), dincolo de insulă |
+   | grădinița (`sf_front_garden`, N2) | 1 | în fâșia de 4 m dintre bandă și fațada retrasă de la intrarea în serpentine |
+
+   **Locul porții.** Inventarul o punea pe o stradă laterală a străzii tramvaiului, la y ~40; rândul
+   B2E e continuu acolo, iar planșa modelatorului a arătat că o poartă cu fața spre stradă se vede din
+   profil. Am căutat capetele de linie de vedere (unde drumul cotește și ceva drept înainte rămâne în
+   cadru) și am măsurat întâi pe unde ies mașinile din viraj (16 seed-uri, 49–64, cu un contor de
+   puncte nou în `probe_sf_watch`, `SF_PUNCTE`):
+
+   | candidat | cea mai mică distanță a unei mașini (16 seed-uri) | se citește | fața | verdict |
+   |---|---|---|---|---|
+   | **capătul străzii tramvaiului**, (152, 146) | 18 m de (144, 152), deci ≥ ~12 m de poartă | de la ~120 m la ~45 m drept înainte, cu cerul și dealul de fundal în spate, lampioanele în prim-plan; ~2,7 s la 28 m/s; în viraj iese din cadru (cel mai aproape: 26 m) | N, contralumină; silueta rămâne roșu-verde | **ales** |
+   | capătul străzii spre V a ocolului, (−148, 315) | 20,5 m | la 60 și 40 m, pe cer | E (lumină razantă) | al doilea: drumul de apropiere e mai scurt și nu are fațade de ambele părți pentru lampioane |
+   | capătul străzii spre N a ocolului, la chei, (−124,7, 463,5) | **8 m** (o intrare la 16 m/s în cercul de 8 m) | cel mai bine: fața la soare, magaziile și apa în spate | S, luminată | **respins la (a)**: la 3,5 m de marginea drumului, exact unde ies mașinile care ratează virajul; și terenul cade 0,26 m sub socluri |
+   | strada laterală de la y ~40 (rezerva) | 5,9 m, 17 intrări până la 29,8 m/s | (planșa modelatorului) | V | nefolosit |
+
+   Planșa: `img/sf_route/p8e_poarta_candidate.png`. **La 15 m de pe linia de cursă nu se ajunge**:
+   locul ales e la capătul liniei de vedere, deci cel mai aproape trece mașina la 26 m, în viraj.
+
+   **Ce se citește și ce nu** (capturile `p8e_asezat_*`):
+   - poarta: da, de la 60–80 m, cu lampioanele (`poarta_60`, `poarta_40`); la 26 m e în afara cadrului;
+   - pescărușii de pe acoperișurile magaziilor: da, albi pe lemnul maro și pe pâclă (`pescarusi_chei`);
+     cei de pe stâlpii pontonului: da, mici (`barci_ponton`); cei de pe parapetul podului: vezi
+     `pescarusi_capdepod`;
+   - **papagalii: la scara modelului (0,9–1,15) pe bănci erau puncte cu roșu; la 1,5–1,7 se citesc ca
+     papagali** (corp verde, cap roșu); am lăsat 1,6–1,8 (`SF_PAPAGAL_SCARA`). Cei de pe coame se văd
+     ca un punct roșu pe creastă; **cei în zbor nu intră în cadrul camerei de joc** pe strada coamei
+     (camera privește în jos, ei sunt deasupra caselor) — nemăsurați din cursă;
+   - velierele: da, de pe tablier și de pe ponton; feribotul: da, de pe ponton (`barci_*`);
+   - grădinița: da, mică, în fața zidului (`gradina`, vedere liberă de la furcă).
+
+   **Gărzi** (pe scena finală):
+
+   | | înainte (8d + sunet) | după | prag |
+   |---|---|---|---|
+   | `probe_decor --track=25`: materiale | 23 | 23 | ≤ 38 |
+   | `ProbeLaneClear --track=17` | 50 | 50 | 50 |
+   | soare pe lanț (`ProbeSfLight --real`) | 82,0 % | 82,0 % | ≥ 80 % |
+   | `ProbeSfRoute` | −0,29 m | −0,29 m | ≥ −0,30 |
+   | `ProbeSfCase`, `ProbeSfSpate`, `ProbeSfTrotuar`, `ProbeSfStalp`, `ProbeSfScari`, `ProbeSfSunet` | OK | OK | — |
+   | `probe_manual --track=25` | OK | OK (lampioanele cu `ancora_sol` pe drumul de sub ele) | — |
+   | `probe_decor_overlap --manual` | 73 | 73, aceleași piese | 73 |
+   | `verify_sanfrancisco.sh` | OK | OK | — |
+   | `ProbeSfTeatru` (nou) | — | OK; cele patru sabotaje pică | — |
+
+   `ProbeSfTeatru` (cu `--no-manual-batch`): picioarele celor 22 + 16 păsări cocotate la 0,000 m de
+   suprafața VIZUALĂ de sub ele (raze pe triunghiurile modelelor, nu pe teren); cele în zbor la ≥ 3,8 m
+   peste apă sau peste orice; bărcile pe apă de ≥ 8,3 m, la ≥ 70 m de orice bandă (deci și de ponton),
+   fără coliziune; poarta cu soclurile pe teren (în aer 0,000, îngropat 0,15 din 0,35 permis), niciun
+   punct al amprentei pe carosabil sau pe trotuar; lampioanele la ≥ 6,27 m peste drum; grădinița la
+   −0,02 m de teren. Sabotajele `pasari` (−0,3 m), `barci` (un punct lângă ponton), `poarta` (+0,4 m),
+   `lampioane` (−2,5 m): toate pică. Picioarele vin din `tools/data/sf_8e_perch.tsv`
+   (`ProbeSfTeatru --dump-perch`), cererile din `sf_8e_perch_req.tsv`; terenul de la capătul străzii
+   tramvaiului din `sf_8e_ground.tsv` (`ProbeSfSpate --dump-ground --rect=100,110,100,100`).
+
+   **Contactele cu poarta** (`probe_sf_watch`, `=== SF poarta contacte`): **0** în lotul final;
+   contorul e viu: cu `SF_8E_SABOTAJ=1` (poarta pe dreapta de start, stâlpul interior pe axa benzii)
+   un seed de 40 s numără 11.
+
+   **Lotul final** (8 × 16 × 250 s, seed-uri noi 97–112, `--seed-ai-prefs`, aceeași zi):
+
+   | | control (`SF_PAS8E=0`) | scena finală |
+   |---|---|---|
+   | tur mediu | 83,07 s | 83,15 s |
+   | tramvaiul 1 / 2, cu contact | 1,0 / 1,6 % | 1,0 / 2,6 % |
+   | pod: peste despărțitor / frontale în coridor / barieră | 0 / 0 / 5,4 % | 0 / 0 / 5,3 % |
+   | repuneri / ejectări / `[blocaj]` | 8 / 5 / 9 | 11 / 5 / 14 |
+   | ponton: căderi | 0,78 % | 1,03 % |
+   | contacte case din față / din spate | 9 / 0 | 6 / 1 |
+   | contacte cu poarta | 0 | **0** |
+   | stâlpi: contacte semafor / felinar / arbore | 0 / 0 / 0 | 0 / 2 / 6 |
+   | treceri serpentine / ocol (aceleași 51 de preferințe) | 174 / 210 | 180 / 204 |
+
+   Nimic din ce adaugă 8e nu se atinge în afara porții (0 contacte). Diferențele dintre cele două
+   coloane sunt istorii de tur 1 diferite (8d, a doua trecere: corpurile în plus schimbă numeric
+   simularea), nu teatrul. **De urmărit, din lotul final:** arborele de stradă de pe B de la (153, 51)
+   a fost lovit în turul 1 în două seed-uri, la 32 și 34 m/s, o dată cu repunere și ejectare (iar
+   mașina a lovit apoi și vecinul de la (153, 65)); arborii de pe B stau la 9 m de ax, pe trotuarul
+   care acum e drum. Propunere, neaplicată: arborii de pe latura de E a lui B mutați la ~10,8 m (în fața
+   fațadelor de la 11,75) sau scoși cei doi din dreptul y 51–65.
+
+   **Costul pe profilul de telefon** (`ProbePerf --track=17 --mobile --phone-shadow`, desktop, 10
+   puncte × 6 cadre; **un proxy, nu o măsurătoare pe iPhone**):
+
+   | | desene medie / vârf | triunghiuri medie | GPU ms mediană / vârf |
+   |---|---|---|---|
+   | pista întreagă | 169 / 306 | 236k | 0,39 / 3,29 |
+   | fără trotuare (`SF_TROTUAR=0`, aceeași rulare) | 168 / 305 | 233k | 0,39 / 3,30 |
+
+   Atribuirea (`--attrib`, cât scade când se stinge grupul): mașinile parcate −11 desene / −2k tri;
+   rândurile din spate (`CaseSpate`) −30 desene / −47k tri; stolurile și bărcile ≤ 1 desen fiecare.
+   **Grupurile coapte din `DecorManual` (podul, casele din față, poarta, lampioanele) nu se pot stinge
+   după nume după coacere**: atribuirea lor iese 0 și nu înseamnă nimic. Cu `--no-manual-batch`
+   (decorul necopt, deci desene mai multe decât în joc: medie 315): podul −77 desene / −23k tri, casele
+   din față B / D / E / G −33 / −23 / −18 / −15 desene, casele pictate −3, poarta −1, lampioanele −1,
+   felinarele −9, arborii de stradă −27, semafoarele −1. **Buffere MultiMesh pe pistă: 367** (buget
+   iPhone 2.500).
+
 ## 8. Lecții aplicate anticipat, și ce a fost respins
 
 - **Săritura s-a măsurat înaintea traseului**, nu după decor: profilul blocului

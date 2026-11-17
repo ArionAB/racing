@@ -4284,7 +4284,7 @@ GATE_SITES = {
 if E8_POARTA and _p7_glb("structures/sf_dragon_gate.glb", "e8_gate"):
     (gmx, gmy), gyaw, gdesc = GATE_SITES[POARTA_LOC]
     if E8_SABOTAJ:
-        gmx, gmy, gyaw, gdesc = MK["far1"][2] - 60.0, MK["far1"][3], 90.0, "SABOTAJ: pe dreapta de start"
+        gmx, gmy, gyaw, gdesc = MK["far1"][2] - 60.0, MK["far1"][3] + 3.4, 90.0, "SABOTAJ: pe dreapta de start, stalpul interior pe ax"
     ca, sa = math.cos(math.radians(gyaw)), math.sin(math.radians(gyaw))
 
     def _gl(lx, lz):
@@ -4295,6 +4295,8 @@ if E8_POARTA and _p7_glb("structures/sf_dragon_gate.glb", "e8_gate"):
         for dx in (-bx_ / 2.0, 0.0, bx_ / 2.0):
             for dz in (-by_ / 2.0, 0.0, by_ / 2.0):
                 v = e8_ground(*_gl(px_ + dx, dz))
+                if E8_SABOTAJ:
+                    v = road_at(gmx, gmy)[1]        # pe tablier: cota drumului
                 if v is None:
                     raise SystemExit("8e: poarta (%s) iese din hartile de teren" % POARTA_LOC)
                 gs.append(v)
@@ -4446,8 +4448,8 @@ if E8_PAPA:
                 perch.append(p_)
     n_p = _e8_flock("PapagaliCocotati", "animals/sf_parrot_perch.glb", "e8_par_p", perch, PARROT_SCALE, 3)
     fly = []
-    for k_, (x_, z_, h_) in enumerate(((58.0, 70.0, 11.0), (64.0, 66.0, 12.5), (70.0, 72.0, 10.5),
-                                       (61.0, 77.0, 12.0), (75.0, 68.0, 11.5))):
+    for k_, (x_, z_, h_) in enumerate(((66.0, 104.0, 15.0), (72.0, 100.0, 16.5), (78.0, 106.0, 14.5),
+                                       (69.0, 109.0, 16.0), (83.0, 101.0, 15.5))):
         g_ = e8_ground(x_, -z_)
         if g_ is not None:
             fly.append((x_, g_ + h_, z_))

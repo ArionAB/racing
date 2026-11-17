@@ -5653,8 +5653,8 @@ metadata/sf_8e_stol = "animals/sf_parrot_perch.glb"
 [node name="PapagaliInZbor" type="MultiMeshInstance3D" parent="."]
 script = ExtResource("e8_flock")
 model = ExtResource("e8_par_f")
-positions = PackedVector3Array(58.000, 62.500, 70.000, 64.000, 62.560, 66.000, 70.000, 60.830, 72.000, 61.000, 63.800, 77.000, 75.000, 60.340, 68.000)
-yaws = PackedFloat32Array(3.8101, 0.7592, 1.7157, 3.3580, 4.0369)
+positions = PackedVector3Array(66.000, 67.670, 104.000, 72.000, 69.110, 100.000, 78.000, 67.130, 106.000, 69.000, 68.677, 109.000, 83.000, 67.995, 101.000)
+yaws = PackedFloat32Array(2.3265, 0.2705, 5.7247, 3.0788, 4.7281)
 scale_min = 1.60
 scale_max = 1.80
 seed_value = 20261121

@@ -451,6 +451,20 @@ tramvaiului. De pe mijlocul tablierului ar fi la ~260 m (în pâclă, siluetă),
 3. **Val 3:** F2, inelul de fundal; H5, poarta; N1, scările publice; N3, bolovanii; M5/M6/M9;
    T2/T3. H7 doar dacă se decide.
 
+   **Stare la pasul 8e (17 nov 2026): așezate pe Track25** (brief §7 „8e”, blocul „PASUL 8e” din
+   `tools/gen_sf_route.py`, `SF_PAS8E=0` = scena de dinainte):
+   - **H5** poarta: **nu** pe strada laterală de la y ~40 (rândul B2E e continuu acolo, iar din
+     camera care urcă strada poarta se vedea din profil), ci **drept înainte la capătul străzii
+     tramvaiului 1**, după colțul spre coamă, la (152, 146), cu fața spre N (spre camera care urcă).
+     Candidatele și clasamentul: `img/sf_route/p8e_poarta_candidate.png`;
+   - **M9** lampioanele: `sf_lantern_string.glb` (nu felinarele Chongqing), 2 șiruri de câte 3
+     module peste strada tramvaiului, între fațadele lui B3, la +8 m, văzute odată cu poarta;
+   - **T2** pescărușii pe acoperișurile magaziilor, pe stâlpii pontonului și pe parapetul capului de
+     V al podului, plus 9 în zbor jos peste apă; papagalii **nu** în chiparoși (verdele dispare acolo):
+     pe casele pictate și pe băncile din fața lor, la scara 1,6–1,8, plus 5 în zbor deasupra lor;
+   - **T3** trei veliere și feribotul Okinawei (refolosit), `PathMover` fără coliziune, în golf;
+   - **N2** grădinița de la intrarea în serpentine (o grădiniță în fâșia de 4 m).
+
 Fiecare val: `verify_glb.py` pe fiecare GLB, comparația din fișier (nu din `.blend`), integrarea
 prin generator, `probe_decor --track=25` (garda de materiale) și o captură `--gamecam` la
 punctul din §4 unde piesa e cea mai aproape.

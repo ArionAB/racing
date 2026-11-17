@@ -521,6 +521,8 @@ func _physics_process(delta: float) -> void:
 		if _podm != null:
 			_tick_pod(i, c, delta)
 		_tick_case(i, c, p, delta)
+		_tick_points(i, c, p)
+		_tick_gate(i, c, p)
 		if not _poles.is_empty():
 			_tick_poles(i, c, p)
 		if q.distance_to(p) > 8.0:
@@ -999,8 +1001,79 @@ static func _med(a: Array) -> float:
 	return float(b[b.size() / 2])
 
 
+## PASUL 8e: puncte de interes (locurile candidate pentru poarta), din `SF_PUNCTE="x,z,r;x,z,r"`
+## (Godot): de cate ori intra o masina in cercul de raza r (cel mult o data pe secunda), cu viteza,
+## si cea mai mica distanta atinsa. Masoara unde ies masinile din viraj, inainte sa pui ceva acolo.
+var _pts: Array = []             # [Vector3 (x, z, r), intrari, v max, d min]
+var _pts_last: Dictionary = {}
+
+
+## PASUL 8e: contactele cu POARTA (corpurile WorldProp de sub `DecorManual/Poarta`: un hull pe stalp
+## si unul pe cadru), ca la celelalte corpuri solide: o masina x poarta, cel mult unul pe secunda.
+var _gate_hits: Array = []       # [t, masina, v, poz]
+var _gate_last: Dictionary = {}
+var _gate_seen := -1             # corpuri gasite (-1 = necautat)
+
+
+func _tick_gate(i: int, c: Car, p: Vector3) -> void:
+	if _gate_seen < 0:
+		_gate_seen = 0
+		var g: Node = _race.track.get_node_or_null(^"DecorManual/Poarta")
+		if g != null:
+			_gate_seen = g.find_children("*", "StaticBody3D", true, false).size()
+		print("=== SF poarta: %d corpuri de coliziune" % _gate_seen)
+	if _gate_seen == 0:
+		return
+	for b in c.get_colliding_bodies():
+		var par := (b as Node).get_parent()
+		if par == null or String(par.name) != "Poarta":
+			continue
+		if _t - float(_gate_last.get(i, -99.0)) > 1.0:
+			_gate_hits.append([_t, i, c.horizontal_speed(), p])
+		_gate_last[i] = _t
+
+
+func _tick_points(i: int, c: Car, p: Vector3) -> void:
+	if _pts.is_empty():
+		var env := OS.get_environment("SF_PUNCTE")
+		if env.is_empty():
+			_pts.append(null)
+			return
+		for part in env.split(";"):
+			var v := part.split_floats(",")
+			if v.size() == 3:
+				_pts.append([Vector3(v[0], v[1], v[2]), 0, 0.0, INF])
+		if _pts.is_empty():
+			_pts.append(null)
+		return
+	if _pts[0] == null:
+		return
+	for k in _pts.size():
+		var pt: Array = _pts[k]
+		var c3: Vector3 = pt[0]
+		var d := Vector2(p.x - c3.x, p.z - c3.y).length()
+		pt[3] = minf(float(pt[3]), d)
+		if d < c3.z:
+			var key := "%d|%d" % [i, k]
+			if _t - float(_pts_last.get(key, -99.0)) > 1.0:
+				pt[1] = int(pt[1]) + 1
+				pt[2] = maxf(float(pt[2]), c.horizontal_speed())
+			_pts_last[key] = _t
+
+
 func report() -> void:
 	var cars: Array[Car] = _race.cars
+	if _gate_seen >= 0:
+		print("=== SF poarta contacte: %d (corpuri %d)" % [_gate_hits.size(), _gate_seen])
+		for h in _gate_hits:
+			var hp: Vector3 = h[3]
+			print("    [sf poarta] t=%5.1fs %-18s v=%.1f poz=(%.1f,%.1f,%.1f)" % [float(h[0]), cars[int(h[1])].pilot_name,
+				float(h[2]), hp.x, hp.y, hp.z])
+	if not _pts.is_empty() and _pts[0] != null:
+		for pt: Array in _pts:
+			var c3: Vector3 = pt[0]
+			print("=== SF punct (%.1f, %.1f) r=%.1f: intrari %d, v max %.1f, distanta minima %.1f m" % [c3.x, c3.y,
+				c3.z, int(pt[1]), float(pt[2]), float(pt[3])])
 	# PASUL 8d: preferinta de scurtatura a fiecarei masini (cea de la final; cu zarul de nivel stins
 	# `prefers_shortcut` se trage o data, la `configure`) si ruta pe care a trecut efectiv la furca.
 	for i in cars.size():

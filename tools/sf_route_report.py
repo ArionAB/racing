@@ -453,6 +453,19 @@ def main():
         if vs:
             print(f"    viteza celui care loveste: med {st.median(vs):.1f} m/s, max {max(vs):.1f}")
 
+    g_n, g_seen, g_rows = 0, 0, []
+    for p in logs:
+        txt = open(p, encoding="utf-8", errors="replace").read()
+        m = re.search(r"^=== SF poarta contacte: (\d+) \(corpuri (\d+)\)", txt, re.M)
+        if m:
+            g_seen += 1
+            g_n += int(m.group(1))
+            g_rows += [os.path.basename(p) + " " + r for r in re.findall(r"^    \[sf poarta\] (.*)$", txt, re.M)]
+    if g_seen:
+        print(f"  POARTA (pasul 8e): contacte {g_n} in {g_seen} seed-uri cu contor")
+        for r in g_rows[:10]:
+            print("    " + r)
+
     print("\n--- felii (v_med medie, % lent mediu, pereti total)")
     for k in sorted(buckets):
         v, sl, w = buckets[k]

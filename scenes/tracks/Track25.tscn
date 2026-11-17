@@ -71,6 +71,16 @@
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/props/sf_stair_lane.glb" id="v3_stair"]
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/props/sf_bench.glb" id="v3_bench"]
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/props/sf_bike_rack.glb" id="v3_rack"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/structures/sf_dragon_gate.glb" id="e8_gate"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/props/sf_lantern_string.glb" id="e8_lant"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/animals/sf_gull_perch.glb" id="e8_gull_p"]
+[ext_resource type="Script" path="res://scenes/props/flock.gd" id="e8_flock"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/animals/sf_gull_glide.glb" id="e8_gull_g"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/animals/sf_parrot_perch.glb" id="e8_par_p"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/animals/sf_parrot_fly.glb" id="e8_par_f"]
+[ext_resource type="Script" path="res://scenes/props/path_mover.gd" id="e8_mover"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/vehicles/sf_sailboat.glb" id="e8_sail"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/vehicles/island_ferry.glb" id="e8_ferry"]
 [ext_resource type="Script" path="res://scenes/props/world_prop.gd" id="p7_worldprop"]
 [ext_resource type="Script" path="res://scenes/hazards/ambience_bed.gd" id="s8e_bed"]
 [ext_resource type="AudioStream" path="res://assets/audio/cable_hum.wav" id="s8e_hum"]
@@ -5501,6 +5511,45 @@ metadata/coliziune = "none"
 transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 584.462, 19.680, -228.626)
 metadata/coliziune = "none"
 
+[node name="Poarta" type="Node3D" parent="DecorManual"]
+
+[node name="PoartaDragonului" parent="DecorManual/Poarta" instance=ExtResource("e8_gate")]
+transform = Transform3D(1.00000, 0, 0.00000, 0, 1.00000, 0, -0.00000, 0, 1.00000, 152.000, 52.328, 146.000)
+metadata/coliziune = "hull"
+metadata/sf_poarta = true
+
+[node name="Lampioane" type="Node3D" parent="DecorManual"]
+
+[node name="Ghirlanda0_0" parent="DecorManual/Lampioane" instance=ExtResource("e8_lant")]
+transform = Transform3D(1.11905, 0, 0.00000, 0, 1, 0, -0.00000, 0, 1.00000, 136.167, 54.297, 58.000)
+metadata/coliziune = "none"
+
+[node name="Ghirlanda0_1" parent="DecorManual/Lampioane" instance=ExtResource("e8_lant")]
+transform = Transform3D(1.11905, 0, 0.00000, 0, 1, 0, -0.00000, 0, 1.00000, 144.000, 54.297, 58.000)
+metadata/coliziune = "none"
+
+[node name="Ghirlanda0_2" parent="DecorManual/Lampioane" instance=ExtResource("e8_lant")]
+transform = Transform3D(1.11905, 0, 0.00000, 0, 1, 0, -0.00000, 0, 1.00000, 151.833, 54.297, 58.000)
+metadata/coliziune = "none"
+
+[node name="Ghirlanda1_0" parent="DecorManual/Lampioane" instance=ExtResource("e8_lant")]
+transform = Transform3D(1.11905, 0, 0.00000, 0, 1, 0, -0.00000, 0, 1.00000, 136.167, 56.351, 76.000)
+metadata/coliziune = "none"
+
+[node name="Ghirlanda1_1" parent="DecorManual/Lampioane" instance=ExtResource("e8_lant")]
+transform = Transform3D(1.11905, 0, 0.00000, 0, 1, 0, -0.00000, 0, 1.00000, 144.000, 56.351, 76.000)
+metadata/coliziune = "none"
+
+[node name="Ghirlanda1_2" parent="DecorManual/Lampioane" instance=ExtResource("e8_lant")]
+transform = Transform3D(1.11905, 0, 0.00000, 0, 1, 0, -0.00000, 0, 1.00000, 151.833, 56.351, 76.000)
+metadata/coliziune = "none"
+
+[node name="GradinaSerpentine" type="Node3D" parent="DecorManual"]
+
+[node name="Gradina0" parent="DecorManual/GradinaSerpentine" instance=ExtResource("v3_garden")]
+transform = Transform3D(0.84201, 0, 0.53946, 0, 1.00000, 0, -0.53946, 0, 0.84201, 4.130, 13.515, -323.326)
+metadata/coliziune = "none"
+
 [node name="CasePictateCorpuri" type="StaticBody3D" parent="."]
 
 [node name="Corp_capatE" type="CollisionShape3D" parent="CasePictateCorpuri"]
@@ -5562,6 +5611,104 @@ shape = SubResource("Box_v3_12_00_9_00_20_00")
 [node name="Corp_Magazia3" type="CollisionShape3D" parent="MagaziiCorpuri"]
 transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, -31.400, 8.405, -480.720)
 shape = SubResource("Box_v3_12_00_9_00_12_00")
+
+[node name="Barci" type="Node3D" parent="."]
+
+[node name="PescarusiCocotati" type="MultiMeshInstance3D" parent="."]
+script = ExtResource("e8_flock")
+model = ExtResource("e8_gull_p")
+positions = PackedVector3Array(-92.700, 14.618, -476.166, -92.700, 14.618, -483.498, -92.700, 14.618, -492.052, -74.300, 14.108, -474.966, -74.300, 14.108, -485.652, -49.800, 13.421, -476.166, -49.800, 13.421, -483.498, -49.800, 13.421, -492.052, -31.400, 12.906, -474.966, -31.400, 12.906, -485.652, 54.875, 3.800, -460.300, 66.875, 3.800, -460.300, 78.875, 3.800, -460.300, 90.875, 3.800, -460.300, 102.875, 3.800, -460.300, 114.875, 3.800, -460.300, 266.000, 21.200, -241.000, 266.000, 21.200, -216.250, 272.000, 21.200, -241.000, 272.000, 21.200, -216.250, 279.000, 21.200, -241.000, 279.000, 21.200, -216.250)
+yaws = PackedFloat32Array(3.5989, 1.8797, 5.1365, 4.3790, 3.1573, 4.1696, 3.7437, 2.3841, 4.8450, 0.4887, 0.5079, 2.3003, 1.9146, 3.2638, 5.0143, 2.3754, 3.3947, 5.5397, 0.3054, 4.5693, 0.7575, 4.2586)
+scale_min = 0.90
+scale_max = 1.15
+seed_value = 20261118
+metadata/sf_8e_stol = "animals/sf_gull_perch.glb"
+
+[node name="PescarusiInZbor" type="MultiMeshInstance3D" parent="."]
+script = ExtResource("e8_flock")
+model = ExtResource("e8_gull_g")
+positions = PackedVector3Array(-55.000, 4.500, -512.000, -20.000, 6.000, -518.000, 5.000, 3.800, -506.000, 60.000, 5.200, -490.000, 95.000, 4.200, -499.000, 130.000, 6.500, -486.000, 300.000, 8.000, -300.000, 318.000, 10.500, -292.000, 296.000, 7.000, -318.000)
+yaws = PackedFloat32Array(1.5673, 5.1068, 2.6704, 2.8362, 5.4402, 4.8206, 3.4592, 5.6426, 5.6723)
+scale_min = 0.90
+scale_max = 1.15
+seed_value = 20261119
+metadata/sf_8e_stol = "animals/sf_gull_glide.glb"
+
+[node name="PapagaliCocotati" type="MultiMeshInstance3D" parent="."]
+script = ExtResource("e8_flock")
+model = ExtResource("e8_par_p")
+positions = PackedVector3Array(93.475, 65.670, 114.500, 86.475, 65.872, 114.500, 88.100, 65.273, 118.650, 84.700, 66.236, 118.900, 79.475, 65.772, 114.500, 72.475, 65.468, 114.500, 74.100, 65.700, 118.275, 70.700, 62.450, 118.900, 65.475, 65.975, 114.500, 58.100, 66.444, 117.500, 60.100, 63.985, 118.150, 56.700, 53.594, 119.900, 61.400, 53.410, 123.650, 62.500, 53.410, 123.650, 89.900, 53.410, 123.650, 91.000, 53.410, 123.650)
+yaws = PackedFloat32Array(3.0247, 4.6827, 3.5797, 5.3390, 4.1312, 5.2901, 5.0807, 1.2497, 1.5551, 2.3736, 5.1400, 5.3826, 6.2710, 0.3037, 2.6058, 6.0964)
+scale_min = 0.90
+scale_max = 1.15
+seed_value = 20261120
+metadata/sf_8e_stol = "animals/sf_parrot_perch.glb"
+
+[node name="PapagaliInZbor" type="MultiMeshInstance3D" parent="."]
+script = ExtResource("e8_flock")
+model = ExtResource("e8_par_f")
+positions = PackedVector3Array(58.000, 62.500, 70.000, 64.000, 62.560, 66.000, 70.000, 60.830, 72.000, 61.000, 63.800, 77.000, 75.000, 60.340, 68.000)
+yaws = PackedFloat32Array(3.8101, 0.7592, 1.7157, 3.3580, 4.0369)
+scale_min = 0.90
+scale_max = 1.15
+seed_value = 20261121
+metadata/sf_8e_stol = "animals/sf_parrot_fly.glb"
+
+[node name="Velier1" type="Path3D" parent="Barci"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 387.286, 0.000, -314.609)
+script = ExtResource("e8_mover")
+model = ExtResource("e8_sail")
+model_node = "Sailboat"
+collide = false
+points = PackedVector3Array(0.00, 0.00, 0.00, -6.10, 0.00, 6.74, -17.71, 0.00, 10.11, -33.06, 0.00, 9.60, -49.81, 0.00, 5.28, -65.42, 0.00, -2.18, -77.51, 0.00, -11.66, -84.23, 0.00, -21.70, -84.57, 0.00, -30.78, -78.47, 0.00, -37.52, -66.87, 0.00, -40.89, -51.52, 0.00, -40.38, -34.76, 0.00, -36.06, -19.15, 0.00, -28.60, -7.06, 0.00, -19.13, -0.34, 0.00, -9.08, 0.00, 0.00, 0.00)
+speed = 2.6
+phase = 0.00
+stick_to_ground = false
+bob_amplitude = 0.06
+rock_amplitude = 0.03
+metadata/sf_8e_barca = true
+
+[node name="Velier2" type="Path3D" parent="Barci"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 446.705, 0.000, -404.835)
+script = ExtResource("e8_mover")
+model = ExtResource("e8_sail")
+model_node = "Sailboat"
+collide = false
+points = PackedVector3Array(0.00, 0.00, 0.00, -0.81, 0.00, 8.14, -7.09, 0.00, 16.54, -17.88, 0.00, 23.92, -31.53, 0.00, 29.15, -45.97, 0.00, 31.45, -59.00, 0.00, 30.45, -68.64, 0.00, 26.31, -73.41, 0.00, 19.67, -72.60, 0.00, 11.53, -66.32, 0.00, 3.13, -55.53, 0.00, -4.25, -41.88, 0.00, -9.48, -27.44, 0.00, -11.78, -14.41, 0.00, -10.78, -4.77, 0.00, -6.64, 0.00, 0.00, 0.00)
+speed = 2.2
+phase = 0.45
+stick_to_ground = false
+bob_amplitude = 0.06
+rock_amplitude = 0.03
+metadata/sf_8e_barca = true
+
+[node name="Velier3" type="Path3D" parent="Barci"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 279.810, 0.000, -550.642)
+script = ExtResource("e8_mover")
+model = ExtResource("e8_sail")
+model_node = "Sailboat"
+collide = false
+points = PackedVector3Array(0.00, 0.00, 0.00, -4.59, 0.00, 8.82, -16.07, 0.00, 15.63, -32.68, 0.00, 19.40, -51.90, 0.00, 19.55, -70.80, 0.00, 16.06, -86.51, 0.00, 9.47, -96.63, 0.00, 0.77, -99.62, 0.00, -8.72, -95.03, 0.00, -17.53, -83.55, 0.00, -24.35, -66.94, 0.00, -28.11, -47.72, 0.00, -28.27, -28.82, 0.00, -24.78, -13.11, 0.00, -18.18, -2.99, 0.00, -9.48, 0.00, 0.00, 0.00)
+speed = 2.4
+phase = 0.70
+stick_to_ground = false
+bob_amplitude = 0.06
+rock_amplitude = 0.03
+metadata/sf_8e_barca = true
+
+[node name="Feribot" type="Path3D" parent="Barci"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 430.000, 0.000, -650.000)
+script = ExtResource("e8_mover")
+model = ExtResource("e8_ferry")
+model_node = "Island_Ferry"
+collide = false
+points = PackedVector3Array(0.00, 0.00, 0.00, -8.86, 0.00, 10.35, -34.83, 0.00, 20.00, -76.15, 0.00, 28.28, -130.00, 0.00, 34.64, -192.71, 0.00, 38.64, -260.00, 0.00, 40.00, -327.29, 0.00, 38.64, -390.00, 0.00, 34.64, -443.85, 0.00, 28.28, -485.17, 0.00, 20.00, -511.14, 0.00, 10.35, -520.00, 0.00, 0.00, -511.14, 0.00, -10.35, -485.17, 0.00, -20.00, -443.85, 0.00, -28.28, -390.00, 0.00, -34.64, -327.29, 0.00, -38.64, -260.00, 0.00, -40.00, -192.71, 0.00, -38.64, -130.00, 0.00, -34.64, -76.15, 0.00, -28.28, -34.83, 0.00, -20.00, -8.86, 0.00, -10.35, 0.00, 0.00, 0.00)
+speed = 3.2
+phase = 0.20
+stick_to_ground = false
+bob_amplitude = 0.06
+rock_amplitude = 0.03
+metadata/sf_8e_barca = true
 
 [node name="Sunet" type="Node" parent="."]
 

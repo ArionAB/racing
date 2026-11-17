@@ -1,8 +1,8 @@
 # San Francisco (Track25) — handoff for the next session
 
-Updated 16 Nov 2026, after step 8d (pavements, solid poles, sheds, stairs).
-Open PRs, stacked, none merged: #740 ⊂ #741 ⊂ #742 ⊂ #743 ⊂ #744 (wave 3), and
-step 8d on top of #744 from branch `sanfrancisco/pas8d-trotuare`.
+Updated 17 Nov 2026, after step 8e (sound, gate, birds, boats, garden).
+Steps 7–8d are in `main` since 17 Nov 2026 (#740–#744 and #746). Step 8e is on
+branch `sanfrancisco/pas8e-teatru` (worktree `D:/GameDev/wt-sf-pas7`).
 Read this first, then the brief (`docs/track_briefs/san_francisco.md`; §7 is the
 step plan, and "pasul 7" there has the full results). Project rules are in
 `CLAUDE.md`; the running memory is `san-francisco-track-project.md` in the
@@ -118,8 +118,38 @@ of step 8. No iOS build since #723 (build 54) — **start one only when they ask
      the shared world material (the mask stores strength in alpha; a builder saw
      full grain on a zero-strength slot). Project-wide, unverified, the
      developer's call.
-   Still missing: the gate (H5), the garden of the switchback-entrance
-   house, gulls/parrots, sails and the ferry, sound.
+   **Also DONE, on branch `sanfrancisco/pas8e-teatru` (17 Nov 2026) — step 8e**
+   (brief §7 "8e" has the numbers; `SF_PAS8E=0` and `SF_SUNET=0` reproduce the
+   scenes from before):
+   - **Sound**, all synthesised (`tools/generate_sfx.gd`, `_save_sf_sounds`): a
+     bell per cable car (rings once on approach: 90 m on the climb, 130 m at the
+     shortcut mouth), the cable hum along the tram street, plank rattle on the
+     pontoon, gulls / sea lions / parrots as sparse positional calls. Guard
+     `ProbeSfSunet`. **To listen:** run `res://tools/AscultaSfSunet.tscn` with a
+     window. Whether it sounds right is the developer's ear, not the probe's.
+   - **The gate** stands at the top of the tram street, straight ahead after the
+     corner onto the ridge, at map (152, 146), not on the side street of the
+     inventory: a gate beside the street is seen edge-on and was invisible at
+     40 m. It is solid; 0 contacts in the batch. Lantern strings across B.
+   - **Birds**: gulls on the shed roofs, pontoon bollards and bridge-head
+     parapet; parrots on the painted ladies and their benches at scale 1.6–1.8,
+     **not in the cypresses** (green on green vanishes). Flying parrots and the
+     bridge-head birds do not read from the race camera.
+   - **Boats**: three sailboats and the Okinawa ferry on `PathMover` loops, no
+     collision. The garden at the switchback entrance. Guard `ProbeSfTeatru`.
+   - **Phone-profile cost on desktop** (a proxy, not an iPhone measurement):
+     169 / 306 draws mean / peak, 367 MultiMesh buffers (budget 2,500).
+     `ProbePerf --attrib` reads 0 for baked `DecorManual` groups; use
+     `--no-manual-batch` to attribute them.
+   Open, for the developer:
+   - **The landing thud** plays four times in about 6 s on the jump chain, within
+     1 dB, louder than the engine. A per-track variation is proposed, not built.
+   - **Street trees on B stand 9 m from the axis, on pavement that now drives
+     like road.** One at map (153, 51) was hit at 32–34 m/s in two seeds, once
+     with an ejection. Proposal on the table: move them to about 10.8 m.
+   - The gate stands on bare ground; nothing dresses the hill around it.
+   Still missing: nothing from the inventory's must-have list. Not measured:
+   anything on an iPhone.
 1. **(Done — kept for the rules.)** All seven houses, each with a truly
    mirrored `_m` file, are done and accepted on `sanfrancisco/pas7b-case`
    (14 GLBs; mixed kit on `SfLoc --glb=kit`: pastel 40.3 % of house pixels,

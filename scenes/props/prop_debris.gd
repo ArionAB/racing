@@ -19,9 +19,11 @@ extends Node3D
 const SLOTS: int = 4
 const CHUNKS: int = 6
 const PUFFS: int = 4
-## Frunze (soft-hazards): 3 rafale de cate 8, tot din acelasi manager.
+## Frunze (soft-hazards): 3 rafale de cate 18, tot din acelasi manager. Erau 8 frunze de 42 cm:
+## pe telefon, prin tufele Angkor, nu se vedeau deloc — dezvoltatorul a cerut efectul crezand ca
+## lipseste (16 nov 2026). Acum o rafala e un nor care trece de capota.
 const LEAF_SLOTS: int = 3
-const LEAVES: int = 8
+const LEAVES: int = 18
 const LEAF_COOLDOWN_S: float = 0.12
 const MIN_DV: float = 1.8
 const FULL_DV: float = 14.0
@@ -213,7 +215,7 @@ func _make_leaves() -> CPUParticles3D:
 	e.angular_velocity_min = -540.0
 	e.angular_velocity_max = 540.0
 	var leaf := BoxMesh.new() # frunza = placa subtire, nu aschie
-	leaf.size = Vector3(0.42, 0.05, 0.28)
+	leaf.size = Vector3(0.5, 0.05, 0.34)
 	leaf.material = _chunk_material
 	e.mesh = leaf
 	return e

@@ -21,7 +21,6 @@ FOREST_GLBS = {
     'sugar_palm': 'plants/sugar_palm.glb',
     'fern_cluster': 'res://assets/models/plants/fern_cluster.glb',
     'tropical_shrub': 'res://assets/models/plants/tropical_shrub.glb',
-    'bamboo_clump': 'res://assets/models/halong/plants/bamboo_clump.glb',
 }
 
 # Reglaje MeshForest pentru PadureMasa (proprietati de export emise in .tscn; vezi scenes/props/mesh_forest.gd).
@@ -35,8 +34,8 @@ FOREST_GLBS = {
 FOREST_SETTINGS = {
     'lod_m': '50.0',
     'slice_near_m': '40.0',
-    'mid_from_far_species': 'PackedStringArray("tropical_shrub", "fern_cluster", "bamboo_clump")',
-    'frond_thin_species': 'PackedStringArray("sugar_palm")',
+    'mid_from_far_species': 'PackedStringArray("tropical_shrub", "fern_cluster")',
+    'frond_thin_species': 'PackedStringArray("sugar_palm", "tropical_shrub", "fern_cluster")',
 }
 
 import random
@@ -45,10 +44,12 @@ _CANOPY = ('tetrameles_a', 'tetrameles_b', 'dipterocarp', 'strangler_fig')
 _CANOPY_W = (0.20, 0.20, 0.57, 0.03)
 _CANOPY_FAR_W = (0.06, 0.06, 0.87, 0.01)   # departe tetrameles = bete fara coroana vizibila: dipterocarp
 # Etajul de mijloc (coroana la 2-12 m, in cadrul camerei de joc): palmieri de zahar, bambus, tufe.
-_MID = ('sugar_palm', 'bamboo_clump', 'tropical_shrub')
-_MID_W = (0.45, 0.30, 0.25)
-_UNDER = ('tropical_shrub', 'fern_cluster', 'bamboo_clump')
-_UNDER_W = (0.40, 0.45, 0.15)
+# Fara bambus (feedback de pe telefon, 16 nov 2026): `bamboo_clump` (imprumutat de la Ha Long) are trei
+# tulpini subtiri cu doi bulgari de frunze in varf — in joc „plante cu picioare de bete", neprofesionist.
+_MID = ('sugar_palm', 'tropical_shrub')
+_MID_W = (0.62, 0.38)
+_UNDER = ('tropical_shrub', 'fern_cluster')
+_UNDER_W = (0.47, 0.53)
 
 # RUNDA 2 (4/4 critici orbi: „mesteceni albi in grila pe gazon”, coroane prea sus, liane = bete maro, tufe-varza).
 #   - trunchiul (slot 19 CORAL_SAND, crem) e remapat pe gri-brun inchis in `world_prop.gd` (SLOT_REMAP_BY_THEME angkor);
@@ -109,6 +110,14 @@ FOREST = (
         dict(label='piata regala 2', kind='disc', center=(72.0, -330.0), radius=30.0, claim=True),
         dict(label='piata regala 3', kind='disc', center=(72.0, -260.0), radius=30.0, claim=True),
         dict(label='piata regala 4', kind='disc', center=(72.0, -195.0), radius=30.0, claim=True),
+    ]
+    # Pavajul pietei regale (`custom_bench_patches` x 60..107, z -366..-200, gen_angkor_route.py) e mai lat decat
+    # cele 4 discuri de mai sus (centrate la x 72): pe fasia x 100-107 de langa sosea cresteau palmieri, tufe si
+    # ferigi prin dale (feedback de pe telefon, 16 nov 2026). Discuri de 27 m la 18 m pe axa pavajului (x 84)
+    # il acopera cap-coada: la jumatatea dintre doua discuri raman 25,4 m de o parte si de alta (x 58,6..109,4).
+    + [dict(label='pavaj piata %d' % k, kind='disc', center=(84.0, -372.0 + 18.0 * k), radius=27.0, claim=True)
+       for k in range(11)]
+    + [
         dict(label='terasa Bayon 1', kind='disc', center=(-120.0, -437.0), radius=22.0, claim=True),
         dict(label='terasa Bayon 2', kind='disc', center=(-75.0, -437.0), radius=22.0, claim=True),
         dict(label='terasa Bayon 3', kind='disc', center=(-30.0, -437.0), radius=22.0, claim=True),

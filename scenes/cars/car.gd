@@ -3097,9 +3097,12 @@ func _update_soft_veg(delta: float) -> void:
 		var tint := Color(0.38, 0.56, 0.24)
 		if track != null:
 			tint = tint.lerp(track.theme_ground_tint, 0.25)
-		PropDebris.leaf_burst(get_tree(), global_position + Vector3.UP * 0.4,
-			v.normalized() * 0.5 + Vector3.UP,
-			clampf(inverse_lerp(bush_burst_min_speed, 28.0, speed), 0.0, 1.0), tint)
+		var k := clampf(inverse_lerp(bush_burst_min_speed, 28.0, speed), 0.0, 1.0)
+		# Din varful tufei (0,9 m), nu de la 0,4: de acolo frunzele ieseau sub caroserie, ascunse de ea.
+		if PropDebris.leaf_burst(get_tree(), global_position + Vector3.UP * 0.9,
+				v.normalized() * 0.5 + Vector3.UP, k, tint) and is_player:
+			# Fosnetul perdelei de liane (vine_curtain.gd): tufa se si aude, nu doar se vede.
+			AudioManager.play_sfx_at(&"roll_grass", global_position, 1.25, lerpf(-12.0, -7.0, k), 0)
 
 
 ## Fumul de cauciuc dupa alunecare (0..1): cate pufuri se vad, cat de opace si

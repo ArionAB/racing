@@ -4601,6 +4601,13 @@ if E8_PESC:
             p_ = e8_perch("felinar_pod%d" % k_, x_ - 0.6, z_, x_ + 0.6, z_, 13)
             if p_:
                 perch.append(p_)
+        # primii stalpi ai parapetului, pe latura fiecarei benzi, unde intra camera pe tablier (banda de N
+        # intra pe la V, cea de S pe la E). Picioarele turnurilor n-au polita la cota tablierului: soclul
+        # de beton e la 16 m sub el (masurat pe sf_bridge_tower.glb), nu se vede de pe pod.
+        for k_, (x_, z_) in enumerate(((273.0, -241.0), (277.5, -241.0), (467.0, -216.25), (462.5, -216.25))):
+            p_ = e8_perch("parapet_cap%d" % k_, x_, z_ - 0.4, x_, z_ + 0.4, 9)
+            if p_:
+                perch.append(p_)
     n_p = _e8_flock("PescarusiCocotati", "animals/sf_gull_perch.glb", "e8_gull_p", perch, GULL_SCALE, 1)
     # in zbor: jos peste apa, la N de chei (vazuti de pe chei si de pe ponton pe fondul apei), si langa
     # capul de V al podului, sub tablier
@@ -4616,8 +4623,9 @@ if E8_PESC:
     if E8_CURTE:
         # in MISCARE, langa tablier, la ~6-8 m in afara parapetului, la cota tablierului, pe fondul apei,
         # in sensul traficului de pe latura lor (pe pod se circula pe stanga: banda de N spre E)
+        # (ambele bucle in sens invers: latura dinspre pod merge spre E la N si spre V la S, ca benzile)
         for k_, (cz, rev, ph) in enumerate(((-264.0, True, 0.0), (-264.0, True, 0.12),
-                                           (-193.0, False, 0.5), (-193.0, False, 0.62))):
+                                           (-193.0, True, 0.5), (-193.0, True, 0.62))):
             pts_ = _e8_ellipse(370.0, DECK_Y + 2.5 + 0.8 * (k_ % 2), cz, 112.0, 13.0, 24, rev)
             n_m += _e8_mover("PescarusPod%d" % k_, "animals/sf_gull_glide.glb", "e8_gull_g", "Gull_Glide", pts_,
                              13.0, ph, 1.1)

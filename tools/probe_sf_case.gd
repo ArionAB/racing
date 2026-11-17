@@ -112,7 +112,7 @@ func _ground(x: float, z: float) -> float:
 ## suprafata cea mai de sus dintre ele; terenul de sub trotuar e ascuns. Trotuarul e in `Shoulders`
 ## sau, cu `paved_level_color`, in corpul lui (`Trotuar`).
 func _surface(x: float, z: float) -> float:
-	return _first(x, z, ["TerrainBody", "Shoulders", "Trotuar"])
+	return _first(x, z, ["TerrainBody", "Shoulders", "Trotuar", "TrotuarCurte"])
 
 
 func _first(x: float, z: float, names: Array) -> float:

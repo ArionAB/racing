@@ -369,7 +369,7 @@ func _walk_name(x: float, z: float) -> String:
 			return ""
 		var col := hit["collider"] as Node
 		var nm := String(col.name) if col != null else ""
-		if nm in ["Trotuar", "TerrainBody", "RoadTop", "RoadSides", "Shoulders"]:
+		if nm in ["Trotuar", "TrotuarCurte", "TerrainBody", "RoadTop", "RoadSides", "Shoulders"]:
 			return nm
 		excl.append(hit["rid"])
 	return ""
@@ -390,7 +390,7 @@ func _check_curte() -> int:
 		var bi := _track.closest_index_global(c)
 		if _track.is_on_road(bi, c + Vector3.UP * 0.5):
 			on_road += 1
-		if _sabotage != "curte" and _walk_name(c.x, c.z) != "Trotuar":
+		if _sabotage != "curte" and _walk_name(c.x, c.z) != "TrotuarCurte":
 			sand += 1
 	# casele: amprenta cutiilor de coliziune (`CurtePoartaCorpuri`), colturile bazei cu 0,5 m inauntru;
 	# fiecare la >= half_width + CURTE_ROAD_GAP de axul oricarei benzi si nu pe trotuarul/pavajul de sub ele
@@ -417,7 +417,7 @@ func _check_curte() -> int:
 					min_gap = minf(min_gap, dh)
 					if dh < CURTE_ROAD_GAP:
 						h_bad += 1
-				if _walk_name(p.x, p.z) == "Trotuar":
+				if _walk_name(p.x, p.z) in ["Trotuar", "TrotuarCurte"]:
 					h_bad += 1
 	var low := INF
 	var d := _track.get_node_or_null(^"DecorManual/CurtePoarta")

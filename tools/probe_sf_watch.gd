@@ -37,6 +37,10 @@ extends Node
 ##   - VALUL 2: trecerile masinilor PRIN volumul stalpilor si trunchiurilor fara coliziune
 ##     (`metadata/sf_poles`: semafoare, felinare, arbori de strada) si mobilierul mic BumpProp (grupul
 ##     `sf_street_bodies`): urnite, secunde pe carosabil, din care in zona de aterizare.
+##     PASUL 8d: cand stalpii au coliziune (cilindrul `trunk` al WorldProp), CONTACTELE reale cu el
+##     (`get_colliding_bodies`), pe familie si pe stalp, cu viteza la contact, daca masina era in zbor,
+##     si ce s-a intamplat in urmatoarele 4 s (repusa / ejectata / viteza minima). Linia de volum ramane
+##     (cu stalpi solizi ea numara atingerile, nu trecerile).
 ##   - VALUL 3: contactele cu corpurile noi (casele pictate `CasePictateCorpuri`, placa turnanta
 ##     `PlacaCorpuri` = gheretă + vagonul parcat, magaziile de chei `MagaziiCorpuri`), pe acelasi
 ##     tipar ca la case (un contact = o masina care atinge corpul, cu cel putin 1 s intre doua).
@@ -470,6 +474,9 @@ func _on_respawn(c: Car, i: int) -> void:
 	if _gate2_t[i] >= 0.0:
 		_gate2_resp[i] = true
 	_resp.append([_t, i, _zone(_prev[i]), _prev[i]])
+	for f in _pole_follow:
+		if int(f[5]) == i and _t - float(f[1]) <= 4.0:
+			f[3] = true
 	if _near_pontoon(_prev[i]) and _prev[i].y < _pont[0].y - 1.0:
 		_pont_falls.append([_t, i, _prev[i]])
 
@@ -597,11 +604,75 @@ func _setup_poles(track: Track) -> void:
 	for fam: String in fams:
 		for p: Vector3 in PackedVector3Array(fams[fam]):
 			_poles.append([fam, p, float(radii.get(fam, 0.3))])
-	print("=== SF stalpi fara coliziune: %d (%s)" % [_poles.size(), ", ".join(fams.keys().map(
+	print("=== SF stalpi in sf_poles: %d (%s)" % [_poles.size(), ", ".join(fams.keys().map(
 		func(f: String) -> String: return "%s %d" % [f, PackedVector3Array(fams[f]).size()]))])
 
 
+## PASUL 8d: corpurile de coliziune ale stalpilor (StaticBody3D cu `mod_coliziune` = "trunk", sub
+## DecorManual/Semafoare|Felinare|Arbori), legate de stalpul din `sf_poles` cel mai apropiat (< 1 m).
+## Rezolvate lenes, la primul tick: WorldProp le construieste in `_ready`.
+var _pole_body: Dictionary = {}  # instance_id corp -> indicele stalpului
+var _pole_bodies_done := false
+var _pole_contacts: Array = []   # [t, masina, stalp, v, in_aer, poz masina]
+var _pole_c_last: Dictionary = {}
+var _pole_follow: Array = []     # [indice contact, t0, v_min, repusa, ejectata, masina]
+
+
+func _resolve_pole_bodies() -> void:
+	_pole_bodies_done = true
+	var track: Track = _race.track
+	var dm: Node = track.get_node_or_null(^"DecorManual")
+	if dm == null:
+		return
+	var per_fam := {}
+	for dir_name in ["Semafoare", "Felinare", "Arbori"]:
+		var d: Node = dm.get_node_or_null(NodePath(dir_name))
+		if d == null:
+			continue
+		for b in d.find_children("*", "StaticBody3D", true, false):
+			if String((b as Node).get_meta("mod_coliziune", "")) != "trunk":
+				continue
+			var bp := (b as Node3D).global_position
+			for cs in (b as Node).get_children():
+				if cs is CollisionShape3D:
+					bp = (cs as Node3D).global_position
+					break
+			var best := -1
+			var bd := 1.0
+			for k in _poles.size():
+				var q: Vector3 = _poles[k][1]
+				var dd := Vector2(bp.x - q.x, bp.z - q.z).length()
+				if dd < bd:
+					bd = dd
+					best = k
+			if best >= 0:
+				_pole_body[(b as Node).get_instance_id()] = best
+				var fam: String = _poles[best][0]
+				per_fam[fam] = int(per_fam.get(fam, 0)) + 1
+	print("=== SF stalpi cu coliziune: %d corpuri legate de stalpi (%s)" % [_pole_body.size(),
+		", ".join(per_fam.keys().map(func(f: String) -> String: return "%s %d" % [f, per_fam[f]]))])
+
+
 func _tick_poles(i: int, c: Car, p: Vector3) -> void:
+	if not _pole_bodies_done:
+		_resolve_pole_bodies()
+	if not _pole_body.is_empty():
+		for b in c.get_colliding_bodies():
+			var id := (b as Node).get_instance_id()
+			if not _pole_body.has(id):
+				continue
+			var k: int = _pole_body[id]
+			var key := "%d|%d" % [i, k]
+			if _t - float(_pole_c_last.get(key, -99.0)) > 1.0:
+				_pole_contacts.append([_t, i, k, c.horizontal_speed(), not c.is_on_floor(), p])
+				_pole_follow.append([_pole_contacts.size() - 1, _t, c.horizontal_speed(), false, false, i])
+			_pole_c_last[key] = _t
+	for f in _pole_follow:
+		if int(f[5]) != i or _t - float(f[1]) > 4.0:
+			continue
+		f[2] = minf(float(f[2]), c.horizontal_speed())
+		if c.is_ejected:
+			f[4] = true
 	var half := (c.data.body_width * 0.5) if c.data != null else 0.9
 	for k in _poles.size():
 		var q: Vector3 = _poles[k][1]
@@ -705,6 +776,35 @@ func _report_v2() -> void:
 			var q: Vector3 = pl[1]
 			print("    [sf stalp] t=%5.1fs %s #%d %-18s v=%.1f %s poz=(%.0f,%.1f,%.0f)" % [float(h[0]), String(pl[0]),
 				int(h[2]), cars[int(h[1])].pilot_name, float(h[3]), "zbor" if bool(h[4]) else "sol", q.x, q.y, q.z])
+		# PASUL 8d: contactele reale (stalpi cu coliziune). Linia apare si cu 0 corpuri: spune ca
+		# lotul ARE contor, iar `solizi 0` spune ca stalpii n-au coliziune in scena asta.
+		var solid := {}
+		for k in _pole_body.values():
+			var fam_k: String = _poles[int(k)][0]
+			solid[fam_k] = int(solid.get(fam_k, 0)) + 1
+		for fam: String in fams:
+			var cs: Array = _pole_contacts.filter(func(h: Array) -> bool: return String(_poles[int(h[2])][0]) == fam)
+			var vs2: Array = cs.map(func(h: Array) -> float: return float(h[3]))
+			vs2.sort()
+			var hit_k := {}
+			var air2 := 0
+			for h in cs:
+				hit_k[int(h[2])] = true
+				if bool(h[4]):
+					air2 += 1
+			print("=== SF stalpi contact %s: %d stalpi, solizi %d, contacte %d (stalpi atinsi %d, in zbor %d), v med %.1f max %.1f m/s" % [
+				fam, int(fams[fam]), int(solid.get(fam, 0)), cs.size(), hit_k.size(), air2,
+				float(vs2[vs2.size() / 2]) if not vs2.is_empty() else 0.0,
+				float(vs2[vs2.size() - 1]) if not vs2.is_empty() else 0.0])
+		for f in _pole_follow:
+			var h: Array = _pole_contacts[int(f[0])]
+			var pl: Array = _poles[int(h[2])]
+			var q: Vector3 = pl[1]
+			var pc: Vector3 = h[5]
+			print("    [sf stalp lovit] t=%5.1fs %s #%d %-18s v=%.1f %s vmin4s=%.1f repusa=%s ejectata=%s stalp=(%.0f,%.1f,%.0f) masina=(%.1f,%.1f,%.1f)" % [
+				float(h[0]), String(pl[0]), int(h[2]), cars[int(h[1])].pilot_name, float(h[3]),
+				"zbor" if bool(h[4]) else "sol", float(f[2]), "da" if bool(f[3]) else "nu",
+				"da" if bool(f[4]) else "nu", q.x, q.y, q.z, pc.x, pc.y, pc.z])
 	var n := 0
 	for rb in _street:
 		if rb != null:
@@ -901,6 +1001,20 @@ static func _med(a: Array) -> float:
 
 func report() -> void:
 	var cars: Array[Car] = _race.cars
+	# PASUL 8d: preferinta de scurtatura a fiecarei masini (cea de la final; cu zarul de nivel stins
+	# `prefers_shortcut` se trage o data, la `configure`) si ruta pe care a trecut efectiv la furca.
+	for i in cars.size():
+		var ai := cars[i].controller as AIController
+		var r0 := 0
+		var r1 := 0
+		for ps in _passes:
+			if int(ps[0]) == i:
+				if int(ps[1]) == 1:
+					r1 += 1
+				else:
+					r0 += 1
+		print("=== SF pref %d %s: scurtatura=%s treceri ocol=%d serpentine=%d" % [i, cars[i].pilot_name,
+			("da" if ai.prefers_shortcut else "nu") if ai != null else "?", r0, r1])
 	print("=== SF lant: %d muchii" % _lips.size())
 	for k in _lips.size():
 		var vs: Array = _lip_v[k]

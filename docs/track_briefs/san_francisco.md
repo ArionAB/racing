@@ -2104,6 +2104,240 @@ parcate (4,2 m) sunt refuzate de `BumpProp` (plafonul de 2 m), deci rămân stat
    **Încă lipsesc:** trotuarele, poarta (H5), grădinița casei de la intrarea în serpentine,
    pescărușii și papagalii, velele și feribotul, sunetul.
 
+   **8d. Trotuarele și stâlpii solizi (17 nov 2026)**, ramura `sanfrancisco/pas8d-trotuare`. Două
+   decizii ale dezvoltatorului: (1) fâșia dintre carosabil și fațade devine trotuar, iar o mașină pe
+   el are viteză de drum, nu plafonul de offroad; (2) semafoarele, felinarele și arborii de stradă
+   devin solizi. `SF_PAS8D=0` reface scena de dinainte octet cu octet; `SF_TROTUAR=0`,
+   `SF_STALPI=0`, `SF_SEMAFOR_B1=0` sting câte o parte.
+
+   **Trotuarele.** Mecanismul de temă al Jodhpur-ului (`shoulder_width_zones` +
+   `shoulder_zones_are_road`) nu se potrivea: e pe ambele laturi (pe SF casele stau des pe una) și e
+   umărul care coboară spre teren. Trotuarul e pragul plat (`level_shoulder_zones`) pe o latură:
+   cheia nouă `Track.paved_level_zones` (Vector4(de_la, până_la, lățime, latură)), o placă la cota
+   buzei asfaltului, numărată de `is_on_road`. Generatorul scrie zonele din rândurile de case.
+
+   | zonă | unde | lățimea plăcii (de la buză) |
+   |---|---|---|
+   | B | 6 rânduri, ambele laturi | 5,05 m (fațada la 11,75 + 0,30 sub ea) |
+   | C | latura de N a coamei, sub grădinițe | 6,80 m (fațada caselor pictate la 13,5) |
+   | D | lanțul: **o placă pe latură**, de la primul rând până după ultima mașină parcată | 4,40 m (acoperă capătul mașinilor parcate, la 11,1 m) |
+   | E | ocolul: latura de N a străzii spre V, ambele laturi ale străzii spre N | 3,80 m |
+   | G | latura de V | 3,80 m |
+
+   - **La nivel, fără bordură în relief.** Marginea carosabilului e o fâșie de 0,30 m mai deschisă
+     (vertex color). Garda măsoară treapta asfalt → trotuar: **0,000 m** în toate cele 677 de
+     puncte coapte.
+   - **Material propriu, beton deschis** (`paved_level_color`, peste dala `concrete.png`):
+     umărul temei (CONCRETE pe aceeași dală, × 0,82) iese maro-bej pe ecran, la fel de închis ca
+     nisipul. **Materiale: 22 → 23** (prag 38).
+   - **Capetele: rampe de 8 m** (`paved_zone_ramp_m`), dincolo de capătul rândului. Prima variantă
+     cobora pe un singur segment copt (1,5–3 m): pentru o mașină venită pe nisip la 9–10 m de ax,
+     capătul plăcii era un prag de 0,3 m pe ~0,5 m. Lotul ei a avut **o ejectare la 29 m/s cu
+     `lovit=Trotuar`** la intrarea pe ocol (−28, 325). Pe 8 m panta văzută din mers e ~9°; în cele
+     trei loturi de după: nicio ejectare cu `lovit=Trotuar` sau `Shoulders`. Rampa se scurtează automat dacă ar trece la
+     < 2 m de un tramvai (o dată: B1V, la strada laterală a tramvaiului 1). Consecință: pe B
+     golurile de 14 m dintre rânduri sunt mai scurte decât două rampe, deci placa trece și peste
+     ele (puțin îngustată la mijloc).
+   - **Lanțul e o placă continuă**: între colțul de jos al unui rând și prima mașină parcată sunt
+     0,65 m, deci acolo nu încape nicio rampă. Toate cele 42 de mașini parcate stau acum pe trotuar
+     (brief §3: „parcate perpendicular pe trotuar”).
+   - **Casele s-au ridicat pe placă**: podeaua = cota trotuarului la capătul de sus al fațadei +
+     0,10 m (+0,03 minim, cât lasă fusta de 2,4 m pe panta lanțului). Ridicarea: B, E, G, C
+     0,32–0,48 m; D 0,15–0,93 m. Pe lanț rezerva fustei scade de la +0,37 la **+0,06 m**; fusta
+     din spate a caselor de pe lanț rămâne în aer până la 1,20 m (informativ, era 0,28; spatele dă
+     în rândul din spate).
+   - Tot ce stă pe fâșie e pe placă: felinarele, arborii de pe B, semafoarele, băncile și
+     grădinițele coamei (prin `v2_ground`, din punctele coapte `tools/data/sf_route_baked.tsv`,
+     `ProbeSfCase --dump-baked`); mașinile parcate și mobilierul mic se așază singure la pornire.
+     `sf_case_ground.tsv` nu s-a schimbat (terenul e același).
+   - **AI-ul:** linia lui vine din `lookahead_point`/`width_at_index`, deci nu vede trotuarul și
+     nu-l folosește ca linie; doar nu mai e frânat pe el. Consecință de știut: plasa cursei
+     „offroad sub 2,5 m/s timp de 5 s” nu mai prinde o mașină oprită pe trotuar; acolo o scoate
+     anti-blocajul propriu al AI-ului (măsurat cu `ProbeSfStalp`, mai jos).
+
+   **Stâlpii solizi.** Cilindrul `trunk` al `WorldProp` (raza fusului din `TRUNK_RADIUS`: 0,20 /
+   0,14 / 0,20 m), corpuri statice, plafonul BumpProp de 64 neatins. Semaforul de pe B de la y 102
+   (`Strada1`, traversat de 3 ori în lotul de control, până la 32,7 m/s, toate în turul 1) s-a mutat
+   **de la 8,5 la 11,0 m de ax**, în dreptul golului dintre rânduri; capul rămâne peste banda din
+   dreapta (3,3–3,5 m de ax). Celelalte cinci (muchiile și `Strada2`) s-au mutat **de la 8,5 la
+   9,5 m de ax** (pragul lui `probe_manual` pentru o piesă solidă: semilățimea + 2 m; `SF_SEMAFOR_LAT=0`
+   le lasă la 8,5). Cu semafoarele pe placă, scara lor a coborât de la ×1,14 la **×1,04**: capul la
+   8,02–8,04 m peste drum (contract ≥ 8,0), la 2,0 m de ax pe muchii și pe `Strada2` (deasupra benzii
+   din dreapta, aproape de linia de mijloc), la 3,5 m pe `Strada1`.
+
+   **Gărzi**
+
+   | | control | după | prag |
+   |---|---|---|---|
+   | `probe_decor --track=25`: materiale | 22 | **23** (trotuarul) | ≤ 38 |
+   | `probe_decor` pe celelalte piste | — | identic, linie cu linie | — |
+   | `ProbeLaneClear --track=17` | 50 | 50 | 50 |
+   | soare pe lanț (`ProbeSfLight --real`) | 83,6 % | **82,0 %** (casele ridicate) | ≥ 80 % |
+   | `ProbeSfRoute` | −0,29 m | −0,29 m | ≥ −0,30 |
+   | `ProbeSfCase` / `ProbeSfSpate` | OK / OK | OK / OK (`ProbeSfCase --sabotaj` pică) | — |
+   | `probe_decor_overlap --manual` | 73 | 73, aceleași piese | 73 |
+   | `ProbeSfTrotuar` (nou) | — | OK; `--sabotaj` (placa la +0,30 m) pică | — |
+   | `ProbeSfStalp` (nou) | — | OK pe 9 cazuri; pe scena fără stâlpi solizi pică | — |
+
+   `ProbeSfTrotuar`: treapta 0,000 m în 677 de puncte, profilul plăcii fără salturi, zero nisip peste
+   placă; `is_on_road` DA pe 460 de puncte de trotuar, NU dincolo de placă (230), pe latura fără
+   trotuar (41) și în goluri (24). Dinamic, cu o mașină reală: plafonul ei pe trotuar = cel de pe
+   bandă (36,0 m/s), pe latura fără trotuar 16,2 m/s (× 0,45); viteza la capăt 29,5 / 29,5 / 16,3 m/s
+   (ocolul) și 25,3 / 24,5 / 16,2 m/s (strada de întors).
+   `probe_manual --track=25` (nu e în `verify_local`): cu semafoarele la 8,5 m marca 5 „IN DRUM”
+   (solide, sub pragul ei de semilățime + 2 m); la 9,5 m iese **OK**.
+
+   **`ProbeSfStalp`** (mașina de joc în cursă reală, de la 12 m — semaforul de pe muchie de la 6 m —
+   drept în stâlp, apoi AI-ul la volan):
+
+   | stâlp | v | contact | tunel | urcare | v la 0,5 s | recuperată | repusă / ejectată |
+   |---|---|---|---|---|---|---|---|
+   | felinar (155, −75) | 10 / 20 / 34 | da / da / da | nu | 0,23 / 0,60 / 0,16 m | 0,4 / 0,1 / 0,2 | 6,4 / 3,2 / 3,4 s | — / — / 1 + 1 |
+   | arbore (153, −82) | 10 / 20 / 34 | da / da / da | nu | 0,60 / 0,94 / 0,00 m | 2,2 / 1,1 / 8,2 | 3,2 / 3,0 / 3,5 s | — / — / 1 + 1 |
+   | semafor muchia 2 (la 8,5 m) | 10 / 20 / 34 | da / da / da | nu | 0,05 / 0,00 / 0,39 m | 0,4 / 4,0 / 7,7 | 2,9 / 2,3 / 3,4 s | — / — / 1 + 1 |
+   | semafor muchia 1 (la 9,5 m) | 10 / 20 / 34 | da / da / da | nu | 0,03 / 0,00 / 0,46 m | 0,3 / 4,0 / 7,9 | 3,0 / 2,3 / 3,4 s | — / — / 1 + 1 |
+
+   La 34 m/s șoferul e ejectat (mecanica mașinilor deschise, ca la orice zid) și repunerea vine în
+   ~3,4 s; sub asta mașina se oprește sau deviază și pleacă singură. Nicio trecere prin stâlp, nicio
+   aruncare peste 1 m.
+
+   **Condusul** (8 × 16 × 250 s, aceeași zi; lotul 3 rulat de două ori):
+
+   | | control | trotuare | trotuare + stâlpi solizi | idem, lotul 2 |
+   |---|---|---|---|---|
+   | tur mediu | 82,75 s | 82,96 s | 83,22 s | 83,07 s |
+   | tramvaiul 1 / 2, cu contact | 1,7 / 4,4 % | 1,7 / 2,7 % | 1,3 / 2,2 % | 2,6 / 4,2 % |
+   | pod: peste despărțitor / frontale în coridor | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+   | pod: contact cu bariera | 6,0 % | 5,6 % | 5,3 % | 4,6 % |
+   | repuneri / ejectări / `[blocaj]` | 2 / 1 / 4 | 1 / 1 / 7 | 12 / 5 / 15 | 12 / 7 / 7 |
+   | ponton: căderi | 0,26 % | 0,00 % | 1,04 % | 0,77 % |
+   | contacte case din față / din spate | 5 / 0 | 3 / 0 | 4 / 0 | 2 / 0 |
+   | stâlpi: treceri prin volum (fără coliziune) | semafor 3, felinar 3, arbore 1 | semafor 1, felinar 1, arbore 0 | — | — |
+   | stâlpi: contacte (solizi) semafor / felinar / arbore | — | — | 0 / 2 / 6 | 1 / 1 / 1 |
+   | treceri pe serpentine / pe ocol | 171 / 213 | 167 / 211 | 203 / 180 | 205 / 179 |
+
+   - **Niciun contact cu un stâlp n-a dus la repunere sau ejectare** (în 4 s după contact). Cele mai
+     lovite: arborele de pe G (159, 298) o dată la 32,8 m/s (a plecat cu 23,9), arborii de pe B la
+     (153, −37) / (153, −51) la 24,7 / 21,6 m/s, felinarul de pe B la (155, 152) de 3 ori sub 8 m/s
+     (o grămadă lentă lângă intrarea tramvaiului 1), semaforul `Strada2` (136, 11) o dată la 9,3 m/s.
+     Niciun stâlp nu ia o parte disproporționată; semafoarele de pe muchii: 0 contacte în 32 de
+     seed-uri.
+   - **Repunerile și `[blocaj]` din loturile cu stâlpi solizi sunt în serpentine (6–7) și pe ponton
+     (3–4)**, niciunul lângă un stâlp sau pe trotuar. Ele urmează traficul de pe serpentine, care a
+     urcat în ambele loturi (203–205 treceri față de 167–171): alegerea scurtăturii se trage o dată
+     pe cursă (`prefers_shortcut`): zar, nu stâlpi — dovedit la a doua trecere, mai jos
+     (zarul nu era semănat; incidentele țin de setul de seed-uri). Turul mediu urcă cu 0,3–0,5 s în aceleași loturi, pe feliile 0,45–0,60
+     (serpentinele și ocolul).
+   - Contorul de contacte e dovedit viu: `SF_STALPI_SABOTAJ=1` (câte un stâlp solid din fiecare
+     familie pe dreapta de start) dă într-un seed de 40 s 4 / 7 / 4 contacte.
+
+   **Capturi:** `docs/asset_briefs/img/sf_route/p8d_trotuar_*.png` (B, muchia 1, lanțul cu mașinile
+   parcate, ocolul spre V și spre N, strada de întors).
+
+   **8d, a doua trecere (17 nov 2026).**
+
+   **De ce se mutau mașinile pe serpentine.** Loturile de mai sus dădeau 171 / 213 și 167 / 211
+   treceri serpentine / ocol fără stâlpi solizi și 203 / 180, 205 / 179 cu ei. **Nu stâlpii.** Două
+   artefacte ale sondei, dovedite separat:
+   - **Zarul scurtăturii nu era semănat.** Cu profilul implicit, `AIController.configure` trage
+     `prefers_shortcut` o singură dată pe cursă, din `Race._rng`. `Race._ready` face
+     `_rng.randomize()` și configurează mașinile chiar în `add_child`; ProbeRace seamănă `_rng` abia
+     după. Deci preferința celor 7 AI era zar de PROCES, nu de seed (doar mașina jucătorului, pe
+     care ProbeRace o reconfigurează cu rng-ul ei, era fixă). Măsurat: aceeași scenă, aceleași
+     seed-uri 1 și 2, rulate de două ori: preferințele diferă de la o rulare la alta. Steag nou în
+     ProbeRace, `--seed-ai-prefs` (opt-in): preferința se retrage din seed și din indicele mașinii,
+     cu un rng separat (restul tragerilor rămân ca fără el). Cu el, pe aceleași 16 seed-uri:
+
+     | | control | trotuare, stâlpi nesolizi | trotuare + stâlpi solizi |
+     |---|---|---|---|
+     | mașini care preferă scurtătura | 54 / 128 | 54 / 128 (aceleași) | 54 / 128 (aceleași) |
+     | treceri serpentine / ocol | 185 / 199 | 192 / 192 | 186 / 198 |
+     | din care împinse pe serpentine fără să le prefere | 23 | 30 | 24 |
+
+     Cine preferă scurtătura o ia de fiecare dată (162 / 162 în toate trei); restul diferenței e
+     fizic, mașini împinse pe ramură la furcă, la fel de des cu și fără stâlpi.
+   - **Repunerile și `[blocaj]` în plus țineau de setul de seed-uri, nu de stâlpi.** Și cu
+     preferințele semănate, lotul cu stâlpi solizi a ieșit mai rău (18 / 10 / 19 față de 6 / 2 / 9),
+     tot în serpentine (îngrămădeala din turul 1), pe ponton și pe lanț (`lovit=RoadTop`), niciunul
+     lângă un stâlp. Cauza e numerică: aceeași scenă, același seed, rulată de două ori, dă urme
+     identice bit cu bit pe primele 13 s (`PROBE_RACE_TRACE=2`); scena cu stâlpi solizi și cea fără
+     se despart la **t = 5,72 s, pe linia de start (x 499), la ~340 m de cel mai apropiat stâlp**, în
+     a șaptea zecimală a vitezei unei mașini din pluton. Cele 71 de corpuri statice în plus schimbă
+     ordinea în care Jolt rezolvă contactele, nu traiectoria vreunei mașini prin ele. Turul 1 e apoi
+     aproape determinist pe scenă (3 rulări din aceeași scenă și seed: aceleași blocaje în toate trei pe 4 din 8
+     cazuri, în două din trei pe celelalte 4), deci **un lot repetat pe aceleași seed-uri retrage aceleași istorii** și nu confirmă
+     nimic: cele trei loturi „cu stâlpi” de mai sus erau, în turul 1, practic aceeași probă.
+   - **Comparația cinstită:** seed-uri noi, preferințe semănate. Pe 32 de seed-uri (17–48),
+     8 × 250 s:
+
+     | | trotuare, stâlpi nesolizi | trotuare + stâlpi solizi |
+     |---|---|---|
+     | tur mediu | 83,08 s | 82,99 s |
+     | tramvaiul 1 / 2, cu contact | 1,2 / 2,4 % | 1,8 / 2,9 % |
+     | pod: peste despărțitor / frontale în coridor / barieră | 0 / 0 / 6,0 % | 0 / 0 / 4,3 % |
+     | repuneri / ejectări / `[blocaj]` | 15 / 10 / 20 | 9 / 6 / 23 |
+     | ponton: căderi | 0,26 % | 0,13 % |
+     | contacte case din față / din spate | 3 / 0 | 8 / 0 |
+     | treceri serpentine / ocol | 354 / 414 | 338 / 430 |
+     | contacte cu stâlpii semafor / felinar / arbore | — | 0 / 2 / 3 (max 29,3 m/s, 0 repuneri) |
+
+     Excesul de incidente nu se mai vede. Pentru loturile A/B pe SF de aici înainte: `--seed-ai-prefs`,
+     și o diferență între două scene se crede doar pe seed-uri diferite de cele pe care s-a văzut.
+
+   **Scările publice** (modulul refăcut de pe `sanfrancisco/pas8d-struct`, unit aici): vechea regulă
+   (`sink = min(gap, 0,4) + 0,05`) le îngropa — măsurat pe terenul real, treptele ajungeau la 0,59–1,29 m
+   sub teren. Generatorul le așază acum pe profilul treptelor: originea = cea mai mică cotă la care
+   nicio treaptă (|x| ≤ 1,0) a celor două module nu intră în teren (harta `v2_ground`) + 0,10 m
+   (harta pe grilă de 1–2 m față de terenul real: până la 0,07 m), cu fusta (−1,8) verificată pe tot
+   conturul. `SF_SCARI_ASEZARE=0` reface așezarea veche.
+
+   | scara | ridicată față de așezarea veche | originea peste terenul de sub ea | fusta folosită (din 1,8) |
+   |---|---|---|---|
+   | 0 (185, 276) | +0,73 m | +0,48 m | 0,68 m |
+   | 1 (219, 276) | +1,29 m | +0,85 m | 1,49 m |
+   | 2 (249, 275) | +0,98 m | +0,71 m | 0,93 m |
+   | 3 (187, 336) | +1,39 m | +0,94 m | 1,55 m |
+
+   Garda nouă `ProbeSfScari` (pe `TerrainBody`): treptele cu 0,03–0,31 m peste teren, fundul fustei
+   cu 0,25–1,34 m sub teren pe toate cele 8 module; `--sabotaj` (−0,5 m) pică pe toate 8, la fel
+   scena cu așezarea veche. Măsurătorile celuilalt constructor (0,76 / 1,33 / 1,01 / 1,42) ies
+   apropiate; diferența vine din marjă și din eșantionare.
+
+   **Magaziile de chei** (aceeași ramură, numerele constructorului): pereții de pe nisipul atlasului
+   (SAND_MID) pe MARBLE_GREY abia încălzit, șipcile pe ASPHALT_EDGE cu tentă maro în vertex colors,
+   schema K6. Saturația pereților în cadrul de chei 0,895 → 0,339, luma +9 %, contrast pereți / șipci
+   1,26 → 1,48; triunghiuri și materiale neschimbate (`probe_decor --track=25`: tot 23).
+
+   **Fusta din spate a caselor de pe lanț** (în aer până la 1,20 m): doar casele de colț din capătul
+   de sus al fiecărui bloc (`D?E_00`, `D?V_00`), cu spatele la 22,5 m de ax. Spatele dă în rândul din
+   spate (case la ≥ 22,6 m), latura liberă (spre intersecție) are fusta până în teren. Din camera de
+   joc nu se vede nicăieri: `p8d_spate_intersectie_gamecam.png` (intersecția dinaintea muchiei 2),
+   `p8d_spate_muchia1_sus.png` (de deasupra muchiei 1, spre colțul de V), `p8d_spate_din_ocol.png`
+   (de pe ocol, înapoi spre lanț). Nicio reparație construită. `ProbeSfCase --spate` le listează.
+
+   **Gărzi pe scena finală:** materiale 23; `ProbeLaneClear` 50; soare pe lanț 82,0 %;
+   `ProbeSfRoute` −0,29 m; `ProbeSfCase`, `ProbeSfSpate`, `ProbeSfTrotuar`, `ProbeSfStalp`,
+   `ProbeSfScari` OK; `probe_decor_overlap` 73, aceleași piese; `probe_manual --track=25` OK;
+   `verify_sanfrancisco.sh` OK. `SF_PAS8D=0` reface scena de la `b4265ac0` octet cu octet (cu GLB-urile
+   noi ale scării și magaziilor).
+
+   **Lotul final**, 8 × 16 × 250 s, `--seed-ai-prefs`, aceeași zi:
+
+   | | control (`SF_PAS8D=0`) | scena finală |
+   |---|---|---|
+   | tur mediu | 82,75 s | 82,98 s |
+   | tramvaiul 1 / 2, cu contact | 2,6 / 2,9 % | 1,9 / 2,6 % |
+   | pod: peste despărțitor / frontale în coridor / barieră | 0 / 0 / 5,7 % | 0 / 0 / 5,0 % |
+   | repuneri / ejectări / `[blocaj]` | 3 / 3 / 10 | 18 / 10 / 19 |
+   | ponton: căderi | 0,00 % | 1,03 % |
+   | contacte case din față / din spate | 2 / 0 | 4 / 0 |
+   | contacte cu stâlpii semafor / felinar / arbore | — (treceri prin volum: 3 / 0 / 1) | 0 / 0 / 2 (max 15,6 m/s) |
+
+   Incidentele lotului final sunt cele din istoriile de tur 1 de mai sus (serpentine, ponton); pe
+   32 de seed-uri noi nu se reproduc.
+
+   **De decis după 8d:** trotuarul trece peste golurile de pe B.
+
 ## 8. Lecții aplicate anticipat, și ce a fost respins
 
 - **Săritura s-a măsurat înaintea traseului**, nu după decor: profilul blocului

@@ -357,6 +357,8 @@ def main():
     case_rows = []
     pole_n = {}
     pole_rows = []
+    pole_solid = {}
+    pole_hits = []      # pasul 8d: contactele reale (fam, #, v, aer, vmin4s, repusa, ejectata, stalp, jurnal)
     mob = {"n": 0, "hits": 0, "road": 0.0, "land": 0.0, "lost": 0, "seeds": 0}
     mob_rows = []
     for p in logs:
@@ -375,12 +377,18 @@ def main():
             v3_present |= {x for x in m.group(4).split(",") if x}
         for m in re.finditer(r"^    \[sf casa\] (.*)$", txt, re.M):
             case_rows.append(os.path.basename(p) + " " + m.group(1))
-        for m in re.finditer(r"^=== SF stalpi (\S+): (\d+) stalpi", txt, re.M):
+        for m in re.finditer(r"^=== SF stalpi (?!contact )(\S+): (\d+) stalpi", txt, re.M):
             pole_n[m.group(1)] = int(m.group(2))
         for m in re.finditer(r"^    \[sf stalp\] t=\s*([\d.]+)s (\S+) #(\d+) (.+?)\s+v=([\d.]+) (\S+) poz=\((.*)\)$",
                              txt, re.M):
             pole_rows.append((m.group(2), int(m.group(3)), float(m.group(5)), m.group(6), m.group(7),
                               os.path.basename(p), m.group(4).strip()))
+        for m in re.finditer(r"^=== SF stalpi contact (\S+): (\d+) stalpi, solizi (\d+)", txt, re.M):
+            pole_solid[m.group(1)] = int(m.group(3))
+        for m in re.finditer(r"^    \[sf stalp lovit\] t=\s*([\d.]+)s (\S+) #(\d+) (.+?)\s+v=([\d.]+) (\S+) vmin4s=([\d.]+) "
+                             r"repusa=(\S+) ejectata=(\S+) stalp=\((.*?)\)", txt, re.M):
+            pole_hits.append((m.group(2), int(m.group(3)), float(m.group(5)), m.group(6) == "zbor", float(m.group(7)),
+                              m.group(8) == "da", m.group(9) == "da", m.group(10), os.path.basename(p)))
         m = re.search(r"^=== SF mobilier: piese=(\d+) urnite=(\d+) pe_carosabil=([\d.]+)s "
                       r"in_zona_de_aterizare=([\d.]+)s pierdute=(\d+)", txt, re.M)
         if m:
@@ -409,12 +417,31 @@ def main():
         for r in rows:
             per_pole[(r[1], r[4])] = per_pole.get((r[1], r[4]), 0) + 1
         air = sum(1 for r in rows if r[3] == "zbor")
-        print(f"  STALPI {fam}: {pole_n[fam]} fara coliziune; treceri PRIN volum {len(rows)} "
+        print(f"  STALPI {fam}: {pole_n[fam]} ({'solizi: atingeri' if pole_solid.get(fam) else 'fara coliziune: treceri'} "
+              f"PRIN volum) {len(rows)} "
               f"({len(rows) / max(lap_n, 1):.4f} pe tur-masina), in zbor {air}"
               + (f", v med {st.median(vs):.1f} max {max(vs):.1f} m/s" if vs else ""))
         for (k, pz), c in sorted(per_pole.items(), key=lambda kv: -kv[1])[:8]:
             vk = sorted(r[2] for r in rows if r[1] == k)
             print(f"    #{k} la ({pz}): {c} treceri, v med {st.median(vk):.1f} max {max(vk):.1f}")
+    if pole_solid or pole_hits:
+        print("  STALPI SOLIZI (pasul 8d, contacte reale cu cilindrul `trunk`; corpuri pe familie: %s)" % (
+            ", ".join("%s %d" % kv for kv in sorted(pole_solid.items())) or "-"))
+        for fam in sorted(set(pole_n) | set(pole_solid)):
+            hs = [h for h in pole_hits if h[0] == fam]
+            vs = sorted(h[2] for h in hs)
+            print(f"    {fam}: contacte {len(hs)} ({len(hs) / max(lap_n, 1):.4f} pe tur-masina), stalpi atinsi "
+                  f"{len({h[1] for h in hs})}, in zbor {sum(1 for h in hs if h[3])}, repuse in 4 s "
+                  f"{sum(1 for h in hs if h[5])}, ejectate {sum(1 for h in hs if h[6])}"
+                  + (f", v med {st.median(vs):.1f} max {max(vs):.1f} m/s" if vs else ""))
+        per = {}
+        for h in pole_hits:
+            per.setdefault((h[0], h[1], h[7]), []).append(h)
+        for (fam, k, pz), hs in sorted(per.items(), key=lambda kv: -len(kv[1]))[:6]:
+            vs = sorted(h[2] for h in hs)
+            print(f"      {fam} #{k} la ({pz}): {len(hs)} contacte, v med {st.median(vs):.1f} max {max(vs):.1f}, "
+                  f"repuse {sum(1 for h in hs if h[5])}, ejectate {sum(1 for h in hs if h[6])}; "
+                  + ", ".join(sorted({h[8] for h in hs})))
     if mob["seeds"]:
         by_tag = {}
         for tag, car, v in mob_rows:

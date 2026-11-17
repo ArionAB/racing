@@ -243,6 +243,8 @@ var _angkor: bool = false
 ## `--sf`: observatorul traseului San Francisco (tools/probe_sf_watch.gd): lantul de muchii,
 ## scurtatura fata de ocol intre aceleasi doua porti.
 var _sf_watch: Node = null
+## `--seed-ai-prefs`: preferinta de scurtatura a AI-ului trasa din seed (vezi `_start_race`).
+var _seed_ai_prefs: bool = false
 var _sf: bool = false
 ## `--no-tub`: scoate `ShishiOdoshiHazard` din scena (A/B-ul tubului, Kyoto).
 var _no_tub: bool = false
@@ -464,6 +466,8 @@ func _ready() -> void:
 			_haboob_at = float(arg.trim_prefix("--haboob-at="))
 		elif arg == "--angkor":
 			_angkor = true
+		elif arg == "--seed-ai-prefs":
+			_seed_ai_prefs = true
 		elif arg == "--sf":
 			_sf = true
 		elif arg == "--no-daruma":
@@ -582,6 +586,21 @@ func _start_race() -> void:
 			ai.configure(_race.track, rng, visible)
 		else:
 			(car.controller as AIController).line_offset = rng.randf_range(-0.35, 0.35)
+			# `--seed-ai-prefs`: preferinta de scurtatura a AI-ului (`prefers_shortcut`) e trasa de
+			# Race la `configure`, cu `Race._rng`, care e `randomize()`-at in `_ready` si semanat de
+			# sonda abia DUPA add_child. Fara steag ea e deci zar de proces, nu de seed (pasul 8d SF:
+			# loturile A/B difereau tocmai aici). Cu steag se retrage dintr-un rng separat, semanat din
+			# seed si din indicele masinii: celelalte trageri (linia, viteza) raman exact ca fara el.
+			if _seed_ai_prefs:
+				var ai_c := car.controller as AIController
+				var prng := RandomNumberGenerator.new()
+				prng.seed = hash([_seed, i, "pref"])
+				var chance := ai_c.skill.shortcut_chance
+				if ai_c.skill.shortcut_dice > 0:
+					chance = float(ai_c.skill.shortcut_dice) / 6.0
+				if _race.track.ai_shortcut_chance >= 0.0:
+					chance = _race.track.ai_shortcut_chance
+				ai_c.prefers_shortcut = prng.randf() < chance
 		# Variatie onesta, dar determinista — altfel cifrele danseaza intre rulari.
 		# Zarul se trage MEREU, si cu `--equal-speed`: asa seed-ul da aceleasi
 		# line_offset-uri cu sau fara el, iar A/B-ul compara doar vitezele.

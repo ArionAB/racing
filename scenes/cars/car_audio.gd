@@ -14,7 +14,8 @@ extends Node
 ##   - RATEURI la ridicarea gazului de la turatie mare (aleator, cu cooldown).
 ##   - DERAPAJ: scrasnet cu volum/pitch dupa alunecarea REALA a cauciucurilor; pe
 ##     sol afanat se transforma in sisait de pietris.
-##   - SUPRAFATA (doar jucatorul): iarba, pietris/nisip, apa mica, cross-fade dupa
+##   - SUPRAFATA (doar jucatorul): iarba, pietris/nisip, apa mica, scandurile unei punti
+##     (doar unde pista cere `wood_deck_voice`), cross-fade dupa
 ##     suprafata, volum dupa viteza; zdranganeala de bordura.
 ##   - TURBO (doar jucatorul): click la apasare, suvoi cat arde, sisait la capat.
 ##   - VANT (doar jucatorul): creste cu viteza, aproape mut sub jumatate din max.
@@ -24,7 +25,9 @@ extends Node
 ## pornite + cate 1 pentru fiecare efect ACTIV (cele inactive sunt oprite); fiecare
 ## adversar = 1 bucla de motor, restul doar cand chiar aluneca/rateaza.
 
-enum Surface { NONE, GRASS, GRAVEL, WATER }
+## WOOD: scandurile unei punti de lemn, doar unde pista o cere (`Track.is_wood_deck_voice_at`;
+## San Francisco, pontonul). Pe celelalte piste nu apare niciodata.
+enum Surface { NONE, GRASS, GRAVEL, WATER, WOOD }
 
 @export_group("Motor: trepte")
 ## Fractia din `max_speed` la care urca treapta 1->2, 2->3, ... (cinci trepte).
@@ -107,6 +110,8 @@ enum Surface { NONE, GRASS, GRAVEL, WATER }
 ## Volum (dB) al rularii la viteza mica si la 60% din max (si peste).
 @export var roll_db: Vector2 = Vector2(-36.0, -13.0)
 @export var roll_water_bonus_db: float = 2.0
+## Scandurile (WOOD) peste curba de rulare: lemnul trebuie sa se auda peste motor.
+@export var roll_wood_bonus_db: float = 4.0
 @export var roll_pitch: Vector2 = Vector2(0.80, 1.30)
 ## Zdranganeala de bordura (dB / pitch dupa viteza).
 @export var kerb_db: Vector2 = Vector2(-28.0, -9.0)
@@ -174,7 +179,8 @@ var _prev_fwd: float = 0.0
 var _decel: float = 0.0
 var _pop_cd: float = 0.0
 var _pop_second_left: float = -1.0
-var _roll_w: Dictionary = {Surface.GRASS: 0.0, Surface.GRAVEL: 0.0, Surface.WATER: 0.0}
+var _roll_w: Dictionary = {Surface.GRASS: 0.0, Surface.GRAVEL: 0.0, Surface.WATER: 0.0,
+	Surface.WOOD: 0.0}
 var _kerb_w: float = 0.0
 var _wind_gain: float = 0.0
 var _whoosh_fade: float = 0.0
@@ -391,6 +397,9 @@ func _surface_kind(on_road: bool, is_loose: bool) -> Surface:
 		return Surface.NONE
 	if car.in_water:
 		return Surface.WATER
+	if on_road and car.route == 0 and car.track != null \
+			and car.track.is_wood_deck_voice_at(car.track.frac_at(car.road_index)):
+		return Surface.WOOD
 	if not is_loose:
 		return Surface.NONE
 	if on_road:
@@ -413,7 +422,7 @@ func _ground_is_grass() -> bool:
 
 func _update_roll(dt: float, speed: float) -> void:
 	var speed_k := smoothstep(1.0, car.max_speed * 0.6, speed)
-	for s in [Surface.GRASS, Surface.GRAVEL, Surface.WATER]:
+	for s in [Surface.GRASS, Surface.GRAVEL, Surface.WATER, Surface.WOOD]:
 		var want := 1.0 if surface == s else 0.0
 		var w: float = _roll_w[s]
 		w = lerpf(w, want, 1.0 - exp(-9.0 * dt))
@@ -430,12 +439,15 @@ func _update_roll(dt: float, speed: float) -> void:
 				nm = &"roll_gravel"
 			elif s == Surface.WATER:
 				nm = &"roll_water"
+			elif s == Surface.WOOD:
+				nm = &"plank_rattle"
 			p = _make_3d(nm, &"SFX", roll_db.x, 45.0)
 			roll[s] = p
 		if not p.playing:
 			p.play()
 		p.volume_db = lerpf(roll_db.x, roll_db.y, speed_k) + linear_to_db(w) \
-			+ (roll_water_bonus_db if s == Surface.WATER else 0.0)
+			+ (roll_water_bonus_db if s == Surface.WATER else 0.0) \
+			+ (roll_wood_bonus_db if s == Surface.WOOD else 0.0)
 		p.pitch_scale = lerpf(roll_pitch.x, roll_pitch.y, speed_k)
 
 

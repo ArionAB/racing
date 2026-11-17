@@ -18404,6 +18404,22 @@ func is_ice_at(frac: float) -> bool:
 	return _frac_in_ranges(frac, _ice_ranges())
 
 
+## Puntea de lemn de la fractia data SUNA a scandura (bucla `plank_rattle` a CarAudio)? Doar
+## daca tema / pista o cere (`wood_deck_voice`, San Francisco: pontonul); altfel nu, deci
+## puntea Kiyomizu de pe Kyoto ramane cum era. Intervalele sunt aceleasi cu ale mesh-ului
+## (`wood_deck_ranges`): sunetul urmeaza exact scandura desenata. Cache la primul apel:
+## CarAudio intreaba la fiecare tick.
+func is_wood_deck_voice_at(frac: float) -> bool:
+	if _wood_voice_ranges.is_empty() and not _wood_voice_ready:
+		_wood_voice_ready = true
+		if bool(theme_flag("wood_deck_voice", false)):
+			_wood_voice_ranges = _wood_deck_ranges()
+	return not _wood_voice_ranges.is_empty() and _frac_in_ranges(frac, _wood_voice_ranges)
+
+var _wood_voice_ranges: Array[Vector2] = []
+var _wood_voice_ready: bool = false
+
+
 ## Cat de putin tine cenusa / nisipul adanc. Reper: asfalt 8, ud 3.6, drift 2.
 ## Brief-ul Stromboli cere 0.85x pe cenusa, adica ~6.8 pe scara asta.
 ## 0 = nu se schimba nimic (implicitul masinii).

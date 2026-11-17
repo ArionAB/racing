@@ -102,6 +102,9 @@ extends Track
 @export var custom_wood_deck_ranges: Array[Vector2] = []
 ## Culoarea scandurilor (cheia de tema `wood_deck_color`); alfa 0 = cea a temei.
 @export var custom_wood_deck_color: Color = Color(0, 0, 0, 0)
+## Scandurile se si AUD (cheia de tema `wood_deck_voice`): bucla `plank_rattle` a CarAudio cat
+## jucatorul ruleaza pe interval. Implicit nu: puntea Kiyomizu ramane muta ca inainte.
+@export var custom_wood_deck_voice: bool = false
 ## Din ce e facut drumul — schimba materialul, marcajele si urmele lasate de
 ## masini. Vezi Track.road_surface (e o alegere a PISTEI, nu a temei).
 @export_enum("asphalt", "dirt", "snow") var custom_road_surface: String = "asphalt"
@@ -364,6 +367,8 @@ func _theme_overrides() -> Dictionary:
 		over["wood_deck_ranges"] = custom_wood_deck_ranges
 	if custom_wood_deck_color.a > 0.0:
 		over["wood_deck_color"] = custom_wood_deck_color
+	if custom_wood_deck_voice:
+		over["wood_deck_voice"] = true
 	return over
 
 

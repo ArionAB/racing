@@ -122,8 +122,11 @@ func _wiring() -> void:
 	_check(calls != null, "Golful: AmbienceCalls")
 	if calls != null:
 		var n := calls.spot_pos.size()
-		_check(n == 6 and calls.spot_sfx.size() == n and calls.spot_radius.size() == n
-			and calls.spot_gap.size() == n and calls.spot_db.size() == n, "golful: 6 locuri, tablouri egale")
+		# pasul 8e, a doua trecere (`PasariZbor` in scena): doua locuri in plus, unde se vad pasarile
+		var curte := scene.get_node_or_null(^"PasariZbor") != null
+		var n_exp := 8 if curte else 6
+		_check(n == n_exp and calls.spot_sfx.size() == n and calls.spot_radius.size() == n
+			and calls.spot_gap.size() == n and calls.spot_db.size() == n, "golful: %d locuri, tablouri egale" % n_exp)
 		var kinds := {}
 		var ok_lv := true
 		for i in n:
@@ -134,8 +137,35 @@ func _wiring() -> void:
 					or calls.spot_radius[i] < 30.0 or calls.spot_radius[i] > 120.0:
 				ok_lv = false
 		_check(ok_lv, "golful: streamuri existente, -20..-3 dB, intervale >= 3 s, raze 30..120 m")
-		_check(int(kinds.get(&"gull_call", 0)) == 3 and int(kinds.get(&"sea_lion_bark", 0)) == 1
-			and int(kinds.get(&"parrot_squawk", 0)) == 2, "golful: 3 pescarusi, 1 lei de mare, 2 papagali")
+		var n_gull := 4 if curte else 3
+		var n_par := 3 if curte else 2
+		_check(int(kinds.get(&"gull_call", 0)) == n_gull and int(kinds.get(&"sea_lion_bark", 0)) == 1
+			and int(kinds.get(&"parrot_squawk", 0)) == n_par,
+			"golful: %d pescarusi, 1 lei de mare, %d papagali" % [n_gull, n_par])
+		if curte:
+			# fiecare loc de strigat are pasari de felul lui cocotate la cel mult 45 m (se aud unde se vad)
+			# (din `positions` ale stolului, in cadrul scenei: scena aici nu e in arbore, MultiMesh-ul nu e facut)
+			var far_spot := 0.0
+			var n_spot := 0
+			for i in n:
+				var fl: String = {&"gull_call": "PescarusiCocotati", &"parrot_squawk": "PapagaliCocotati"}.get(calls.spot_sfx[i], "")
+				var fn := scene.find_child(fl, true, false) as Node3D if fl != "" else null
+				if fn == null:
+					continue
+				var xf := fn.transform
+				var up := fn.get_parent() as Node3D
+				while up != null and up != scene:
+					xf = up.transform * xf
+					up = up.get_parent() as Node3D
+				var best := INF
+				for lp: Vector3 in (fn.get("positions") as PackedVector3Array):
+					var q := xf * lp
+					best = minf(best, Vector2(q.x - calls.spot_pos[i].x, q.z - calls.spot_pos[i].z).length())
+				far_spot = maxf(far_spot, best)
+				n_spot += 1
+				print("    loc %d (%s) la (%.0f, %.0f): cea mai apropiata pasare cocotata la %.1f m" % [i, calls.spot_sfx[i], calls.spot_pos[i].x, calls.spot_pos[i].z, best])
+			_check(n_spot == n - 1 and far_spot <= 45.0,
+				"golful: fiecare loc de pescarusi/papagali (%d) are pasari cocotate la <= 45 m (cel mai departe %.1f m)" % [n_spot, far_spot])
 		_check(calls.global_gap_s >= 1.0, "golful: pauza globala %.1f s" % calls.global_gap_s)
 		var raft := scene.get_node_or_null(^"DecorManual/LeiDeMare/Pluta") as Node3D
 		var li := calls.spot_sfx.find(&"sea_lion_bark")

@@ -4328,17 +4328,22 @@ if E8_POARTA and _p7_glb("structures/sf_dragon_gate.glb", "e8_gate"):
 # ghirlande peste ulita, doua felinare, doua banci, doi arbori de strada de-o parte si de alta a
 # curtii. Casele stau LATERAL fata de poarta (fatadele la CURTE_FACADE m de axa ulitei, dincolo de
 # carligele ei de 6 m): din urcare, creasta in trepte a portii ramane pe cer, nu pe fatade.
+# Masurat pe capturi (120 / 60 / 40 / 26 m de pe linia de cursa): cu fatadele la 9 m si prima casa la
+# 12 m dupa poarta, casa roz din dreapta statea in spatele acoperisului lateral al portii la 120 m, iar
+# la 60 / 40 m ambele case atingeau streasina. Mutate INAPOI (de la 18 m) si IN LATURI (fatadele la
+# 11,5 m), doua pe latura in loc de trei (mai departe terenul cade spre E peste fusta casei: la 20 m
+# sau la 12 m de ax, casa E1 cadea 2,5 m); pavajul ramane cat era, cu o fasie de iarba pana la fatade.
 #   SF_8E_CURTE=0  curtea si pasarile vizibile (blocurile de mai jos) stinse: scena de pe ramura
 #                  dinainte (commit 887956c1), octet cu octet
 E8_CURTE = P8E and os.environ.get("SF_8E_CURTE", "1") == "1"
-CURTE_FACADE = 9.0        # fatadele ulitei fata de axa ei (poarta are carligele la 6,0)
-CURTE_PAVE_HALF = 9.3     # pavajul pana sub fatade (+0,3, ca trotuarul)
-CURTE_END = 36.0          # ulita continua atatia m dupa poarta
-CURTE_HOUSE0 = 12.0       # prima casa incepe la atatia m dupa poarta
-CURTE_N = 3               # case pe latura: capat, rand, capat
+CURTE_FACADE = 11.5       # fatadele ulitei fata de axa ei (poarta are carligele la 6,0)
+CURTE_PAVE_HALF = 9.3     # pavajul: 18,6 m, cat poarta cu socluri si streasina (+ ~3 m pe latura)
+CURTE_END = 32.0          # ulita se termina la ultimele case (dincolo terenul cade ~17 %, prea putin pt. scara)
+CURTE_HOUSE0 = 18.0       # prima casa incepe la atatia m dupa poarta
+CURTE_N = 2               # case pe latura: doua case de capat
 CURTE_LIFT = 0.08         # pavajul peste teren
 CURTE_ROAD_GAP = 3.0      # curtea incepe la atat dincolo de marginea carosabilului
-CURTE_LAMP_IN = 1.2
+CURTE_LAMP_IN = 0.6       # felinarele si bancile pe marginea pavajului (nu la fatade)
 CURTE_GHIRLANDA_H = 6.0   # prinderea ghirlandelor peste pavaj
 E8_PATCH = []             # triunghiuri (Godot) pentru `paved_patches`
 CURTE_HOUSES = []
@@ -4436,7 +4441,7 @@ if E8_CURTE and "poarta" in E8_STATS and not E8_SABOTAJ:
     # ghirlandele peste ulita, intre fatade (inaltimea peste pavaj); felinare si banci la fatade;
     # doi arbori de strada de-o parte si de alta a curtii, in afara latimii portii
     if _p7_glb("props/sf_lantern_string.glb", "e8_lant"):
-        for k_, dy in enumerate((CURTE_HOUSE0 + 3.5, CURTE_HOUSE0 + 3.5 + CASE_W * 1.5)):
+        for k_, dy in enumerate((CURTE_HOUSE0 + 3.5, CURTE_HOUSE0 + CASE_W * CURTE_N - 3.5)):
             my = gmy - dy
             L_ = 2.0 * CURTE_FACADE
             n_ = max(1, int(round(L_ / 7.0)))
@@ -4450,15 +4455,15 @@ if E8_CURTE and "poarta" in E8_STATS and not E8_SABOTAJ:
                          extra="metadata/ancora_sol = Vector3(0, %.2f, 0)\nmetadata/sf_curte_ghirlanda = %.2f\n"
                                % (-CURTE_GHIRLANDA_H, g_))
     if _p7_glb("props/sf_street_lamp.glb", "v2_lamp"):
-        for k_, (side_, dy) in enumerate(((1.0, CURTE_HOUSE0 + CASE_W), (-1.0, CURTE_HOUSE0 + CASE_W * 2.0))):
-            mx, my = gmx + side_ * (CURTE_FACADE - CURTE_LAMP_IN), gmy - dy
+        for k_, (side_, dy) in enumerate(((1.0, CURTE_HOUSE0 - 6.0), (-1.0, CURTE_HOUSE0 + CASE_W))):
+            mx, my = gmx + side_ * (CURTE_PAVE_HALF - CURTE_LAMP_IN), gmy - dy
             g_ = e8_ground(mx, my) + CURTE_LIFT
             _v3_inst("CurtePoarta", "Felinar%d" % k_, "props/sf_street_lamp.glb", "v2_lamp",
                      _v2_xf(0.0, 1.0, (mx, g_ - 0.05, -my)), coll="trunk")
             CURTE_LAMPS.append((mx, g_, -my))
     if _p7_glb("props/sf_bench.glb", "v3_bench"):
-        for k_, (side_, dy) in enumerate(((-1.0, CURTE_HOUSE0 + CASE_W * 0.5), (1.0, CURTE_HOUSE0 + CASE_W * 2.5))):
-            mx, my = gmx + side_ * (CURTE_FACADE - 1.3), gmy - dy
+        for k_, (side_, dy) in enumerate(((-1.0, CURTE_HOUSE0 - 3.0), (1.0, CURTE_HOUSE0 + CASE_W * 1.5))):
+            mx, my = gmx + side_ * (CURTE_PAVE_HALF - CURTE_LAMP_IN - 0.7), gmy - dy
             g_ = e8_ground(mx, my) + CURTE_LIFT
             X_, Z_ = _v3_frame((-side_, 0.0))
             _v3_inst("CurtePoarta", "Banca%d" % k_, "props/sf_bench.glb", "v3_bench", _v3_xf(X_, Z_, (mx, g_ - 0.03, -my)))
@@ -4851,6 +4856,10 @@ if SUNET:
     ]
     if E8_CURTE and "poarta" in E8_STATS:
         # pasul 8e, a doua trecere: unde se vad pasarile se si aud (poarta cu papagalii, tablierul cu pescarusii)
+        # papagalii din parcul de S nu mai au pasari la mai putin de 59 m: locul lor se muta pe ghirlandele
+        # de pe B, unde stau acum papagalii (y 58 si 76 pe harta)
+        SF_SPOTS = [("papagali ghirlande B", (X_T, 58.0, 67.0)) + sp[2:] if sp[0] == "papagali parc S" else sp
+                    for sp in SF_SPOTS]
         SF_SPOTS += [
             ("papagali poarta", (E8_STATS["poarta"][2], 60.0, -E8_STATS["poarta"][3] - 6.0), "parrot_squawk", 65.0, (10.0, 18.0), -10.0),
             ("pescarusi tablier", (370.0, DECK_Y + 6.0, -228.6), "gull_call", 80.0, (8.0, 15.0), -10.0),

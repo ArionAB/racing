@@ -130,11 +130,20 @@ of step 8. No iOS build since #723 (build 54) — **start one only when they ask
    - **The gate** stands at the top of the tram street, straight ahead after the
      corner onto the ridge, at map (152, 146), not on the side street of the
      inventory: a gate beside the street is seen edge-on and was invisible at
-     40 m. It is solid; 0 contacts in the batch. Lantern strings across B.
-   - **Birds**: gulls on the shed roofs, pontoon bollards and bridge-head
-     parapet; parrots on the painted ladies and their benches at scale 1.6–1.8,
-     **not in the cypresses** (green on green vanishes). Flying parrots and the
-     bridge-head birds do not read from the race camera.
+     40 m. It is solid; 0 contacts in two batches. Lantern strings across B.
+     **It is the entrance to a short lane** (second pass, `SF_8E_CURTE`): a paved
+     forecourt and 32 m of lane through the gate (`Track.paved_patches`, own
+     body `TrotuarCurte`, not road), four kit houses set back 18 m and out
+     11.5 m so the gate's roofline stays against the sky, lanterns, lamps,
+     benches, trees. The ground falls to the east: the houses cannot go further.
+   - **Birds** sit where the race camera looks: gulls on the shed roofs, the
+     pontoon bollards, the bridge deck's lamp heads and first parapet posts;
+     parrots on the gate, the lantern cables on B, the signal mast arms, the
+     courtyard lamps and the painted ladies' benches, at scale 1.6–1.8, **not in
+     the cypresses** (green on green vanishes). The flying ones move on
+     `PathMover` loops: four parrots across the ridge street, six gulls (scale
+     2.0) alongside the bridge deck. They read, but small; the flying gulls are
+     not in every frame. Each bird spot has its sound spot (8 in all).
    - **Boats**: three sailboats and the Okinawa ferry on `PathMover` loops, no
      collision. The garden at the switchback entrance. Guard `ProbeSfTeatru`.
    - **Phone-profile cost on desktop** (a proxy, not an iPhone measurement):
@@ -147,7 +156,8 @@ of step 8. No iOS build since #723 (build 54) — **start one only when they ask
    - **Street trees on B stand 9 m from the axis, on pavement that now drives
      like road.** One at map (153, 51) was hit at 32–34 m/s in two seeds, once
      with an ejection. Proposal on the table: move them to about 10.8 m.
-   - The gate stands on bare ground; nothing dresses the hill around it.
+   Decided by the developer on 17 Nov 2026: the landing thud stays as it is and
+   the B street trees stay where they are.
    Still missing: nothing from the inventory's must-have list. Not measured:
    anything on an iPhone.
 1. **(Done — kept for the rules.)** All seven houses, each with a truly

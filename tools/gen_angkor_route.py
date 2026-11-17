@@ -1031,6 +1031,10 @@ blend_time = 0.35
                 gw0_[3] + (gw1_[3] - gw0_[3]) * t)
 
     broken_ = [33.0, 55.0, 80.0]
+    # Boltile opresc si CAMERA (`Track.CAMERA_BLOCKER_LAYER`, tiparul blocului Liziba din world_prop.gd): cu camera
+    # coborata sub cheie (CameraGaleria, mai jos), pe cotitura dinaintea iesirii (frac de ramura 0,73-0,75) ea ramane
+    # 3 m in lateral, unde bolta are doar 3,4 m, si intra in corbele (ProbeCameraSolid). `_unclip` o trage in fata lor.
+    CAM_BLOCK = "metadata/camera_blocker = true\n"
     # boltile se opresc la 82 (capatul boltii prabusite de la 80): o bolta peste rampa (prima
     # integrare) prindea masinile urcate cu 1,2 m in corbele (ProbeLaneClear, `Bolta11`).
     edges_ = [TREE_GATE_S + 6.5] + [b for bk in broken_ for b in (bk - 2.0, bk + 2.0)][:-1] + [82.0]
@@ -1042,11 +1046,12 @@ blend_time = 0.35
                 spans_.append(a_ + (b_ - a_) * (j_ + 0.5) / n_)
     for j_, sv_ in enumerate(spans_):
         bx_, by_, be_ = br_at(sv_)
-        decor_txt += place(f"Bolta{j_}", "27_vault", (-1, 0, 0), (0, 1, 0), (0, 0, -1), bx_, be_, -by_, col="mesh")
+        decor_txt += place(f"Bolta{j_}", "27_vault", (-1, 0, 0), (0, 1, 0), (0, 0, -1), bx_, be_, -by_, col="mesh") \
+            + CAM_BLOCK
     for j_, sv_ in enumerate(broken_):
         bx_, by_, be_ = br_at(sv_)
         decor_txt += place(f"BoltaPrabusita{j_}", "28_vault_b", (-1, 0, 0), (0, 1, 0), (0, 0, -1),
-                           bx_, be_, -by_, col="mesh")
+                           bx_, be_, -by_, col="mesh") + CAM_BLOCK
     # Radacina-rampa: buza la 18 m inaintea capatului ramurii (cocoasa veche era la 22; mutata ca sa
     # nu stea sub bolta prabusita de la 80 m); modelul urca spre -Z, rotit cu 180 de grade.
     rx_, ry_, re_ = br_at(gL_ - 18.0 - 4.43)
@@ -1054,6 +1059,10 @@ blend_time = 0.35
     # rampa pusa pe cota punctelor avea muchia de jos ca o bordura de 13 cm: ProbeRace val 2, 5 ejectari
     # „perete” la ~40 m/s fix pe muchie. Coborata cu 0,15 m: muchia intra sub nisip.
     decor_txt += place("RadacinaRampa", "29_ramp", (-1, 0, 0), (0, 1, 0), (0, 0, -1), rx_, re_ - 0.15, -ry_, col="mesh")
+    # Camera SUB bolta (feedback de pe telefon, 16 nov 2026: „camera ar trebui sa coboare in tunel, sa vedem
+    # inauntru”). Bolta `vault_intact` are cheia la 6,6 m si 5,8 m la +-1 m de ax (raze din Blender pe GLB);
+    # presetul implicit (6,5 m) punea camera fix in piatra cheii, deci se vedea galeria de deasupra zidurilor.
+    # La 3,8 m camera ramane sub bolta si pe linia de +-2 m (4,2 m) cu marja; cerinta de tavan (12 m) tine.
     gc0_ = br_at(TREE_GATE_S + 6.0)
     gc1_ = br_at(84.0)
     cam_txt += f"""
@@ -1061,8 +1070,10 @@ blend_time = 0.35
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, {r2((gc0_[0] + gc1_[0]) / 2)}, {r2((gc0_[2] + gc1_[2]) / 2)}, {r2(-(gc0_[1] + gc1_[1]) / 2)})
 script = ExtResource("17_camzone")
 size = Vector3(12.0, 9.0, {r2(abs(gc1_[1] - gc0_[1]) + 4.0)})
+height = 3.8
+look_height = 1.0
 ceiling = 6.6
-ceiling_dist = 16.0
+ceiling_dist = 12.0
 blend_time = 0.35
 """
     # ---- VAL 3-4 (kit §1.2, §1.4-§1.7): piesele mari ale locului. Decor (coliziune "none") in afara

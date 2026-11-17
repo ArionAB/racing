@@ -224,6 +224,13 @@ extends Node
 ##                             AnimationPlayer (kea: Idle/Open) ramane in bind
 ##                             pose. Sufixul intra in numele fisierului:
 ##                             vitrina_kea_open.png.
+##   --vitrina-lift=8.0         piesa ridicata cu atatia metri peste teren (pasari
+##                             in zbor, San Francisco pas 8e).
+##   --vitrina-y=0.0            cota ABSOLUTA in loc de teren (velierul pe apa;
+##                             peste golf terenul e fundul lagunei).
+##   --vitrina-offsets=a:s:l[:y],...  cate o pozitie per piesa din lista
+##                             --vitrina (inainte, lateral, ridicare, yaw) -- un
+##                             stol mic in fata unui copac intr-o captura.
 ##   --cross-at=8.0            obstacolele care TRAVERSEAZA (SlidingHazard
 ##                             Motion.TRAVERSARE: elefantii din Serengeti,
 ##                             cireada) la N SECUNDE absolute in ciclul lor
@@ -491,6 +498,14 @@ func _ready() -> void:
 	# langa masina ies din cadrul camerei de joc (jumatate de cadru ~50 grade).
 	var vitrina_ahead := 0.0
 	var vitrina_step := 8.0
+	# --vitrina-lift=<m>: piesa ridicata cu atatia metri peste teren (pasarile din stol,
+	# San Francisco pas 8e). --vitrina-y=<m>: cota ABSOLUTA in loc de teren (velierul pe
+	# apa, cota 0; peste golf terenul e fundul lagunei). Implicit: pe teren, ca inainte.
+	var vitrina_lift := 0.0
+	var vitrina_abs_y := NAN
+	# --vitrina-offsets=a:s:l[:y],...: cate o pozitie PER PIESA din lista (inainte, lateral,
+	# ridicare, yaw), ca un stol mic in fata unui copac sa intre intr-o singura captura.
+	var vitrina_offsets := PackedStringArray()
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--vitrina="):
 			vitrina_stem = arg.trim_prefix("--vitrina=")
@@ -508,6 +523,12 @@ func _ready() -> void:
 			continue
 		if arg.begins_with("--vitrina-step="):
 			vitrina_step = float(arg.trim_prefix("--vitrina-step="))
+		if arg.begins_with("--vitrina-lift="):
+			vitrina_lift = float(arg.trim_prefix("--vitrina-lift="))
+		if arg.begins_with("--vitrina-y="):
+			vitrina_abs_y = float(arg.trim_prefix("--vitrina-y="))
+		if arg.begins_with("--vitrina-offsets="):
+			vitrina_offsets = arg.trim_prefix("--vitrina-offsets=").split(",", false)
 			continue
 		if arg == "--car":
 			show_car = true
@@ -1164,9 +1185,19 @@ func _ready() -> void:
 				# rand de kit intr-o singura captura (int-a, Kyoto).
 				var stems := vitrina_stem.split(",", false)
 				for si in stems.size():
-					_place_vitrina(track,
-						focus + dir * (vitrina_ahead + float(si) * vitrina_step),
-						dir, stems[si], vitrina_side, vitrina_yaw, vitrina_anim)
+					var v_ahead := vitrina_ahead + float(si) * vitrina_step
+					var v_side := vitrina_side
+					var v_lift := vitrina_lift
+					var v_yaw := vitrina_yaw
+					if vitrina_offsets.size() == stems.size():
+						var f := vitrina_offsets[si].split(":")
+						v_ahead = float(f[0])
+						v_side = float(f[1])
+						v_lift = float(f[2]) if f.size() > 2 else vitrina_lift
+						v_yaw = float(f[3]) if f.size() > 3 else vitrina_yaw
+					_place_vitrina(track, focus + dir * v_ahead,
+						dir, stems[si], v_side, v_yaw, vitrina_anim,
+						v_lift, vitrina_abs_y)
 		cam.projection = Camera3D.PROJECTION_PERSPECTIVE
 		cam.fov = fov
 		cam.far = 400.0
@@ -1886,7 +1917,7 @@ func _vitrina_path(stem: String) -> String:
 	# Kitul Kyoto, Okinawa, Transfagarasan, Carrara si Stromboli
 	# (assets/models/<kit>/<categorie>/<stem>.glb). Carrara reuse-uieste ginestra
 	# Stromboli, deci si kitul ala trebuie sa se gaseasca pe stem.
-	for kit: String in ["kyoto", "okinawa", "transfagarasan", "carrara", "stromboli"]:
+	for kit: String in ["kyoto", "okinawa", "transfagarasan", "carrara", "stromboli", "sanfrancisco"]:
 		var root: String = "res://assets/models/" + kit
 		var d := DirAccess.open(root)
 		if d == null:
@@ -1899,7 +1930,8 @@ func _vitrina_path(stem: String) -> String:
 
 
 func _place_vitrina(track: Track, focus: Vector3, dir: Vector3, stem: String,
-		side: float, yaw_deg: float, anim_name: String = "") -> void:
+		side: float, yaw_deg: float, anim_name: String = "", lift: float = 0.0,
+		abs_y: float = NAN) -> void:
 	var path := _vitrina_path(stem)
 	if path.is_empty():
 		push_error("--vitrina=%s: stem necunoscut. Vezi _VITRINA_MODEL_PATHS in tools/snapshot.gd."
@@ -1928,7 +1960,7 @@ func _place_vitrina(track: Track, focus: Vector3, dir: Vector3, stem: String,
 	holder.add_child(inst)
 	var right := dir.cross(Vector3.UP).normalized()
 	var pos := focus + right * side
-	pos.y = track._terrain_mesh_y(pos.x, pos.z)
+	pos.y = (track._terrain_mesh_y(pos.x, pos.z) if is_nan(abs_y) else abs_y) + lift
 	var basis := Basis.looking_at(dir, Vector3.UP).rotated(Vector3.UP,
 		deg_to_rad(yaw_deg))
 	holder.transform = Transform3D(basis, pos)

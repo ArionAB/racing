@@ -4628,12 +4628,16 @@ if E8_PESC:
     if E8_CURTE:
         # in MISCARE, langa tablier, la ~6-8 m in afara parapetului, la cota tablierului, pe fondul apei,
         # in sensul traficului de pe latura lor (pe pod se circula pe stanga: banda de N spre E)
-        # (ambele bucle in sens invers: latura dinspre pod merge spre E la N si spre V la S, ca benzile)
-        for k_, (cz, rev, ph) in enumerate(((-264.0, True, 0.0), (-264.0, True, 0.12),
-                                           (-193.0, True, 0.5), (-193.0, True, 0.62))):
-            pts_ = _e8_ellipse(370.0, DECK_Y + 2.5 + 0.8 * (k_ % 2), cz, 112.0, 13.0, 24, rev)
+        # (ambele bucle in sens invers: latura dinspre pod merge spre E la N si spre V la S, ca benzile).
+        # Trei pe bucla, cu fazele la o treime: pe orice bucata a podului e cel putin unul pe latura
+        # dinspre tablier (cu doi, la 0 / 0,12, capturile prindeau des ambii pe latura departata).
+        # Latura dinspre pod la ~13,5 m de axa benzii (7 m in afara parapetului), cea departata la 20 m mai
+        # incolo; scara 2,0: la 1,1, de la 30-35 m, pescarusul in zbor era un punct de cativa pixeli.
+        for k_, (cz, ph) in enumerate(((-258.5, 0.0), (-258.5, 0.333), (-258.5, 0.667),
+                                       (-199.0, 0.167), (-199.0, 0.5), (-199.0, 0.833))):
+            pts_ = _e8_ellipse(370.0, DECK_Y + 2.0 + 0.6 * (k_ % 3), cz, 112.0, 10.0, 24, True)
             n_m += _e8_mover("PescarusPod%d" % k_, "animals/sf_gull_glide.glb", "e8_gull_g", "Gull_Glide", pts_,
-                             13.0, ph, 1.1)
+                             13.0, ph, 2.0)
     E8_STATS["pescarusi"] = (n_p, n_g + n_m)
     print("pescarusi (8e): %d cocotati, %d in zbor (din care %d in miscare langa tablier)" % (n_p, n_g + n_m, n_m))
 

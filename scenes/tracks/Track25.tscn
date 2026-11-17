@@ -5523,26 +5523,32 @@ metadata/sf_poarta = true
 [node name="Ghirlanda0_0" parent="DecorManual/Lampioane" instance=ExtResource("e8_lant")]
 transform = Transform3D(1.11905, 0, 0.00000, 0, 1, 0, -0.00000, 0, 1.00000, 136.167, 54.297, 58.000)
 metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(0, -8.00, 0)
 
 [node name="Ghirlanda0_1" parent="DecorManual/Lampioane" instance=ExtResource("e8_lant")]
 transform = Transform3D(1.11905, 0, 0.00000, 0, 1, 0, -0.00000, 0, 1.00000, 144.000, 54.297, 58.000)
 metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(0, -8.00, 0)
 
 [node name="Ghirlanda0_2" parent="DecorManual/Lampioane" instance=ExtResource("e8_lant")]
 transform = Transform3D(1.11905, 0, 0.00000, 0, 1, 0, -0.00000, 0, 1.00000, 151.833, 54.297, 58.000)
 metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(0, -8.00, 0)
 
 [node name="Ghirlanda1_0" parent="DecorManual/Lampioane" instance=ExtResource("e8_lant")]
 transform = Transform3D(1.11905, 0, 0.00000, 0, 1, 0, -0.00000, 0, 1.00000, 136.167, 56.351, 76.000)
 metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(0, -8.00, 0)
 
 [node name="Ghirlanda1_1" parent="DecorManual/Lampioane" instance=ExtResource("e8_lant")]
 transform = Transform3D(1.11905, 0, 0.00000, 0, 1, 0, -0.00000, 0, 1.00000, 144.000, 56.351, 76.000)
 metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(0, -8.00, 0)
 
 [node name="Ghirlanda1_2" parent="DecorManual/Lampioane" instance=ExtResource("e8_lant")]
 transform = Transform3D(1.11905, 0, 0.00000, 0, 1, 0, -0.00000, 0, 1.00000, 151.833, 56.351, 76.000)
 metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(0, -8.00, 0)
 
 [node name="GradinaSerpentine" type="Node3D" parent="DecorManual"]
 
@@ -5639,8 +5645,8 @@ script = ExtResource("e8_flock")
 model = ExtResource("e8_par_p")
 positions = PackedVector3Array(93.475, 65.670, 114.500, 86.475, 65.872, 114.500, 88.100, 65.273, 118.650, 84.700, 66.236, 118.900, 79.475, 65.772, 114.500, 72.475, 65.468, 114.500, 74.100, 65.700, 118.275, 70.700, 62.450, 118.900, 65.475, 65.975, 114.500, 58.100, 66.444, 117.500, 60.100, 63.985, 118.150, 56.700, 53.594, 119.900, 61.400, 53.410, 123.650, 62.500, 53.410, 123.650, 89.900, 53.410, 123.650, 91.000, 53.410, 123.650)
 yaws = PackedFloat32Array(3.0247, 4.6827, 3.5797, 5.3390, 4.1312, 5.2901, 5.0807, 1.2497, 1.5551, 2.3736, 5.1400, 5.3826, 6.2710, 0.3037, 2.6058, 6.0964)
-scale_min = 0.90
-scale_max = 1.15
+scale_min = 1.60
+scale_max = 1.80
 seed_value = 20261120
 metadata/sf_8e_stol = "animals/sf_parrot_perch.glb"
 
@@ -5649,8 +5655,8 @@ script = ExtResource("e8_flock")
 model = ExtResource("e8_par_f")
 positions = PackedVector3Array(58.000, 62.500, 70.000, 64.000, 62.560, 66.000, 70.000, 60.830, 72.000, 61.000, 63.800, 77.000, 75.000, 60.340, 68.000)
 yaws = PackedFloat32Array(3.8101, 0.7592, 1.7157, 3.3580, 4.0369)
-scale_min = 0.90
-scale_max = 1.15
+scale_min = 1.60
+scale_max = 1.80
 seed_value = 20261121
 metadata/sf_8e_stol = "animals/sf_parrot_fly.glb"
 

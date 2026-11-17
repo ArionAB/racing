@@ -4353,7 +4353,10 @@ if E8_LAMP and E8_POARTA and _p7_glb("props/sf_lantern_string.glb", "e8_lant"):
             c_, s_ = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
             xf = "Transform3D(%.5f, 0, %.5f, 0, 1, 0, %.5f, 0, %.5f, %.3f, %.3f, %.3f)" % (
                 c_ * sx, s_, -s_ * sx, c_, cx, yh, -cy)
-            _v3_inst("Lampioane", "Ghirlanda%d_%d" % (k_, m_), "props/sf_lantern_string.glb", "e8_lant", xf)
+            # `ancora_sol` (probe_manual): ghirlanda atarna intre fatade, deci „solul" ei e drumul de sub
+            # ea; inaltimea fata de drum o masoara ProbeSfTeatru (LANTERN_CLEAR)
+            _v3_inst("Lampioane", "Ghirlanda%d_%d" % (k_, m_), "props/sf_lantern_string.glb", "e8_lant", xf,
+                     extra="metadata/ancora_sol = Vector3(0, %.2f, 0)\n" % (ry - yh))
             n_mod += 1
             lows.append(yh - LANTERN_SAG - ry)
     if lows and min(lows) < LANTERN_CLEAR:
@@ -4416,7 +4419,9 @@ if E8_PESC:
     print("pescarusi (8e): %d cocotati, %d in zbor" % (n_p, n_g))
 
 # --- PAPAGALII: pe casele pictate si pe bancile coamei; in zbor peste parc
-PARROT_SCALE = tuple(float(v) for v in os.environ.get("SF_PAPAGAL_SCARA", "0.9,1.15").split(","))
+# Scara papagalilor: la 0,9-1,15 (cea a modelului) pe banci se citeau ca puncte cu rosu; la 1,5-1,7 ca
+# papagali (corp verde, cap rosu) din camera de joc (p8e_asezat_papagali*.png). SF_PAPAGAL_SCARA=a,b.
+PARROT_SCALE = tuple(float(v) for v in os.environ.get("SF_PAPAGAL_SCARA", "1.6,1.8").split(","))
 if E8_PAPA:
     perch = []
     y_f = Y_COAMA + LADY_SETBACK

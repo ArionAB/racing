@@ -61,6 +61,8 @@ extends Node
 ##   --train-at=0.55           muta ceasul trecerii de cale ferata la fractia
 ##                             ceruta din ciclu, ca trenul sa fie IN cadru la
 ##                             momentul capturii (implicit e parcat, invizibil)
+##   --mover-time=1.0          fiecare PathMover la S secunde de mers din faza lui
+##                             (grupurile raman decalate); S = 0, 1, 2 = o secventa
 ##   --typhoon-at=0.12         la fel, pentru mini-typhoon: 0 = pe axa soselei,
 ##                             0.25 = la capatul maturarii, 0.12 = la jumatatea
 ##                             traversarii. Fara el, captura o prinde mereu pe
@@ -429,6 +431,7 @@ func _ready() -> void:
 	var landmark_id := -1
 	var landmark_dist := 30.0
 	var train_at := -1.0
+	var mover_time := -1.0
 	var bridge_at := -1.0
 	var typhoon_at := -1.0
 	var wave_at := -1.0
@@ -569,6 +572,8 @@ func _ready() -> void:
 			landmark_dist = float(arg.trim_prefix("--dist="))
 		elif arg.begins_with("--train-at="):
 			train_at = float(arg.trim_prefix("--train-at="))
+		elif arg.begins_with("--mover-time="):
+			mover_time = float(arg.trim_prefix("--mover-time="))
 		elif arg.begins_with("--bridge-at="):
 			bridge_at = float(arg.trim_prefix("--bridge-at="))
 		elif arg.begins_with("--typhoon-at="):
@@ -773,6 +778,8 @@ func _ready() -> void:
 		_smooth_organics(track)
 	if train_at >= 0.0:
 		_set_train_phase(track, train_at)
+	if mover_time >= 0.0:
+		_set_mover_time(track, mover_time)
 	if door_at >= 0.0:
 		await _set_door_phase(track, door_at)
 	if herd_at >= 0.0:
@@ -1425,6 +1432,31 @@ func _show_wipers_demo(count: int) -> void:
 	add_child(w)
 	w.force_spawn_demo(count)
 	print("--wipers-demo=%d: WindshieldWipers instantiat, %d picaturi fortate" % [count, count])
+
+
+## `--mover-time=S`: fiecare PathMover (bucla) acolo unde ar fi dupa S secunde de mers din faza
+## LUI (`phase * lungime + speed * S`), deci grupurile raman decalate ca in joc. Pentru SECVENTE:
+## acelasi cadru la S = 0, 1, 2 arata miscarea (SF pasul 8e: papagalii si pescarusii in zbor).
+func _set_mover_time(root: Node, t: float) -> void:
+	var found := 0
+	for node in root.find_children("*", "PathMover", true, false):
+		var mover := node as PathMover
+		if mover == null or mover.curve == null:
+			continue
+		var length := mover.curve.get_baked_length()
+		if length < 0.5:
+			continue
+		mover.set("_started", true)
+		mover.set("_dist", fposmod(mover.phase * length + mover.speed * t, length))
+		var body: Node3D = mover.call("body")
+		if body != null:
+			body.set("sync_to_physics", false)
+			mover._physics_process(0.0)
+			body.set("sync_to_physics", true)
+		else:
+			mover._physics_process(0.0)
+		found += 1
+	print("--mover-time=%.2f: %d PathMover mutate" % [t, found])
 
 
 ## Muta ceasul trenului la o fractie din ciclul lui, ca sa apuce sa fie IN cadru

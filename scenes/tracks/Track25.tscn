@@ -833,6 +833,9 @@ placeholder_nose_color = Color(0.42, 0.42, 0.42, 1)
 model = ExtResource("p7_tram")
 model_yaw = 0.0
 bell_sfx = &"cable_bell_mouth"
+bell_range_m = 130.0
+bell_db = 0.0
+bell_min_gap_s = 20.0
 
 [node name="Pod" type="Node3D" parent="."]
 

@@ -1684,6 +1684,12 @@ V3_SABOTAJ = VAL3 and os.environ.get("SF_V3_SABOTAJ", "0") == "1"
 # locurile e mai jos, langa scrierea scenei.
 SUNET = os.environ.get("SF_SUNET", "1") == "1"
 TRAM_BELLS = {"Tramvai1": "cable_bell_climb", "Tramvai2": "cable_bell_mouth"}
+# Tramvaiul gurii suna de mai departe: din serpentine, la raza implicita de 90 m, clopotul venea
+# abia la 2,0-2,6 s inainte de gura (ProbeSfSunet). La 130 m (si 0 dB la sursa, ca sa se auda
+# de acolo) avansul creste; urcarea ramane la 90 m (3,5 s la 28 m/s, vagonul e in fata ta). Pauza de
+# 20 s: serpentinele fac zig-zag, distanta trecea peste raza + rearmare intre doua ace si clopotul
+# suna a doua oara la 8 s, cu vagonul deja plecat (masurat). 20 s < ciclul de 29 s: o trecere, un clopot.
+TRAM_BELL_EXTRA = {"Tramvai2": ["bell_range_m = 130.0", "bell_db = 0.0", "bell_min_gap_s = 20.0"]}
 
 
 def _tram_node(name, curve_id, speed, period, phase, reach=0.0):
@@ -1706,7 +1712,7 @@ def _tram_node(name, curve_id, speed, period, phase, reach=0.0):
         # fata vagonului (clopotul, maneta) e pe -Z in GLB, deci fara corectie de orientare
         lines += ['model = ExtResource("%s")' % TRAM_MODEL, "model_yaw = 0.0"]
     if SUNET and name in TRAM_BELLS:
-        lines += ['bell_sfx = &"%s"' % TRAM_BELLS[name]]
+        lines += ['bell_sfx = &"%s"' % TRAM_BELLS[name]] + TRAM_BELL_EXTRA.get(name, [])
     return chr(10) + chr(10).join(lines) + chr(10)
 
 

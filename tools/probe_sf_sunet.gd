@@ -190,9 +190,8 @@ func _make_bus(sfx: StringName) -> BusHazard:
 	hz.stick_to_ground = false
 	hz.bell_sfx = sfx
 	if _sab == "clopot":
-		# sabotaj: clopotul suna oricand esti aproape, fara zavor si fara pauza
+		# sabotaj: clopotul suna cand esti aproape, fie ca te apropii, fie ca nu
 		hz.bell_closing_mps = -1000.0
-		hz.bell_rearm_m = -1000.0
 		hz.bell_min_gap_s = 0.0
 	add_child(hz)
 	return hz
@@ -333,7 +332,6 @@ func _race(shortcut: bool) -> void:
 	if _sab == "clopot":
 		for t in trams:
 			t.bell_closing_mps = -1000.0
-			t.bell_rearm_m = -1000.0
 			t.bell_min_gap_s = 0.0
 	elif _sab == "zumzet":
 		var moved := PackedVector3Array()

@@ -1849,6 +1849,82 @@ parcate (4,2 m) sunt refuzate de `BumpProp` (plafonul de 2 m), deci rămân stat
 8. Kituri, fundal, teatru, sunet; `probe_decor`; testul de
    citire final; **verdictul dezvoltatorului la volan**.
 
+   **8a. Rândurile din față ale caselor — FĂCUT (16 nov 2026)**, ramura `sanfrancisco/pas8-case`.
+   `tools/gen_sf_route.py` (blocul „PASUL 8”) așază **156 de case** ale kitului sub
+   `DecorManual/Case{B,D,E,G}`, din care 19 colțuri cu turnuleț. `SF_CASE=0` reface scena de
+   dinainte octet cu octet.
+
+   | zonă | unde | retragerea fațadei | case | colțuri |
+   |---|---|---|---|---|
+   | **D** lanțul | 4 blocuri, ambele laturi, pe panta de 48 m dintre intersecțiile plate; rândurile se opresc la 45,0 m după muchie, înaintea mașinilor parcate | 10,5 m | 48 | 16: ambele capete, pe ambele laturi |
+   | **B** strada tramvaiului | ambele laturi, câte 3 rânduri, cu goluri de 14 m la y ≈ 88 și ≈ −5 | **11,75 m** (colțul îndepărtat al mașinilor parcate e la 11,1 m) | 62 | 1 |
+   | **E** ocolul | latura de N a străzii spre V (fațadele la soare); ambele laturi ale străzii spre N | 10,5 m | 30 | 0 |
+   | **G** strada de întors | doar latura de V, 2 rânduri | 10,5 m | 16 | 0 |
+
+   - **Așezarea:** Track25 n-are geometrie de trotuar, deci podeaua stă pe teren, la cel mai înalt
+     punct de pe linia fațadei (capătul de sus), fără bordura de +0,15. Căderea maximă pe o fațadă
+     e 2,03 m, sub fusta de 2,4 m. Terenul vine din `tools/data/sf_case_ground.tsv` (raze
+     verticale pe `TerrainBody`, `ProbeSfCase --dump-ground`): **se reface dacă se schimbă
+     traseul sau terenul**.
+   - **Amestecul:** `KIT_SEQ`, familia se schimbă la fiecare vecin; cinci pasteluri prin
+     `wall_class`, fără doi vecini pe același pastel; fișiere `_m` pe mâna cealaltă; garajul spre
+     vale, turnulețul spre intersecție. Generatorul se oprește cu eroare la orice încălcare.
+   - **Coliziunea:** o cutie pe casă sub `CaseCorpuri` (amprenta, de la −2,4 la +9,6, fără
+     bovindou); GLB-ul are `coliziune = "none"` și `contact = "none"` pe instanță.
+   - **Colțurile pe lanț** stau la ambele capete, pe ambele laturi (decizia coordonatorului). Cu
+     regula „V doar la vale”, capătul de deal al rândurilor de V arăta un perete orb de 12 × 10 m
+     pe fiecare muchie. Costul: soare pe lanț **83,6 %** în loc de 87,0 % (`SF_CASE_COLT=mixt`);
+     contractul e ≥ 80 %. Un colț fără turnuleț (piesă care nu există) ar da marja înapoi.
+
+   **Gărzi** (înainte → după):
+
+   | | înainte | cu case | prag |
+   |---|---|---|---|
+   | `probe_decor --track=25`: materiale | 17 | **22** (cele cinci pasteluri) | ≤ 38 |
+   | desene / triunghiuri pe toată pista | 98 / 236k | 285 / 464k | — |
+   | `ProbeLaneClear --track=17` | 50 | 50 | linia de bază 50 |
+   | soare pe lanț (`ProbeSfLight --real`) | 100 % | 83,6 % | ≥ 80 % |
+   | `ProbeSfCase` (nou; `--sabotaj` pică) | — | OK pe toate casele | — |
+   | ProbePerf, desktop: desene medie / vârf | 37 / 67 | 99 / 205 | — |
+   | buffere MultiMesh după coacerea `DecorManual` | 13 | ~200 | buget iPhone 2.500 |
+
+   Desenele, triunghiurile și ProbePerf sunt măsurate pe scena cu regula veche de colțuri (13
+   colțuri); scena finală are 19.
+
+   **Condusul** (8 mașini × 16 seed-uri × 250 s; lotul final e pe scena cu colțurile la ambele
+   capete):
+
+   | | pasul 7 | control fără case | case, regula veche de colțuri | **case, scena finală** |
+   |---|---|---|---|---|
+   | tur mediu | 82,83 s | 82,88 s | 83,11 s | 83,06 s |
+   | tramvaiul 1 / 2, cu contact | 1,7 / 2,8 % | 2,3 / 2,7 % | 1,3 / 3,1 % | 2,3 / 3,8 % |
+   | pod: peste despărțitor / frontale | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+   | pod: contact cu bariera | 6,7 % | 5,3 % | 5,5 % | 4,8 % |
+   | repuneri / ejectări / `[blocaj]` | 9 / 7 / 7 | 5 / 2 / 13 | 8 / 6 / 20 | 8 / 6 / 18 |
+   | ponton: căderi | 0,52 % | 0,26 % | 0,26 % | 0,26 % |
+
+   Niciun jurnal de cursă nu înregistrează un contact cu `CaseCorpuri`. Incidentele sunt în
+   serpentine și pe ponton (îngrămădeala din turul 1), plus ejectările cunoscute din racordul de la
+   baza lanțului (`lovit=RoadTop`, 3 în lotul final), la ≥ 28 m de orice casă. Contactul cu
+   bariera de pe pod a revenit în bandă (4,8–5,5 %) în toate cele trei loturi ale pasului 8.
+
+   **Capturi** (`docs/asset_briefs/img/sf_route/p8_case_*.png`): B cu vagonul, prima muchie,
+   mijlocul lanțului, furca, ocolul (2), strada de întors.
+
+   **Ce a rămas, din ce s-a văzut la 8a:**
+   - **pereți orbi la capetele de rând fără colț**: pe ocol (lângă viraje) și la golurile inventate
+     dintre rânduri pe B și G. Cere o casă de capăt cu ferestre pe latură;
+   - **niciun trotuar**: fâșia dintre drum și fațade e teren (nisip), iar pana fustei stă pe el;
+   - **rândurile din spate lipsesc** (în spatele primului rând e teren gol): `CityFill` cu N tente
+     și cu meshurile `_m`;
+   - **desenele cresc de ~2,7 ori** (fiecare pereche fișier × pastel își coace bufferul lui, ~1,7
+     case pe buffer). În valoare absolută pista rămâne printre cele mai ușoare (285 de desene pe
+     toată pista, față de 250–3.500 la celelalte), dar pe iPhone nu e măsurat. Pârghia: pastelul
+     pe instanță într-un singur material de perete;
+   - latura de S a străzii de ocol spre V e goală (fațadele ar fi cu spatele la soare);
+   - `probe_decor_overlap --manual` măsoară zero piese fără `--no-manual-batch` (coacerea ascunde
+     nodurile).
+
 ## 8. Lecții aplicate anticipat, și ce a fost respins
 
 - **Săritura s-a măsurat înaintea traseului**, nu după decor: profilul blocului

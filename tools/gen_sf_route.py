@@ -2143,6 +2143,349 @@ if PONT_INFO is not None:
     POD_PROPS = _new + ["custom_cornice_ravines = Array[int]([%d])" % _ri,
                         "custom_ravine_widths = Array[Vector2]([Vector2(%d, 60)])" % _ri]
 
+# =============================================================================================
+# PASUL 8 (brief §7 pasul 8, 16 nov 2026): RANDURILE DIN FATA ale kitului casei de rand
+# (`assets/models/sanfrancisco/buildings/sf_row_*.glb`, kit §3.1 / §11), pe strazile pe care
+# brief-ul pune case: B (strada tramvaiului 1, ambele laturi), D (lantul, in trepte, ambele
+# laturi), E (ocolul: latura de N a strazii spre V, ambele laturi ale strazii spre N), G (strada de
+# intors, latura de V). Fara: latura de N a bratului coamei (casele pictate, alt kit), elanul,
+# terasa (palmieri), cheiul, pontonul, podul si capetele lui, interiorul serpentinelor.
+#   - FATADA paralela cu axa strazii, la CASE_SETBACK m de ea (§2.0: 10,5). Pe strada tramvaiului 1
+#     masinile parcate perpendicular (pasul 6) au coltul departat la HW + PARK_GAP + PARK_LEN =
+#     11,1 m de axa, deci acolo fatada sta la 11,75 (0,65 m de ele), pe ambele laturi. Pe lant
+#     randurile se opresc la 45,0 m dupa muchie, inaintea primei masini parcate (46,6 - 0,95 =
+#     45,65 m): 0,65 m in lungul strazii, fatada ramane la 10,5;
+#   - PODEAUA (Y = 0 a casei) pe TEREN: Track25 n-are trotuar, deci podeaua = cota cea mai inalta a
+#     terenului pe linia fatadei (capatul de SUS pe strada in panta), din harta coapta
+#     `tools/data/sf_case_ground.tsv` (`ProbeSfCase --dump-ground`, raze pe `TerrainBody`). Fusta
+#     (-2,4) acopera caderea pe 7 m (garda: generatorul si ProbeSfCase);
+#   - AMESTECUL: `KIT_SEQ` din tools/sf_loc_decor.gd (familia se schimba la fiecare vecin), cinci
+#     pasteluri prin metadata `wall_class` (vecinii difera mereu), mana cealalta prin fisierul `_m`
+#     (niciodata scale.x = -1), garajul spre capatul de VALE;
+#   - COLTURILE (`sf_row_corner_turret`, 9 m) doar la capatul de rand dinspre o intersectie reala,
+#     cu turnuletul spre ea: pe lant capetele de VALE ale blocurilor (spre intersectia plata) pe
+#     ambele laturi si capetele de DEAL (spre intersectia de pe muchie) doar pe latura de E (umbra
+#     cade spre NE, departe de carosabil), plus capatul de N al randului de V de pe strada
+#     tramvaiului 1 (strada laterala a tramvaiului). Turnuletul costa soare pe lant (pasul 7b:
+#     85,4 -> 81,4 %), masurat aici cu `ProbeSfLight --real`;
+#   - COLIZIUNEA: o cutie pe amprenta (latimea x 12 m, de la -2,4 la +9,6), statica, FARA
+#     bovindou, sub `CaseCorpuri`; GLB-urile au `coliziune = "none"` (hull-ul implicit ar fi pus
+#     un zid invizibil la 0,9 m in fata garajului) si `contact = "none"` (discurile de contact ale
+#     caselor lipite s-ar suprapune in placa neagra, ca la zidurile din Machu Picchu).
+#   SF_CASE=0        scena de dinainte, octet cu octet
+#   SF_CASE_COLT=0   fara colturi;  =vale  doar capetele de vale;  =est  doar latura de E a lantului;
+#                    =mixt  E la ambele capete, V doar la vale (87,0 % soare pe lant; implicitul,
+#                    cu ambele capete pe ambele laturi, da 83,6 %)
+# =============================================================================================
+P8_CASE = os.environ.get("SF_CASE", "1") == "1"
+P8_COLT = os.environ.get("SF_CASE_COLT", "1")
+CASE_DIR = "buildings"
+KIT_SEQ = ["sf_row_a_canted", "sf_row_b_square", "sf_row_c_canted", "sf_row_a_square", "sf_row_b_canted",
+           "sf_row_c_square"]
+KIT_CORNER = "sf_row_corner_turret"
+PASTELS = ["sf_clapboard", "sf_clapboard_pink", "sf_clapboard_blue", "sf_clapboard_mint", "sf_clapboard_butter"]
+CASE_W, CASE_W_CORNER, CASE_D, CASE_SKIRT, CASE_EAVE = 7.0, 9.0, 12.0, 2.4, 9.6
+CASE_SETBACK = 10.5
+CASE_SETBACK_PARKED = HW + PARK_GAP + PARK_LEN + 0.65           # 11,75: strada tramvaiului 1
+CASE_GROUND_PATH = os.path.join(HERE, "data", "sf_case_ground.tsv")
+CASE_ROAD_MIN = HW + 2.5      # amprenta fata de axa buclei (poligonul de control; sonda: HW + 1,5 pe curba coapta)
+CASE_BRANCH_MIN = SERP_BW + 2.5
+CASE_TRAM_MIN = 1.25 + 2.0
+CASE_CAR_MIN = 0.6
+P8_NODES, P8_SUB = [], []
+CASE_STATS = {}
+
+
+def _case_ground_grid():
+    g = {}
+    if os.path.exists(CASE_GROUND_PATH):
+        for line in open(CASE_GROUND_PATH, encoding="utf-8"):
+            tk = line.split()
+            if len(tk) == 3:
+                g[(int(round(float(tk[0]))), int(round(float(tk[1]))))] = float(tk[2])
+    return g
+
+
+def _case_ground(G_, gx, gz):
+    """Cota terenului (bilinear pe grila de 1 m); None in afara hartii."""
+    x0, z0 = math.floor(gx), math.floor(gz)
+    fx, fz = gx - x0, gz - z0
+    try:
+        a, b = G_[(x0, z0)], G_[(x0 + 1, z0)]
+        c, d = G_[(x0, z0 + 1)], G_[(x0 + 1, z0 + 1)]
+    except KeyError:
+        return None
+    return (a * (1 - fx) + b * fx) * (1 - fz) + (c * (1 - fx) + d * fx) * fz
+
+
+def _pt_seg(p, a, b):
+    sx, sy = b[0] - a[0], b[1] - a[1]
+    L2 = sx * sx + sy * sy
+    t = max(0.0, min(1.0, ((p[0] - a[0]) * sx + (p[1] - a[1]) * sy) / max(L2, 1e-9)))
+    return math.hypot(a[0] + sx * t - p[0], a[1] + sy * t - p[1])
+
+
+def _edge_pts(poly, step=0.5):
+    out = []
+    for i in range(len(poly)):
+        a, b = poly[i], poly[(i + 1) % len(poly)]
+        n = max(1, int(math.ceil(math.dist(a, b) / step)))
+        out += [(a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n) for k in range(n)]
+    return out
+
+
+def _in_convex(p, poly, tol=0.0):
+    sgn = 0
+    for i in range(len(poly)):
+        a, b = poly[i], poly[(i + 1) % len(poly)]
+        c = ((b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0])) / max(math.dist(a, b), 1e-9)
+        if abs(c) < tol:
+            return False
+        s_ = 1 if c > 0 else -1
+        if sgn == 0:
+            sgn = s_
+        elif s_ != sgn:
+            return False
+    return True
+
+
+def _poly_poly(pa, pb):
+    if any(_in_convex(p, pb) for p in pa) or any(_in_convex(p, pa) for p in pb):
+        return 0.0
+    return min(min(_pt_seg(p, pb[i], pb[(i + 1) % len(pb)]) for i in range(len(pb))) for p in _edge_pts(pa))
+
+
+def _poly_line(poly, line):
+    pts = _edge_pts(poly)
+    cx = sum(p[0] for p in poly) / len(poly)
+    cy = sum(p[1] for p in poly) / len(poly)
+    best = 1e18
+    for a, b in zip(line, line[1:]):
+        if _pt_seg((cx, cy), a, b) > 60.0:
+            continue
+        if _in_convex(a, poly):
+            return 0.0
+        for p in pts:
+            best = min(best, _pt_seg(p, a, b))
+    return best
+
+
+# RANDURILE: (zona, nume, punctul de start al strazii (harta), directia ei (harta, unitara), latura
+# (+1 = la dreapta directiei, -1 = la stanga), retragerea fatadei, t0, numarul de case de rand,
+# coltul ("t0" / "t1" / None)). Casele se aseaza de la t0 in sensul directiei; coltul ia capatul
+# cerut. Pe lant blocul b incepe la muchia lui (y = 72 b): randul se termina la 45,0 m dupa muchie
+# (inaintea masinilor parcate), adica pe panta de 48 m dintre doua intersectii plate.
+CASE_ROWS = []
+if B200 and P8_CASE:
+    # latura de E: colt la ambele capete (umbra turnuletului cade spre NE, departe de carosabil);
+    # latura de V: doar la capatul de vale. Randul de E incepe cu 1 m INAINTEA muchiei (pe platul
+    # intersectiei; ultima masina parcata a blocului de dinainte e la 8,55 m), ca 9 + 4 x 7 + 9 m sa
+    # se opreasca tot la 45,0 m dupa muchie.
+    # IMPLICIT (coordonatorul, 16 nov 2026): colt la AMBELE capete pe AMBELE laturi ale lantului.
+    # Masurat cu `ProbeSfLight --real`: 83,6 % soare pe lant (contract >= 80, tinta >= 82), fata de
+    # 87,0 % cu regula „E la ambele capete, V doar la vale" (`SF_CASE_COLT=mixt`). Cele 3,4 puncte
+    # cumpara capatul de DEAL al randurilor de V: fara colt, acolo ramanea un perete orb de
+    # 12 x 10 m chiar pe muchie, in cadrul fiecarei sarituri (p8_case_D_muchia1_gamecam.png).
+    # Un colt FARA turnulet (piesa de kit care nu exista inca) ar da inapoi marja.
+    _chain_colt = {"1": ("both", "both"), "mixt": ("both", "t1"), "vale": ("t1", "t1"),
+                   "est": ("both", None), "0": (None, None)}.get(P8_COLT, ("both", "both"))
+    for b_ in range(BLOCKS):
+        y_l = PTS[LIPS[b_]][1]
+        for side_, nm_, colt_ in ((1.0, "E", _chain_colt[0]), (-1.0, "V", _chain_colt[1])):
+            # strada spre N (0, 1): dreapta = E
+            t0_, n_ = (-1.0, 4) if colt_ == "both" else (1.0, 5 if colt_ else 6)
+            if colt_ is None:
+                n_, t0_ = 6, 3.0
+            CASE_ROWS.append(("D", "D%d%s" % (b_ + 1, nm_), (0.0, y_l), (0.0, 1.0), side_, CASE_SETBACK,
+                              t0_, n_, colt_))
+    # strada tramvaiului 1: de la baza ei (B0) spre S (urca). Strazi transversale de 14 m la y ~ 88
+    # si ~ -5 (benzile de soare ale brief-ului §2 B), aliniate pe ambele laturi; pe latura de V
+    # randul de N incepe dupa strada laterala a tramvaiului (care intra la y ~ 164).
+    _b0 = (MK["B0"][2], MK["B0"][3])
+    _bc = P8_COLT != "0"
+    for nm_, t0_, n_ in (("B1", 18.4, 9), ("B2", 95.4, 11), ("B3", 186.4, 12)):
+        CASE_ROWS.append(("B", nm_ + "E", _b0, (0.0, -1.0), -1.0, CASE_SETBACK_PARKED, t0_, n_, None))
+    for nm_, t0_, n_, colt_ in (("B1", 30.4, 6, "t0" if _bc else None), ("B2", 95.4, 11, None),
+                                ("B3", 186.4, 12, None)):
+        if colt_ is None and nm_ == "B1":
+            t0_, n_ = 32.4, 7
+        CASE_ROWS.append(("B", nm_ + "V", _b0, (0.0, -1.0), 1.0, CASE_SETBACK_PARKED, t0_, n_, colt_))
+    # strada de intors (spre S, urca): latura de V, doua randuri cu o strada transversala intre ele
+    _g0 = (MK["G0"][2], MK["G0"][3])
+    CASE_ROWS.append(("G", "G1V", _g0, (0.0, -1.0), 1.0, CASE_SETBACK, 14.0, 9, None))
+    CASE_ROWS.append(("G", "G2V", _g0, (0.0, -1.0), 1.0, CASE_SETBACK, 91.0, 7, None))
+    # ocolul: strada spre V (y = 315, coboara spre V), latura de N (fatadele spre S, la soare);
+    # strada spre N (x = -124,7, coboara spre N), ambele laturi
+    _oa = (-RB, F_Y + RB)
+    _ob = (-RB - BYP_A - RB, F_Y + 2.0 * RB)
+    CASE_ROWS.append(("E", "EAN", _oa, (-1.0, 0.0), 1.0, CASE_SETBACK, 15.0, 9, None))
+    CASE_ROWS.append(("E", "EBE", _ob, (0.0, 1.0), 1.0, CASE_SETBACK, 16.0, 11, None))
+    CASE_ROWS.append(("E", "EBV", _ob, (0.0, 1.0), -1.0, CASE_SETBACK, 20.0, 10, None))
+
+CASE_HOUSES = []      # dict-uri: nume, zona, fisier, pastel, w, origine (godot), X, Z (godot), podea, ...
+if CASE_ROWS:
+    _G = _case_ground_grid()
+    if not _G:
+        raise SystemExit("casele: lipseste harta terenului %s — ruleaza ProbeSfCase --dump-ground"
+                         % os.path.relpath(CASE_GROUND_PATH, ROOT))
+    for idx_, (zone, rname, a_, u_, side_, setb, t0_, n_reg, colt_) in enumerate(CASE_ROWS):
+        nrm = (u_[1] * side_, -u_[0] * side_)            # spre casa (dreapta directiei = (uy, -ux))
+        slots = [CASE_W] * n_reg
+        if colt_ in ("t0", "both"):
+            slots = [CASE_W_CORNER] + slots
+        if colt_ in ("t1", "both"):
+            slots = slots + [CASE_W_CORNER]
+        t = t0_
+        t_end = t0_ + sum(slots)
+
+        def _fl(tt, off, _a=a_, _u=u_, _n=nrm):
+            return (_a[0] + _u[0] * tt + _n[0] * off, _a[1] + _u[1] * tt + _n[1] * off)
+
+        def _gnd(tt, off):
+            p = _fl(tt, off)
+            v = _case_ground(_G, p[0], -p[1])
+            if v is None:
+                raise SystemExit("casele: %s iese din harta terenului la harta (%.1f, %.1f)" % (rname, p[0], p[1]))
+            return v
+        # capatul de vale al randului (cota terenului pe linia fatadei la cele doua capete)
+        down = 1.0 if _gnd(t_end, setb) < _gnd(t0_, setb) else -1.0
+        for i_, w_ in enumerate(slots):
+            corner = w_ > CASE_W
+            tc = t + w_ / 2.0
+            # podeaua: cota cea mai inalta a terenului pe linia fatadei (+ latura libera a coltului)
+            samples = []
+            k_ = 0.0
+            while k_ <= w_ + 1e-6:
+                samples.append(_gnd(t + k_, setb))
+                k_ += 0.5
+            side_line = []
+            # coltul de la capatul t0 e primul slot; cel de la t1, ultimul
+            c_end = "t0" if (corner and i_ == 0 and colt_ in ("t0", "both")) else "t1"
+            if corner:
+                te = t if c_end == "t0" else t + w_
+                d_ = 0.0
+                while d_ <= CASE_D + 1e-6:
+                    side_line.append(_gnd(te, setb + d_))
+                    d_ += 0.5
+            floor_ = max(samples + side_line)
+            low = min(samples + side_line)
+            if floor_ - low > CASE_SKIRT - 0.05:
+                raise SystemExit("casele: %s/%d cade %.2f m pe fatada (fusta %.1f)" % (rname, i_, floor_ - low, CASE_SKIRT))
+            ctr = _fl(tc, setb + CASE_D / 2.0)
+            Z = (nrm[0], 0.0, -nrm[1])                     # +Z_glb = spatele casei
+            X = (Z[2], 0.0, -Z[0])                         # UP x Z
+            # +X_glb pe harta: (X[0], -X[2])
+            Xm = (X[0], -X[2])
+            if corner:
+                want = -1.0 if c_end == "t0" else 1.0      # turnuletul spre capatul randului
+                tdir = (u_[0] * want, u_[1] * want)
+                use_m = (-Xm[0] * tdir[0] - Xm[1] * tdir[1]) < 0.0     # turnuletul de baza e pe -X
+                stem = KIT_CORNER
+            else:
+                ddir = (u_[0] * down, u_[1] * down)
+                use_m = (Xm[0] * ddir[0] + Xm[1] * ddir[1]) < 0.0      # garajul de baza e pe +X
+                stem = KIT_SEQ[(i_ + 2 * idx_ + (0 if side_ > 0 else 1)) % len(KIT_SEQ)]
+            fname = stem + ("_m" if use_m else "")
+            CASE_HOUSES.append(dict(
+                name="%s_%02d" % (rname, i_), zone=zone, row=rname, file=fname, corner=corner, w=w_,
+                pastel=(i_ * 2 + (0 if side_ > 0 else 3) + idx_) % len(PASTELS),
+                o=(ctr[0], floor_, -ctr[1]), X=X, Z=Z, floor=floor_, drop=floor_ - low,
+                fp=[_fl(t + du, setb + dd) for du, dd in ((0.0, 0.0), (w_, 0.0), (w_, CASE_D), (0.0, CASE_D))],
+            ))
+            t += w_
+    # --- garzile de geometrie (pe harta): sosea, scurtatura, tramvaie, masini parcate, zidurile si
+    # straturile serpentinelor, suprapuneri. Pica generatorul, ca la masinile parcate.
+    _main_line = list(PTS) + [PTS[0]]
+    _br_line = [(g[0], -g[2]) for g in DENSE_G]
+    _cars = []
+    for (mx, my, side, kind, slot, tag) in parked:
+        _cars.append([(mx - PARK_LEN / 2.0, my - PARK_W / 2.0), (mx + PARK_LEN / 2.0, my - PARK_W / 2.0),
+                      (mx + PARK_LEN / 2.0, my + PARK_W / 2.0), (mx - PARK_LEN / 2.0, my + PARK_W / 2.0)])
+    _walls = [[(x_, -z_) for x_, z_ in box_corners(c, size, yaw)[0]] for c, size, yaw in boxes_wall]
+    _beds = [[(p[0], -p[2]) for p in og] for og, _, _ in prisms_bed]
+    worst = dict(road=1e9, branch=1e9, tram=1e9, car=1e9, serp=1e9)
+    for hi_, h in enumerate(CASE_HOUSES):
+        fp = h["fp"]
+        for key, line, lim in (("road", _main_line, CASE_ROAD_MIN), ("branch", _br_line, CASE_BRANCH_MIN),
+                               ("tram", TRAM1_MAP, CASE_TRAM_MIN), ("tram", TRAM2_MAP, CASE_TRAM_MIN)):
+            d_ = _poly_line(fp, line)
+            worst[key] = min(worst[key], d_)
+            if d_ < lim:
+                raise SystemExit("casele: %s la %.2f m de %s (prag %.2f)" % (h["name"], d_, key, lim))
+        for cp in _cars:
+            if math.dist(cp[0], fp[0]) > 40.0:
+                continue
+            d_ = _poly_poly(fp, cp)
+            worst["car"] = min(worst["car"], d_)
+            if d_ < CASE_CAR_MIN:
+                raise SystemExit("casele: %s la %.2f m de o masina parcata" % (h["name"], d_))
+        for wp in _walls + _beds:
+            if math.dist(wp[0], fp[0]) > 60.0:
+                continue
+            d_ = _poly_poly(fp, wp)
+            worst["serp"] = min(worst["serp"], d_)
+            if d_ < 1.0:
+                raise SystemExit("casele: %s la %.2f m de serpentine" % (h["name"], d_))
+        for hj in range(hi_ + 1, len(CASE_HOUSES)):
+            g_ = CASE_HOUSES[hj]["fp"]
+            if math.dist(g_[0], fp[0]) > 30.0:
+                continue
+            if any(_in_convex(p, g_, 0.02) for p in fp) or any(_in_convex(p, fp, 0.02) for p in g_):
+                raise SystemExit("casele: %s se suprapune cu %s" % (h["name"], CASE_HOUSES[hj]["name"]))
+    # vecinii: alta familie, alt pastel
+    for a_h, b_h in zip(CASE_HOUSES, CASE_HOUSES[1:]):
+        if a_h["row"] != b_h["row"]:
+            continue
+        fam = lambda f: f.replace("_m", "").split("_")[2]    # noqa: E731  (a / b / c / corner)
+        if fam(a_h["file"]) == fam(b_h["file"]) or a_h["pastel"] == b_h["pastel"]:
+            raise SystemExit("casele: vecinii %s / %s au aceeasi familie sau acelasi pastel" % (a_h["name"], b_h["name"]))
+    # --- nodurile: casele sub DecorManual/Case<zona>, cutiile sub CaseCorpuri (radacina)
+    _zones_done = []
+    for h in CASE_HOUSES:
+        rid = _p7_glb("%s/%s.glb" % (CASE_DIR, h["file"]), "p8_" + h["file"])
+        if rid is None:
+            continue
+        if h["zone"] not in _zones_done:
+            P8_NODES.append('[node name="Case%s" type="Node3D" parent="DecorManual"]\n' % h["zone"])
+            _zones_done.append(h["zone"])
+        X, Z, o = h["X"], h["Z"], h["o"]
+        P8_NODES.append('[node name="%s" parent="DecorManual/Case%s" instance=ExtResource("%s")]\n'
+                        'transform = Transform3D(%.5f, 0, %.5f, 0, 1, 0, %.5f, 0, %.5f, %.3f, %.3f, %.3f)\n'
+                        'metadata/coliziune = "none"\nmetadata/contact = "none"\nmetadata/wall_class = "%s"\n'
+                        'metadata/sf_case = "%s"\nmetadata/sf_case_w = %.1f\n'
+                        % (h["name"], h["zone"], rid, X[0], Z[0], X[2], Z[2], o[0], o[1], o[2],
+                           PASTELS[h["pastel"]], h["zone"], h["w"]))
+        h["placed"] = True
+    _placed = [h for h in CASE_HOUSES if h.get("placed")]
+    if _placed:
+        P8_NODES.append('[node name="CaseCorpuri" type="StaticBody3D" parent="."]\n')
+        for wk in sorted({h["w"] for h in _placed}):
+            P8_SUB.append('[sub_resource type="BoxShape3D" id="Box_casa%d"]\nsize = Vector3(%.1f, %.1f, %.1f)\n'
+                          % (int(wk), wk, CASE_SKIRT + CASE_EAVE, CASE_D))
+        for h in _placed:
+            X, Z, o = h["X"], h["Z"], h["o"]
+            yc = o[1] - CASE_SKIRT + (CASE_SKIRT + CASE_EAVE) / 2.0
+            P8_NODES.append('[node name="Corp_%s" type="CollisionShape3D" parent="CaseCorpuri"]\n'
+                            'transform = Transform3D(%.5f, 0, %.5f, 0, 1, 0, %.5f, 0, %.5f, %.3f, %.3f, %.3f)\n'
+                            'shape = SubResource("Box_casa%d")\n'
+                            % (h["name"], X[0], Z[0], X[2], Z[2], o[0], yc, o[2], int(h["w"])))
+        from collections import Counter
+        print("casele de rand: %d (%s), colturi %d; fisiere %d; podeaua pe teren (fara trotuar), caderea maxima "
+              "pe o fatada %.2f m (fusta %.1f)" % (
+                  len(_placed), ", ".join("%s %d" % kv for kv in sorted(Counter(h["zone"] for h in _placed).items())),
+                  sum(1 for h in _placed if h["corner"]), len({h["file"] for h in _placed}),
+                  max(h["drop"] for h in _placed), CASE_SKIRT))
+        print("casele: amprenta la >= %.2f m de axa buclei (poligon), %.2f de scurtatura, %.2f de tramvaie, "
+              "%.2f de masinile parcate, %.2f de serpentine" % (worst["road"], worst["branch"], worst["tram"],
+                                                                 worst["car"], worst["serp"]))
+        for rn in dict.fromkeys(h["row"] for h in _placed):
+            hs = [h for h in _placed if h["row"] == rn]
+            print("  %-5s %2d case (%s), podeaua %.1f..%.1f, cadere max %.2f" % (
+                rn, len(hs), " ".join(h["file"].replace("sf_row_", "") for h in hs),
+                min(h["floor"] for h in hs), max(h["floor"] for h in hs), max(h["drop"] for h in hs)))
+    P7_NODES += P8_NODES
+    P6_SUB += P8_SUB
+
 if P7_NODES:
     # containerul de decor asezat din generator: `WorldProp` pune materialul lumii pe tot
     # subarborele; pista il cauta dupa nume (`DecorManual`), la radacina

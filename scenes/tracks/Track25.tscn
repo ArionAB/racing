@@ -72,6 +72,9 @@
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/props/sf_bench.glb" id="v3_bench"]
 [ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/props/sf_bike_rack.glb" id="v3_rack"]
 [ext_resource type="Script" path="res://scenes/props/world_prop.gd" id="p7_worldprop"]
+[ext_resource type="Script" path="res://scenes/hazards/ambience_bed.gd" id="s8e_bed"]
+[ext_resource type="AudioStream" path="res://assets/audio/cable_hum.wav" id="s8e_hum"]
+[ext_resource type="Script" path="res://scenes/hazards/ambience_calls.gd" id="s8e_calls"]
 
 [sub_resource type="Curve3D" id="Curve3D_sf"]
 closed = true
@@ -213,6 +216,7 @@ custom_ravine_widths = Array[Vector2]([Vector2(2, 60)])
 metadata/sf_ponton = [Vector3(40.000, 3.000, -454.000), Vector3(120.000, 3.000, -454.000)]
 custom_wood_deck_ranges = Array[Vector2]([Vector2(0.6580, 0.6920)])
 ai_drop_edges = Array[Vector4]([Vector4(0.6520, 0.6836, -1, 2.5)])
+custom_wood_deck_voice = true
 metadata/jump_crests = [Vector2(0.369, 0.3927), Vector2(0.3975, 0.4212), Vector2(0.426, 0.4497), Vector2(0.4545, 0.4782)]
 metadata/sf_lips = [Vector3(0.000, 53.000, -0.000), Vector3(0.000, 43.400, -72.000), Vector3(0.000, 33.800, -144.000), Vector3(0.000, 24.200, -216.000)]
 metadata/sf_block_len = 48.0
@@ -805,6 +809,7 @@ placeholder_color = Color(0.55, 0.55, 0.55, 1)
 placeholder_nose_color = Color(0.42, 0.42, 0.42, 1)
 model = ExtResource("p7_tram")
 model_yaw = 0.0
+bell_sfx = &"cable_bell_climb"
 
 [node name="Tramvai2" type="Path3D" parent="Tramvaie"]
 curve = SubResource("Curve3D_tram2")
@@ -827,6 +832,7 @@ placeholder_color = Color(0.55, 0.55, 0.55, 1)
 placeholder_nose_color = Color(0.42, 0.42, 0.42, 1)
 model = ExtResource("p7_tram")
 model_yaw = 0.0
+bell_sfx = &"cable_bell_mouth"
 
 [node name="Pod" type="Node3D" parent="."]
 
@@ -5553,3 +5559,22 @@ shape = SubResource("Box_v3_12_00_9_00_20_00")
 [node name="Corp_Magazia3" type="CollisionShape3D" parent="MagaziiCorpuri"]
 transform = Transform3D(-1.00000, 0, -0.00000, 0, 1.00000, 0, 0.00000, 0, -1.00000, -31.400, 8.405, -480.720)
 shape = SubResource("Box_v3_12_00_9_00_12_00")
+
+[node name="Sunet" type="Node" parent="."]
+
+[node name="ZumzetCablu" type="Node" parent="Sunet"]
+script = ExtResource("s8e_bed")
+bed_stream = ExtResource("s8e_hum")
+bed_db = -14.0
+fade_seconds = 0.8
+zone_line = PackedVector3Array(144.000, 20.000, -184.426, 144.000, 57.543, 148.000)
+zone_full_m = 14.0
+zone_silent_m = 45.0
+
+[node name="Golful" type="Node" parent="Sunet"]
+script = ExtResource("s8e_calls")
+spot_pos = PackedVector3Array(-30.000, 12.000, -470.000, 80.000, 12.000, -468.000, 250.000, 30.000, -228.600, -62.000, 1.500, -490.000, 50.000, 58.000, 40.000, 70.000, 58.000, 85.000)
+spot_sfx = Array[StringName]([&"gull_call", &"gull_call", &"gull_call", &"sea_lion_bark", &"parrot_squawk", &"parrot_squawk"])
+spot_radius = PackedFloat32Array(80.0, 80.0, 80.0, 75.0, 65.0, 65.0)
+spot_gap = PackedVector2Array(5.0, 11.0, 6.0, 12.0, 7.0, 14.0, 6.0, 13.0, 8.0, 16.0, 9.0, 17.0)
+spot_db = PackedFloat32Array(-9.0, -9.0, -10.0, -6.0, -10.0, -10.0)

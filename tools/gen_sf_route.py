@@ -1678,6 +1678,14 @@ V3_CAPS = _v3_flag("SF_V3_CAPS")              # I: zidurile moi ale podului pe b
 V3_SABOTAJ = VAL3 and os.environ.get("SF_V3_SABOTAJ", "0") == "1"
 
 
+# SUNETUL (pasul 8e, brief §5.6): SF_SUNET=0 = scena de dinainte, octet cu octet. Clopotul celor doua
+# tramvaie (`BusHazard.bell_sfx`), scandurile pontonului (`custom_wood_deck_voice`), zumzetul cablului
+# pe strada tramvaiului 1 (`AmbienceBed` cu `zone_line`) si golful (`AmbienceCalls`). Blocul cu
+# locurile e mai jos, langa scrierea scenei.
+SUNET = os.environ.get("SF_SUNET", "1") == "1"
+TRAM_BELLS = {"Tramvai1": "cable_bell_climb", "Tramvai2": "cable_bell_mouth"}
+
+
 def _tram_node(name, curve_id, speed, period, phase, reach=0.0):
     b = "true" if TRAM_AI else "false"
     lines = [
@@ -1697,6 +1705,8 @@ def _tram_node(name, curve_id, speed, period, phase, reach=0.0):
     if TRAM_MODEL:
         # fata vagonului (clopotul, maneta) e pe -Z in GLB, deci fara corectie de orientare
         lines += ['model = ExtResource("%s")' % TRAM_MODEL, "model_yaw = 0.0"]
+    if SUNET and name in TRAM_BELLS:
+        lines += ['bell_sfx = &"%s"' % TRAM_BELLS[name]]
     return chr(10) + chr(10).join(lines) + chr(10)
 
 
@@ -4203,6 +4213,61 @@ if P7_NODES:
 # fara niciun model, scena iese octet cu octet ca la pasul 6
 P7_TAIL = (chr(10) + chr(10).join(P7_NODES)) if P7_NODES else ""
 
+# =============================================================================================
+# SUNETUL (pasul 8e, brief §5.6). Tot ce urmeaza e gol cu SF_SUNET=0 (scena de dinainte).
+#   - zumzetul cablului: AmbienceBed cu `zone_line` pe axa strazii tramvaiului 1, de la baza
+#     urcarii (B0) pana unde iese tramvaiul; plin la <= 14 m de axa (banda + trotuarul), mut de la
+#     45 m (coama, dupa colt, e deja la > 45 m dupa ~50 m de mers spre V);
+#   - golful: AmbienceCalls, locuri fixe (nu modele): pescarusi peste chei si peste capul de V al
+#     podului, leii de mare pe pluta lor (LIONS_AT), papagalii in parcul cu chiparosi de pe coama.
+#     Pozitiile sunt in raportul pasului 8e (brief §7), ca stolurile sa fie puse unde e sunetul.
+# =============================================================================================
+SUNET_EXT, SUNET_PROPS, SUNET_NODES = [], [], []
+if SUNET:
+    SUNET_PROPS.append("custom_wood_deck_voice = true")
+    SUNET_EXT += [
+        '[ext_resource type="Script" path="res://scenes/hazards/ambience_bed.gd" id="s8e_bed"]\n',
+        '[ext_resource type="AudioStream" path="res://assets/audio/cable_hum.wav" id="s8e_hum"]\n',
+        '[ext_resource type="Script" path="res://scenes/hazards/ambience_calls.gd" id="s8e_calls"]\n',
+    ]
+    _hum_line = [godot((MK["B0"][2], MK["B0"][3]), DECK_Y), TRAM1_G[-1]] if B200 else [TRAM1_G[2], TRAM1_G[-1]]
+    _yq = Y_LOW + 9.0
+    SF_SPOTS = [
+        # (nume, pozitie Godot, sunet, raza m, interval s, dB)
+        ("pescarusi chei V", (-30.0, _yq, -470.0), "gull_call", 80.0, (5.0, 11.0), -9.0),
+        ("pescarusi ponton", (80.0, _yq, -468.0), "gull_call", 80.0, (6.0, 12.0), -9.0),
+        ("pescarusi capul de pod", (250.0, DECK_Y + 10.0, -228.6), "gull_call", 80.0, (7.0, 14.0), -10.0),
+        ("leii de mare", (LIONS_AT[0], SEA_Y + 1.5, -LIONS_AT[1]), "sea_lion_bark", 75.0, (6.0, 13.0), -6.0),
+        ("papagali parc S", (50.0, 58.0, 40.0), "parrot_squawk", 65.0, (8.0, 16.0), -10.0),
+        ("papagali parc N", (70.0, 58.0, 85.0), "parrot_squawk", 65.0, (9.0, 17.0), -10.0),
+    ]
+    SUNET_NODES.append("\n".join([
+        '[node name="Sunet" type="Node" parent="."]',
+        "",
+        '[node name="ZumzetCablu" type="Node" parent="Sunet"]',
+        'script = ExtResource("s8e_bed")',
+        'bed_stream = ExtResource("s8e_hum")',
+        "bed_db = -14.0",
+        "fade_seconds = 0.8",
+        "zone_line = PackedVector3Array(%s)" % ", ".join("%.3f, %.3f, %.3f" % tuple(v) for v in _hum_line),
+        "zone_full_m = 14.0",
+        "zone_silent_m = 45.0",
+        "",
+        '[node name="Golful" type="Node" parent="Sunet"]',
+        'script = ExtResource("s8e_calls")',
+        "spot_pos = PackedVector3Array(%s)" % ", ".join("%.3f, %.3f, %.3f" % sp[1] for sp in SF_SPOTS),
+        "spot_sfx = Array[StringName]([%s])" % ", ".join('&"%s"' % sp[2] for sp in SF_SPOTS),
+        "spot_radius = PackedFloat32Array(%s)" % ", ".join("%.1f" % sp[3] for sp in SF_SPOTS),
+        "spot_gap = PackedVector2Array(%s)" % ", ".join("%.1f, %.1f" % sp[4] for sp in SF_SPOTS),
+        "spot_db = PackedFloat32Array(%s)" % ", ".join("%.1f" % sp[5] for sp in SF_SPOTS),
+        "",
+    ]))
+    print("sunetul (8e): clopot pe %s; zumzet pe %s; locuri: %s" % (
+        ", ".join("%s=%s" % kv for kv in TRAM_BELLS.items()),
+        " -> ".join("(%.0f, %.0f)" % (v[0], v[2]) for v in _hum_line),
+        "; ".join("%s (%.0f, %.0f, %.0f)" % (sp[0], *sp[1]) for sp in SF_SPOTS)))
+SUNET_TAIL = (chr(10) + chr(10).join(SUNET_NODES)) if SUNET_NODES else ""
+
 tscn = f"""[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
@@ -4210,7 +4275,7 @@ tscn = f"""[gd_scene format=3]
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="3_branch"]
 [ext_resource type="ArrayMesh" path="res://{OBJ_REL}" id="4_gri"]
 [ext_resource type="Script" path="res://scenes/hazards/bus_hazard.gd" id="5_bus"]
-{POD_EXT}{"".join(P6_EXT)}{"".join(P7_EXT)}
+{POD_EXT}{"".join(P6_EXT)}{"".join(P7_EXT)}{"".join(SUNET_EXT)}
 [sub_resource type="Curve3D" id="Curve3D_sf"]
 closed = true
 _data = {{
@@ -4255,7 +4320,7 @@ custom_width_segments = Array[Vector3]([{", ".join(V3(*w_) for w_ in width_segme
 custom_sun_rotation_deg = Vector3({SUN_ELEV}, {SUN_AZ}, 0)
 branch_smooth_level = true
 terrain_pad_m = 120.0
-{chr(10).join(POD_PROPS + P6_PROPS + meta)}
+{chr(10).join(POD_PROPS + P6_PROPS + SUNET_PROPS + meta)}
 
 [node name="Path" type="Path3D" parent="."]
 curve = SubResource("Curve3D_sf")
@@ -4281,7 +4346,7 @@ material_override = SubResource("Mat_gri")
 [node name="Tramvaie" type="Node3D" parent="."]
 {tram_nodes}
 {chr(10).join(POD_NODES)}
-{chr(10).join(P6_NODES)}{P7_TAIL}"""
+{chr(10).join(P6_NODES)}{P7_TAIL}{SUNET_TAIL}"""
 with open(os.devnull if DRY else OUT_TSCN, "w", encoding="utf-8", newline="\n") as f:
     f.write(tscn)
 print(f"scris {os.path.relpath(OUT_TSCN, ROOT)}; sea_level_offset {SEA_OFFSET}")

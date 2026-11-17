@@ -2338,6 +2338,82 @@ parcate (4,2 m) sunt refuzate de `BumpProp` (plafonul de 2 m), deci rămân stat
 
    **De decis după 8d:** trotuarul trece peste golurile de pe B.
 
+   **8e. Sunetul (17 nov 2026)**, ramura `sanfrancisco/pas8e-teatru`. Până acum pista n-avea niciun
+   sunet al ei. Totul e sintetizat în `tools/generate_sfx.gd` (blocul `_save_sf_sounds`, generator
+   propriu `rng_sf`, apelat ultimul: niciun fișier existent nu se rescrie), nimic eșantionat, nicio
+   melodie. `SF_SUNET=0` reface scena de dinainte octet cu octet.
+
+   | sunet | fișier | cum pornește | unde se aude | nivel |
+   |---|---|---|---|---|
+   | clopotul urcării | `cable_bell_climb.wav` (1,54 s, gong de 640 Hz lovit de 2 ori) | `BusHazard.bell_sfx` pe `Tramvai1`: o dată când mașina jucătorului se apropie de corpul **vizibil** (≤ 90 m, apropiere ≥ 2 m/s); tace până te depărtezi la > 120 m sau vagonul se ascunde; cel mult o dată la 8 s | poziționat pe vagon (`AudioStreamPlayer3D`, unit_size 20, până la 170 m) | −3 dB la sursă |
+   | clopotul gurii | `cable_bell_mouth.wav` (1,60 s, 880 Hz, 3 lovituri dese) | aceeași regulă, pe `Tramvai2`, dar de la **130 m** și cel mult o dată la **20 s** (vezi mai jos) | idem | 0 dB |
+   | zumzetul cablului | `cable_hum.wav` (buclă de 4 s, 110 Hz + 7 armonice, ticul rolelor la 0,5 s) | `AmbienceBed` cu `zone_line` nou: urechea (camera) față de axa străzii tramvaiului 1, (144, −184) → (144, 148) | plin la ≤ 14 m de axă, mut de la 45 m, oprit cât e mut | −14 dB |
+   | scândurile pontonului | `plank_rattle.wav` (buclă de 1 s, ~16 bătăi de lemn de 360/860 Hz + un scârțâit) | `CarAudio` (suprafața `WOOD`, nouă): roțile jos, pe bandă, pe intervalul `wood_deck_ranges` — aceleași fracții ca scândura desenată | jucătorul; pitch și volum după viteză, ca iarba și pietrișul | −36…−13 dB după viteză, +4 dB |
+   | pescărușii | `gull_call.wav` (3 strigăte, 1,1 s) | `AmbienceCalls` (nou): un loc strigă doar cu camera în raza lui, la 5–14 s, niciodată la < 1,5 s de alt strigăt | (−30, 12, −470) chei V, (80, 12, −468) peste ponton, (250, 30, −228,6) capul de V al podului; raza 80 m | −9 / −9 / −10 dB |
+   | leii de mare | `sea_lion_bark.wav` (3 lătrături, 1,1 s) | idem, la 6–13 s | pluta (−62, 1,5, −490), raza 75 m | −6 dB |
+   | papagalii | `parrot_squawk.wav` (2 țipete + ciripit, 0,95 s) | idem, la 8–17 s | parcul cu chiparoși: (50, 58, 40) și (70, 58, 85), raza 65 m | −10 dB |
+
+   Strigătele golfului trec prin cele 4 playere 3D comune ale `AudioManager`, cu prioritatea 0 (decor):
+   nu fură niciodată un player de la un impact. Pista adaugă **3 playere** (2 clopote, zumzetul) plus
+   **1** în `CarAudio` (scândurile, creat la prima trecere pe ponton). Fișierele noi: 498 KB în total
+   (clopote 68 + 71, zumzet 176, scânduri 44, pescăruș 49, leu de mare 49, papagal 42 KB).
+
+   **Cod comun, stins implicit** (celelalte piste rămân cum erau): `BusHazard.bell_sfx` (gol = mut,
+   fără player: Carrara, Machu Picchu, Fiordland), `AmbienceBed.zone_line` (gol = ca la Angkor),
+   `Track.is_wood_deck_voice_at` + `TrackFromPath.custom_wood_deck_voice` (puntea Kiyomizu rămâne
+   mută), `AmbienceCalls` (nod nou). Sondele de sunet ale celorlalte piste (`ProbeAngkorSound`,
+   `ProbeHazardSound`, `ProbeImpactSound`, `ProbeTurboSound`, `ProbeEngineVoice`, `ProbeLiftPops`,
+   `ProbeSlipSqueal`, `ProbeSurfaceVoice`, `ProbeWind`): OK.
+
+   **Garda `ProbeSfSunet`** (cablajul, clopotul izolat pe o dreaptă, două curse reale de 175 s cu
+   mașina jucătorului condusă de AI, una pe ocol și una pe serpentine). `--sabotaj=clopot` (sună
+   la apropiere fără să te apropii), `zumzet` (linia mutată 300 m), `ponton` (intervalul vocii
+   mutat la 0,55–0,59), `golf` (fără pauze și fără rază): toate pică.
+
+   **Măsurat** (`ProbeSfSunet`, două curse de 175 s, ~2 ture fiecare):
+
+   | clopot | unde e mașina | distanța / apropierea la clopot | vagonul la clopot | avansul |
+   |---|---|---|---|---|
+   | urcarea (4 din 4) | pe strada tramvaiului, 28,2–28,7 m/s | 89,6–89,9 m / 23,0–23,4 m/s | vizibil (strada e dreaptă) | **3,48–3,53 s** până la 12 m de vagon |
+   | gura, din spate pe ocol | pe ocol, spre chei, 28 m/s | 129,9 m / 19,2 m/s | ascuns de case | **7,5 s** până la 12 m; în gură după 8,5 s |
+   | gura, vagonul apare lângă tine | pe chei, 28 m/s | 65 m (la apariție) | vizibil | 2,2 s până la 12 m |
+   | gura, din serpentine (2 din 2) | în serpentine, 25,7–26,9 m/s | 129,9 m / 17,7–24,2 m/s | o dată ascuns de rândul din spate, o dată vizibil | mașina ajunge în gură **după 8,4–8,7 s**; vagonul era atunci la 29 și 64 m de gură |
+
+   - **Raza gurii, 130 m (nu 90 m) și pauza de 20 s.** Cu 90 m, din serpentine clopotul venea abia la
+     2,0–2,6 s înaintea gurii. Iar zig-zagul acelor ducea distanța peste raza + 30 m între două ace,
+     deci clopotul se rearma și suna a doua oară la 8 s, cu vagonul deja plecat (măsurat); 20 s e sub
+     ciclul de 29 s: o trecere, un clopot. Pe urcare rămâne 90 m: vagonul e drept în față, clopotul e
+     „acum”, nu un avertisment de după colț. **Pe urcare clopotul nu vine înainte să vezi vagonul**;
+     pe ocol (case) și din serpentine (rândul din spate) da, o dată din două.
+   - Clopote pe tur: cel mult unul pe vagon (2 + 2 în 175 s, pe fiecare cursă); niciunul ascuns, niciunul
+     fără apropiere reală (apropierea măsurată de sondă din poziții, nu din jurnalul clopotului).
+   - **Zumzetul**: pornit 31,3–31,7 s din 175 (~15 s pe tur, 18 % din timp), −14 dB plin pe strada
+     tramvaiului în toate cele 1.344 / 1.365 de cadre, oprit în toate cadrele la ≥ 50 m de ea.
+   - **Scândurile**: 2 treceri, 4,7–4,9 s pe lemn; `WOOD` în toate cele 232–238 de cadre cu roțile pe
+     miezul pontonului și în niciun cadru în afara lui; bucla la −9,0…−9,2 dB (viteză de cursă).
+   - **Golful**: 13–15 strigăte în 175 s (4,5–5,1 pe minut), cel mai scurt interval 1,6 s, urechea la
+     5–55 m de loc; toate redate (pool-ul 3D comun: cel mult 3 din 4 ocupate). Leii de mare latră
+     doar pe ocol (pe serpentine nu treci pe lângă plută).
+   - **Aterizările**: singurele din tur sunt cele 4 de pe lanț (8 în 175 s, ambele curse), la ~2,0 s una
+     de alta, cu căderi de 17,9–19,7 m/s → `land` la −4,8…−5,9 dB (pitch 0,95–0,98) + `land_heavy` la
+     −6,8…−7,9 dB, plus ±4 % pitch la întâmplare. Adică **același sunet de patru ori în 6 s, în 1 dB**,
+     peste motor (−15…−11 dB). **Recomandare, neaplicată** (decizia coordonatorului): o variație, nu un
+     nivel mai mic — două variante de `land` alternate ca la impact, sau −2…−3 dB pe a 2-a…a 4-a
+     aterizare la < 3 s de precedenta; doar pe Track25, prin temă. Dacă obosește, decide urechea.
+
+   **Gărzi** (pe scena cu sunet): `probe_decor --track=25` 23 de materiale (OK); `ProbeLaneClear
+   --track=17` 50, exact linia de bază; `probe_manual --track=25` OK; `ProbeSfTrotuar` OK;
+   `ProbeSfStalp` OK, aceleași cifre ca la 8d. Fără lot de cursă: nimic din ce atinge o mașină nu s-a
+   schimbat. Rulate înainte de raza de 130 m a gurii (schimbare doar de exporturi de sunet).
+   `ProbeBusDepot` (Machu Picchu, nu e în `verify_local`) pică pe `CURAT: CocheraJos`, **identic cu
+   `bus_hazard.gd` din main** — preexistent.
+
+   **Ce verifică sonda și ce nu.** Sonda știe ce fișier pornește, când, pe ce bus, la ce nivel și unde.
+   Nu știe cum sună: dacă clopotul se aude peste motor la 90–130 m pe un telefon, dacă zumzetul se aude
+   pe difuzorul unui telefon (are energie sub 300 Hz), dacă scândurile sună a lemn, dacă pescărușii
+   sună a pescăruși. Pentru ureche: `godot --path . res://tools/AscultaSfSunet.tscn` (cu fereastră)
+   le cântă pe rând, la nivelurile din joc; fișierele sunt în `assets/audio/`.
+
 ## 8. Lecții aplicate anticipat, și ce a fost respins
 
 - **Săritura s-a măsurat înaintea traseului**, nu după decor: profilul blocului

@@ -27,20 +27,22 @@ func _ready() -> void:
 	add_child(label)
 	await _play(&"cable_bell_climb", -3.0, 1.0, 2.0, "clopotul urcarii (Tramvai1)")
 	await _play(&"cable_bell_climb", -3.0, 1.0, 2.2, "clopotul urcarii, din nou")
-	await _play(&"cable_bell_mouth", -3.0, 1.0, 2.0, "clopotul gurii (Tramvai2)")
-	await _play(&"cable_bell_mouth", -3.0, 1.0, 2.2, "clopotul gurii, din nou")
+	await _play(&"cable_bell_mouth", 0.0, 1.0, 2.0, "clopotul gurii (Tramvai2)")
+	await _play(&"cable_bell_mouth", 0.0, 1.0, 2.2, "clopotul gurii, din nou")
 	await _hum()
 	for p: float in [0.8, 1.05, 1.3]:
 		await _play(&"plank_rattle", -36.0 + 23.0 * (p - 0.8) / 0.5 + 4.0, p, 2.0,
 			"scandurile pontonului, pitch %.2f" % p, true)
-	for nm: StringName in [&"gull_call", &"sea_lion_bark", &"parrot_squawk"]:
-		await _play(nm, -6.0, 0.95, 1.6, String(nm))
-		await _play(nm, -6.0, 1.07, 2.0, String(nm) + " (alt pitch)")
-	for fs: float in [11.5, 12.5, 13.0, 12.0]:
+	var call_db := {&"gull_call": -9.0, &"sea_lion_bark": -6.0, &"parrot_squawk": -10.0}
+	for nm: StringName in call_db:
+		await _play(nm, float(call_db[nm]), 0.95, 1.6, String(nm))
+		await _play(nm, float(call_db[nm]), 1.07, 2.0, String(nm) + " (alt pitch)")
+	# caderile masurate pe cele patru muchii ale lantului (ProbeSfSunet, un tur), la ~2 s una de alta
+	for fs: float in [17.9, 18.0, 19.0, 18.3]:
 		for e: Dictionary in AudioManager.plan_land(fs):
 			AudioManager.call(&"_play_2d", e["name"], float(e["pitch"]), float(e["db"]))
 		print("aterizare, cadere %.1f m/s" % fs)
-		await get_tree().create_timer(1.2).timeout
+		await get_tree().create_timer(2.0).timeout
 	print("gata")
 	get_tree().quit()
 

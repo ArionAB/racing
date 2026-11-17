@@ -23,6 +23,11 @@ Moduri (prin run_build.py, argumentele dupa al doilea `--`):
                     grade, FOV vertical 68; soare jos (28 de grade), cald, din
                     fata-lateral; o cutie de 4,2 m (masina) pe strada. Doua
                     cadre: la vale si la deal -> <nume>_row_gamecam.png
+  --kitrow          kitul amestecat: cele SAPTE case intr-un rand (ordinea `KIT_ROW`, coltul
+                    la capatul de vale, `_m`, cu turnuletul spre vale = spre intersectie),
+                    aceeasi strada si camera ca `--row` -> sf_row_kit_row_gamecam.png, plus
+                    liniile acoperisurilor: elevatie ortografica din strada si o vedere din
+                    spate-sus -> sf_row_kit_rooflines.png
 
     D:/Blender/blender.exe --background --factory-startup \\
         --python tools/blender/run_build.py -- preview_sf_row.py -- --row sf_row_b_canted
@@ -63,6 +68,10 @@ PASTELS = {
     "mint": "#B9D6BE", "butter": "#EDD68A",
 }
 ROW_ORDER = ["blue", "pink", "mint", "butter", "cream", "pink"]
+# randul kitului (de la deal la vale): familiile alterneaza A/B/C, bovindoul tesit/patrat
+KIT_ROW = ["sf_row_a_canted", "sf_row_b_square", "sf_row_c_canted", "sf_row_a_square",
+           "sf_row_b_canted", "sf_row_c_square"]
+KIT_CORNER = "sf_row_corner_turret_m"
 
 # camera de joc (brief §2/§9)
 GC_HEIGHT, GC_DIST, GC_PITCH, GC_FOV = 10.0, 12.5, 29.0, 68.0
@@ -349,7 +358,9 @@ def _ground_disc(z=0.0, hex_color="#BDBAB4", size=40.0):
 
 def compare(name, res_height=900):
     os.makedirs(FID_DIR, exist_ok=True)
-    crop = os.path.join(CROP_DIR, name + ".png")
+    # varianta oglindita `_m` se pune langa decuparea casei de baza (la colt, `_m` are
+    # turnuletul pe +X, ca decuparea)
+    crop = os.path.join(CROP_DIR, re.sub(r"_m$", "", name) + ".png")
     _clear()
     meshes = _import(name, PASTELS["blue"])
     ground = _ground_disc()
@@ -386,16 +397,22 @@ def _street_h(x):
     return -SLOPE * x
 
 
-def row(name, count=6):
+def row(name, count=6, kit=False):
     os.makedirs(FID_DIR, exist_ok=True)
     _clear()
     scene = bpy.context.scene
     houses = []
-    for i in range(count):
-        xc = PITCH_X * i
+    if kit:
+        # coltul ia felia a saptea si se lungeste 2 m spre vale (intersectia)
+        items = [(n, PITCH_X * i, PITCH_X * i - 3.5) for i, n in enumerate(KIT_ROW)]
+        items.append((KIT_CORNER, PITCH_X * len(KIT_ROW) + 1.0, PITCH_X * len(KIT_ROW) - 3.5))
+        count = len(items)
+    else:
+        items = [(name, PITCH_X * i, PITCH_X * i - 3.5) for i in range(count)]
+    for i, (nm, xc, xtop) in enumerate(items):
         # podeaua la cota trotuarului din capatul de SUS al casei (+ bordura)
-        z = _street_h(xc - 3.5) + CURB
-        houses += _import(name, PASTELS[ROW_ORDER[i % len(ROW_ORDER)]], offset=(xc, 0.0, z))
+        z = _street_h(xtop) + CURB
+        houses += _import(nm, PASTELS[ROW_ORDER[i % len(ROW_ORDER)]], offset=(xc, 0.0, z))
     axis_y = YF + FACADE_TO_AXIS
     x0, x1 = -60.0, 110.0
     walk_y0, walk_y1 = -8.0, YF + WALK_W
@@ -465,7 +482,36 @@ def row(name, count=6):
         frames.append(p)
     _compose(["--stack", ",".join(frames), "--labels",
               "la vale (camera spre +X), la deal (camera spre -X)",
-              "--out", os.path.join(FID_DIR, name + "_row_gamecam.png")])
+              "--out", os.path.join(FID_DIR, ("sf_row_kit" if kit else name) + "_row_gamecam.png")])
+    _rm(*frames)
+    if not kit:
+        return
+    # liniile acoperisurilor: elevatie ortografica din strada + din spate-sus
+    car.hide_render = True
+    xm = PITCH_X * (count - 1) * 0.5
+    frames = []
+    cam.data.type = "ORTHO"
+    cam.data.ortho_scale = 62.0
+    cam.location = Vector((xm, axis_y + 60.0, _street_h(xm) + 4.0))
+    cam.rotation_euler = Vector((0.0, -1.0, 0.0)).to_track_quat("-Z", "Y").to_euler()
+    bpy.context.view_layer.update()
+    p = os.path.join(FID_DIR, "_roof_elev.png")
+    scene.render.filepath = p
+    bpy.ops.render.render(write_still=True)
+    frames.append(p)
+    cam.data.type = "PERSP"
+    cam.data.angle = math.radians(50.0)
+    tgt = Vector((xm, -2.0, _street_h(xm) + 8.0))
+    cam.location = tgt + Vector((-26.0, -40.0, 26.0))
+    cam.rotation_euler = (tgt - cam.location).normalized().to_track_quat("-Z", "Y").to_euler()
+    bpy.context.view_layer.update()
+    p = os.path.join(FID_DIR, "_roof_back.png")
+    scene.render.filepath = p
+    bpy.ops.render.render(write_still=True)
+    frames.append(p)
+    _compose(["--stack", ",".join(frames), "--labels",
+              "elevatie din strada (ortografic),din spate-sus",
+              "--out", os.path.join(FID_DIR, "sf_row_kit_rooflines.png")])
     _rm(*frames)
 
 
@@ -475,6 +521,8 @@ if "--compare" in args:
     compare(args[args.index("--compare") + 1])
 elif "--views" in args:
     views(args[args.index("--views") + 1])
+elif "--kitrow" in args:
+    row(None, kit=True)
 elif "--row" in args:
     row(args[args.index("--row") + 1])
 elif "--all" in args:

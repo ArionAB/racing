@@ -1883,6 +1883,14 @@ const CLASSES_BY_MODEL := {
 	"sf_row_b_canted": SF_ROW_CLASSES, "sf_row_b_square": SF_ROW_CLASSES,
 	"sf_row_c_canted": SF_ROW_CLASSES, "sf_row_c_square": SF_ROW_CLASSES,
 	"sf_row_corner_turret": SF_ROW_CLASSES,
+	# Variantele `_m`: geometrie oglindita de-adevaratelea (o instanta cu
+	# scale.x = -1 iese pe dos in MultiMesh). Sunt fisiere separate, deci au
+	# nevoie de intrarea lor: fara ea `Row_Wall` ramanea pe atlas (masurat pe
+	# SfLoc: 68 de case `_m` fara pastel).
+	"sf_row_a_canted_m": SF_ROW_CLASSES, "sf_row_a_square_m": SF_ROW_CLASSES,
+	"sf_row_b_canted_m": SF_ROW_CLASSES, "sf_row_b_square_m": SF_ROW_CLASSES,
+	"sf_row_c_canted_m": SF_ROW_CLASSES, "sf_row_c_square_m": SF_ROW_CLASSES,
+	"sf_row_corner_turret_m": SF_ROW_CLASSES,
 	"blue_house_a": {
 		"House_Wall": Palette.TRI_PREFIX + "blue_lime_light",
 		"House_Rail": Palette.ATLAS_PREFIX, "House_Trim": Palette.ATLAS_PREFIX,
@@ -3744,10 +3752,16 @@ func _apply_wall_class() -> void:
 
 
 func _wall_class_of(model: Node) -> String:
+	# Urca pana la containerul `WorldProp` INCLUSIV: o metadata pusa pe nodul
+	# DecorManual insusi da pastelul tuturor caselor de sub el (masurat la
+	# pilotul de pe SfLoc: oprita la `n != self`, metadata de pe container era
+	# ignorata tacut).
 	var n: Node = model
-	while n != null and n != self:
+	while n != null:
 		if n.has_meta(WALL_CLASS_META):
 			return String(n.get_meta(WALL_CLASS_META))
+		if n == self:
+			break
 		n = n.get_parent()
 	return ""
 

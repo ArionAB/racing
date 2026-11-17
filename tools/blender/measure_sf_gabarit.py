@@ -19,9 +19,21 @@ urmeaza e ce citeste FIZICA jocului din fisier si verify nu vede:
   sf_median_block   EXACT 3,00 x 0,95 x 0,60 (+-0,01), min Y 0, centrat; un nod `MedianBlock`;
                     fetele laterale ale bazei VERTICALE (profilul in panta arunca masinile peste
                     bariera): talpa si umarul la |Z| 0,30, niciun varf de fata tras spre ax.
-  sf_row_b_canted   X +-3,5, fatada la Z -6,0 cu bovindoul pana la -6,9, spatele la +6,0, Y de la
-                    -2,4 la cel mult +12,6; exact nodurile `Row_Wall` si `Row_Trim`; nimic nu
-                    iese din planul fatadei sub +3,3 (scara e in nisa, nu pe trotuar).
+  sf_row_{a,b,c}_{canted,square} (+ `_m`, oglindite)
+                    X +-3,5, fatada la Z -6,0 cu bovindoul pana la -6,9, spatele la +6,0, Y de la
+                    -2,4; exact nodurile `Row_Wall` si `Row_Trim`; nimic nu iese din planul
+                    fatadei sub +3,3 (scara e in nisa, nu pe trotuar). Varful, pe familie (brief
+                    §3.2): B (fronton) cel mult +12,6; A (cornisa grea peste +9,6, 0,7 m) EXACT
+                    +10,3; C (fatada falsa) EXACT +10,8 — un varf exact prinde si o cornisa
+                    disparuta, nu doar una prea inalta.
+  sf_row_corner_turret, _m
+                    amprenta 9,0 x 12,0: X -4,5..+4,5 la pereti, Z -6,0 (fatada) .. +6,0, Y de la
+                    -2,4 la EXACT +15,0 (varful turnuletului). Turnuletul iese 0,866 din FIECARE
+                    fatada (octogon cu raza 1,6, doua varfuri pe planurile fatadelor), plus
+                    coroana si streasina conului 0,12: X- = -5,486 si Z- = -6,986 (+-0,02),
+                    din geometrie, nu din brief (brief-ul nu da iesirea turnuletului). La `_m`,
+                    X e oglindit (turnuletul pe +X). Nimic sub +3,3 nu iese din NICIUNA din cele
+                    doua fatade de strada (-Z si -X; la `_m` -Z si +X).
 
 Radacinile fara scala/rotatie/translatie la toate (memoria scala-glb-neaplicata-la-radacina).
 """
@@ -41,7 +53,26 @@ PIECES = {
     "sf_median_truck": "vehicles/sf_median_truck.glb",
     "sf_median_block": "props/sf_median_block.glb",
     "sf_row_b_canted": "buildings/sf_row_b_canted.glb",
+    "sf_row_b_canted_m": "buildings/sf_row_b_canted_m.glb",
 }
+# Variantele `_m` (oglindite de-adevaratelea, pentru MultiMesh-ul din CityFill: o instanta cu
+# scale.x = -1 iese pe dos acolo) au aceeasi amprenta, cu garajul pe -X.
+# Varful pe familie: ("max", y) = cel mult; ("eq", y) = exact.
+ROW_TOP = {"a": ("eq", 10.3), "b": ("max", 12.6), "c": ("eq", 10.8)}
+ROW_SPEC = {}
+for _fam in "abc":
+    for _bay in ("canted", "square"):
+        for _sfx in ("", "_m"):
+            _k = "sf_row_%s_%s%s" % (_fam, _bay, _sfx)
+            ROW_SPEC[_k] = dict(x=(-3.5, 3.5), top=ROW_TOP[_fam], z0=(-6.9, 0.02), street_x=0)
+TURRET_OUT = 5.486      # |X| al turnuletului: 4,5 - 0,612 + 1,478 + 0,12 (coroana/con)
+ROW_SPEC["sf_row_corner_turret"] = dict(x=(-TURRET_OUT, 4.5), top=("eq", 15.0),
+                                        z0=(-6.986, 0.02), street_x=-1)
+ROW_SPEC["sf_row_corner_turret_m"] = dict(x=(-4.5, TURRET_OUT), top=("eq", 15.0),
+                                          z0=(-6.986, 0.02), street_x=1)
+for _k in ROW_SPEC:
+    PIECES.setdefault(_k, "buildings/%s.glb" % _k)
+ROW_KEYS = tuple(ROW_SPEC)
 
 
 def _box(ps):
@@ -110,20 +141,35 @@ def check(key, path, report=True):
             bad.append("(profil) fata laterala a bazei nu e verticala de la 0 la +0,65 "
                        "(%d varfuri trase spre ax; talpa la 0,30: %s; umarul la 0,30: %s)"
                        % (len(slope), foot, shoulder))
-    elif key == "sf_row_b_canted":
+    elif key in ROW_KEYS:
+        sp = ROW_SPEC[key]
         _names(bad, nodes, ["Row_Wall", "Row_Trim"])
         (x0, x1), (y0, y1), (z0, z1) = b
-        for name, got, want, tol in (("X-", x0, -3.5, 0.01), ("X+", x1, 3.5, 0.01), ("Y-", y0, -2.4, 0.01),
-                                     ("Z- (bovindou)", z0, -6.9, 0.02), ("Z+ (spate)", z1, 6.0, 0.02)):
+        for name, got, want, tol in (("X-", x0, sp["x"][0], 0.01), ("X+", x1, sp["x"][1], 0.01),
+                                     ("Y-", y0, -2.4, 0.01),
+                                     ("Z- (bovindou/turnulet)", z0, sp["z0"][0], sp["z0"][1]),
+                                     ("Z+ (spate)", z1, 6.0, 0.02)):
             if not _near(got, want, tol):
                 bad.append("(amprenta) %s = %.3f, contract %.3f" % (name, got, want))
-        if y1 > 12.6 + 0.01:
-            bad.append("(amprenta) Y+ = %.3f, cel mult 12,6" % y1)
-        # sub +3,3 doar relief plat (brau, pilastrii nisei, rama garajului): cel mult 8 cm
+        mode, top = sp["top"]
+        if mode == "max" and y1 > top + 0.01:
+            bad.append("(amprenta) Y+ = %.3f, cel mult %.1f" % (y1, top))
+        if mode == "eq" and not _near(y1, top, 0.01):
+            bad.append("(amprenta) Y+ = %.3f, contract exact %.2f" % (y1, top))
+        # sub +3,3 doar relief plat (brau, pilastrii nisei, rama garajului, ancadramentele
+        # ferestrelor de parter ale coltului): cel mult 8 cm, pe fiecare fatada de strada
         low = [p for p in ps if p[1] < 3.3 - 1e-3 and p[2] < -6.08]
         if low:
             bad.append("(fatada) %d varfuri ies din planul fatadei sub +3,3 (max %.2f m), ex. %s"
                        % (len(low), max(-6.0 - p[2] for p in low), tuple(round(v, 3) for v in low[0])))
+        sx = sp["street_x"]
+        if sx:
+            wall = 4.5
+            low = [p for p in ps if p[1] < 3.3 - 1e-3 and sx * p[0] > wall + 0.08]
+            if low:
+                bad.append("(fatada laterala) %d varfuri ies din fatada %sX sub +3,3 (max %.2f m), ex. %s"
+                           % (len(low), "+" if sx > 0 else "-",
+                              max(sx * p[0] - wall for p in low), tuple(round(v, 3) for v in low[0])))
     if report:
         (x0, x1), (y0, y1), (z0, z1) = b
         print("%-18s X %.3f..%.3f  Y %.3f..%.3f  Z %.3f..%.3f  noduri %s  %s"
@@ -167,14 +213,28 @@ def sabotages(key):
             ("capul inaltat cu 5 cm", "aabb",
              lambda g, b: poke(g, b, node0(g), lambda p: p[1] > 0.94, lambda p: (p[0], p[1] + 0.05, p[2]))),
         ]
-    elif key == "sf_row_b_canted":
+    elif key in ROW_KEYS:
         out += [
             ("o treapta scoasa pe trotuar (0,5 m in fata fatadei, sub +3,3)", "fatada",
              lambda g, b: poke(g, b, "Row_Trim", lambda p: p[1] < 0.0 and p[2] < -5.9,
                                lambda p: (p[0], p[1], -6.5))),
             ("streasina iesita lateral cu 10 cm", "amprenta",
-             lambda g, b: poke(g, b, "Row_Trim", lambda p: p[0] > 3.49, lambda p: (p[0] + 0.1, p[1], p[2]))),
+             lambda g, b, xm=ROW_SPEC[key]["x"][1] - 0.01:
+             poke(g, b, "Row_Trim", lambda p: p[0] > xm, lambda p: (p[0] + 0.1, p[1], p[2]))),
         ]
+        sp = ROW_SPEC[key]
+        top = sp["top"][1]
+        if sp["top"][0] == "eq":
+            # A: cornisa grea; C: treapta aticului; colt: varful turnuletului
+            out.append(("varful (cornisa/atic/turnulet) inaltat cu 10 cm", "amprenta",
+                        lambda g, b, t=top: poke(g, b, "Row_Trim", lambda p: p[1] > t - 0.005,
+                                                 lambda p: (p[0], p[1] + 0.1, p[2]))))
+        if sp["street_x"]:
+            s_ = sp["street_x"]
+            out.append(("o treapta scoasa pe trotuarul strazii laterale (0,5 m)", "fatada laterala",
+                        lambda g, b, s_=s_: poke(g, b, "Row_Trim",
+                                                 lambda p: p[1] < 0.0 and s_ * p[0] > 4.4,
+                                                 lambda p: (s_ * 5.0, p[1], p[2]))))
     return out
 
 

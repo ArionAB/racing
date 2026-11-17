@@ -19,7 +19,7 @@ cars, petals), #739 (asset sheet, briefs).
 | `vehicles/cable_car.glb` | in game on both trams; AABB exactly 2.50 × 3.20 × 8.50 |
 | `structures/sf_bridge_*.glb` (9 pieces) | in game: 110 instances under `DecorManual/Pod`, no collision of their own |
 | `vehicles/sf_median_truck.glb`, `props/sf_median_block.glb` | in game through the new `truck_model` / `block_model` exports of `MovableMedianHazard` |
-| `buildings/sf_row_b_canted.glb` (house pilot) | modelled and measured on `SfLoc`; **v1 reads as a white house, v2 ordered** (see below) |
+| `buildings/sf_row_b_canted.glb` (house pilot) | v1 (in `pas7-hero`) read as a white house; **v2 accepted on branch `sanfrancisco/pas7b-case`**: pastel 39.8 % of house pixels on `SfLoc` (v1 17.5 %, code houses 31 %), with a truly mirrored `_m` variant |
 
 Track25 = San Francisco, B200 loop, ~2,571 m, lap ~82.8 s with 8 AI. The
 developer's feel test of the B200 loop, step 6 and step 7 is deferred to the end
@@ -37,11 +37,18 @@ of step 8. No iOS build since #723 (build 54) — **start one only when they ask
 
 ## Next steps
 
-1. **House pilot v2** (`sf_row_b_canted`): ground storey and gable field on
-   `Row_Wall`, slimmer white trim, AO per brief, plus a truly mirrored `_m`
-   variant. Target: pastel ≥ 28 % of house pixels on `SfLoc` (v1: 17.5 %, the
-   code houses of step 0: 31 %). Only then order the other six houses
-   (`sf_painted_row_kit.md` §3.2).
+1. **Put the house kit on Track25.** All seven houses, each with a truly
+   mirrored `_m` file, are done and accepted on `sanfrancisco/pas7b-case`
+   (14 GLBs; mixed kit on `SfLoc --glb=kit`: pastel 40.3 % of house pixels,
+   ΔV 0.349, ΔE 15.0, 16 materials). They are on no track yet. Rules measured
+   at the kit (brief §7 "Kitul complet"):
+   - mixing rule `KIT_SEQ` from `tools/sf_loc_decor.gd` (family changes at every
+     neighbour); the other hand uses the `_m` file, never `scale.x = −1`;
+   - **corner turrets cost sun on the chain** (85.4 % → 81.4 %, threshold 80 %):
+     place them only at the downhill end of a row or on the east side of the
+     N–S streets, and re-measure with `ProbeSfLight` before street trees (V4);
+   - facades A/B/C look alike below the roofline, and A and C are hard to tell
+     apart from the chase camera — a lever if the rows read repetitive.
 2. **Step 8 — kits, background, set dressing, sound.** Waves 2 and 3 are in
    `docs/asset_briefs/sanfrancisco_inventory.md` §6. Code that step 8 needs,
    found at the pilot:

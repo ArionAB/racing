@@ -84,8 +84,14 @@ check "structures/sf_bridge_walkway_8.glb" 600 --origin=waterline
 check "structures/sf_bridge_lamp.glb" 600 --origin=assembly
 
 echo
-echo "== kitul casei de rand (sf_painted_row_kit.md): pilotul =="
-check "buildings/sf_row_b_canted.glb" 2500 --origin=waterline
+echo "== kitul casei de rand (sf_painted_row_kit.md): sapte case + variantele _m =="
+for h in sf_row_a_canted sf_row_a_square sf_row_b_canted sf_row_b_square          sf_row_c_canted sf_row_c_square; do
+  check "buildings/$h.glb" 2500 --origin=waterline
+  check "buildings/${h}_m.glb" 2500 --origin=waterline
+done
+# coltul: 9 x 12 m, doua fatade si turnuletul (brief §8: <= 3.500)
+check "buildings/sf_row_corner_turret.glb" 3500 --origin=waterline
+check "buildings/sf_row_corner_turret_m.glb" 3500 --origin=waterline
 
 echo
 echo "== garzile de cote =="

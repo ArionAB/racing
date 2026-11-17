@@ -1763,6 +1763,69 @@ parcate (4,2 m) sunt refuzate de `BumpProp` (plafonul de 2 m), deci rămân stat
    subțire (nimic sub 0,10 m), AO pe perete ca în brief; ținta: pastel ≥ 28 % din pixelii caselor.
    Parterul de piatră din planșă rămâne la un parametru din `build_sf_row.py`.
 
+   **Pilotul v2 — ACCEPTAT (15 nov 2026, ramura `sanfrancisco/pas7b-case`).** Aceeași sondă,
+   aceleași cadre:
+
+   | | case din cod | pilot v1 | **pilot v2** | prag |
+   |---|---|---|---|---|
+   | pixeli de casă pe pastel | 31,0 % | 17,5 % | **39,8 %** | ținta ≥ 28 % |
+   | pixeli pe trim alb | 34,0 % | 38,0 % | 27,9 % | — |
+   | pixeli pe parterul de piatră | 1,8 % | 11,3 % | 0,6 % | — |
+   | ΔV soare/umbră | 0,325 | 0,392 | 0,353 | ≥ 0,28 |
+   | ΔE2000 minim | 15,0 | 15,0 | 15,0 | ≥ 10 |
+   | soare pe lanț | 85,1 % | 85,4 % | 85,4 % | ≥ 80 % |
+   | elevația fațadei (etaje + fronton): pastel / alb | — | 23,4 / 55,9 % | 45,1 / 34,3 % | ≥ 45 / ≤ 35 % |
+
+   Ce s-a schimbat: parterul și benzile frontonului pe `Row_Wall`, trim mai subțire (rame și
+   stâlpi 0,10 m, brâu 0,12, fără friză), AO-ul peretelui doar din ocluzia de deasupra (cel vechi
+   înnegrea colțurile lipite de trim și cobora toată fața la 0,62). 1.264 de triunghiuri.
+   `STYLE = STYLE_V1` în `build_sf_row.py` reface v1; `ground = "stone"` readuce parterul din
+   planșă. Kitul livrează și **`sf_row_b_canted_m.glb`**, geometrie oglindită de-adevăratelea.
+   Capturi: `img/sf_loc/pilot_v2_01…05.png` lângă `pilot_0N.png` (v1) și `loc_*.png` (cod).
+   Elevația se măsoară cu `tools/blender/measure_sf_row_facade.py` (raze orizontale din 2 în
+   2 cm, clasate pe nod și pe slot). **Celelalte șase case sunt comandate pe aceleași reguli.**
+
+   **Kitul complet — ACCEPTAT (15 nov 2026, `sanfrancisco/pas7b-case`).** Șapte case, fiecare cu
+   varianta `_m` (14 GLB-uri în `assets/models/sanfrancisco/buildings/`); pilotul a rămas
+   octet cu octet.
+
+   | casă | triunghiuri | vârf | elevație pastel / alb |
+   |---|---|---|---|
+   | `sf_row_a_canted` / `a_square` (Italianate, cornișă grea) | 1.390 / 1.394 | +10,3 | 46,1 / 33,6 · 53,1 / 26,7 |
+   | `sf_row_b_canted` / `b_square` (Queen Anne, fronton) | 1.264 / 1.264 | +12,6 | 45,1 / 34,3 · 53,9 / 27,3 |
+   | `sf_row_c_canted` / `c_square` (Stick, fațadă falsă) | 1.349 / 1.349 | +10,8 | 42,6 / 37,8 · 49,5 / 31,0 |
+   | `sf_row_corner_turret` (9 × 12 m, turnuleț) | 2.681 | +15,0 | 51,1 / 31,4 (−Z) · 63,9 / 24,5 (−X) |
+
+   Pe `SfLoc`, cu kitul amestecat (`--glb=kit`, aceeași sondă):
+
+   | | case din cod | pilot v2 | **kit** | prag |
+   |---|---|---|---|---|
+   | pixeli de casă pe pastel | 31,0 % | 39,8 % | **40,3 %** | ținta ≥ 28 % |
+   | ΔV soare/umbră | 0,325 | 0,353 | 0,349 | ≥ 0,28 |
+   | ΔE2000 minim | 15,0 | 15,0 | 15,0 | ≥ 10 |
+   | **soare pe lanț** | 85,1 % | 85,4 % | **81,4 %** | ≥ 80 % |
+   | materiale unice | 16 | 16 | 16 | ≤ 38 |
+   | triunghiuri, 136 de case | 103.640 | 171.904 | 192.528 | — |
+
+   - **Soarele pe lanț scade cu 4 puncte din cauza colțurilor**: turnulețul de 15 m, la soare jos,
+     aruncă umbra pe stradă în josul pantei (fără colțuri, kitul dă 86,5 %). Marja față de prag e
+     1,4 puncte. **La plasarea pe Track25: colțuri doar la capetele de vale ale rândurilor sau doar
+     pe latura de E a străzilor N–S**, și contractul se remăsoară cu `ProbeSfLight` înainte de
+     arborii de stradă (V4), care consumă din aceeași marjă.
+   - **Varietatea vine din linia acoperișurilor și din colțuri** (`img/sf_loc/kit_03.png`,
+     `img/sf_fidelity/sf_row_kit_rooflines.png`). La nivelul fațadei, A, B și C seamănă între ele
+     (același bovindou + pereche de ferestre), iar A și C se confundă din camera de joc: amândouă
+     au vârful plat, treapta aticului lui C e de 0,45 m.
+   - **Regula de amestec** (în `tools/sf_loc_decor.gd`, de copiat în generatorul pistei): tipul de
+     pe poziția `i` e `KIT_SEQ[(i + 2·idx + latura) % 6]`, cu `KIT_SEQ = [a_canted, b_square,
+     c_canted, a_square, b_canted, c_square]`, deci familia se schimbă la fiecare vecin. Casele de
+     pe latura cu garajul pe cealaltă mână iau fișierul `_m`, **niciodată `scale.x = −1`**. Colțul
+     stă doar la capătul de rând dinspre o intersecție, cu turnulețul spre ea.
+   - Abateri față de brief: colțul n-are garaj; cornișa lui A iese doar 0,10 m peste bovindou (ca
+     să rămână limita de −6,9); C are o treaptă la atic.
+   - `WorldProp.CLASSES_BY_MODEL` are acum și cele șapte nume `_m` (fără ele `Row_Wall` rămânea pe
+     atlas): 136/136 case pe pastelul cerut, pe calea jocului.
+
    **Găsit la pilot, pentru pasul 8:**
    - **oglindirea prin `scale.x = −1` merge pe instanță, NU în `MultiMesh`** (casa iese pe dos:
      `img/sf_loc/pilot_oglinda_fata.png`). `CityFill` are nevoie de mesh oglindit de-adevăratelea,

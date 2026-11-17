@@ -30,6 +30,7 @@
 #   measure_sf_street.py   mobilierul valului 2 (masinile parcate, semaforul, felinarul, piesele mici)
 #   measure_sf_plants.py   vegetatia valului 2 (chiparosii, arborele de strada, hortensiile, gradinita)
 #   measure_sf_struct.py   structurile valului 3 (placa turnanta, magaziile, insula, fundalul, scara, leii)
+#   measure_sf_pas8e.py    pasul 8e (poarta, pescarusii, papagalii, velierul, sirul de lampioane)
 
 set -u
 cd "$(dirname "$0")/../.." || exit 1
@@ -149,6 +150,23 @@ check "props/sf_stair_lane.glb" 400 --origin=waterline
 check "animals/sf_sea_lions.glb" 1800 --origin=waterline
 
 echo
+echo "== pasul 8e: poarta, pasarile, velierul, lampioanele (inventar §5.1 H5, §5.3 M9, §5.5 T2/T3) =="
+# build_sf_pas8e.py; garda de cote: measure_sf_pas8e.py. Exceptii declarate:
+#   --origin=assembly   poarta: cinci noduri (patru stalpi + Gate_Frame); doar stalpii ating Y = 0, cadrul
+#                       incepe la +3,93 prin constructie (nodurile separate dau hull doar pe stalpi).
+#   --origin=waterline  papagalul pe creanga (originea la gheare, coada ATARNA pana la -0,20) si velierul
+#                       (originea la linia apei, carena pana la -0,40): geometria INCALECA Y = 0.
+#   --origin=rim        sirul de lampioane: originea la prinderi (fata de sus a cablului), totul atarna.
+# Bugetele: poarta e hero, o instanta (~3k in inventar, 5,1k livrate); pasarile <= 150 (inventar T2).
+check "structures/sf_dragon_gate.glb" 6000 --origin=assembly
+check "animals/sf_gull_perch.glb" 150
+check "animals/sf_gull_glide.glb" 150
+check "animals/sf_parrot_perch.glb" 150 --origin=waterline
+check "animals/sf_parrot_fly.glb" 150
+check "vehicles/sf_sailboat.glb" 600 --origin=waterline
+check "props/sf_lantern_string.glb" 400 --origin=rim
+
+echo
 echo "== garzile de cote =="
 python tools/blender/measure_sf_bridge.py || fail=1
 st=$(python tools/blender/measure_sf_bridge.py --selftest 2>&1); rc=$?
@@ -172,6 +190,10 @@ python tools/blender/measure_sf_struct.py || fail=1
 st=$(python tools/blender/measure_sf_struct.py --selftest 2>&1); rc=$?
 printf '%s\n' "$st" | grep -E "SELFTEST"
 [ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei structurilor a esuat"; fail=1; }
+python tools/blender/measure_sf_pas8e.py || fail=1
+st=$(python tools/blender/measure_sf_pas8e.py --selftest 2>&1); rc=$?
+printf '%s\n' "$st" | grep -E "SELFTEST"
+[ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei pasului 8e a esuat"; fail=1; }
 
 echo
 echo "== GLB-uri nedeclarate (verificate fara exceptii) =="

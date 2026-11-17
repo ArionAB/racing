@@ -151,6 +151,39 @@ class_name CityFill
 ## regiunea, min_road_m, exclude_xz si row_mode se ignora.
 @export var explicit_xforms: PackedFloat32Array = PackedFloat32Array()
 
+## N TENTE DE PERETE (opt-in; gol = cele doua tente de dinainte, deschis / indigo dupa
+## `indigo_ratio`, Jodhpur si Kyoto neschimbate). San Francisco, pasul 8b: cele cinci pasteluri ale
+## casei de rand, aceeasi idee ca `WorldProp.WALL_CLASS_META` — numele claselor de perete, PRIMA fiind
+## clasa pe care modelul o poarta din `CLASSES_BY_MODEL` (baza, `sf_clapboard`). Fiecare casa ia o
+## singura clasa: din `explicit_wall` (randurile date de generator) sau trasa dupa `wall_weights`,
+## mereu alta decat a casei de dinainte (vecinul din sir).
+@export var wall_classes: PackedStringArray = PackedStringArray()
+@export var wall_weights: PackedFloat32Array = PackedFloat32Array()
+## PASTELUL PE INSTANTA (doar cu `wall_classes`): cand clasele difera DOAR prin tenta (aceeasi dala,
+## aceeasi scara triplanara — cazul `sf_clapboard*`), peretele fiecarui model e UN singur buffer pe
+## materialul bazei, iar pastelul vine din culoarea instantei (materialul are
+## `vertex_color_use_as_albedo`, deci culoarea instantei inmulteste albedo-ul): culoarea =
+## tenta clasei / tenta bazei, in spatiul liniar, adica exact albedo-ul clasei. Zero materiale noi si
+## de N ori mai putine buffere de perete. Daca vreo clasa difera si prin altceva decat tenta, se cade
+## singur pe un sablon per clasa (un buffer de perete pe model, clasa si celula).
+@export var wall_tint_per_instance: bool = true
+## KITUL OGLINDIT (opt-in; gol = comportamentul dinainte): pentru fiecare model din `models`, fisierul
+## lui oglindit DE-ADEVARATELEA (`_m`, aceeasi ordine; null = fara pereche). O instanta ceruta cu
+## determinant NEGATIV (scale.x = -1: „garajul pe cealalta mana") s-ar desena pe dos intr-un
+## MultiMesh (memoria `multimesh-oglindire-culling`); aici se deseneaza cu mesh-ul `_m` si cu
+## transformarea refacuta POZITIVA (axa X intoarsa inapoi), deci imaginea e aceeasi.
+@export var mirror_models: Array[PackedScene] = []
+## Clasa de perete a fiecarei instante explicite (indice in `wall_classes`, aceeasi ordine ca
+## `explicit_xforms`); gol = trasa dupa `wall_weights`.
+@export var explicit_wall: PackedInt32Array = PackedInt32Array()
+## Umbra aruncata a fiecarei instante explicite (1 = arunca prin `shadow_proxy`, 0 = nu); gol = toate
+## arunca. Randurile din spate departe de drum nu intra niciodata in cascada de umbra a camerei, dar
+## un buffer de umbra se deseneaza intreg daca ii atinge AABB-ul: scoase din el, nu costa nimic.
+@export var explicit_shadow: PackedInt32Array = PackedInt32Array()
+## Feliaza si instantele explicite pe `cell_m` (opt-in; false = o singura felie, ca pana acum):
+## pentru umpluturi explicite intinse pe tot orasul, nu pe o fasie.
+@export var explicit_cells: bool = false
+
 var stats := {}
 
 
@@ -192,8 +225,11 @@ func _trace(msg: String) -> void:
 func _build() -> void:
 	var track := _find_track()
 	if track == null:
-		push_warning("CityFill %s: nu gasesc pista" % name)
-		return
+		# Instantele explicite nu cer pista (doar generarea pe teren); sonda de tenta
+		# (tools/ProbeSfTenta.tscn) deseneaza umplutura pe o scena goala.
+		if explicit_xforms.is_empty():
+			push_warning("CityFill %s: nu gasesc pista" % name)
+			return
 	# Terenul trebuie sa fie in spatiul fizic inainte de raycast-uri.
 	await get_tree().physics_frame
 	var space := get_world_3d().direct_space_state
@@ -205,47 +241,126 @@ func _build() -> void:
 	else:
 		places = _generate_rows(track, space) if row_mode else _generate(track, space)
 	_trace("CityFill %s: %d places, templates..." % [name, places.size()])
-	var parts := await _templates()
+	# Lista de modele: `models`, apoi perechile oglindite (indicele `models.size() + i` = oglinda
+	# lui `models[i]`). Fara `mirror_models` lista e exact `models`.
+	var all_models: Array[PackedScene] = models.duplicate()
+	for i in models.size():
+		all_models.append(mirror_models[i] if i < mirror_models.size() else null)
+	# Modul de tenta: 0 = cele doua tente de dinainte; 1 = un sablon per clasa din `wall_classes`;
+	# 2 = pastelul pe instanta (un sablon, culoarea instantei pe perete).
+	var mode := 0
+	if not wall_classes.is_empty():
+		mode = 2 if wall_tint_per_instance and _tint_compatible() else 1
+	var wall_rgb: Array[Color] = []
+	var parts: Array
+	if mode == 0:
+		parts = await _templates([{}, {WorldProp.LIME_INDIGO_META: true}], models)
+	else:
+		# Doar modelele folosite (perechile `_m` nefolosite nu se instantiaza).
+		var used := {}
+		for p: Dictionary in places:
+			var m0: int = int(p["mi"]) if p.has("mi") else -1
+			if m0 >= 0:
+				used[m0] = true
+				if (p["xf"] as Transform3D).basis.determinant() < 0.0 and all_models[models.size() + m0] != null:
+					used[models.size() + m0] = true
+		if used.is_empty() or places.any(func(p: Dictionary) -> bool: return not p.has("mi")):
+			for i in all_models.size():
+				if all_models[i] != null:
+					used[i] = true
+		var variants: Array = [{}]
+		if mode == 1:
+			variants = []
+			for c in wall_classes:
+				variants.append({WorldProp.WALL_CLASS_META: c})
+		var list: Array[PackedScene] = []
+		for i in all_models.size():
+			list.append(all_models[i] if used.has(i) else null)
+		parts = await _templates(variants, list, mode == 2)
+		if mode == 2:
+			var base := Palette.triplanar_class_material(wall_classes[0]).albedo_color.srgb_to_linear()
+			for c in wall_classes:
+				var t := Palette.triplanar_class_material(c).albedo_color.srgb_to_linear()
+				wall_rgb.append(Color(t.r / maxf(base.r, 1e-4), t.g / maxf(base.g, 1e-4),
+					t.b / maxf(base.b, 1e-4), 1.0))
 	_trace("CityFill %s: templates done, batching" % name)
 	var groups := {}
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value + 7
+	var wrng := RandomNumberGenerator.new()
+	wrng.seed = seed_value + 11
 	var counts := PackedInt32Array()
-	counts.resize(models.size())
+	counts.resize(models.size() if mirror_models.is_empty() else all_models.size())
 	var indigo_n := 0
+	var per_wall := PackedInt32Array()
+	per_wall.resize(wall_classes.size())
+	var prev_wall := -1
+	var swapped := 0
+	var inside_out := 0
+	var casters := 0
 	for p: Dictionary in places:
 		var mi: int = int(p["mi"]) if p.has("mi") else _pick(rng)
-		var ind := rng.randf() < indigo_ratio
-		if ind:
-			indigo_n += 1
-		counts[mi] += 1
+		var variant := 0
+		var wi := 0
+		if mode == 0:
+			var ind := rng.randf() < indigo_ratio
+			if ind:
+				indigo_n += 1
+			variant = int(ind)
+		else:
+			wi = int(p["wall"]) if p.has("wall") else _pick_wall(wrng, prev_wall)
+			wi = clampi(wi, 0, wall_classes.size() - 1)
+			prev_wall = wi
+			per_wall[wi] += 1
+			variant = wi if mode == 1 else 0
+		var casts: bool = bool(p.get("shadow", true))
 		var xf: Transform3D = p["xf"]
 		if face_xz.z > 0.0:
 			xf = _faced(xf, mi)
+		if xf.basis.determinant() < 0.0:
+			# Mana cealalta: mesh-ul `_m` cu transformarea refacuta pozitiva.
+			if models.size() + mi < all_models.size() and all_models[models.size() + mi] != null:
+				mi += models.size()
+				xf.basis.x = -xf.basis.x
+				swapped += 1
+			else:
+				inside_out += 1
+		counts[mi] += 1
+		if casts:
+			casters += 1
 		var cell := Vector2i(floori(xf.origin.x / cell_m), floori(xf.origin.z / cell_m))
-		if not explicit_xforms.is_empty() and not _cell_forced 				and visibility_end_m <= 0.0:
+		if not explicit_xforms.is_empty() and not _cell_forced 				and visibility_end_m <= 0.0 and not explicit_cells:
 			# Randurile explicite sunt o fasie de cateva sute de metri langa
 			# drum: o singura felie (altfel axele x = 0 / z = 0 le taie in
 			# patru si dubleaza desenele fara castig de culling). Cu taiere pe
 			# distanta se felieaza: altfel fasia ar fi taiata toata odata.
 			cell = Vector2i.ZERO
 		for part: Dictionary in parts[mi]:
-			if part["variant"] != -1 and int(part["variant"]) != int(ind):
+			if part["variant"] != -1 and int(part["variant"]) != variant:
+				continue
+			if part.get("shadow", false) and not casts:
 				continue
 			var key := "%d|%d|%d|%d" % [mi, part["id"], cell.x, cell.y]
 			if not groups.has(key):
-				groups[key] = {"part": part, "xfs": [], "cell": cell, "model": mi}
+				groups[key] = {"part": part, "xfs": [], "cell": cell, "model": mi, "cols": []}
 			(groups[key]["xfs"] as Array).append(xf * (part["local"] as Transform3D))
+			if part.get("tint", false):
+				(groups[key]["cols"] as Array).append(wall_rgb[wi])
 	var batches := 0
 	var tris := 0
 	for key: String in groups:
 		var g: Dictionary = groups[key]
 		var part: Dictionary = g["part"]
 		var xfs: Array = g["xfs"]
+		var cols: Array = g["cols"]
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
+		# Culorile se cer INAINTE de numarul de instante (MultiMesh refuza altfel).
+		mm.use_colors = not cols.is_empty()
 		mm.mesh = part["mesh"]
 		mm.instance_count = xfs.size()
+		for i in cols.size():
+			mm.set_instance_color(i, cols[i])
 		# Nodul sta in centrul caselor lui, ca distanta de taiere sa se masoare
 		# de acolo si nu de la originea pistei.
 		var center := Vector3.ZERO
@@ -262,7 +377,7 @@ func _build() -> void:
 			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY \
 				if part.get("shadow", false) else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mmi.name = "CityFill_%s__p%d_%d_%d" % [
-			models[int(g["model"])].resource_path.get_file().get_basename(),
+			all_models[int(g["model"])].resource_path.get_file().get_basename(),
 			int(part["id"]), (g["cell"] as Vector2i).x, (g["cell"] as Vector2i).y]
 		mmi.multimesh = mm
 		mmi.material_override = part["material"]
@@ -277,9 +392,19 @@ func _build() -> void:
 	var rej: Dictionary = stats.get("rejected", {})
 	stats = {"below_road": stats.get("below_road", 0), "houses": places.size(), "indigo": indigo_n, "batches": batches, "centroid": cen, "rejected": rej,
 		"tris": tris, "ms": Time.get_ticks_msec() - t0, "per_model": counts}
-	print("CityFill %s: %d case (%d indigo, raport %.2f), %d buffere, %d tri, %d ms, centroid (%.0f, %.1f, %.0f), respinse %s" % [
-		name, places.size(), indigo_n, indigo_ratio, batches, tris, stats["ms"],
-		cen.x, cen.y, cen.z, str(stats.get("rejected", {}))])
+	if mode == 0:
+		print("CityFill %s: %d case (%d indigo, raport %.2f), %d buffere, %d tri, %d ms, centroid (%.0f, %.1f, %.0f), respinse %s" % [
+			name, places.size(), indigo_n, indigo_ratio, batches, tris, stats["ms"],
+			cen.x, cen.y, cen.z, str(stats.get("rejected", {}))])
+	else:
+		stats["per_wall"] = per_wall
+		stats["wall_mode"] = "instanta" if mode == 2 else "clasa"
+		stats["mirrored"] = swapped
+		stats["inside_out"] = inside_out
+		stats["casters"] = casters
+		print("CityFill %s: %d case, tente %s pe %s %s, %d oglindite pe `_m`, %d pe dos, %d arunca umbra, %d buffere, %d tri, %d ms" % [
+			name, places.size(), str(Array(wall_classes)), stats["wall_mode"], str(Array(per_wall)),
+			swapped, inside_out, casters, batches, tris, stats["ms"]])
 	_trace("CityFill %s: done, %d buffers, %d ms" % [name, batches, int(stats["ms"])])
 
 
@@ -292,7 +417,13 @@ func _explicit() -> Array:
 		var b := Basis(Vector3(f[i + 1], f[i + 2], f[i + 3]),
 			Vector3(f[i + 4], f[i + 5], f[i + 6]), Vector3(f[i + 7], f[i + 8], f[i + 9]))
 		var mi := clampi(int(f[i]), 0, models.size() - 1)
-		out.append({"mi": mi, "xf": Transform3D(b, Vector3(f[i + 10], f[i + 11], f[i + 12]))})
+		var d := {"mi": mi, "xf": Transform3D(b, Vector3(f[i + 10], f[i + 11], f[i + 12]))}
+		var k := out.size()
+		if k < explicit_wall.size():
+			d["wall"] = explicit_wall[k]
+		if k < explicit_shadow.size():
+			d["shadow"] = explicit_shadow[k] != 0
+		out.append(d)
 		i += 13
 	stats["rejected"] = {}
 	stats["below_road"] = 0
@@ -566,23 +697,29 @@ func _ground(space: PhysicsDirectSpaceState3D, track: Track, c: Vector2) -> floa
 	return NAN
 
 
-## Sabloanele: fiecare model de doua ori (deschis / indigo) sub un WorldProp
-## temporar copil al acestui nod — deci sub pista, cu tema reala (memoria
-## `decor-ready-inaintea-temei`) — si citite DUPA apelurile amanate.
-## Intoarce, per model, lista de parti {id, mesh, material, local, variant, tris};
-## `variant` = -1 (comuna), 0 (deschis), 1 (indigo).
-func _templates() -> Array:
+## Sabloanele: fiecare model o data pe VARIANTA (o varianta = metadatele puse pe instanta: azi
+## {} deschis si {indigo} pe Jodhpur, sau {wall_class} pe clasa) sub un WorldProp temporar copil
+## al acestui nod — deci sub pista, cu tema reala (memoria `decor-ready-inaintea-temei`) — si
+## citite DUPA apelurile amanate. Un model null in `list` nu se instantiaza (lista lui de parti e
+## goala). Intoarce, per model, lista de parti {id, mesh, material, local, variant, tris};
+## `variant` = -1 (comuna) sau indicele variantei. Cu `tint`, partile pe materialul clasei de baza
+## (`wall_classes[0]`) primesc `tint` (culoarea instantei).
+func _templates(variants: Array, list: Array[PackedScene], tint: bool = false) -> Array:
 	var holder := Node3D.new()
 	holder.name = "CityFillTemplates"
 	holder.set_script(load("res://scenes/props/world_prop.gd"))
 	holder.set("auto_collision", false)
 	var roots: Array = []
-	for m in models:
+	for m in list:
+		if m == null:
+			roots.append(null)
+			continue
 		var pair: Array = []
-		for v in 2:
+		for v in variants.size():
 			var inst := m.instantiate() as Node3D
-			if v == 1:
-				inst.set_meta(WorldProp.LIME_INDIGO_META, true)
+			var metas: Dictionary = variants[v]
+			for key: String in metas:
+				inst.set_meta(key, metas[key])
 			holder.add_child(inst)
 			pair.append(inst)
 		roots.append(pair)
@@ -590,27 +727,35 @@ func _templates() -> Array:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	var world := Palette.world_material()
+	var base_wall: Material = Palette.triplanar_class_material(wall_classes[0]) if tint else null
+	# Modul vechi (fara `wall_classes`) ramane octet cu octet: LOD-uri generate pe toate partile,
+	# atlasul unit mereu. Modul nou pastreaza LOD-urile importului unde mesh-ul e cel importat.
+	var keep_import := not wall_classes.is_empty()
 	var out: Array = []
 	for mi_idx in roots.size():
 		var parts: Array = []
+		if roots[mi_idx] == null:
+			out.append(parts)
+			continue
 		var atlas_st: ArrayMesh = null
 		var atlas_tris := 0
+		var atlas_src: Array = []      # [mesh, local] ale nodurilor de atlas (varianta 0)
 		var shadow_st: ArrayMesh = null
-		for v in 2:
+		for v in variants.size():
 			var root: Node3D = roots[mi_idx][v]
 			for mi in _meshes(root):
 				var local := _xf_to(mi, root)
 				var mat := mi.material_override
-				# Forma e aceeasi in ambele tente (difera doar materialul).
-				if shadow_proxy and v == 0 \
-						and mi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
+				# Forma e aceeasi in toate variantele (difera doar materialul).
+				if shadow_proxy and v == 0 						and mi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
 					for s in mi.mesh.get_surface_count():
 						var sh := SurfaceTool.new()
 						sh.append_from(mi.mesh, s, local)
 						shadow_st = sh.commit(shadow_st)
 				if mat == world or mat == null:
-					if v == 1:
-						continue # atlasul e comun celor doua tente
+					if v != 0:
+						continue # atlasul e comun tuturor variantelor
+					atlas_src.append([mi.mesh, local])
 					for s in mi.mesh.get_surface_count():
 						var st := SurfaceTool.new()
 						st.append_from(mi.mesh, s, local)
@@ -620,12 +765,25 @@ func _templates() -> Array:
 					var tr := 0
 					for s in mi.mesh.get_surface_count():
 						tr += _tris(mi.mesh, s)
-					parts.append({"id": parts.size() + 1, "mesh": mi.mesh,
-						"material": mat, "local": local, "variant": v, "tris": tr})
+					var part := {"id": parts.size() + 1, "mesh": mi.mesh,
+						"material": mat, "local": local, "variant": v, "tris": tr}
+					if tint and mat == base_wall:
+						part["tint"] = true
+					parts.append(part)
 		if generate_lods:
 			for part: Dictionary in parts:
+				if keep_import and _has_lods(part["mesh"]):
+					continue
 				part["mesh"] = _with_lods(part["mesh"])
-		if atlas_st != null:
+		if keep_import and atlas_src.size() == 1 and (atlas_src[0][0] as Mesh).get_surface_count() == 1:
+			# Un singur nod de atlas cu o singura suprafata: mesh-ul importului, cu LOD-urile lui,
+			# nu o copie unita (care le-ar pierde si ar trebui sa le genereze din nou).
+			var am: Mesh = atlas_src[0][0]
+			if generate_lods and not _has_lods(am):
+				am = _with_lods(am)
+			parts.append({"id": 0, "mesh": am, "material": world,
+				"local": atlas_src[0][1], "variant": -1, "tris": atlas_tris})
+		elif atlas_st != null:
 			# Atlasul vine din mai multe noduri (2 suprafete pe machiya a/b/d):
 			# unite, sunt un desen in loc de doua. Acelasi format, deci nimic nu
 			# se pierde la lipire.
@@ -638,6 +796,42 @@ func _templates() -> Array:
 		out.append(parts)
 	holder.queue_free()
 	return out
+
+
+## Are mesh-ul LOD-uri (ale importului sau generate)? Citirea trece prin registrul `MeshCpu`.
+func _has_lods(mesh: Mesh) -> bool:
+	for s in mesh.get_surface_count():
+		if MeshCpu.surface_lods(mesh, s).is_empty():
+			return false
+	return mesh.get_surface_count() > 0
+
+
+## Clasele din `wall_classes` difera DOAR prin tenta fata de prima (aceeasi dala, aceeasi proiectie)?
+## Atunci pastelul poate sta in culoarea instantei (vezi `wall_tint_per_instance`).
+func _tint_compatible() -> bool:
+	var base := Palette.triplanar_class_material(wall_classes[0])
+	for c in wall_classes:
+		var m := Palette.triplanar_class_material(c)
+		if m.albedo_texture != base.albedo_texture or m.uv1_scale != base.uv1_scale 				or m.uv1_triplanar != base.uv1_triplanar 				or m.uv1_world_triplanar != base.uv1_world_triplanar 				or m.uv1_triplanar_sharpness != base.uv1_triplanar_sharpness 				or m.roughness != base.roughness or m.metallic_specular != base.metallic_specular 				or m.texture_filter != base.texture_filter or not m.vertex_color_use_as_albedo 				or m.albedo_color.a != base.albedo_color.a:
+			return false
+	return true
+
+
+## Clasa de perete a casei urmatoare dupa `wall_weights` (egale daca lipsesc), alta decat `prev`.
+func _pick_wall(rng: RandomNumberGenerator, prev: int) -> int:
+	var n := wall_classes.size()
+	var total := 0.0
+	for i in n:
+		if i != prev:
+			total += wall_weights[i] if wall_weights.size() == n else 1.0
+	var r := rng.randf() * total
+	for i in n:
+		if i == prev:
+			continue
+		r -= wall_weights[i] if wall_weights.size() == n else 1.0
+		if r <= 0.0:
+			return i
+	return (prev + 1) % n
 
 
 ## Toate suprafetele intr-una singura (= un desen). `commit` pe acelasi

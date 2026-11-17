@@ -57,6 +57,11 @@ const TRUNK_RADIUS := {
 	# pinul are baza evazata, r 1,35 la y < 1, dar trunchiul real e ~0,7).
 	"fukugi_tree_a": 0.25, "fukugi_tree_b": 0.25, "fukugi_tree_c": 0.25,
 	"ryukyu_pine": 0.7, "fan_palm": 0.35, "convex_mirror": 0.1,
+	# San Francisco, valul 2: coroana chiparosului are 10-13 m (AABB-ul ar da un stalp de
+	# 3 m); raza pe trunchiul de la baza (O 1,76-2,34 cu contraforturi, measure_sf_plants.py).
+	# Stalpii si arborele de strada: raza fusului (O 0,35 / 0,25 / ~0,4).
+	"sf_cypress_a": 0.75, "sf_cypress_b": 0.9, "sf_cypress_c": 0.7,
+	"sf_signal_mast": 0.2, "sf_street_lamp": 0.14, "sf_street_tree": 0.2,
 }
 
 ## Numele metadatei prin care o INSTANTA anume iese din regula generala.
@@ -80,6 +85,11 @@ const COLLISION_META := "coliziune"
 ##          care se agata masina)
 ##   none   fantoma — ce ar strica cursa daca ar opri masina
 const PROP_COLLISION := {
+	# San Francisco, valul 2 (inventar §5.3-§5.4): stalpii si copacii au cilindru pe fus.
+	# Generatorul (gen_sf_route.py) le stinge PE INSTANTA (`coliziune = "none"`) pe cele de
+	# langa carosabil pana se masoara ce face un stalp tare pe o muchie.
+	"sf_signal_mast": "trunk", "sf_street_lamp": "trunk", "sf_street_tree": "trunk",
+	"sf_cypress_a": "trunk", "sf_cypress_b": "trunk", "sf_cypress_c": "trunk",
 	# --- se trece PRIN ele ------------------------------------------------
 	"ice_grotto_arch": "mesh",       # tunelul scurt de la POI D
 	# Ha Long: masivul cu grota marina, tunelul de ~85 m sapat pe axa soselei
@@ -932,6 +942,13 @@ const ACCENT_HOLDS_CLASS := {
 const SF_ROW_CLASSES := {
 	"Row_Wall": Palette.TRI_PREFIX + "sf_clapboard",
 	"Row_Trim": Palette.ATLAS_PREFIX,
+}
+
+## Chiparosii de Monterey San Francisco (valul 2, inventar V1): coroana punctata,
+## ca artarii Kyoto (trunchiul pe atlas, masa de departe ascunsa de aproape).
+const SF_CYPRESS_CLASSES := {
+	"Cypress_Trunk": Palette.ATLAS_PREFIX, "Cypress_Crown": Palette.CROWN_PREFIX,
+	"Cypress_Core": Palette.CORE_PREFIX, "Cypress_Leaves": Palette.LEAF_PREFIX,
 }
 
 ## Cheia e numele fisierului .glb (fara extensie); valoarea, o mapare
@@ -1891,6 +1908,12 @@ const CLASSES_BY_MODEL := {
 	"sf_row_b_canted_m": SF_ROW_CLASSES, "sf_row_b_square_m": SF_ROW_CLASSES,
 	"sf_row_c_canted_m": SF_ROW_CLASSES, "sf_row_c_square_m": SF_ROW_CLASSES,
 	"sf_row_corner_turret_m": SF_ROW_CLASSES,
+	# Valul 2 San Francisco: chiparosii (V1) si arborele de strada (V4), coroana punctata.
+	"sf_cypress_a": SF_CYPRESS_CLASSES, "sf_cypress_b": SF_CYPRESS_CLASSES,
+	"sf_cypress_c": SF_CYPRESS_CLASSES,
+	"sf_street_tree": {"StreetTree_Trunk": Palette.ATLAS_PREFIX,
+		"StreetTree_Crown": Palette.CROWN_PREFIX, "StreetTree_Core": Palette.CORE_PREFIX,
+		"StreetTree_Leaves": Palette.LEAF_PREFIX},
 	"blue_house_a": {
 		"House_Wall": Palette.TRI_PREFIX + "blue_lime_light",
 		"House_Rail": Palette.ATLAS_PREFIX, "House_Trim": Palette.ATLAS_PREFIX,

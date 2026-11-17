@@ -149,6 +149,9 @@ var _empty: bool = false
 ## `--no-leaves`: scoate covorul de frunze (Kyoto) inainte de numarare — linia de
 ## baza a materialelor fara el, ca sa se vada cat adauga.
 var _no_leaves: bool = false
+## `--list-materials`: tipareste materialele distincte ale fiecarei piste (clasa / shader / textura),
+## ca un „+N materiale" sa se poata citi pe nume (San Francisco, valul 2, nov 2026).
+var _list_mats: bool = false
 
 
 func _initialize() -> void:
@@ -158,6 +161,8 @@ func _initialize() -> void:
 			only = int(arg.trim_prefix("--track="))
 		elif arg == "--no-leaves":
 			_no_leaves = true
+		elif arg == "--list-materials":
+			_list_mats = true
 	# Limita de sus se MUTA la fiecare pista noua, si de fiecare data cineva o
 	# uita: cu `range(1, 20)` un `--track=20` nu gasea nicio pista, apoi la fel
 	# cu 21. Acum 23, pentru Track22 (Ha Long, 15 oct 2026) — garda de materiale
@@ -205,6 +210,27 @@ func _process(_delta: float) -> bool:
 	_track = null
 	_index += 1
 	return false
+
+
+## Un nume lizibil pentru un material (`--list-materials`).
+static func _describe_mat(mat: Material) -> String:
+	if mat == null:
+		return "(niciun material)"
+	if mat == Palette.world_material():
+		return "materialul lumii (atlas)"
+	var bits: Array[String] = [mat.get_class()]
+	if not mat.resource_name.is_empty():
+		bits.append("'%s'" % mat.resource_name)
+	if mat is ShaderMaterial and (mat as ShaderMaterial).shader != null:
+		bits.append((mat as ShaderMaterial).shader.resource_path.get_file())
+	if mat is BaseMaterial3D:
+		var bm := mat as BaseMaterial3D
+		if bm.albedo_texture != null:
+			bits.append(bm.albedo_texture.resource_path.get_file())
+		bits.append("albedo #%s" % bm.albedo_color.to_html(false))
+		if bm.vertex_color_use_as_albedo:
+			bits.append("vertex_color")
+	return " ".join(bits)
 
 
 ## E nodul un descendent al containerului de decor manual (DecorManual)?
@@ -279,6 +305,8 @@ func _measure(path: String, track: Node) -> Dictionary:
 		if mat == world_mat:
 			on_atlas += count
 		var key := mat.get_instance_id() if mat != null else 0
+		if _list_mats and not all_mats.has(key):
+			print("  [material] %s  <- %s" % [_describe_mat(mat), String(node.get_path()).get_slice("/", 3) + "/.../" + String(node.name)])
 		all_mats[key] = true
 		var mesh_tris := 0
 		if mesh != null:

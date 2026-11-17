@@ -44,6 +44,12 @@ var _overlaps: Array[float] = [0.4, 1.0, 1.8]
 var _cars: Array[int] = []
 var _speed: float = 30.0
 var _woken: int = 0
+## Valul 2 (nov 2026): `--kind=N` (caroseria lovita: 0 sedan, 1 break, 2 duba; implicit 0), `--glb`
+## (modelele `sf_parked_*.glb` in locul placeholderului din cutii) si `--boxes` (tipareste cutia de
+## coliziune pe care BumpProp o scoate din fiecare caroserie si iese: dovada ca modelele au acelasi
+## gabarit ca placeholderul).
+var _kind: int = 0
+var _glb: bool = false
 
 
 func _ready() -> void:
@@ -61,11 +67,19 @@ func _ready() -> void:
 				_cars.append(int(s))
 		elif arg.begins_with("--speed="):
 			_speed = float(arg.trim_prefix("--speed="))
+		elif arg.begins_with("--kind="):
+			_kind = int(arg.trim_prefix("--kind="))
+		elif arg == "--glb":
+			_glb = true
 	if _cars.is_empty():
 		for i in GameState.CAR_DATA.size():
 			_cars.append(i)
 	add_child(_ground())
 	await get_tree().physics_frame
+	if "--boxes" in OS.get_cmdline_user_args():
+		await _boxes()
+		get_tree().quit(0)
+		return
 	print("")
 	print("=== MASINI PARCATE — lovitura la %.0f m/s, masina parcata perpendiculara, botul intrat in banda ===" % _speed)
 	print("  masina        masa_m | masa_p  intrat | pierdere_s  v_dupa/v0  yaw_dupa  ejectat | aruncata_m  v_max_p")
@@ -95,6 +109,35 @@ func _ready() -> void:
 	get_tree().quit(0 if _woken > 0 else 1)
 
 
+## `--boxes`: cutia de coliziune a fiecarei caroserii (placeholder, sau `--glb`), asa cum o scoate
+## BumpProp din AABB-ul modelului: dimensiuni, centru (in spatiul corpului), masa.
+func _boxes() -> void:
+	print("=== MASINI PARCATE — cutiile de coliziune (%s) ===" % ("modelele GLB" if _glb else "placeholderul"))
+	for kind in 3:
+		var parked = ParkedCar.new()
+		parked.body_kind = kind
+		parked.set("use_glb", _glb)
+		parked.mass_kg = 70.0
+		parked.go_home = false
+		parked.snap_to_ground = false
+		parked.transform = Transform3D(Basis.IDENTITY, Vector3(20.0 * kind, 0.0, 40.0))
+		add_child(parked)
+		for _f in 3:
+			await get_tree().physics_frame
+		for c in parked.get_children():
+			if c is RigidBody3D:
+				var rb := c as RigidBody3D
+				var aabb := Track.model_aabb(rb.get_child(0) as Node3D) if rb.get_child_count() > 0 else AABB()
+				for s in rb.get_children():
+					if s is CollisionShape3D and (s as CollisionShape3D).shape is BoxShape3D:
+						var cs := s as CollisionShape3D
+						var sz := (cs.shape as BoxShape3D).size
+						print("  caroseria %d: cutie %.3f x %.3f x %.3f m, centru (%.3f, %.3f, %.3f), masa %.0f kg | AABB model %.3f x %.3f x %.3f, z %.3f..%.3f" % [
+							kind, sz.x, sz.y, sz.z, cs.position.x, cs.position.y, cs.position.z, rb.mass,
+							aabb.size.x, aabb.size.y, aabb.size.z, aabb.position.z, aabb.end.z])
+		parked.queue_free()
+
+
 func _ground() -> StaticBody3D:
 	var b := StaticBody3D.new()
 	var cs := CollisionShape3D.new()
@@ -115,6 +158,8 @@ func _run(ci: int, mass: float, overlap: float) -> Dictionary:
 	var body: RigidBody3D = null
 	if mass > 0.0:
 		parked = ParkedCar.new()
+		parked.body_kind = _kind
+		parked.set("use_glb", _glb)
 		parked.mass_kg = mass
 		parked.go_home = false
 		parked.snap_to_ground = false

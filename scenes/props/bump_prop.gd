@@ -72,6 +72,11 @@ var _home_pending: bool = false
 ##   "max_height"  la fel, plafonul de inaltime (m) in locul celor 1,8 m: duba parcata din foaia
 ##           de assets San Francisco. Masurat cu tools/ProbeBumpTall.tscn (piesa de 2,4 m lovita
 ##           la 30 m/s): vezi antetul sondei.
+##   "box"   AABB-ul (in spatiul propriu al modelului, fara scara) din care se scoate cutia, in
+##           locul celui masurat pe model: un GABARIT de contract, cand modelul vizual se schimba
+##           dar coliziunea trebuie sa ramana cea masurata (masinile parcate San Francisco, valul
+##           2: modelele GLB inlocuiesc placeholderul, iar contactele pasului 6 sunt pe cutiile
+##           lui — tools/ProbeSfParked.tscn --boxes).
 static func wrap(model: Node3D, opts: Dictionary = {}) -> BumpProp:
 	# In editor (Track e @tool) nu: fara simulare, corpul ar fi doar zgomot in
 	# arbore, iar scriptul asta nu ruleaza acolo.
@@ -89,6 +94,8 @@ static func wrap(model: Node3D, opts: Dictionary = {}) -> BumpProp:
 		Vector3.ZERO)
 	var aabb := Track.model_aabb(model)
 	model.transform = saved
+	if opts.has("box"):
+		aabb = Transform3D(Basis.from_scale(saved.basis.get_scale()), Vector3.ZERO) * (opts["box"] as AABB)
 	var max_foot := float(opts.get("max_footprint", MAX_FOOTPRINT_M))
 	var max_h := float(opts.get("max_height", MAX_HEIGHT_M))
 	if aabb.size.y <= 0.01 or aabb.size.y > max_h \
@@ -113,6 +120,8 @@ func _setup(model: Node3D, opts: Dictionary = {}) -> void:
 	collision_mask = 1 | LAYER
 	# Cutia se masoara in spatiul CORPULUI: modelul e copilul lui acum.
 	var aabb := Track.model_aabb(model)
+	if opts.has("box"):
+		aabb = model.transform * (opts["box"] as AABB)
 	var box := BoxShape3D.new()
 	# Putin sub vizual, ca sa nu se agate de colturi invizibile, si cu talpa
 	# ridicata cu SPAWN_LIFT_M: piesele sunt asezate pe teren cu talpa la cota

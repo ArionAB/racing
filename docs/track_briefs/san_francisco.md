@@ -2450,8 +2450,8 @@ parcate (4,2 m) sunt refuzate de `BumpProp` (plafonul de 2 m), deci rămân stat
    **Ce se citește și ce nu** (capturile `p8e_asezat_*`):
    - poarta: da, de la 60–80 m, cu lampioanele (`poarta_60`, `poarta_40`); la 26 m e în afara cadrului;
    - pescărușii de pe acoperișurile magaziilor: da, albi pe lemnul maro și pe pâclă (`pescarusi_chei`);
-     cei de pe stâlpii pontonului: da, mici (`barci_ponton`); cei de pe parapetul podului: vezi
-     `pescarusi_capdepod`;
+     cei de pe stâlpii pontonului: da, mici (`barci_ponton`); cei de pe parapetul capului de pod: **abia**, câteva
+     puncte albe pe roșu la ~20 m (`pescarusi_capdepod`); cei în zbor peste strâmtoare nu se disting;
    - **papagalii: la scara modelului (0,9–1,15) pe bănci erau puncte cu roșu; la 1,5–1,7 se citesc ca
      papagali** (corp verde, cap roșu); am lăsat 1,6–1,8 (`SF_PAPAGAL_SCARA`). Cei de pe coame se văd
      ca un punct roșu pe creastă; **cei în zbor nu intră în cadrul camerei de joc** pe strada coamei

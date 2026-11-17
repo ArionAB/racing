@@ -102,6 +102,19 @@ extends Node3D
 ## l-ai ratat. 0 = beton dur.
 @export var block_soft_crush_s: float = 0.6
 
+@export_group("Model")
+## Modelul utilajului (`sf_median_truck.glb`): fata pe -Z, originea la baza, tot
+## in gabaritul `truck_size`. Se instantiaza rotit cu -90 de grade, ca -Z din GLB
+## sa cada pe +X local (sensul de mers). Gol = cutia gri placeholder. COLIZIUNEA
+## si citirea AI-ului raman pe `truck_size` in ambele cazuri: modelul e doar
+## vizual (contractele de la pasii 1d si 2b sunt masurate pe cutie).
+@export var truck_model: PackedScene = null
+## Modelul blocului (`sf_median_block.glb`): lungimea pe X (= `block_len`),
+## originea la baza. Se ia primul mesh din fisier si se pune in MultiMesh, pe
+## atlasul lumii. Gol = BoxMesh placeholder. Coliziunea ramane cutia de
+## `block_collision_height`.
+@export var block_model: PackedScene = null
+
 @export_group("AI")
 ## AI-ul citeste culoarul liber curent. Implicit stins.
 @export var ai_reads_corridor: bool = false
@@ -125,6 +138,9 @@ var _block_z: PackedFloat32Array = PackedFloat32Array()
 var _block_yaw: PackedFloat32Array = PackedFloat32Array()
 var _mm: MultiMesh = null
 var _mm_fixed_first: int = 0
+## Cat se ridica instanta vizuala a blocului peste corpul lui: jumatate de
+## inaltime la BoxMesh (origine in centru), 0 la model (origine la baza).
+var _block_mesh_lift: float = 0.0
 var _truck: AnimatableBody3D = null
 var _static_s_t: float = 0.0
 var _prev_win := Vector2i(0, -1)
@@ -208,17 +224,26 @@ func _block_count() -> int:
 func _build() -> void:
 	var n := _block_count()
 	var n_fixed := int(ceil(approach_m / block_len)) * 2
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.62, 0.62, 0.6)
-	var bm := BoxMesh.new()
-	bm.size = Vector3(block_len + 0.1, block_height, block_width)
-	bm.material = mat
+	var block_mesh := _model_mesh(block_model)
 	_mm = MultiMesh.new()
 	_mm.transform_format = MultiMesh.TRANSFORM_3D
-	_mm.mesh = bm
-	_mm.instance_count = n + n_fixed
 	var mmi := MultiMeshInstance3D.new()
 	mmi.name = "Blocuri"
+	if block_mesh != null:
+		# Mesh-ul importat isi pastreaza LOD-urile (nu se reconstruieste din
+		# arrays); materialul e atlasul lumii, deja numarat pe pista.
+		_mm.mesh = block_mesh
+		_block_mesh_lift = 0.0
+		mmi.material_override = Palette.world_material()
+	else:
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color(0.62, 0.62, 0.6)
+		var bm := BoxMesh.new()
+		bm.size = Vector3(block_len + 0.1, block_height, block_width)
+		bm.material = mat
+		_mm.mesh = bm
+		_block_mesh_lift = block_height * 0.5
+	_mm.instance_count = n + n_fixed
 	mmi.multimesh = _mm
 	add_child(mmi)
 	var pmat := PhysicsMaterial.new()
@@ -271,10 +296,26 @@ func _build() -> void:
 				fixed.add_child(cs)
 			var idx := n + (0 if side < 0.0 else nf) + k
 			_mm.set_instance_transform(idx, Transform3D(Basis.IDENTITY,
-				Vector3(s, block_height * 0.5 - 0.05, 0.0)))
+				Vector3(s, _block_mesh_lift - 0.05, 0.0)))
 	if truck_enabled and not static_center:
 		_build_truck()
 		_place_truck()
+
+
+## Primul mesh dintr-un GLB (sau null): blocul e un singur nod-mesh.
+func _model_mesh(scene: PackedScene) -> Mesh:
+	if scene == null:
+		return null
+	var inst := scene.instantiate()
+	var found: Mesh = null
+	var stack: Array[Node] = [inst]
+	while not stack.is_empty() and found == null:
+		var node: Node = stack.pop_back()
+		if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+			found = (node as MeshInstance3D).mesh
+		stack.append_array(node.get_children())
+	inst.free()
+	return found
 
 
 func _block_xform(s: float, z: float, yaw: float) -> Transform3D:
@@ -290,7 +331,7 @@ func _place_block(k: int, s: float, s_t: float, force: bool) -> bool:
 	_block_yaw[k] = yaw
 	var xf := _block_xform(s, z, yaw)
 	_blocks[k].transform = xf
-	_mm.set_instance_transform(k, xf.translated_local(Vector3(0.0, block_height * 0.5, 0.0)))
+	_mm.set_instance_transform(k, xf.translated_local(Vector3(0.0, _block_mesh_lift, 0.0)))
 	return true
 
 
@@ -309,6 +350,17 @@ func _build_truck() -> void:
 	cs.shape = box
 	cs.position = Vector3(0.0, truck_size.y * 0.5 + 0.05, 0.0)
 	_truck.add_child(cs)
+	if truck_model != null:
+		var model := truck_model.instantiate() as Node3D
+		if model != null:
+			model.name = "Model"
+			# -Z din GLB pe +X local. Utilajul are cabina la ambele capete, deci
+			# intoarcerea cu 180 de grade de la capete nu se vede.
+			model.rotation.y = -PI * 0.5
+			Palette.apply_world_material(model)
+			_truck.add_child(model)
+			add_child(_truck)
+			return
 	var mi := MeshInstance3D.new()
 	var bm := BoxMesh.new()
 	bm.size = box.size

@@ -8,6 +8,19 @@
 [ext_resource type="PackedScene" path="res://scenes/hazards/MovableMedian.tscn" id="6_median"]
 [ext_resource type="Script" path="res://scenes/props/sf_hydrangea_petals.gd" id="8_petals"]
 [ext_resource type="Script" path="res://scenes/props/sf_parked_car.gd" id="7_parked"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/vehicles/cable_car.glb" id="p7_tram"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/structures/sf_bridge_tower.glb" id="p7_pod_tower"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/structures/sf_bridge_deck_8.glb" id="p7_pod_deck_8"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/structures/sf_bridge_parapet_8.glb" id="p7_pod_parapet_8"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/structures/sf_bridge_flares.glb" id="p7_pod_flares"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/structures/sf_bridge_cable_main.glb" id="p7_pod_cable_main"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/structures/sf_bridge_cable_side.glb" id="p7_pod_cable_side"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/structures/sf_bridge_anchor.glb" id="p7_pod_anchor"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/structures/sf_bridge_walkway_8.glb" id="p7_pod_walkway_8"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/structures/sf_bridge_lamp.glb" id="p7_pod_lamp"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/vehicles/sf_median_truck.glb" id="p7_camion"]
+[ext_resource type="PackedScene" path="res://assets/models/sanfrancisco/props/sf_median_block.glb" id="p7_bloc"]
+[ext_resource type="Script" path="res://scenes/props/world_prop.gd" id="p7_worldprop"]
 
 [sub_resource type="Curve3D" id="Curve3D_sf"]
 closed = true
@@ -79,22 +92,11 @@ size = Vector3(0.40, 2.10, 1.82)
 [sub_resource type="StandardMaterial3D" id="Mat_pod_gri"]
 albedo_color = Color(0.62, 0.62, 0.6, 1)
 
-[sub_resource type="StandardMaterial3D" id="Mat_pod_rosu"]
-albedo_color = Color(0.73, 0.21, 0.13, 1)
-
 [sub_resource type="BoxShape3D" id="Box_pod_parapet"]
 size = Vector3(224.000, 1.200, 0.500)
 
-[sub_resource type="BoxMesh" id="Mesh_pod_parapet"]
-size = Vector3(224.000, 1.200, 0.500)
-material = SubResource("Mat_pod_gri")
-
 [sub_resource type="BoxShape3D" id="Box_pod_flare"]
 size = Vector3(10.000, 1.200, 0.500)
-
-[sub_resource type="BoxMesh" id="Mesh_pod_flare"]
-size = Vector3(10.000, 1.200, 0.500)
-material = SubResource("Mat_pod_gri")
 
 [sub_resource type="BoxShape3D" id="Box_pod_cap_baza"]
 size = Vector3(80.000, 4.300, 0.600)
@@ -113,16 +115,8 @@ material = SubResource("Mat_pod_gri")
 [sub_resource type="BoxShape3D" id="Box_pod_leg"]
 size = Vector3(3.000, 75.000, 3.000)
 
-[sub_resource type="BoxMesh" id="Mesh_pod_leg"]
-size = Vector3(3.000, 75.000, 3.000)
-material = SubResource("Mat_pod_rosu")
-
 [sub_resource type="BoxShape3D" id="Box_pod_beam"]
 size = Vector3(2.400, 2.400, 32.000)
-
-[sub_resource type="BoxMesh" id="Mesh_pod_beam"]
-size = Vector3(2.400, 2.400, 32.000)
-material = SubResource("Mat_pod_rosu")
 
 [sub_resource type="SphereMesh" id="Mesh_hortensie"]
 radius = 1.0
@@ -756,6 +750,8 @@ pitch_to_ground = true
 ai_branch_reach_m = 0.0
 placeholder_color = Color(0.55, 0.55, 0.55, 1)
 placeholder_nose_color = Color(0.42, 0.42, 0.42, 1)
+model = ExtResource("p7_tram")
+model_yaw = 0.0
 
 [node name="Tramvai2" type="Path3D" parent="Tramvaie"]
 curve = SubResource("Curve3D_tram2")
@@ -776,6 +772,8 @@ pitch_to_ground = true
 ai_branch_reach_m = 35.0
 placeholder_color = Color(0.55, 0.55, 0.55, 1)
 placeholder_nose_color = Color(0.42, 0.42, 0.42, 1)
+model = ExtResource("p7_tram")
+model_yaw = 0.0
 
 [node name="Pod" type="Node3D" parent="."]
 
@@ -785,49 +783,25 @@ placeholder_nose_color = Color(0.42, 0.42, 0.42, 1)
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 370.00000, 20.55000, -241.07641)
 shape = SubResource("Box_pod_parapet")
 
-[node name="ParapetNordM" type="MeshInstance3D" parent="Pod/Parapet"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 370.00000, 20.55000, -241.07641)
-mesh = SubResource("Mesh_pod_parapet")
-
 [node name="EvazareNordV" type="CollisionShape3D" parent="Pod/Parapet"]
 transform = Transform3D(-0.93969, 0.00000, 0.34202, 0.00000, 1.00000, 0.00000, -0.34202, 0.00000, -0.93969, 253.30154, 20.55000, -242.78651)
 shape = SubResource("Box_pod_flare")
-
-[node name="EvazareNordVM" type="MeshInstance3D" parent="Pod/Parapet"]
-transform = Transform3D(-0.93969, 0.00000, 0.34202, 0.00000, 1.00000, 0.00000, -0.34202, 0.00000, -0.93969, 253.30154, 20.55000, -242.78651)
-mesh = SubResource("Mesh_pod_flare")
 
 [node name="EvazareNordE" type="CollisionShape3D" parent="Pod/Parapet"]
 transform = Transform3D(0.93969, 0.00000, 0.34202, 0.00000, 1.00000, 0.00000, -0.34202, 0.00000, 0.93969, 486.69846, 20.55000, -242.78651)
 shape = SubResource("Box_pod_flare")
 
-[node name="EvazareNordEM" type="MeshInstance3D" parent="Pod/Parapet"]
-transform = Transform3D(0.93969, 0.00000, 0.34202, 0.00000, 1.00000, 0.00000, -0.34202, 0.00000, 0.93969, 486.69846, 20.55000, -242.78651)
-mesh = SubResource("Mesh_pod_flare")
-
 [node name="ParapetSud" type="CollisionShape3D" parent="Pod/Parapet"]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 370.00000, 20.55000, -216.17641)
 shape = SubResource("Box_pod_parapet")
-
-[node name="ParapetSudM" type="MeshInstance3D" parent="Pod/Parapet"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 370.00000, 20.55000, -216.17641)
-mesh = SubResource("Mesh_pod_parapet")
 
 [node name="EvazareSudV" type="CollisionShape3D" parent="Pod/Parapet"]
 transform = Transform3D(-0.93969, 0.00000, -0.34202, 0.00000, 1.00000, 0.00000, 0.34202, 0.00000, -0.93969, 253.30154, 20.55000, -214.46631)
 shape = SubResource("Box_pod_flare")
 
-[node name="EvazareSudVM" type="MeshInstance3D" parent="Pod/Parapet"]
-transform = Transform3D(-0.93969, 0.00000, -0.34202, 0.00000, 1.00000, 0.00000, 0.34202, 0.00000, -0.93969, 253.30154, 20.55000, -214.46631)
-mesh = SubResource("Mesh_pod_flare")
-
 [node name="EvazareSudE" type="CollisionShape3D" parent="Pod/Parapet"]
 transform = Transform3D(0.93969, 0.00000, -0.34202, 0.00000, 1.00000, 0.00000, 0.34202, 0.00000, 0.93969, 486.69846, 20.55000, -214.46631)
 shape = SubResource("Box_pod_flare")
-
-[node name="EvazareSudEM" type="MeshInstance3D" parent="Pod/Parapet"]
-transform = Transform3D(0.93969, 0.00000, -0.34202, 0.00000, 1.00000, 0.00000, 0.34202, 0.00000, 0.93969, 486.69846, 20.55000, -214.46631)
-mesh = SubResource("Mesh_pod_flare")
 
 [node name="CapS" type="StaticBody3D" parent="Pod"]
 metadata/soft_hit_crush = 1.0
@@ -854,49 +828,17 @@ mesh = SubResource("Mesh_pod_cap_malulcelalalt")
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 320.00000, 27.50000, -214.12641)
 shape = SubResource("Box_pod_leg")
 
-[node name="T0Picior2M" type="MeshInstance3D" parent="Pod/Turnuri"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 320.00000, 27.50000, -214.12641)
-mesh = SubResource("Mesh_pod_leg")
-
 [node name="T0Picior0" type="CollisionShape3D" parent="Pod/Turnuri"]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 320.00000, 27.50000, -243.12641)
 shape = SubResource("Box_pod_leg")
-
-[node name="T0Picior0M" type="MeshInstance3D" parent="Pod/Turnuri"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 320.00000, 27.50000, -243.12641)
-mesh = SubResource("Mesh_pod_leg")
-
-[node name="T0Traversa0M" type="MeshInstance3D" parent="Pod/Turnuri"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 320.00000, 35.00000, -228.62641)
-mesh = SubResource("Mesh_pod_beam")
-
-[node name="T0Traversa1M" type="MeshInstance3D" parent="Pod/Turnuri"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 320.00000, 59.00000, -228.62641)
-mesh = SubResource("Mesh_pod_beam")
 
 [node name="T1Picior2" type="CollisionShape3D" parent="Pod/Turnuri"]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 420.00000, 27.50000, -214.12641)
 shape = SubResource("Box_pod_leg")
 
-[node name="T1Picior2M" type="MeshInstance3D" parent="Pod/Turnuri"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 420.00000, 27.50000, -214.12641)
-mesh = SubResource("Mesh_pod_leg")
-
 [node name="T1Picior0" type="CollisionShape3D" parent="Pod/Turnuri"]
 transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 420.00000, 27.50000, -243.12641)
 shape = SubResource("Box_pod_leg")
-
-[node name="T1Picior0M" type="MeshInstance3D" parent="Pod/Turnuri"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 420.00000, 27.50000, -243.12641)
-mesh = SubResource("Mesh_pod_leg")
-
-[node name="T1Traversa0M" type="MeshInstance3D" parent="Pod/Turnuri"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 420.00000, 35.00000, -228.62641)
-mesh = SubResource("Mesh_pod_beam")
-
-[node name="T1Traversa1M" type="MeshInstance3D" parent="Pod/Turnuri"]
-transform = Transform3D(1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000, 420.00000, 59.00000, -228.62641)
-mesh = SubResource("Mesh_pod_beam")
 
 [node name="Despartitor" parent="Pod" instance=ExtResource("6_median")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 270.000, 20.000, -228.626)
@@ -915,6 +857,8 @@ truck_speed = 4.00
 truck_dwell_s = 4.00
 phase = 0.3873
 ai_reads_corridor = true
+truck_model = ExtResource("p7_camion")
+block_model = ExtResource("p7_bloc")
 
 [node name="Hortensii" type="MultiMeshInstance3D" parent="SerpentineGri"]
 multimesh = SubResource("MM_hortensii")
@@ -1396,3 +1340,448 @@ color_slot = 19
 mass_kg = 70.0
 metadata/sf_tag = "urcare"
 metadata/sf_axis_x = 144.00
+
+[node name="DecorManual" type="Node3D" parent="."]
+script = ExtResource("p7_worldprop")
+
+[node name="Pod" type="Node3D" parent="DecorManual"]
+
+[node name="Turn0" parent="DecorManual/Pod" instance=ExtResource("p7_pod_tower")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 320.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Turn1" parent="DecorManual/Pod" instance=ExtResource("p7_pod_tower")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 420.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier00" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 270.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier01" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 278.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier02" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 286.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier03" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 294.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier04" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 302.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier05" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 310.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier06" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 318.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier07" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 326.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier08" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 334.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier09" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 342.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier10" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 350.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier11" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 358.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier12" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 366.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier13" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 374.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier14" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 382.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier15" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 390.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier16" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 398.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier17" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 406.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier18" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 414.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier19" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 422.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier20" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 430.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier21" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 438.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier22" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 446.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier23" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 454.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Tablier24" parent="DecorManual/Pod" instance=ExtResource("p7_pod_deck_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 462.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet00" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 258.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar00" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 258.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet01" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 266.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar01" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 266.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet02" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 274.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar02" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 274.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet03" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 282.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar03" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 282.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet04" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 290.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar04" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 290.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet05" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 298.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar05" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 298.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet06" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 306.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar06" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 306.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet07" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 314.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar07" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 314.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet08" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 322.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar08" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 322.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet09" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 330.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar09" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 330.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet10" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 338.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar10" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 338.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet11" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 346.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar11" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 346.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet12" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 354.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar12" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 354.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet13" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 362.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar13" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 362.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet14" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 370.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar14" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 370.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet15" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 378.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar15" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 378.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet16" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 386.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar16" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 386.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet17" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 394.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar17" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 394.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet18" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 402.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar18" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 402.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet19" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 410.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar19" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 410.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet20" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 418.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar20" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 418.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet21" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 426.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar21" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 426.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet22" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 434.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar22" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 434.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet23" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 442.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar23" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 442.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet24" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 450.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar24" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 450.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet25" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 458.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar25" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 458.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet26" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 466.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar26" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 466.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Parapet27" parent="DecorManual/Pod" instance=ExtResource("p7_pod_parapet_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 474.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="Trotuar27" parent="DecorManual/Pod" instance=ExtResource("p7_pod_walkway_8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 474.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="EvazareV" parent="DecorManual/Pod" instance=ExtResource("p7_pod_flares")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 258.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="EvazareE" parent="DecorManual/Pod" instance=ExtResource("p7_pod_flares")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 482.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="CabluCentral" parent="DecorManual/Pod" instance=ExtResource("p7_pod_cable_main")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 320.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="CabluV" parent="DecorManual/Pod" instance=ExtResource("p7_pod_cable_side")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 320.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="CabluE" parent="DecorManual/Pod" instance=ExtResource("p7_pod_cable_side")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 420.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="AncorajV" parent="DecorManual/Pod" instance=ExtResource("p7_pod_anchor")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 270.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="AncorajE" parent="DecorManual/Pod" instance=ExtResource("p7_pod_anchor")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 470.000, 20.000, -228.626)
+metadata/coliziune = "none"
+
+[node name="FelinarN00" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 275.000, 20.200, -242.226)
+metadata/coliziune = "none"
+
+[node name="FelinarS00" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 275.000, 20.200, -215.026)
+metadata/coliziune = "none"
+
+[node name="FelinarN01" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 295.000, 20.200, -242.226)
+metadata/coliziune = "none"
+
+[node name="FelinarS01" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 295.000, 20.200, -215.026)
+metadata/coliziune = "none"
+
+[node name="FelinarN02" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 315.000, 20.200, -242.226)
+metadata/coliziune = "none"
+
+[node name="FelinarS02" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 315.000, 20.200, -215.026)
+metadata/coliziune = "none"
+
+[node name="FelinarN03" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 335.000, 20.200, -242.226)
+metadata/coliziune = "none"
+
+[node name="FelinarS03" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 335.000, 20.200, -215.026)
+metadata/coliziune = "none"
+
+[node name="FelinarN04" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 355.000, 20.200, -242.226)
+metadata/coliziune = "none"
+
+[node name="FelinarS04" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 355.000, 20.200, -215.026)
+metadata/coliziune = "none"
+
+[node name="FelinarN05" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 375.000, 20.200, -242.226)
+metadata/coliziune = "none"
+
+[node name="FelinarS05" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 375.000, 20.200, -215.026)
+metadata/coliziune = "none"
+
+[node name="FelinarN06" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 395.000, 20.200, -242.226)
+metadata/coliziune = "none"
+
+[node name="FelinarS06" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 395.000, 20.200, -215.026)
+metadata/coliziune = "none"
+
+[node name="FelinarN07" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 415.000, 20.200, -242.226)
+metadata/coliziune = "none"
+
+[node name="FelinarS07" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 415.000, 20.200, -215.026)
+metadata/coliziune = "none"
+
+[node name="FelinarN08" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 435.000, 20.200, -242.226)
+metadata/coliziune = "none"
+
+[node name="FelinarS08" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 435.000, 20.200, -215.026)
+metadata/coliziune = "none"
+
+[node name="FelinarN09" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 455.000, 20.200, -242.226)
+metadata/coliziune = "none"
+
+[node name="FelinarS09" parent="DecorManual/Pod" instance=ExtResource("p7_pod_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 455.000, 20.200, -215.026)
+metadata/coliziune = "none"

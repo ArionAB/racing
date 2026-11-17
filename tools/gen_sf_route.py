@@ -1629,6 +1629,33 @@ for name, x, y, e, r in PEAKS:
                   f'transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {x}, {e}, {-y})\n'
                   f'gizmo_extents = {r}\nscript = ExtResource("2_peak")\nradius_m = {r}\n')
 
+# =============================================================================================
+# PASUL 7 (brief §7 pasul 7, 15 nov 2026): MODELELE HERO. Un GLB intra in scena DOAR daca fisierul
+# exista (`_p7_glb`), deci generatorul merge si cu kitul livrat pe jumatate; fara fisier ramane
+# placeholderul gri al pasilor 2b/5. COLIZIUNEA nu se schimba nicaieri: vagonul are AABB-ul
+# placeholderului (2,5 x 3,2 x 8,5, masurat de `PathMover` pe model), podul e pur vizual peste
+# cutiile existente, utilajul si blocul raman pe cutiile hazardului.
+#   SF_PAS7=0   scena pasului 6 (A/B), fara niciun model
+#   SF_POD_MODEL=0 / SF_TRAM_MODEL=0 / SF_MEDIAN_MODEL=0   cate o familie stinsa
+# =============================================================================================
+P7 = os.environ.get("SF_PAS7", "1") == "1"
+SF_MODELS = "assets/models/sanfrancisco"
+P7_EXT, P7_NODES = [], []
+
+
+def _p7_glb(rel, rid, flag="1"):
+    """id-ul de ext_resource al GLB-ului `rel`, sau None daca fisierul lipseste / e stins."""
+    if not P7 or flag != "1" or not os.path.exists(os.path.join(ROOT, *SF_MODELS.split("/"), *rel.split("/"))):
+        return None
+    line = '[ext_resource type="PackedScene" path="res://%s/%s" id="%s"]\n' % (SF_MODELS, rel, rid)
+    if line not in P7_EXT:
+        P7_EXT.append(line)
+    return rid
+
+
+TRAM_MODEL = _p7_glb("vehicles/cable_car.glb", "p7_tram", os.environ.get("SF_TRAM_MODEL", "1"))
+
+
 def _tram_node(name, curve_id, speed, period, phase, reach=0.0):
     b = "true" if TRAM_AI else "false"
     lines = [
@@ -1645,6 +1672,9 @@ def _tram_node(name, curve_id, speed, period, phase, reach=0.0):
         "placeholder_color = Color(0.55, 0.55, 0.55, 1)",
         "placeholder_nose_color = Color(0.42, 0.42, 0.42, 1)",
     ]
+    if TRAM_MODEL:
+        # fata vagonului (clopotul, maneta) e pe -Z in GLB, deci fara corectie de orientare
+        lines += ['model = ExtResource("%s")' % TRAM_MODEL, "model_yaw = 0.0"]
     return chr(10) + chr(10).join(lines) + chr(10)
 
 
@@ -1686,25 +1716,38 @@ if B200:
     X_D0, X_D1 = MK["tab0"][2], MK["tab1"][2]
     assert abs(MK["tab1r"][3] - (AXIS_Y - LANE_Z)) < 1e-6 and abs(X_D1 - X_D0 - DECK) < 1e-6
     _sub = {}
+    # KITUL PODULUI (pasul 7): piesele `sf_bridge_*.glb`, pur vizuale, asezate pe cadrul podului
+    # (origine la capatul de V al tablierului, pe fata carosabilului, pe ax; +X spre E). Cu kitul
+    # de baza complet, meshurile gri/rosii `*M` ale placeholderului dispar; cutiile de coliziune
+    # raman EXACT cum sunt (contractele de la 1d si 2b sunt masurate pe ele).
+    _pod_flag = os.environ.get("SF_POD_MODEL", "1")
+    POD_KIT = {k: _p7_glb("structures/sf_bridge_%s.glb" % k, "p7_pod_" + k, _pod_flag)
+               for k in ("tower", "deck_8", "parapet_8", "flares", "cable_main", "cable_side",
+                         "anchor", "walkway_8", "lamp")}
+    POD_MODEL = all(POD_KIT[k] for k in ("tower", "deck_8", "parapet_8", "flares", "cable_main",
+                                         "cable_side", "anchor"))
+    _POD_KIT_BOXES = ("parapet", "flare", "leg", "beam")
 
     def _box(key, name, parent, size, xform, coll=True, mesh=True, mat="Mat_pod_gri"):
         sid = "Box_pod_%s" % key
         if sid not in _sub:
             _sub[sid] = ('[sub_resource type="BoxShape3D" id="%s"]\nsize = Vector3(%.3f, %.3f, %.3f)\n'
                          % (sid, size[0], size[1], size[2]))
-            _sub["Mesh_pod_" + key] = ('[sub_resource type="BoxMesh" id="Mesh_pod_%s"]\n'
-                                       'size = Vector3(%.3f, %.3f, %.3f)\nmaterial = SubResource("%s")\n'
-                                       % (key, size[0], size[1], size[2], mat))
+            if not (POD_MODEL and key in _POD_KIT_BOXES):
+                _sub["Mesh_pod_" + key] = ('[sub_resource type="BoxMesh" id="Mesh_pod_%s"]\n'
+                                           'size = Vector3(%.3f, %.3f, %.3f)\nmaterial = SubResource("%s")\n'
+                                           % (key, size[0], size[1], size[2], mat))
         tx = "transform = Transform3D(%s)\n" % ", ".join("%.5f" % v for v in xform)
         if coll:
             POD_NODES.append('[node name="%s" type="CollisionShape3D" parent="%s"]\n%sshape = SubResource("%s")\n'
                              % (name, parent, tx, sid))
-        if mesh:
+        if mesh and not (POD_MODEL and key in _POD_KIT_BOXES):
             POD_NODES.append('[node name="%sM" type="MeshInstance3D" parent="%s"]\n%smesh = SubResource("Mesh_pod_%s")\n'
                              % (name, parent, tx, key))
 
     POD_SUB.append('[sub_resource type="StandardMaterial3D" id="Mat_pod_gri"]\nalbedo_color = Color(0.62, 0.62, 0.6, 1)\n')
-    POD_SUB.append('[sub_resource type="StandardMaterial3D" id="Mat_pod_rosu"]\nalbedo_color = Color(0.73, 0.21, 0.13, 1)\n')
+    if not POD_MODEL:   # rosul placeholder al portalurilor: cu kitul, nimic nu-l mai foloseste
+        POD_SUB.append('[sub_resource type="StandardMaterial3D" id="Mat_pod_rosu"]\nalbedo_color = Color(0.73, 0.21, 0.13, 1)\n')
     POD_NODES.append('[node name="Pod" type="Node3D" parent="."]\n')
     # parapetele exterioare + evazarile
     POD_NODES.append('[node name="Parapet" type="StaticBody3D" parent="Pod"]\n')
@@ -1766,6 +1809,39 @@ if B200:
             _box("beam", "T%dTraversa%d" % (ti, bi), "Pod/Turnuri", (2.4, 2.4, 2 * leg_z + 3.0),
                  (1, 0, 0, 0, 1, 0, 0, 0, 1, xt, yb, GZ), coll=False, mat="Mat_pod_rosu")
     POD_SUB += list(_sub.values())
+    if POD_MODEL:
+        def _pod_piece(kind, name, x, flip=False, z=0.0, y=0.0):
+            # cadrul podului -> lume; `flip` = rotit cu 180 de grade in jurul lui Y (capatul de E)
+            r = "-1, 0, 0, 0, 1, 0, 0, 0, -1" if flip else "1, 0, 0, 0, 1, 0, 0, 0, 1"
+            P7_NODES.append('[node name="%s" parent="DecorManual/Pod" instance=ExtResource("%s")]\n'
+                            'transform = Transform3D(%s, %.3f, %.3f, %.3f)\nmetadata/coliziune = "none"\n'
+                            % (name, POD_KIT[kind], r, X_D0 + x, DECK_Y + y, GZ + z))
+
+        P7_NODES.append('[node name="Pod" type="Node3D" parent="DecorManual"]\n')
+        for ti, xt in enumerate((DECK * 0.25, DECK * 0.75)):
+            _pod_piece("tower", "Turn%d" % ti, xt)
+        for k_ in range(int(round(DECK / 8.0))):
+            _pod_piece("deck_8", "Tablier%02d" % k_, 8.0 * k_)
+        for k_ in range(int(round((DECK + 24.0) / 8.0))):
+            _pod_piece("parapet_8", "Parapet%02d" % k_, -12.0 + 8.0 * k_)
+            if POD_KIT["walkway_8"]:
+                _pod_piece("walkway_8", "Trotuar%02d" % k_, -12.0 + 8.0 * k_)
+        _pod_piece("flares", "EvazareV", -12.0)
+        _pod_piece("flares", "EvazareE", DECK + 12.0, flip=True)
+        _pod_piece("cable_main", "CabluCentral", DECK * 0.25)
+        _pod_piece("cable_side", "CabluV", DECK * 0.25)
+        _pod_piece("cable_side", "CabluE", DECK * 0.75, flip=True)
+        _pod_piece("anchor", "AncorajV", 0.0)
+        _pod_piece("anchor", "AncorajE", DECK, flip=True)
+        if POD_KIT["lamp"]:
+            # felinarele pe trotuarul exterior (fata lui la +0,20), la 20 m, pe ambele parti, la
+            # x 5, 25, ..., 195: exact intre doi tiranti (care stau din 10 in 10 m) si la 5 m de
+            # turnuri (x 50 / 150). La 24 m pas, doua cadeau lipite de cate un tirant (x 40, 160).
+            for k_, xl in enumerate(range(5, int(DECK), 20)):
+                for side, nm in ((-1, "N"), (1, "S")):
+                    _pod_piece("lamp", "Felinar%s%02d" % (nm, k_), float(xl), z=side * 13.6, y=0.20)
+        print(f"podul: kitul de modele asezat ({len(P7_NODES) - 1} piese sub DecorManual/Pod); "
+              f"placeholderul gri scos, cutiile de coliziune neschimbate")
     # despartitorul
     run = (DECK - 2 * (30.0 + 15.0)) / TRUCK_SPEED
     TRUCK_CYCLE = 2.0 * (run + TRUCK_DWELL)
@@ -1792,6 +1868,11 @@ if B200:
         "truck_dwell_s = %.2f" % TRUCK_DWELL,
         "phase = %.4f" % TRUCK_PHASE,
         "ai_reads_corridor = %s" % ("true" if MEDIAN_AI else "false"),
+    ] + ['%s = ExtResource("%s")' % (prop, rid) for prop, rid in (
+        ("truck_model", _p7_glb("vehicles/sf_median_truck.glb", "p7_camion",
+                                os.environ.get("SF_MEDIAN_MODEL", "1"))),
+        ("block_model", _p7_glb("props/sf_median_block.glb", "p7_bloc",
+                                os.environ.get("SF_MEDIAN_MODEL", "1")))) if rid] + [
         "",
     ]))
     POD_PROPS = [
@@ -2062,6 +2143,15 @@ if PONT_INFO is not None:
     POD_PROPS = _new + ["custom_cornice_ravines = Array[int]([%d])" % _ri,
                         "custom_ravine_widths = Array[Vector2]([Vector2(%d, 60)])" % _ri]
 
+if P7_NODES:
+    # containerul de decor asezat din generator: `WorldProp` pune materialul lumii pe tot
+    # subarborele; pista il cauta dupa nume (`DecorManual`), la radacina
+    P7_EXT.append('[ext_resource type="Script" path="res://scenes/props/world_prop.gd" id="p7_worldprop"]\n')
+    P7_NODES.insert(0, '[node name="DecorManual" type="Node3D" parent="."]\n'
+                       'script = ExtResource("p7_worldprop")\n')
+# fara niciun model, scena iese octet cu octet ca la pasul 6
+P7_TAIL = (chr(10) + chr(10).join(P7_NODES)) if P7_NODES else ""
+
 tscn = f"""[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
@@ -2069,7 +2159,7 @@ tscn = f"""[gd_scene format=3]
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="3_branch"]
 [ext_resource type="ArrayMesh" path="res://{OBJ_REL}" id="4_gri"]
 [ext_resource type="Script" path="res://scenes/hazards/bus_hazard.gd" id="5_bus"]
-{POD_EXT}{"".join(P6_EXT)}
+{POD_EXT}{"".join(P6_EXT)}{"".join(P7_EXT)}
 [sub_resource type="Curve3D" id="Curve3D_sf"]
 closed = true
 _data = {{
@@ -2140,7 +2230,7 @@ material_override = SubResource("Mat_gri")
 [node name="Tramvaie" type="Node3D" parent="."]
 {tram_nodes}
 {chr(10).join(POD_NODES)}
-{chr(10).join(P6_NODES)}"""
+{chr(10).join(P6_NODES)}{P7_TAIL}"""
 with open(os.devnull if DRY else OUT_TSCN, "w", encoding="utf-8", newline="\n") as f:
     f.write(tscn)
 print(f"scris {os.path.relpath(OUT_TSCN, ROOT)}; sea_level_offset {SEA_OFFSET}")

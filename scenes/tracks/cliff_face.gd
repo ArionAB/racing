@@ -73,9 +73,19 @@ extends Marker3D
 ## Materialul de folosit pentru fetele acestui nod: clasa triplanara daca
 ## `material_class` e completat, altfel `world_material()` (comportamentul
 ## dinainte, bit-identic).
+##
+## PERETII DE TAIETURA (`cut_wall`) fara clasa iau atlasul cu granulatie plina
+## (`Palette.grain_material`, GRAIN_PREFIX), nu masca de slot. Sunt stanca taiata,
+## dar sunt vopsiti pe sloturi de nisip si de asfalt (0..2, 5, 6, 10, 19) doar ca
+## sa ia culoarea; din nov 2026, cand masca ajunge pe materialul lumii, tarii
+## acelor sloturi (0.235..0.70) turteau zidurile: pe Machu Picchu zidurile gri
+## ale terasei deveneau planuri gri plate. Granulatia era structura lor.
+## Un material in plus pe pista (partajat cu orice alta piesa GRAIN_PREFIX).
 func _face_material() -> StandardMaterial3D:
 	if material_class != "":
 		return Palette.triplanar_class_material(material_class)
+	if cut_wall:
+		return Palette.grain_material()
 	return Palette.world_material()
 
 ## Cat de departe de marginea asfaltului incepe BUZA falezei.

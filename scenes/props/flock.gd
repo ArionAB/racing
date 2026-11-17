@@ -238,7 +238,10 @@ func _build() -> void:
 				halo_radius_m * 0.7, halo_reflect_stretch, halo_flicker, seed_value)
 	if view_m > 0.0:
 		visibility_range_end = view_m
-	if tri_class.begins_with(Palette.ATINT_PREFIX):
+	if tri_class == Palette.GRAIN_PREFIX:
+		# atlasul lumii cu granulatie plina, fara masca de slot (ex. salina Serengeti)
+		material_override = Palette.grain_material()
+	elif tri_class.begins_with(Palette.ATINT_PREFIX):
 		# tenta de atlas partajata (ex. "atint:ok_bloom"): culoarea slotului ramane, inmultita cu tenta
 		material_override = Palette.atlas_tint_material(tri_class.trim_prefix(Palette.ATINT_PREFIX))
 	elif tri_class.begins_with("class:"):

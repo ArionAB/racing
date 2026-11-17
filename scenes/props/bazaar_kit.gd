@@ -138,8 +138,12 @@ func _ready() -> void:
 
 
 func _apply_materials() -> void:
+	# Granulatie plina, fara masca de slot (Palette.GRAIN_PREFIX). Copertinele
+	# stau pe sloturile de vopsea de masina (14..16) si pe lava (30), unde masca
+	# da 0 / 0.15: fara granulatie panza iesea plastic colorat plat (nov 2026).
+	# Materialul e partajat: tot bazarul costa tot UN material.
 	for mi in _meshes:
-		mi.material_override = Palette.world_material()
+		mi.material_override = Palette.grain_material()
 
 
 func _cell(cells: Dictionary, p: Vector3) -> SurfaceTool:

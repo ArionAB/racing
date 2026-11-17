@@ -2307,7 +2307,11 @@ const _TF_STONE: String = Palette.TRI_PREFIX + "tf_stone"
 # si in joc peretii de zapada se citeau ca parapet de piatra (criticul orb POI D r1:
 # "zidurile albe-gri sunt parapet de piatra, nu zapada"). Pe atlas se vad treptele
 # modelate ale zapezii vechi, alb-albastrui in umbra. Si un material mai putin.
-const _TF_SNOW: String = Palette.ATLAS_PREFIX
+# "Treptele" erau insa GRANULATIA de detaliu la tarie plina: din nov 2026 masca
+# per slot ajunge pe materialul lumii, iar FOAM_WHITE (22) sta la 0.20, deci pe
+# atlas zapada iesea forme plate, alb-albastrui uniform. GRAIN_PREFIX pastreaza
+# atlasul si AO-ul, cu granulatia plina, adica exact aspectul aprobat de critic.
+const _TF_SNOW: String = Palette.GRAIN_PREFIX
 const _TF_CONCRETE: String = Palette.TRI_PREFIX + "concrete"
 # Tencuiala: briefului ii cere ALBA (FOAM_WHITE), iar clasa `plaster` (#978D7D) a dat in joc
 # (154,121,84), bej-maro, pe cand atlasul da (192,176,149), crem. Ca la Okinawa
@@ -3975,6 +3979,8 @@ func _model_class_material(cls: String) -> Material:
 		return Palette.world_material()
 	if cls == Palette.PLAIN_PREFIX:
 		return Palette.plain_material()
+	if cls == Palette.GRAIN_PREFIX:
+		return Palette.grain_material()
 	if Palette.stipple_material(cls) != null:
 		return Palette.stipple_material(cls)
 	if cls.begins_with(Palette.GLOW_PREFIX):

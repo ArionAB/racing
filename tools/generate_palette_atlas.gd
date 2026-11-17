@@ -328,16 +328,38 @@ func _sky_cover() -> void:
 	print("  sky_cover.png  (%dx%d, nori pentru cer)" % [W, H])
 
 
-## Masca de intensitate a detaliului, 32x1 RGBA. Alfa per slot; culoarea e alba
-## peste tot (conteaza doar canalul alfa).
+## Masca de intensitate a detaliului, 32x1 RGBA. Taria slotului sta in TOATE
+## cele patru canale (R = G = B = A), fiindca cei doi cititori citesc canale
+## diferite:
+##   - `Palette.world_material()` (StandardMaterial3D) citeste ROSUL. Codul
+##     generat de Godot 4.7 (scene/resources/material.cpp) e
+##       ALBEDO.rgb = mix(ALBEDO.rgb, detail, detail_mask_tex.r);
+##     Pana in nov 2026 masca era alba pe RGB si purta taria doar in alfa, deci
+##     pe materialul lumii taria a fost 1.0 pe TOATE sloturile din ziua in care
+##     a aparut stratul (c8bed579, aug 2026) — masurat cu
+##     tools/probe_detail_mask.gd, patrate plate pe sloturi de alfa cunoscut.
+##   - `prop_detail_fade.gdshader` citeste ALFA explicit.
 ##
-## Se importa FARA compresie si FARA mipmap-uri: BC1 are alfa pe un bit si ar
-## distruge treptele, iar mipmap-urile ar amesteca sloturile vecine.
-func _write_detail_mask(path: String) -> void:
+## Se importa FARA compresie si FARA mipmap-uri (vezi detail_mask.png.import):
+##   - compresia VRAM pe 32x1 PICA pe D3D12 (blocurile BC sunt 4x4, iar
+##     inaltimea 1 nu se aliniaza): `CreateResource failed 0x80070057`, textura
+##     nu se creeaza deloc si shaderul cade pe albul implicit — masca = 1 si pe
+##     prop_detail_fade, pe desktop. Pe Vulkan se creeaza, dar cu trepte mutate
+##     cu pana la 0.02 (BC3 interpoleaza alfa in 8 niveluri pe bloc de 4 sloturi);
+##   - mipmap-urile ar amesteca sloturile vecine (nivelul 16x1 = media a doua).
+##
+## `static`, ca masca sa se poata rescrie singura, fara restul atlasului:
+##   load("res://tools/generate_palette_atlas.gd")._write_detail_mask(path)
+static func _write_detail_mask(path: String) -> void:
+	# Valorile sunt cele din PNG-ul livrat. 0..2, 5..6 si 19 au fost coborate de
+	# mana in 33bb603b (aug 2026: nisip 1.00 -> 0.275, asfalt 0.55 -> 0.235),
+	# fara ca tabelul de aici sa fie actualizat; regenerarea le-ar fi intors.
+	# Se scrie in 8 biti prin trunchiere (set_pixel), deci valorile sunt alese
+	# ca n/255 + o jumatate de treapta: 0.2755 -> 70, 0.2355 -> 60.
 	const STRENGTH := {
-		0: 1.00, 1: 1.00, 2: 1.00,   # nisip
+		0: 0.2755, 1: 0.2755, 2: 0.2755,   # nisip (33bb603b)
 		3: 1.00, 4: 1.00,            # roca — aici conteaza cel mai mult
-		5: 0.55, 6: 0.55,            # asfalt: uzura, dar sa ramana lizibil
+		5: 0.2355, 6: 0.2355,        # asfalt (33bb603b)
 		7: 0.35,                     # bordura: marcaj, nu suprafata naturala
 		8: 0.75,                     # beton
 		9: 0.85,                     # lemn: fibra
@@ -347,7 +369,7 @@ func _write_detail_mask(path: String) -> void:
 		14: 0.0, 15: 0.0, 16: 0.0,   # ACCENTE MASINI — raman imaculate
 		# --- Mediu insular (17..23) ---
 		17: 0.30, 18: 0.25,          # apa: detaliul de roca ar face-o sa arate ca noroi
-		19: 1.00,                    # nisip coraligen
+		19: 0.2755,                  # nisip coraligen (33bb603b)
 		20: 1.00,                    # bazalt — la fel ca roca, aici conteaza
 		21: 0.45,                    # vegetatie tropicala, ca 12/13
 		22: 0.20,                    # spuma: cea mai curata suprafata din decor
@@ -359,11 +381,11 @@ func _write_detail_mask(path: String) -> void:
 	var img := Image.create(Palette.SLOTS, 1, false, Image.FORMAT_RGBA8)
 	for slot in Palette.SLOTS:
 		var a: float = STRENGTH.get(slot, 1.0)
-		img.set_pixel(slot, 0, Color(1.0, 1.0, 1.0, a))
+		img.set_pixel(slot, 0, Color(a, a, a, a))
 	if img.save_png(path) != OK:
 		push_error("Nu am putut scrie " + path)
 		return
-	print("  %s  (%dx1, alfa per slot)" % [path.get_file(), Palette.SLOTS])
+	print("  %s  (%dx1, taria per slot in R=G=B=A)" % [path.get_file(), Palette.SLOTS])
 
 
 ## Ca _write_tileable, dar cu latura configurabila si cu statistici tiparite.

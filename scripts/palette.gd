@@ -18,7 +18,8 @@ extends RefCounted
 const ATLAS_PATH: String = "res://assets/textures/palette_atlas.png"
 ## Stratul de detaliu de suprafata, aplicat triplanar peste toata lumea.
 const DETAIL_PATH: String = "res://assets/textures/detail_rock.png"
-## Cat de tare bate detaliul pe fiecare slot (alfa per slot, 32x1).
+## Cat de tare bate detaliul pe fiecare slot (32x1; taria in R=G=B=A, fiindca
+## materialul lumii citeste R, iar prop_detail_fade.gdshader citeste A).
 const DETAIL_MASK_PATH: String = "res://assets/textures/detail_mask.png"
 ## Scara detaliului: 1 / 0.35 = o repetitie la 2.86 m.
 const DETAIL_SCALE: float = 0.35
@@ -231,6 +232,9 @@ static func set_detail_texture(path: String) -> void:
 	_detail_path = want
 	if _shared != null:
 		_shared.detail_albedo = load(_detail_path)
+	# Copia cu granulatie plina (GRAIN_PREFIX) are aceeasi textura de detaliu.
+	if _grain_mat != null:
+		_grain_mat.detail_albedo = load(_detail_path)
 	# Si varianta cu stingere pe distanta, din acelasi motiv: altfel o pista
 	# incarcata dupa alta ar pastra detaliul precedentei pe prop-uri.
 	if _faded_detail != null:
@@ -314,9 +318,19 @@ static func world_material() -> StandardMaterial3D:
 		# capata detaliu de suprafata fara unwrap, fara re-export si, esential,
 		# FARA MATERIAL NOU: garda de draw call-uri nu se misca.
 		#
-		# Masca (32x1 RGBA, alfa per slot) se esantioneaza pe UV1, adica pe
+		# Masca (32x1, taria slotului in R=G=B=A) se esantioneaza pe UV1, adica pe
 		# centrul slotului — asa slotul din paleta devine si canal de intensitate:
-		# roca primeste tot, masinile nimic.
+		# roca primeste tot, masinile nimic. StandardMaterial3D citeste ROSUL
+		# mastii (`mix(ALBEDO.rgb, detail, detail_mask_tex.r)` in codul generat de
+		# Godot 4.7); pana in nov 2026 taria statea doar in alfa, deci aici era 1.0
+		# pe toate sloturile. Vezi tools/generate_palette_atlas.gd
+		# (_write_detail_mask) si tools/probe_detail_mask.gd.
+		# Importul mastii ramane FARA compresie, FARA mipmap-uri si fara
+		# fix_alpha_border: comprimata, textura de 32x1 nu se creeaza pe D3D12
+		# (shaderul cade pe alb = 1.0 peste tot), mipmap-urile amesteca sloturile
+		# vecine, iar fix_alpha_border umple sloturile cu alfa 0 (14..16) cu
+		# culoarea vecinilor. Un slot coborat se si LUMINEAZA: detaliul are media
+		# ~0.9 si intuneca tot ce acopera (style_bible §4).
 		_shared.detail_enabled = true
 		_shared.detail_albedo = load(_detail_now())
 		_shared.detail_mask = load(DETAIL_MASK_PATH)
@@ -2233,6 +2247,33 @@ static func plain_material() -> StandardMaterial3D:
 	return _plain_mat
 
 
+## Al optulea prefix acceptat: "grain". Opusul lui PLAIN_PREFIX: acelasi atlas,
+## acelasi AO, acelasi strat de detaliu, dar FARA masca per slot — granulatia
+## bate la tarie plina pe orice slot, adica exact cum arata materialul lumii
+## pana in nov 2026, cand masca nu ajungea la el (vezi `world_material`).
+##
+## DE CE exista. Masca e o regula pe SLOT, iar sloturile se reutilizeaza:
+## FOAM_WHITE (22) tine si caroseriile albe si ramele caselor (care castiga din
+## a fi curate), dar si salina Serengeti si zapada veche de pe Transfagarasan,
+## unde granulatia era singura structura a suprafetei — fara ea, salina iese o
+## pata crema arsa (luminanta 209 -> 231) si zapada, forme plate. Tabelul nu
+## poate urca slotul fara sa-l urce si pe masini; piesa isi cere deci granulatia
+## inapoi pe numele ei. Masurat in nov 2026, fiecare pe cadrul pe care a aparut.
+##
+## Costa UN material pe pista care il foloseste (nu unul per piesa).
+const GRAIN_PREFIX := "grain"
+
+static var _grain_mat: StandardMaterial3D = null
+
+static func grain_material() -> StandardMaterial3D:
+	if _grain_mat == null:
+		_grain_mat = world_material().duplicate() as StandardMaterial3D
+		# Fara masca: textura implicita a uniformei e alba (`hint_default_white`),
+		# deci taria e 1.0 pe orice slot.
+		_grain_mat.detail_mask = null
+	return _grain_mat
+
+
 ## Al saptelea prefix acceptat: "atint:<nume>". ATLASUL modelului, cu o TENTA pe
 ## material: culoarea slotului ramane (nicio textura noua, nicio clasa
 ## triplanara), dar se inmulteste cu `ATLAS_TINTS[nume]`.
@@ -2565,6 +2606,8 @@ static func apply_class_materials(root: Node, mapping: Dictionary) -> void:
 		var cls := _class_for(String(mi.name), mapping)
 		if cls.is_empty():
 			mi.material_override = world_material()
+		elif cls == GRAIN_PREFIX:
+			mi.material_override = grain_material()
 		elif stipple_material(cls) != null:
 			mi.material_override = stipple_material(cls)
 		elif cls.begins_with(FINISH_PREFIX):
@@ -2605,6 +2648,8 @@ static func apply_object_class_materials(root: Node, mapping: Dictionary,
 		var cls := _class_for(String(mi.name), mapping)
 		if cls.is_empty():
 			mi.material_override = world_material()
+		elif cls == GRAIN_PREFIX:
+			mi.material_override = grain_material()
 		elif stipple_material(cls) != null:
 			mi.material_override = stipple_material(cls)
 		elif cls.begins_with(FINISH_PREFIX):

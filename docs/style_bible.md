@@ -181,13 +181,39 @@ Ce e permis:
   niciun UV**: assets-urile rămân neatinse și materialul rămâne unul singur.
   `uv2_scale = 0.35` → o repetiție la **2.86 m**.
 
-  **Masca per slot** (`detail_mask.png`, 32×1 RGBA) face din slot un canal de
-  autorat: nisip/rocă/bazalt 1.00 · lemn 0.85 · beton 0.75 · rugină 0.70 ·
-  asfalt 0.55 · olane 0.55 · vegetație 0.45 · bordură 0.35 · metal vopsit 0.30 ·
-  apă 0.25–0.30 · spumă 0.20 · **accente mașini 0.00**
-  (§1 — mașinile rămân cele mai curate suprafețe din cadru).
+  **Masca per slot** (`detail_mask.png`, 32×1) face din slot un canal de
+  autorat: rocă/bazalt 1.00 · lemn 0.85 · beton 0.75 · rugină 0.70 ·
+  olane 0.55 · vegetație 0.45 · bordură 0.35 · metal vopsit 0.30 ·
+  apă 0.25–0.30 · nisip 0.275 · asfalt 0.235 · spumă 0.20 · lavă 0.15 ·
+  **accente mașini 0.00** (§1 — mașinile rămân cele mai curate suprafețe din
+  cadru); sloturile nenumite (24–29, 31) stau la 1.00. Sursa de adevăr e
+  tabelul `STRENGTH` din `tools/generate_palette_atlas.gd`
+  (`_write_detail_mask`), iar PNG-ul se regenerează din el octet cu octet.
   Apa și spuma stau jos deliberat: stratul de detaliu e o textură de *rocă*, iar
-  la intensitate mare face marea să arate ca noroi.
+  la intensitate mare face marea să arate ca noroi. Un slot coborât se și
+  **luminează** (textura de detaliu are media ~0.9 și întunecă tot ce
+  acoperă): pe pistele măsurate, +6…+19 puncte de luminanță pe suprafețele
+  afectate.
+
+  **Tăria stă în toate cele patru canale (R = G = B = A).** `StandardMaterial3D`
+  citește **roșul** măștii (`mix(ALBEDO.rgb, detail, detail_mask_tex.r)` în codul
+  generat de Godot 4.7), iar `prop_detail_fade.gdshader` citește alfa. Până în
+  nov 2026 tăria stătea doar în alfa, deci pe materialul lumii a fost 1.00 pe
+  toate sloturile din ziua în care a apărut stratul — inclusiv pe mașini.
+  **Importul măștii nu se schimbă înapoi:** fără compresie, fără mipmap-uri,
+  `fix_alpha_border = false`. Comprimată (BC3), textura de 32×1 nu se creează
+  deloc pe D3D12 (`CreateResource failed 0x80070057`, iar shaderul cade pe alb);
+  mipmap-urile ar amesteca sloturile vecine; `fix_alpha_border` umple RGB-ul
+  sloturilor cu alfa 0 (14–16, mașinile) cu valorile vecinilor. Garda:
+  `tools/probe_detail_mask.gd` (cu fereastră).
+
+  **Masca e o regulă pe slot, iar sloturile se reutilizează.** Unde granulația
+  era singura structură a suprafeței, piesa își cere granulația plină pe numele
+  ei, nu prin tabel: prefixul `grain` (`Palette.grain_material()`, materialul
+  lumii fără mască, un material în plus pe pistă). Azi: salina Serengeti,
+  zăpada veche de pe Transfăgărășan, pereții de tăietură (`cut_wall`) și
+  bazarul din Jodhpur. Înainte să cobori un slot, uită-te cine îl mai folosește
+  (`tools/probe_detail_census.gd`).
 
 - **Apa răspunde la lumină, nu doar la culoare** (v12, sep 2026,
   `water.gdshader` § „STRAT ILUMINAT"). Opacă și unshaded rămâne (contractele

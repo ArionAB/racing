@@ -640,6 +640,9 @@ func _crust(poly: PackedVector2Array, cx: float, cz: float, sea: float) -> void:
 		return
 	_out.append('[node name="E_CrustaSare" type="MultiMeshInstance3D" parent="%s"]' % ZONE)
 	_out.append('script = ExtResource("flock")')
+	# Granulatie plina, fara masca de slot (Palette.GRAIN_PREFIX): pe FOAM_WHITE
+	# la 0.20 salina iesea o pata crema arsa, fara nicio structura (nov 2026).
+	_out.append('tri_class = "grain"')
 	_out.append("disc_slot = 22")
 	_out.append("disc_radius = 7.0")
 	_out.append("scale_min = 0.75")

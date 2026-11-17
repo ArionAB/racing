@@ -1908,6 +1908,18 @@ const CLASSES_BY_MODEL := {
 	"sf_row_b_canted_m": SF_ROW_CLASSES, "sf_row_b_square_m": SF_ROW_CLASSES,
 	"sf_row_c_canted_m": SF_ROW_CLASSES, "sf_row_c_square_m": SF_ROW_CLASSES,
 	"sf_row_corner_turret_m": SF_ROW_CLASSES,
+	# Pasul 8c: casele de CAPAT (latura finisata) si cele sase case PICTATE, fiecare cu `_m`.
+	# Aceleasi doua noduri (`Row_Wall` / `Row_Trim`); fara intrare, peretele ramane pe atlas
+	# si casa iese alba, oricare i-ar fi `wall_class`.
+	"sf_row_end_a": SF_ROW_CLASSES, "sf_row_end_a_m": SF_ROW_CLASSES,
+	"sf_row_end_b": SF_ROW_CLASSES, "sf_row_end_b_m": SF_ROW_CLASSES,
+	"sf_row_end_c": SF_ROW_CLASSES, "sf_row_end_c_m": SF_ROW_CLASSES,
+	"sf_painted_lady_a": SF_ROW_CLASSES, "sf_painted_lady_a_m": SF_ROW_CLASSES,
+	"sf_painted_lady_b": SF_ROW_CLASSES, "sf_painted_lady_b_m": SF_ROW_CLASSES,
+	"sf_painted_lady_c": SF_ROW_CLASSES, "sf_painted_lady_c_m": SF_ROW_CLASSES,
+	"sf_painted_lady_d": SF_ROW_CLASSES, "sf_painted_lady_d_m": SF_ROW_CLASSES,
+	"sf_painted_lady_e": SF_ROW_CLASSES, "sf_painted_lady_e_m": SF_ROW_CLASSES,
+	"sf_painted_lady_f": SF_ROW_CLASSES, "sf_painted_lady_f_m": SF_ROW_CLASSES,
 	# Valul 2 San Francisco: chiparosii (V1) si arborele de strada (V4), coroana punctata.
 	"sf_cypress_a": SF_CYPRESS_CLASSES, "sf_cypress_b": SF_CYPRESS_CLASSES,
 	"sf_cypress_c": SF_CYPRESS_CLASSES,
@@ -2603,6 +2615,8 @@ const CLASSES_BY_THEME := {
 const NO_SHADOW_MODELS := {
 	"lengai": true, "crater_far_wall": true, "kyoto_horizon": true,
 	"horizon_mesas": true,
+	# San Francisco, valul 3 (F1): insula cu far din axul lantului, la ~330 m de muchia 4.
+	"sf_island_light": true,
 }
 
 

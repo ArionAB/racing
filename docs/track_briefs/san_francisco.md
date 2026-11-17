@@ -2024,6 +2024,86 @@ parcate (4,2 m) sunt refuzate de `BumpProp` (plafonul de 2 m), deci rămân stat
 
    **Nepuse încă din ce e modelat:** grădinițele (casa lor nu există), băncile și rastelul.
 
+   **8c, valul 3 (17 nov 2026)**, ramura `sanfrancisco/pas8c-val3`, blocul „VALUL 3” din
+   `tools/gen_sf_route.py`. `SF_VAL3=0` reface scena de dinainte octet cu octet;
+   `SF_V3_<FAMILIE>=0` stinge câte o familie (inelul de fundal e în temă, fără comutator).
+
+   | familie | câte | unde / regula |
+   |---|---|---|
+   | case de capăt (`sf_row_end_a/b/c` + `_m`) | 61 | în locul casei obișnuite la orice capăt de rând cu latura spre gol: 21 în rândurile din față (B 11, G 4, E 6) și 40 în cele din spate, unde latura liberă e la cel mult 32 m de axa buclei (deci și lângă colțurile cu turnuleț de pe muchii). Aceeași familie, același pastel, aceeași cutie; mâna aleasă ca latura cu ferestre să privească în afară |
+   | case pictate (`sf_painted_lady_a…f`) | 6 + 2 | pe latura de N a brațului coamei, cu fața spre S: roz, albastru, mentă, galben, crem, albastru, fiecare cu grădinița ei (la 1,2 m în fața fațadei, ca să ocolească pridvorul). Fațada la 13,5 m de ax: grădina se termină la 9,3 m, rămân 2,3 m de trotuar. **Rândul e flancat de câte o casă de capăt** (fără ele, casele din margine arătau un perete orb de 12 × 12 m la ieșirea din colț). Cutii sub `CasePictateCorpuri`, adânci de 13,2 m unde e pridvor |
+   | placa turnantă + vagon parcat | 1 | la (−144, 430), în afara colțului de NV al ocolului (locul cel mai plat: 0,4 m diferență de teren pe disc, față de ~1,3 m la poziția din inventar); șinele spre intrarea tramvaiului 2; cutii pe gheretă și pe vagon (`PlacaCorpuri`) |
+   | magazii de chei | 4 | lung, scurt, lung, scurt la x −92,7 … −31,4, cu ușa spre drum și muchia punții pe muchia cheiului (y 472); cutii pe corp (`MagaziiCorpuri`). Pluta cu lei de mare între a doua și a treia. Pontonul (x 40 → 120) neatins |
+   | insula cu far | 1 | la (0, 546), în axul lanțului, la 330 m de muchia 4; fără coliziune, fără umbră |
+   | inelul de fundal (`sf_horizon`) | 5 piese | în tema `sanfrancisco` din `track.gd`, la poziții fixe ca la Carrara: două dealuri la E peste strâmtoare cu un oraș în spate (scara 0,6, la ~420 m de pod), un deal și un oraș la S–SV, în capul străzii tramvaiului. Toate dealurile au același azimut, deci pâlcurile de chiparoși se apleacă spre ENE ca parcul |
+   | scări publice | 4 × 2 module | pe malul golfului la capul podului (singurul loc cu 6 m de urcare pe 10 m; golurile de pe B sunt plate), la 24–33 m de ax, fără coliziune |
+   | bănci, rastele | 4 + 2 | în fața grădinițelor și pe latura de S a cheiului, fără coliziune |
+   | zidurile moi de pe pod (`Pod/CapS`) | 26 + 26 blocuri | cutiile gri au devenit rânduri de `sf_median_block`; coliziunea e neschimbată |
+
+   **Pâcla temei** a coborât de la `fog_max` 0,55 la **0,40**: malul celălalt, insula și inelul se
+   citesc ca depărtare, nu ca ceață (`p8_val3_pacla055_*` față de `p8_val3_pacla040_*`). 0,28 n-a
+   arătat muchie în cadre fixe, dar la planul îndepărtat (380 m) geometria ar fi acoperită doar
+   28 %; se poate încerca la volan. E pâclă de distanță, nu vreme.
+
+   **Gărzi** (înainte → după): materiale 23 → **22** (a dispărut griul zidurilor de pe pod, nimic
+   nou); `ProbeLaneClear` 50; soare pe lanț 83,6 % → 83,6 %; `ProbeSfCase` / `ProbeSfSpate` cunosc
+   casele de capăt (sabotajul `--sabotaj-capat` pică); `verify_sanfrancisco.sh` OK cu toate cele
+   68 de GLB-uri; tabelul `probe_decor` al celorlalte piste identic. ProbePerf desktop: desene
+   medie / vârf 142 / 268 → 164 / 302; buffere MultiMesh 287 → 355 (buget iPhone 2.500).
+
+   Două abateri, raportate ca atare:
+   - **`probe_decor_overlap`: 61 → 73 piese peste asfalt.** Cele 12 noi sunt blocuri de beton de
+     la capetele zidurilor moi (0,12–1,10 m peste margine): vizualul unei coliziuni care era deja
+     acolo. Cutia gri de dinainte se vedea la fel, dar nu era numărată (nu stătea sub
+     `DecorManual`). Linia de bază a gărzii e acum 73;
+   - **`ProbeSfTenta` pică pragul strict de pixeli pe casele noi** (0,9–3,1 % pixeli diferiți cu
+     peste 12 între casa pusă ca nod și cea din `CityFill`, față de 0,5 %; diferența medie rămâne
+     0,85–1,05, sub 1,5). Pastelul ajunge pe ele pe ambele căi (cele cinci tente diferă cu
+     16–18 / 255). Pragul n-a fost relaxat; cauza diferenței nu e stabilită.
+
+   **Condusul** (8 mașini × 16 seed-uri × 250 s; control = aceeași zi, `SF_VAL3=0`; valul 3 rulat
+   de două ori):
+
+   | | control | valul 3, lotul 1 | valul 3, lotul 2 |
+   |---|---|---|---|
+   | tur mediu | 82,82 s | 82,87 s | 82,71 s |
+   | tramvaiul 1 / 2, cu contact | 1,7 / 2,8 % | 3,0 / 2,9 % | 1,3 / 3,9 % |
+   | pod: peste despărțitor | 0 | 0 | 0 |
+   | pod: frontale în coridor | 0 | 0 | **1** |
+   | pod: contact cu bariera | 4,9 % | 6,3 % | 7,4 % |
+   | repuneri / ejectări / `[blocaj]` | 11 / 8 / 3 | 6 / 5 / 9 | 7 / 4 / 7 |
+   | ponton: căderi | 0,52 % | 0,00 % | 0,52 % |
+   | contacte case din față / din spate | 2 / 0 | 3 / 0 | 5 / 0 |
+   | contacte case pictate / placă / magazii | — | 0 / 0 / 0 | 0 / 0 / 0 |
+
+   - **Corpurile noi n-au fost atinse**, iar zerourile sunt măsurate: cu `SF_V3_SABOTAJ=1` (câte o
+     cutie din fiecare corp nou pusă pe dreapta de start) un seed de 40 s numără 7 / 7 / 3.
+   - **Frontala din coridor (lotul 2, seed 5, t = 73 s)** nu e trafic pe contrasens: nimeni n-a
+     trecut peste despărțitor. Taxiul a lovit utilajul și bariera pe banda lui, s-a oprit întors,
+     iar Poliția, venind din spate pe aceeași bandă, a intrat în el. Contractul „0 frontale în
+     coridor” a fost scris pentru contrasens; cazul ăsta e o mașină răsucită după contactul cu
+     utilajul, primul de felul lui în ~11 loturi. De urmărit.
+   - **Tramvaiul 1 și bariera nu se pot lega de valul 3.** Scena cu valul 3 și cea fără diferă,
+     ca noduri de fizică, doar prin cele 17 corpuri noi (case pictate, placă, magazii), toate cu 0
+     contacte; pe pod și pe străzile tramvaielor nu s-a schimbat nicio coliziune. Tramvaiul 1 a
+     ieșit 3,0 % și apoi 1,3 % pe aceeași scenă. **Contactul cu bariera a variat între 4,4 % și
+     7,4 % în nouă loturi cu aceeași coliziune pe pod**, deci banda de la 2b (4,6–5,5 %) e mai
+     îngustă decât zgomotul lotului.
+
+   **Capturi:** `docs/asset_briefs/img/sf_route/p8_val3_*.png` (muchia 1, coama, placa, cheiul,
+   insula de pe muchia 4, grila și tablierul, zidul moale, orașul de sus).
+
+   **Piesele valului 3** (Blender): casele de capăt și cele pictate în `build_sf_row.py` (cele 14
+   case de dinainte ies octet cu octet după reconstruire), structurile în `build_sf_struct.py` cu
+   garda `measure_sf_struct.py`. Inelul de fundal e la a doua versiune: prima avea pe dealuri
+   copaci cu coroană plată pe trunchi subțire (silueta salcâmilor din Serengeti) și dealuri de
+   57 m, tăiate de marginea cadrului.
+
+   **De decis după valul 3:** lemnul magaziilor iese portocaliu-saturat (culoarea modelului);
+   scările de pe mal se citesc slab (linii albe subțiri); pâcla 0,40 sau 0,28.
+   **Încă lipsesc:** trotuarele, poarta (H5), grădinița casei de la intrarea în serpentine,
+   pescărușii și papagalii, velele și feribotul, sunetul.
+
 ## 8. Lecții aplicate anticipat, și ce a fost respins
 
 - **Săritura s-a măsurat înaintea traseului**, nu după decor: profilul blocului

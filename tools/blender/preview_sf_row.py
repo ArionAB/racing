@@ -29,6 +29,20 @@ Moduri (prin run_build.py, argumentele dupa al doilea `--`):
                     liniile acoperisurilor: elevatie ortografica din strada si o vedere din
                     spate-sus -> sf_row_kit_rooflines.png
 
+  --end <nume>      casa de capat (pasul 8c): 3/4 din coltul laturii finisate | elevatia
+                    laterala (dinspre -X) -> <nume>.png
+  --crest <capat> <obisnuita>
+                    rand pe 28 % care se termina la deal in casa de capat, din camera de joc,
+                    punctul camerei la 40 m in amonte de capatul randului (platoul muchiei plat
+                    pana la X = -14), langa aceeasi vedere cu casa obisnuita pe acelasi loc
+                    -> sf_row_end_crest_gamecam.png
+  --compare sf_painted_lady_<x>
+                    decupare | randare, corpul in tenta decuparii (`LADY_TINT`)
+  --ladies          cele sase case pictate in rand (cinci pasteluri, albastrul repetat), cu
+                    gradinita de 7 x 3 m in fata fiecareia (de la Godot Z -7,2, dupa
+                    pridvoare), strada plata la 16 m de fatade, soarele din fata: 3/4 de la
+                    50 m, acelasi unghi de la 30 m, razant -> sf_painted_ladies_row_gamecam.png
+
     D:/Blender/blender.exe --background --factory-startup \\
         --python tools/blender/run_build.py -- preview_sf_row.py -- --row sf_row_b_canted
 
@@ -72,6 +86,15 @@ ROW_ORDER = ["blue", "pink", "mint", "butter", "cream", "pink"]
 KIT_ROW = ["sf_row_a_canted", "sf_row_b_square", "sf_row_c_canted", "sf_row_a_square",
            "sf_row_b_canted", "sf_row_c_square"]
 KIT_CORNER = "sf_row_corner_turret_m"
+# casele pictate (pasul 8c): tenta corpului ca pe decuparea fiecareia
+LADY_TINT = {"sf_painted_lady_a": "pink", "sf_painted_lady_b": "blue",
+             "sf_painted_lady_c": "mint", "sf_painted_lady_d": "butter",
+             "sf_painted_lady_e": "pink", "sf_painted_lady_f": "blue"}
+# randul caselor pictate: cinci pasteluri (jocul are cinci), albastrul repetat la distanta
+LADY_ROW = [("sf_painted_lady_a", "pink"), ("sf_painted_lady_b", "blue"),
+            ("sf_painted_lady_c", "mint"), ("sf_painted_lady_d", "butter"),
+            ("sf_painted_lady_e", "cream"), ("sf_painted_lady_f", "blue")]
+GARDEN_GLB = os.path.join(PROJ, "assets", "models", "sanfrancisco", "props", "sf_front_garden.glb")
 
 # camera de joc (brief §2/§9)
 GC_HEIGHT, GC_DIST, GC_PITCH, GC_FOV = 10.0, 12.5, 29.0, 68.0
@@ -362,7 +385,8 @@ def compare(name, res_height=900):
     # turnuletul pe +X, ca decuparea)
     crop = os.path.join(CROP_DIR, re.sub(r"_m$", "", name) + ".png")
     _clear()
-    meshes = _import(name, PASTELS["blue"])
+    # casele pictate: corpul in tenta decuparii lor (restul kitului: albastru-pal)
+    meshes = _import(name, PASTELS[LADY_TINT.get(re.sub(r"_m$", "", name), "blue")])
     ground = _ground_disc()
     img = bpy.data.images.load(crop)
     cw, ch = img.size
@@ -515,9 +539,205 @@ def row(name, count=6, kit=False):
     _rm(*frames)
 
 
+# --- Pasul 8c: casele de capat si casele pictate ------------------------------------------
+
+def end_views(name, res_height=900):
+    """Casa de capat: 3/4 din coltul laturii finisate (fata + latura -X) | elevatia laterala
+    (dinspre -X, teleobiectiv lung, aproape ortografic) -> <nume>.png"""
+    os.makedirs(FID_DIR, exist_ok=True)
+    _clear()
+    meshes = _import(name, PASTELS["pink"])
+    ground = _ground_disc()
+    p1 = os.path.join(FID_DIR, "_end_q3_%s.png" % name)
+    _render_object(meshes, [ground], p1, azimuth=128.0, elevation=13.0, lens=60.0, margin=1.06,
+                   res_height=res_height, aspect=0.85, frame_zmin=0.0)
+    p2 = os.path.join(FID_DIR, "_end_side_%s.png" % name)
+    _render_object(meshes, [ground], p2, azimuth=180.0, elevation=1.0, lens=600.0, margin=1.04,
+                   res_height=res_height, aspect=1.35, frame_zmin=0.0)
+    _compose(["--montage", ",".join((p1, p2)), "--out", os.path.join(FID_DIR, name + ".png")])
+    _rm(p1, p2)
+
+
+def _strip(name, xs, y0, y1, hfn, dz, hex_color):
+    """Fasie de teren/trotuar/carosabil pe X, urmand profilul `hfn` (cu frangere la
+    fiecare x din `xs`)."""
+    vs, faces = [], []
+    for x in xs:
+        vs += [(x, y0, hfn(x) + dz), (x, y1, hfn(x) + dz)]
+    for i in range(len(xs) - 1):
+        a = 2 * i
+        faces.append([a, a + 2, a + 3, a + 1])
+    me = bpy.data.meshes.new(name)
+    me.from_pydata(vs, [], faces)
+    me.update()
+    obj = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(obj)
+    obj.data.materials.append(_plain_material(name + "_m", hex_color))
+    return obj
+
+
+def _street(hfn, xs, axis_y, walk_y1, road_half=7.5, far=40.0, walk_y0=-8.0):
+    road_y1 = axis_y + road_half
+    return [
+        _strip("PrevWalk", xs, walk_y0, walk_y1, hfn, CURB, "#B9B3A8"),
+        _strip("PrevRoad", xs, walk_y1, road_y1, hfn, 0.0, "#55555A"),
+        _strip("PrevFar", xs, road_y1, road_y1 + far, hfn, CURB, "#A9A397"),
+    ]
+
+
+def _gamecam_scene(sun_dir, sun_energy=3.6, sun_hex="FFC890"):
+    scene = bpy.context.scene
+    _lights_off()
+    _sun("RowSun", sun_dir, sun_energy, color=_hex_lin(sun_hex), angle_deg=1.2)
+    _world("9DB4C8", 0.45)
+    scene.view_settings.view_transform = "Standard"
+    scene.view_settings.look = "None"
+    _engine(scene)
+    scene.render.resolution_x, scene.render.resolution_y = GC_RES
+    scene.render.resolution_percentage = 100
+    scene.render.film_transparent = False
+    scene.render.image_settings.color_mode = "RGB"
+    scene.render.image_settings.file_format = "PNG"
+    cam = _cam()
+    cam.data.type = "PERSP"
+    cam.data.sensor_fit = "VERTICAL"
+    cam.data.angle = math.radians(GC_FOV)
+    cam.data.clip_start = 0.3
+    cam.data.clip_end = 600.0
+    return scene, cam
+
+
+def _chase(cam, point, heading_deg, ground_h):
+    """Camera de joc: 12,5 m in spatele punctului `point` (pe directia de mers
+    `heading_deg`, masurata de la +X spre +Y), 10 m peste drum, in jos la 29 de grade."""
+    a = math.radians(heading_deg)
+    d = Vector((math.cos(a), math.sin(a), 0.0))
+    pitch = math.radians(GC_PITCH)
+    cam.location = Vector((point[0], point[1], ground_h + GC_HEIGHT)) - d * GC_DIST
+    look = Vector((d.x * math.cos(pitch), d.y * math.cos(pitch), -math.sin(pitch)))
+    cam.rotation_euler = look.to_track_quat("-Z", "Y").to_euler()
+    bpy.context.view_layer.update()
+
+
+CREST_X = -14.0      # muchia: platoul intersectiei e plat pana aici, apoi strada coboara 28 %
+
+
+def _crest_h(x):
+    return 0.0 if x <= CREST_X else -SLOPE * (x - CREST_X)
+
+
+def crest(end_name, reg_name):
+    """Ce vede soferul cand ajunge pe muchie: un rand pe panta de 28 % care se termina la
+    deal cu o casa de capat (latura finisata spre muchie), din camera de joc, cu punctul
+    camerei la 40 m in amonte de capatul randului. Sus: casa de capat; jos: aceeasi vedere
+    cu casa obisnuita (latura oarba) pe acelasi loc -> sf_row_end_crest_gamecam.png"""
+    os.makedirs(FID_DIR, exist_ok=True)
+    frames = []
+    for tag, first in (("capat", end_name), ("obisnuita", reg_name)):
+        _clear()
+        names = [first] + KIT_ROW[1:6]
+        houses = []
+        for i, nm in enumerate(names):
+            z = _crest_h(PITCH_X * i - 3.5) + CURB
+            houses += _import(nm, PASTELS[ROW_ORDER[i % len(ROW_ORDER)]],
+                              offset=(PITCH_X * i, 0.0, z))
+        axis_y = YF + FACADE_TO_AXIS
+        xs = [-120.0, CREST_X, 110.0]
+        planes = _street(_crest_h, xs, axis_y, YF + WALK_W)
+        _hide_others(houses + planes)
+        scene, cam = _gamecam_scene(_from_dir(SUN_AZ, 28.0))
+        px = -3.5 - 40.0
+        _chase(cam, (px, axis_y), 0.0, _crest_h(px))
+        p = os.path.join(FID_DIR, "_crest_%s.png" % tag)
+        scene.render.filepath = p
+        bpy.ops.render.render(write_still=True)
+        frames.append(p)
+    _compose(["--stack", ",".join(frames), "--labels",
+              "casa de capat (%s),casa obisnuita (%s)" % (end_name, reg_name),
+              "--out", os.path.join(FID_DIR, "sf_row_end_crest_gamecam.png")])
+    _rm(*frames)
+
+
+def _import_garden(offset):
+    before = set(bpy.data.objects)
+    bpy.ops.import_scene.gltf(filepath=GARDEN_GLB)
+    new = [o for o in bpy.data.objects if o not in before]
+    for o in new:
+        if o.parent is None:
+            o.location = o.location + Vector(offset)
+    bpy.context.view_layer.update()
+    meshes = [o for o in new if o.type == "MESH"]
+    for o in meshes:
+        _fix_ao_layer_name(o)
+        _per_slot_tint(o)
+    return meshes
+
+
+# Gradinita (7 x 3 m) in fata caselor pictate: incepe la Godot Z = -7,2 (dupa zona
+# pridvoarelor, care ies pana la -7,15), deci centrul la Blender Y = 8,7.
+GARDEN_Y = YF + 1.2 + 1.5
+LADY_FACADE_TO_AXIS = 16.0
+
+
+def ladies_row():
+    """Cele sase case pictate in rand, fiecare in alt pastel, cu gradinita in fata, pe
+    strada plata a coamei (axa la 16 m de fatade), luminate din fata (fatadele spre S):
+    intai frontal in 3/4, de la 50 m (iesirea din coltul de sus), apoi razant, de pe
+    strada -> sf_painted_ladies_row_gamecam.png"""
+    os.makedirs(FID_DIR, exist_ok=True)
+    _clear()
+    objs = []
+    for i, (nm, tint) in enumerate(LADY_ROW):
+        objs += _import(nm, PASTELS[tint], offset=(PITCH_X * i, 0.0, 0.0))
+        objs += _import_garden((PITCH_X * i, GARDEN_Y, 0.0))
+    axis_y = YF + LADY_FACADE_TO_AXIS
+    flat = (lambda x: 0.0)
+    walk_y1 = axis_y - 4.5
+    objs += [
+        _strip("PrevApron", [-150.0, 150.0], -8.0, YF + 1.2, flat, 0.02, "#B9B3A8"),
+        _strip("PrevLawn", [-150.0, 150.0], YF + 1.2, walk_y1 - 3.0, flat, 0.0, "#9AA77A"),
+        _strip("PrevWalk", [-150.0, 150.0], walk_y1 - 3.0, walk_y1, flat, CURB, "#B9B3A8"),
+        _strip("PrevRoad", [-150.0, 150.0], walk_y1, axis_y + 4.5, flat, 0.0, "#55555A"),
+        _strip("PrevFar", [-150.0, 150.0], axis_y + 4.5, axis_y + 120.0, flat, CURB, "#A9A397"),
+    ]
+    _hide_others(objs)
+    # soarele din fata (fatadele spre S): dinspre strada (+Y), usor din stanga
+    scene, cam = _gamecam_scene(_from_dir(70.0, 34.0))
+    xm = PITCH_X * 2.5
+    frames = []
+    # 1) frontal in 3/4: punctul camerei la 50 m de mijlocul randului, la 40 de grade de
+    #    normala fatadelor, spre amonte (-X), cu fata spre rand
+    a = math.radians(40.0)
+    for dist in (50.0, 30.0):           # 50 m = brief-ul; 30 m = acelasi unghi, mai aproape
+        pt = (xm - dist * math.sin(a), YF + dist * math.cos(a))
+        heading = math.degrees(math.atan2(YF + 2.0 - pt[1], xm - pt[0]))
+        _chase(cam, pt, heading, 0.0)
+        p = os.path.join(FID_DIR, "_ladies_34_%d.png" % dist)
+        scene.render.filepath = p
+        bpy.ops.render.render(write_still=True)
+        frames.append(p)
+    # 2) razant: pe axa strazii, inainte de primul rand, cu fata de-a lungul lui
+    _chase(cam, (-12.0, axis_y), 0.0, 0.0)
+    p = os.path.join(FID_DIR, "_ladies_razant.png")
+    scene.render.filepath = p
+    bpy.ops.render.render(write_still=True)
+    frames.append(p)
+    _compose(["--stack", ",".join(frames), "--labels",
+              "frontal 3/4 de la 50 m (iesirea din coltul de sus),acelasi unghi de la 30 m,razant de pe strada",
+              "--out", os.path.join(FID_DIR, "sf_painted_ladies_row_gamecam.png")])
+    _rm(*frames)
+
+
 argv = sys.argv
 args = argv[argv.index("--") + 1:] if "--" in argv else []
-if "--compare" in args:
+if "--end" in args:
+    end_views(args[args.index("--end") + 1])
+elif "--crest" in args:
+    _i = args.index("--crest")
+    crest(args[_i + 1], args[_i + 2])
+elif "--ladies" in args:
+    ladies_row()
+elif "--compare" in args:
     compare(args[args.index("--compare") + 1])
 elif "--views" in args:
     views(args[args.index("--views") + 1])

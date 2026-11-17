@@ -29,6 +29,7 @@
 #   measure_sf_gabarit.py  cutiile pe care le citeste fizica: vagon, utilaj, bloc, casa
 #   measure_sf_street.py   mobilierul valului 2 (masinile parcate, semaforul, felinarul, piesele mici)
 #   measure_sf_plants.py   vegetatia valului 2 (chiparosii, arborele de strada, hortensiile, gradinita)
+#   measure_sf_struct.py   structurile valului 3 (placa turnanta, magaziile, insula, fundalul, scara, leii)
 
 set -u
 cd "$(dirname "$0")/../.." || exit 1
@@ -94,6 +95,18 @@ done
 # coltul: 9 x 12 m, doua fatade si turnuletul (brief §8: <= 3.500)
 check "buildings/sf_row_corner_turret.glb" 3500 --origin=waterline
 check "buildings/sf_row_corner_turret_m.glb" 3500 --origin=waterline
+# casele de capat (pasul 8c): ca o casa de rand (<= 2.500), cu latura -X (`_m`: +X) finisata
+for h in sf_row_end_a sf_row_end_b sf_row_end_c; do
+  check "buildings/$h.glb" 2500 --origin=waterline
+  check "buildings/${h}_m.glb" 2500 --origin=waterline
+done
+# casele pictate (K2, inventar: <= 5.000, sase instante). Exceptie declarata:
+#   --allow-slots=31    doar `a`: accentul ei e FLAMINGO_PINK (benzile, coloanele, turnuletul)
+for k in a b c d e f; do
+  fl=""; [ "$k" = a ] && fl="--allow-slots=31"
+  check "buildings/sf_painted_lady_$k.glb" 5000 --origin=waterline $fl
+  check "buildings/sf_painted_lady_${k}_m.glb" 5000 --origin=waterline $fl
+done
 
 echo
 echo "== valul 2: mobilierul de strada si vegetatia (inventar §5.3-§5.4) =="
@@ -121,6 +134,20 @@ check "plants/sf_hydrangea_blue.glb" 600 --allow-slots=31
 check "props/sf_front_garden.glb" 400 --allow-slots=31
 
 echo
+echo "== valul 3: structurile, fundalul, scara, leii de mare (inventar §5.1, §5.4, §5.5) =="
+# Exceptii declarate:
+#   --origin=assembly   placa turnanta: doua noduri (discul, ghereta), ambele cu baza la Y = 0.
+#   --origin=waterline  magaziile (puntea la Y = 0, pilonii pana la -6), insula (stanca la nivelul
+#                       apei, fusta la -3) si leii (pluta incaleca apa): geometria INCALECA Y = 0.
+check "structures/sf_turntable.glb" 1500 --origin=assembly
+check "structures/sf_pier_shed.glb" 2500 --origin=waterline
+check "structures/sf_pier_shed_short.glb" 2000 --origin=waterline
+check "structures/sf_island_light.glb" 3000 --origin=waterline
+check "structures/sf_horizon.glb" 1600
+check "props/sf_stair_lane.glb" 400
+check "animals/sf_sea_lions.glb" 1800 --origin=waterline
+
+echo
 echo "== garzile de cote =="
 python tools/blender/measure_sf_bridge.py || fail=1
 st=$(python tools/blender/measure_sf_bridge.py --selftest 2>&1); rc=$?
@@ -140,6 +167,10 @@ st=$(python tools/blender/measure_sf_plants.py --selftest 2>&1); rc=$?
 printf '%s
 ' "$st" | grep -E "SELFTEST"
 [ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei de vegetatie a esuat"; fail=1; }
+python tools/blender/measure_sf_struct.py || fail=1
+st=$(python tools/blender/measure_sf_struct.py --selftest 2>&1); rc=$?
+printf '%s\n' "$st" | grep -E "SELFTEST"
+[ "$rc" -eq 0 ] || { echo "   !! selftest-ul gardei structurilor a esuat"; fail=1; }
 
 echo
 echo "== GLB-uri nedeclarate (verificate fara exceptii) =="

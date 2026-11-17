@@ -323,7 +323,8 @@ func _report() -> bool:
 			% [row["name"], String(row["path"]).get_file(), row["pieces"]])
 		var ov: Array = row["over"]
 		print("  PESTE ASFALT (>= %.2f m peste margine): %d" % [OVER_MIN, ov.size()])
-		for w in ov.slice(0, 12):
+		# `--toate`: toata lista (atribuirea pe familii, valul 3 San Francisco); implicit primele 12
+		for w in ov.slice(0, ov.size() if "--toate" in OS.get_cmdline_user_args() else 12):
 			var c: Vector3 = (w["aabb"] as AABB).get_center()
 			print("    %-14s intra %.2f m peste asfalt  la (%.0f, %.0f)" % [w["id"], w["over"], c.x, c.z])
 		var ins: Array = row["inside"]

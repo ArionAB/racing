@@ -35,6 +35,24 @@ urmeaza e ce citeste FIZICA jocului din fisier si verify nu vede:
                     X e oglindit (turnuletul pe +X). Nimic sub +3,3 nu iese din NICIUNA din cele
                     doua fatade de strada (-Z si -X; la `_m` -Z si +X).
 
+  sf_row_end_{a,b,c}, _m (casele de CAPAT, pasul 8c)
+                    ca familia lor (fatada, Z-, varful), plus LATURA FINISATA (-X; la `_m` +X):
+                    sub +3,3 nimic peste 0,08 din planul laturii (brau, rama ferestrei de parter);
+                    intre +3,3 si +9,0 cel mult 0,20 (relieful ferestrelor: rama 0,10, pervaz
+                    0,15, cornisa mica 0,18, sprinceana A 0,16); peste +9,0 streasina/cornisa
+                    EXACT cat s-a construit (A 0,45, B 0,35, C 0,35: X- = -3,95 / -3,85). Latura
+                    trebuie sa FIE fatada: >= 200 de varfuri de rama iesite >= 0,09 intre +3,3 si
+                    +9,0 si fereastra de parter (>= 20 de varfuri iesite 0,05..0,07 la 0,85..2,45).
+                    Latura cealalta e oarba: X+ exact 3,5.
+  sf_painted_lady_{a..f}, _m (casele pictate, K2)
+                    X EXACT +-3,5 (laturi oarbe, stau in rand), Y de la -2,4 la varful construit
+                    (a, c, d, f +14,5 = varful turnului; b +13,25; e +13,56 = cosul), Z- exact
+                    (pridvorul; d fara pridvor: bovindoul, -6,9), niciodata dincolo de -7,2.
+                    Regula PRIDVORULUI: sub +3,3, tot ce iese peste 8 cm din fatada sta in
+                    intervalul X declarat al pridvorului (la `_m` oglindit) si pana la -7,2; casa
+                    cu pridvor declarat trebuie sa-l aiba (un varf sub +3,3 la Z <= -7,1); d nu
+                    are voie cu nimic. Intervalele sunt ce trebuie sa lase liber gradinita.
+
 Radacinile fara scala/rotatie/translatie la toate (memoria scala-glb-neaplicata-la-radacina).
 """
 import json
@@ -43,7 +61,7 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from measure_sf_bridge import _roots, _write_glb, load, poke, verts  # noqa: E402
+from measure_sf_bridge import _roots, _write_glb, load, poke, poke_all, verts  # noqa: E402
 from verify_glb import load_glb  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -70,6 +88,25 @@ ROW_SPEC["sf_row_corner_turret"] = dict(x=(-TURRET_OUT, 4.5), top=("eq", 15.0),
                                         z0=(-6.986, 0.02), street_x=-1)
 ROW_SPEC["sf_row_corner_turret_m"] = dict(x=(-4.5, TURRET_OUT), top=("eq", 15.0),
                                           z0=(-6.986, 0.02), street_x=1)
+for _k in ROW_SPEC:
+    PIECES.setdefault(_k, "buildings/%s.glb" % _k)
+# Casele de capat (pasul 8c): familia lor + latura finisata (`end_side` = -1 la baza).
+END_OVERHANG = {"a": 0.45, "b": 0.35, "c": 0.35}
+for _fam in "abc":
+    for _sfx, _side in (("", -1), ("_m", 1)):
+        _ov = END_OVERHANG[_fam]
+        ROW_SPEC["sf_row_end_%s%s" % (_fam, _sfx)] = dict(
+            x=(-3.5 - _ov, 3.5) if _side < 0 else (-3.5, 3.5 + _ov), top=ROW_TOP[_fam],
+            z0=(-6.9, 0.02), street_x=0, end_side=_side, end_ov=_ov)
+# Casele pictate (K2): varful si Z- construite; pridvorul (X0, X1 la baza) sau None.
+LADY_SPEC = {"a": (14.5, -7.15, (-3.45, -0.40)), "b": (13.25, -7.15, (-3.45, -0.05)),
+             "c": (14.5, -7.18, (-3.46, -0.59)), "d": (14.5, -6.90, None),
+             "e": (13.56, -7.18, (-3.46, -0.34)), "f": (14.5, -7.15, (-1.60, 1.60))}
+for _k, (_top, _z0, _porch) in LADY_SPEC.items():
+    for _sfx in ("", "_m"):
+        _pr = None if _porch is None else (_porch if not _sfx else (-_porch[1], -_porch[0]))
+        ROW_SPEC["sf_painted_lady_%s%s" % (_k, _sfx)] = dict(
+            x=(-3.5, 3.5), top=("eq", _top), z0=(_z0, 0.01), street_x=0, lady=True, porch=_pr)
 for _k in ROW_SPEC:
     PIECES.setdefault(_k, "buildings/%s.glb" % _k)
 ROW_KEYS = tuple(ROW_SPEC)
@@ -159,6 +196,19 @@ def check(key, path, report=True):
         # sub +3,3 doar relief plat (brau, pilastrii nisei, rama garajului, ancadramentele
         # ferestrelor de parter ale coltului): cel mult 8 cm, pe fiecare fatada de strada
         low = [p for p in ps if p[1] < 3.3 - 1e-3 and p[2] < -6.08]
+        if sp.get("lady"):
+            # casele pictate: pridvorul are voie sub +3,3, dar numai in intervalul lui
+            pr = sp["porch"]
+            if any(p[2] < -7.2 - 1e-3 for p in ps):
+                bad.append("(pridvor) ceva iese dincolo de Z -7,2 (min %.3f)" % min(p[2] for p in ps))
+            out = [p for p in low if pr is None or not (pr[0] - 0.01 <= p[0] <= pr[1] + 0.01)]
+            if out:
+                bad.append("(fatada) %d varfuri ies sub +3,3 in afara pridvorului %s, ex. %s"
+                           % (len(out), pr, tuple(round(v, 3) for v in out[0])))
+            if pr is not None and not any(p[2] <= -7.1 for p in low):
+                bad.append("(pridvor) pridvorul declarat %s lipseste (nimic sub +3,3 la Z <= -7,1)"
+                           % (pr,))
+            low = []
         if low:
             bad.append("(fatada) %d varfuri ies din planul fatadei sub +3,3 (max %.2f m), ex. %s"
                        % (len(low), max(-6.0 - p[2] for p in low), tuple(round(v, 3) for v in low[0])))
@@ -170,6 +220,22 @@ def check(key, path, report=True):
                 bad.append("(fatada laterala) %d varfuri ies din fatada %sX sub +3,3 (max %.2f m), ex. %s"
                            % (len(low), "+" if sx > 0 else "-",
                               max(sx * p[0] - wall for p in low), tuple(round(v, 3) for v in low[0])))
+        es = sp.get("end_side")
+        if es:
+            def rel(p):
+                return es * p[0] - 3.5
+            for lo_, hi_, lim, nm in ((-9.0, 3.3, 0.08, "sub +3,3"), (3.3, 9.0, 0.20, "+3,3..+9,0"),
+                                      (9.0, 99.0, sp["end_ov"], "peste +9,0")):
+                over = [p for p in ps if lo_ <= p[1] < hi_ and rel(p) > lim + 1e-3]
+                if over:
+                    bad.append("(latura finisata) %d varfuri ies %s peste %.2f (max %.2f), ex. %s"
+                               % (len(over), nm, lim, max(rel(p) for p in over),
+                                  tuple(round(v, 3) for v in over[0])))
+            nfr = sum(1 for p in ps if 3.3 < p[1] < 9.0 and 0.09 <= rel(p) <= 0.2 + 1e-3)
+            ngw = sum(1 for p in ps if 0.85 < p[1] < 2.45 and 0.05 < rel(p) <= 0.07 + 1e-3)
+            if nfr < 200 or ngw < 20:
+                bad.append("(latura finisata) nu e fatada: %d varfuri de rama la etaje (>= 200), "
+                           "%d la fereastra de parter (>= 20)" % (nfr, ngw))
     if report:
         (x0, x1), (y0, y1), (z0, z1) = b
         print("%-18s X %.3f..%.3f  Y %.3f..%.3f  Z %.3f..%.3f  noduri %s  %s"
@@ -229,6 +295,49 @@ def sabotages(key):
             out.append(("varful (cornisa/atic/turnulet) inaltat cu 10 cm", "amprenta",
                         lambda g, b, t=top: poke(g, b, "Row_Trim", lambda p: p[1] > t - 0.005,
                                                  lambda p: (p[0], p[1] + 0.1, p[2]))))
+        es = sp.get("end_side")
+        if es:
+            out += [
+                ("o treapta scoasa pe latura finisata (0,5 m, sub +3,3)", "latura finisata",
+                 lambda g, b, es=es: poke(g, b, "Row_Trim", lambda p: p[1] < 0.0 and es * p[0] > 3.45,
+                                          lambda p: (es * 4.0, p[1], p[2]))),
+                ("o rama de fereastra laterala iesita 0,4 m", "latura finisata",
+                 lambda g, b, es=es: poke(g, b, "Row_Trim",
+                                          lambda p: 3.3 < p[1] < 9.0 and es * p[0] > 3.55,
+                                          lambda p: (es * 3.9, p[1], p[2]))),
+                ("latura finisata rasa (ferestrele lipite de perete)", "latura finisata",
+                 lambda g, b, es=es: poke_all(g, b, "Row_Trim",
+                                              lambda p: 0.8 < p[1] < 9.0 and es * p[0] > 3.505,
+                                              lambda p: (es * 3.5, p[1], p[2])) > 0),
+                ("cornisa laterala lungita cu 10 cm", "amprenta",
+                 lambda g, b, es=es, ov=sp["end_ov"]: poke(
+                     g, b, "Row_Trim", lambda p: es * p[0] > 3.5 + ov - 0.01,
+                     lambda p: (p[0] + es * 0.1, p[1], p[2]))),
+            ]
+        if sp.get("lady"):
+            pr = sp["porch"]
+            out = [o for o in out if o[1] != "fatada"]
+            out += [
+                ("o treapta pe gradinita in afara pridvorului (sub +3,3)", "fatada",
+                 lambda g, b, pr=pr: poke(g, b, "Row_Trim",
+                                          lambda p: p[1] < 0.0 and p[2] < -5.9 and (
+                                              pr is None or not (pr[0] - 0.3 <= p[0] <= pr[1] + 0.3)),
+                                          lambda p: (p[0], p[1], -6.6))),
+                ("pridvorul / bovindoul impins la Z -7,4", "pridvor",
+                 lambda g, b, zc=(-7.1 if pr is not None else -6.85): poke(
+                     g, b, "Row_Trim", lambda p: p[2] < zc, lambda p: (p[0], p[1], -7.4))),
+            ]
+            if pr is not None:
+                out.append(("pridvorul scos (tras la planul fatadei)", "pridvor",
+                            lambda g, b: sum(poke_all(g, b, nd,
+                                                      lambda p: p[1] < 3.3 and p[2] < -6.08,
+                                                      lambda p: (p[0], p[1], -6.0))
+                                             for nd in ("Row_Trim", "Row_Wall")) > 0))
+            else:
+                out.append(("un pridvor adaugat la casa fara pridvor", "fatada",
+                            lambda g, b: poke(g, b, "Row_Trim",
+                                              lambda p: p[1] < 2.0 and p[2] < -5.9,
+                                              lambda p: (p[0], p[1], -7.0))))
         if sp["street_x"]:
             s_ = sp["street_x"]
             out.append(("o treapta scoasa pe trotuarul strazii laterale (0,5 m)", "fatada laterala",

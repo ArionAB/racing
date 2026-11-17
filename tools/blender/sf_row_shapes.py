@@ -1143,3 +1143,481 @@ def finish_house(h, smooth_angle=55.0, wall_ao="overhead", wall_z=(LEVEL, 12.45)
         o.scale = (1.0, 1.0, 1.0)
     ao = bake_house_ao([wall, trim], wall_z=wall_z, wall_ao=wall_ao)
     return wall, trim, ao
+
+
+# =====================================================================================
+# Extinderea kitului (pasul 8c): casele de CAPAT si casele pictate (K2).
+# Functii NOI, adaugate la coada: cele de mai sus raman neatinse, ca cele 14 GLB-uri ale
+# kitului (deja puse pe pista de sute de ori) sa iasa octet cu octet la o reconstruire.
+# =====================================================================================
+
+S_BRICK = 23        # tile_terracotta: cosul de fum (caramida)
+
+# --- Casa de capat: latura -X ca a doua fatada, mai linistita ------------------------
+
+def side_facade(h, rows, win_ys, glass, fw, hood, z_belt, board_top, ground_win_y,
+                belt_h=0.12, cols=None):
+    """Latura -X (planul x = -HX, priveste spre -X) ca FATADA a doua a unei case de capat
+    de rand: grila de scandura (Row_Wall) pe `rows`, ferestre inalte pe etaje la Blender
+    Y = `win_ys`, una mica la parter, braul si scandurile de colt intoarse pe colt.
+    `hood(c, w, z_top)` pune cornisa/sprinceana ferestrei (dupa familie).
+
+    Regula de gabarit (garda `measure_sf_gabarit.py`): sub +3,3 doar relief plat (brau
+    0,06, rama ferestrei de parter 0,06, scanduri de colt 0,05); intre +3,3 si +9,0
+    relieful ferestrelor de etaj (rama 0,10, pervaz 0,15, cornisa mica 0,18), ca pe
+    fatada de strada; peste +9,0 streasina/cornisa (vezi `side_eave_*`)."""
+    o = V(-h.hx, 0, 0)
+    cols = cols or (YBW, YBW + 0.3, YF - 0.3, YF)
+    for a, b in zip(cols[:-1], cols[1:]):
+        for c0, c1 in zip(rows[:-1], rows[1:]):
+            h.wall.rect(o, YP, UP, a, b, c0, c1, S_WALL, -XP)
+    gw, grows = glass
+    for y in win_ys:
+        c = V(-h.hx, y, 0)
+        for gz, gh in grows:
+            z0, ht = gz - fw, gh + 2 * fw
+            window(h, c, -YP, -XP, z0, gw + 2 * fw, ht, fw=fw, proud=0.1, hood=False,
+                   sill=True)
+            hood(c, gw + 2 * fw, z0 + ht)
+    # fereastra mica de parter: rama iesita 0,06, fara pervaz (nimic peste 8 cm sub +3,3)
+    window(h, V(-h.hx, ground_win_y, 0), -YP, -XP, 0.9, gw + 2 * fw, 1.5, fw=fw, proud=0.06,
+           hood=False, sill=False)
+    # braul intors pe colt (inchide capatul braului de pe fatada) si scandurile de colt
+    h.trim_bev.box(V(-h.hx - 0.06, YBW, LEVEL), V(-h.hx, YF + 0.06, LEVEL + belt_h), S_WHITE,
+                   skip=("+X",))
+    h.trim.box(V(-h.hx - 0.05, YF - 0.10, z_belt), V(-h.hx, YF + 0.05, board_top), S_WHITE,
+               skip=("+X",))
+    h.trim.box(V(-h.hx - 0.05, YBW, z_belt), V(-h.hx, YBW + 0.10, board_top), S_WHITE,
+               skip=("+X",))
+
+
+def side_eave_cornice(h, z_corn=(9.35, 9.6), proud=0.35, y0=YB, y1=None, modillions=()):
+    """Cornisa principala INTOARSA pe latura -X (B, C): aceeasi sectiune ca pe fatada
+    (iesita `proud`), de la spate pana in fata cornisei de pe fatada (o inchide pe colt),
+    cu modilioane dedesubt."""
+    y1 = YF + proud if y1 is None else y1
+    hx = h.hx
+    h.trim_bev.box(V(-hx - proud, y0, z_corn[0]), V(-hx, y1, z_corn[1]), S_WHITE,
+                   skip=("+X",))
+    for y in modillions:
+        h.trim.box(V(-hx - proud + 0.06, y - 0.07, z_corn[0] - 0.16), V(-hx, y + 0.07, z_corn[0]),
+                   S_WHITE, skip=("+X", "+Z"))
+
+
+def side_roof_fascia(h, z0, z1, y0, y1, proud=0.10):
+    """Bordura alba pe muchia laterala a acoperisului (B, C): acopera capatul placii de
+    ardezie de pe latura -X, ca bordura frontonului de pe fata."""
+    h.trim.box(V(-h.hx - proud, y0, z0), V(-h.hx, y1, z1), S_WHITE, skip=("+X",))
+
+
+def side_italianate_cornice(h, z_bed=(9.6, 9.7), z_crown=(10.05, 10.3), proud=0.45,
+                            consoles=(), console_w=0.14, console_d=0.38):
+    """Cornisa GREA (A) care trece peste colt si continua pe latura -X: braul de jos,
+    consolele in volute (profil in planul XZ) si coroana iesita `proud`."""
+    hx = h.hx
+    h.trim.box(V(-hx - 0.05, YB, z_bed[0]), V(-hx, YF + 0.05, z_bed[1]), S_WHITE,
+               skip=("+X",))
+    h.trim_bev.box(V(-hx - proud, YB, z_crown[0]), V(-hx, YF + proud, z_crown[1]), S_WHITE,
+                   skip=("+X",))
+    z0, z1 = z_bed[1], z_crown[0]
+    for y in consoles:
+        y0 = y - console_w * 0.5
+        prof = [V(-hx, y0, z1), V(-hx - console_d, y0, z1), V(-hx - console_d, y0, z1 - 0.12),
+                V(-hx - 0.12, y0, z0)]
+        h.trim.prism(prof, (0, console_w, 0), S_WHITE, skip_sides=(0, 3))
+
+
+def side_false_front_return(h, back=1.5, z0=EAVE, z_side=10.35, thick=0.12, cap_h=0.12,
+                            cap_out=0.10):
+    """Fatada falsa (C) INTOARSA pe latura -X pe `back` metri (asa arata o fatada falsa din
+    lateral: un perete-paravan care se opreste, iar acoperisul in panta se vede in spatele
+    lui). Peretele aticului pe scandura, pe ambele fete si pe capat; capacul alb, iesit
+    `cap_out` (peste +10,2, deci in voie)."""
+    hx = h.hx
+    w = h.wall
+    ya, yb = YF - back, YF - thick
+    zs = z_side - cap_h
+    w.rect(V(-hx, 0, 0), YP, UP, ya, yb, z0, zs, S_WALL, -XP)
+    w.rect(V(-hx + thick, 0, 0), YP, UP, ya, yb, z0, zs, S_WALL, XP)
+    w.rect(V(0, ya, 0), XP, UP, -hx, -hx + thick, z0, zs, S_WALL, -YP)
+    h.trim_bev.box(V(-hx - cap_out, ya, zs), V(-hx + thick, yb, z_side), S_WHITE)
+    h.trim_bev.box(V(-hx - cap_out, yb, zs), V(-hx, YF + cap_out, z_side), S_WHITE,
+                   skip=("+X",))
+
+
+# --- Casele pictate (K2): vocabular nou ----------------------------------------------
+
+def mark(h):
+    """Pozitia curenta in fiecare grup: `accent(h, mark, ...)` recoloreaza ce s-a
+    construit DUPA ea."""
+    return (len(h.wall.faces), len(h.trim.faces), len(h.trim_bev.faces))
+
+
+def accent(h, since, slot, only=(S_WHITE,), zr=None, parts=(1, 2), tall=None):
+    """Fetele construite dupa `since` (din `mark`), pe sloturile `only`, trec pe `slot`
+    (culoarea de accent a casei). `zr` = (z0, z1): doar fetele cu centrul in banda asta;
+    `tall` = doar fetele care acopera cel putin atatia metri pe verticala (montantii)."""
+    groups = (h.wall, h.trim, h.trim_bev)
+    for gi in parts:
+        p = groups[gi]
+        for k in range(since[gi], len(p.faces)):
+            if p.slots[k] not in only:
+                continue
+            if zr is not None:
+                z = sum(p.verts[i].z for i in p.faces[k]) / len(p.faces[k])
+                if not (zr[0] <= z <= zr[1]):
+                    continue
+            if tall is not None:
+                zs = [p.verts[i].z for i in p.faces[k]]
+                if max(zs) - min(zs) < tall:
+                    continue
+            p.slots[k] = slot
+
+
+def finial(p, x, y, z0, z1, slot, w=0.14, r=0.15):
+    """Varf decorativ: stalp patrat (>= 0,10) si un romb alungit deasupra."""
+    zp = z0 + (z1 - z0) * 0.4
+    p.box(V(x - w * 0.5, y - w * 0.5, z0), V(x + w * 0.5, y + w * 0.5, zp), slot, skip=("-Z",))
+    zm = zp + (z1 - zp) * 0.4
+    pts = [V(x + r, y, zm), V(x, y + r, zm), V(x - r, y, zm), V(x, y - r, zm)]
+    p.piece(pts + [V(x, y, zp), V(x, y, z1)],
+            [[i, (i + 1) % 4, 5] for i in range(4)] + [[(i + 1) % 4, i, 4] for i in range(4)],
+            slot, center=V(x, y, zm))
+
+
+def lady_walls(h, holes, rows=(LEVEL, LEVEL + 0.4, 8.85, 9.35, EAVE), strip=0.3,
+               side_top=EAVE):
+    """Peretii de scandura ai unei case pictate: fatada etajelor (grila pe `rows`) cu
+    GOLURI unde stau bovindourile, turnurile si turnuletele (`holes` = (x0, x1, z_cut):
+    peretele se opreste la z_cut, deasupra il inchide corpul din fata), laturile ORBE si
+    spatele (de la 0 la `side_top`). Benzile de `strip` langa goluri tin AO-ul de sub
+    streasini in banda lui (ca `upper_walls`)."""
+    w = h.wall
+    hx = h.hx
+    o = V(0, YF, 0)
+    cuts = {-hx, hx}
+    for x0, x1, _z in holes:
+        cuts |= {x0, x1}
+        for x in (x0 - strip, x1 + strip):
+            if -hx + 0.05 < x < hx - 0.05 and not any(a - 1e-6 <= x <= b + 1e-6
+                                                       for a, b, _ in holes):
+                cuts.add(x)
+    cols = sorted(cuts)
+    for a, b in zip(cols[:-1], cols[1:]):
+        hole = next((ho for ho in holes if a >= ho[0] - 1e-6 and b <= ho[1] + 1e-6), None)
+        if hole is not None:
+            zc = hole[2]
+            rr = [z for z in rows if z < zc - 1e-6] + [zc]
+        else:
+            rr = list(rows)
+        for c0, c1 in zip(rr[:-1], rr[1:]):
+            w.rect(o, XP, UP, a, b, c0, c1, S_WALL, YP)
+    for sx in (-1, 1):
+        w.rect(V(sx * hx, 0, 0), YP, UP, YBW, YF, 0.0, side_top, S_WALL, XP * sx)
+    w.rect(V(0, YBW, 0), XP, UP, -hx, hx, 0.0, side_top, S_WALL, -YP)
+
+
+def pair_windows(h, xs, fw=0.10, glass=(0.69, ((4.23, 1.59), (6.88, 1.59))), hood_h=0.12,
+                 rows=None):
+    """Ferestre inalte pe fatada (ca perechea kitului), cu cornisa mica comuna peste
+    fiecare grup de pe acelasi rand."""
+    gw, grows = glass
+    for gz, gh in (rows or grows):
+        z0, ht = gz - fw, gh + 2 * fw
+        for x in xs:
+            window(h, V(x, YF, 0), XP, YP, z0, gw + 2 * fw, ht, fw=fw, proud=0.1,
+                   hood=False, sill=True)
+        hx = gw * 0.5 + fw + 0.075
+        wall_box(h.trim, V(0, YF, 0), XP, YP, min(xs) - hx, max(xs) + hx, 0.0, 0.18,
+                 z0 + ht, z0 + ht + hood_h, S_WHITE)
+
+
+def ground_windows(h, xs, fw=0.10, gw=0.69):
+    """Ferestre de parter: rama iesita 0,06, fara pervaz (sub +3,3 nimic peste 8 cm)."""
+    for x in xs:
+        window(h, V(x, YF, 0), XP, YP, 0.8, gw + 2 * fw, 1.6, fw=fw, proud=0.06, hood=False,
+               sill=False)
+
+
+def spandrels(h, outline, z0, z1, slot, inset=0.10, proud=0.025):
+    """Panourile dintre randurile de ferestre ale unui bovindou (pe fiecare fata, intre
+    montantii de colt), in culoarea de ACCENT: banda tare a casei pictate."""
+    for i in range(len(outline) - 1):
+        a, b, d, nrm = _seg(outline, i)
+        L = (b - a).length
+        wall_box(h.trim, V(a.x, a.y, 0), d, nrm, inset, L - inset, 0.0, proud, z0, z1, slot)
+
+
+def cross_gable(h, xc, w, apex, y_face=YF, over=0.45, depth=3.5, thick=0.15, verge_h=0.22,
+                bands=(), band_h=0.28, band_out=0.05, band_slot=S_WALL, window_at=None,
+                finial_slot=None, finial_h=0.85, eave_over=0.0, z_eave=EAVE, split=None,
+                field=True):
+    """Fronton spre strada pe O PARTE a fatadei (casele pictate): campul triunghiular pe
+    scandura (Row_Wall) in planul `y_face` (YF = pe fatada; mai in fata = pe fruntea unui
+    bovindou care urca in fronton), doua ape de ardezie cu coama pe Y care intra `depth`
+    in acoperisul principal (se ingroapa in el), bordura alba pe muchiile inclinate,
+    benzi de solzi (pe `band_slot`: pastel sau ACCENT), fereastra mica si varful
+    decorativ. `eave_over` = cat ies apele lateral peste latimea campului (pe bovindou)."""
+    hw = w * 0.5
+    wall_apex = apex - thick
+    yf, yb = y_face + over, y_face - depth
+    he = hw + eave_over
+    if field:
+        gs = split if split is not None else z_eave + (wall_apex - z_eave) * 0.25
+        hs = hw * (wall_apex - gs) / (wall_apex - z_eave)
+        h.wall.face([V(xc - hw, y_face, z_eave), V(xc + hw, y_face, z_eave),
+                     V(xc + hs, y_face, gs), V(xc - hs, y_face, gs)], S_WALL, YP)
+        h.wall.face([V(xc - hs, y_face, gs), V(xc + hs, y_face, gs),
+                     V(xc, y_face, wall_apex)], S_WALL, YP)
+    # apele: eave-bot, eave-top, ridge-top, ridge-bot (ca `gable_roof`)
+    z_e = z_eave - eave_over * (wall_apex - z_eave) / hw
+    for sx in (-1, 1):
+        e_bot, e_top = V(xc + sx * he, 0, z_e), V(xc + sx * he, 0, z_e + thick)
+        r_bot, r_top = V(xc, 0, wall_apex), V(xc, 0, apex)
+        vs = []
+        for base in (e_bot, e_top, r_top, r_bot):
+            vs.append(V(base.x, yb, base.z))
+            vs.append(V(base.x, yf, base.z))
+        faces = [[2, 3, 5, 4], [0, 6, 7, 1], [1, 7, 5, 3], [0, 1, 3, 2]]
+        h.trim_bev.piece(vs, faces, S_DARK)
+    # bordura
+    if verge_h:
+        run, rise = he, apex - (z_e + thick)
+        L = math.hypot(run, rise)
+        for sx in (-1, 1):
+            top_e, top_r = V(xc + sx * he, 0, z_e + thick), V(xc, 0, apex)
+            u = (top_r - top_e).normalized()
+            wv = Vector((sx * rise, 0.0, run)).normalized()
+            c = (top_e + top_r) * 0.5 - wv * (verge_h * 0.5)
+            c.y = yf + 0.02
+            h.trim_bev.obox(c, u, YP, wv, L * 0.5, 0.07, verge_h * 0.5, S_WHITE)
+    # solzii
+    span = wall_apex - z_eave
+
+    def hwz(z):
+        return hw * (wall_apex - z) / span
+
+    bp = h.wall if band_slot == S_WALL else h.trim
+    for z0 in bands:
+        z1 = z0 + band_h
+        a0, a1 = hwz(z0), hwz(z1)
+        bp.face([V(xc - a0, y_face + band_out, z0), V(xc + a0, y_face + band_out, z0),
+                 V(xc + a1, y_face + 0.004, z1), V(xc - a1, y_face + 0.004, z1)], band_slot,
+                YP + UP * 0.1)
+        bp.face([V(xc - a0, y_face, z0), V(xc + a0, y_face, z0), V(xc + a0, y_face + band_out, z0),
+                 V(xc - a0, y_face + band_out, z0)], band_slot, -UP)
+    if window_at:
+        z0, s = window_at
+        window(h, V(xc, y_face, 0), XP, YP, z0, s, s * 1.15, fw=0.1, proud=0.09, sash=False,
+               hood=False, sill=True)
+    if finial_slot is not None:
+        finial(h.trim, xc, yf - 0.05, apex - 0.1, apex + finial_h, finial_slot)
+
+
+def side_gable_roof(h, y_ridge=0.0, apex=12.6, thick=0.15, over_front=0.35):
+    """Acoperis in doua ape cu coama PARALELA cu strada (pe X, la Blender Y = `y_ridge`):
+    apa din fata se vede din strada, deci poarta lucarne. Frontoanele de pe laturi sunt
+    oarbe, pe scandura (vecinii le acopera in rand)."""
+    hx = h.hx
+    # apa din fata are streasina (iesita `over_front`) la +9,6 pe muchie, deci deasupra
+    # cornisei; la planul fatadei sta cu `zf - EAVE` mai sus (banda de perete de mai jos)
+    yfe = YF + over_front
+    zf = EAVE + over_front * (apex - EAVE) / (yfe - y_ridge)
+    for (y_e, y_r) in ((yfe, y_ridge), (YB, y_ridge)):
+        z_e = EAVE
+        vs = [V(-hx, y_e, z_e), V(hx, y_e, z_e), V(hx, y_e, z_e + thick), V(-hx, y_e, z_e + thick),
+              V(-hx, y_r, apex - thick), V(hx, y_r, apex - thick), V(hx, y_r, apex),
+              V(-hx, y_r, apex)]
+        faces = [[3, 2, 6, 7], [0, 4, 5, 1], [0, 1, 2, 3], [0, 3, 7, 4], [1, 5, 6, 2]]
+        h.trim_bev.piece(vs, faces, S_DARK, center=V(0, (y_e + y_r) * 0.5, (z_e + apex) * 0.5))
+    for sx in (-1, 1):
+        x = sx * hx
+        h.wall.face([V(x, YBW, EAVE), V(x, YF, EAVE), V(x, YF, zf), V(x, y_ridge, apex - thick)],
+                    S_WALL, XP * sx)
+    h.wall.rect(V(0, YF, 0), XP, UP, -hx, hx, EAVE, zf, S_WALL, YP)
+
+
+def pyramid_roof(h, x0, x1, y0, y1, z, apex, slot=S_DARK, finial_slot=S_WHITE, finial_h=0.6):
+    """Acoperis piramidal (turnul patrat) cu varf decorativ."""
+    cx, cy = (x0 + x1) * 0.5, (y0 + y1) * 0.5
+    base = [V(x0, y0, z), V(x1, y0, z), V(x1, y1, z), V(x0, y1, z)]
+    h.trim_bev.piece(base + [V(cx, cy, apex)], [[0, 1, 4], [1, 2, 4], [2, 3, 4], [3, 0, 4],
+                                                [3, 2, 1, 0]], slot,
+                     center=V(cx, cy, z + (apex - z) * 0.25))
+    if finial_slot is not None:
+        finial(h.trim, cx, cy, apex - 0.2, apex + finial_h, finial_slot)
+
+
+def tower_top(h, x0, x1, y0, y1, z0, z_top, crown, roof_apex, accent_slot, win=None,
+              post_w=0.10, crown_out=0.12, roof_over=0.15, finial_h=0.6):
+    """Partea de turn a unui bovindou PATRAT care urca peste streasina (`x0..x1` pe fata,
+    fruntea la Blender Y = `y1`, spatele la `y0`, in acoperis): patru pereti de scandura
+    de la `z0` la `z_top`, montanti albi pe muchii, ferestre pe fata (si pe laturi),
+    coroana (accent) si acoperis piramidal cu varf."""
+    w = h.wall
+    faces = ((V(x0, y1, 0), XP, x1 - x0, YP), (V(x1, y1, 0), -YP, y1 - y0, XP),
+             (V(x1, y0, 0), -XP, x1 - x0, -YP), (V(x0, y0, 0), YP, y1 - y0, -XP))
+    rows = (z0, z_top - 0.45, z_top)
+    for c, u, L, n in faces:
+        for c0, c1 in zip(rows[:-1], rows[1:]):
+            w.rect(c, u, UP, 0.0, L, c0, c1, S_WALL, n)
+        for a, b in ((0.0, post_w), (L - post_w, L)):
+            wall_box(h.trim, c, u, n, a, b, 0.0, 0.035, z0, z_top, S_WHITE)
+    if win:
+        gz, gh, gw = win
+        for c, u, L, n in faces[:2] + faces[3:]:
+            if L < gw + 0.5:
+                continue
+            window(h, c + u * (L * 0.5), u, n, gz - 0.1, gw + 0.2, gh + 0.2, fw=0.1, proud=0.08,
+                   hood=False, sill=False)
+    zc0, zc1 = crown
+    ol = [V(x0, y0, zc0), V(x1, y0, zc0), V(x1, y1, zc0), V(x0, y1, zc0)]
+    ol = [V(p.x + (crown_out if p.x > (x0 + x1) * 0.5 else -crown_out),
+            p.y + (crown_out if p.y > (y0 + y1) * 0.5 else -crown_out), zc0) for p in ol]
+    h.trim_bev.prism(ol, (0, 0, zc1 - zc0), accent_slot)
+    pyramid_roof(h, x0 - roof_over, x1 + roof_over, y0 - roof_over, y1 + roof_over, zc1,
+                 roof_apex, finial_slot=accent_slot, finial_h=finial_h)
+
+
+def porch(h, x0, x1, proj=1.10, posts=(), post_w=0.20, post_slot=S_WHITE, z_beam=(2.6, 2.85),
+          z_roof=(2.85, 3.1), kind="flat", ped_apex=None, accent_slot=S_WHITE,
+          opening=None, parapet_h=0.75, parapet_t=0.12):
+    """Pridvorul cu coloane al unei case pictate: podea la cota 0 (plina cu podeaua casei),
+    fusta de beton pana la -2,4 pe fata si pe laturi (ca fusta casei: terenul o taie),
+    coloane patrate cu capitel, parapet PLIN (panou pastel pe Row_Wall cu mana curenta alba
+    de 0,12 x 0,18; nu baluștri subtiri: nimic sub 0,10 m),
+    grinda si placa de acoperis cu bordura alba. `kind`:
+      - "flat"      placa alba, ardezie deasupra;
+      - "balcony"   placa = podeaua unui balcon, cu parapet plin deasupra (peste +3,3);
+      - "pediment"  fronton triunghiular pe fruntea pridvorului (camp pastel, cornisa alba
+                    in pantă), cu ape scurte inapoi spre fatada.
+    Iese `proj` din fatada (casele pictate stau in spatele gradinitelor, nu pe trotuar);
+    placa iese cu 0,05 in plus. `opening` = (xa, xb): golul din parapetul din fata (spre
+    usa)."""
+    t = h.trim
+    y0, y1 = YF, YF + proj
+    # podeaua si fusta
+    t.rect(V(0, 0, 0), XP, YP, x0, x1, y0, y1, S_STONE, UP)
+    t.rect(V(0, y1, 0), XP, UP, x0, x1, SKIRT, 0.0, S_STONE, YP)
+    t.rect(V(x0, 0, 0), YP, UP, y0, y1, SKIRT, 0.0, S_STONE, -XP)
+    t.rect(V(x1, 0, 0), YP, UP, y0, y1, SKIRT, 0.0, S_STONE, XP)
+    # coloanele (cu baza si capitel), pe fruntea pridvorului
+    yc = y1 - 0.14
+    for x in posts:
+        t.box(V(x - post_w * 0.5, yc - post_w * 0.5, 0.0), V(x + post_w * 0.5, yc + post_w * 0.5,
+              z_beam[0] - 0.15), post_slot, skip=("-Z",))
+        t.box(V(x - post_w * 0.5 - 0.05, yc - post_w * 0.5 - 0.05, z_beam[0] - 0.15),
+              V(x + post_w * 0.5 + 0.05, yc + post_w * 0.5 + 0.05, z_beam[0]), post_slot)
+        t.box(V(x - post_w * 0.5 - 0.04, yc - post_w * 0.5 - 0.04, 0.0),
+              V(x + post_w * 0.5 + 0.04, yc + post_w * 0.5 + 0.04, 0.25), post_slot,
+              skip=("-Z",))
+    # parapetul plin: pe laturi si pe fata, cu gol spre usa
+    pt = parapet_t
+
+    def rail(lo, hi, skip, part_wall=h.wall, part_cap=t):
+        zc = hi.z - 0.12
+        part_wall.box(lo, V(hi.x, hi.y, zc), S_WALL, skip=skip)
+        part_cap.box(V(lo.x - 0.03, lo.y - (0.0 if "-Y" in skip else 0.03), zc),
+                     V(hi.x + 0.03, hi.y + 0.03, hi.z), S_WHITE,
+                     skip=tuple(k for k in skip if k == "-Y"))
+    for xs in (x0, x1 - pt):
+        rail(V(xs, y0, 0.0), V(xs + pt, y1 - 0.04, parapet_h), ("-Z", "-Y"))
+    segs = [(x0 + pt, x1 - pt)] if opening is None else [(x0 + pt, opening[0]),
+                                                          (opening[1], x1 - pt)]
+    for a, b in segs:
+        if b - a > 0.05:
+            rail(V(a, y1 - 0.04 - pt, 0.0), V(b, y1 - 0.04, parapet_h), ("-Z",))
+    # grinda si placa
+    t.box(V(x0, y1 - 0.28, z_beam[0]), V(x1, y1, z_beam[1]), accent_slot, skip=("-Y",))
+    h.trim_bev.box(V(x0 - 0.05, y0, z_roof[0]), V(x1 + 0.05, y1 + 0.05, z_roof[1]), S_WHITE,
+                   skip=("-Y",))
+    if kind == "flat":
+        t.rect(V(0, 0, z_roof[1] + 0.004), XP, YP, x0 + 0.05, x1 - 0.05, y0, y1 - 0.05, S_DARK, UP)
+    elif kind == "balcony":
+        t.rect(V(0, 0, z_roof[1] + 0.004), XP, YP, x0 + 0.05, x1 - 0.05, y0, y1 - 0.05, S_STONE,
+               UP)
+        zb = z_roof[1]
+        for xs in (x0, x1 - pt):
+            rail(V(xs, y0, zb), V(xs + pt, y1, zb + parapet_h), ("-Y", "-Z"))
+        rail(V(x0 + pt, y1 - pt, zb), V(x1 - pt, y1, zb + parapet_h), ("-Z",))
+        for x in (x0 + pt * 0.5, x1 - pt * 0.5):        # stalpii de colt ai balconului
+            h.trim.box(V(x - 0.09, y1 - 0.18, zb), V(x + 0.09, y1 + 0.0, zb + parapet_h + 0.15),
+                       accent_slot, skip=("-Z",))
+    elif kind == "pediment":
+        xm = (x0 + x1) * 0.5
+        hw = (x1 - x0) * 0.5 + 0.05
+        zb = z_roof[1]
+        yp = y1 + 0.03
+        th = 0.12
+        # campul (pastel) pe fruntea pridvorului
+        h.wall.face([V(xm - hw + 0.12, yp - 0.03, zb), V(xm + hw - 0.12, yp - 0.03, zb),
+                     V(xm, yp - 0.03, ped_apex - th - 0.08)], S_WALL, YP)
+        # apele scurte, inapoi pana in fatada
+        for sx in (-1, 1):
+            vs = [V(xm + sx * hw, y0, zb), V(xm + sx * hw, yp, zb), V(xm + sx * hw, yp, zb + th),
+                  V(xm + sx * hw, y0, zb + th), V(xm, y0, ped_apex - th), V(xm, yp, ped_apex - th),
+                  V(xm, yp, ped_apex), V(xm, y0, ped_apex)]
+            h.trim_bev.piece(vs, [[3, 2, 6, 7], [0, 4, 5, 1], [1, 5, 6, 2]], S_DARK,
+                             center=V(xm + sx * hw * 0.5, (y0 + yp) * 0.5, (zb + ped_apex) * 0.5))
+        # cornisa in panta (alba) pe fruntea frontonului
+        run, rise = hw, ped_apex - zb
+        L = math.hypot(run, rise)
+        for sx in (-1, 1):
+            a, b = V(xm + sx * hw, 0, zb + th), V(xm, 0, ped_apex)
+            u = (b - a).normalized()
+            wv = Vector((sx * rise, 0.0, run)).normalized()
+            c = (a + b) * 0.5 - wv * 0.09
+            c.y = yp + 0.0
+            h.trim_bev.obox(c, u, YP, wv, L * 0.5, 0.05, 0.09, S_WHITE)
+
+
+def dormer(h, c, u, n, w, z0, z_eave, apex, depth, over=0.25, thick=0.12, verge_h=0.16,
+           win=(0.62, 0.85), finial_slot=None, eave_out=0.10):
+    """Lucarna cu fronton pe o apa a acoperisului principal, in sistemul local (c, u, n):
+    `c` = punctul de pe planul fetei ei (la z = 0), `u` de-a lungul fetei, `n` spre
+    exterior (orizontal). Fata si obrajii pe scandura (Row_Wall), coborati pana la `z0`
+    (sub suprafata acoperisului: partea ingropata nu se vede), doua ape mici de ardezie
+    care intra `depth` in acoperis, bordura alba, fereastra cu rama alba si varf."""
+    def P(x, y, z):
+        return c + u * x + n * y + UP * z
+
+    hw = w * 0.5
+    wa = apex - thick
+    h.wall.face([P(-hw, 0, z0), P(hw, 0, z0), P(hw, 0, z_eave), P(-hw, 0, z_eave)], S_WALL, n)
+    h.wall.face([P(-hw, 0, z_eave), P(hw, 0, z_eave), P(0, 0, wa)], S_WALL, n)
+    for s in (-1, 1):
+        h.wall.face([P(s * hw, 0, z0), P(s * hw, -depth, z0), P(s * hw, -depth, z_eave),
+                     P(s * hw, 0, z_eave)], S_WALL, u * s)
+    he = hw + eave_out
+    z_e = z_eave - eave_out * (wa - z_eave) / hw
+    for s in (-1, 1):
+        vs = []
+        for (x, z) in ((s * he, z_e), (s * he, z_e + thick), (0, apex), (0, wa)):
+            vs.append(P(x, -depth, z))
+            vs.append(P(x, over, z))
+        h.trim_bev.piece(vs, [[2, 3, 5, 4], [0, 6, 7, 1], [1, 7, 5, 3], [0, 1, 3, 2]], S_DARK,
+                         center=P(s * he * 0.5, (over - depth) * 0.5, (z_e + apex) * 0.5))
+    if verge_h:
+        run, rise = he, apex - (z_e + thick)
+        L = math.hypot(run, rise)
+        for s in (-1, 1):
+            a, b = P(s * he, over + 0.02, z_e + thick), P(0, over + 0.02, apex)
+            uu = (b - a).normalized()
+            wv = (u * (s * rise) + UP * run).normalized()
+            cc = (a + b) * 0.5 - wv * (verge_h * 0.5)
+            h.trim_bev.obox(cc, uu, n, wv, L * 0.5, 0.06, verge_h * 0.5, S_WHITE)
+    gw, gh = win
+    zw = z0 + max(0.12, (z_eave - z0 - gh) * 0.5)
+    window(h, P(0, 0, 0), u, n, zw, gw + 0.2, gh + 0.2, fw=0.1, proud=0.08, hood=False,
+           sill=True)
+    if finial_slot is not None:
+        f = P(0, over - 0.04, 0)
+        finial(h.trim, f.x, f.y, apex - 0.08, apex + 0.6, finial_slot, w=0.12, r=0.12)
+
+
+def chimney(h, x, y, z0, z1, wx=0.75, wy=0.55):
+    """Cos de fum de caramida (slot 23) cu capac de beton."""
+    h.trim.box(V(x - wx * 0.5, y - wy * 0.5, z0), V(x + wx * 0.5, y + wy * 0.5, z1), S_BRICK,
+               skip=("-Z",))
+    h.trim_bev.box(V(x - wx * 0.5 - 0.07, y - wy * 0.5 - 0.07, z1),
+                   V(x + wx * 0.5 + 0.07, y + wy * 0.5 + 0.07, z1 + 0.16), S_STONE)

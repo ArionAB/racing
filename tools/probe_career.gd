@@ -3,7 +3,10 @@ extends Node
 ## regrupare, raftul din scena si lacatul cursei. Merge HEADLESS.
 ##
 ## Punctele (25 oct 2026): locul 1/2/3 = 3/2/1, provocarea reusita in cursa = +1,
-## contratimpul 0 (fara tinte). Lacatele: lumea 2 la 8, lumea 3 la 18.
+## contratimpul 0 (fara tinte). Lacatele: lumea 2 la 8, lumea 3 la 18, lumea 4
+## la 28. Lumea 4 (Ha Long, Carrara, San Francisco, Angkor — 19 nov 2026) n-are
+## provocari, deci pistele ei dau maxim 3, nu 4: maximul carierei e 12 x 4 +
+## 4 x 3 = 60.
 ##
 ## Rulare:
 ##   Godot --headless --path . res://tools/ProbeCareer.tscn -- --check
@@ -21,7 +24,13 @@ extends Node
 const ProbeTmp := preload("res://tools/probe_tmp.gd")
 ## Cate verificari trebuie sa fi rulat. Daca cineva scoate o sectiune sau o
 ## iesire timpurie sare peste ele, numarul scade si verdictul pica.
-const MIN_CHECKS := 170
+const MIN_CHECKS := 205
+## Maximul carierei: 12 piste cu provocare x 4 + 4 fara x 3.
+const MAX_POINTS := 60
+## Lumea 4, cum a dictat-o dezvoltatorul (19 nov 2026): pistele SI ordinea.
+const WORLD_4: Array[StringName] = [&"halong", &"carrara", &"san_francisco", &"angkor"]
+## O pista din registru care nu e in nicio lume (banc de test).
+const OUTSIDE_TRACK: StringName = &"dunele"
 
 var _fails: Array[String] = []
 var _checks: int = 0
@@ -122,6 +131,9 @@ func _clone_config() -> CareerConfig:
 		w.rival = src.rival
 		w.rival_track = src.rival_track
 		out.worlds.append(w)
+	# Provocarile raman cele reale (resurse partajate, nemodificate aici):
+	# `max_points` depinde de ele, deci o clona fara ele ar numara altceva.
+	out.challenges = _real_config.challenges.duplicate()
 	return out
 
 
@@ -147,8 +159,8 @@ func _check_track_ids() -> void:
 			"index_of_id(%s) != %d" % [id, i])
 	_expect(TrackInfo.index_of_id(&"nu_exista_deloc") == -1,
 		"un id necunoscut trebuie sa dea -1")
-	# Ha Long e in joc dar in nicio lume: starea normala, nu o eroare.
-	_expect(TrackInfo.index_of_id(&"halong") >= 0, "halong lipseste din TRACK_SCENES")
+	# Bancul de test e in registru dar in nicio lume: starea normala, nu o eroare.
+	_expect(TrackInfo.index_of_id(OUTSIDE_TRACK) >= 0, "%s lipseste din TRACK_SCENES" % OUTSIDE_TRACK)
 
 
 # -------------------------------------------------------------- 1. config
@@ -158,7 +170,17 @@ func _check_config() -> void:
 	# aici, de aceea urmeaza sabotajele.
 	var real := Career.validate()
 	_expect(real.is_empty(), "config real are probleme: %s" % ", ".join(real))
-	_expect(Career.worlds().size() == 3, "se asteapta 3 lumi, sunt %d" % Career.worlds().size())
+	_expect(Career.worlds().size() == 4, "se asteapta 4 lumi, sunt %d" % Career.worlds().size())
+	# 4 x 4: fiecare lume are 4 piste, iar a patra e exact cea dictata.
+	var in_worlds := 0
+	for world in Career.worlds():
+		_expect(world.tracks.size() == 4, "%s are 4 piste (%d)" % [world.id, world.tracks.size()])
+		in_worlds += world.tracks.size()
+	_expect(in_worlds == 16, "16 piste in lumi, sunt %d" % in_worlds)
+	if Career.worlds().size() == 4:
+		_expect(Career.worlds()[3].tracks == WORLD_4,
+			"lumea 4 = %s, in ordinea asta (%s)" % [WORLD_4, Career.worlds()[3].tracks])
+	_expect(not _in_any_world(OUTSIDE_TRACK), "%s nu are voie intr-o lume" % OUTSIDE_TRACK)
 	var clean := Career.validate(_clone_config())
 	_expect(clean.is_empty(), "clona nesabotata ar trebui sa fie curata")
 
@@ -198,6 +220,13 @@ func _check_config() -> void:
 	cfg.worlds[0].free = false
 	p = Career.validate(cfg)
 	_expect(p.size() == 1 and "free" in p[0], "zero lumi free: %s" % ", ".join(p))
+
+
+func _in_any_world(track_id: StringName) -> bool:
+	for world in Career.worlds():
+		if world.tracks.has(track_id):
+			return true
+	return false
 
 
 # --------------------------------------------------------- 2. persistenta
@@ -248,17 +277,44 @@ func _check_gating() -> void:
 	var w := Career.worlds()
 	_expect(Career.points() == 0, "de la zero punctele sunt 0, sunt %d" % Career.points())
 	_expect(Career.is_world_unlocked(w[0]), "lumea free trebuie sa fie deschisa")
-	_expect(not Career.is_world_unlocked(w[1]) and not Career.is_world_unlocked(w[2]),
-		"de la zero lumile 2 si 3 sunt sigilate")
-	_expect(Career.points_missing(w[1]) == 8 and Career.points_missing(w[2]) == 18,
-		"lipsesc 8 si 18, sunt %d si %d" % [Career.points_missing(w[1]), Career.points_missing(w[2])])
+	_expect(not Career.is_world_unlocked(w[1]) and not Career.is_world_unlocked(w[2])
+		and not Career.is_world_unlocked(w[3]),
+		"de la zero lumile 2, 3 si 4 sunt sigilate")
+	_expect(Career.points_missing(w[1]) == 8 and Career.points_missing(w[2]) == 18
+		and Career.points_missing(w[3]) == 28,
+		"lipsesc 8, 18 si 28, sunt %d, %d si %d" % [Career.points_missing(w[1]),
+			Career.points_missing(w[2]), Career.points_missing(w[3])])
 	var rivals := 0
+	var with_challenge := 0
+	var without_challenge := 0
 	for world in w:
 		if world.rival != &"":
 			rivals += 1
-	var expected_max := Career.MAX_TRACK_POINTS * 12 + Career.RIVAL_POINTS * rivals
-	_expect(Career.max_points() == 48 and expected_max == 48,
-		"max_points trebuie 48 (12 piste x 4, 0 rivali), e %d" % Career.max_points())
+		for id in world.tracks:
+			if Career.challenge_for(id) != null:
+				with_challenge += 1
+			else:
+				without_challenge += 1
+	var expected_max := Career.MAX_TRACK_POINTS * with_challenge + Career.MEDAL_GOLD * without_challenge
+	expected_max += Career.RIVAL_POINTS * rivals
+	_expect(with_challenge == 12 and without_challenge == 4,
+		"12 piste cu provocare si 4 fara, sunt %d si %d" % [with_challenge, without_challenge])
+	_expect(Career.max_points() == MAX_POINTS and expected_max == MAX_POINTS,
+		"max_points trebuie %d (12 x 4 + 4 x 3, 0 rivali), e %d" % [MAX_POINTS, Career.max_points()])
+	# Maximul unei piste e al EI: bonusul nu se socoteste unde nu exista
+	# (altfel pasaportul arata un total pe care nimeni nu-l poate atinge).
+	_expect(Career.max_track_points(&"kyoto") == Career.MAX_TRACK_POINTS,
+		"kyoto (cu provocare) = %d" % Career.MAX_TRACK_POINTS)
+	for id in WORLD_4:
+		_expect(Career.max_track_points(id) == Career.MEDAL_GOLD,
+			"%s (fara provocare) = %d, e %d" % [id, Career.MEDAL_GOLD, Career.max_track_points(id)])
+	# Pragul fiecarei lumi se poate atinge din lumile de dinaintea ei.
+	var reachable := 0
+	for i in w.size():
+		_expect(w[i].points_to_unlock <= reachable,
+			"%s: pragul %d incape in cele %d puncte de dinainte" % [w[i].id, w[i].points_to_unlock, reachable])
+		for id in w[i].tracks:
+			reachable += Career.max_track_points(id)
 
 	# Lumea 1: locul 3 pe toate cele 4 piste = 4 puncte; lacatul lumii 2 e la 8.
 	var placed := 0
@@ -303,16 +359,39 @@ func _check_gating() -> void:
 	Career.set_challenge(w[1].tracks[1])
 	_expect(Career.points() == 18 and Career.is_world_unlocked(w[2]),
 		"la 18 puncte lumea 3 se deschide (sunt %d)" % Career.points())
-	_expect(is_equal_approx(Career.progress_fraction(), 18.0 / 48.0), "progress_fraction gresit")
-	# O pista din afara lumilor nu conteaza (Ha Long e doar cursa rapida).
-	Career.set_race_medal(&"halong", Career.MEDAL_GOLD)
-	Career.set_challenge(&"halong")
+	_expect(is_equal_approx(Career.progress_fraction(), 18.0 / float(MAX_POINTS)), "progress_fraction gresit")
+	# O pista din afara lumilor nu conteaza (bancul de test).
+	Career.set_race_medal(OUTSIDE_TRACK, Career.MEDAL_GOLD)
+	Career.set_challenge(OUTSIDE_TRACK)
 	_expect(Career.points() == 18, "pista din afara lumilor nu aduce puncte (%d)" % Career.points())
 	var counts := Career.medal_counts()
 	# cursa: 1 aur + 3 bronz (lumea 1) + 4 argint (lumea 2); tt: 1 aur + 1
-	# argint. Aurul de pe Ha Long nu intra (doar pistele din lumi).
+	# argint. Aurul de pe banc nu intra (doar pistele din lumi).
 	_expect(int(counts[3]) == 1 + 1 and int(counts[2]) == 4 + 1 and int(counts[1]) == 3,
 		"medal_counts gresit: %s" % str(counts))
+	# Lumea 3: locul 3 pe toate cele 4 piste = +4 => 22; lacatul lumii 4 e la 28.
+	_expect(not Career.is_world_unlocked(w[3]) and Career.points_missing(w[3]) == 10,
+		"la 18 lumea 4 inca sigilata, lipsesc 10")
+	for id in w[2].tracks:
+		Career.set_race_medal(id, Career.MEDAL_BRONZE)
+	_expect(Career.points() == 22 and not Career.is_world_unlocked(w[3]),
+		"la 22 lumea 4 inca sigilata (sunt %d)" % Career.points())
+	for i in 2:
+		Career.set_race_medal(w[2].tracks[i], Career.MEDAL_GOLD) # bronz -> aur = +2
+	_expect(Career.points() == 26 and not Career.is_world_unlocked(w[3]),
+		"la 26 lumea 4 inca sigilata (sunt %d)" % Career.points())
+	Career.set_challenge(w[2].tracks[0])
+	_expect(Career.points() == 27 and not Career.is_world_unlocked(w[3])
+		and Career.points_missing(w[3]) == 1, "la 27 lumea 4 inca sigilata, lipseste 1")
+	Career.set_challenge(w[2].tracks[1])
+	_expect(Career.points() == 28 and Career.is_world_unlocked(w[3]),
+		"la 28 de puncte lumea 4 se deschide (sunt %d)" % Career.points())
+	# Pistele lumii 4 dau puncte de loc; fara provocare in config, bifa nu
+	# aduce nimic si pista e „plina" la 3.
+	var first_w4: StringName = w[3].tracks[0]
+	Career.set_race_medal(first_w4, Career.MEDAL_GOLD)
+	_expect(Career.points() == 31 and Career.track_points(first_w4) == Career.max_track_points(first_w4),
+		"locul 1 pe %s = +3 si pista e plina (sunt %d)" % [first_w4, Career.points()])
 	_expect(Career.medal_for_position(1) == 3 and Career.medal_for_position(2) == 2
 		and Career.medal_for_position(3) == 1 and Career.medal_for_position(4) == 0
 		and Career.medal_for_position(6) == 0, "medal_for_position")
@@ -359,7 +438,7 @@ func _check_regroup() -> void:
 	_expect(Career.validate(cfg).is_empty(), "config regrupat trebuie sa ramana valid")
 	_expect(Career.track_state(&"kyoto") == state_before, "regruparea a schimbat starea pistei")
 	_expect(Career.points() == points_before, "regruparea a schimbat totalul de puncte")
-	_expect(Career.max_points() == 48, "max_points nu depinde de lume")
+	_expect(Career.max_points() == MAX_POINTS, "max_points nu depinde de lume")
 
 	# Deblocarea se recalculeaza din noile praguri.
 	cfg.worlds[1].points_to_unlock = points_before + 1
@@ -369,7 +448,7 @@ func _check_regroup() -> void:
 
 	# Rivalul: +RIVAL_POINTS la maxim si la puncte cand e batut, cheie pe rival.
 	cfg.worlds[0].rival = &"rival_test"
-	_expect(Career.max_points() == 48 + Career.RIVAL_POINTS, "un rival adauga RIVAL_POINTS la maxim")
+	_expect(Career.max_points() == MAX_POINTS + Career.RIVAL_POINTS, "un rival adauga RIVAL_POINTS la maxim")
 	Career.set_rival_beaten(&"rival_test")
 	_expect(Career.points() == points_before + Career.RIVAL_POINTS, "rivalul batut aduce RIVAL_POINTS")
 	cfg.worlds[0].rival = &""
@@ -399,10 +478,10 @@ func _check_panel() -> void:
 			cards.append(n)
 		elif n is Label and (n as Label).text.begins_with("SEALED"):
 			sealed += 1
-	_expect(boxes == 3, "o cutie per lume: asteptat 3, sunt %d" % boxes)
+	_expect(boxes == 4, "o cutie per lume: asteptat 4, sunt %d" % boxes)
 	_expect(cards.size() == 4, "doar lumea 1 e deschisa => 4 carduri, sunt %d" % cards.size())
-	_expect(sealed == 2, "2 lumi sigilate => 2 etichete SEALED, sunt %d" % sealed)
-	_expect(panel._points_label.text == "POINTS  0 / 48",
+	_expect(sealed == 3, "3 lumi sigilate => 3 etichete SEALED, sunt %d" % sealed)
+	_expect(panel._points_label.text == "POINTS  0 / %d" % MAX_POINTS,
 		"pasaport initial: '%s'" % panel._points_label.text)
 	for card in cards:
 		_expect(card._medals != null, "cardul din cariera trebuie sa aiba medaliile")
@@ -416,7 +495,7 @@ func _check_panel() -> void:
 
 	# progress_changed reimprospateaza pasaportul si cardul.
 	Career.set_race_medal(&"kyoto", Career.MEDAL_GOLD)
-	_expect(panel._points_label.text == "POINTS  3 / 48",
+	_expect(panel._points_label.text == "POINTS  3 / %d" % MAX_POINTS,
 		"dupa o medalie: '%s'" % panel._points_label.text)
 	all.clear()
 	_collect(panel, all)
@@ -430,7 +509,7 @@ func _check_panel() -> void:
 	_expect(kyoto_medal == 3, "cardul Kyoto trebuie sa arate aurul, are %d" % kyoto_medal)
 	_expect(cards.size() == 4, "reimprospatarea nu are voie sa dubleze cardurile (%d)" % cards.size())
 
-	# Cu 8 puncte se deschide lumea 2: 8 carduri, 1 eticheta SEALED. Kyoto are
+	# Cu 8 puncte se deschide lumea 2: 8 carduri, 2 etichete SEALED. Kyoto are
 	# deja locul 1 (3); inca un loc 1 si doua locuri 3 = 8. Contratimpul NU
 	# conteaza (fara tinte): medaliile lui nu misca lacatul.
 	Career.set_race_medal(Career.worlds()[0].tracks[0], Career.MEDAL_GOLD)
@@ -449,8 +528,8 @@ func _check_panel() -> void:
 			cards_after += 1
 		elif n is Label and (n as Label).text.begins_with("SEALED"):
 			sealed_after += 1
-	_expect(cards_after == 8 and sealed_after == 1,
-		"dupa deblocare: 8 carduri / 1 sigilata, sunt %d / %d" % [cards_after, sealed_after])
+	_expect(cards_after == 8 and sealed_after == 2,
+		"dupa deblocare: 8 carduri / 2 sigilate, sunt %d / %d" % [cards_after, sealed_after])
 	# Foaia pistei: tap pe card deschide butoanele, nu porneste cursa.
 	var started := [0]
 	Career.race_starter = func() -> void: started[0] += 1

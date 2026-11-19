@@ -1,4 +1,4 @@
-# Modul Carieră — „Turul lumii” — v0.12 (brief de design; pasul 0 retunat, pașii 1, 2, 4a, 4b și 5 construiți; punctaj în loc de ștampile după sesiunea la volan)
+# Modul Carieră — „Turul lumii” — v0.13 (brief de design; pasul 0 retunat, pașii 1, 2, 4a, 4b și 5 construiți; punctaj în loc de ștampile după sesiunea la volan)
 
 > Cerut de dezvoltator pe 16 oct 2026, în perioada de polish pentru release:
 > „pornind de la modul Adventure din Crash Team Racing, ce idei ai pentru
@@ -142,6 +142,19 @@
 > puncte, zero migrare. Gărzi: `ProbeCareer` 188 și `ProbeChallenge` 217
 > verificări, cu sabotaj (pragul lumii 2 mutat la 6 → 4 picări). Nerulat la
 > volan: fluxul cursă → „+3 · CHALLENGE +1” → raft.
+>
+> **v0.13 (19 nov 2026), decizia dezvoltatorului:** a patra lume — **Ha
+> Long, Carrara, San Francisco, Angkor**, în ordinea asta
+> (`data/world_4.tres`); aceleași patru piste sunt și a patra cupă din WORLD
+> CUP (#704). Cariera are acum 4 lumi × 4 piste = cele 16 piste de lansare.
+> Ce NU a decis dezvoltatorul și e pus provizoriu: numele („LUMEA 4”, ca
+> celelalte), pragul de deblocare (**28**, pe pasul 8 / 18 / 28) și numele
+> cupei („WONDERS CUP”). Cele patru piste intră **fără provocare** (cer
+> contracte și, pe unele, semnale noi — §4.3), deci dau maxim 3 puncte, nu
+> 4: `Career.max_track_points(id)` socotește bonusul doar unde există, iar
+> maximul carierei e 12 × 4 + 4 × 3 = **60**, nu 64. Fără asta pașaportul ar
+> fi arătat un total pe care nimeni nu-l poate atinge. Salvarea e
+> neschimbată (progresul e pe pistă). Fără rival pentru lumea 4.
 
 ## 0. Într-o propoziție
 
@@ -805,8 +818,10 @@ Rămase:
    mecanică (v0.12); pot rămâne ca grafică a pașaportului.
 6. **Sens invers** — intră sau nu în v1 după ce `ProbeRace` îl rulează pe
    fiecare pistă.
-7. **Ha Long** — când intră în carieră și în ce lume (a patra cutie, sau a
-   cincea pistă a uneia existente; `CareerWorld.tracks` nu are limită).
+7. ~~**Ha Long** — când intră în carieră și în ce lume~~ — decis pe 19 nov
+   2026 (v0.13): a patra cutie, cu Carrara, San Francisco și Angkor. Rămân
+   deschise pentru lumea 4: numele, pragul (28, provizoriu), provocările
+   celor patru piste și dacă are rival.
 8. **Turul fals după repunere** (§2.1): issue separat, de verificat înainte
    ca recordurile de carieră să conteze — o repunere peste linie nu are
    voie să numere un tur.

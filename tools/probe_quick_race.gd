@@ -13,7 +13,7 @@ extends Node
 ##      sus, in aceeasi ordine; focusul la prima pornire (`selected_track` = 0,
 ##      adica Dunele) cade pe un cartonas jucabil, iar dupa o cursa pe pista
 ##      jucata;
-##   3. cariera (lumi + provocari) si cupele numesc doar piste jucabile;
+##   3. cariera (lumile) si cupele numesc doar piste jucabile;
 ##   4. registrul e neatins: primele 17 intrari din TRACK_SCENES/TRACK_NAMES
 ##      sunt cele de dinainte (indicii uneltelor si cheile recordurilor stau
 ##      pe loc); o pista noua se poate doar ADAUGA la coada;
@@ -145,8 +145,6 @@ func _check_modes() -> void:
 	for world in Career.worlds():
 		for track_id in world.tracks:
 			ids.append("%s:%s" % [world.id, track_id])
-	for challenge in Career.config.challenges:
-		ids.append("provocare:%s" % challenge.track)
 	for res in GameState.WORLD_CUPS:
 		var cup := res as WorldCup
 		for track_id in cup.tracks:

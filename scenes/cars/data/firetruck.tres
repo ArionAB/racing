@@ -7,7 +7,7 @@
 [resource]
 script = ExtResource("1")
 id = &"firetruck"
-display_name = "Pompierii"
+display_name = "Fire Truck"
 color = Color(0.9, 0.35, 0.1, 1)
 max_speed = 35.0
 acceleration = 15.0

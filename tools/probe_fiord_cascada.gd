@@ -303,7 +303,7 @@ func _test_matrix() -> void:
 		print("-- runda 2: intrare lenta (10 m/s) pentru Autobuz/Pompierii --")
 		for i in GameState.CAR_DATA.size():
 			var nm := String(GameState.CAR_DATA[i].display_name)
-			if nm != "Autobuzul" and nm != "Pompierii":
+			if nm != "Bus" and nm != "Fire Truck":
 				continue
 			for rain in _rain_factors:
 				for accel in _accels:
@@ -461,7 +461,7 @@ func _run_once(preset: int, speed: float, rain: float, accel: float) -> Dictiona
 ## Cifrele "dupa" trebuie sa fie clar mai mari decat "inainte", altfel
 ## mecanismul nu e conectat (aceeasi garda ca `_test_force_connected`, dar pe
 ## impact, nu pe compresie).
-const IMPACT_AB_CARS: Array[String] = ["Politia", "Muscle", "Autobuzul", "Buggy"]
+const IMPACT_AB_CARS: Array[String] = ["Police", "Muscle", "Bus", "Buggy"]
 const IMPACT_AB_SPEED: float = 25.0
 
 func _test_impact_ab() -> void:
@@ -676,7 +676,7 @@ func _report_verdict() -> void:
 		var nm := String(GameState.CAR_DATA[i].display_name)
 		if nm == "Buggy":
 			buggy_idx = i
-		elif nm == "Politia":
+		elif nm == "Police":
 			police_idx = i
 	if buggy_idx >= 0 and police_idx >= 0:
 		var buggy_bottom := false

@@ -6130,6 +6130,9 @@ func rebuild() -> void:
 	_wire_scene_water_hazards()
 	_build_world_bounds()
 	build_step.emit(&"apa")
+	# Decorul lovibil de pe marginea drumului, din fisierul pistei (daca are unul). Ultimul:
+	# se aseaza cu raze pe lumea gata construita — vezi RoadsideProps.
+	RoadsideProps.attach(self)
 
 ## Cablează hazardele de apa DECLARATE CA NODURI in scena (azi: [TideHazard]).
 ##

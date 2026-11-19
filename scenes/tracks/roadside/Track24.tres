@@ -1,0 +1,165 @@
+[gd_resource type="Resource" script_class="RoadsideSet" format=3]
+
+[ext_resource type="Script" path="res://scenes/props/roadside_set.gd" id="1_qba73"]
+
+[resource]
+script = ExtResource("1_qba73")
+pieces = {
+"coconut": {
+"bounce": 0.35,
+"glb": "res://assets/models/angkor/props/knock_angkor.glb",
+"mass": 0.6,
+"node": "Coconut",
+"scale": 1.4,
+"shape": "sphere"
+},
+"jar": {
+"glb": "res://assets/models/angkor/props/knock_angkor.glb",
+"mass": 2.5,
+"node": "WaterJar",
+"scale": 1.4,
+"shape": "cylinder"
+},
+"rice": {
+"glb": "res://assets/models/angkor/props/knock_angkor.glb",
+"mass": 1.0,
+"node": "RiceBasket",
+"scale": 1.4,
+"shape": "cylinder"
+}
+}
+groups = Array[Dictionary]([{
+"count": 4,
+"frac": 0.011600000000000001,
+"gap": 1.2,
+"note": "open, viraj 0 grade",
+"pattern": "cluster",
+"piece": ["coconut", "rice", "jar"],
+"side": -1
+}, {
+"count": 3,
+"frac": 0.0829,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj 80 grade",
+"pattern": "pyramid",
+"piece": "rice",
+"side": 1
+}, {
+"count": 5,
+"frac": 0.1824,
+"gap": 1.2,
+"note": "exit, viraj 84 grade",
+"pattern": "cluster",
+"piece": ["coconut", "rice", "jar"],
+"side": 1
+}, {
+"count": 4,
+"frac": 0.21230000000000002,
+"gap": 1.2,
+"note": "exit, viraj 103 grade",
+"pattern": "row",
+"piece": "rice",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.28190000000000004,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -87 grade",
+"pattern": "pyramid",
+"piece": "rice",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.3723,
+"gap": 1.2,
+"lying": true,
+"note": "outside, viraj -30 grade",
+"pattern": "row",
+"piece": "jar",
+"side": -1
+}, {
+"count": 5,
+"frac": 0.3914,
+"gap": 1.2,
+"note": "exit, viraj -88 grade",
+"pattern": "cluster",
+"piece": ["coconut", "rice", "jar"],
+"side": -1
+}, {
+"count": 3,
+"frac": 0.49250000000000005,
+"gap": 1.2,
+"note": "outside, viraj -37 grade",
+"pattern": "row",
+"piece": "coconut",
+"side": -1
+}, {
+"count": 4,
+"frac": 0.5406000000000001,
+"gap": 1.2,
+"note": "exit, viraj -48 grade",
+"pattern": "row",
+"piece": "rice",
+"side": -1
+}, {
+"count": 4,
+"frac": 0.5796,
+"gap": 1.2,
+"note": "straight, viraj 0 grade",
+"pattern": "cluster",
+"piece": ["coconut", "rice", "jar"],
+"side": -1
+}, {
+"count": 3,
+"frac": 0.6667000000000001,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj 50 grade",
+"pattern": "pyramid",
+"piece": "rice",
+"side": 1
+}, {
+"count": 5,
+"frac": 0.7048,
+"gap": 1.2,
+"note": "exit, viraj -84 grade",
+"pattern": "cluster",
+"piece": ["coconut", "rice", "jar"],
+"side": -1
+}, {
+"count": 4,
+"frac": 0.7695000000000001,
+"gap": 1.2,
+"note": "exit, viraj -72 grade",
+"pattern": "row",
+"piece": "rice",
+"side": -1
+}, {
+"count": 2,
+"frac": 0.8408,
+"gap": 1.2,
+"lying": true,
+"note": "straight, viraj 0 grade",
+"pattern": "row",
+"piece": "jar",
+"side": -1
+}, {
+"count": 4,
+"frac": 0.9254,
+"gap": 1.2,
+"note": "outside, viraj -45 grade",
+"pattern": "taper",
+"piece": "coconut",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.9436,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -75 grade",
+"pattern": "pyramid",
+"piece": "rice",
+"side": -1
+}])

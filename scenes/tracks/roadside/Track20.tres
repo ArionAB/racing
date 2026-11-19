@@ -1,0 +1,151 @@
+[gd_resource type="Resource" script_class="RoadsideSet" format=3]
+
+[ext_resource type="Script" path="res://scenes/props/roadside_set.gd" id="1_74vvv"]
+
+[resource]
+script = ExtResource("1_74vvv")
+pieces = {
+"fishbox": {
+"glb": "res://assets/models/okinawa/props/knock_okinawa.glb",
+"mass": 0.6,
+"node": "FishBox",
+"scale": 1.4,
+"shape": "box"
+},
+"float": {
+"bounce": 0.4,
+"glb": "res://assets/models/okinawa/props/knock_okinawa.glb",
+"mass": 0.8,
+"node": "GlassFloat",
+"scale": 1.4,
+"shape": "sphere"
+},
+"jar": {
+"glb": "res://assets/models/okinawa/props/knock_okinawa.glb",
+"mass": 2.5,
+"node": "KameJar",
+"scale": 1.4,
+"shape": "cylinder"
+}
+}
+groups = Array[Dictionary]([{
+"count": 4,
+"frac": 0.013600000000000001,
+"gap": 1.2,
+"note": "open, viraj -0 grade",
+"pattern": "cluster",
+"piece": ["float", "fishbox", "jar"],
+"side": -1
+}, {
+"count": 3,
+"frac": 0.1092,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -55 grade",
+"pattern": "pyramid",
+"piece": "fishbox",
+"side": -1
+}, {
+"count": 5,
+"frac": 0.154,
+"gap": 1.2,
+"note": "exit, viraj -37 grade",
+"pattern": "row",
+"piece": ["float", "fishbox", "jar"],
+"side": -1
+}, {
+"count": 3,
+"frac": 0.21350000000000002,
+"gap": 1.2,
+"note": "exit, viraj -54 grade",
+"pattern": "wall",
+"piece": "fishbox",
+"rows": 2,
+"side": -1
+}, {
+"count": 2,
+"frac": 0.268,
+"gap": 1.2,
+"lying": true,
+"note": "open, viraj -7 grade",
+"pattern": "row",
+"piece": "jar",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.34800000000000003,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -58 grade",
+"pattern": "pyramid",
+"piece": "fishbox",
+"side": -1
+}, {
+"count": 5,
+"frac": 0.37720000000000004,
+"gap": 1.2,
+"note": "exit, viraj 43 grade",
+"pattern": "cluster",
+"piece": ["float", "fishbox", "jar"],
+"side": 1
+}, {
+"count": 3,
+"frac": 0.48250000000000004,
+"gap": 1.2,
+"note": "exit, viraj -46 grade",
+"pattern": "wall",
+"piece": "fishbox",
+"rows": 2,
+"side": -1
+}, {
+"count": 3,
+"frac": 0.5224,
+"gap": 1.2,
+"note": "open, viraj -23 grade",
+"pattern": "row",
+"piece": "fishbox",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.6228,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj 42 grade",
+"pattern": "pyramid",
+"piece": "fishbox",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.7359,
+"gap": 1.2,
+"lying": true,
+"note": "overshoot, viraj -48 grade",
+"pattern": "row",
+"piece": "jar",
+"side": -1
+}, {
+"count": 2,
+"frac": 0.7768,
+"gap": 1.2,
+"note": "inside, viraj -53 grade",
+"pattern": "row",
+"piece": "float",
+"side": 1
+}, {
+"count": 5,
+"frac": 0.8333,
+"gap": 1.2,
+"note": "exit, viraj -48 grade",
+"pattern": "cluster",
+"piece": ["float", "fishbox", "jar"],
+"side": -1
+}, {
+"count": 3,
+"frac": 0.9747,
+"gap": 1.2,
+"lying": true,
+"note": "outside, viraj 56 grade",
+"pattern": "row",
+"piece": "jar",
+"side": 1
+}])

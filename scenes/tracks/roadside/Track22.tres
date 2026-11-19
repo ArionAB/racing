@@ -1,0 +1,129 @@
+[gd_resource type="Resource" script_class="RoadsideSet" format=3]
+
+[ext_resource type="Script" path="res://scenes/props/roadside_set.gd" id="1_4nunm"]
+
+[resource]
+script = ExtResource("1_4nunm")
+pieces = {
+"barrel": {
+"glb": "res://assets/models/halong/props/knock_halong.glb",
+"mass": 2.0,
+"node": "FloatBarrel",
+"scale": 1.4,
+"shape": "cylinder"
+},
+"basket": {
+"glb": "res://assets/models/halong/props/knock_halong.glb",
+"mass": 1.0,
+"node": "FishBasket",
+"scale": 1.4,
+"shape": "cylinder"
+},
+"hats": {
+"glb": "res://assets/models/halong/props/knock_halong.glb",
+"mass": 0.5,
+"node": "HatStack",
+"scale": 1.4,
+"shape": "hull"
+}
+}
+groups = Array[Dictionary]([{
+"count": 3,
+"frac": 0.0241,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj 93 grade",
+"pattern": "pyramid",
+"piece": "barrel",
+"side": 1
+}, {
+"count": 2,
+"frac": 0.25720000000000004,
+"gap": 1.2,
+"note": "inside, viraj 37 grade",
+"pattern": "row",
+"piece": "hats",
+"side": -1
+}, {
+"count": 4,
+"frac": 0.343,
+"gap": 1.2,
+"note": "straight, viraj 0 grade",
+"pattern": "cluster",
+"piece": ["barrel", "basket", "hats"],
+"side": 1
+}, {
+"count": 4,
+"frac": 0.3902,
+"gap": 1.2,
+"note": "open, viraj 18 grade",
+"pattern": "cluster",
+"piece": ["barrel", "basket", "hats"],
+"side": 1
+}, {
+"count": 2,
+"frac": 0.448,
+"gap": 1.2,
+"lying": true,
+"note": "open, viraj 9 grade",
+"pattern": "row",
+"piece": "barrel",
+"side": 1
+}, {
+"count": 5,
+"frac": 0.5347000000000001,
+"gap": 1.2,
+"note": "exit, viraj 45 grade",
+"pattern": "cluster",
+"piece": ["barrel", "basket", "hats"],
+"side": 1
+}, {
+"count": 4,
+"frac": 0.5867,
+"gap": 1.2,
+"note": "exit, viraj 74 grade",
+"pattern": "row",
+"piece": "barrel",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.6724,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj 90 grade",
+"pattern": "pyramid",
+"piece": "barrel",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.7081000000000001,
+"gap": 1.2,
+"note": "open, viraj -7 grade",
+"pattern": "row",
+"piece": "barrel",
+"side": -1
+}, {
+"count": 4,
+"frac": 0.7659,
+"gap": 1.2,
+"note": "open, viraj 13 grade",
+"pattern": "cluster",
+"piece": ["barrel", "basket", "hats"],
+"side": 1
+}, {
+"count": 5,
+"frac": 0.8748,
+"gap": 1.2,
+"note": "exit, viraj -53 grade",
+"pattern": "cluster",
+"piece": ["barrel", "basket", "hats"],
+"side": -1
+}, {
+"count": 4,
+"frac": 0.9740000000000001,
+"gap": 1.2,
+"note": "exit, viraj -63 grade",
+"pattern": "row",
+"piece": "barrel",
+"side": -1
+}])

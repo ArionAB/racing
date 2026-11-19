@@ -88,6 +88,13 @@ const SETTLE_S: float = 1.0
 
 var _spawn_y: float = 0.0
 var _rolls: bool = false
+## Saltul la lovitura (`opts.pop`, m/s): la primul contact cu o masina piesa primeste viteza asta
+## in SUS, deci zboara peste capota in loc sa fie impinsa pe sol in fata barei. E un reglaj de
+## feel (decor lovibil, valul 3), nu o reparatie masurata: pe ProbeBumpProps viteza masinii dupa
+## lovitura a iesit la fel cu si fara el. 0 = fara (tot ce exista dinainte de valul 3).
+var _pop: float = 0.0
+var _pop_ready: bool = true
+const POP_COOLDOWN_S: float = 0.6
 var _settle_t: float = 0.0
 var _home: Transform3D = Transform3D.IDENTITY
 var _home_back: bool = false
@@ -116,6 +123,8 @@ var _home_pending: bool = false
 ##           2: modelele GLB inlocuiesc placeholderul, iar contactele pasului 6 sunt pe cutiile
 ##           lui — tools/ProbeSfParked.tscn --boxes).
 ##   "shape" forma de coliziune, din `SHAPES`; implicit "box". Vezi constanta.
+##   "pop"   viteza in sus (m/s) primita la primul contact cu o masina; vezi `_pop`.
+##   "bounce" cat sare piesa (0..1) in locul implicitului de 0,2: mingea de plaja, geamandura.
 static func wrap(model: Node3D, opts: Dictionary = {}) -> BumpProp:
 	# In editor (Track e @tool) nu: fara simulare, corpul ar fi doar zgomot in
 	# arbore, iar scriptul asta nu ruleaza acolo.
@@ -210,12 +219,17 @@ func _setup(model: Node3D, opts: Dictionary = {}) -> void:
 	if opts.has("mass"):
 		mass = float(opts["mass"])
 	_home_back = bool(opts.get("home", false))
+	_pop = maxf(0.0, float(opts.get("pop", 0.0)))
+	if _pop > 0.0:
+		contact_monitor = true
+		max_contacts_reported = 2
+		body_entered.connect(_on_body_entered)
 	var mat := PhysicsMaterial.new()
 	# 0,35, nu 0,7: un teanc inalt de 4 kg lovit jos se rastoarna peste capota
 	# si, cu frecare mare, se freca sub caroserie — masina cadea de la 13 la
 	# 5,8 m/s pe o oala (ProbeBumpProps, Cappadocia). La 0,35 pierde ~20%.
 	mat.friction = 0.35
-	mat.bounce = 0.2
+	mat.bounce = clampf(float(opts.get("bounce", 0.2)), 0.0, 1.0)
 	physics_material_override = mat
 	linear_damp = ROLL_LINEAR_DAMP if _rolls else 0.3
 	angular_damp = ROLL_ANGULAR_DAMP if _rolls else 0.6
@@ -235,6 +249,16 @@ func _setup(model: Node3D, opts: Dictionary = {}) -> void:
 	get_tree().physics_frame.connect(func() -> void:
 		_home = global_transform
 		sleeping = true, CONNECT_ONE_SHOT)
+
+
+func _on_body_entered(body: Node) -> void:
+	if not _pop_ready or not body.is_in_group(&"cars"):
+		return
+	_pop_ready = false
+	var v := linear_velocity
+	v.y = maxf(v.y, _pop)
+	linear_velocity = v
+	get_tree().create_timer(POP_COOLDOWN_S).timeout.connect(func() -> void: _pop_ready = true)
 
 
 ## O singura infasuratoare convexa peste toate mesh-urile VIZIBILE ale modelului, in spatiul

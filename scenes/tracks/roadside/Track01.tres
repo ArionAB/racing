@@ -1,0 +1,146 @@
+[gd_resource type="Resource" script_class="RoadsideSet" format=3]
+
+[ext_resource type="Script" path="res://scenes/props/roadside_set.gd" id="1_8ov8e"]
+
+[resource]
+script = ExtResource("1_8ov8e")
+pieces = {
+"barrel": {
+"classes": "junk",
+"glb": "res://assets/models/props/props_junk.glb",
+"node": "Barrel_A",
+"scale": 1.4,
+"shape": "cylinder"
+},
+"barrel_b": {
+"classes": "junk",
+"glb": "res://assets/models/props/props_junk.glb",
+"node": "Barrel_B",
+"scale": 1.4,
+"shape": "cylinder"
+},
+"crate": {
+"classes": "junk",
+"glb": "res://assets/models/props/props_junk.glb",
+"node": "Crate_B",
+"scale": 1.4,
+"shape": "box"
+},
+"tyre": {
+"classes": "junk",
+"glb": "res://assets/models/props/props_junk.glb",
+"node": "Tyre",
+"scale": 1.4,
+"shape": "cylinder"
+},
+"tyres": {
+"classes": "junk",
+"glb": "res://assets/models/props/props_junk.glb",
+"node": "TyreStack",
+"scale": 1.4,
+"shape": "cylinder"
+}
+}
+groups = Array[Dictionary]([{
+"count": 4,
+"frac": 0.031100000000000003,
+"gap": 1.2,
+"note": "open, viraj 8 grade",
+"pattern": "cluster",
+"piece": ["tyre", "crate", "barrel"],
+"side": -1
+}, {
+"count": 2,
+"frac": 0.1125,
+"gap": 1.2,
+"lying": true,
+"note": "open, viraj 9 grade",
+"pattern": "row",
+"piece": "barrel_b",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.1696,
+"gap": 1.2,
+"note": "open, viraj 21 grade",
+"pattern": "row",
+"piece": "barrel",
+"side": -1
+}, {
+"count": 2,
+"frac": 0.2889,
+"gap": 1.2,
+"note": "inside, viraj 25 grade",
+"pattern": "row",
+"piece": "tyres",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.37370000000000003,
+"gap": 1.2,
+"lying": true,
+"note": "outside, viraj 33 grade",
+"pattern": "row",
+"piece": "barrel_b",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.4983,
+"gap": 1.2,
+"lying": true,
+"note": "overshoot, viraj 61 grade",
+"pattern": "row",
+"piece": "barrel_b",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.5692,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -95 grade",
+"pattern": "pyramid",
+"piece": "barrel",
+"side": -1
+}, {
+"count": 4,
+"frac": 0.6211,
+"gap": 1.2,
+"note": "open, viraj -25 grade",
+"pattern": "cluster",
+"piece": ["tyre", "crate", "barrel"],
+"side": 1
+}, {
+"count": 2,
+"frac": 0.6799000000000001,
+"gap": 1.2,
+"lying": true,
+"note": "open, viraj -17 grade",
+"pattern": "row",
+"piece": "barrel_b",
+"side": 1
+}, {
+"count": 4,
+"frac": 0.7716000000000001,
+"gap": 1.2,
+"note": "outside, viraj 98 grade",
+"pattern": "taper",
+"piece": "tyres",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.8443,
+"gap": 1.2,
+"note": "inside, viraj 35 grade",
+"pattern": "taper",
+"piece": "tyres",
+"side": -1,
+"skew": 0.4
+}, {
+"count": 4,
+"frac": 0.9706,
+"gap": 1.2,
+"note": "overshoot, viraj 57 grade",
+"pattern": "taper",
+"piece": "tyres",
+"side": 1
+}])

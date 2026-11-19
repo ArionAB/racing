@@ -1,0 +1,156 @@
+[gd_resource type="Resource" script_class="RoadsideSet" format=3]
+
+[ext_resource type="Script" path="res://scenes/props/roadside_set.gd" id="1_n84my"]
+
+[resource]
+script = ExtResource("1_n84my")
+pieces = {
+"bucket": {
+"glb": "res://assets/models/kyoto/props/knock_kyoto.glb",
+"mass": 0.8,
+"node": "WoodBucket",
+"scale": 1.4,
+"shape": "cylinder"
+},
+"daruma": {
+"glb": "res://assets/models/kyoto/props/knock_kyoto.glb",
+"mass": 1.5,
+"node": "Daruma",
+"scale": 1.4,
+"shape": "sphere"
+},
+"sake": {
+"glb": "res://assets/models/kyoto/props/knock_kyoto.glb",
+"mass": 3.0,
+"node": "SakeBarrel",
+"scale": 1.4,
+"shape": "cylinder"
+}
+}
+groups = Array[Dictionary]([{
+"count": 4,
+"frac": 0.031,
+"gap": 1.2,
+"note": "straight, viraj 0 grade",
+"pattern": "row",
+"piece": ["sake", "bucket", "daruma"],
+"side": 1
+}, {
+"count": 3,
+"frac": 0.09390000000000001,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -84 grade",
+"pattern": "pyramid",
+"piece": "sake",
+"side": -1
+}, {
+"count": 5,
+"frac": 0.13240000000000002,
+"gap": 1.2,
+"note": "exit, viraj 42 grade",
+"pattern": "cluster",
+"piece": ["sake", "bucket", "daruma"],
+"side": 1
+}, {
+"count": 2,
+"frac": 0.20470000000000002,
+"gap": 1.2,
+"lying": true,
+"note": "straight, viraj 0 grade",
+"pattern": "row",
+"piece": "sake",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.2535,
+"gap": 1.2,
+"lying": true,
+"note": "outside, viraj -68 grade",
+"pattern": "row",
+"piece": "sake",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.3493,
+"gap": 1.2,
+"note": "outside, viraj -26 grade",
+"pattern": "row",
+"piece": "daruma",
+"side": -1
+}, {
+"count": 4,
+"frac": 0.37460000000000004,
+"gap": 1.2,
+"note": "exit, viraj -54 grade",
+"pattern": "row",
+"piece": "sake",
+"side": -1
+}, {
+"count": 4,
+"frac": 0.4817,
+"gap": 1.2,
+"note": "open, viraj -13 grade",
+"pattern": "cluster",
+"piece": ["sake", "bucket", "daruma"],
+"side": -1
+}, {
+"count": 4,
+"frac": 0.5033,
+"gap": 1.2,
+"note": "outside, viraj -28 grade",
+"pattern": "taper",
+"piece": "bucket",
+"side": -1
+}, {
+"count": 2,
+"frac": 0.5840000000000001,
+"gap": 1.2,
+"lying": true,
+"note": "open, viraj -1 grade",
+"pattern": "row",
+"piece": "sake",
+"side": 1
+}, {
+"count": 2,
+"frac": 0.6657000000000001,
+"gap": 1.2,
+"note": "inside, viraj 25 grade",
+"pattern": "row",
+"piece": "bucket",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.7211000000000001,
+"gap": 1.2,
+"lying": true,
+"note": "outside, viraj -30 grade",
+"pattern": "row",
+"piece": "sake",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.8009000000000001,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -51 grade",
+"pattern": "pyramid",
+"piece": "sake",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.9033,
+"gap": 1.2,
+"note": "open, viraj -8 grade",
+"pattern": "row",
+"piece": "sake",
+"side": -1
+}, {
+"count": 4,
+"frac": 0.9390000000000001,
+"gap": 1.2,
+"note": "open, viraj 13 grade",
+"pattern": "cluster",
+"piece": ["sake", "bucket", "daruma"],
+"side": -1
+}])

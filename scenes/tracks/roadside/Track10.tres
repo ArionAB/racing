@@ -1,0 +1,164 @@
+[gd_resource type="Resource" script_class="RoadsideSet" format=3]
+
+[ext_resource type="Script" path="res://scenes/props/roadside_set.gd" id="1_aijo3"]
+
+[resource]
+script = ExtResource("1_aijo3")
+pieces = {
+"drum": {
+"glb": "res://assets/models/baikal/props/knock_baikal.glb",
+"node": "FuelDrum",
+"scale": 1.4,
+"shape": "cylinder"
+},
+"fish": {
+"glb": "res://assets/models/baikal/props/knock_baikal.glb",
+"mass": 1.5,
+"node": "FishCrate",
+"scale": 1.4,
+"shape": "box"
+},
+"ice": {
+"glb": "res://assets/models/baikal/props/knock_baikal.glb",
+"mass": 3.0,
+"node": "IceBlock",
+"scale": 1.4,
+"shape": "box"
+}
+}
+groups = Array[Dictionary]([{
+"count": 4,
+"frac": 0.041100000000000005,
+"gap": 1.2,
+"note": "straight, viraj 0 grade",
+"pattern": "cluster",
+"piece": ["ice", "fish", "drum"],
+"side": 1
+}, {
+"count": 4,
+"frac": 0.0898,
+"gap": 1.2,
+"note": "open, viraj -15 grade",
+"pattern": "cluster",
+"piece": ["ice", "fish", "drum"],
+"side": -1
+}, {
+"count": 2,
+"frac": 0.1384,
+"gap": 1.2,
+"lying": true,
+"note": "open, viraj -13 grade",
+"pattern": "row",
+"piece": "drum",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.20950000000000002,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj 35 grade",
+"pattern": "pyramid",
+"piece": "drum",
+"side": 1
+}, {
+"count": 5,
+"frac": 0.2594,
+"gap": 1.2,
+"note": "exit, viraj 36 grade",
+"pattern": "row",
+"piece": ["ice", "fish", "drum"],
+"side": 1
+}, {
+"count": 3,
+"frac": 0.31920000000000004,
+"gap": 1.2,
+"note": "open, viraj 12 grade",
+"pattern": "row",
+"piece": "drum",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.41400000000000003,
+"gap": 1.2,
+"lying": true,
+"note": "outside, viraj 28 grade",
+"pattern": "row",
+"piece": "drum",
+"side": 1
+}, {
+"count": 4,
+"frac": 0.4514,
+"gap": 1.2,
+"note": "open, viraj -1 grade",
+"pattern": "cluster",
+"piece": ["ice", "fish", "drum"],
+"side": 1
+}, {
+"count": 2,
+"frac": 0.5561,
+"gap": 1.2,
+"lying": true,
+"note": "open, viraj -3 grade",
+"pattern": "row",
+"piece": "drum",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.6234000000000001,
+"gap": 1.2,
+"note": "exit, viraj 48 grade",
+"pattern": "wall",
+"piece": "ice",
+"rows": 2,
+"side": 1
+}, {
+"count": 3,
+"frac": 0.6646000000000001,
+"gap": 1.2,
+"note": "open, viraj 0 grade",
+"pattern": "row",
+"piece": "drum",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.7481,
+"gap": 1.2,
+"note": "open, viraj -4 grade",
+"pattern": "row",
+"piece": ["ice", "fish", "drum"],
+"side": -1
+}, {
+"count": 2,
+"frac": 0.8092,
+"gap": 1.2,
+"note": "inside, viraj -43 grade",
+"pattern": "row",
+"piece": "fish",
+"side": 1
+}, {
+"count": 4,
+"frac": 0.8566,
+"gap": 1.2,
+"note": "outside, viraj 57 grade",
+"pattern": "taper",
+"piece": "fish",
+"side": 1
+}, {
+"count": 2,
+"frac": 0.9052,
+"gap": 1.2,
+"lying": true,
+"note": "open, viraj 15 grade",
+"pattern": "row",
+"piece": "drum",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.9576,
+"gap": 1.2,
+"lying": true,
+"note": "outside, viraj 63 grade",
+"pattern": "row",
+"piece": "drum",
+"side": 1
+}])

@@ -6295,187 +6295,187 @@ metadata/coliziune = "none"
 
 [node name="jalon13" parent="DecorManual/ZoneE_Portal" unique_id=2002376699 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.740561, 0, 0.67199, 0, 1, 0, -0.67199, 0, -0.740561, -405.0809, 16.514206, -611.195)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon14" parent="DecorManual/ZoneE_Portal" unique_id=601668371 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.996881, 0, 0.078914, 0, 1, 0, -0.078914, 0, -0.996881, -407.7391, 16.372665, -597.185)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon15" parent="DecorManual/ZoneE_Portal" unique_id=61234764 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(0.844325, 0, -0.535832, 0, 1, 0, 0.535832, 0, 0.844325, -389.0635, 16.92392, -607.3726)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon16" parent="DecorManual/ZoneE_Portal" unique_id=299922225 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.996223, 0, 0.086837, 0, 1, 0, -0.086837, 0, -0.996223, -393.9324, 16.897842, -593.96954)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon17" parent="DecorManual/ZoneE_Portal" unique_id=649061554 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.445916, 0, -0.895075, 0, 1, 0, 0.895075, 0, -0.445916, -375.34836, 17.516586, -602.32416)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon18" parent="DecorManual/ZoneE_Portal" unique_id=1213531572 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.999765, 0, -0.021684, 0, 1, 0, 0.021684, 0, -0.999765, -380.15164, 17.55304, -588.8975)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon19" parent="DecorManual/ZoneE_Portal" unique_id=1421849889 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.284157, 0, 0.958778, 0, 1, 0, -0.958778, 0, -0.284157, -364.04956, 17.99179, -598.2829)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon20" parent="DecorManual/ZoneE_Portal" unique_id=510524286 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(0.981066, 0, -0.193675, 0, 1, 0, 0.193675, 0, 0.981066, -368.85046, 17.987152, -584.8554)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon21" parent="DecorManual/ZoneE_Portal" unique_id=1582142756 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(0.896222, 0, 0.443606, 0, 1, 0, -0.443606, 0, 0.896222, -350.4122, 18.5728, -593.3229)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon22" parent="DecorManual/ZoneE_Portal" unique_id=2104820297 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(0.986558, 0, -0.163412, 0, 1, 0, 0.163412, 0, 0.986558, -354.9622, 18.557587, -579.8082)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon23" parent="DecorManual/ZoneE_Portal" unique_id=77261230 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.746231, 0, 0.665688, 0, 1, 0, -0.665688, 0, -0.746231, -338.96555, 19.074371, -589.65784)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon24" parent="DecorManual/ZoneE_Portal" unique_id=1387077356 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(0.575266, 0, -0.817966, 0, 1, 0, 0.817966, 0, 0.575266, -340.47073, 19.118103, -575.47754)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon25" parent="DecorManual/ZoneE_Portal" unique_id=1813910120 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.958169, 0, 0.286203, 0, 1, 0, -0.286203, 0, -0.958169, -327.3997, 20.319565, -590.67053)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon26" parent="DecorManual/ZoneE_Portal" unique_id=1851151539 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(0.485267, 0, 0.874366, 0, 1, 0, -0.874366, 0, 0.485267, -324.80032, 20.333466, -576.6494)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon27" parent="DecorManual/ZoneE_Portal" unique_id=1869408662 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.868551, 0, 0.4956, 0, 1, 0, -0.4956, 0, -0.868551, -312.83392, 21.869095, -594.1992)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon28" parent="DecorManual/ZoneE_Portal" unique_id=862224520 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.967912, 0, 0.251289, 0, 1, 0, -0.251289, 0, -0.967912, -309.49518, 21.865784, -580.3356)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon29" parent="DecorManual/ZoneE_Portal" unique_id=335980429 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.596129, 0, 0.802889, 0, 1, 0, -0.802889, 0, -0.596129, -298.61798, 23.34697, -597.6431)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon30" parent="DecorManual/ZoneE_Portal" unique_id=297306686 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(0.658218, 0, 0.752828, 0, 1, 0, -0.752828, 0, 0.658218, -295.25696, 23.353897, -583.78485)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon31" parent="DecorManual/ZoneE_Portal" unique_id=1213150701 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.932549, 0, -0.361044, 0, 1, 0, 0.361044, 0, -0.932549, -283.8698, 24.82756, -601.31775)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon32" parent="DecorManual/ZoneE_Portal" unique_id=1174858825 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.910438, 0, -0.413645, 0, 1, 0, 0.413645, 0, -0.910438, -281.5387, 24.824493, -587.24963)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon33" parent="DecorManual/ZoneE_Portal" unique_id=611215322 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.999148, 0, 0.041281, 0, 1, 0, -0.041281, 0, -0.999148, -268.39963, 26.22203, -601.809)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon34" parent="DecorManual/ZoneE_Portal" unique_id=454075201 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.999954, 0, 0.009605, 0, 1, 0, -0.009605, 0, -0.999954, -270.1768, 26.204346, -587.6602)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon35" parent="DecorManual/ZoneE_Portal" unique_id=538391017 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.383764, 0, -0.923431, 0, 1, 0, 0.923431, 0, -0.383764, -255.83246, 27.43715, -599.0583)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon36" parent="DecorManual/ZoneE_Portal" unique_id=1089978011 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(0.983846, 0, 0.179016, 0, 1, 0, -0.179016, 0, 0.983846, -259.3521, 27.422958, -585.23944)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon37" parent="DecorManual/ZoneE_Portal" unique_id=862862365 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.608317, 0, 0.793694, 0, 1, 0, -0.793694, 0, -0.608317, -242.49821, 28.829102, -595.8112)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon38" parent="DecorManual/ZoneE_Portal" unique_id=1027402977 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(0.079654, 0, 0.996823, 0, 1, 0, -0.996823, 0, 0.079654, -245.84178, 28.827972, -581.9488)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon39" parent="DecorManual/ZoneE_Portal" unique_id=378332451 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(0.57149, 0, -0.820609, 0, 1, 0, 0.820609, 0, 0.57149, -230.87357, 30.04007, -593.012)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon40" parent="DecorManual/ZoneE_Portal" unique_id=1374209261 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(0.999543, 0, -0.03023, 0, 1, 0, 0.03023, 0, 0.999543, -234.12643, 30.046234, -579.128)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon41" parent="DecorManual/ZoneE_Portal" unique_id=204288938 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(0.918226, 0, 0.396057, 0, 1, 0, -0.396057, 0, 0.918226, -217.14342, 31.416626, -589.5925)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon42" parent="DecorManual/ZoneE_Portal" unique_id=1326381220 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.914784, 0, -0.403942, 0, 1, 0, 0.403942, 0, -0.914784, -221.06358, 31.464172, -575.88196)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon43" parent="DecorManual/ZoneE_Portal" unique_id=1913453947 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(0.454593, 0, -0.890699, 0, 1, 0, 0.890699, 0, 0.454593, -204.28592, 32.67119, -584.3123)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon44" parent="DecorManual/ZoneE_Portal" unique_id=948158526 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.263902, 0, 0.964549, 0, 1, 0, -0.964549, 0, -0.263902, -211.86569, 32.645737, -572.2336)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon45" parent="DecorManual/ZoneE_Portal" unique_id=1291911026 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.926669, 0, 0.375878, 0, 1, 0, -0.375878, 0, -0.926669, -192.92006, 34.07341, -575.76904)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon46" parent="DecorManual/ZoneE_Portal" unique_id=1691586651 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.948151, 0, -0.31782, 0, 1, 0, 0.31782, 0, -0.948151, -201.56221, 34.059845, -564.42615)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon47" parent="DecorManual/ZoneE_Portal" unique_id=1292373907 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.275367, 0, 0.961339, 0, 1, 0, -0.961339, 0, -0.275367, -183.39072, 35.307816, -568.4928)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon48" parent="DecorManual/ZoneE_Portal" unique_id=577412455 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(0.836241, 0, 0.548362, 0, 1, 0, -0.548362, 0, 0.836241, -192.02191, 35.30533, -557.1416)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon49" parent="DecorManual/ZoneE_Portal" unique_id=144759317 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.990454, 0, 0.137844, 0, 1, 0, -0.137844, 0, -0.990454, -173.8425, 36.54599, -561.236)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon50" parent="DecorManual/ZoneE_Portal" unique_id=288250394 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(0.766519, 0, -0.642222, 0, 1, 0, 0.642222, 0, 0.766519, -182.46512, 36.547073, -549.87836)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon51" parent="DecorManual/ZoneE_Portal" unique_id=238954749 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(0.866632, 0, 0.498948, 0, 1, 0, -0.498948, 0, 0.866632, -162.1221, 38.055923, -552.504)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon52" parent="DecorManual/ZoneE_Portal" unique_id=1158159939 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.730851, 0, 0.682537, 0, 1, 0, -0.682537, 0, -0.730851, -170.67981, 38.058777, -541.0973)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon53" parent="DecorManual/ZoneE_Portal" unique_id=1651869403 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(0.320493, 0, -0.947251, 0, 1, 0, 0.947251, 0, 0.320493, -150.25179, 39.54306, -541.8614)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon54" parent="DecorManual/ZoneE_Portal" unique_id=673175300 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.608615, 0, -0.793466, 0, 1, 0, 0.793466, 0, -0.608615, -160.83202, 39.508957, -532.3007)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon55" parent="DecorManual/ZoneE_Portal" unique_id=1093039227 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.082691, 0, -0.996575, 0, 1, 0, 0.996575, 0, -0.082691, -141.31465, 40.816986, -531.1306)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon56" parent="DecorManual/ZoneE_Portal" unique_id=1091164554 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.972382, 0, -0.233395, 0, 1, 0, 0.233395, 0, -0.972382, -152.45354, 40.807632, -522.22705)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon57" parent="DecorManual/ZoneE_Portal" unique_id=844150565 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(0.946949, 0, 0.321384, 0, 1, 0, -0.321384, 0, 0.946949, -132.66551, 42.115738, -520.4252)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="jalon58" parent="DecorManual/ZoneE_Portal" unique_id=1625908547 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(-0.569337, 0, -0.822104, 0, 1, 0, 0.822104, 0, -0.569337, -143.73448, 42.10698, -511.43484)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="grohotis59" parent="DecorManual/ZoneE_Portal" unique_id=473532833 instance=ExtResource("s_scree_slab")]
 transform = Transform3D(-0.306375, 0, 0.951911, 0, 1, 0, -0.951911, 0, -0.306375, -415.11108, 16.23616, -588.8434)
@@ -10436,7 +10436,7 @@ transform = Transform3D(0.34214962, 0, -0.9396456, 0, 1, 0, 0.9396456, 0, 0.3421
 
 [node name="baliza5" parent="DecorManual/ZoneH_Mal" unique_id=1447900990 instance=ExtResource("s_snow_pole")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.9018, 0.261627, 20.83009)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="semn6" parent="DecorManual/ZoneH_Mal" unique_id=1534236174 instance=ExtResource("s_road_sign_blank")]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -13.67866, 0.131393, 35.670273)

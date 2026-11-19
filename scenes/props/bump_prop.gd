@@ -31,7 +31,13 @@ const MAX_HEIGHT_M: float = 1.8
 ## Plafonul de corpuri per pista (costul pe mobil). Adormite nu costa, dar o
 ## izbitura in gramada le trezeste pe toate deodata. Peste plafon, piesa ramane
 ## statica (WorldProp cade pe hull) — nimic nu dispare.
-const MAX_PER_TRACK: int = 64
+## 128 din nov 2026 (decizia dezvoltatorului; era 64): San Francisco cerea exact 64 (42 de
+## masini parcate + 22 de piese de strada), deci nicio piesa noua nu mai incapea acolo, iar
+## decorul lovibil se intinde pe toate pistele. Stalpii de bordura (`RoadMarker`, pana la 110)
+## se numara separat, deci costul corpurilor adormite era deja acceptat la scara asta. Ce NU
+## acopera plafonul: fiecare piesa e un nod in afara coacerii MultiMesh, adica desene in plus —
+## o pista care se apropie de plafon se masoara cu `ProbePerf`.
+const MAX_PER_TRACK: int = 128
 ## Masa din volumul cutiei, cu o densitate de JUCARIE (kg/m³): o masina are
 ## 100-260 kg, iar un butoi de jucarie trebuie sa zboare, nu sa opreasca. Cu
 ## jumatate din cutie „plina": butoiul ~4 kg, rucsacul ~0,5 kg.

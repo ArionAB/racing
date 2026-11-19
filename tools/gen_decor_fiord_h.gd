@@ -257,7 +257,7 @@ func _village() -> void:
 	_place("luggage_container", "container", 0.921, 1.0, 16.0, deg_to_rad(20.0), 1.0, "hull")
 	_place("luggage_container", "container", 0.924, 1.0, 16.5, deg_to_rad(-15.0), 1.0, "hull")
 	# balize pe marginea drumului, lânga sat.
-	_place("snow_pole", "baliza", 0.918, 1.0, 1.0, 0.0, 1.0, "none")
+	_place("snow_pole", "baliza", 0.918, 1.0, 1.0, 0.0, 1.0, "bump")
 	_place("road_sign_blank", "semn", 0.927, 1.0, 2.0, deg_to_rad(-90.0), 1.0, "hull")
 	# RUNDA 6: a doua instanta de lodge, LANGA heliport (verdict runda 5:
 	# "langa heliportul cu H lipseste un lodge cu volum si silueta clara" —

@@ -133,10 +133,18 @@ pur plus haosul fizic, nu proiectilele.
   chiar arsă), nu din butoane; pe touch butonul vizat pulsează. Textele și
   pragurile: `scenes/race/tutorial/tutorial_default.tres`. Se reia din
   SETTINGS. Garda: `ProbeTutorial` (cu sabotaj pe fiecare contract).
+- **Mașinile se câștigă în carieră** ✔ (19 nov 2026): fără ele cariera n-avea
+  nicio miză față de World Cup. Garaj de start Taxi + Buggy, restul la praguri
+  de puncte de carieră (provizorii), **zăvorâte** — o mașină câștigată nu se
+  mai pierde. Pistele rămân deschise în orice mod; AI-ul conduce orice mașină.
+  Singurul lacăt: `Career.is_car_unlocked`; datele în `career_config.tres`
+  (`starting_cars`, `car_rewards`). Comutator ascuns: 7 atingeri pe titlul
+  GARAGE. Garda: `ProbeCarUnlock` (cu sabotaj pe fiecare contract).
 
 ## Post-MVP (nu implementa fără să fie cerut)
 
-Multiplayer, campionat lung, unlockables, tuning vizual de mașini, monetizare.
+Multiplayer, campionat lung, alte unlockables (mașinile câștigate în carieră
+sunt construite), tuning vizual de mașini, monetizare.
 Analiza de monetizare, cu argumente pro/contra și deciziile deschise:
 `docs/monetizare/model_de_monetizare.md`.
 

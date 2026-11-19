@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="CareerConfig" load_steps=19 format=3]
+[gd_resource type="Resource" script_class="CareerConfig" load_steps=27 format=3]
 
 [ext_resource type="Script" path="res://scenes/career/career_config.gd" id="1"]
 [ext_resource type="Resource" path="res://scenes/career/data/world_1.tres" id="w1"]
@@ -17,8 +17,18 @@
 [ext_resource type="Resource" path="res://scenes/career/data/challenges/chongqing.tres" id="c_chongqing"]
 [ext_resource type="Resource" path="res://scenes/career/data/challenges/baikal.tres" id="c_baikal"]
 [ext_resource type="Resource" path="res://scenes/career/data/challenges/fiordland.tres" id="c_fiordland"]
+[ext_resource type="Resource" path="res://scenes/career/data/car_rewards/ambulance.tres" id="r_ambulance"]
+[ext_resource type="Resource" path="res://scenes/career/data/car_rewards/police_sports.tres" id="r_police_sports"]
+[ext_resource type="Resource" path="res://scenes/career/data/car_rewards/hotrod.tres" id="r_hotrod"]
+[ext_resource type="Resource" path="res://scenes/career/data/car_rewards/tow_truck.tres" id="r_tow_truck"]
+[ext_resource type="Resource" path="res://scenes/career/data/car_rewards/firetruck.tres" id="r_firetruck"]
+[ext_resource type="Resource" path="res://scenes/career/data/car_rewards/monster.tres" id="r_monster"]
+[ext_resource type="Resource" path="res://scenes/career/data/car_rewards/bus.tres" id="r_bus"]
+[ext_resource type="Resource" path="res://scenes/career/data/car_rewards/muscle.tres" id="r_muscle"]
 
 [resource]
 script = ExtResource("1")
 worlds = Array[Resource]([ExtResource("w1"), ExtResource("w2"), ExtResource("w3"), ExtResource("w4")])
 challenges = Array[Resource]([ExtResource("c_kyoto"), ExtResource("c_stromboli"), ExtResource("c_serengeti"), ExtResource("c_okinawa"), ExtResource("c_monument_valley"), ExtResource("c_machu_picchu"), ExtResource("c_jodhpur"), ExtResource("c_transfagarasan"), ExtResource("c_cappadocia"), ExtResource("c_chongqing"), ExtResource("c_baikal"), ExtResource("c_fiordland")])
+starting_cars = Array[StringName]([&"taxi", &"buggy"])
+car_rewards = Array[Resource]([ExtResource("r_ambulance"), ExtResource("r_police_sports"), ExtResource("r_hotrod"), ExtResource("r_tow_truck"), ExtResource("r_firetruck"), ExtResource("r_monster"), ExtResource("r_bus"), ExtResource("r_muscle")])

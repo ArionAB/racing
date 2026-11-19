@@ -1,6 +1,7 @@
 class_name CareerPanel
 extends Control
-## Raftul carierei: pasaportul (puncte + medalii) sus, apoi o cutie per lume
+## Raftul carierei: pasaportul (puncte, urmatoarea masina de castigat, cate
+## masini ai, medalii) sus, apoi o cutie per lume
 ## cu pistele ei. Lumea deblocata arata carduri (tap = deschide foaia pistei:
 ## RACE cu bonusul provocarii / TIME TRIAL); cea sigilata arata un lacat si
 ## cate puncte mai lipsesc.
@@ -17,6 +18,11 @@ const BRONZE := Color(0.75, 0.50, 0.30)
 
 ## Referinte pastrate pentru reimprospatare (si pentru sonda).
 var _points_label: Label
+## „NEXT CAR  POLITIA  ·  2 MORE POINTS": urmatorul lucru de castigat, vizibil
+## si la trei minute distanta — carligul carierei (19 nov 2026).
+var _next_car_label: Label
+## „CARS  3 / 10".
+var _cars_label: Label
 var _medals_row: HBoxContainer
 var _worlds_box: VBoxContainer
 var _first_card: TrackCard
@@ -73,6 +79,16 @@ func _build_passport() -> Control:
 	_points_label.add_theme_font_size_override("font_size", 40)
 	_points_label.add_theme_color_override("font_color", TrackSelectPanel.TITLE_COLOR)
 	column.add_child(_points_label)
+	_next_car_label = Label.new()
+	_next_car_label.name = "NextCarLabel"
+	_next_car_label.add_theme_font_size_override("font_size", 24)
+	_next_car_label.add_theme_color_override("font_color", GOLD)
+	column.add_child(_next_car_label)
+	_cars_label = Label.new()
+	_cars_label.name = "CarsLabel"
+	_cars_label.add_theme_font_size_override("font_size", 20)
+	_cars_label.add_theme_color_override("font_color", TrackCard.TEXT_DIM)
+	column.add_child(_cars_label)
 	_medals_row = HBoxContainer.new()
 	_medals_row.add_theme_constant_override("separation", 22)
 	column.add_child(_medals_row)
@@ -81,6 +97,8 @@ func _build_passport() -> Control:
 
 func _refresh() -> void:
 	_points_label.text = "POINTS  %d / %d" % [Career.points(), Career.max_points()]
+	_next_car_label.text = next_car_text()
+	_cars_label.text = "CARS  %d / %d" % [Career.earned_car_count(), Career.garage_size()]
 
 	for child in _medals_row.get_children():
 		child.free()
@@ -100,6 +118,18 @@ func _refresh() -> void:
 	_first_card = null
 	for world in Career.worlds():
 		_worlds_box.add_child(_build_world(world))
+
+
+## Pe progresul real (`Career.next_car_reward`), nu pe comutatorul de
+## dezvoltator: pasaportul spune ce ai castigat.
+static func next_car_text() -> String:
+	var reward := Career.next_car_reward()
+	if reward == null:
+		return "ALL CARS EARNED"
+	var missing := maxi(0, reward.points - Career.points())
+	return "NEXT CAR  %s  ·  %d MORE %s" % [
+		Career.car_display_name(reward.car).to_upper(), missing,
+		"POINT" if missing == 1 else "POINTS"]
 
 
 func _build_world(world: CareerWorld) -> Control:

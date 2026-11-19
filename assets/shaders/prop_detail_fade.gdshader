@@ -26,6 +26,12 @@ uniform sampler2D albedo_atlas : source_color, filter_linear_mipmap;
 uniform sampler2D detail_tex : source_color, filter_linear_mipmap, repeat_enable;
 uniform sampler2D detail_mask_tex : source_color, filter_linear_mipmap;
 uniform float detail_scale = 0.35;
+// STRATUL DE DETALIU PORNIT? Palette.faded_detail_material() il leaga de
+// `Palette.DETAIL_GLOBAL_STRENGTH`: din 17 nov 2026 e 0 (decizia
+// dezvoltatorului, granulatia "arata ca zgomot"), deci fals — si atunci
+// fragmentul sare peste cele 4 esantionari (masca + 3 triplanare). Uniforma e
+// aceeasi pentru tot desenul, deci ramura nu diverge intre fragmente.
+uniform bool detail_on = true;
 uniform float detail_near_m = 26.0;
 uniform float detail_far_m = 130.0;
 uniform float detail_floor = 0.28;
@@ -163,6 +169,8 @@ void vertex() {
 
 void fragment() {
 	vec4 base = texture(albedo_atlas, UV);
+	vec3 det = vec3(1.0);
+	if (detail_on) {
 	// Masca se citeste pe UV1, adica pe centrul slotului: slotul din paleta e
 	// si canal de intensitate (roca primeste tot, masinile nimic).
 	float mask = texture(detail_mask_tex, UV).a;
@@ -176,7 +184,7 @@ void fragment() {
 	// verticale ale unui horn proiectiile laterale trebuie sa pastreze Y-ul
 	// obiectului pe axa V a texturii; cu perechile inversate canelurile ies
 	// ORIZONTALE, adica exact defectul reparat atunci.
-	vec3 det = texture(detail_tex, v_obj_pos.zy).rgb * w.x
+	det = texture(detail_tex, v_obj_pos.zy).rgb * w.x
 		+ texture(detail_tex, v_obj_pos.xz).rgb * w.y
 		+ texture(detail_tex, v_obj_pos.xy).rgb * w.z;
 
@@ -247,6 +255,7 @@ void fragment() {
 	// Masca de slot decide CAT din stratul de detaliu se aplica; unde e 0,
 	// rezultatul e 1.0 (identitatea inmultirii), adica material curat.
 	det = mix(vec3(1.0), det, mask);
+	}
 
 	vec3 alb = base.rgb * COLOR.rgb * det;
 

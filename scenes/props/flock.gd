@@ -114,6 +114,17 @@ class_name FlockProp
 ## brun inchis — care exista deja in atlas, deci costa ZERO materiale.
 @export var disc_skirt_slot: int = -1
 
+## TONUL placii, prin vertex color (care inmulteste culoarea slotului): `x` in
+## centru, `y` pe margine. (1, 1) = placa neatinsa, ca inainte.
+##
+## De ce exista: salina Serengeti (FOAM_WHITE) traia din granulatia stratului de
+## detaliu, care o intuneca in medie cu ~10% si ii dadea textura. Cu stratul
+## stins (decizia dezvoltatorului, 17 nov 2026) placile iesau alb ars — peste
+## jumatate din pixeli la plafon. Un ton sub 1 o aduce inapoi sub alb, iar
+## marginea mai inchisa decat centrul face ca placile suprapuse sa se citeasca
+## ca o crusta cu pete, nu ca o foaie. Zero materiale, zero texturi.
+@export var disc_tone: Vector2 = Vector2.ONE
+
 ## Reaseaza fiecare instanta pe TERENUL de la rulare, pastrand ofsetul fata de
 ## cota cu care a fost scrisa in lista.
 ##
@@ -181,7 +192,7 @@ func _ready() -> void:
 
 
 func _build() -> void:
-	var mesh: Mesh = _disc_mesh(disc_slot, disc_radius, disc_skirt, disc_skirt_slot) if model == null and disc_slot >= 0 else _mesh_of(model, mesh_name)
+	var mesh: Mesh = _disc_mesh(disc_slot, disc_radius, disc_skirt, disc_skirt_slot, disc_tone) if model == null and disc_slot >= 0 else _mesh_of(model, mesh_name)
 	if mesh != null and model != null and ao_keep < 1.0:
 		mesh = _lift_ao(mesh, ao_keep)
 	if mesh == null:
@@ -357,7 +368,7 @@ static func _mesh_of_uncached(ps: PackedScene, want: String = "") -> Mesh:
 ## plin — crusta de sare din referinta e cea mai LUMINOASA suprafata din cadru,
 ## nu doar cea mai putin saturata.
 static func _disc_mesh(slot: int, radius: float, skirt: float = 0.0,
-		skirt_slot: int = -1) -> Mesh:
+		skirt_slot: int = -1, tone: Vector2 = Vector2.ONE) -> Mesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var uv := Palette.uv(slot)
@@ -377,7 +388,8 @@ static func _disc_mesh(slot: int, radius: float, skirt: float = 0.0,
 				Vector3(cos(a1) * radius, 0.0, sin(a1) * radius)]:
 			st.set_uv(uv)
 			st.set_normal(Vector3.UP)
-			st.set_color(Color.WHITE)
+			var t := tone.x if v == Vector3.ZERO else tone.y
+			st.set_color(Color(t, t, t))
 			st.add_vertex(v)
 	# FUSTA: centura de fete verticale care coboara de la marginea fetei de sus.
 	# Fara ea placa e o foaie fara grosime si terasa citeste ca un decal (vezi

@@ -1,0 +1,1179 @@
+# Toy Racer — Japanese.
+msgid ""
+msgstr ""
+"Project-Id-Version: Toy Racer\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8-bit\n"
+"Language: ja\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#. Subtitle under the title TOY RACER (which is never translated).
+#: scenes/main_menu/main_menu.gd:26
+msgid "toy cars, drifting and bumping"
+msgstr "おもちゃの車で、ドリフトと体当たり"
+
+#: scenes/main_menu/main_menu.gd:32
+#: scenes/ui/track_select_panel.gd:122
+msgid "QUICK RACE"
+msgstr "クイックレース"
+
+#: scenes/main_menu/main_menu.gd:35
+#: scenes/ui/world_cup_panel.gd:31
+msgid "WORLD CUP"
+msgstr "ワールドカップ"
+
+#: scenes/main_menu/main_menu.gd:37
+#: scenes/ui/career_panel.gd:41
+msgid "CAREER"
+msgstr "キャリア"
+
+#: scenes/main_menu/main_menu.gd:39
+#: scenes/ui/garage_panel.gd:142
+msgid "GARAGE"
+msgstr "ガレージ"
+
+#: scenes/main_menu/main_menu.gd:41
+#: scenes/ui/hud.gd:464
+#: scenes/ui/settings_panel.gd:40
+msgid "SETTINGS"
+msgstr "設定"
+
+#. Desktop only.
+#: scenes/main_menu/main_menu.gd:46
+msgid "QUIT"
+msgstr "終了"
+
+#. Settings row label. Shown as "<translation> / Language" when the game is not in English.
+#: scenes/ui/settings_panel.gd:327
+#: scenes/ui/settings_panel.gd:328
+msgid "Language"
+msgstr "言語"
+
+#. Language choice: follow the device language. The language names themselves are never translated.
+#: scenes/ui/settings_panel.gd:336
+msgid "AUTO"
+msgstr "自動"
+
+#: scenes/ui/settings_panel.gd:61
+msgid "Steering sensitivity"
+msgstr "ハンドル感度"
+
+#: scenes/ui/settings_panel.gd:65
+msgid "Effects volume"
+msgstr "効果音の音量"
+
+#: scenes/ui/settings_panel.gd:70
+msgid "Engine volume"
+msgstr "エンジン音の音量"
+
+#: scenes/ui/settings_panel.gd:76
+msgid "Vibration"
+msgstr "振動"
+
+#. Accessibility (photosensitivity): the storm lightning stops whitening the screen.
+#: scenes/ui/settings_panel.gd:82
+msgid "Reduce flashes"
+msgstr "フラッシュを抑える"
+
+#: scenes/ui/settings_panel.gd:91
+msgid "Camera: distance"
+msgstr "カメラ：距離"
+
+#: scenes/ui/settings_panel.gd:95
+msgid "Camera: height"
+msgstr "カメラ：高さ"
+
+#: scenes/ui/settings_panel.gd:99
+msgid "Camera: field of view"
+msgstr "カメラ：視野"
+
+#. How fast the camera settles behind the car.
+#: scenes/ui/settings_panel.gd:103
+msgid "Camera: follow speed"
+msgstr "カメラ：追従速度"
+
+#: scenes/ui/settings_panel.gd:109
+msgid "Graphics"
+msgstr "グラフィック"
+
+#. Graphics quality.
+#: scripts/autoload/game_state.gd:376
+msgid "Low"
+msgstr "低"
+
+#. Graphics quality.
+#: scripts/autoload/game_state.gd:376
+msgid "Normal"
+msgstr "標準"
+
+#. Graphics quality.
+#: scripts/autoload/game_state.gd:376
+msgid "High"
+msgstr "高"
+
+#: scenes/ui/settings_panel.gd:114
+msgid "Performance counter"
+msgstr "パフォーマンス表示"
+
+#: scenes/ui/settings_panel.gd:121
+msgid "Location telemetry (tap it to copy)"
+msgstr "位置テレメトリ（タップでコピー）"
+
+#: scenes/ui/settings_panel.gd:136
+msgid "Real headlight at night (test)"
+msgstr "夜間のリアルなライト（テスト）"
+
+#: scenes/race/tutorial/tutorial_director.gd:25
+msgid "REPLAY TUTORIAL"
+msgstr "チュートリアルをもう一度"
+
+#: scenes/ui/settings_panel.gd:151
+msgid "CREDITS & LICENSES"
+msgstr "クレジットとライセンス"
+
+#: scenes/ui/settings_panel.gd:158
+msgid "RESET CAMERA"
+msgstr "カメラをリセット"
+
+#: scenes/ui/career_panel.gd:260
+#: scenes/ui/settings_panel.gd:173
+msgid "BACK"
+msgstr "戻る"
+
+#: scenes/ui/track_select_panel.gd:158
+msgid "<  BACK"
+msgstr "<  戻る"
+
+#. Button: put the car back on the track.
+#: scenes/ui/hud.gd:135
+msgid "↺  RESET"
+msgstr "↺  リセット"
+
+#: scenes/ui/hud.gd:180
+msgid "WRONG WAY"
+msgstr "逆走中"
+
+#. Time trial: the turbo tank is sealed (it does not refill).
+#: scenes/ui/hud.gd:407
+msgid "SEALED"
+msgstr "封印中"
+
+#: scenes/ui/hud.gd:457
+msgid "PAUSED"
+msgstr "ポーズ中"
+
+#: scenes/ui/hud.gd:461
+msgid "RESUME"
+msgstr "再開"
+
+#: scenes/race/race.gd:898
+#: scenes/ui/hud.gd:469
+msgid "RESTART"
+msgstr "リスタート"
+
+#: scenes/ui/hud.gd:474
+#: scenes/ui/hud.gd:538
+msgid "MENU"
+msgstr "メニュー"
+
+#: scenes/ui/hud.gd:738
+msgid "LAP %d/%d"
+msgstr "ラップ %d/%d"
+
+#. Speed. km/h is the SI unit symbol and stays in Latin letters in every language.
+#: scenes/ui/hud.gd:739
+msgid "%.0f km/h"
+msgstr "%.0f km/h"
+
+#. Best lap time.
+#: scenes/ui/hud.gd:741
+msgid "BEST  %s"
+msgstr "ベスト  %s"
+
+#. Big countdown shown while the car is off the road.
+#: scenes/ui/hud.gd:815
+msgid "OFF ROAD"
+msgstr "コースアウト"
+
+#. Time of the saved ghost car.
+#: scenes/ui/hud.gd:853
+msgid "GHOST %s"
+msgstr "ゴースト %s"
+
+#. %d = bonus points, %s = challenge title.
+#: scenes/ui/hud.gd:874
+msgid "CHALLENGE +%d: %s"
+msgstr "チャレンジ +%d：%s"
+
+#: scenes/race/race.gd:806
+#: scenes/race/race.gd:957
+#: scenes/ui/hud.gd:879
+msgid "CHALLENGE FAILED"
+msgstr "チャレンジ失敗"
+
+#: scenes/race/race.gd:956
+msgid "CHALLENGE +%d"
+msgstr "チャレンジ +%d"
+
+#. Countdown, very large text: keep it as short as possible.
+#: scenes/race/race.gd:222
+msgid "READY?"
+msgstr "よーい"
+
+#. Countdown, very large text. Japanese: the classic start call よーい、ドン.
+#: scenes/race/race.gd:468
+msgid "GO!"
+msgstr "ドン！"
+
+#. After the car fell off the track and was put back.
+#: scenes/race/race.gd:280
+msgid "MISSED — back on track"
+msgstr "ミス — コースに復帰"
+
+#. The toy driver was thrown out of the car.
+#: scenes/race/race.gd:293
+msgid "EJECTED!"
+msgstr "放り出された！"
+
+#: scenes/race/race.gd:302
+msgid "STEERING REVERSED  <=>"
+msgstr "ハンドル反転  <=>"
+
+#: scenes/race/race.gd:307
+msgid "ON FIRE!"
+msgstr "炎上中！"
+
+#: scenes/race/race.gd:483
+msgid "ROCKET START!"
+msgstr "ロケットスタート！"
+
+#: scenes/race/race.gd:486
+msgid "Too early..."
+msgstr "早すぎた…"
+
+#: scenes/race/race.gd:773
+msgid "NEW LAP RECORD! %s"
+msgstr "ラップレコード更新！ %s"
+
+#. %s = one of the ordinals 1st..6th below.
+#: scenes/race/race.gd:867
+#: scenes/race/race.gd:871
+msgid "FINISH — %s place!"
+msgstr "ゴール — %s！"
+
+#: scenes/race/race.gd:868
+msgid "RACE RECORD %s"
+msgstr "レースレコード %s"
+
+#. Finishing position. Only ever used in front of the word for "place" ("FINISH — %s place!", "%s PLACE +%d"); agree with it.
+#: scenes/race/race.gd:20
+msgid "1st"
+msgstr "1位"
+
+#. Finishing position. Only ever used in front of the word for "place" ("FINISH — %s place!", "%s PLACE +%d"); agree with it.
+#: scenes/race/race.gd:20
+msgid "2nd"
+msgstr "2位"
+
+#. Finishing position. Only ever used in front of the word for "place" ("FINISH — %s place!", "%s PLACE +%d"); agree with it.
+#: scenes/race/race.gd:20
+msgid "3rd"
+msgstr "3位"
+
+#. Finishing position. Only ever used in front of the word for "place" ("FINISH — %s place!", "%s PLACE +%d"); agree with it.
+#: scenes/race/race.gd:20
+msgid "4th"
+msgstr "4位"
+
+#. Finishing position. Only ever used in front of the word for "place" ("FINISH — %s place!", "%s PLACE +%d"); agree with it.
+#: scenes/race/race.gd:20
+msgid "5th"
+msgstr "5位"
+
+#. Finishing position. Only ever used in front of the word for "place" ("FINISH — %s place!", "%s PLACE +%d"); agree with it.
+#: scenes/race/race.gd:20
+msgid "6th"
+msgstr "6位"
+
+#: scenes/race/race.gd:885
+msgid "+%d pts  (total %d)"
+msgstr "+%d点  （合計 %d点）"
+
+#: scenes/race/race.gd:889
+msgid "RECORD!"
+msgstr "レコード！"
+
+#. %s = track name.
+#: scenes/race/race.gd:897
+msgid "RESULTS — %s"
+msgstr "結果 — %s"
+
+#: scenes/race/race.gd:901
+#: scenes/race/race.gd:905
+msgid "BACK TO CAREER"
+msgstr "キャリアに戻る"
+
+#. Cup name — race number / races in the cup — track name.
+#: scenes/race/race.gd:907
+msgid "%s — RACE %d/%d — %s"
+msgstr "%s — レース %d/%d — %s"
+
+#: scenes/race/race.gd:909
+msgid "FINAL STANDINGS"
+msgstr "最終順位"
+
+#: scenes/race/race.gd:910
+msgid "NEXT RACE"
+msgstr "次のレース"
+
+#: scenes/race/race.gd:917
+msgid "NO TARGET YET"
+msgstr "目標タイムなし"
+
+#: scenes/race/race.gd:920
+#: scenes/race/race.gd:946
+msgid "NO MEDAL"
+msgstr "メダルなし"
+
+#. Time — medal reached (GOLD/SILVER/BRONZE/NO MEDAL).
+#: scenes/race/race.gd:921
+msgid "TIME TRIAL — %s — %s"
+msgstr "タイムアタック — %s — %s"
+
+#: scenes/race/race.gd:922
+msgid "NEW GHOST"
+msgstr "新ゴースト"
+
+#. Both the medal and the hardest rivals level.
+#: scenes/cars/ai_skill/ai_skill.gd:111
+#: scenes/race/race.gd:929
+#: scenes/race/race.gd:943
+#: scenes/ui/career_panel.gd:279
+msgid "GOLD"
+msgstr "ゴールド"
+
+#. Both the medal and the medium rivals level.
+#: scenes/cars/ai_skill/ai_skill.gd:111
+#: scenes/race/race.gd:930
+#: scenes/race/race.gd:944
+#: scenes/ui/career_panel.gd:280
+msgid "SILVER"
+msgstr "シルバー"
+
+#. Both the medal and the easiest rivals level.
+#: scenes/cars/ai_skill/ai_skill.gd:111
+#: scenes/race/race.gd:931
+#: scenes/race/race.gd:945
+#: scenes/ui/career_panel.gd:281
+msgid "BRONZE"
+msgstr "ブロンズ"
+
+#. %s = ordinal (1st..6th) in capitals, %d = points. Japanese: the ordinal 1位 already says "place".
+#: scenes/race/race.gd:953
+msgid "%s PLACE +%d"
+msgstr "%s +%d"
+
+#: scenes/race/race.gd:958
+msgid "%s  =  %d PTS"
+msgstr "%s  =  %d点"
+
+#: scenes/race/race.gd:996
+msgid "%d point"
+msgid_plural "%d points"
+msgstr[0] "%d点"
+
+#. Cup name, then the pilot who won it.
+#: scenes/race/race.gd:1001
+msgid "%s WINNER: %s!"
+msgstr "%s 優勝：%s！"
+
+#: scenes/race/race.gd:1005
+msgid "PLAY AGAIN"
+msgstr "もう一度"
+
+#. The player's name in the results table.
+#: scenes/race/race.gd:1166
+msgid "You"
+msgstr "あなた"
+
+#. Rival pilot's name: keep it, only transliterate where the script differs.
+#: scenes/race/race.gd:17
+msgid "Robo"
+msgstr "ロボ"
+
+#. Rival pilot's name: keep it, only transliterate where the script differs.
+#: scenes/race/race.gd:17
+msgid "Vex"
+msgstr "ヴェクス"
+
+#. Rival pilot's name: keep it, only transliterate where the script differs.
+#: scenes/race/race.gd:17
+msgid "Luna"
+msgstr "ルナ"
+
+#. Rival pilot's name: keep it, only transliterate where the script differs.
+#: scenes/race/race.gd:17
+msgid "Kai"
+msgstr "カイ"
+
+#. Rival pilot's name: keep it, only transliterate where the script differs.
+#: scenes/race/race.gd:17
+msgid "Nyx"
+msgstr "ニクス"
+
+#: scenes/ui/career_panel.gd:41
+msgid "CHOOSE A WORLD"
+msgstr "ワールドを選ぼう"
+
+#: scenes/ui/career_panel.gd:83
+msgid "POINTS  %d / %d"
+msgstr "ポイント  %d / %d"
+
+#: scenes/ui/career_panel.gd:117
+msgid "FREE"
+msgstr "無料"
+
+#. A locked career world and the points still needed to open it.
+#: scenes/ui/career_panel.gd:157
+msgid "SEALED — %d MORE POINT"
+msgid_plural "SEALED — %d MORE POINTS"
+msgstr[0] "封印中 — あと%dポイント"
+
+#. Both the career race button and the small caption above a track's best race time.
+#: scenes/ui/career_panel.gd:221
+#: scenes/ui/track_card.gd:183
+msgid "RACE"
+msgstr "レース"
+
+#. %s = best place (1ST PLACE / NO PODIUM YET), then points earned / points possible.
+#: scenes/ui/career_panel.gd:221
+msgid "%s  ·  %d / %d PTS"
+msgstr "%s  ·  %d / %d点"
+
+#. %s = challenge title.
+#: scenes/ui/career_panel.gd:235
+msgid "BONUS +%d  ·  %s"
+msgstr "ボーナス +%d  ·  %s"
+
+#: scenes/ui/career_panel.gd:237
+msgid "DONE"
+msgstr "達成"
+
+#: scenes/ui/career_panel.gd:244
+msgid "NO TIME YET"
+msgstr "タイムなし"
+
+#. Best time · medal.
+#: scenes/ui/career_panel.gd:246
+msgid "BEST %s · %s"
+msgstr "ベスト %s · %s"
+
+#: scenes/ui/career_panel.gd:251
+msgid "GHOST"
+msgstr "ゴースト"
+
+#: scenes/ui/career_panel.gd:253
+msgid "(no targets yet)"
+msgstr "（目標タイムなし）"
+
+#: scenes/ui/career_panel.gd:254
+msgid "TIME TRIAL"
+msgstr "タイムアタック"
+
+#: scenes/ui/career_panel.gd:289
+msgid "1ST PLACE"
+msgstr "1位"
+
+#: scenes/ui/career_panel.gd:290
+msgid "2ND PLACE"
+msgstr "2位"
+
+#: scenes/ui/career_panel.gd:291
+msgid "3RD PLACE"
+msgstr "3位"
+
+#: scenes/ui/career_panel.gd:292
+msgid "NO PODIUM YET"
+msgstr "表彰台なし"
+
+#: scenes/ui/world_cup_panel.gd:31
+msgid "CHOOSE A CUP"
+msgstr "カップを選ぼう"
+
+#: scenes/ui/world_cup_panel.gd:48
+msgid "POINTS PER RACE  6 · 5 · 4 · 3 · 2 · 1"
+msgstr "各レースのポイント  6 · 5 · 4 · 3 · 2 · 1"
+
+#. Rule: in one cup no two cars on the grid are the same model.
+#: scenes/ui/world_cup_panel.gd:49
+msgid "NEW RIVALS EVERY CUP, NEVER THE SAME CAR TWICE"
+msgstr "カップごとに新しいライバル、同じ車は二度と出ない"
+
+#: scenes/ui/world_cup_panel.gd:84
+msgid "%d RACE"
+msgid_plural "%d RACES"
+msgstr[0] "%dレース"
+
+#. Button that starts a cup.
+#: scenes/ui/world_cup_panel.gd:178
+msgid "START"
+msgstr "スタート"
+
+#: scenes/ui/track_select_panel.gd:122
+msgid "CHOOSE A TRACK"
+msgstr "コースを選ぼう"
+
+#. Small caption above a track's best lap time.
+#: scenes/ui/track_card.gd:182
+msgid "LAP"
+msgstr "ラップ"
+
+#: scenes/ui/ai_skill_selector.gd:37
+msgid "RIVALS"
+msgstr "ライバル"
+
+#: scenes/ui/ai_skill_selector.gd:20
+msgid "Relaxed rivals: they brake early and make mistakes."
+msgstr "のんびりライバル。早めにブレーキを踏み、ミスもする。"
+
+#: scenes/ui/ai_skill_selector.gd:21
+msgid "Solid rivals: clean lines, the occasional slip."
+msgstr "手堅いライバル。ライン取りは正確、たまにミスする。"
+
+#: scenes/ui/ai_skill_selector.gd:22
+msgid "Flat out: they use every bit of their car."
+msgstr "全開。マシンの性能を限界まで引き出す。"
+
+#: scenes/ui/garage_panel.gd:209
+msgid "SELECT"
+msgstr "決定"
+
+#. The toy figure sitting in the car (a skin).
+#: scenes/ui/garage_panel.gd:257
+msgid "DRIVER"
+msgstr "ドライバー"
+
+#: scenes/ui/garage_panel.gd:198
+msgid "SPEED"
+msgstr "スピード"
+
+#. Acceleration, abbreviated.
+#: scenes/ui/garage_panel.gd:198
+msgid "ACCEL"
+msgstr "加速"
+
+#: scenes/ui/garage_panel.gd:198
+msgid "GRIP"
+msgstr "グリップ"
+
+#. Car weight: decides who pushes whom.
+#: scenes/ui/garage_panel.gd:570
+msgid "MASS"
+msgstr "重さ"
+
+#. Weight value; agree with the word for MASS.
+#: scenes/ui/garage_panel.gd:470
+msgid "LIGHT"
+msgstr "軽い"
+
+#. Weight value; agree with the word for MASS.
+#: scenes/ui/garage_panel.gd:473
+msgid "MEDIUM"
+msgstr "普通"
+
+#. Weight value; agree with the word for MASS.
+#: scenes/ui/garage_panel.gd:472
+msgid "HEAVY"
+msgstr "重い"
+
+#. Car name (garage card, results).
+#: scenes/cars/data/muscle.tres:10
+msgid "Muscle"
+msgstr "マッスル"
+
+#. Car name (garage card, results).
+#: scenes/cars/data/police_sports.tres:10
+msgid "Police"
+msgstr "パトカー"
+
+#. Car name (garage card, results).
+#: scenes/cars/data/taxi.tres:10
+msgid "Taxi"
+msgstr "タクシー"
+
+#. Car name (garage card, results).
+#: scenes/cars/data/bus.tres:10
+#: scenes/props/world_prop.gd:1265
+msgid "Bus"
+msgstr "バス"
+
+#. Car name (garage card, results).
+#: scenes/cars/data/firetruck.tres:10
+msgid "Fire Truck"
+msgstr "消防車"
+
+#. Car name (garage card, results).
+#: scenes/cars/data/buggy.tres:10
+msgid "Buggy"
+msgstr "バギー"
+
+#. Car name (garage card, results).
+#: scenes/cars/data/ambulance.tres:10
+msgid "Ambulance"
+msgstr "救急車"
+
+#. Car name (garage card, results).
+#: scenes/cars/data/hotrod.tres:10
+msgid "Hot rod"
+msgstr "ホットロッド"
+
+#. Car name (garage card, results).
+#: scenes/cars/data/monster.tres:10
+msgid "Monster"
+msgstr "モンスター"
+
+#. Car name (garage card, results).
+#: scenes/cars/data/tow_truck.tres:10
+msgid "Tow Truck"
+msgstr "レッカー車"
+
+#. Driver skin name (the colour of the toy figure).
+#: scenes/cars/data/drivers/driver_blue.tres:9
+msgid "Blue"
+msgstr "ブルー"
+
+#. Driver skin name (the colour of the toy figure).
+#: scenes/cars/data/drivers/driver_red.tres:9
+msgid "Red"
+msgstr "レッド"
+
+#. Driver skin name (the colour of the toy figure).
+#: scenes/cars/data/drivers/driver_yellow.tres:9
+msgid "Yellow"
+msgstr "イエロー"
+
+#. Driver skin name (the colour of the toy figure).
+#: scenes/cars/data/drivers/driver_green.tres:9
+msgid "Green"
+msgstr "グリーン"
+
+#: scenes/ui/credits_panel.gd:66
+msgid "CREDITS"
+msgstr "クレジット"
+
+#: scenes/ui/credits_panel.gd:66
+msgid "LICENSES & THANKS"
+msgstr "ライセンスと謝辞"
+
+#. %s = licence identifier (MIT, OFL-1.1...), never translated.
+#: scenes/ui/credits_panel.gd:238
+#: scenes/ui/credits_panel.gd:253
+msgid "SHOW  %s"
+msgstr "表示  %s"
+
+#. %s = licence identifier, never translated.
+#: scenes/ui/credits_panel.gd:253
+msgid "HIDE  %s"
+msgstr "隠す  %s"
+
+#: scenes/ui/loading_screen.gd:269
+msgid "TRACK"
+msgstr "コース"
+
+#: scenes/ui/loading_screen.gd:58
+msgid "Hold TURBO in the last second of the countdown for a rocket start."
+msgstr "カウントダウンの最後の1秒でターボを押し続けると、ロケットスタート！"
+
+#: scenes/ui/loading_screen.gd:59
+msgid "Drifting fills the turbo bar much faster than driving straight."
+msgstr "ドリフトすると、まっすぐ走るよりずっと速くターボゲージがたまる。"
+
+#: scenes/ui/loading_screen.gd:60
+msgid "Turbo is yours to spend: save it for a long straight or right before a jump."
+msgstr "ターボの使いどころは自分次第。長いストレートやジャンプの直前に取っておこう。"
+
+#: scenes/ui/loading_screen.gd:61
+msgid "Heavy cars push, light cars fly. Pick your fights wisely."
+msgstr "重い車は押し、軽い車は吹っ飛ぶ。ぶつかる相手はよく選ぼう。"
+
+#: scenes/ui/loading_screen.gd:62
+msgid "Grass slows you down, but some shortcuts are still worth the risk."
+msgstr "芝生に入ると遅くなるけど、危険をおかす価値のある近道もある。"
+
+#. Position pop-up after an overtake (P3 = 3rd place).
+#: scenes/ui/position_popup.gd:61
+msgid "P%d"
+msgstr "%d位"
+
+#: scenes/career/challenge_tracker.gd:104
+msgid "LAP %d"
+msgstr "ラップ %d"
+
+#. Baikal challenge progress: ice plates broken on this lap.
+#: scenes/career/challenge_tracker.gd:107
+msgid "LAP %d: %d PLATE"
+msgid_plural "LAP %d: %d PLATES"
+msgstr[0] "ラップ %d：%d枚"
+
+#: scenes/race/tutorial/tutorial_config.gd:49
+msgid "TUTORIAL"
+msgstr "チュートリアル"
+
+#: scenes/race/tutorial/tutorial_config.gd:50
+msgid "Follow the hints.\nEach one goes away once you've done it."
+msgstr "ヒントに従って操作しよう。\nできたヒントは消えていく。"
+
+#: scenes/race/tutorial/tutorial_config.gd:51
+msgid "STEER"
+msgstr "ハンドル"
+
+#. Touch screen: the two steering buttons are arrows.
+#: scenes/race/tutorial/tutorial_config.gd:52
+msgid "Hold the LEFT and the RIGHT arrow"
+msgstr "左の矢印と右の矢印を長押ししよう"
+
+#. Keyboard. {steer_left} etc. are replaced with key names: keep them exactly.
+#: scenes/race/tutorial/tutorial_config.gd:53
+msgid "Hold {steer_left} and {steer_right} to steer"
+msgstr "{steer_left}と{steer_right}を長押しでハンドル操作"
+
+#: scenes/race/tutorial/tutorial_config.gd:54
+msgid "GAS"
+msgstr "アクセル"
+
+#: scenes/race/tutorial/tutorial_config.gd:55
+msgid "Hold the green arrow to drive"
+msgstr "緑の矢印を長押しで走る"
+
+#: scenes/race/tutorial/tutorial_config.gd:56
+msgid "Hold {accelerate} to drive"
+msgstr "{accelerate}を長押しで走る"
+
+#: scenes/race/tutorial/tutorial_config.gd:57
+msgid "DRIFT"
+msgstr "ドリフト"
+
+#: scenes/race/tutorial/tutorial_config.gd:58
+msgid "Hold DRIFT while you turn.\nDrifting fills the turbo bar fast!"
+msgstr "曲がりながらドリフトボタンを長押し。\nドリフトでターボゲージが一気にたまる！"
+
+#: scenes/race/tutorial/tutorial_config.gd:59
+msgid "Hold {drift} while you turn.\nDrifting fills the turbo bar fast!"
+msgstr "曲がりながら{drift}を長押し。\nドリフトでターボゲージが一気にたまる！"
+
+#: scenes/race/tutorial/tutorial_config.gd:60
+msgid "Faster! You need speed to drift"
+msgstr "もっと速く！ドリフトにはスピードが必要"
+
+#: scenes/race/tutorial/tutorial_config.gd:61
+msgid "Now turn while you hold it"
+msgstr "押したままハンドルを切ろう"
+
+#: scenes/race/tutorial/tutorial_config.gd:62
+msgid "TURBO"
+msgstr "ターボ"
+
+#: scenes/race/tutorial/tutorial_config.gd:63
+msgid "Hold TURBO (the flame) to burn the bar"
+msgstr "ターボ（炎のボタン）を長押しでゲージを使う"
+
+#: scenes/race/tutorial/tutorial_config.gd:64
+msgid "Hold {turbo} to burn the bar"
+msgstr "{turbo}を長押しでゲージを使う"
+
+#: scenes/race/tutorial/tutorial_config.gd:65
+msgid "Bar empty: drift to fill it"
+msgstr "ゲージが空。ドリフトでためよう"
+
+#: scenes/race/tutorial/tutorial_config.gd:66
+msgid "YOU'RE READY!"
+msgstr "準備完了！"
+
+#: scenes/race/tutorial/tutorial_config.gd:67
+msgid "Drift fills the bar. TURBO burns it, you pick the moment.\nTIP: hold TURBO as the countdown ends for a ROCKET START."
+msgstr "ドリフトでゲージがたまり、ターボで使う。タイミングは自分次第。\nヒント：カウントダウンの終わりにターボを押し続けるとロケットスタート！"
+
+#: scenes/race/tutorial/tutorial_config.gd:68
+#: scenes/ui/tutorial_overlay.gd:110
+msgid "SKIP TUTORIAL"
+msgstr "チュートリアルをスキップ"
+
+#: scenes/race/tutorial/tutorial_config.gd:69
+#: scenes/ui/tutorial_overlay.gd:113
+msgid "CONTINUE"
+msgstr "続ける"
+
+#: scenes/race/tutorial/tutorial_config.gd:72
+msgid "FIRST TIME HERE?"
+msgstr "はじめて？"
+
+#: scenes/race/tutorial/tutorial_config.gd:73
+msgid "Take a one-minute test drive:\nsteering, gas, drift and turbo."
+msgstr "1分間の試乗をしよう：\nハンドル、アクセル、ドリフト、ターボ。"
+
+#: scenes/race/tutorial/tutorial_config.gd:74
+msgid "TEST DRIVE"
+msgstr "試乗する"
+
+#: scenes/race/tutorial/tutorial_config.gd:75
+msgid "SKIP"
+msgstr "スキップ"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track01.tres:8
+msgid "The Dunes"
+msgstr "砂丘"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track08.tres:8
+#: scenes/tracks/info/Track20.tres:8
+#: scripts/autoload/game_state.gd:135
+#: scripts/save_schema.gd:93
+msgid "Okinawa"
+msgstr "沖縄"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track09.tres:8
+msgid "The Alps"
+msgstr "アルプス"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track10.tres:8
+#: scripts/autoload/game_state.gd:133
+#: scripts/save_schema.gd:83
+msgid "Baikal"
+msgstr "バイカル"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track11.tres:8
+#: scripts/autoload/game_state.gd:133
+#: scripts/save_schema.gd:84
+msgid "Stromboli"
+msgstr "ストロンボリ"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track12.tres:8
+#: scripts/autoload/game_state.gd:134
+#: scripts/save_schema.gd:85
+msgid "Chongqing"
+msgstr "重慶"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track13.tres:8
+#: scripts/autoload/game_state.gd:134
+#: scripts/save_schema.gd:86
+msgid "Cappadocia"
+msgstr "カッパドキア"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track14.tres:8
+#: scripts/autoload/game_state.gd:134
+#: scripts/save_schema.gd:87
+msgid "Serengeti"
+msgstr "セレンゲティ"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track15.tres:8
+#: scripts/autoload/game_state.gd:134
+#: scripts/save_schema.gd:88
+msgid "Machu Picchu"
+msgstr "マチュ・ピチュ"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track16.tres:8
+#: scripts/autoload/game_state.gd:134
+#: scripts/save_schema.gd:89
+msgid "Fiordland"
+msgstr "フィヨルドランド"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track17.tres:8
+#: scripts/autoload/game_state.gd:135
+#: scripts/save_schema.gd:90
+msgid "Jodhpur"
+msgstr "ジョードプル"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track18.tres:8
+#: scripts/autoload/game_state.gd:135
+#: scripts/save_schema.gd:91
+msgid "Kyoto"
+msgstr "京都"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track19.tres:8
+#: scripts/autoload/game_state.gd:135
+#: scripts/save_schema.gd:92
+msgid "Monument Valley"
+msgstr "モニュメント・バレー"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track21.tres:8
+#: scripts/autoload/game_state.gd:133
+#: scripts/save_schema.gd:82
+msgid "Transfagarasan"
+msgstr "トランスファガラシャン"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track22.tres:8
+#: scripts/autoload/game_state.gd:135
+#: scripts/save_schema.gd:94
+msgid "Ha Long"
+msgstr "ハロン湾"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track23.tres:8
+#: scripts/autoload/game_state.gd:135
+#: scripts/save_schema.gd:95
+msgid "Carrara"
+msgstr "カッラーラ"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track24.tres:8
+#: scripts/autoload/game_state.gd:136
+#: scripts/save_schema.gd:96
+msgid "Angkor"
+msgstr "アンコール"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track25.tres:8
+#: scripts/autoload/game_state.gd:136
+msgid "San Francisco"
+msgstr "サンフランシスコ"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track01.tres:9
+msgid "DESERT"
+msgstr "砂漠"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track08.tres:9
+#: scenes/tracks/info/Track18.tres:9
+#: scenes/tracks/info/Track20.tres:9
+msgid "JAPAN"
+msgstr "日本"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track09.tres:9
+#: scenes/tracks/info/Track21.tres:9
+msgid "EUROPE"
+msgstr "ヨーロッパ"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track10.tres:9
+msgid "RUSSIA"
+msgstr "ロシア"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track11.tres:9
+#: scenes/tracks/info/Track23.tres:9
+msgid "ITALY"
+msgstr "イタリア"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track12.tres:9
+msgid "CHINA"
+msgstr "中国"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track13.tres:9
+msgid "TURKEY"
+msgstr "トルコ"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track14.tres:9
+msgid "TANZANIA"
+msgstr "タンザニア"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track15.tres:9
+msgid "PERU"
+msgstr "ペルー"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track16.tres:9
+msgid "NEW ZEALAND"
+msgstr "ニュージーランド"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track17.tres:9
+msgid "INDIA"
+msgstr "インド"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track19.tres:9
+#: scenes/tracks/info/Track25.tres:9
+msgid "USA"
+msgstr "アメリカ"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track22.tres:9
+msgid "ASIA"
+msgstr "アジア"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track24.tres:9
+msgid "CAMBODIA"
+msgstr "カンボジア"
+
+#. World Cup cup name. FRONTIER = wild, far-away lands; WONDERS = wonders of the world (Ha Long, Carrara, San Francisco, Angkor).
+#: scenes/world_cup/data/asia_cup.tres:8
+msgid "ASIA CUP"
+msgstr "アジアカップ"
+
+#. World Cup cup name. FRONTIER = wild, far-away lands; WONDERS = wonders of the world (Ha Long, Carrara, San Francisco, Angkor).
+#: scenes/world_cup/data/europe_cup.tres:8
+msgid "EUROPE CUP"
+msgstr "ヨーロッパカップ"
+
+#. World Cup cup name. FRONTIER = wild, far-away lands; WONDERS = wonders of the world (Ha Long, Carrara, San Francisco, Angkor).
+#: scenes/world_cup/data/frontier_cup.tres:8
+msgid "FRONTIER CUP"
+msgstr "フロンティアカップ"
+
+#. World Cup cup name. FRONTIER = wild, far-away lands; WONDERS = wonders of the world (Ha Long, Carrara, San Francisco, Angkor).
+#: scenes/world_cup/data/wonders_cup.tres:8
+msgid "WONDERS CUP"
+msgstr "ワンダーカップ"
+
+#. Career world (a group of four tracks).
+#: scenes/career/data/world_1.tres:8
+msgid "WORLD 1"
+msgstr "ワールド1"
+
+#. Career world (a group of four tracks).
+#: scenes/career/data/world_2.tres:8
+msgid "WORLD 2"
+msgstr "ワールド2"
+
+#. Career world (a group of four tracks).
+#: scenes/career/data/world_3.tres:8
+msgid "WORLD 3"
+msgstr "ワールド3"
+
+#. Career world (a group of four tracks).
+#: scenes/career/data/world_4.tres:8
+msgid "WORLD 4"
+msgstr "ワールド4"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/baikal.tres:8
+msgid "THIN ICE"
+msgstr "薄氷"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/baikal.tres:9
+msgid "One lap without breaking a plate."
+msgstr "氷を1枚も割らずに1周しよう。"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/cappadocia.tres:8
+msgid "CLEAN SPIRAL"
+msgstr "ノーミスらせん"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/cappadocia.tres:9
+msgid "Drive the spiral without hitting the wall."
+msgstr "壁に当たらずにらせんを走り抜けよう。"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/chongqing.tres:8
+msgid "ALL ABOARD"
+msgstr "全員乗車"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/chongqing.tres:9
+msgid "Catch the cable car every lap."
+msgstr "毎周ロープウェイに乗ろう。"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/fiordland.tres:8
+msgid "OLD ROAD"
+msgstr "旧道"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/fiordland.tres:9
+msgid "Take the shortcut every lap."
+msgstr "毎周近道を通ろう。"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/jodhpur.tres:8
+msgid "NO TUK-TUK HITS"
+msgstr "トゥクトゥク接触なし"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/jodhpur.tres:9
+msgid "Finish without hitting a single tuk-tuk."
+msgstr "トゥクトゥクに一度もぶつからずにゴールしよう。"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/kyoto.tres:8
+msgid "NO THROWS"
+msgstr "吹っ飛ばされない"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/kyoto.tres:9
+msgid "Do not get thrown by the Gion float or the shishimai."
+msgstr "祇園祭の山鉾にも獅子舞にも吹っ飛ばされないように。"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/machu_picchu.tres:8
+msgid "NO SHOVES"
+msgstr "押し出されない"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/machu_picchu.tres:9
+msgid "Pass the bus without being shoved."
+msgstr "バスに押されずに追い越そう。"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/monument_valley.tres:8
+msgid "NO CRUSHING"
+msgstr "つぶされない"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/monument_valley.tres:9
+msgid "Pass the boulders without getting crushed."
+msgstr "岩につぶされずに通り抜けよう。"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/okinawa.tres:8
+msgid "DRY RUN"
+msgstr "ぬれずにゴール"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/okinawa.tres:9
+msgid "Finish without the wave surge taking you."
+msgstr "大波にさらわれずにゴールしよう。"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/serengeti.tres:8
+msgid "NO ANIMAL HITS"
+msgstr "動物接触なし"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/serengeti.tres:9
+msgid "Finish without hitting a single animal."
+msgstr "動物に一度もぶつからずにゴールしよう。"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/stromboli.tres:8
+msgid "NO FIREBALLS"
+msgstr "火の玉を回避"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/stromboli.tres:9
+msgid "Finish all laps without a single fireball hit."
+msgstr "火の玉に一度も当たらずに全周走りきろう。"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/transfagarasan.tres:8
+msgid "RED RUNNER"
+msgstr "信号無視"
+
+#. Career challenge (bonus +1): title in capitals, hint as a sentence.
+#: scenes/career/data/challenges/transfagarasan.tres:9
+msgid "Run the tunnel light 3 times without the bus hitting you."
+msgstr "トンネルの赤信号を3回突破して、バスにぶつからないようにしよう。"
+

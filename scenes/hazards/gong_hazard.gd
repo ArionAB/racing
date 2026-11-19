@@ -260,7 +260,7 @@ func _except_bump_props() -> void:
 
 func _build_disc() -> void:
 	_disc = RigidBody3D.new()
-	_disc.name = "Disc"
+	_disc.name = "GongDisc"   # numele apare in rapoartele ProbeLaneClear
 	_disc.position = Vector3(0.0, center_height, 0.0)
 	_disc.mass = mass
 	_disc.collision_layer = LAYER

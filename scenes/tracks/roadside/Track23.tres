@@ -1,0 +1,164 @@
+[gd_resource type="Resource" script_class="RoadsideSet" format=3]
+
+[ext_resource type="Script" path="res://scenes/props/roadside_set.gd" id="1_rc1s5"]
+
+[resource]
+script = ExtResource("1_rc1s5")
+pieces = {
+"cone": {
+"glb": "res://assets/models/carrara/props/knock_carrara.glb",
+"mass": 1.2,
+"node": "SiteCone",
+"scale": 1.4,
+"shape": "hull"
+},
+"marble": {
+"glb": "res://assets/models/carrara/props/knock_carrara.glb",
+"mass": 4.0,
+"node": "MarbleOffcut",
+"scale": 1.4,
+"shape": "box"
+},
+"reel": {
+"glb": "res://assets/models/carrara/props/knock_carrara.glb",
+"mass": 3.0,
+"node": "CableReel",
+"scale": 1.4,
+"shape": "cylinder"
+}
+}
+groups = Array[Dictionary]([{
+"count": 4,
+"frac": 0.0397,
+"gap": 1.2,
+"note": "straight, viraj 0 grade",
+"pattern": "cluster",
+"piece": ["cone", "reel", "cone"],
+"side": 1
+}, {
+"count": 3,
+"frac": 0.11410000000000001,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -133 grade",
+"pattern": "pyramid",
+"piece": "reel",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.18180000000000002,
+"gap": 1.2,
+"lying": true,
+"note": "outside, viraj 72 grade",
+"pattern": "row",
+"piece": "reel",
+"side": 1
+}, {
+"count": 5,
+"frac": 0.20600000000000002,
+"gap": 1.2,
+"note": "exit, viraj 132 grade",
+"pattern": "cluster",
+"piece": ["cone", "reel", "cone"],
+"side": 1
+}, {
+"count": 4,
+"frac": 0.2534,
+"gap": 1.2,
+"note": "open, viraj -2 grade",
+"pattern": "cluster",
+"piece": ["cone", "reel", "cone"],
+"side": 1
+}, {
+"count": 4,
+"frac": 0.34040000000000004,
+"gap": 1.2,
+"note": "exit, viraj -39 grade",
+"pattern": "row",
+"piece": "reel",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.381,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj 46 grade",
+"pattern": "pyramid",
+"piece": "reel",
+"side": 1
+}, {
+"count": 5,
+"frac": 0.47390000000000004,
+"gap": 1.2,
+"note": "exit, viraj -69 grade",
+"pattern": "cluster",
+"piece": ["cone", "reel", "cone"],
+"side": -1
+}, {
+"count": 2,
+"frac": 0.5184,
+"gap": 1.2,
+"lying": true,
+"note": "open, viraj 0 grade",
+"pattern": "row",
+"piece": "reel",
+"side": 1
+}, {
+"count": 2,
+"frac": 0.6209,
+"gap": 1.2,
+"lying": true,
+"note": "straight, viraj 0 grade",
+"pattern": "row",
+"piece": "reel",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.6586000000000001,
+"gap": 1.2,
+"note": "open, viraj 0 grade",
+"pattern": "row",
+"piece": "reel",
+"side": 1
+}, {
+"count": 4,
+"frac": 0.6867000000000001,
+"gap": 1.2,
+"note": "open, viraj 0 grade",
+"pattern": "cluster",
+"piece": ["cone", "reel", "cone"],
+"side": 1
+}, {
+"count": 4,
+"frac": 0.8046000000000001,
+"gap": 1.2,
+"note": "exit, viraj -63 grade",
+"pattern": "row",
+"piece": "reel",
+"side": -1
+}, {
+"count": 4,
+"frac": 0.8269000000000001,
+"gap": 1.2,
+"note": "outside, viraj -31 grade",
+"pattern": "taper",
+"piece": "cone",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.8743000000000001,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj 85 grade",
+"pattern": "pyramid",
+"piece": "reel",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.9584,
+"gap": 1.2,
+"note": "straight, viraj 0 grade",
+"pattern": "row",
+"piece": "reel",
+"side": 1
+}])

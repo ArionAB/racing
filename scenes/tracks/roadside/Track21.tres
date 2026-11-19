@@ -1,0 +1,172 @@
+[gd_resource type="Resource" script_class="RoadsideSet" format=3]
+
+[ext_resource type="Script" path="res://scenes/props/roadside_set.gd" id="1_ifwey"]
+
+[resource]
+script = ExtResource("1_ifwey")
+pieces = {
+"bale": {
+"glb": "res://assets/models/transfagarasan/props/knock_transfagarasan.glb",
+"mass": 2.0,
+"node": "HayBale",
+"scale": 1.4,
+"shape": "box"
+},
+"cheese": {
+"glb": "res://assets/models/transfagarasan/props/knock_transfagarasan.glb",
+"mass": 1.5,
+"node": "CheeseWheel",
+"scale": 1.4,
+"shape": "cylinder"
+},
+"churn": {
+"glb": "res://assets/models/transfagarasan/props/knock_transfagarasan.glb",
+"mass": 2.5,
+"node": "MilkChurn",
+"scale": 1.4,
+"shape": "cylinder"
+},
+"cone": {
+"glb": "res://assets/models/transfagarasan/props/road_works.glb",
+"node": "Works_Cone_1",
+"scale": 1.4,
+"shape": "hull"
+}
+}
+groups = Array[Dictionary]([{
+"count": 4,
+"frac": 0.0131,
+"gap": 1.2,
+"note": "open, viraj 1 grade",
+"pattern": "cluster",
+"piece": ["churn", "cheese", "bale"],
+"side": -1
+}, {
+"count": 2,
+"frac": 0.0674,
+"gap": 1.2,
+"lying": true,
+"note": "open, viraj 1 grade",
+"pattern": "row",
+"piece": "cheese",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.1703,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj 46 grade",
+"pattern": "pyramid",
+"piece": "bale",
+"side": 1
+}, {
+"count": 5,
+"frac": 0.2011,
+"gap": 1.2,
+"note": "exit, viraj 36 grade",
+"pattern": "cluster",
+"piece": ["churn", "cheese", "bale"],
+"side": 1
+}, {
+"count": 3,
+"frac": 0.25070000000000003,
+"gap": 1.2,
+"note": "exit, viraj 117 grade",
+"pattern": "wall",
+"piece": "bale",
+"rows": 2,
+"side": 1
+}, {
+"count": 3,
+"frac": 0.3302,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -37 grade",
+"pattern": "pyramid",
+"piece": "bale",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.3929,
+"gap": 1.2,
+"note": "open, viraj -1 grade",
+"pattern": "row",
+"piece": "bale",
+"side": -1
+}, {
+"count": 2,
+"frac": 0.48360000000000003,
+"gap": 1.2,
+"note": "inside, viraj 40 grade",
+"pattern": "row",
+"piece": "cone",
+"side": -1
+}, {
+"count": 4,
+"frac": 0.5341,
+"gap": 1.2,
+"note": "open, viraj -20 grade",
+"pattern": "cluster",
+"piece": ["churn", "cheese", "bale"],
+"side": 1
+}, {
+"count": 3,
+"frac": 0.5762,
+"gap": 1.2,
+"note": "inside, viraj 65 grade",
+"pattern": "taper",
+"piece": "cone",
+"side": -1,
+"skew": 0.4
+}, {
+"count": 4,
+"frac": 0.6277,
+"gap": 1.2,
+"note": "straight, viraj 0 grade",
+"pattern": "cluster",
+"piece": ["churn", "cheese", "bale"],
+"side": 1
+}, {
+"count": 3,
+"frac": 0.7016,
+"gap": 1.2,
+"lying": true,
+"note": "overshoot, viraj 37 grade",
+"pattern": "row",
+"piece": "cheese",
+"side": 1
+}, {
+"count": 2,
+"frac": 0.7998000000000001,
+"gap": 1.2,
+"lying": true,
+"note": "straight, viraj 0 grade",
+"pattern": "row",
+"piece": "cheese",
+"side": -1
+}, {
+"count": 2,
+"frac": 0.8269000000000001,
+"gap": 1.2,
+"lying": true,
+"note": "open, viraj -0 grade",
+"pattern": "row",
+"piece": "cheese",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.8803000000000001,
+"gap": 1.2,
+"note": "straight, viraj 0 grade",
+"pattern": "row",
+"piece": "bale",
+"side": -1
+}, {
+"count": 5,
+"frac": 0.9860000000000001,
+"gap": 1.2,
+"note": "exit, viraj 42 grade",
+"pattern": "cluster",
+"piece": ["churn", "cheese", "bale"],
+"side": 1
+}])

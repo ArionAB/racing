@@ -1,0 +1,131 @@
+[gd_resource type="Resource" script_class="RoadsideSet" format=3]
+
+[ext_resource type="Script" path="res://scenes/props/roadside_set.gd" id="1_w6yw3"]
+
+[resource]
+script = ExtResource("1_w6yw3")
+pieces = {
+"bin": {
+"glb": "res://assets/models/fiordland/props/knock_fiordland.glb",
+"mass": 2.0,
+"node": "FishBin",
+"scale": 1.4,
+"shape": "box"
+},
+"buoy": {
+"bounce": 0.5,
+"glb": "res://assets/models/fiordland/props/knock_fiordland.glb",
+"mass": 1.0,
+"node": "MooringBuoy",
+"scale": 1.4,
+"shape": "sphere"
+},
+"cone": {
+"glb": "res://assets/models/fiordland/props/knock_fiordland.glb",
+"mass": 1.2,
+"node": "RoadCone",
+"scale": 1.4,
+"shape": "hull"
+}
+}
+groups = Array[Dictionary]([{
+"count": 3,
+"frac": 0.0204,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj 81 grade",
+"pattern": "pyramid",
+"piece": "bin",
+"side": 1
+}, {
+"count": 4,
+"frac": 0.2737,
+"gap": 1.2,
+"note": "open, viraj -16 grade",
+"pattern": "cluster",
+"piece": ["cone", "buoy", "bin"],
+"side": 1
+}, {
+"count": 3,
+"frac": 0.3089,
+"gap": 1.2,
+"note": "open, viraj -2 grade",
+"pattern": "row",
+"piece": "bin",
+"side": -1
+}, {
+"count": 5,
+"frac": 0.38680000000000003,
+"gap": 1.2,
+"note": "exit, viraj -41 grade",
+"pattern": "cluster",
+"piece": ["cone", "buoy", "bin"],
+"side": -1
+}, {
+"count": 3,
+"frac": 0.4481,
+"gap": 1.2,
+"note": "exit, viraj -39 grade",
+"pattern": "wall",
+"piece": "bin",
+"rows": 2,
+"side": -1
+}, {
+"count": 3,
+"frac": 0.5037,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj 35 grade",
+"pattern": "pyramid",
+"piece": "bin",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.6178,
+"gap": 1.2,
+"note": "outside, viraj -31 grade",
+"pattern": "row",
+"piece": "buoy",
+"side": -1
+}, {
+"count": 5,
+"frac": 0.6994,
+"gap": 1.2,
+"note": "exit, viraj 49 grade",
+"pattern": "cluster",
+"piece": ["cone", "buoy", "bin"],
+"side": 1
+}, {
+"count": 4,
+"frac": 0.7199,
+"gap": 1.2,
+"note": "open, viraj 20 grade",
+"pattern": "cluster",
+"piece": ["cone", "buoy", "bin"],
+"side": 1
+}, {
+"count": 4,
+"frac": 0.7904,
+"gap": 1.2,
+"note": "outside, viraj -25 grade",
+"pattern": "taper",
+"piece": "cone",
+"side": -1
+}, {
+"count": 2,
+"frac": 0.8738,
+"gap": 1.2,
+"note": "inside, viraj -35 grade",
+"pattern": "row",
+"piece": "cone",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.9518000000000001,
+"gap": 1.2,
+"note": "inside, viraj -103 grade",
+"pattern": "taper",
+"piece": "cone",
+"side": 1,
+"skew": 0.4
+}])

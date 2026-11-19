@@ -1,0 +1,167 @@
+[gd_resource type="Resource" script_class="RoadsideSet" format=3]
+
+[ext_resource type="Script" path="res://scenes/props/roadside_set.gd" id="1_o75gr"]
+
+[resource]
+script = ExtResource("1_o75gr")
+pieces = {
+"amphora": {
+"glb": "res://assets/models/stromboli/props/knock_stromboli.glb",
+"mass": 2.5,
+"node": "Amphora",
+"scale": 1.4,
+"shape": "cylinder"
+},
+"buoy": {
+"bounce": 0.5,
+"glb": "res://assets/models/stromboli/props/knock_stromboli.glb",
+"mass": 1.0,
+"node": "FishingBuoy",
+"scale": 1.4,
+"shape": "sphere"
+},
+"lemons": {
+"glb": "res://assets/models/stromboli/props/knock_stromboli.glb",
+"mass": 1.5,
+"node": "LemonCrate",
+"scale": 1.4,
+"shape": "box"
+}
+}
+groups = Array[Dictionary]([{
+"count": 3,
+"frac": 0.0181,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj 60 grade",
+"pattern": "pyramid",
+"piece": "lemons",
+"side": 1
+}, {
+"count": 4,
+"frac": 0.0703,
+"gap": 1.2,
+"note": "open, viraj 0 grade",
+"pattern": "cluster",
+"piece": ["buoy", "lemons", "amphora"],
+"side": -1
+}, {
+"count": 5,
+"frac": 0.1365,
+"gap": 1.2,
+"note": "exit, viraj 137 grade",
+"pattern": "row",
+"piece": ["buoy", "lemons", "amphora"],
+"side": 1
+}, {
+"count": 3,
+"frac": 0.24600000000000002,
+"gap": 1.2,
+"note": "exit, viraj 136 grade",
+"pattern": "wall",
+"piece": "lemons",
+"rows": 2,
+"side": 1
+}, {
+"count": 3,
+"frac": 0.2952,
+"gap": 1.2,
+"lying": true,
+"note": "outside, viraj -123 grade",
+"pattern": "row",
+"piece": "amphora",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.32830000000000004,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -136 grade",
+"pattern": "pyramid",
+"piece": "lemons",
+"side": -1
+}, {
+"count": 2,
+"frac": 0.3795,
+"gap": 1.2,
+"note": "inside, viraj 65 grade",
+"pattern": "row",
+"piece": "buoy",
+"side": -1
+}, {
+"count": 5,
+"frac": 0.46790000000000004,
+"gap": 1.2,
+"note": "exit, viraj -163 grade",
+"pattern": "cluster",
+"piece": ["buoy", "lemons", "amphora"],
+"side": -1
+}, {
+"count": 3,
+"frac": 0.5301,
+"gap": 1.2,
+"note": "exit, viraj -97 grade",
+"pattern": "wall",
+"piece": "lemons",
+"rows": 2,
+"side": -1
+}, {
+"count": 3,
+"frac": 0.5763,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -118 grade",
+"pattern": "pyramid",
+"piece": "lemons",
+"side": -1
+}, {
+"count": 5,
+"frac": 0.6627000000000001,
+"gap": 1.2,
+"note": "exit, viraj 100 grade",
+"pattern": "cluster",
+"piece": ["buoy", "lemons", "amphora"],
+"side": 1
+}, {
+"count": 3,
+"frac": 0.7219,
+"gap": 1.2,
+"note": "exit, viraj -58 grade",
+"pattern": "wall",
+"piece": "lemons",
+"rows": 2,
+"side": -1
+}, {
+"count": 2,
+"frac": 0.757,
+"gap": 1.2,
+"lying": true,
+"note": "open, viraj 23 grade",
+"pattern": "row",
+"piece": "amphora",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.8293,
+"gap": 1.2,
+"note": "open, viraj 2 grade",
+"pattern": "row",
+"piece": "lemons",
+"side": -1
+}, {
+"count": 4,
+"frac": 0.9347000000000001,
+"gap": 1.2,
+"note": "straight, viraj 0 grade",
+"pattern": "cluster",
+"piece": ["buoy", "lemons", "amphora"],
+"side": 1
+}, {
+"count": 4,
+"frac": 0.9699000000000001,
+"gap": 1.2,
+"note": "open, viraj 0 grade",
+"pattern": "cluster",
+"piece": ["buoy", "lemons", "amphora"],
+"side": 1
+}])

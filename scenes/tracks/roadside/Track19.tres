@@ -1,0 +1,154 @@
+[gd_resource type="Resource" script_class="RoadsideSet" format=3]
+
+[ext_resource type="Script" path="res://scenes/props/roadside_set.gd" id="1_vh0eo"]
+
+[resource]
+script = ExtResource("1_vh0eo")
+pieces = {
+"bale": {
+"glb": "res://assets/models/monumentvalley/props/knock_monumentvalley.glb",
+"node": "RoundBale",
+"scale": 1.4,
+"shape": "cylinder"
+},
+"barrel": {
+"glb": "res://assets/models/monumentvalley/props/knock_monumentvalley.glb",
+"mass": 3.0,
+"node": "RanchBarrel",
+"scale": 1.4,
+"shape": "cylinder"
+},
+"bucket": {
+"glb": "res://assets/models/monumentvalley/props/knock_monumentvalley.glb",
+"mass": 0.8,
+"node": "FeedBucket",
+"scale": 1.4,
+"shape": "cylinder"
+},
+"tumble": {
+"bounce": 0.35,
+"glb": "res://assets/models/monumentvalley/plants/tumbleweed.glb",
+"mass": 1.2,
+"node": "",
+"scale": 1.4,
+"shape": "sphere"
+}
+}
+groups = Array[Dictionary]([{
+"count": 3,
+"frac": 0.0526,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -85 grade",
+"pattern": "pyramid",
+"piece": "barrel",
+"side": -1
+}, {
+"count": 4,
+"frac": 0.0833,
+"gap": 1.2,
+"note": "open, viraj 0 grade",
+"pattern": "cluster",
+"piece": ["barrel", "bucket", "tumble"],
+"side": -1
+}, {
+"count": 4,
+"frac": 0.13970000000000002,
+"gap": 1.2,
+"note": "straight, viraj 0 grade",
+"pattern": "cluster",
+"piece": ["barrel", "bucket", "tumble"],
+"side": 1
+}, {
+"count": 3,
+"frac": 0.24400000000000002,
+"gap": 1.2,
+"lying": true,
+"note": "outside, viraj -27 grade",
+"pattern": "row",
+"piece": "bale",
+"side": -1
+}, {
+"count": 4,
+"frac": 0.2813,
+"gap": 1.2,
+"note": "exit, viraj -58 grade",
+"pattern": "cluster",
+"piece": ["barrel", "bucket", "tumble"],
+"side": -1
+}, {
+"count": 2,
+"frac": 0.31870000000000004,
+"gap": 1.2,
+"lying": true,
+"note": "open, viraj 1 grade",
+"pattern": "row",
+"piece": "bale",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.3856,
+"gap": 1.2,
+"note": "open, viraj -11 grade",
+"pattern": "row",
+"piece": "barrel",
+"side": 1
+}, {
+"count": 4,
+"frac": 0.47940000000000005,
+"gap": 1.2,
+"note": "exit, viraj -55 grade",
+"pattern": "row",
+"piece": "barrel",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.5292,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -43 grade",
+"pattern": "pyramid",
+"piece": "barrel",
+"side": -1
+}, {
+"count": 5,
+"frac": 0.6153000000000001,
+"gap": 1.2,
+"note": "exit, viraj -76 grade",
+"pattern": "cluster",
+"piece": ["barrel", "bucket", "tumble"],
+"side": -1
+}, {
+"count": 4,
+"frac": 0.6459,
+"gap": 1.2,
+"note": "open, viraj -23 grade",
+"pattern": "cluster",
+"piece": ["barrel", "bucket", "tumble"],
+"side": 1
+}, {
+"count": 4,
+"frac": 0.7675000000000001,
+"gap": 1.2,
+"note": "exit, viraj 70 grade",
+"pattern": "row",
+"piece": "barrel",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.8230000000000001,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -47 grade",
+"pattern": "pyramid",
+"piece": "barrel",
+"side": -1
+}, {
+"count": 4,
+"frac": 0.8756,
+"gap": 1.2,
+"note": "outside, viraj -38 grade",
+"pattern": "taper",
+"piece": "bucket",
+"side": -1
+}])

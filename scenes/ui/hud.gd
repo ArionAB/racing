@@ -551,6 +551,7 @@ func _open_pause() -> void:
 	_touch.visible = false
 	_pause_button.visible = false
 	_respawn_button.visible = false
+	_set_bottom_row(false)
 	_pause_panel.visible = true
 
 func _close_pause() -> void:
@@ -558,8 +559,18 @@ func _close_pause() -> void:
 	_touch.visible = true
 	_pause_button.visible = true
 	_respawn_button.visible = true
+	_set_bottom_row(true)
 	_pause_panel.visible = false
 	_settings.visible = false
+
+
+## Randul de jos (bara de turbo si linia SEALED / GHOST / CHALLENGE) se ascunde
+## in pauza, ca butoanele touch: e construit dupa panourile de pauza, deci se
+## desena PESTE ele — in limbile cu randuri mai inalte (japoneza) sau cu texte
+## mai late, peste BACK / RESET CAMERA din setari (ProbeLocalization, D).
+func _set_bottom_row(on: bool) -> void:
+	_charge_bg.get_parent().visible = on
+	_sealed_label.get_parent().visible = on
 
 func _unhandled_input(event: InputEvent) -> void:
 	# ESC comuta pauza — util pe desktop in timpul dezvoltarii.

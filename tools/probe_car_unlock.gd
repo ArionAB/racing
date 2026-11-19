@@ -584,7 +584,7 @@ func _check_texts() -> void:
 	var panel := CareerPanel.new()
 	add_child(panel)
 	await get_tree().process_frame
-	_check("7", panel._next_car_label.text == "NEXT CAR  AMBULANTA  ·  3 MORE POINTS",
+	_check("7", panel._next_car_label.text == "NEXT CAR  AMBULANCE  ·  3 MORE POINTS",
 		"pasaport, save gol: '%s'" % panel._next_car_label.text)
 	_check("7", panel._cars_label.text == "CARS  2 / 10",
 		"pasaport, save gol: '%s'" % panel._cars_label.text)

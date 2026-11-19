@@ -153,8 +153,9 @@
 > aleasă pentru Quick Race, World Cup, carieră, contratimp) arată ce ai
 > câștigat; AI-ul conduce în continuare orice mașină, și pe cele necâștigate —
 > să le vezi pe grilă face parte din cârlig.
-> - **Garajul de start: Taxi + Buggy** (Taxi primul: e mașina pe care cade un
->   jucător nou). Restul vin la praguri de puncte de carieră, până când rivalii
+> - **Garajul de start: Taxi + Buggy** (ales de coordonator din propunerea de
+>   la §5, neconfirmat încă de dezvoltator; Taxi primul: e mașina pe care cade
+>   un jucător nou). Restul vin la praguri de puncte de carieră, până când rivalii
 >   (pasul 3, #683) preiau mașinile-vedetă (Poliția, Pompierii, Autobuzul,
 >   Muscle):
 >
@@ -843,8 +844,11 @@ Rămase:
    deci numele vine din altceva (etape ale turului? „Lumea 1/2/3”?). Apare
    pe cutie, deci decide și iconografia raftului.
 2. ~~**Garajul de start**: Buggy + Taxi, sau o singură mașină (progresie mai
-   lungă, început mai sărac).~~ **Decis (19 nov 2026):** Taxi + Buggy; restul
-   mașinilor se câștigă în carieră, la praguri de puncte (v0.13).
+   lungă, început mai sărac).~~ **Construit (19 nov 2026):** Taxi + Buggy; restul
+   mașinilor se câștigă în carieră, la praguri de puncte (v0.13). Că mașinile
+   se câștigă e decizia dezvoltatorului; **perechea de start și pragurile le-a
+   ales coordonatorul** (propunerea din §5) și așteaptă confirmarea lui la
+   volan — sunt date în `career_config.tres`, nu cod.
 3. **Rivalii** (§5): perechile Vex/Poliția, Luna/Pompierii, Robo/Autobuzul,
    Nyx/Muscle final — propunere; pistele lor le alege matricea **după pasul
    0**. Robo cere comportamentul de apărare, fără el altă mașină în lumea 3.

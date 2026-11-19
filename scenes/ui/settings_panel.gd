@@ -339,6 +339,10 @@ func _add_language_row(parent: VBoxContainer) -> void:
 	choice.selected = Localization.LOCALES.find(GameState.language) + 1
 	choice.custom_minimum_size = Vector2(160, 44)
 	choice.add_theme_font_size_override("font_size", 20)
+	# „日本語" trebuie sa se vada si cand jocul e in engleza (Noto e in lantul
+	# fonturilor de text doar in japoneza): lista are fontul ei.
+	choice.add_theme_font_override("font", Localization.language_menu_font())
+	choice.get_popup().add_theme_font_override("font", Localization.language_menu_font())
 	row.add_child(choice)
 	choice.item_selected.connect(func(i: int) -> void:
 		GameState.language = "" if i == 0 else Localization.LOCALES[i - 1]

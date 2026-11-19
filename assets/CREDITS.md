@@ -64,9 +64,10 @@ nu se foloseste pentru o versiune modificata — si nu modificam nimic.
 
 Fontul textelor in japoneza (localizarea, nov 2026): un singur fisier,
 `NotoSansJP-Medium.otf` (SubsetOTF, versiunea 2.004), original, nemodificat,
-nesubsetat. Sta ca FALLBACK in spatele lui Barlow si al fontului implicit al
-temei (`Localization.install_fonts`), deci intra doar pe glifele pe care Barlow
-nu le are. Textul integral al licentei e in
+nesubsetat. Cand jocul e in japoneza sta ca FALLBACK in spatele lui Barlow si
+al fontului implicit al temei (`Localization.set_locale`), deci intra doar pe
+glifele pe care Barlow nu le are; in orice limba, il foloseste lista de limbi
+din SETTINGS („日本語"). Textul integral al licentei e in
 `assets/fonts/LICENSE_notosansjp_OFL.txt`. Aceleasi conditii OFL ca la Barlow;
 numele rezervat de licenta e „Source".
 

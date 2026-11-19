@@ -37,9 +37,10 @@ const NATIVE_NAMES: Dictionary = {
 ## Fisierele de traducere (le citeste si project.godot, si sonda).
 const PO_DIR := "res://localization/"
 
-## Fontul japonez: fallback pentru Barlow si pentru fontul implicit al temei.
-## Barlow n-are kana/kanji; fara fallback-ul nostru, textul ar depinde de
-## fonturile sistemului (ce are telefonul, in ce stil, sau patratele goale).
+## Fontul japonez: in japoneza, fallback pentru Barlow si pentru fontul implicit
+## al temei (vezi `set_locale`). Barlow n-are kana/kanji; fara fallback-ul
+## nostru, textul ar depinde de fonturile sistemului (ce are telefonul, in ce
+## stil, sau patratele goale).
 const FONT_JP: FontFile = preload("res://assets/fonts/NotoSansJP-Medium.otf")
 const FONT_BOLD: FontFile = preload("res://assets/fonts/BarlowCondensed-SemiBold.ttf")
 const FONT_MEDIUM: FontFile = preload("res://assets/fonts/BarlowCondensed-Medium.ttf")
@@ -72,28 +73,51 @@ static func from_device(device_locale: String) -> String:
 ## Intoarce limba efectiva.
 static func apply(saved: String) -> String:
 	var locale := resolve(saved, OS.get_locale())
-	TranslationServer.set_locale(locale)
+	set_locale(locale)
 	return locale
 
 
-## Pune Noto Sans JP in coada fiecarui font de text al jocului. O data, la
-## pornire (GameState._ready), inainte sa se modeleze vreun text. Fonturile
-## sunt resurse partajate (preload), deci fallback-ul ajunge la toate
-## Control-urile care le folosesc, fara nicio schimbare in panouri.
-static func install_fonts() -> void:
-	var targets: Array[Font] = [FONT_BOLD, FONT_MEDIUM, ThemeDB.fallback_font]
+## Limba + fonturile ei. Noto Sans JP intra in coada lui Barlow si a fontului
+## implicit al temei DOAR in japoneza: `Font.get_height` ia maximul pe tot
+## lantul, deci cu Noto (ascendent si descendent mai mari) in coada, fiecare
+## eticheta Barlow ar creste in inaltime si in engleza — HUD-ul se muta cu
+## 3 px (prins de ProbeTouchZones). Fonturile sunt resurse partajate (preload),
+## deci schimbarea ajunge la toate Control-urile, fara nimic in panouri.
+static func set_locale(locale: String) -> void:
+	TranslationServer.set_locale(locale)
+	for font in _text_fonts():
+		_set_fallback(font, FONT_JP, locale == "ja")
+
+
+## Fontul listei de limbi din SETTINGS: numele se scriu fiecare in limba lui
+## („日本語" si cand jocul e in engleza), deci lantul are Noto MEREU.
+static func language_menu_font() -> Font:
+	if _menu_font == null:
+		_menu_font = FontVariation.new()
+		_menu_font.base_font = ThemeDB.fallback_font
+		_menu_font.fallbacks = [FONT_JP]
+	return _menu_font
+
+
+static var _menu_font: FontVariation
+
+
+static func _text_fonts() -> Array[Font]:
+	var out: Array[Font] = [FONT_BOLD, FONT_MEDIUM, ThemeDB.fallback_font]
 	var theme := ThemeDB.get_default_theme()
-	if theme != null and theme.default_font != null:
-		targets.append(theme.default_font)
-	for font in targets:
-		_add_fallback(font, FONT_JP)
+	if theme != null and theme.default_font != null and not theme.default_font in out:
+		out.append(theme.default_font)
+	return out
 
 
-static func _add_fallback(font: Font, extra: Font) -> void:
+static func _set_fallback(font: Font, extra: Font, on: bool) -> void:
 	if font == null or font == extra:
 		return
 	var list := font.fallbacks
-	if extra in list:
+	if on == (extra in list):
 		return
-	list.append(extra)
+	if on:
+		list.append(extra)
+	else:
+		list.erase(extra)
 	font.fallbacks = list

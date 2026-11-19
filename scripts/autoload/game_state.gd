@@ -440,8 +440,7 @@ func _ready() -> void:
 	load_settings()
 	load_records()
 	apply_gfx_tier()
-	# Inainte de orice ecran: fontul japonez in coada fonturilor, apoi limba.
-	Localization.install_fonts()
+	# Inainte de orice ecran: limba (si, in japoneza, fontul japonez).
 	Localization.apply(language)
 
 

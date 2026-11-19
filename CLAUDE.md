@@ -98,6 +98,13 @@ pur plus haosul fizic, nu proiectilele.
   bancurile de test: Dunele, Okinawa manual. A patra cupă (Ha Long, Carrara,
   San Francisco, Angkor) e și lumea 4 a carierei
   (`scenes/career/data/world_4.tres`). Garda: `ProbeWorldCup`.
+  - **Cupa salvată: CONTINUE / RESET** (19 nov 2026). Fiecare cupă își are
+    save-ul ei în `world_cup.cfg` (`WorldCupSave`, pe id-uri: cupă, mașini,
+    nivel AI): cursa următoare, punctele, adversarii, mașina și nivelul de la
+    start. Se scrie la rezultatele fiecărei curse (nimic înainte de prima
+    terminată), se șterge după ultima; ieșirea din mijlocul cursei nu contează.
+    CONTINUE reia cupa cu mașina ei; RESET cere două atingeri (SURE?, 3 s) și
+    șterge doar cupa aceea. Save nepotrivit = absent. Garda: `ProbeWorldCupSave`.
 - Touch controls: **numai butoane** — ◀ ▶ viraj (stânga-jos), ▲ gaz și ▼
   frână/marșarier (dreapta-jos, ca o pereche de pedale), TURBO/DRIFT pe rândul
   de deasupra lor ✔ — validat pe iPhone (oct 2026, trei iterații).

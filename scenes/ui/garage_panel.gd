@@ -544,10 +544,12 @@ func _register_title_tap(now_ms: int) -> bool:
 		return false
 	_dev_taps.clear()
 	GameState.dev_unlock_all_cars = not GameState.dev_unlock_all_cars
-	GameState.save_settings()
 	# Stins cu o masina necastigata selectata: selectia cade pe garajul de start.
+	# INAINTE de salvare: `ensure_selected_car` nu scrie pe disc, iar aici
+	# jucatorul a comutat el ceva, deci selectia noua se salveaza odata cu el.
 	if not GameState.dev_unlock_all_cars:
 		Career.ensure_selected_car()
+	GameState.save_settings()
 	_title.text = _title_text()
 	_show(_shown)
 	return true

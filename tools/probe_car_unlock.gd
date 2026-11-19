@@ -34,8 +34,11 @@ extends Node
 ##        --sabotaj=garaj   garda din `_on_select_pressed` ocolita
 ##        --sabotaj=dublu   atingerile emulate numarate si ele
 ##   5. `ensure_selected_car`: o selectie incuiata trece pe PRIMA masina de
-##      start (si se salveaza); una deschisa ramane.
+##      start, DOAR IN MEMORIE — fisierul de setari ramane neatins (meniul
+##      ruleaza si in save-ul comun al sondelor: o scriere acolo schimba masina
+##      jucatorului in toate cursele de dupa); una deschisa ramane.
 ##        --sabotaj=ordine  starting_cars inversat in config
+##        --sabotaj=scrie   selectia mutata e si salvata, ca in prima varianta
 ##   6. `validate()`: fiecare regula noua, sabotata in memorie, da exact
 ##      problema ei; config-ul real e curat; `CareerConfig.new()` da tot doar
 ##      problema „o lume free".
@@ -52,7 +55,7 @@ const ProbeTmp := preload("res://tools/probe_tmp.gd")
 ## Sub atatea verificari verdictul pica: o sectiune sarita = garda oarba.
 const MIN_CHECKS := 90
 const SABOTAGES: Array[String] = ["start", "prag", "zavor", "dev", "garaj", "dublu",
-	"ordine", "validare", "text"]
+	"ordine", "scrie", "validare", "text"]
 
 var _sabotage: String = ""
 var _checks: int = 0
@@ -458,6 +461,12 @@ func _check_garage() -> void:
 		"inca 7 atingeri sting comutatorul ('%s')" % panel._title.text)
 	_check("4", GameState.selected_car == taxi,
 		"stins cu Muscle selectata: selectia trece pe Taxi (%d)" % GameState.selected_car)
+	settings = ConfigFile.new()
+	settings.load(_settings_path)
+	_check("4", String(settings.get_value("game", "car", "")) == "taxi"
+			and not bool(settings.get_value("debug", "unlock_all_cars", true)),
+		"stins: Taxi si comutatorul stins ajung pe disc ('%s')"
+			% settings.get_value("game", "car", ""))
 	_check("4", _visible_locks(panel) == _locked_count(),
 		"stins: lacatele inapoi (%d / %d)" % [_visible_locks(panel), _locked_count()])
 	panel.queue_free()
@@ -499,12 +508,12 @@ func _check_ensure() -> void:
 	if FileAccess.file_exists(_settings_path):
 		DirAccess.remove_absolute(_settings_path)
 	Career.ensure_selected_car()
+	if _sabotage == "scrie":
+		GameState.save_settings()
 	_check("5", GameState.selected_car == taxi,
 		"Muscle incuiata -> prima masina de start, Taxi (%s)" % _car_id(GameState.selected_car))
-	var settings := ConfigFile.new()
-	settings.load(_settings_path)
-	_check("5", String(settings.get_value("game", "car", "")) == "taxi",
-		"selectia mutata e salvata ('%s')" % settings.get_value("game", "car", ""))
+	_check("5", not FileAccess.file_exists(_settings_path),
+		"ensure_selected_car nu scrie setarile pe disc")
 	GameState.selected_car = buggy
 	Career.ensure_selected_car()
 	_check("5", GameState.selected_car == buggy, "Buggy (deschisa) ramane selectata")

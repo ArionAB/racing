@@ -370,13 +370,20 @@ static func car_display_name(car_id: StringName) -> String:
 
 
 ## Daca masina selectata e incuiata, selectia trece pe prima masina de start
-## din garaj si setarile se salveaza. Se cheama DOAR din `MainMenu._ready()`
-## (si din garaj, la stingerea comutatorului): nu din `_ready()`-ul carierei si
-## nici din `race.gd`, fiindca zeci de sonde incarca `Race.tscn` direct cu
+## din garaj — DOAR IN MEMORIE. Se cheama DOAR din `MainMenu._ready()` (si din
+## garaj, la stingerea comutatorului): nu din `_ready()`-ul carierei si nici din
+## `race.gd`, fiindca zeci de sonde incarca `Race.tscn` direct cu
 ## `selected_car = 0` (Muscle, incuiata pe un save gol) si liniile lor de baza
 ## nu au voie sa se mute.
-## Un id dormant (masina dintr-un build mai nou, selectia cazuta pe 0) se pierde
-## aici: in build-ul asta masina efectiva era oricum cea de pe 0, incuiata.
+##
+## NU salveaza setarile, si nu din economie: prima varianta salva, iar primul
+## pas din verify_local.sh (porneste scena principala = meniul) a scris
+## `car="taxi"` in save-ul comun al sondelor — toate cursele de dupa au rulat cu
+## Taxi in loc de Muscle si `ProbeTfHazards` a picat pe pragul oilor (19 nov
+## 2026). Corectia e derivata: meniul o reface la fiecare pornire, deci pe disc
+## n-are ce cauta. Ajunge acolo cand jucatorul salveaza el ceva (SELECT, o
+## setare), ca orice alta selectie. De aceea nici id-ul dormant (masina dintr-un
+## build mai nou) nu se pierde aici.
 func ensure_selected_car() -> void:
 	var current := SaveSchema.id_at(GameState.CAR_DATA, GameState.selected_car)
 	if current != &"" and is_car_unlocked(current):
@@ -385,7 +392,6 @@ func ensure_selected_car() -> void:
 		var index := SaveSchema.index_of(GameState.CAR_DATA, car_id)
 		if index >= 0:
 			GameState.selected_car = index
-			GameState.save_settings()
 			return
 
 

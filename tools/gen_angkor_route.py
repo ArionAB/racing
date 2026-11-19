@@ -610,6 +610,11 @@ MOAT_W_OUT = 200.0      # malul de vest al bratului de V
 # galeriile, cu gopura pe dreapta (x -103..-92), inaintea arcului.
 MOAT_IN_W = 104.0
 GOPURA_X = -97.5
+# Gopura de vest LATA de 1,25 ori (golul 12,5 m pe drumul de 9 m), ca cea de nord. Pana la 19 nov 2026 masinile
+# franau aici pentru arcul R 30 de dupa ea; acum soseaua merge drept in templu si plutonul din turul 1 trece
+# prin gopura cu ~40 m/s (ProbeRace pe seed-uri noi: o ejectare pe stalp la 40,1 m/s, t = 9 s; pe traseul
+# vechi, 0 in 32 de seed-uri). X al modelului e lungimea lui, de-a curmezisul drumului.
+GOPURA_W_SCALE = 1.25
 GOPURA_N_Y = 68.0        # gopura de nord (B): peste calea de nord, imediat dupa capatul galeriei (y 62), inaintea santului
 TREE_GATE_S = 26.0      # poarta-copac pe ramura. 14 m: ramura inca se racorda la bucla (ProbeLaneClear pe banda
                         # -1,5). 22 m: aripa de est la ~4 m de virajul buclei (ProbeRace val 1: 1 ejectare + 1 blocaj
@@ -989,7 +994,7 @@ metadata/coliziune = "mesh"
     gpx_, gpy_ = pos_at(gs_)
     decor_txt += f"""
 [node name="GopuraVest" parent="DecorManual" instance=ExtResource("15_gopura")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, {r2(gpx_)}, {r2(elev_at(gs_))}, {r2(-gpy_)})
+transform = Transform3D(0, 0, -1, 0, 1, 0, {GOPURA_W_SCALE}, 0, 0, {r2(gpx_)}, {r2(elev_at(gs_))}, {r2(-gpy_)})
 metadata/coliziune = "mesh"
 """
     # Gopura de nord (B): aceeasi piesa ca la vest, LATA de 1,25 ori (golul 12,5 m; la 1,0 ProbeRace a dat o ejectare pe

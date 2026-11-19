@@ -14,18 +14,32 @@ extends Node
 ##     niciuna peste 1,5 m; nicio ejectare, repunere sau tranzitie de repunere.
 ##  c. SE LEAGANA SI SE LINISTESTE: dupa lovitura Buggy-ului amplitudinea trece de 25° in
 ##     1 s, nu depaseste limita balamalei (+0,5°), discul ramane prins (distanta de la pivot
-##     constanta la 5 cm) si amplitudinea (din energie) e sub 5° la 15 s dupa lovitura.
+##     constanta la 5 cm) si amplitudinea (din energie) e sub 5° la 15 s dupa lovitura. Limita
+##     si prinderea se cer in toate scenariile (a)-(f), nu in (g): vezi (g).
 ##  d. FARA PRASTIE: a doua masina vine dupa prima, pe gongul in miscare: 4 perechi x 4
 ##     intarzieri (`PAIR_DELAYS`, 1,2 s e cerinta). Nicio masina nu ajunge peste 1,15x viteza
 ##     ei de REFERINTA (aceeasi masina, acelasi start, fara gong — cu gaz tinut, Buggy-ul
 ##     accelereaza oricum de la 25 spre 35 m/s), masurat pana la prima tamponare intre
 ##     masini (castigul de dupa ea nu e al gongului); niciuna peste 1,5 m; niciuna blocata
 ##     (< 2 m/s mai mult de 1 s); nicio transformare NaN. Aspiratia e oprita la perechi.
-##  e. BANDA: centrul discului nu se misca lateral mai mult de 0,15 m in niciun scenariu,
+##  e. BANDA: centrul discului nu se misca lateral mai mult de 0,15 m in scenariile (a)-(f),
 ##     iar o masina trecuta la 1,0 m de buza (latimea din presetare) nu atinge discul.
 ##  f. SUNET: un singur sunet per lovitura (`GongHazard.rings` si intrarile `gong_hit` din
 ##     `AudioManager.sfx_log`, care trebuie sa fie egale), niciunul in repaus sau la trecerea
 ##     pe langa.
+##  g. FARA EJECTARE (nov 2026, ProbeRace pe Track24: un Muscle si-a pierdut soferul „perete”
+##     37,2 m/s chiar la ultimul gong). Cele mai rele cazuri construite, toate la plafonul
+##     masinii: Muscle (36 m/s, cea mai rapida din garaj) si Police (cea mai usoara dintre cele
+##     rapide) in gongul in repaus, centrat si excentric, la 100% si 115% din plafon; Muscle-ul
+##     oblic (20-90°); Muscle-ul in discul care SE INTOARCE dupa o lovitura de autobuz sau de
+##     buggy, la fiecare 0,1 s intre 1,3 si 3,4 s; Muscle-ul in gong cu un ZID la 1,5-8 m dupa
+##     disc. Zero ejectari, repuneri, tranzitii de repunere, NaN. Martorii (acelasi zid, fara
+##     gong) TREBUIE sa ejecteze, altfel zidul nu mai e destul de tare ca sa masoare ceva.
+##     Ce s-a vazut (fara meta-ul `Car.SOFT_BODY_NO_EJECT_META`): discul SINGUR nu ejecteaza
+##     pe podea plata — delta-v-ul maxim intr-un tick pe disc e ~14 m/s (18 cu zidul lipit), iar
+##     `Car` ejecteaza „perete” abia la 26 m/s si numai intr-un tick cu contact static. Ejecteaza
+##     combinatia: gongul ia viteza, zidul de dupa el (5 si 8 m) da tick-ul de 26-27 m/s.
+##     Exact ce acopera fereastra de 0,6 s deschisa de contactul cu discul.
 ##
 ## Sabotaje (fiecare trebuie sa pice EXACT contractul lui; codul de iesire 1):
 ##   --sabotaj=repaus   gongul din (a) are leagan propriu de 4°
@@ -39,6 +53,8 @@ extends Node
 ##                      sabotaj care pica la limita, nu unul de incredere.
 ##   --sabotaj=banda    discul din (e) are colizorul cu 1,2 m mai lat decat desenul
 ##   --sabotaj=sunet    gongurile din (f) fara pauza si cu pragul de lovitura la 0,01 rad/s
+##   --sabotaj=ejectare discurile din (g) fara `Car.SOFT_BODY_NO_EJECT_META`: zidul de la 5 si
+##                      8 m ejecteaza Muscle-ul (27,0 / 26,6 m/s)
 ##
 ## [b]Masurat[/b] (19 nov 2026, gongul implicit: 70 kg, raza 1,3, pivot 7,5 m, buza la 0,45 m;
 ## 3 procese x 3 runde, imprastierea sub 0,2 puncte — Jolt a dat practic aceleasi cifre):
@@ -84,6 +100,30 @@ const PAIRS: Array = [["buggy", "buggy"], ["bus", "tuktuk"], ["tuktuk", "bus"], 
 const LANE_CARS: Array[String] = ["bus", "buggy"]
 ## Leaganul propriu verificat la (a): amplitudinea tinuta in ultimele 4 s din 14.
 const IDLE_DEG: float = 8.0
+## (g) Cea mai rapida masina din garaj (Muscle, 36 m/s) si cea mai usoara dintre cele rapide
+## (Police, 90 kg): in gongul in repaus la plafon si la 1,15x plafon (turbo, aspiratie, panta).
+const EJECT_TOP: Array = [["muscle", 1.0, 0.0], ["muscle", 1.0, 0.9], ["muscle", 1.0, -0.9],
+	["muscle", 1.15, 0.0], ["police_sports", 1.0, 0.0], ["police_sports", 1.15, 0.0]]
+## (g) Lovituri OBLICE la plafon (Muscle): o masina care vireaza prin nava intra in disc pe
+## muchie. [unghi, x tinta] Masurat: balamaua Jolt e MOALE lateral sub o lovitura de 135 kg la
+## 36 m/s — discul e tras 0,2-0,3 m in lateral la 20-35°, 0,8-0,9 m la 50°, 1,5 m la 90°, si se
+## intoarce; de aceea (c) si (e) nu se cer pe scenariile (g).
+const EJECT_YAW: Array = [[20.0, 0.0], [35.0, 0.0], [50.0, 0.0], [20.0, 1.2], [35.0, 1.2],
+	[50.0, 1.2], [-35.0, -1.2], [70.0, 0.6], [90.0, 0.0]]
+## (g) Discul care se INTOARCE: intai o masina il trimite in leagan (autobuzul cel mai sus,
+## buggy-ul mai jos), apoi Muscle-ul la plafon ajunge cu botul in planul discului la T
+## secunde dupa primul contact. T acopera coborarea, trecerea prin verticala si urcarea
+## inapoi (la 2,0 s, in (d), autobuzul a lovit gongul care se intorcea).
+const EJECT_FIRST: Array[String] = ["bus", "buggy"]
+## (g) Gongul in fata unui ZID (pragul, ancadramentul portalului de nord de pe Track24): Muscle-ul
+## la plafon loveste discul, apoi zidul la D metri dupa planul discului. Aici e mecanismul care
+## ejecteaza: `Car` arunca soferul „perete” pe delta-v-ul unui tick cu contact STATIC (>= 26 m/s),
+## iar discul singur nu ajunge acolo (vezi tabelul (g)). Martorul (acelasi zid, fara gong) TREBUIE
+## sa ejecteze, altfel scenariul nu mai masoara nimic.
+const EJECT_WALL_D: Array[float] = [1.5, 3.0, 5.0, 8.0]
+const EJECT_T0: float = 1.3
+const EJECT_T1: float = 3.4
+const EJECT_DT: float = 0.1
 
 
 class ScriptDriver:
@@ -126,6 +166,16 @@ class Tracked:
 	var tags: PackedStringArray = PackedStringArray()
 	## Primul cadru (de la lansare) cu o tamponare intre masini; -1 = niciuna.
 	var car_contact_frame: int = -1
+	## Viteza de lansare ceruta (m/s); <= 0 = `_entry_speed` (25 m/s sau plafonul).
+	var want_speed: float = -1.0
+	## Directia de lansare (grade, in jurul lui Y; 0 = drept spre -Z) — (g), loviturile oblice.
+	var yaw_deg: float = 0.0
+	## (g) Cel mai mare delta-v orizontal intr-un tick cu discul atins (m/s), si cel dintr-un
+	## tick in care masina atingea si un corp static (singurul caz in care Car ejecteaza „perete”).
+	var max_dv_disc: float = 0.0
+	var max_dv_disc_static: float = 0.0
+	var eject_note: String = ""
+	var prev_v: Vector3 = Vector3.ZERO
 	var _touching: bool = false
 	var _gap: float = 99.0
 
@@ -151,6 +201,9 @@ class Run:
 	var delay: float = 0.0
 	## Gongul acestui scenariu e sabotat (pentru contractul sabotajului, nu pentru celelalte).
 	var sabotaged: bool = false
+	## (g) Martor: zidul fara gong; aici ejectarea e CERUTA, nu interzisa.
+	var control: bool = false
+	var wall: StaticBody3D
 	var frames: int = 0
 	var sfx_rings: int = 0
 	## Copiate din gong la sfarsitul rundei (gongul se elibereaza inaintea raportului).
@@ -178,11 +231,12 @@ func _ready() -> void:
 	var body := StaticBody3D.new()
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()
-	box.size = Vector3(4000, 1, 4000)
+	box.size = Vector3(12000, 1, 4000)
 	shape.shape = box
 	body.add_child(shape)
 	add_child(body)
-	body.global_position = Vector3(0, -0.5, 0)
+	# Culoarele merg spre +X, cate LANE_GAP; (g) adauga zeci de culoare.
+	body.global_position = Vector3(5000, -0.5, 0)
 	_start_round()
 
 
@@ -242,7 +296,63 @@ func _start_round() -> void:
 		var probe_car := _add_car(ln, c, 0.0)
 		var x := ln.gong.radius + 1.0 + probe_car.car.collider_half_width()
 		probe_car.car.global_position.x = ln.origin.x + x
+	# (g) Fara ejectare. Sabotajul scoate meta de pe disc: discul devine o popica oarecare.
+	for e: Array in EJECT_TOP:
+		var er := _new_run("ejectare_%s_x%.2f_%.0f%%" % [e[0], e[2], float(e[1]) * 100.0],
+			"eject", 4.0)
+		_add_eject_gong(er)
+		var tr := _add_car(er, String(e[0]), float(e[2]))
+		tr.want_speed = tr.car.max_speed * float(e[1])
+	for e: Array in EJECT_YAW:
+		var er := _new_run("ejectare_oblic_%.0fgr_x%.1f" % [e[0], e[1]], "eject", 4.0)
+		_add_eject_gong(er)
+		var tr := _add_car(er, "muscle", float(e[1]))
+		tr.want_speed = tr.car.max_speed
+		tr.yaw_deg = float(e[0])
+	for d in EJECT_WALL_D:
+		var wr := _new_run("ejectare_zid_%.1fm" % d, "eject", 4.0)
+		_add_eject_gong(wr)
+		_add_wall(wr, d)
+		var wt := _add_car(wr, "muscle", 0.0)
+		wt.want_speed = wt.car.max_speed
+		var cr := _new_run("martor_zid_%.1fm" % d, "eject", 4.0)
+		cr.control = true
+		_add_wall(cr, d)
+		var ct := _add_car(cr, "muscle", 0.0)
+		ct.want_speed = ct.car.max_speed
+	for first in EJECT_FIRST:
+		var t := EJECT_T0
+		while t <= EJECT_T1 + 0.001:
+			var er := _new_run("ejectare_intoarcere_%s_%.1fs" % [first, t], "eject", 4.0 + t)
+			er.delay = t
+			_add_eject_gong(er)
+			var a := _add_car(er, first, 0.0)
+			var b := _add_car(er, "muscle", 0.0, 300.0)
+			b.want_speed = b.car.max_speed
+			a.car.slip_max_gap = 0.0
+			b.car.slip_max_gap = 0.0
+			t += EJECT_DT
 	print("[gong] runda %d/%d: %d scenarii" % [_round + 1, _reps, _runs.size()])
+
+
+## Zid static (strat 1, ca peretii pistei) peste culoar, cu fata la `d` m dupa planul discului.
+func _add_wall(r: Run, d: float) -> void:
+	var wall := StaticBody3D.new()
+	var cs := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(8.0, 3.0, 1.0)
+	cs.shape = box
+	wall.add_child(cs)
+	add_child(wall)
+	wall.global_position = r.origin + Vector3(0.0, 1.5, -d - 0.5)
+	r.wall = wall
+
+
+func _add_eject_gong(r: Run) -> void:
+	_add_gong(r, {})
+	if _sab == "ejectare":
+		r.gong.disc().remove_meta(Car.SOFT_BODY_NO_EJECT_META)
+		r.sabotaged = true
 
 
 func _pair_name(p: Array, dl: float) -> String:
@@ -312,14 +422,20 @@ func _entry_speed(car: Car) -> float:
 	return minf(SPEED, car.max_speed)
 
 
+func _launch_speed(tr: Tracked) -> float:
+	return tr.want_speed if tr.want_speed > 0.0 else _entry_speed(tr.car)
+
+
 func _launch(tr: Tracked, at: Vector3) -> void:
 	var car := tr.car
-	car.global_transform = Transform3D(Basis.IDENTITY, at)
-	car.linear_velocity = Vector3(0.0, 0.0, -_entry_speed(car))
+	var basis := Basis(Vector3.UP, deg_to_rad(tr.yaw_deg))
+	car.global_transform = Transform3D(basis, at)
+	car.linear_velocity = basis * Vector3(0.0, 0.0, -_launch_speed(tr))
 	car.angular_velocity = Vector3.ZERO
 	tr.drv.throttle = 1.0
 	tr.launched_frame = 0
-	tr.launch_speed = _entry_speed(car)
+	tr.launch_speed = _launch_speed(tr)
+	tr.prev_v = car.linear_velocity
 
 
 # ------------------------------------------------------------------ pasul
@@ -357,16 +473,22 @@ func _tick(r: Run) -> void:
 		var first: Tracked = r.cars[0]
 		if first.launched_frame < 0 and r.t >= SETTLE_S:
 			var z0 := _front(first.car) + LAUNCH_GAP + _disc_half(r.gong)
-			_launch(first, Vector3(first.car.global_position.x, 0.05, r.origin.z + z0))
+			if absf(first.yaw_deg) > 0.01:
+				# Pe directia masinii, prin punctul (x, planul discului): intra oblic.
+				var dir := Basis(Vector3.UP, deg_to_rad(first.yaw_deg)) * Vector3.FORWARD
+				var aim := Vector3(first.car.global_position.x, 0.05, r.origin.z)
+				_launch(first, aim - dir * z0)
+			else:
+				_launch(first, Vector3(first.car.global_position.x, 0.05, r.origin.z + z0))
 	for tr: Tracked in r.cars:
 		_tick_car(r, tr)
 	# A doua masina a perechii: teleportata la contactul primei, ca botul ei sa ajunga in
 	# planul discului (in repaus) dupa `delay` secunde.
-	if r.kind == "pair" and r.cars.size() == 2:
+	if (r.kind == "pair" or r.kind == "eject") and r.cars.size() == 2:
 		var a: Tracked = r.cars[0]
 		var b: Tracked = r.cars[1]
 		if a.contact_frame >= 0 and b.launched_frame < 0:
-			var z := _entry_speed(b.car) * r.delay + _front(b.car) + _disc_half(r.gong)
+			var z := _launch_speed(b) * r.delay + _front(b.car) + _disc_half(r.gong)
 			_launch(b, Vector3(b.car.global_position.x, 0.05, r.origin.z + z))
 	if r.hit_frame < 0 and r.cars.size() > 0 and (r.cars[0] as Tracked).contact_frame >= 0:
 		r.hit_frame = r.frames
@@ -407,6 +529,18 @@ func _tick_car(r: Run, tr: Tracked) -> void:
 				tr.car_contact_frame = tr.launched_frame
 				break
 	tr.speeds.append(v)
+	if touching:
+		var dv := car.linear_velocity - tr.prev_v
+		var dv_h := Vector2(dv.x, dv.z).length()
+		tr.max_dv_disc = maxf(tr.max_dv_disc, dv_h)
+		for body in car.get_colliding_bodies():
+			if body is StaticBody3D:
+				tr.max_dv_disc_static = maxf(tr.max_dv_disc_static, dv_h)
+				break
+	tr.prev_v = car.linear_velocity
+	if tr.ejects > 0 and tr.eject_note == "":
+		tr.eject_note = "%s %.1f m/s la %.2f s" % [car.last_eject_cause, car.last_eject_value,
+			float(tr.launched_frame) * STEP]
 	var what := ""
 	if touching:
 		what += "disc "
@@ -449,6 +583,8 @@ func _end_round() -> void:
 	_results.append(_runs)
 	# Curatenia: alta runda, alte corpuri.
 	for r: Run in _runs:
+		if r.wall != null:
+			r.wall.queue_free()
 		if r.gong != null:
 			r.gong.queue_free()
 		for tr: Tracked in r.cars:
@@ -539,6 +675,7 @@ func _report() -> void:
 	_contract_d()
 	_contract_e()
 	_contract_f()
+	_contract_g()
 	print("")
 	print("PROBE GONG: ", "PICAT" if _failed else "OK")
 	# Un cadru, ca nodurile ultimei runde (queue_free) sa plece inainte de iesire.
@@ -571,6 +708,8 @@ func _report_table() -> void:
 			ymax.append(tr.max_y)
 		print("%-8s | %-11s | %s%% (%s%%) | %s | %s° | %s" % [c, _spread(entry), _spread(kept),
 			_spread(kept_rel), _spread(v15), _spread(ang), _spread(ymax)])
+	print("")
+	_report_eject_table()
 	print("")
 	print("perechi (decalate +-%.2f m): masina, intrare m/s, max v/referinta, a atins discul, a tamponat, unghi max gong, y max, blocat max s" % PAIR_X)
 	for p: Array in PAIRS:
@@ -702,6 +841,8 @@ func _contract_c() -> void:
 				continue
 			if r.sabotaged and _sab != "leagan":
 				continue # gongul altui contract
+			if r.kind == "eject":
+				continue # (g) sunt lovituri la plafon si oblice; cifrele lor sunt in tabelul (g)
 			worst_a = maxf(worst_a, r.max_angle)
 			worst_e = maxf(worst_e, r.max_arm_err)
 			ok = ok and r.max_angle <= r.limit_deg + 0.5 and r.max_arm_err < 0.05
@@ -753,6 +894,8 @@ func _contract_e() -> void:
 		for r: Run in rs:
 			if r.sabotaged and _sab != "banda":
 				continue # gongul altui contract
+			if r.kind == "eject":
+				continue # (g): vezi tabelul (g), coloanele lat / prindere
 			worst = maxf(worst, r.max_lat)
 		lat.append(worst)
 		ok = ok and worst <= 0.15
@@ -799,3 +942,81 @@ func _contract_f() -> void:
 						r.rings, episodes, r.sfx_rings])
 	_check(ok, "f. SUNET: 0 in repaus si pe langa, 1 per lovitura, <= contacte la perechi, apeluri = redari%s"
 		% ("" if notes.is_empty() else " — " + ", ".join(notes)))
+
+
+## (g): per scenariu, masina din spate (sau singura): delta-v maxim pe disc, din care cel cu
+## contact static in acelasi tick, si ejectarile, pe toate rundele.
+func _report_eject_table() -> void:
+	print("")
+	print("ejectare (g): scenariu, masina, intrare m/s, dv max pe disc, dv max pe disc + static, unghi max gong, ejectari/repuneri")
+	var names: Array[String] = []
+	for r: Run in _results[0]:
+		if r.kind == "eject":
+			names.append(r.name)
+	for nm in names:
+		var entry: Array = []
+		var dv: Array = []
+		var dvs: Array = []
+		var ang: Array = []
+		var lat: Array = []
+		var arm: Array = []
+		var bad := 0
+		var kind := ""
+		var notes: Array[String] = []
+		for rs: Array in _results:
+			var r := _find(rs, nm)
+			var tr: Tracked = r.cars[r.cars.size() - 1]
+			kind = tr.kind
+			entry.append(tr.entry if tr.entry > 0.0 else tr.launch_speed)
+			dv.append(tr.max_dv_disc)
+			dvs.append(tr.max_dv_disc_static)
+			ang.append(r.max_angle)
+			lat.append(r.max_lat)
+			arm.append(r.max_arm_err * 100.0)
+			for t2: Tracked in r.cars:
+				bad += t2.ejects + t2.respawns + t2.recovers
+				if t2.eject_note != "":
+					notes.append("%s: %s" % [t2.kind, t2.eject_note])
+		print("  %-36s %-13s | %s | %s | %s | %s° | lat %s m, prindere %s cm | %d%s" % [nm, kind,
+			_spread(entry), _spread(dv), _spread(dvs), _spread(ang), _spread(lat), _spread(arm), bad,
+			"" if notes.is_empty() else " (" + ", ".join(notes) + ")"])
+
+
+func _contract_g() -> void:
+	var ok := true
+	var n := 0
+	var touched := 0
+	var worst := 0.0
+	var worst_s := 0.0
+	var controls := 0
+	var controls_ejected := 0
+	var notes: Array[String] = []
+	for rs: Array in _results:
+		for r: Run in rs:
+			if r.kind != "eject":
+				continue
+			if r.control:
+				var ej := 0
+				for tr: Tracked in r.cars:
+					ej += tr.ejects
+				controls += 1
+				controls_ejected += 1 if ej > 0 else 0
+				if ej == 0:
+					ok = false
+					notes.append("%s: martorul NU a ejectat (scenariul nu mai masoara)" % r.name)
+				continue
+			n += 1
+			var last: Tracked = r.cars[r.cars.size() - 1]
+			touched += 1 if last.touched else 0
+			for tr: Tracked in r.cars:
+				worst = maxf(worst, tr.max_dv_disc)
+				worst_s = maxf(worst_s, tr.max_dv_disc_static)
+				if tr.ejects + tr.respawns + tr.recovers > 0 or tr.nan:
+					ok = false
+					notes.append("%s/%s: ejectari %d, repuneri %d, tranzitii %d%s" % [r.name,
+						tr.kind, tr.ejects, tr.respawns, tr.recovers,
+						"" if tr.eject_note == "" else " (" + tr.eject_note + ")"])
+	var shown := ", ".join(notes.slice(0, 8)) + (" (+%d)" % (notes.size() - 8) if notes.size() > 8 else "")
+	_check(ok, "g. FARA EJECTARE: %d scenarii (%d cu masina din spate pe disc), dv max pe disc %.1f m/s (cu contact static %.1f), 0 ejectari/repuneri; martori cu zid fara gong: %d/%d ejectati%s"
+		% [n, touched, worst, worst_s, controls_ejected, controls,
+		"" if notes.is_empty() else " — " + shown])

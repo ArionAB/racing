@@ -42,6 +42,15 @@ extends Node3D
 ## ghiont scalat cu masa ei, in fiecare tick de contact) — gongul il primeste si el, si e in
 ## cifrele masurate.
 ##
+## [b]Nu arunca soferul[/b]: discul poarta `Car.SOFT_BODY_NO_EJECT_META`, deci contactul cu el
+## deschide fereastra in care masina nu-si ejecteaza soferul (aceeasi ca la turma, #614).
+## Fara ea, pe Track24 (ProbeRace, 16 seed-uri) un Muscle a fost ejectat „perete” 37,2 m/s
+## chiar la ultimul gong. Ejectarea de perete cere un tick cu contact STATIC si >= 26 m/s;
+## discul singur da cel mult ~14 m/s pe tick (18 cu un zid lipit de el), deci nu el o
+## declanseaza, ci zidul sau pragul in care intra masina imediat dupa el (ProbeGong (g):
+## zid la 5 si 8 m dupa disc, 27 m/s, ejectat fara meta, nu si cu ea). Discul nu atinge
+## nimic static pe Track24: maturat de la -75° la +75°, toate cele 5 gonguri sunt libere.
+##
 ## [b]Sunetul[/b]: o lovitura e un salt al vitezei unghiulare (`ring_min_dw`, rad/s intr-un
 ## tick) cu o masina in contact; gravitatia si fortele de mai sus dau sub 0,05 rad/s pe tick.
 ## Un singur `ring_sfx` per lovitura, cu pauza `ring_cooldown` (o masina sprijinita de disc nu
@@ -263,6 +272,8 @@ func _build_disc() -> void:
 	_disc.name = "GongDisc"   # numele apare in rapoartele ProbeLaneClear
 	_disc.position = Vector3(0.0, center_height, 0.0)
 	_disc.mass = mass
+	# Costa viteza dupa masa, nu arunca soferul (Car.SOFT_BODY_NO_EJECT_META, ca turma).
+	_disc.set_meta(Car.SOFT_BODY_NO_EJECT_META, true)
 	_disc.collision_layer = LAYER
 	# Masca 1, nu 0: vezi antetul (coliziunea vazuta dintr-o parte = disc de masa infinita).
 	_disc.collision_mask = 1

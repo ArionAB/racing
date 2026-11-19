@@ -25,7 +25,15 @@ extends Node
 ##
 ## Rulare:
 ##   Godot --headless --path . res://tools/ProbeMainMenuQuit.tscn
+##
+## Meniul SCRIE setari: din 19 nov 2026 `_ready` muta o masina incuiata pe
+## garajul de start (`Career.ensure_selected_car`) si salveaza. Sub
+## verify_local.sh save-ul e comun tuturor sondelor (si ramane intre rulari),
+## deci un `selected_car` mutat aici ar fi schimbat masina jucatorului in toate
+## cursele sondelor de dupa. Setarile si cariera merg in folderul procesului
+## (ProbeTmp, #722), sters la final.
 
+const ProbeTmp := preload("res://tools/probe_tmp.gd")
 const QUIT_WORDS: Array[String] = ["QUIT", "EXIT"]
 const ALLOWED_QUIT_SOURCES: Array[String] = ["res://scenes/main_menu/main_menu.gd"]
 const SOURCE_ROOTS: Array[String] = ["res://scenes", "res://scripts"]
@@ -38,8 +46,17 @@ class FakePlatformMenu extends "res://scenes/main_menu/main_menu.gd":
 
 var _fail := 0
 var _desktop_texts: Array[String] = []
+var _tmp_dir := ""
+var _real_settings_path := ""
+var _real_career_path := ""
 
 func _ready() -> void:
+	_tmp_dir = ProbeTmp.make("main_menu_quit")
+	_real_settings_path = GameState.settings_path
+	_real_career_path = Career.save_path
+	var shared_before := _read_text(_real_settings_path)
+	GameState.settings_path = _tmp_dir + "settings.cfg"
+	Career.save_path = _tmp_dir + "career.cfg"
 	await get_tree().process_frame
 	await get_tree().physics_frame
 	# [nume, etichete Godot, are voie la QUIT]. Desktop intai: lista lui de
@@ -58,8 +75,27 @@ func _ready() -> void:
 	print("")
 	_check_sources()
 	print("")
+	_expect(_read_text(_real_settings_path) == shared_before,
+		"setarile comune (save-ul sondelor) neatinse de meniu")
+	_remove_tmp()
 	print("VERDICT: %s (%d esecuri)" % ["OK" if _fail == 0 else "PROBLEMA", _fail])
 	get_tree().quit(1 if _fail > 0 else 0)
+
+func _read_text(path: String) -> String:
+	var f := FileAccess.open(path, FileAccess.READ)
+	return f.get_as_text() if f != null else "<lipsa>"
+
+## Si din `_exit_tree`, pentru iesirile timpurii.
+func _remove_tmp() -> void:
+	if _tmp_dir == "":
+		return
+	GameState.settings_path = _real_settings_path
+	Career.save_path = _real_career_path
+	ProbeTmp.remove(_tmp_dir)
+	_tmp_dir = ""
+
+func _exit_tree() -> void:
+	_remove_tmp()
 
 func _expect(ok: bool, what: String) -> void:
 	if not ok:

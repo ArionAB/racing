@@ -130,7 +130,7 @@ func _build_thumb(info: TrackInfo) -> Control:
 	hint.alignment = BoxContainer.ALIGNMENT_CENTER
 	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	thumb.add_child(hint)
-	var big := _label(info.display_name.to_upper(), 30, Color(1, 1, 1, 0.22))
+	var big := _label(tr(info.display_name).to_upper(), 30, Color(1, 1, 1, 0.22))
 	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_child(big)
 	var path := _label(TrackInfo.thumb_path(track_index).trim_prefix("res://"),
@@ -157,7 +157,8 @@ func _build_footer(info: TrackInfo) -> Control:
 	names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	names.add_theme_constant_override("separation", 2)
 	row.add_child(names)
-	var title := _label(info.display_name.to_upper(), 22, Color.WHITE)
+	# Numele si regiunea sunt in engleza in TrackInfo; se traduc la afisare.
+	var title := _label(tr(info.display_name).to_upper(), 22, Color.WHITE)
 	title.clip_text = true
 	title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	names.add_child(title)
@@ -168,7 +169,7 @@ func _build_footer(info: TrackInfo) -> Control:
 	var dot := _Dot.new()
 	dot.color = info.accent
 	region_row.add_child(dot)
-	region_row.add_child(_label(info.region, 14, TEXT_DIM))
+	region_row.add_child(_label(tr(info.region), 14, TEXT_DIM))
 
 	var clock := _Clock.new()
 	clock.size_flags_vertical = Control.SIZE_SHRINK_CENTER

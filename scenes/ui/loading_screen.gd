@@ -266,10 +266,10 @@ func _build_ui() -> void:
 	margin.add_child(column)
 
 	var region := _label(22, info.accent.lightened(0.45))
-	region.text = info.region.to_upper() if info.region != "" else "TRACK"
+	region.text = tr(info.region).to_upper() if info.region != "" else tr("TRACK")
 	column.add_child(region)
 	var title := _label(60, Color.WHITE)
-	title.text = info.display_name if info.display_name != "" \
+	title.text = tr(info.display_name) if info.display_name != "" \
 		else GameState.TRACK_NAMES[track_index]
 	column.add_child(title)
 

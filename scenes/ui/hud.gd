@@ -733,10 +733,10 @@ func set_info(position: int, total_cars: int, lap: int, total_laps: int,
 		speed_kmh: float, lap_time: String, best_lap: String) -> void:
 	_pos_label.text = str(position)
 	_pos_total.text = "/%d" % total_cars
-	_lap_label.text = "LAP %d/%d" % [lap, total_laps]
-	_speed_label.text = "%.0f km/h" % speed_kmh
+	_lap_label.text = tr("LAP %d/%d") % [lap, total_laps]
+	_speed_label.text = tr("%.0f km/h") % speed_kmh
 	_time_label.text = lap_time
-	_best_label.text = "BEST  %s" % best_lap
+	_best_label.text = tr("BEST  %s") % best_lap
 
 
 ## Linia de dezvoltare de sub panou (recorduri, pista, taste). Ascunsa in
@@ -810,7 +810,7 @@ func set_offroad_clock(seconds: float) -> void:
 		_offroad_label.visible = false
 		return
 	_offroad_label.visible = true
-	_offroad_label.text = "OFF ROAD\n%.1f" % maxf(seconds, 0.0)
+	_offroad_label.text = tr("OFF ROAD") + "\n%.1f" % maxf(seconds, 0.0)
 	_offroad_label.add_theme_color_override("font_color",
 		Color(1.0, 0.3, 0.2) if seconds < 1.0 else Color(1.0, 0.82, 0.25))
 
@@ -848,12 +848,13 @@ func set_sealed_turbo(on: bool) -> void:
 func set_ghost_time(ms: int) -> void:
 	_ghost_label.visible = ms > 0
 	if ms > 0:
-		_ghost_label.text = "GHOST %s" % TrackCard._format_ms(ms)
+		_ghost_label.text = tr("GHOST %s") % TrackCard._format_ms(ms)
 ## Provocarea gimmick-ului (bonus +1 in cursa de cariera): "CHALLENGE +1:
-## <titlu>", verde pana o pici.
+## <titlu>", verde pana o pici. Titlul vine in engleza (din .tres) si se
+## traduce aici.
 func set_challenge(title: String) -> void:
 	_challenge_title = title
-	_challenge_label.text = _challenge_prefix() + title
+	_challenge_label.text = _challenge_head()
 	_challenge_label.modulate = Color(0.55, 0.9, 0.5)
 	_challenge_label.visible = true
 
@@ -862,12 +863,13 @@ func set_challenge(title: String) -> void:
 func set_challenge_progress(text: String) -> void:
 	if _challenge_failed:
 		return
-	_challenge_label.text = _challenge_prefix() + _challenge_title \
-		+ ("   " + text if text != "" else "")
+	_challenge_label.text = _challenge_head() + ("   " + text if text != "" else "")
 
 
-static func _challenge_prefix() -> String:
-	return "CHALLENGE +%d: " % Career.CHALLENGE_POINTS
+## „CHALLENGE +1: TITLU", tradus ca sablon intreg (in japoneza ordinea si
+## doua-punctele difera).
+func _challenge_head() -> String:
+	return tr("CHALLENGE +%d: %s") % [Career.CHALLENGE_POINTS, tr(_challenge_title)]
 
 
 func set_challenge_failed() -> void:

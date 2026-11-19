@@ -101,10 +101,11 @@ func progress_text() -> String:
 			return "%d / %d" % [mini(events, challenge.count), challenge.count]
 		CareerChallenge.Rule.EVERY_LAP:
 			var lap := mini(closed_laps.size() + 1, GameState.total_laps)
-			return "LAP %d%s" % [lap, " \u2713" if lap_events > 0 else ""]
+			return tr("LAP %d") % lap + (" \u2713" if lap_events > 0 else "")
 		CareerChallenge.Rule.CLEAN_LAP:
 			var lap := mini(closed_laps.size() + 1, GameState.total_laps)
-			return "LAP %d: %d PLATES" % [lap, lap_events]
+			return tr_n("LAP %d: %d PLATE", "LAP %d: %d PLATES", lap_events) \
+				% [lap, lap_events]
 	return ""
 
 

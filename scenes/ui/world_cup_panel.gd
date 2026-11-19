@@ -44,8 +44,9 @@ func _ready() -> void:
 	content.add_theme_constant_override("separation", 20)
 	pad.add_child(content)
 
-	var rules := _label("POINTS PER RACE  6 · 5 · 4 · 3 · 2 · 1     ·     "
-		+ "NEW RIVALS EVERY CUP, NEVER THE SAME CAR TWICE", 18,
+	# Doua propozitii separate (fiecare tradusa intreaga), lipite cu punct.
+	var rules := _label(tr("POINTS PER RACE  6 · 5 · 4 · 3 · 2 · 1") + "     ·     "
+		+ tr("NEW RIVALS EVERY CUP, NEVER THE SAME CAR TWICE"), 18,
 		TrackCard.TEXT_DIM)
 	rules.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content.add_child(rules)
@@ -78,9 +79,9 @@ func _build_cup(cup: WorldCup) -> Control:
 	var title_row := HBoxContainer.new()
 	title_row.add_theme_constant_override("separation", 14)
 	column.add_child(title_row)
-	var title := _label(cup.display_name, 30, Color.WHITE)
+	var title := _label(tr(cup.display_name), 30, Color.WHITE)
 	title_row.add_child(title)
-	var count := _label("%d RACES" % cup.tracks.size(), 18,
+	var count := _label(tr_n("%d RACE", "%d RACES", cup.tracks.size()) % cup.tracks.size(), 18,
 		TrackSelectPanel.SUBTITLE_COLOR)
 	count.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	title_row.add_child(count)
@@ -164,7 +165,7 @@ func _build_tile(race_no: int, track_index: int, accent: Color) -> Control:
 	row.add_theme_constant_override("separation", 10)
 	footer.add_child(row)
 	row.add_child(_label(str(race_no), 20, accent.lightened(0.35)))
-	var name_label := _label(info.display_name.to_upper(), 18, Color.WHITE)
+	var name_label := _label(tr(info.display_name).to_upper(), 18, Color.WHITE)
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_label.clip_text = true
 	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS

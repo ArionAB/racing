@@ -58,7 +58,7 @@ func show_change(new_pos: int, old_pos: int) -> void:
 	_tri_color = gain_color if _dir > 0 else loss_color
 	last_dir = _dir
 	last_color = _tri_color
-	last_text = "P%d" % new_pos
+	last_text = tr("P%d") % new_pos
 	shown_count += 1
 	_label.text = last_text
 	_label.add_theme_color_override("font_color", _tri_color)

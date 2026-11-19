@@ -106,6 +106,8 @@ func _ready() -> void:
 	_build_pause_panel(root)
 	_build_results_panel(root)
 	_settings = SettingsPanel.new()
+	# Limba se schimba doar din meniul principal (vezi SettingsPanel.show_language).
+	_settings.show_language = false
 	_settings.visible = false
 	_settings.back_pressed.connect(func() -> void:
 		_settings.visible = false

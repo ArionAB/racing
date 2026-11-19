@@ -1073,6 +1073,9 @@ func _save_angkor_sounds() -> void:
 	_save("root_creak", _root_creak())
 	_save("jungle_bed", _jungle_bed())
 	_save("rain_leaves", _rain_leaves())
+	# Gongul de templu (GongHazard). ULTIMUL consumator al lui `rng_an`: inserat mai sus ar
+	# fi rescris fisierele de dupa el.
+	_save("gong_hit", _gong_hit())
 
 
 func _an_noise() -> float:
@@ -1270,6 +1273,50 @@ func _rain_leaves() -> PackedFloat32Array:
 		drop *= 0.985
 		raw[i] = band * 0.8 + _an_noise() * drop * 0.5
 	return _peak_norm(_loop_crossfade(raw, n, fade), 0.6)
+
+
+## Gongul de bronz al templului (GongHazard), 3 s: zece partiale NEARMONICE (rapoartele unei
+## placi circulare de bronz batute in mijloc, nu ale unei coarde), fiecare dublat cu un
+## frate dezacordat cu 0,4-1,6 Hz — batai lente, „respiratia" bronzului. Fundamentala la
+## 98 Hz tine cel mai mult (-35 dB la 3 s, unde fisierul se inchide), partialele de sus se
+## sting in zecimi de secunda. Atacul: 4 ms, cu un bufnet de ciocan inmuiat (zgomot trece-jos, 40 ms) si o
+## alunecare in jos de 1,5% a inaltimii in primele 0,25 s (metalul care se aseaza). Se
+## acordeaza din `GongHazard.pitch`, deci fisierul ramane unul singur.
+func _gong_hit() -> PackedFloat32Array:
+	var dur := 3.0
+	var n := int(RATE * dur)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var f0 := 98.0
+	var ratios := [1.0, 1.47, 2.09, 2.56, 2.99, 3.53, 4.23, 5.11, 6.02, 7.37]
+	var amps := [1.0, 0.62, 0.55, 0.38, 0.33, 0.24, 0.2, 0.14, 0.1, 0.07]
+	# Timpul de cadere la 1/e (s), mai scurt spre partialele de sus.
+	var taus := [0.75, 0.62, 0.55, 0.42, 0.36, 0.28, 0.22, 0.16, 0.12, 0.09]
+	var beats := [0.4, 0.7, 1.1, 0.9, 1.6, 1.3, 0.8, 1.5, 1.2, 1.0]
+	var phases := PackedFloat32Array()
+	phases.resize(ratios.size() * 2)
+	for k in phases.size():
+		phases[k] = rng_an.randf() * TAU
+	var acc := PackedFloat32Array()
+	acc.resize(phases.size())
+	var lp := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		var glide := 1.0 + 0.015 * exp(-t / 0.08)
+		var v := 0.0
+		for k in ratios.size():
+			var f := f0 * float(ratios[k]) * glide
+			var env := float(amps[k]) * exp(-t / float(taus[k]))
+			acc[k * 2] += f / float(RATE)
+			acc[k * 2 + 1] += (f + float(beats[k])) / float(RATE)
+			v += env * (sin(TAU * acc[k * 2] + phases[k * 2]) 				+ 0.7 * sin(TAU * acc[k * 2 + 1] + phases[k * 2 + 1]))
+		# Bufnetul ciocanului inmuiat: zgomot trece-jos, stins in ~40 ms.
+		lp += 0.08 * (_an_noise() - lp)
+		var thump := lp * 6.0 * exp(-t / 0.04)
+		var attack := minf(t / 0.004, 1.0)
+		var tail := clampf((dur - t) / 0.25, 0.0, 1.0)
+		out[i] = (v * attack + thump) * tail
+	return _peak_norm(out, 0.85)
 
 
 # ======================================================================

@@ -1,4 +1,4 @@
-# Modul Carieră — „Turul lumii” — v0.12 (brief de design; pasul 0 retunat, pașii 1, 2, 4a, 4b și 5 construiți; punctaj în loc de ștampile după sesiunea la volan)
+# Modul Carieră — „Turul lumii” — v0.13 (brief de design; pasul 0 retunat, pașii 1, 2, 4a, 4b și 5 construiți; punctaj în loc de ștampile după sesiunea la volan; mașinile se câștigă în carieră)
 
 > Cerut de dezvoltator pe 16 oct 2026, în perioada de polish pentru release:
 > „pornind de la modul Adventure din Crash Team Racing, ce idei ai pentru
@@ -142,6 +142,55 @@
 > puncte, zero migrare. Gărzi: `ProbeCareer` 188 și `ProbeChallenge` 217
 > verificări, cu sabotaj (pragul lumii 2 mutat la 6 → 4 picări). Nerulat la
 > volan: fluxul cursă → „+3 · CHALLENGE +1” → raft.
+>
+> **v0.13 (19 nov 2026), mașinile se câștigă în carieră.** Dezvoltatorul, ca
+> jucător: „n-am niciun motiv să joc cariera când pot juca World Cup pentru tot
+> ce e disponibil; nu e progresie, nimic care să mă țină”. Verificat în cod:
+> punctele deschideau doar cutia următoare, toate cele 10 mașini erau alese din
+> prima pornire, iar `[garage] unlocked` se salva și nu-l citea niciun ecran.
+> Deciziile lui: **pistele rămân deschise în orice mod „deocamdată”**; **mașinile
+> se câștigă în carieră** și numai acolo. Garajul (global: o singură mașină
+> aleasă pentru Quick Race, World Cup, carieră, contratimp) arată ce ai
+> câștigat; AI-ul conduce în continuare orice mașină, și pe cele necâștigate —
+> să le vezi pe grilă face parte din cârlig.
+> - **Garajul de start: Taxi + Buggy** (Taxi primul: e mașina pe care cade un
+>   jucător nou). Restul vin la praguri de puncte de carieră, până când rivalii
+>   (pasul 3, #683) preiau mașinile-vedetă (Poliția, Pompierii, Autobuzul,
+>   Muscle):
+>
+>   | mașina | puncte |
+>   |---|---|
+>   | Ambulanța | 3 |
+>   | Poliția | 6 |
+>   | Hot rod | 10 |
+>   | Macaraua | 14 |
+>   | Pompierii | 19 |
+>   | Monster | 25 |
+>   | Autobuzul | 32 |
+>   | Muscle | 40 |
+>
+>   Maximul de azi e 48 (3 lumi × 4 piste × 4). **Pragurile sunt provizorii**:
+>   se retunează când cariera trece la 4 lumi (#704). Date, nu cod:
+>   `CareerConfig.starting_cars` și `car_rewards` (`CareerCarReward`, câte un
+>   `.tres` în `scenes/career/data/car_rewards/`). O mașină din garaj care nu e
+>   în nicio listă e deschisă (ca o pistă în nicio lume).
+> - **Zăvorul**: o mașină câștigată nu se mai ia înapoi. Când punctele ating
+>   pragul, id-ul ei intră în `[garage] unlocked` și rămâne acolo, chiar dacă
+>   un prag mutat sau o regrupare scade apoi punctele calculate. E excepția
+>   deliberată de la „punctele se calculează, nu se stochează” (§10): pragurile
+>   sunt date de tuning care se vor muta. Un save cu puncte de dinainte își
+>   primește mașinile la încărcare, fără anunț; schema `career.cfg` rămâne v1.
+> - **Pe ecran**: în garaj mașina încuiată se vede întreagă (vitrină, bare,
+>   comparația), cartonașul e stins, cu lacăt, iar SELECT spune ce lipsește
+>   („CAREER: 4 MORE PTS”); la rezultate „NEW CAR: POLITIA”; în pașaport „NEXT
+>   CAR  POLITIA  ·  2 MORE POINTS” și „CARS 3 / 10”. O selecție încuiată cade
+>   pe Taxi la intrarea în meniu.
+> - **Comutatorul ascuns de dezvoltator**: 7 atingeri pe titlul GARAGE în 3
+>   secunde deschid toate mașinile (titlul devine „GARAGE · ALL CARS”); există
+>   și în build-ul de release de pe telefon, se salvează în `settings.cfg` și
+>   nu scrie nimic în progresul carierei.
+>
+> Gardă: `ProbeCarUnlock` (7 contracte, fiecare cu `--sabotaj=` care îl pică).
 
 ## 0. Într-o propoziție
 
@@ -793,8 +842,9 @@ Rămase:
 1. **Numele celor trei lumi** — grupele nu sunt pe continent sau pe climă,
    deci numele vine din altceva (etape ale turului? „Lumea 1/2/3”?). Apare
    pe cutie, deci decide și iconografia raftului.
-2. **Garajul de start**: Buggy + Taxi, sau o singură mașină (progresie mai
-   lungă, început mai sărac).
+2. ~~**Garajul de start**: Buggy + Taxi, sau o singură mașină (progresie mai
+   lungă, început mai sărac).~~ **Decis (19 nov 2026):** Taxi + Buggy; restul
+   mașinilor se câștigă în carieră, la praguri de puncte (v0.13).
 3. **Rivalii** (§5): perechile Vex/Poliția, Luna/Pompierii, Robo/Autobuzul,
    Nyx/Muscle final — propunere; pistele lor le alege matricea **după pasul
    0**. Robo cere comportamentul de apărare, fără el altă mașină în lumea 3.

@@ -84,7 +84,9 @@ ANK_RESULTS.clear()
 FAST = os.environ.get("DRIVE_FAST", "") == "1"   # iteratie: AO cu 4 raze
 
 ST = ANK_STONE
-BRONZE = RUST                  # 10 RUST_METAL: bronzul gongului si al candelelor
+BRONZE = LARCH_RUST            # 27: bronzul (buza, butonul si inelul gongului, cupele candelelor)
+GOLD = CAR_YELLOW              # 16: fata gongului, acelasi auriu ca gongurile-hazard din sala
+EMBER = LAVA_ORANGE            # 30: jarul din cupele candelelor (accentul atlasului pentru ce arde)
 ROAD_Z = 4.0
 FACE = 0.03                    # fata vizibila a peretelui, in spatele planului de coliziune
 WALL_T = 2.2                   # grosimea peretilor de tub (spatele lor, e = 2,2)
@@ -595,6 +597,7 @@ def lamp(B, G, p, scale=1.0):
     B.frustum((x, y, z + 0.28 * s + 0.45 * s), 0.10 * s, 0.07 * s, 0.9 * s, ST, segments=8)
     B.frustum((x, y, z + 1.18 * s + 0.05 * s), 0.12 * s, 0.20 * s, 0.10 * s, ST, segments=8)
     G.frustum((x, y, z + 1.28 * s + 0.07 * s), 0.12 * s, 0.28 * s, 0.14 * s, BRONZE, segments=10)
+    G.frustum((x, y, z + 1.42 * s + 0.05 * s), 0.11 * s, 0.0, 0.10 * s, EMBER, segments=3)   # jar: 4 tri
 
 
 def apsara(B, L, u0, e_back, h0, scale=1.0, pose=0, depth=0.14):
@@ -1420,10 +1423,12 @@ def sanctuary(S_, Br, sites):
     # gongul (bronz): disc, buza, butonul din mijloc, doua snururi
     gc = Vector((0, 0, zt + 2.05))
     rot = Matrix.Rotation(math.atan2(d.y, d.x), 4, "Z") @ Matrix.Rotation(math.radians(90), 4, "Y")
-    for (r, th) in ((1.18, 0.10), (1.26, 0.06)):
+    # fata aurie (disc), buza de bronz (mai subtire: se vede doar pe margine), inelul de bronz de pe
+    # fata (cilindru mai gros r 0,78, acoperit in mijloc de un disc auriu r 0,70)
+    for (r, th, sl) in ((1.18, 0.10, GOLD), (1.26, 0.06, BRONZE), (0.78, 0.14, BRONZE), (0.70, 0.15, GOLD)):
         res = bmesh.ops.create_cone(Br.bm, cap_ends=True, cap_tris=False, segments=24, radius1=r,
                                     radius2=r, depth=th, matrix=Matrix.Translation(gc) @ rot)
-        Br._tag(res["verts"], BRONZE)
+        Br._tag(res["verts"], sl)
     for (r, th) in ((0.34, 0.26), (0.18, 0.38)):
         res = bmesh.ops.create_cone(Br.bm, cap_ends=True, cap_tris=False, segments=12, radius1=r,
                                     radius2=r * 0.8, depth=th, matrix=Matrix.Translation(gc) @ rot)

@@ -849,6 +849,7 @@ func _setup_ghost() -> void:
 
 func _finish_race() -> void:
 	state = State.FINISHED
+	hud.lock_pause() # dupa sosire nu mai exista RESTART: vezi RaceHUD.lock_pause
 	impact_feel.cancel_hit_stop()
 	position_watch.reset(0)
 	hud.position_popup.hide_now()

@@ -45,6 +45,9 @@ extends Node
 ##      randul de stare exact cu save; RESET >= 48 px si mai ingust decat
 ##      CONTINUE; randul incape; reimprospatare la aratare; focus pe cupa jucata.
 ##        --sabotaj=panou    panoul citeste alt fisier la reaparitie
+##   i. DUPA SOSIRE pauza nu se mai deschide: punctele sunt numarate si pe
+##      disc, iar RESTART din pauza ar rejuca aceeasi cursa peste ele.
+##        --sabotaj=pauza    zavorul pauzei scos dupa sosire
 ##
 ## Captura panoului (o cupa in desfasurare, restul neatinse), CU FEREASTRA:
 ##   godot --path . res://tools/ProbeWorldCupSave.tscn -- --captura=C:/.../wc.png
@@ -58,9 +61,9 @@ const RACE_SCENE := "res://scenes/race/Race.tscn"
 ## Scena usoara pe care ruleaza cursele (pista CUPEI ramane `selected_track`).
 const RACE_BENCH := "res://scenes/tracks/Track01.tscn"
 ## Sub atatea verificari verdictul pica: o sectiune sarita = garda oarba.
-const MIN_CHECKS := 95
+const MIN_CHECKS := 96
 const SABOTAGES: Array[String] = ["runda", "indici", "devreme", "mijloc", "masina",
-	"nivel", "final", "reset1", "toate", "validare", "viitor", "panou"]
+	"nivel", "final", "reset1", "toate", "validare", "viitor", "panou", "pauza"]
 ## Adversarii pe grila in sonda (cursele sunt mai scurte); sloturi = 3.
 const AI := 2
 ## Randul de stare asteptat, LITERAL (vezi `_check_panel`).
@@ -413,6 +416,15 @@ func _check_continue() -> void:
 	race.call("_go")
 	await _physics(3)
 	race.call("_finish_race")
+	# i. Dupa sosire pauza e inchisa: rezultatele sunt deja numarate si pe disc,
+	# iar RESTART din pauza ar rejuca aceeasi cursa peste punctele ei.
+	if _sabotage == "pauza":
+		race.hud.set("_pause_locked", false)
+	race.hud.call("_open_pause")
+	var paused := get_tree().paused
+	if paused:
+		race.hud.call("_close_pause")
+	_check("i", not paused, "dupa sosire pauza nu se mai deschide (RESTART ar numara cursa de doua ori)")
 	race.call("_show_results")
 	var info := TrackInfo.for_track(_cup_a.track_index(1))
 	var title := _results_title(race)

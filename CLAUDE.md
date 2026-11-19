@@ -90,11 +90,14 @@ pur plus haosul fizic, nu proiectilele.
     închisă a scurtăturii): lista e la `AIController._reads_hazard`. După o
     repunere pilotul citește hazardul care tocmai l-a prins (fără bucle de
     repuneri). Garda: `ProbeAiDice` (în verify, 4 sabotaje).
-- **World Cup** ✔ (oct 2026): 3 cupe × 4 curse (`scenes/world_cup/data/`),
-  puncte cumulate 6-5-4-3-2-1 (`GameState.CHAMP_POINTS`). La fiecare cupă
-  nouă adversarii sunt trași aleatoriu din garaj, **niciodată aceeași mașină
-  de două ori** (nici a jucătorului) — `GameState.draw_ai_lineup`. Pe dinafară:
-  Dunele, Okinawa manual, Ha Long, Carrara. Garda: `ProbeWorldCup`.
+- **World Cup** ✔ (oct 2026; a patra cupă nov 2026): 4 cupe × 4 curse
+  (`scenes/world_cup/data/`) = cele 16 piste de lansare, puncte cumulate
+  6-5-4-3-2-1 (`GameState.CHAMP_POINTS`). La fiecare cupă nouă adversarii
+  sunt trași aleatoriu din garaj, **niciodată aceeași mașină de două ori**
+  (nici a jucătorului) — `GameState.draw_ai_lineup`. Pe dinafară doar
+  bancurile de test: Dunele, Okinawa manual. A patra cupă (Ha Long, Carrara,
+  San Francisco, Angkor) e și lumea 4 a carierei
+  (`scenes/career/data/world_4.tres`). Garda: `ProbeWorldCup`.
 - Touch controls: **numai butoane** — ◀ ▶ viraj (stânga-jos), ▲ gaz și ▼
   frână/marșarier (dreapta-jos, ca o pereche de pedale), TURBO/DRIFT pe rândul
   de deasupra lor ✔ — validat pe iPhone (oct 2026, trei iterații).
@@ -130,10 +133,18 @@ pur plus haosul fizic, nu proiectilele.
   chiar arsă), nu din butoane; pe touch butonul vizat pulsează. Textele și
   pragurile: `scenes/race/tutorial/tutorial_default.tres`. Se reia din
   SETTINGS. Garda: `ProbeTutorial` (cu sabotaj pe fiecare contract).
+- **Mașinile se câștigă în carieră** ✔ (19 nov 2026): fără ele cariera n-avea
+  nicio miză față de World Cup. Garaj de start Taxi + Buggy, restul la praguri
+  de puncte de carieră (provizorii), **zăvorâte** — o mașină câștigată nu se
+  mai pierde. Pistele rămân deschise în orice mod; AI-ul conduce orice mașină.
+  Singurul lacăt: `Career.is_car_unlocked`; datele în `career_config.tres`
+  (`starting_cars`, `car_rewards`). Comutator ascuns: 7 atingeri pe titlul
+  GARAGE. Garda: `ProbeCarUnlock` (cu sabotaj pe fiecare contract).
 
 ## Post-MVP (nu implementa fără să fie cerut)
 
-Multiplayer, campionat lung, unlockables, tuning vizual de mașini, monetizare.
+Multiplayer, campionat lung, alte unlockables (mașinile câștigate în carieră
+sunt construite), tuning vizual de mașini, monetizare.
 Analiza de monetizare, cu argumente pro/contra și deciziile deschise:
 `docs/monetizare/model_de_monetizare.md`.
 

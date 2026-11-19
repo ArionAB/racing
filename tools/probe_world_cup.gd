@@ -2,25 +2,27 @@ extends Node
 ## WORLD CUP: datele cupelor, adversarii trasi fara repetare, punctajul
 ## cumulat si o cursa reala pornita in modul cupa.
 ##
-## Contractele (decizia dezvoltatorului, 30 oct 2026):
-##   1. trei cupe, pistele fiecareia se rezolva; nicio pista in doua cupe; pe
-##      dinafara Dunele (Track01), Okinawa manual (Track08), Ha Long (Track22),
-##      Carrara (Track23), Angkor (Track24, doar cursa rapida pana decide
-##      dezvoltatorul — brief angkor.md §8) si San Francisco (Track25, idem —
-##      brief san_francisco.md §8); restul pistelor sunt toate intr-o cupa;
+## Contractele (decizia dezvoltatorului, 30 oct 2026; a patra cupa 19 nov 2026):
+##   1. patru cupe x 4 curse = cele 16 piste de lansare; pistele fiecareia se
+##      rezolva; nicio pista in doua cupe; pe dinafara doar bancurile de test,
+##      Dunele (Track01) si Okinawa manual (Track08); a patra cupa e Ha Long,
+##      Carrara, San Francisco, Angkor, in ordinea asta (#704);
 ##   2. la fiecare cupa noua, adversarii sunt trasi aleatoriu si NICIODATA nu
 ##      apare aceeasi masina de doua ori (nici a jucatorului) — verificat pe
 ##      fiecare masina a jucatorului x 300 de extrageri, iar garda e armata:
 ##      lineup-ul vechi (doua autobuze) si unul cu masina jucatorului pica;
 ##   3. barem 6-5-4-3-2-1, cumulat pe toate cursele cupei;
-##   4. Race.tscn real, in cupa: grila foloseste masinile trase (6 masini
-##      diferite), titlul rezultatelor numeste cupa, clasamentul final
-##      departajeaza egalitatile dupa ultima cursa.
+##   4. Race.tscn real, in cupa a PATRA (cea noua): grila foloseste masinile
+##      trase (6 masini diferite), titlul rezultatelor numeste cupa,
+##      clasamentul final departajeaza egalitatile dupa ultima cursa.
 ##
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeWorldCup.tscn
 ##   ... -- --no-race   # fara pasul 4 (doar date si aritmetica)
 
-const EXCLUDED: Array[String] = ["Track01", "Track08", "Track22", "Track23", "Track24", "Track25"]
+const EXCLUDED: Array[String] = ["Track01", "Track08"]
+const CUP_COUNT := 4
+## A patra cupa, cum a dictat-o dezvoltatorul (19 nov 2026): pistele SI ordinea.
+const FOURTH_CUP: Array[StringName] = [&"halong", &"carrara", &"san_francisco", &"angkor"]
 ## Pista pe care ruleaza pasul 4: cea mai usoara de incarcat. Nu e in nicio
 ## cupa, dar cursa nu citeste pista din cupa — `track_scene_override` bate.
 const RACE_BENCH := "res://scenes/tracks/Track01.tscn"
@@ -52,10 +54,15 @@ func _ready() -> void:
 
 func _check_cups() -> void:
 	print("-- cupele")
-	_check(GameState.WORLD_CUPS.size() == 3, "trei cupe (%d)" % GameState.WORLD_CUPS.size())
+	_check(GameState.WORLD_CUPS.size() == CUP_COUNT,
+		"%d cupe (%d)" % [CUP_COUNT, GameState.WORLD_CUPS.size()])
 	var seen: Dictionary = {}
+	var cup_ids: Dictionary = {}
 	for res in GameState.WORLD_CUPS:
 		var cup := res as WorldCup
+		_check(cup.id != &"" and not cup_ids.has(cup.id), "id de cupa unic: '%s'" % cup.id)
+		cup_ids[cup.id] = true
+		_check(cup.display_name != "", "%s are nume afisat" % cup.id)
 		var names: Array[String] = []
 		for i in cup.tracks.size():
 			var index := cup.track_index(i)
@@ -74,6 +81,15 @@ func _check_cups() -> void:
 		var key := TrackInfo.scene_key(i)
 		if not EXCLUDED.has(key):
 			_check(seen.has(key), "%s (%s) e intr-o cupa" % [key, GameState.TRACK_NAMES[i]])
+	_check(seen.size() == CUP_COUNT * 4, "%d piste in cupe (%d)" % [CUP_COUNT * 4, seen.size()])
+	# `.back()`, nu `[CUP_COUNT - 1]`: indexul constant intr-o constanta se
+	# evalueaza la PARSARE, deci cu o cupa lipsa sonda nu s-ar mai incarca
+	# deloc si ar atarna pana la timeout in loc sa pice cu un mesaj.
+	if GameState.WORLD_CUPS.size() == CUP_COUNT:
+		var fourth := GameState.WORLD_CUPS.back() as WorldCup
+		_check(fourth.tracks == FOURTH_CUP,
+			"cupa a patra (%s) = %s, in ordinea asta (%s)"
+				% [fourth.display_name, FOURTH_CUP, fourth.tracks])
 
 
 # --------------------------------------------------------------- 2. masini
@@ -167,7 +183,8 @@ func _check_points() -> void:
 
 func _check_race() -> void:
 	print("-- cursa in cupa")
-	var cup := GameState.WORLD_CUPS[1] as WorldCup
+	# Ultima cupa = cea noua: titlurile si tragerea trec prin .tres-ul ei.
+	var cup := GameState.WORLD_CUPS.back() as WorldCup
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
 	GameState.total_laps = 1

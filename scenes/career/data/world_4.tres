@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="CareerWorld" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/career/career_world.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"world_4"
+display_name = "LUMEA 4"
+tracks = Array[StringName]([&"halong", &"carrara", &"san_francisco", &"angkor"])
+free = false
+points_to_unlock = 28

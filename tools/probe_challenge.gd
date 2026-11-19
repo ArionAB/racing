@@ -149,6 +149,11 @@ func _check_data() -> void:
 		var want_rule: int = RULES.get(track_id, CareerChallenge.Rule.ZERO_EVENTS)
 		_expect(c.rule == want_rule, "%s: regula %d, nu %d" % [track_id, want_rule, c.rule])
 	_expect(Career.challenge_for(NO_CHALLENGE_TRACK) == null, "halong n-are provocare")
+	# Maximul pistei e al EI: 4 cu provocare, 3 fara (lumea 4, 19 nov 2026).
+	_expect(Career.max_track_points(&"kyoto") == Career.MAX_TRACK_POINTS
+		and Career.max_track_points(NO_CHALLENGE_TRACK) == Career.MEDAL_GOLD,
+		"maxim pe pista: kyoto %d, %s %d" % [Career.max_track_points(&"kyoto"),
+			NO_CHALLENGE_TRACK, Career.max_track_points(NO_CHALLENGE_TRACK)])
 	# 4b: contractele noi, cu cifra (DE CE: o schimbare tacuta a lor schimba proba).
 	var rr := Career.challenge_for(&"transfagarasan")
 	_expect(rr.count == 3 and rr.fail_event == &"bus_hit",
@@ -688,6 +693,22 @@ func _check_sheet() -> void:
 	_expect(not _sheet_labels(panel2).has("BonusLabel") and not buttons2.has("ChallengeButton")
 		and buttons2.size() == 3,
 		"fara provocare: fara BONUS, fara CHALLENGE, 3 butoane (%d)" % buttons2.size())
+	# ... si RACE arata punctele din 3, nu din 4: bonusul nu exista pe pista asta.
+	# Kyoto are din pasul de sus locul 3 SI bifa: fara provocare in config bifa
+	# nu mai aduce nimic (1 / 3, nu 2 / 3 — punctele nu trec de maximul pistei).
+	var race2: Button = buttons2.get("RaceButton")
+	var bronze_pts := "%d / %d PTS" % [Career.MEDAL_BRONZE, Career.MEDAL_GOLD]
+	_expect(bool(Career.track_state(&"kyoto").challenge) and race2 != null
+		and bronze_pts in race2.text,
+		"fara provocare: RACE arata '%s' ('%s')" % [bronze_pts, race2.text if race2 != null else ""])
+	var three_pts := "%d / %d PTS" % [0, Career.MEDAL_GOLD]
+	# Aceeasi foaie pe o pista REALA fara provocare (lumea 4).
+	panel2._open_sheet(NO_CHALLENGE_TRACK)
+	await get_tree().process_frame
+	var race3: Button = _sheet_buttons(panel2).get("RaceButton")
+	_expect(not _sheet_labels(panel2).has("BonusLabel") and race3 != null and three_pts in race3.text,
+		"%s: fara BONUS, RACE arata '%s' ('%s')" % [NO_CHALLENGE_TRACK, three_pts,
+			race3.text if race3 != null else ""])
 	panel2.queue_free()
 	Career.config = _real_config
 	Career.race_starter = Callable()

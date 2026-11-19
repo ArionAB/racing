@@ -4241,7 +4241,13 @@ const BUMP_OPTS := {
 		"box": AABB(Vector3(-0.08, 0.0, -0.08), Vector3(0.16, 2.0, 0.16))},
 	"ice_road_sign": {"max_height": 2.4, "mass": 2.0},
 	"ice_road_marker": {"mass": 0.6},
+	# Valul 2: tufa uscata e o sfera (era o cutie de 0,8 m care aluneca pe o fata).
+	"tumbleweed": {"shape": "sphere"},
 }
+
+## Optiuni `BumpProp.wrap` pentru partile din BUMP_PARTS, per stem, apoi per prefix de nod.
+## Conul de trafic e o infasuratoare convexa: lovit, se rastoarna si se rostogoleste in arc.
+const BUMP_PARTS_OPTS := {"road_works": {"Works_Cone_": {"shape": "hull"}}}
 
 ## Modul "bump_parts": ca BUMP_PARTS, dar cerut de piesa (metadata `coliziune`), nu de modelul
 ## in sine, si cu optiuni per parte (`BumpProp.wrap(part, opts)`): masa si `home`. Cheia e stem-ul
@@ -4302,7 +4308,8 @@ func _build_collision() -> void:
 		var bumped_meshes: Array = []
 		var stem_bp := model.scene_file_path.get_file().get_basename()
 		if mode == "hull" and BUMP_PARTS.has(stem_bp):
-			bumped_meshes = _wrap_bump_parts(model, BUMP_PARTS[stem_bp])
+			bumped_meshes = _wrap_bump_parts(model, BUMP_PARTS[stem_bp],
+				BUMP_PARTS_OPTS.get(stem_bp, {}))
 		elif mode == "bump_parts" and BUMP_PART_OPTS.has(stem_bp):
 			var by_pre: Dictionary = BUMP_PART_OPTS[stem_bp]
 			bumped_meshes = _wrap_bump_parts(model, by_pre.keys(), by_pre)

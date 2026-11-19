@@ -9,38 +9,38 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. Subtitle under the title TOY RACER (which is never translated).
-#: scenes/main_menu/main_menu.gd:26
+#: scenes/main_menu/main_menu.gd:31
 msgid "toy cars, drifting and bumping"
 msgstr "petites voitures, dérapages et bousculades"
 
-#: scenes/main_menu/main_menu.gd:32
+#: scenes/main_menu/main_menu.gd:37
 #: scenes/ui/track_select_panel.gd:122
 msgid "QUICK RACE"
 msgstr "COURSE RAPIDE"
 
-#: scenes/main_menu/main_menu.gd:35
+#: scenes/main_menu/main_menu.gd:40
 #: scenes/ui/world_cup_panel.gd:31
 msgid "WORLD CUP"
 msgstr "COUPE DU MONDE"
 
-#: scenes/main_menu/main_menu.gd:37
-#: scenes/ui/career_panel.gd:41
+#: scenes/main_menu/main_menu.gd:42
+#: scenes/ui/career_panel.gd:47
 msgid "CAREER"
 msgstr "CARRIÈRE"
 
-#: scenes/main_menu/main_menu.gd:39
-#: scenes/ui/garage_panel.gd:142
+#: scenes/main_menu/main_menu.gd:44
+#: scenes/ui/garage_panel.gd:525
 msgid "GARAGE"
 msgstr "GARAGE"
 
-#: scenes/main_menu/main_menu.gd:41
+#: scenes/main_menu/main_menu.gd:46
 #: scenes/ui/hud.gd:464
 #: scenes/ui/settings_panel.gd:40
 msgid "SETTINGS"
 msgstr "OPTIONS"
 
 #. Desktop only.
-#: scenes/main_menu/main_menu.gd:46
+#: scenes/main_menu/main_menu.gd:51
 msgid "QUIT"
 msgstr "QUITTER"
 
@@ -98,17 +98,17 @@ msgid "Graphics"
 msgstr "Graphismes"
 
 #. Graphics quality.
-#: scripts/autoload/game_state.gd:376
+#: scripts/autoload/game_state.gd:384
 msgid "Low"
 msgstr "Basse"
 
 #. Graphics quality.
-#: scripts/autoload/game_state.gd:376
+#: scripts/autoload/game_state.gd:384
 msgid "Normal"
 msgstr "Normale"
 
 #. Graphics quality.
-#: scripts/autoload/game_state.gd:376
+#: scripts/autoload/game_state.gd:384
 msgid "High"
 msgstr "Haute"
 
@@ -136,7 +136,7 @@ msgstr "CRÉDITS ET LICENCES"
 msgid "RESET CAMERA"
 msgstr "RÉINITIALISER LA CAMÉRA"
 
-#: scenes/ui/career_panel.gd:260
+#: scenes/ui/career_panel.gd:291
 #: scenes/ui/settings_panel.gd:173
 msgid "BACK"
 msgstr "RETOUR"
@@ -173,46 +173,46 @@ msgid "RESTART"
 msgstr "RECOMMENCER"
 
 #: scenes/ui/hud.gd:474
-#: scenes/ui/hud.gd:538
+#: scenes/ui/hud.gd:550
 msgid "MENU"
 msgstr "MENU"
 
-#: scenes/ui/hud.gd:738
+#: scenes/ui/hud.gd:761
 msgid "LAP %d/%d"
 msgstr "TOUR %d/%d"
 
 #. Speed. km/h is the SI unit symbol and stays in Latin letters in every language.
-#: scenes/ui/hud.gd:739
+#: scenes/ui/hud.gd:762
 msgid "%.0f km/h"
 msgstr "%.0f km/h"
 
 #. Best lap time.
-#: scenes/ui/hud.gd:741
+#: scenes/ui/hud.gd:764
 msgid "BEST  %s"
 msgstr "RECORD  %s"
 
 #. Big countdown shown while the car is off the road.
-#: scenes/ui/hud.gd:815
+#: scenes/ui/hud.gd:838
 msgid "OFF ROAD"
 msgstr "HORS PISTE"
 
 #. Time of the saved ghost car.
-#: scenes/ui/hud.gd:853
+#: scenes/ui/hud.gd:876
 msgid "GHOST %s"
 msgstr "FANTÔME %s"
 
 #. %d = bonus points, %s = challenge title.
-#: scenes/ui/hud.gd:874
+#: scenes/ui/hud.gd:897
 msgid "CHALLENGE +%d: %s"
 msgstr "DÉFI +%d : %s"
 
 #: scenes/race/race.gd:806
-#: scenes/race/race.gd:957
-#: scenes/ui/hud.gd:879
+#: scenes/race/race.gd:970
+#: scenes/ui/hud.gd:902
 msgid "CHALLENGE FAILED"
 msgstr "DÉFI RATÉ"
 
-#: scenes/race/race.gd:956
+#: scenes/race/race.gd:969
 msgid "CHALLENGE +%d"
 msgstr "DÉFI +%d"
 
@@ -309,92 +309,92 @@ msgstr "RECORD !"
 msgid "RESULTS — %s"
 msgstr "RÉSULTATS — %s"
 
-#: scenes/race/race.gd:901
-#: scenes/race/race.gd:905
+#: scenes/race/race.gd:902
+#: scenes/race/race.gd:906
 msgid "BACK TO CAREER"
 msgstr "RETOUR À LA CARRIÈRE"
 
 #. Cup name — race number / races in the cup — track name.
-#: scenes/race/race.gd:907
+#: scenes/race/race.gd:910
 msgid "%s — RACE %d/%d — %s"
 msgstr "%s — COURSE %d/%d — %s"
 
-#: scenes/race/race.gd:909
+#: scenes/race/race.gd:912
 msgid "FINAL STANDINGS"
 msgstr "CLASSEMENT FINAL"
 
-#: scenes/race/race.gd:910
+#: scenes/race/race.gd:913
 msgid "NEXT RACE"
 msgstr "COURSE SUIVANTE"
 
-#: scenes/race/race.gd:917
+#: scenes/race/race.gd:930
 msgid "NO TARGET YET"
 msgstr "PAS ENCORE D'OBJECTIF"
 
-#: scenes/race/race.gd:920
-#: scenes/race/race.gd:946
+#: scenes/race/race.gd:933
+#: scenes/race/race.gd:959
 msgid "NO MEDAL"
 msgstr "PAS DE MÉDAILLE"
 
 #. Time — medal reached (GOLD/SILVER/BRONZE/NO MEDAL).
-#: scenes/race/race.gd:921
+#: scenes/race/race.gd:934
 msgid "TIME TRIAL — %s — %s"
 msgstr "CONTRE-LA-MONTRE — %s — %s"
 
-#: scenes/race/race.gd:922
+#: scenes/race/race.gd:935
 msgid "NEW GHOST"
 msgstr "NOUVEAU FANTÔME"
 
 #. Both the medal and the hardest rivals level.
 #: scenes/cars/ai_skill/ai_skill.gd:111
-#: scenes/race/race.gd:929
-#: scenes/race/race.gd:943
-#: scenes/ui/career_panel.gd:279
+#: scenes/race/race.gd:942
+#: scenes/race/race.gd:956
+#: scenes/ui/career_panel.gd:310
 msgid "GOLD"
 msgstr "OR"
 
 #. Both the medal and the medium rivals level.
 #: scenes/cars/ai_skill/ai_skill.gd:111
-#: scenes/race/race.gd:930
-#: scenes/race/race.gd:944
-#: scenes/ui/career_panel.gd:280
+#: scenes/race/race.gd:943
+#: scenes/race/race.gd:957
+#: scenes/ui/career_panel.gd:311
 msgid "SILVER"
 msgstr "ARGENT"
 
 #. Both the medal and the easiest rivals level.
 #: scenes/cars/ai_skill/ai_skill.gd:111
-#: scenes/race/race.gd:931
-#: scenes/race/race.gd:945
-#: scenes/ui/career_panel.gd:281
+#: scenes/race/race.gd:944
+#: scenes/race/race.gd:958
+#: scenes/ui/career_panel.gd:312
 msgid "BRONZE"
 msgstr "BRONZE"
 
 #. %s = ordinal (1st..6th) in capitals, %d = points. Japanese: the ordinal 1位 already says "place".
-#: scenes/race/race.gd:953
+#: scenes/race/race.gd:966
 msgid "%s PLACE +%d"
 msgstr "%s PLACE +%d"
 
-#: scenes/race/race.gd:958
+#: scenes/race/race.gd:971
 msgid "%s  =  %d PTS"
 msgstr "%s  =  %d PTS"
 
-#: scenes/race/race.gd:996
+#: scenes/race/race.gd:1009
 msgid "%d point"
 msgid_plural "%d points"
 msgstr[0] "%d point"
 msgstr[1] "%d points"
 
 #. Cup name, then the pilot who won it.
-#: scenes/race/race.gd:1001
+#: scenes/race/race.gd:1014
 msgid "%s WINNER: %s!"
 msgstr "%s — VAINQUEUR : %s !"
 
-#: scenes/race/race.gd:1005
+#: scenes/race/race.gd:1018
 msgid "PLAY AGAIN"
 msgstr "REJOUER"
 
 #. The player's name in the results table.
-#: scenes/race/race.gd:1166
+#: scenes/race/race.gd:1179
 msgid "You"
 msgstr "Toi"
 
@@ -423,81 +423,114 @@ msgstr "Kai"
 msgid "Nyx"
 msgstr "Nyx"
 
-#: scenes/ui/career_panel.gd:41
+#: scenes/ui/career_panel.gd:47
 msgid "CHOOSE A WORLD"
 msgstr "CHOISIS UN MONDE"
 
-#: scenes/ui/career_panel.gd:83
+#: scenes/ui/career_panel.gd:99
 msgid "POINTS  %d / %d"
 msgstr "POINTS  %d / %d"
 
-#: scenes/ui/career_panel.gd:117
+#: scenes/ui/career_panel.gd:148
 msgid "FREE"
 msgstr "GRATUIT"
 
 #. A locked career world and the points still needed to open it.
-#: scenes/ui/career_panel.gd:157
+#: scenes/ui/career_panel.gd:188
 msgid "SEALED — %d MORE POINT"
 msgid_plural "SEALED — %d MORE POINTS"
 msgstr[0] "SCELLÉ — ENCORE %d POINT"
 msgstr[1] "SCELLÉ — ENCORE %d POINTS"
 
 #. Both the career race button and the small caption above a track's best race time.
-#: scenes/ui/career_panel.gd:221
+#: scenes/ui/career_panel.gd:252
 #: scenes/ui/track_card.gd:183
 msgid "RACE"
 msgstr "COURSE"
 
 #. %s = best place (1ST PLACE / NO PODIUM YET), then points earned / points possible.
-#: scenes/ui/career_panel.gd:221
+#: scenes/ui/career_panel.gd:252
 msgid "%s  ·  %d / %d PTS"
 msgstr "%s  ·  %d / %d PTS"
 
 #. %s = challenge title.
-#: scenes/ui/career_panel.gd:235
+#: scenes/ui/career_panel.gd:266
 msgid "BONUS +%d  ·  %s"
 msgstr "BONUS +%d  ·  %s"
 
-#: scenes/ui/career_panel.gd:237
+#: scenes/ui/career_panel.gd:268
 msgid "DONE"
 msgstr "RÉUSSI"
 
-#: scenes/ui/career_panel.gd:244
+#: scenes/ui/career_panel.gd:275
 msgid "NO TIME YET"
 msgstr "PAS ENCORE DE TEMPS"
 
 #. Best time · medal.
-#: scenes/ui/career_panel.gd:246
+#: scenes/ui/career_panel.gd:277
 msgid "BEST %s · %s"
 msgstr "RECORD %s · %s"
 
-#: scenes/ui/career_panel.gd:251
+#: scenes/ui/career_panel.gd:282
 msgid "GHOST"
 msgstr "FANTÔME"
 
-#: scenes/ui/career_panel.gd:253
+#: scenes/ui/career_panel.gd:284
 msgid "(no targets yet)"
 msgstr "(pas encore d'objectifs)"
 
-#: scenes/ui/career_panel.gd:254
+#: scenes/ui/career_panel.gd:285
 msgid "TIME TRIAL"
 msgstr "CONTRE-LA-MONTRE"
 
-#: scenes/ui/career_panel.gd:289
+#: scenes/ui/career_panel.gd:320
 msgid "1ST PLACE"
 msgstr "1RE PLACE"
 
-#: scenes/ui/career_panel.gd:290
+#: scenes/ui/career_panel.gd:321
 msgid "2ND PLACE"
 msgstr "2E PLACE"
 
-#: scenes/ui/career_panel.gd:291
+#: scenes/ui/career_panel.gd:322
 msgid "3RD PLACE"
 msgstr "3E PLACE"
 
-#: scenes/ui/career_panel.gd:292
+#: scenes/ui/career_panel.gd:323
 msgid "NO PODIUM YET"
 msgstr "PAS ENCORE DE PODIUM"
+
+#. Career: cars earned / cars in the garage.
+#: scenes/ui/career_panel.gd:101
+msgid "CARS  %d / %d"
+msgstr "VOITURES  %d / %d"
+
+#: scenes/ui/career_panel.gd:128
+msgid "ALL CARS EARNED"
+msgstr "TOUTES LES VOITURES GAGNÉES"
+
+#. %s = car name in capitals, %d = career points still missing.
+#: scenes/ui/career_panel.gd:131
+msgid "NEXT CAR  %s  ·  %d MORE POINT"
+msgid_plural "NEXT CAR  %s  ·  %d MORE POINTS"
+msgstr[0] "PROCHAINE VOITURE  %s  ·  ENCORE %d POINT"
+msgstr[1] "PROCHAINE VOITURE  %s  ·  ENCORE %d POINTS"
+
+#. Results screen, one line per car just earned in the career.
+#: scenes/race/race.gd:922
+msgid "NEW CAR: %s"
+msgstr "NOUVELLE VOITURE : %s"
+
+#. Garage SELECT button on a car not earned yet. One line, it must not widen the button.
+#: scenes/ui/garage_panel.gd:487
+msgid "CAREER: LOCKED"
+msgstr "CARRIÈRE : VERROUILLÉ"
+
+#. Garage SELECT button on a locked car: career points still missing. One line.
+#: scenes/ui/garage_panel.gd:488
+msgid "CAREER: %d MORE PT"
+msgid_plural "CAREER: %d MORE PTS"
+msgstr[0] "CARRIÈRE : ENCORE %d PT"
+msgstr[1] "CARRIÈRE : ENCORE %d PTS"
 
 #: scenes/ui/world_cup_panel.gd:31
 msgid "CHOOSE A CUP"
@@ -548,45 +581,46 @@ msgstr "Rivaux solides : trajectoires propres, une erreur de temps en temps."
 msgid "Flat out: they use every bit of their car."
 msgstr "À fond : ils tirent le maximum de leur voiture."
 
-#: scenes/ui/garage_panel.gd:209
+#: scenes/ui/garage_panel.gd:234
+#: scenes/ui/garage_panel.gd:481
 msgid "SELECT"
 msgstr "CHOISIR"
 
 #. The toy figure sitting in the car (a skin).
-#: scenes/ui/garage_panel.gd:257
+#: scenes/ui/garage_panel.gd:290
 msgid "DRIVER"
 msgstr "PILOTE"
 
-#: scenes/ui/garage_panel.gd:198
+#: scenes/ui/garage_panel.gd:223
 msgid "SPEED"
 msgstr "VITESSE"
 
 #. Acceleration, abbreviated.
-#: scenes/ui/garage_panel.gd:198
+#: scenes/ui/garage_panel.gd:223
 msgid "ACCEL"
 msgstr "ACCÉL."
 
-#: scenes/ui/garage_panel.gd:198
+#: scenes/ui/garage_panel.gd:223
 msgid "GRIP"
 msgstr "ADHÉRENCE"
 
 #. Car weight: decides who pushes whom.
-#: scenes/ui/garage_panel.gd:570
+#: scenes/ui/garage_panel.gd:709
 msgid "MASS"
 msgstr "POIDS"
 
 #. Weight value; agree with the word for MASS.
-#: scenes/ui/garage_panel.gd:470
+#: scenes/ui/garage_panel.gd:588
 msgid "LIGHT"
 msgstr "LÉGER"
 
 #. Weight value; agree with the word for MASS.
-#: scenes/ui/garage_panel.gd:473
+#: scenes/ui/garage_panel.gd:591
 msgid "MEDIUM"
 msgstr "MOYEN"
 
 #. Weight value; agree with the word for MASS.
-#: scenes/ui/garage_panel.gd:472
+#: scenes/ui/garage_panel.gd:590
 msgid "HEAVY"
 msgstr "LOURD"
 

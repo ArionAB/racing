@@ -896,6 +896,7 @@ func _show_results() -> void:
 		})
 	var title := tr("RESULTS — %s") % _track_title()
 	var primary := "RESTART"
+	var banner := ""
 	if Career.is_time_trial():
 		title = _time_trial_title()
 		primary = "BACK TO CAREER"
@@ -903,12 +904,24 @@ func _show_results() -> void:
 	elif Career.active:
 		title += "\n" + _career_points_text()
 		primary = "BACK TO CAREER"
+		# Masinile castigate de cursa asta (zavorate de finish_active).
+		banner = new_cars_text(Career.last_unlocked_cars)
 	if GameState.champ_active:
 		title = tr("%s — RACE %d/%d — %s") % [tr(GameState.champ_cup.display_name),
 			GameState.champ_round + 1, GameState.champ_rounds(), _track_title()]
 		primary = "FINAL STANDINGS" if GameState.champ_is_last_round() \
 			else "NEXT RACE"
-	hud.show_results(title, rows, primary)
+	hud.show_results(title, rows, primary, banner)
+
+
+## „NEW CAR: POLICE", cate un rand per masina castigata (o cursa poate trece
+## doua praguri odata). Gol cand n-a castigat nimic. Tradus (sablon + nume).
+static func new_cars_text(car_ids: Array[StringName]) -> String:
+	var lines := PackedStringArray()
+	for car_id in car_ids:
+		lines.append(String(TranslationServer.translate("NEW CAR: %s")) % String(
+			TranslationServer.translate(Career.car_display_name(car_id))).to_upper())
+	return "\n".join(lines)
 
 ## Titlul: TIME TRIAL - 3:12.4 - SILVER, sau NO TARGET YET (pista n-are
 ## tinte) / NO MEDAL (peste bronz).

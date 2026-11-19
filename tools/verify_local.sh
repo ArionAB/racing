@@ -296,6 +296,13 @@ run_step "Serengeti: animalele nu stau in copaci si stanci" animal_overlap.log '
 # regruparea fara pierderi, raftul numarat in scena si lacatul cursei.
 run_step "Cariera: config, persistenta, gating, raft" career.log 'VERDICT:' -- \
 	--headless --path . res://tools/ProbeCareer.tscn -- --check
+# Masinile se castiga in cariera (19 nov 2026): garajul de start Taxi + Buggy,
+# restul la praguri de puncte si zavorate (nu se mai pierd), comutatorul de
+# dezvoltator fara scrieri, SELECT refuza o masina incuiata, selectia cade pe
+# garajul de start, regulile noi din validate() si textele (rezultate,
+# pasaport). Fiecare contract are un --sabotaj=... care il pica.
+run_step "Cariera: masini castigate, zavor, garaj, texte" car_unlock.log 'VERDICT:' -- \
+	--headless --path . res://tools/ProbeCarUnlock.tscn
 # Save-ul (#690): id-uri stabile, migrarea v0 -> v1 cu copie .bak-v0,
 # idempotenta, id-uri dormante, fisiere stricate / mai noi, garaj reordonat si
 # pista redenumita fara pierderi.
@@ -363,6 +370,13 @@ run_step "Transfagarasan: conurile din tunel se imprastie" tf_cones.log 'VERDICT
 # `--min` e numarul de piese asezate: una cazuta tacut pe "hull" pica pasul.
 run_step "Fiordland: jaloanele se imprastie" bump_fiord.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeBumpProps.tscn -- --track=Track16 --min=47
 run_step "Serengeti: chevroanele se imprastie" bump_ser.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeBumpProps.tscn -- --track=Track14 --min=28
+# Decor lovibil, valul 2: formele care se rostogolesc (`BumpProp` cu `shape`): butoiul si sfera
+# ruleaza, se opresc pe panta lina, se duc la vale pe cea abrupta; conul e infasuratoare convexa.
+run_step "Decor lovibil: piesele rotunde se rostogolesc" bump_roll.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeBumpRoll.tscn
+# Decor lovibil, valul 3: grupurile asezate pe marginea drumului din scenes/tracks/roadside/*.tres.
+# Pe fiecare pista cu fisier: toate piesele au loc bun, dorm si nu se misca neatinse, niciuna pe
+# carosabil, pista sub plafonul de corpuri.
+run_step "Decor lovibil: grupurile de pe marginea drumului (toate pistele)" roadside.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeRoadside.tscn -- --all
 
 # Uneltele nu-si numesc pista cu un numar scris in cod (#718). Cu 18 piste, 12
 # e indexul Monument Valley, dar scena Track12 e Chongqing; resolve_track_index

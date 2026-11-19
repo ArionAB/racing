@@ -1,0 +1,149 @@
+[gd_resource type="Resource" script_class="RoadsideSet" format=3]
+
+[ext_resource type="Script" path="res://scenes/props/roadside_set.gd" id="1_w7qxc"]
+
+[resource]
+script = ExtResource("1_w7qxc")
+pieces = {
+"basket": {
+"glb": "res://assets/models/machupicchu/props/knock_machupicchu.glb",
+"mass": 1.0,
+"node": "WovenBasket",
+"scale": 1.4,
+"shape": "cylinder"
+},
+"jar": {
+"glb": "res://assets/models/machupicchu/props/knock_machupicchu.glb",
+"mass": 2.5,
+"node": "ClayJar",
+"scale": 1.4,
+"shape": "cylinder"
+},
+"pack": {
+"glb": "res://assets/models/machupicchu/props/knock_machupicchu.glb",
+"mass": 1.5,
+"node": "Backpack",
+"scale": 1.4,
+"shape": "box"
+}
+}
+groups = Array[Dictionary]([{
+"count": 4,
+"frac": 0.036000000000000004,
+"gap": 1.2,
+"note": "open, viraj 6 grade",
+"pattern": "cluster",
+"piece": ["jar", "basket", "pack"],
+"side": 1
+}, {
+"count": 4,
+"frac": 0.0711,
+"gap": 1.2,
+"note": "straight, viraj 0 grade",
+"pattern": "cluster",
+"piece": ["jar", "basket", "pack"],
+"side": 1
+}, {
+"count": 2,
+"frac": 0.22410000000000002,
+"gap": 1.2,
+"lying": true,
+"note": "open, viraj -11 grade",
+"pattern": "row",
+"piece": "jar",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.36810000000000004,
+"gap": 1.2,
+"lying": true,
+"note": "outside, viraj 104 grade",
+"pattern": "row",
+"piece": "jar",
+"side": 1
+}, {
+"count": 4,
+"frac": 0.43560000000000004,
+"gap": 1.2,
+"note": "outside, viraj 170 grade",
+"pattern": "taper",
+"piece": "basket",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.49500000000000005,
+"gap": 1.2,
+"lying": true,
+"note": "outside, viraj 159 grade",
+"pattern": "row",
+"piece": "jar",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.5329,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -96 grade",
+"pattern": "pyramid",
+"piece": "basket",
+"side": -1
+}, {
+"count": 2,
+"frac": 0.5959,
+"gap": 1.2,
+"lying": true,
+"note": "straight, viraj 0 grade",
+"pattern": "row",
+"piece": "jar",
+"side": -1
+}, {
+"count": 2,
+"frac": 0.6715,
+"gap": 1.2,
+"note": "inside, viraj 49 grade",
+"pattern": "row",
+"piece": "basket",
+"side": -1
+}, {
+"count": 4,
+"frac": 0.7399,
+"gap": 1.2,
+"note": "outside, viraj -170 grade",
+"pattern": "taper",
+"piece": "basket",
+"side": -1
+}, {
+"count": 5,
+"frac": 0.8011,
+"gap": 1.2,
+"note": "exit, viraj 170 grade",
+"pattern": "row",
+"piece": ["jar", "basket", "pack"],
+"side": 1
+}, {
+"count": 3,
+"frac": 0.8317,
+"gap": 1.2,
+"note": "exit, viraj -170 grade",
+"pattern": "wall",
+"piece": "pack",
+"rows": 1,
+"side": -1
+}, {
+"count": 3,
+"frac": 0.9109,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -93 grade",
+"pattern": "pyramid",
+"piece": "basket",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.9667,
+"gap": 1.2,
+"note": "open, viraj 15 grade",
+"pattern": "row",
+"piece": "basket",
+"side": 1
+}])

@@ -678,6 +678,10 @@ func _check_hud() -> void:
 	hud.show_results(tr("RESULTS — %s") % String(_race.call("_track_title")) + "\n"
 		+ String(_race.call("_career_points_text")), no_rows, "BACK TO CAREER")
 	await _inspect("hud/cariera", hud, [], dev)
+	# Cu masini castigate in cursa (randul NEW CAR, cele mai lungi nume).
+	hud.show_results(String(_race.call("_career_points_text")), no_rows, "BACK TO CAREER",
+		Race.new_cars_text([&"tow_truck", &"ambulance"]))
+	await _inspect("hud/cariera_masina_noua", hud, [], dev)
 	(hud.get("_results_panel") as Control).visible = false
 
 	# Cartonasele turului, peste acelasi HUD, pe touch si pe tastatura.

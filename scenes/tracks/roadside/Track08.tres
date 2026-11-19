@@ -1,0 +1,149 @@
+[gd_resource type="Resource" script_class="RoadsideSet" format=3]
+
+[ext_resource type="Script" path="res://scenes/props/roadside_set.gd" id="1_35iyj"]
+
+[resource]
+script = ExtResource("1_35iyj")
+pieces = {
+"ball": {
+"bounce": 0.6,
+"glb": "res://assets/models/props/knock_beach.glb",
+"mass": 0.6,
+"node": "BeachBall",
+"scale": 1.4,
+"shape": "sphere"
+},
+"bucket": {
+"glb": "res://assets/models/props/knock_beach.glb",
+"mass": 0.8,
+"node": "SandBucket",
+"scale": 1.4,
+"shape": "cylinder"
+},
+"ring": {
+"bounce": 0.4,
+"glb": "res://assets/models/props/knock_beach.glb",
+"mass": 0.5,
+"node": "SwimRing",
+"scale": 1.4,
+"shape": "cylinder"
+}
+}
+groups = Array[Dictionary]([{
+"count": 3,
+"frac": 0.0436,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj 47 grade",
+"pattern": "pyramid",
+"piece": "bucket",
+"side": 1
+}, {
+"count": 4,
+"frac": 0.101,
+"gap": 1.2,
+"note": "open, viraj 12 grade",
+"pattern": "cluster",
+"piece": ["ball", "ring", "bucket"],
+"side": -1
+}, {
+"count": 2,
+"frac": 0.1447,
+"gap": 1.2,
+"lying": true,
+"note": "open, viraj 3 grade",
+"pattern": "row",
+"piece": "ring",
+"side": -1
+}, {
+"count": 5,
+"frac": 0.2262,
+"gap": 1.2,
+"note": "exit, viraj -85 grade",
+"pattern": "cluster",
+"piece": ["ball", "ring", "bucket"],
+"side": -1
+}, {
+"count": 3,
+"frac": 0.2732,
+"gap": 1.2,
+"note": "open, viraj 12 grade",
+"pattern": "row",
+"piece": "bucket",
+"side": -1
+}, {
+"count": 4,
+"frac": 0.3387,
+"gap": 1.2,
+"note": "exit, viraj -50 grade",
+"pattern": "row",
+"piece": "bucket",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.434,
+"gap": 1.2,
+"lying": true,
+"note": "outside, viraj -65 grade",
+"pattern": "row",
+"piece": "ring",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.48560000000000003,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj 66 grade",
+"pattern": "pyramid",
+"piece": "bucket",
+"side": 1
+}, {
+"count": 4,
+"frac": 0.5763,
+"gap": 1.2,
+"note": "open, viraj -25 grade",
+"pattern": "cluster",
+"piece": ["ball", "ring", "bucket"],
+"side": 1
+}, {
+"count": 5,
+"frac": 0.6544,
+"gap": 1.2,
+"note": "exit, viraj -64 grade",
+"pattern": "cluster",
+"piece": ["ball", "ring", "bucket"],
+"side": -1
+}, {
+"count": 2,
+"frac": 0.6912,
+"gap": 1.2,
+"lying": true,
+"note": "open, viraj 0 grade",
+"pattern": "row",
+"piece": "ring",
+"side": 1
+}, {
+"count": 4,
+"frac": 0.7887000000000001,
+"gap": 1.2,
+"note": "straight, viraj 0 grade",
+"pattern": "cluster",
+"piece": ["ball", "ring", "bucket"],
+"side": -1
+}, {
+"count": 4,
+"frac": 0.8519,
+"gap": 1.2,
+"note": "exit, viraj -61 grade",
+"pattern": "row",
+"piece": "bucket",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.9162,
+"gap": 1.2,
+"note": "outside, viraj -28 grade",
+"pattern": "row",
+"piece": "ball",
+"side": -1
+}])

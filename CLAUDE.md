@@ -140,6 +140,11 @@ pur plus haosul fizic, nu proiectilele.
   Singurul lacăt: `Career.is_car_unlocked`; datele în `career_config.tres`
   (`starting_cars`, `car_rewards`). Comutator ascuns: 7 atingeri pe titlul
   GARAGE. Garda: `ProbeCarUnlock` (cu sabotaj pe fiecare contract).
+- **Bonusul carierei „NO RETRY”** ✔ (19 nov 2026, în locul provocărilor per
+  pistă, scoase): +1 pe orice pistă dacă termini cursa fără să fii aruncat
+  (`Car.ejected`) și fără un RESET cerut care a pornit o repunere. Izbiturile,
+  hazardele și repunerile automate nu costă nimic. Maximul carierei: 64. Doar
+  în cursa RACE de carieră (`BonusTracker`). Garda: `ProbeCareerBonus`.
 
 ## Post-MVP (nu implementa fără să fie cerut)
 

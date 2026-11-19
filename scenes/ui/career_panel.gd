@@ -166,7 +166,7 @@ func _build_grid(world: CareerWorld) -> Control:
 		var card := TrackCard.new().setup(index)
 		var state := Career.track_state(track_id)
 		card.set_medals(int(state.race_medal), int(state.tt_medal),
-			bool(state.challenge))
+			Career.has_bonus(track_id))
 		var id := track_id
 		card.pressed.connect(func() -> void: _open_sheet(id))
 		grid.add_child(card)
@@ -245,29 +245,19 @@ func _open_sheet(track_id: StringName) -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(title)
 
-	# RACE: locul cel mai bun si punctele stranse pe pista (loc + bonus) din
-	# maximul EI: 4 cu provocare, 3 fara (bonusul nu exista pe pista aia).
+	# RACE: locul cel mai bun si punctele stranse pe pista (loc + bonus) din 4
+	# (bonusul NO RETRY exista pe fiecare pista).
 	var race_btn := _sheet_button("RACE", "%s  ·  %d / %d PTS" % [
 		_place_name(int(state.race_medal)), Career.track_points(track_id),
-		Career.max_track_points(track_id)])
+		Career.MAX_TRACK_POINTS])
 	race_btn.name = "RaceButton"
 	race_btn.pressed.connect(func() -> void:
 		Career.start_track(track_id, Career.Mode.RACE))
 	column.add_child(race_btn)
 
-	# Provocarea gimmick-ului e BONUS (+1) in cursa normala, nu proba separata
-	# (decizia dezvoltatorului, 25 oct 2026): o eticheta sub RACE, nu un buton.
-	# Pista fara provocare nu arata nimic (nici „SOON").
-	var challenge := Career.challenge_for(track_id)
-	if challenge != null:
-		var done := bool(state.challenge)
-		var bonus := _label("BONUS +%d  ·  %s%s" % [Career.CHALLENGE_POINTS,
-			challenge.title, "  ·  DONE" if done else "\n" + challenge.hint], 18,
-			Color(0.55, 0.9, 0.5) if done else TrackCard.TEXT_DIM)
-		bonus.name = "BonusLabel"
-		bonus.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		bonus.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		column.add_child(bonus)
+	# Bonusul (+1) e in cursa normala, nu proba separata: o eticheta sub RACE,
+	# nu un buton. Acelasi pe fiecare pista (NO RETRY, 19 nov 2026).
+	column.add_child(bonus_label(Career.has_bonus(track_id)))
 
 	var tt_sub := "NO TIME YET"
 	if int(state.tt_best_ms) > 0:
@@ -290,6 +280,24 @@ func _open_sheet(track_id: StringName) -> void:
 	back_btn.pressed.connect(_close_sheet)
 	column.add_child(back_btn)
 	race_btn.grab_focus.call_deferred()
+
+
+const BONUS_DONE_COLOR := Color(0.55, 0.9, 0.5)
+
+## Eticheta BONUS de pe foaia pistei: „BONUS +1  ·  NO RETRY  ·  DONE" cand
+## bifa e pusa, altfel titlul + hint-ul pe randul de dedesubt.
+func bonus_label(done: bool) -> Label:
+	var label := _label(bonus_sheet_text(done), 18,
+		BONUS_DONE_COLOR if done else TrackCard.TEXT_DIM)
+	label.name = "BonusLabel"
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	return label
+
+
+static func bonus_sheet_text(done: bool) -> String:
+	var head := "BONUS +%d  ·  %s" % [Career.BONUS_POINTS, Career.config.bonus_title]
+	return head + ("  ·  DONE" if done else "\n" + Career.config.bonus_hint)
 
 
 func _close_sheet() -> void:

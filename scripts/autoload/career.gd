@@ -17,16 +17,19 @@ extends Node
 ##     acolo nu mai iese. Vezi `_latch_cars`.
 ##
 ## Punctajul (decizia dezvoltatorului, 25 oct 2026, dupa sesiunea la volan):
-## locul 1/2/3 = 3/2/1 puncte (= valoarea medaliei), provocarea gimmick-ului
-## reusita in ACEEASI cursa = +1 bonus. Nu exista proba separata de provocare
-## si nicio „stampila" plata: locul mai bun plateste mai mult. Contratimpul nu
-## da puncte pana nu are tinte (brief §4.2).
+## locul 1/2/3 = 3/2/1 puncte (= valoarea medaliei), plus +1 bonus castigat in
+## ACEEASI cursa. Nicio „stampila" plata: locul mai bun plateste mai mult.
+## Contratimpul nu da puncte pana nu are tinte (brief §4.2).
+##
+## Bonusul (19 nov 2026, inlocuieste provocarile per pista): acelasi pe FIECARE
+## pista, „NO RETRY" — termini cursa fara sa fii aruncat din masina si fara sa
+## apesi RESET. Regula o tine `BonusTracker`; aici stau doar bifa si punctul.
 
 signal progress_changed
 ## O masina tocmai castigata (zavorata de `_changed`, nu de incarcarea unui save).
 signal car_unlocked(car_id: StringName)
 
-## RACE poarta si provocarea pistei (bonus +1, vezi `challenge_to_track`).
+## RACE poarta bonusul NO RETRY (+1, vezi `bonus_active`); contratimpul nu.
 enum Mode { RACE, TIME_TRIAL }
 
 const CONFIG_PATH := "res://scenes/career/data/career_config.tres"
@@ -37,13 +40,12 @@ const MEDAL_NONE := 0
 const MEDAL_BRONZE := 1
 const MEDAL_SILVER := 2
 const MEDAL_GOLD := 3
-## Bonusul provocarii reusite in cursa; un rival batut = cat o victorie
+## Bonusul NO RETRY pastrat in cursa; un rival batut = cat o victorie
 ## (implicit, rivalii nu sunt construiti — brief §12).
-const CHALLENGE_POINTS := 1
+const BONUS_POINTS := 1
 const RIVAL_POINTS := 3
-## Maximul pe o pista CU provocare: locul 1 + bonusul. Pentru o pista anume
-## se intreaba `max_track_points(id)`: fara provocare, maximul e doar locul 1.
-const MAX_TRACK_POINTS := MEDAL_GOLD + CHALLENGE_POINTS
+## Maximul pe ORICE pista: locul 1 + bonusul (bonusul exista pe toate).
+const MAX_TRACK_POINTS := MEDAL_GOLD + BONUS_POINTS
 
 var config: CareerConfig
 ## Suprascris de sonda cu o cale temporara, ca sa nu atinga salvarea reala.
@@ -64,7 +66,11 @@ var active_mode: Mode = Mode.RACE
 ## `GameState.ai_count` dinaintea contratimpului; -1 = nu l-am schimbat.
 var _saved_ai_count: int = -1
 
-var _tracks: Dictionary = {} # id -> {race_medal, tt_medal, tt_best_ms, challenge}
+## id -> {race_medal, tt_medal, tt_best_ms, challenge}. `challenge` e bifa
+## BONUSULUI: cheia si-a pastrat numele de pe vremea provocarilor per pista,
+## si in memorie si pe disc (`career.cfg`, schema 1), ca o bifa veche sa ramana
+## bonusul pistei fara migrare.
+var _tracks: Dictionary = {}
 var _rivals: Dictionary = {} # id -> true cand e batut
 var _cups: Dictionary = {} # id lume -> true cand e castigata
 ## Masinile castigate, pe `CarData.id` (niciodata pe index in CAR_DATA). Doar
@@ -123,25 +129,6 @@ func validate(cfg: CareerConfig = null) -> PackedStringArray:
 				world.rival_track, world.id])
 	if free_count != 1:
 		problems.append("trebuie exact o lume free, sunt %d" % free_count)
-	var challenged: Dictionary = {}
-	for challenge in target.challenges:
-		if TrackInfo.index_of_id(challenge.track) < 0:
-			problems.append("provocarea %s: pista nu exista in TRACK_SCENES" % challenge.track)
-		if challenged.has(challenge.track):
-			problems.append("doua provocari pe pista %s" % challenge.track)
-		challenged[challenge.track] = true
-		if not CareerChallenge.KNOWN_EVENTS.has(challenge.event):
-			problems.append("provocarea %s: evenimentul '%s' nu e cunoscut" % [
-				challenge.track, challenge.event])
-		if challenge.rule == CareerChallenge.Rule.AT_LEAST and challenge.count < 1:
-			problems.append("provocarea %s: AT_LEAST cere count >= 1" % challenge.track)
-		if challenge.fail_event != &"" \
-				and not CareerChallenge.FAIL_EVENTS.has(challenge.fail_event) \
-				and not CareerChallenge.KNOWN_EVENTS.has(challenge.fail_event):
-			problems.append("provocarea %s: fail_event '%s' nu e cunoscut" % [
-				challenge.track, challenge.fail_event])
-		if challenge.event == &"wall_hit" and challenge.zone == &"":
-			problems.append("provocarea %s: wall_hit cere o zona" % challenge.track)
 	_validate_cars(target, problems)
 	return problems
 
@@ -174,14 +161,6 @@ func _validate_cars(target: CareerConfig, problems: PackedStringArray) -> void:
 		problems.append("exista masini de castigat, dar starting_cars e gol")
 
 
-## Provocarea pistei `track_id`, sau null daca pista n-are una.
-func challenge_for(track_id: StringName) -> CareerChallenge:
-	for challenge in config.challenges:
-		if challenge.track == track_id:
-			return challenge
-	return null
-
-
 # ------------------------------------------------------------- progres
 
 func track_state(id: StringName) -> Dictionary:
@@ -207,9 +186,15 @@ func set_time_trial(id: StringName, medal: int, ms: int) -> void:
 	_changed()
 
 
-func set_challenge(id: StringName) -> void:
+## Pune bifa bonusului pe pista (nu se mai ia inapoi).
+func set_bonus(id: StringName) -> void:
 	_state_for(id).challenge = true
 	_changed()
+
+
+## Bifa bonusului pe pista `id`, din orice cursa de pana acum.
+func has_bonus(id: StringName) -> bool:
+	return bool(track_state(id).challenge)
 
 
 func set_rival_beaten(id: StringName) -> void:
@@ -236,17 +221,16 @@ static func medal_for_position(position: int) -> int:
 	return MEDAL_NONE
 
 
-## Punctele unei piste: locul (3/2/1) + bonusul provocarii. Fiecare componenta
-## isi tine maximul separat: locul 1 fara provocare intr-o cursa si locul 3 cu
-## provocarea reusita in alta dau impreuna 3 + 1 — bonusul se poate vana si
-## intr-o cursa ulterioara, nu doar in cea cu locul cel mai bun. Bifa conteaza
-## doar cat pista ARE provocare: una ramasa in salvare pe o pista fara
-## provocare nu aduce nimic, deci punctele nu trec niciodata de
-## `max_track_points`.
+## Punctele unei piste: locul (3/2/1) + bonusul. Fiecare componenta isi tine
+## maximul separat: locul 1 cu bonusul pierdut intr-o cursa si locul 3 cu
+## bonusul pastrat in alta dau impreuna 3 + 1 — bonusul se poate vana si
+## intr-o cursa ulterioara, nu doar in cea cu locul cel mai bun. Bonusul exista
+## pe orice pista, deci o bifa veche (de la o provocare per pista) sau una
+## ramasa pe o pista din lumea 4 conteaza; punctele tot nu trec de
+## `MAX_TRACK_POINTS`.
 func track_points(id: StringName) -> int:
 	var state := track_state(id)
-	var bonus := bool(state.challenge) and challenge_for(id) != null
-	return int(state.race_medal) + (CHALLENGE_POINTS if bonus else 0)
+	return int(state.race_medal) + (BONUS_POINTS if bool(state.challenge) else 0)
 
 
 ## Punctele castigate: pe pistele din lumi (o pista fara lume nu conteaza),
@@ -262,19 +246,12 @@ func points() -> int:
 	return total
 
 
-## Cat se poate strange pe pista `id`: locul 1, plus bonusul DOAR daca pista
-## are provocare. Lumea 4 (Ha Long, Carrara, San Francisco, Angkor) a intrat in
-## cariera fara provocari: cu 4 puncte socotite pe fiecare, pasaportul ar fi
-## aratat un maxim pe care nimeni nu-l poate atinge.
-func max_track_points(id: StringName) -> int:
-	return MEDAL_GOLD + (CHALLENGE_POINTS if challenge_for(id) != null else 0)
-
-
+## Maximul carierei: `MAX_TRACK_POINTS` pe fiecare pista din lumi (bonusul e
+## pe toate) + RIVAL_POINTS per rival. Cu 4 lumi x 4 piste, fara rivali: 64.
 func max_points() -> int:
 	var total := 0
 	for world in config.worlds:
-		for track_id in world.tracks:
-			total += max_track_points(track_id)
+		total += MAX_TRACK_POINTS * world.tracks.size()
 		if world.rival != &"":
 			total += RIVAL_POINTS
 	return total
@@ -475,33 +452,32 @@ func start_track(id: StringName, mode: Mode = Mode.RACE) -> void:
 
 
 ## Inregistreaza rezultatul cursei de cariera: locul da medalia (= punctele
-## locului), `challenge_done` pune bifa provocarii (+CHALLENGE_POINTS; se
-## ignora pe o pista fara provocare). Returneaza punctele facute ACUM de cursa
+## locului), `bonus_kept` pune bifa bonusului (+BONUS_POINTS; doar intr-o
+## cursa RACE, vezi `bonus_active`). Returneaza punctele facute ACUM de cursa
 ## asta (0 si daca nu e cursa de cariera) — nu diferenta fata de ce era salvat:
 ## ecranul de rezultate spune ce ai facut, raftul spune ce ai strans. Bifa si
-## medalia nu se pierd la o cursa mai slaba (pastram maximul). `active` ramane
-## true pana la `leave()`: ecranul de rezultate inca apartine cursei.
-func finish_active(position: int, challenge_done: bool = false) -> int:
+## medalia nu se pierd la o cursa mai slaba sau cu bonusul pierdut (pastram
+## maximul). `active` ramane true pana la `leave()`: ecranul de rezultate inca
+## apartine cursei.
+func finish_active(position: int, bonus_kept: bool = false) -> int:
 	if not active:
 		return 0
+	var with_bonus := bonus_kept and bonus_active()
 	last_unlocked_cars.clear()
 	var medal := medal_for_position(position)
 	set_race_medal(active_track, medal)
 	var bonus := 0
-	if challenge_done and challenge_for(active_track) != null:
-		set_challenge(active_track)
-		bonus = CHALLENGE_POINTS
+	if with_bonus:
+		set_bonus(active_track)
+		bonus = BONUS_POINTS
 	return medal + bonus
 
 
-## Provocarea de urmarit in cursa curenta, sau null. Doar in RACE: provocarea
-## e bonus in cursa normala (cu adversari si trafic), nu proba separata. In
-## contratimp nu exista (singur pe pista, jumatate din contracte — trafic,
-## autobuz — n-ar avea ce masura).
-func challenge_to_track() -> CareerChallenge:
-	if not active or active_mode != Mode.RACE:
-		return null
-	return challenge_for(active_track)
+## Cursa curenta poarta bonusul NO RETRY: doar o cursa RACE de cariera (cu
+## adversari). Nu in contratimp; Quick Race, World Cup si turul ghidat nu sunt
+## cariera (`active` e fals).
+func bonus_active() -> bool:
+	return active and active_mode == Mode.RACE
 
 
 func is_time_trial() -> bool:

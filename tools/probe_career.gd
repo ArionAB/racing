@@ -2,11 +2,11 @@ extends Node
 ## Garda carierei: config, persistenta, puncte si gating, versiune necunoscuta,
 ## regrupare, raftul din scena si lacatul cursei. Merge HEADLESS.
 ##
-## Punctele (25 oct 2026): locul 1/2/3 = 3/2/1, provocarea reusita in cursa = +1,
+## Punctele (25 oct 2026): locul 1/2/3 = 3/2/1, bonusul pastrat in cursa = +1,
 ## contratimpul 0 (fara tinte). Lacatele: lumea 2 la 8, lumea 3 la 18, lumea 4
-## la 28. Lumea 4 (Ha Long, Carrara, San Francisco, Angkor — 19 nov 2026) n-are
-## provocari, deci pistele ei dau maxim 3, nu 4: maximul carierei e 12 x 4 +
-## 4 x 3 = 60.
+## la 28. Din 19 nov 2026 bonusul e acelasi pe FIECARE pista (NO RETRY, in
+## locul provocarilor per pista), deci si lumea 4 (Ha Long, Carrara, San
+## Francisco, Angkor) da 4 pe pista: maximul carierei e 16 x 4 = 64.
 ##
 ## Rulare:
 ##   Godot --headless --path . res://tools/ProbeCareer.tscn -- --check
@@ -25,8 +25,8 @@ const ProbeTmp := preload("res://tools/probe_tmp.gd")
 ## Cate verificari trebuie sa fi rulat. Daca cineva scoate o sectiune sau o
 ## iesire timpurie sare peste ele, numarul scade si verdictul pica.
 const MIN_CHECKS := 205
-## Maximul carierei: 12 piste cu provocare x 4 + 4 fara x 3.
-const MAX_POINTS := 60
+## Maximul carierei: 16 piste x 4 (locul 1 + bonusul, pe fiecare).
+const MAX_POINTS := 64
 ## Lumea 4, cum a dictat-o dezvoltatorul (19 nov 2026): pistele SI ordinea.
 const WORLD_4: Array[StringName] = [&"halong", &"carrara", &"san_francisco", &"angkor"]
 ## O pista din registru care nu e in nicio lume (banc de test).
@@ -131,9 +131,8 @@ func _clone_config() -> CareerConfig:
 		w.rival = src.rival
 		w.rival_track = src.rival_track
 		out.worlds.append(w)
-	# Provocarile raman cele reale (resurse partajate, nemodificate aici):
-	# `max_points` depinde de ele, deci o clona fara ele ar numara altceva.
-	out.challenges = _real_config.challenges.duplicate()
+	out.bonus_title = _real_config.bonus_title
+	out.bonus_hint = _real_config.bonus_hint
 	return out
 
 
@@ -245,7 +244,7 @@ func _check_persistence() -> void:
 	_expect(int(st.tt_best_ms) == 80000, "tt_best_ms trebuie sa ia minimul, e %d" % int(st.tt_best_ms))
 	Career.set_time_trial(k, Career.MEDAL_BRONZE, 95000) # timp mai prost
 	_expect(int(Career.track_state(k).tt_best_ms) == 80000, "un timp mai prost nu inlocuieste recordul")
-	Career.set_challenge(k)
+	Career.set_bonus(k)
 	Career.set_race_medal(&"serengeti", Career.MEDAL_BRONZE)
 	Career.set_rival_beaten(&"rival_test")
 	Career.set_cup_won(&"world_1")
@@ -285,36 +284,23 @@ func _check_gating() -> void:
 		"lipsesc 8, 18 si 28, sunt %d, %d si %d" % [Career.points_missing(w[1]),
 			Career.points_missing(w[2]), Career.points_missing(w[3])])
 	var rivals := 0
-	var with_challenge := 0
-	var without_challenge := 0
+	var tracks := 0
 	for world in w:
 		if world.rival != &"":
 			rivals += 1
-		for id in world.tracks:
-			if Career.challenge_for(id) != null:
-				with_challenge += 1
-			else:
-				without_challenge += 1
-	var expected_max := Career.MAX_TRACK_POINTS * with_challenge + Career.MEDAL_GOLD * without_challenge
-	expected_max += Career.RIVAL_POINTS * rivals
-	_expect(with_challenge == 12 and without_challenge == 4,
-		"12 piste cu provocare si 4 fara, sunt %d si %d" % [with_challenge, without_challenge])
+		tracks += world.tracks.size()
+	var expected_max := Career.MAX_TRACK_POINTS * tracks + Career.RIVAL_POINTS * rivals
+	_expect(tracks == 16 and Career.MAX_TRACK_POINTS == 4,
+		"16 piste, fiecare din 4 (loc 1 + bonus): %d piste, maxim %d" % [tracks,
+			Career.MAX_TRACK_POINTS])
 	_expect(Career.max_points() == MAX_POINTS and expected_max == MAX_POINTS,
-		"max_points trebuie %d (12 x 4 + 4 x 3, 0 rivali), e %d" % [MAX_POINTS, Career.max_points()])
-	# Maximul unei piste e al EI: bonusul nu se socoteste unde nu exista
-	# (altfel pasaportul arata un total pe care nimeni nu-l poate atinge).
-	_expect(Career.max_track_points(&"kyoto") == Career.MAX_TRACK_POINTS,
-		"kyoto (cu provocare) = %d" % Career.MAX_TRACK_POINTS)
-	for id in WORLD_4:
-		_expect(Career.max_track_points(id) == Career.MEDAL_GOLD,
-			"%s (fara provocare) = %d, e %d" % [id, Career.MEDAL_GOLD, Career.max_track_points(id)])
+		"max_points trebuie %d (16 x 4, 0 rivali), e %d" % [MAX_POINTS, Career.max_points()])
 	# Pragul fiecarei lumi se poate atinge din lumile de dinaintea ei.
 	var reachable := 0
 	for i in w.size():
 		_expect(w[i].points_to_unlock <= reachable,
 			"%s: pragul %d incape in cele %d puncte de dinainte" % [w[i].id, w[i].points_to_unlock, reachable])
-		for id in w[i].tracks:
-			reachable += Career.max_track_points(id)
+		reachable += Career.MAX_TRACK_POINTS * w[i].tracks.size()
 
 	# Lumea 1: locul 3 pe toate cele 4 piste = 4 puncte; lacatul lumii 2 e la 8.
 	var placed := 0
@@ -328,11 +314,11 @@ func _check_gating() -> void:
 	Career.set_time_trial(w[0].tracks[0], Career.MEDAL_GOLD, 70000)
 	Career.set_time_trial(w[0].tracks[1], Career.MEDAL_SILVER, 70001)
 	_expect(Career.points() == 4, "contratimpul nu da puncte, sunt %d" % Career.points())
-	# Provocarea = +1 pe pista, independent de loc.
+	# Bonusul = +1 pe pista, independent de loc.
 	for i in 2:
-		Career.set_challenge(w[0].tracks[i])
+		Career.set_bonus(w[0].tracks[i])
 		placed += 1
-	_expect(Career.points() == 6 and placed == 6, "2 provocari => 6 puncte, sunt %d" % Career.points())
+	_expect(Career.points() == 6 and placed == 6, "2 bonusuri => 6 puncte, sunt %d" % Career.points())
 	_expect(not Career.is_world_unlocked(w[1]) and Career.points_missing(w[1]) == 2,
 		"la 6 lumea 2 inca sigilata, lipsesc 2")
 	# Locul mai bun PLATESTE: bronz -> aur pe aceeasi pista = +2 (asta e
@@ -345,7 +331,7 @@ func _check_gating() -> void:
 	# Aceeasi medalie pusa a doua oara nu aduce nimic; una mai slaba nici atat.
 	Career.set_race_medal(w[0].tracks[0], Career.MEDAL_GOLD)
 	Career.set_race_medal(w[0].tracks[0], Career.MEDAL_BRONZE)
-	Career.set_challenge(w[0].tracks[0])
+	Career.set_bonus(w[0].tracks[0])
 	_expect(Career.points() == 8, "repetarea nu da puncte in plus (%d)" % Career.points())
 	_expect(Career.track_points(w[0].tracks[0]) == Career.MAX_TRACK_POINTS,
 		"pista plina: 3 + 1 = %d" % Career.MAX_TRACK_POINTS)
@@ -354,15 +340,15 @@ func _check_gating() -> void:
 		Career.set_race_medal(id, Career.MEDAL_SILVER)
 	_expect(Career.points() == 16, "ar trebui 16 puncte, sunt %d" % Career.points())
 	_expect(not Career.is_world_unlocked(w[2]), "la 16 lumea 3 inca sigilata")
-	Career.set_challenge(w[1].tracks[0])
+	Career.set_bonus(w[1].tracks[0])
 	_expect(not Career.is_world_unlocked(w[2]), "la 17 lumea 3 inca sigilata")
-	Career.set_challenge(w[1].tracks[1])
+	Career.set_bonus(w[1].tracks[1])
 	_expect(Career.points() == 18 and Career.is_world_unlocked(w[2]),
 		"la 18 puncte lumea 3 se deschide (sunt %d)" % Career.points())
 	_expect(is_equal_approx(Career.progress_fraction(), 18.0 / float(MAX_POINTS)), "progress_fraction gresit")
 	# O pista din afara lumilor nu conteaza (bancul de test).
 	Career.set_race_medal(OUTSIDE_TRACK, Career.MEDAL_GOLD)
-	Career.set_challenge(OUTSIDE_TRACK)
+	Career.set_bonus(OUTSIDE_TRACK)
 	_expect(Career.points() == 18, "pista din afara lumilor nu aduce puncte (%d)" % Career.points())
 	var counts := Career.medal_counts()
 	# cursa: 1 aur + 3 bronz (lumea 1) + 4 argint (lumea 2); tt: 1 aur + 1
@@ -380,18 +366,22 @@ func _check_gating() -> void:
 		Career.set_race_medal(w[2].tracks[i], Career.MEDAL_GOLD) # bronz -> aur = +2
 	_expect(Career.points() == 26 and not Career.is_world_unlocked(w[3]),
 		"la 26 lumea 4 inca sigilata (sunt %d)" % Career.points())
-	Career.set_challenge(w[2].tracks[0])
+	Career.set_bonus(w[2].tracks[0])
 	_expect(Career.points() == 27 and not Career.is_world_unlocked(w[3])
 		and Career.points_missing(w[3]) == 1, "la 27 lumea 4 inca sigilata, lipseste 1")
-	Career.set_challenge(w[2].tracks[1])
+	Career.set_bonus(w[2].tracks[1])
 	_expect(Career.points() == 28 and Career.is_world_unlocked(w[3]),
 		"la 28 de puncte lumea 4 se deschide (sunt %d)" % Career.points())
-	# Pistele lumii 4 dau puncte de loc; fara provocare in config, bifa nu
-	# aduce nimic si pista e „plina" la 3.
+	# Pistele lumii 4 au si ele bonusul (NO RETRY e pe fiecare pista, 19 nov
+	# 2026): locul 1 da 3, bifa inca 1, iar pista e „plina" abia la 4.
 	var first_w4: StringName = w[3].tracks[0]
 	Career.set_race_medal(first_w4, Career.MEDAL_GOLD)
-	_expect(Career.points() == 31 and Career.track_points(first_w4) == Career.max_track_points(first_w4),
-		"locul 1 pe %s = +3 si pista e plina (sunt %d)" % [first_w4, Career.points()])
+	_expect(Career.points() == 31 and Career.track_points(first_w4) == Career.MEDAL_GOLD,
+		"locul 1 pe %s = +3 (sunt %d)" % [first_w4, Career.points()])
+	Career.set_bonus(first_w4)
+	_expect(Career.points() == 32 and Career.track_points(first_w4) == Career.MAX_TRACK_POINTS,
+		"bonusul pe %s = +1, pista plina la %d (sunt %d)" % [first_w4,
+			Career.MAX_TRACK_POINTS, Career.points()])
 	_expect(Career.medal_for_position(1) == 3 and Career.medal_for_position(2) == 2
 		and Career.medal_for_position(3) == 1 and Career.medal_for_position(4) == 0
 		and Career.medal_for_position(6) == 0, "medal_for_position")
@@ -425,11 +415,11 @@ func _check_regroup() -> void:
 	Career.config = cfg
 	Career.set_race_medal(&"kyoto", Career.MEDAL_SILVER)
 	Career.set_time_trial(&"kyoto", Career.MEDAL_BRONZE, 88000)
-	Career.set_challenge(&"kyoto")
+	Career.set_bonus(&"kyoto")
 	Career.set_race_medal(&"cappadocia", Career.MEDAL_GOLD)
 	var state_before := Career.track_state(&"kyoto")
 	var points_before := Career.points()
-	# Kyoto: locul 2 (2) + provocare (1), contratimpul 0; Cappadocia: locul 1 (3).
+	# Kyoto: locul 2 (2) + bonus (1), contratimpul 0; Cappadocia: locul 1 (3).
 	_expect(points_before == 6, "kyoto 3 + cappadocia 3 = 6, sunt %d" % points_before)
 
 	# Kyoto trece din lumea 1 in lumea 2.
@@ -559,13 +549,13 @@ func _check_panel() -> void:
 				_expect((buttons[key] as Button).custom_minimum_size.y >= 64.0,
 					key + " sub 64 px")
 		# Provocarea nu mai e proba separata (25 oct 2026): niciun buton CHALLENGE;
-		# bonusul e o eticheta sub RACE (continutul ei il verifica ProbeChallenge).
+		# bonusul e o eticheta sub RACE (continutul ei il verifica ProbeCareerBonus).
 		_expect(not buttons.has("ChallengeButton"), "foaia nu mai are buton CHALLENGE")
 		var has_bonus := false
 		for n in sheet_nodes:
 			if n is Label and n.name == "BonusLabel":
 				has_bonus = true
-		_expect(has_bonus, "foaia pistei cu provocare are eticheta BONUS")
+		_expect(has_bonus, "foaia pistei are eticheta BONUS")
 		if buttons.has("RaceButton"):
 			var race_text := (buttons["RaceButton"] as Button).text
 			_expect(("/ %d PTS" % Career.MAX_TRACK_POINTS) in race_text,
@@ -616,10 +606,10 @@ func _check_race_lock() -> void:
 	_expect(Career.finish_active(5) == 0
 		and int(Career.track_state(&"kyoto").race_medal) == 3,
 		"locul 5 => 0 puncte si nu strica aurul")
-	_expect(Career.finish_active(2, true) == Career.MEDAL_SILVER + Career.CHALLENGE_POINTS
+	_expect(Career.finish_active(2, true) == Career.MEDAL_SILVER + Career.BONUS_POINTS
 		and int(Career.track_state(&"kyoto").race_medal) == 3
 		and bool(Career.track_state(&"kyoto").challenge),
-		"locul 2 + provocare => 2 + 1 acum; pe raft aurul ramane si bifa se pune")
+		"locul 2 + bonus => 2 + 1 acum; pe raft aurul ramane si bifa se pune")
 	_expect(Career.track_points(&"kyoto") == Career.MAX_TRACK_POINTS,
 		"pista: 3 (aur) + 1 (bonus) = %d" % Career.MAX_TRACK_POINTS)
 	_expect(Career.active, "active ramane true pana la leave()")

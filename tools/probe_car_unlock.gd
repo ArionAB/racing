@@ -145,12 +145,13 @@ func _fresh(cfg: CareerConfig = null) -> void:
 	_announced.clear()
 
 
-## Copie in memorie a config-ului real: lumile si provocarile pe aceleasi
+## Copie in memorie a config-ului real: lumile pe aceleasi
 ## referinte (nu se ating), listele de masini copiate ca sa poata fi sabotate.
 func _clone_config() -> CareerConfig:
 	var out := CareerConfig.new()
 	out.worlds = _real_config.worlds.duplicate()
-	out.challenges = _real_config.challenges.duplicate()
+	out.bonus_title = _real_config.bonus_title
+	out.bonus_hint = _real_config.bonus_hint
 	out.starting_cars = _real_config.starting_cars.duplicate()
 	for src in _real_config.car_rewards:
 		var reward := CareerCarReward.new()

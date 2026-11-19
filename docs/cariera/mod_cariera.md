@@ -1,4 +1,4 @@
-# Modul Carieră — „Turul lumii” — v0.14 (brief de design; pasul 0 retunat, pașii 1, 2, 4a, 4b și 5 construiți; punctaj în loc de ștampile după sesiunea la volan; a patra lume; mașinile se câștigă în carieră)
+# Modul Carieră — „Turul lumii” — v0.15 (brief de design; pasul 0 retunat, pașii 1, 2, 4a, 4b și 5 construiți; punctaj în loc de ștampile după sesiunea la volan; a patra lume; mașinile se câștigă în carieră; bonusul NO RETRY în locul provocărilor per pistă)
 
 > Cerut de dezvoltator pe 16 oct 2026, în perioada de polish pentru release:
 > „pornind de la modul Adventure din Crash Team Racing, ce idei ai pentru
@@ -155,6 +155,8 @@
 > maximul carierei e 12 × 4 + 4 × 3 = **60**, nu 64. Fără asta pașaportul ar
 > fi arătat un total pe care nimeni nu-l poate atinge. Salvarea e
 > neschimbată (progresul e pe pistă). Fără rival pentru lumea 4.
+> *(Depășit de v0.15: bonusul e acum pe fiecare pistă, deci și lumea 4 dă 4
+> pe pistă, iar maximul e 64.)*
 >
 > **v0.14 (19 nov 2026), mașinile se câștigă în carieră.** Dezvoltatorul, ca
 > jucător: „n-am niciun motiv să joc cariera când pot juca World Cup pentru tot
@@ -185,7 +187,7 @@
 >
 >   **Pragurile sunt provizorii** (alese de coordonator, neconfirmate de
 >   dezvoltator). Primele au fost puse când cariera avea 3 lumi și maximul
->   era 48 (Muscle la 40); odată cu a patra lume (v0.13, maxim 60) au fost
+>   era 48 (Muscle la 40); odată cu a patra lume (v0.13, maxim 60; 64 din v0.15) au fost
 >   întinse pe toată cariera, în aceeași proporție: lumea 1 aduce trei
 >   mașini, lumile 2 și 3 câte două, iar Muscle (53) cere și lumea 4.
 >   Date, nu cod:
@@ -209,13 +211,70 @@
 >   nu scrie nimic în progresul carierei.
 >
 > Gardă: `ProbeCarUnlock` (7 contracte, fiecare cu `--sabotaj=` care îl pică).
+>
+> **v0.15 (19 nov 2026), bonusul e același pe fiecare pistă: „NO RETRY”.**
+> Dezvoltatorul nu mai vrea un bonus specific fiecărei hărți; vrea ca +1 să
+> însemne „fără reluare”: fără să fii aruncat din mașină și fără să apeși
+> butonul de reluare, iar un accident fără aruncare e în regulă. Cuvintele lui:
+> *„on the career the bonus point i dont want to be specific to each map, i want
+> to be no 'retry' basically means no eject or no click on the retry button, if
+> you crash without eject is fine”*.
+> - **Regula.** +1 dacă termini cursa de carieră (orice loc, ca până acum) fără
+>   (1) să fii **aruncat** din mașină (`Car.ejected` pe mașina jucătorului) și
+>   fără (2) să **ceri o repunere**: butonul „↺ RESET” din HUD sau acțiunea
+>   `reset` (tasta R), adică `Race._on_respawn_requested()`, și numai când
+>   apăsarea **chiar a pornit** o repunere. O apăsare refuzată (numărătoarea,
+>   după sosire, cooldown-ul de după o repunere, în timpul aruncării) nu costă
+>   nimic, iar una peste o repunere deja în curs nu e un al doilea „retry”.
+> - **Ce nu costă bonusul:** izbiturile de perete și de mașini fără aruncare,
+>   hazardele (aruncat, strivit, stropit, ars) și **orice repunere automată**
+>   pe care jucătorul n-a cerut-o: căzut de pe hartă / `RespawnZone`, mașina
+>   răsturnată sau împotmolită, ceasul de off-road, hazardele cu repunerea lor
+>   (tren, avalanșă, câmpul de gheață, podul). Toate se termină în
+>   `Car.respawned`, de aceea regula **nu** stă pe `respawned`.
+> - **Interpretarea coordonatorului, de confirmat de dezvoltator:** „retry
+>   button” = butonul RESET din cursă (nu RESTART din meniul de pauză, care
+>   pornește o cursă nouă cu bonusul întreg), iar „repunerea automată nu costă
+>   bonusul”.
+> - **Provocările per pistă au fost scoase**, nu lăsate nefolosite: codul
+>   (`CareerChallenge`, `ChallengeTracker`), cele 12 fișiere din
+>   `scenes/career/data/challenges/`, `CareerConfig.challenges` și validarea
+>   lor, plus `ProbeChallenge`. Se pot recupera din git. Semnalele hazardelor
+>   și ale mașinii pe care le ascultau (`car_thrown`, `fireball_hit`,
+>   `animal_hit`, `shoved`, `passed_on_red`, `bus_hit`, `boarded`,
+>   `plate_broken`, `crushed`, `splashed`, `wall_hit`…) **rămân** în cod.
+> - **Puncte:** fiecare pistă are acum bonusul, deci fiecare dă maxim 4
+>   (`Career.MAX_TRACK_POINTS`; `max_track_points(id)` a dispărut) și maximul
+>   carierei e 4 lumi × 4 piste × 4 = **64** (+ rivalii, când vor exista).
+>   Salvarea e **neschimbată**: schema v1, cheia de pe disc rămâne
+>   `challenge`. O bifă veche rămâne bonusul pistei, iar una rătăcită pe o
+>   pistă din lumea 4 contează acum. Pragurile mașinilor (v0.14) n-au fost
+>   mutate.
+> - **Pe ecran:** HUD „BONUS +1: NO RETRY” (verde), după pierdere „BONUS LOST”
+>   (roșu), fără contor. Prima pierdere se anunță în mesajul din centru:
+>   aruncarea scrie „EJECTED!” + „BONUS LOST” pe rândul doi, RESET-ul scrie
+>   „BONUS LOST” la apăsare, iar repunerea care urmează (după `RECOVER_S` = 1 s
+>   sau `eject_hold` = 1,1 s, ambele sub cele 1,2 s cât stă mesajul plin)
+>   scrie „MISSED — back on track” + „BONUS LOST”. A doua pierdere nu mai
+>   anunță nimic. Rezultate: „1ST PLACE +3 · NO RETRY +1 = 4 PTS” sau „1ST
+>   PLACE +3 · BONUS LOST = 3 PTS”. Foaia pistei, pe fiecare pistă: „BONUS +1 ·
+>   NO RETRY · DONE”, altfel titlul și pe rândul doi „Finish without an eject or
+>   a RESET.”; RACE „… · n / 4 PTS”. Titlul și indiciul sunt date
+>   (`CareerConfig.bonus_title`, `bonus_hint`). Doar în cursa RACE de carieră:
+>   nu în contratimp, Quick Race, World Cup sau turul ghidat.
+> - Corecție pe drum: un mesaj nou din centru oprește acum stingerea celui
+>   vechi (altfel mesajul repunerii dispărea după 0,2 s).
+>
+> Gardă: `ProbeCareerBonus` (5 contracte, fiecare cu `--sabotaj=` care îl
+> pică), în `verify_local.sh` în locul pasului `ProbeChallenge`.
 
 ## 0. Într-o propoziție
 
 Mașinuța face turul lumii: un raft cu diorame (trei lumi de câte 4 piste,
 gruparea e date, nu cod), fiecare pistă cu o cursă care **plătește după loc**
-(3/2/1 puncte) și un **bonus** pentru provocarea gimmick-ului reușită în
-aceeași cursă (+1), plus un contratimp cu rezervor sigilat și fantomă;
+(3/2/1 puncte) și un **bonus** (+1) dacă termini aceeași cursă fără să fii
+aruncat și fără RESET (v0.15, „NO RETRY”; până atunci, provocarea
+gimmick-ului), plus un contratimp cu rezervor sigilat și fantomă;
 fiecare lume cu un rival 1 contra 1 a cărui mașină o câștigi, iar progresul
 se numără în **puncte** pe pașaport — lumea următoare se deschide la un prag
 de puncte, deci niciun obiectiv nu blochează singur drumul mai departe.
@@ -463,14 +522,16 @@ bool`, `points_to_unlock`. Regulile care decurg de aici:
   o pui într-o cutie.
 
 **Pașaportul** *(v0.12)*. Fiecare pistă dă până la **4 puncte**: locul final
-în cursă (1/2/3 = **3/2/1**, sub podium 0) plus **+1** pentru provocarea
-gimmick-ului reușită în aceeași cursă. Fiecare componentă își ține maximul
-separat (locul cel mai bun, bifa provocării), deci bonusul se poate vâna și
+în cursă (1/2/3 = **3/2/1**, sub podium 0) plus **+1** pentru bonusul
+câștigat în aceeași cursă (din v0.15 „NO RETRY”, același pe fiecare pistă;
+înainte, provocarea gimmick-ului). Fiecare componentă își ține maximul
+separat (locul cel mai bun, bifa bonusului), deci bonusul se poate vâna și
 într-o cursă ulterioară, de pe orice loc. Rivalul învins = **3 puncte** (cât
 o victorie; implicit, până la pasul 3). Lumea următoare se deschide la un
 prag de puncte cumulat (`points_to_unlock` pe fiecare `CareerWorld`;
 provizoriu, de tunat la volan: lumea 2 la **8** din cele 16 posibile în lumea
-1, lumea 3 la **18** din 32; maximul e 12 × 4 = **48** + rivalii). Pragurile
+1, lumea 3 la **18** din 32; maximul era 12 × 4 = **48** + rivalii, azi 16 ×
+4 = **64**, v0.15). Pragurile
 sunt alese ca o lume să se poată deschide **fără niciun loc 1** (patru locuri
 2 = 8) **și fără rivalul** lumii curente — rivalul dă mașina, nu cheia.
 Pașaportul e și ecranul de progres: puncte, medalii pe culori, mașini,
@@ -483,8 +544,9 @@ văzut că așa locul 1 nu merita efortul: bronzul și aurul valorau la fel.
 ## 4. Cele trei probe pe fiecare pistă
 
 Aceeași pistă, trei abilități diferite — dar **două alergări**, nu trei
-(v0.12): cursa poartă și provocarea gimmick-ului, contratimpul e separat.
-12 piste devin 48 de puncte fără conținut nou.
+(v0.12): cursa poartă și bonusul (provocarea gimmick-ului până la v0.15,
+„NO RETRY” de atunci), contratimpul e separat.
+16 piste devin 64 de puncte fără conținut nou (12 și 48 până la a patra lume).
 
 ### 4.1 Cursa
 
@@ -492,9 +554,10 @@ Cursa de azi: 3 tururi, 5 AI. **Puncte după locul final: 1 = 3, 2 = 2, 3 =
 1**, nimic sub 3 (v0.12; până atunci medalie plată). Aur/argint/bronz rămân
 culoarea discului de pe card, dar valoarea lor **e** punctajul. Cursa se
 poate repeta oricând; se păstrează locul cel mai bun. Nu se atinge nimic din
-feel. Provocarea gimmick-ului (§4.3) rulează **în aceeași cursă** și adaugă
-+1; pe foaie, RACE arată „1ST PLACE · 4 / 4 PTS”, iar sub el eticheta BONUS
-cu titlul și indiciul provocării.
+feel. Bonusul rulează **în aceeași cursă** și adaugă +1; pe foaie, RACE
+arată „1ST PLACE · 4 / 4 PTS”, iar sub el eticheta BONUS. Din v0.15 bonusul
+e „NO RETRY” pe fiecare pistă (vezi blocul v0.15 din antet); provocarea
+gimmick-ului din §4.3 e istorie.
 
 ### 4.2 Contratimpul cu rezervor sigilat
 
@@ -535,7 +598,11 @@ fără mână, și e explicabil jucătorului: „bate pilotul casei”. Mașina:
 se măsoară cu cea mai rapidă mașină pe pista aia (ecartul garajului e 3–6%,
 §2.1), deci cu o mașină lentă e mai greu — asta e identitate, nu nedreptate.
 
-### 4.3 Provocarea gimmick-ului
+### 4.3 Provocarea gimmick-ului *(înlocuită în v0.15)*
+
+> **Depășit.** Din 19 nov 2026 bonusul nu mai e per pistă: e „NO RETRY” pe
+> fiecare pistă (blocul v0.15 din antet), iar codul și datele provocărilor au
+> fost scoase (se recuperează din git). Secțiunea rămâne ca istorie de design.
 
 Fiecare pistă are gimmick-ul ei, deci provocarea e **unică per pistă și e
 scrisă cu numele lui** (memoria `garda-cu-numele-gimmickului`: contractul ca
@@ -691,7 +758,7 @@ abțibildurile sunt singurul „inventar” și se câștigă doar prin joc.
   (ținta de viteză e `car.max_speed`) și identitatea mașinilor.
 - **Hub-ul condus** → raft 2D; fun-ul e pe pistă, nu între piste.
 - **Două condiții pe un punct** (CTR cere literele *și* locul 1) → locul
-  și provocarea plătesc separat, în aceeași cursă.
+  și bonusul plătesc separat, în aceeași cursă.
 - **Gradații fără plată** (lecția noastră, 25 oct 2026: aur = bronz = o
   ștampilă) → locul mai bun valorează mai mult; nicio medalie fără puncte.
 
@@ -809,7 +876,10 @@ fac cu fereastră (memoria `snapshot-nu-merge-headless`).
    contratimpul 0, pista din afara lumilor 0, rivalul +3, foaia cu 3 butoane +
    BONUS) și `ProbeChallenge` (217: bonusul fără podium, nu în contratimp, nu
    pe pista fără provocare; foaia pe toate cele 12 piste). Rămân la volan:
-   fluxul în joc și pragurile 8 / 18.
+   fluxul în joc și pragurile 8 / 18. *(v0.15: bonusul a devenit „NO RETRY”,
+   același pe fiecare pistă; `challenge_to_track()` și `ProbeChallenge` au
+   fost înlocuite de `Career.bonus_active()` și `ProbeCareerBonus`, maximul
+   e 64.)*
 3. **Rivalii** — butonul de calitate pe `AIController` (`line_quality`,
    `line_offset` 0, praguri de turbo), comportamentul de apărare, modul 1v1
    din pole, deblocarea mașinii în garaj (garajul citește `Career.unlocked`,
@@ -829,6 +899,10 @@ fac cu fereastră (memoria `snapshot-nu-merge-headless`).
    (regula din `CLAUDE.md`; o clasă „abțibilduri” cu un atlas partajat).
    *Gardă:* o sondă care aruncă semnalul sintetic și verifică verdictul, plus
    sabotaj (semnalul greșit nu trece).
+   **v0.15 (19 nov 2026): SCOASE.** Bonusul e „NO RETRY” pe fiecare pistă
+   (`BonusTracker`, gardă `ProbeCareerBonus`); provocările per pistă, datele
+   și `ProbeChallenge` s-au șters (recuperabile din git), semnalele hazardelor
+   au rămas.
 5. **Fantoma — CONSTRUITĂ (PR #564, 17 oct)**, fără selecția „a ta / a
    rivalului” (vine cu rivalii, pasul 3); starea în `pas5_fantoma_stare.md`.
    Planul inițial: înregistrare, fișier, redare, selecția „a ta / a rivalului”.
@@ -893,6 +967,11 @@ Rămase:
 **Decise (25 oct 2026, la volan):** puncte în loc de ștampile — locul 1/2/3 =
 3/2/1; provocarea gimmick-ului e bonus +1 în cursa normală, nu probă
 separată; contratimpul fără puncte până la decizia de la punctul 9.
+
+**Decise (19 nov 2026):** bonusul +1 nu mai e specific pistei — e „NO RETRY”
+pe fiecare pistă (fără aruncare, fără RESET; blocul v0.15 din antet).
+Interpretarea „retry button = RESET din cursă” și „repunerea automată nu
+costă bonusul” e a coordonatorului, de confirmat.
 
 **Decise (17 oct 2026):** ce cumpără masa = (a) hazarde scalate cu masa +
 (b) trece prin turmă/trafic/bolovani fără să piardă viteza; bara de turbo

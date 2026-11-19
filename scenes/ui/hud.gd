@@ -27,6 +27,10 @@ var _best_label: Label     # cel mai bun tur
 var _detail_label: Label
 var _countdown: Label
 var _message: Label
+var _message_tween: Tween
+## Cat sta plin un mesaj din `flash_message`, si in cat se stinge.
+const FLASH_HOLD_S: float = 1.2
+const FLASH_FADE_S: float = 0.5
 ## Contorul de performanta (setare `GameState.show_perf`). Sus, centrat, ca
 ## sa nu se bata cu pozitia/turul (stanga) si cu pauza/minimapa (dreapta).
 var _perf: Label
@@ -50,9 +54,10 @@ var _charge_bolt: Label
 var _charge_flash: float = 0.0
 var _sealed_label: Label
 var _ghost_label: Label
-var _challenge_label: Label
-var _challenge_title: String = ""
-var _challenge_failed: bool = false
+## Bonusul carierei pe linia de mod: verde cat il ai, rosu dupa ce l-ai pierdut.
+var _bonus_label: Label
+const BONUS_COLOR := Color(0.55, 0.9, 0.5)
+const BONUS_LOST_COLOR := Color(1.0, 0.4, 0.35)
 var _touch: TouchControls
 var _pause_button: Button
 var _respawn_button: Button
@@ -414,13 +419,14 @@ func _build_turbo_bar(root: Control) -> void:
 	_ghost_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_ghost_label.visible = false
 	mode_line.add_child(_ghost_label)
-	# Provocarea gimmick-ului (cariera): in aceeasi zona ca SEALED; cele doua
-	# moduri nu se suprapun (contratimp vs provocare).
-	_challenge_label = _make_label(16)
-	_challenge_label.modulate = Color(0.55, 0.9, 0.5)
-	_challenge_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_challenge_label.visible = false
-	mode_line.add_child(_challenge_label)
+	# Bonusul carierei (NO RETRY): in aceeasi zona ca SEALED; cele doua
+	# moduri nu se suprapun (contratimp vs cursa RACE de cariera).
+	_bonus_label = _make_label(16)
+	_bonus_label.name = "BonusLabel"
+	_bonus_label.modulate = BONUS_COLOR
+	_bonus_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_bonus_label.visible = false
+	mode_line.add_child(_bonus_label)
 
 	# Umplutura e copil al jgheabului, cu 3 px de margine de jur imprejur, ca
 	# marginea intunecata sa ramana vizibila si cand bara e plina.
@@ -844,12 +850,23 @@ func show_position_change(new_pos: int, old_pos: int) -> void:
 	position_popup.show_change(new_pos, old_pos)
 
 
+## Mesajul din centru: 1.2 s plin, apoi se stinge in 0.5 s. Un mesaj nou
+## opreste stingerea celui vechi: altfel tween-ul vechi il stingea pe cel nou
+## la jumatatea timpului lui (ex. „BONUS LOST" la apasarea RESET, urmat dupa
+## 1 s de mesajul repunerii, care ramanea pe ecran doar 0.2 s).
 func flash_message(text: String) -> void:
+	if _message_tween != null and _message_tween.is_valid():
+		_message_tween.kill()
 	_message.text = text
 	_message.modulate.a = 1.0
-	var tw := create_tween()
-	tw.tween_interval(1.2)
-	tw.tween_property(_message, "modulate:a", 0.0, 0.5)
+	_message_tween = create_tween()
+	_message_tween.tween_interval(FLASH_HOLD_S)
+	_message_tween.tween_property(_message, "modulate:a", 0.0, FLASH_FADE_S)
+
+
+## Textul mesajului din centru (gol cand s-a stins de tot). Pentru sonde.
+func flash_text() -> String:
+	return _message.text if _message.modulate.a > 0.0 else ""
 
 ## Rezervor sigilat (contratimp de cariera): arata eticheta SEALED.
 func set_sealed_turbo(on: bool) -> void:
@@ -861,31 +878,20 @@ func set_ghost_time(ms: int) -> void:
 	_ghost_label.visible = ms > 0
 	if ms > 0:
 		_ghost_label.text = "GHOST %s" % TrackCard._format_ms(ms)
-## Provocarea gimmick-ului (bonus +1 in cursa de cariera): "CHALLENGE +1:
-## <titlu>", verde pana o pici.
-func set_challenge(title: String) -> void:
-	_challenge_title = title
-	_challenge_label.text = _challenge_prefix() + title
-	_challenge_label.modulate = Color(0.55, 0.9, 0.5)
-	_challenge_label.visible = true
+
+## Bonusul carierei (+1 in cursa RACE de cariera): "BONUS +1: NO RETRY", verde
+## cat il mai ai. Titlul vine din `CareerConfig.bonus_title`.
+func set_bonus(title: String) -> void:
+	_bonus_label.text = "BONUS +%d: %s" % [Career.BONUS_POINTS, title]
+	_bonus_label.modulate = BONUS_COLOR
+	_bonus_label.visible = true
 
 
-## Progresul regulii („1 / 3", „LAP 2 ✓"), langa titlu; dupa esec nu mai conteaza.
-func set_challenge_progress(text: String) -> void:
-	if _challenge_failed:
-		return
-	_challenge_label.text = _challenge_prefix() + _challenge_title \
-		+ ("   " + text if text != "" else "")
-
-
-static func _challenge_prefix() -> String:
-	return "CHALLENGE +%d: " % Career.CHALLENGE_POINTS
-
-
-func set_challenge_failed() -> void:
-	_challenge_failed = true
-	_challenge_label.text = "CHALLENGE FAILED"
-	_challenge_label.modulate = Color(1.0, 0.4, 0.35)
+## Bonusul s-a pierdut (aruncat din masina sau RESET): "BONUS LOST", rosu,
+## pana la final. Nu se mai intoarce verde in cursa asta.
+func set_bonus_lost() -> void:
+	_bonus_label.text = "BONUS LOST"
+	_bonus_label.modulate = BONUS_LOST_COLOR
 
 
 func set_turbo(charge: float, boosting: bool, drifting: bool = false) -> void:

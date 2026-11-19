@@ -4,9 +4,11 @@ extends Resource
 ## (`data/career_config.tres`) descrie toata structura.
 
 @export var worlds: Array[CareerWorld] = []
-## Provocarea gimmick-ului per pista (maxim una pe pista; vezi `Career.validate`).
-## O pista fara intrare aici nu are provocare, iar foaia ei arata „SOON".
-@export var challenges: Array[CareerChallenge] = []
+## Bonusul carierei (+1), acelasi pe fiecare pista (19 nov 2026, in locul
+## provocarilor per pista): titlul scurt pe HUD, pe foaia pistei si in
+## rezultate; hint-ul o propozitie pe foaia pistei. Regula: `BonusTracker`.
+@export var bonus_title: String = "NO RETRY"
+@export var bonus_hint: String = "Finish without an eject or a RESET."
 ## Garajul de start: masinile deschise de la prima pornire. PRIMA e masina pe
 ## care cade selectia unui jucator nou (`Career.ensure_selected_car`).
 @export var starting_cars: Array[StringName] = []

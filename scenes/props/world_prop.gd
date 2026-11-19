@@ -144,7 +144,9 @@ const PROP_COLLISION := {
 	"stream_bridge": "none",
 	"ice_hole": "none",         # gaura in gheata, plata prin definitie
 	"ice_shards": "none",       # cioburi de 0.5 m, imprastiate pe banda
-	"ice_road_marker": "none",  # betele cu steguleț care marcheaza drumul
+	# Betele cu steguleț si semnele drumului de gheata: se imprastie la contact (decor lovibil,
+	# valul 1, nov 2026). Betele erau fantome, semnele ziduri (hull implicit) la 0,8 m de banda.
+	"ice_road_marker": "bump", "ice_road_sign": "bump",
 	"husky_dog": "none", "nerpa_seal": "none",  # figuranti
 	"flowers_orange": "none", "flowers_white": "none",
 	"hibiscus_bush": "none", "sugar_cane_clump": "none",
@@ -164,7 +166,10 @@ const PROP_COLLISION := {
 	"lamp_lantern_c": "trunk",
 	"neon_sign_a": "trunk", "neon_sign_b": "trunk",
 	"neon_sign_c": "trunk", "neon_sign_d": "trunk",
-	"bollard": "trunk", "chevron_post": "trunk",
+	# `chevron_post` (0,60 x 1,20 x 0,17 m, acelasi fisier si pe Serengeti): era cilindru solid,
+	# iar pe ambele piste cate unul sta PE banda (masurat: -1,3 m Chongqing, -0,3 m Serengeti).
+	# Un panou de tabla pe un bat se culca, nu opreste o masina (decor lovibil, valul 1).
+	"bollard": "trunk", "chevron_post": "bump",
 	# Rufele stau pe o sarma peste alee, la 2.6 m: hull-ul lor ar fi un tavan
 	# plin exact peste carosabil.
 	"laundry_line": "mesh",
@@ -4221,6 +4226,23 @@ const HULL_SKIP_PARTS := {
 ## numelor de noduri. Restul modelului ramane hull static.
 const BUMP_PARTS := {"road_works": ["Works_Cone_"]}
 
+## Optiuni `BumpProp.wrap` per stem, pentru modul "bump" (decor lovibil, valul 1, nov 2026).
+## Stalpii si semnele de pe marginea drumului trec de plafonul de 1,8 m al decorului mic
+## (jalonul Fiordland are 2,00 m, semnul de pe gheata 2,26 m), dar sunt bete subtiri, nu piese
+## mari: plafonul de inaltime se ridica DOAR pentru ele.
+##
+## Masa si cutia jalonului sunt masurate (ProbeBumpProps pe Fiordland, lovit la 15 m/s, distanta
+## dupa 2 s). Cu cutia lui reala (5 x 6 cm) si masa minima de 0,3 kg zbura 59-136 m, adica de
+## vreo 5 ori viteza masinii: disparea, nu se rostogolea. Cu 1 kg si o cutie de 16 cm: 16-70 m.
+## Masina nu pierde viteza pe el (rularea de control, fara tinta, franeaza la fel pe acostament).
+## Betele cu steguleț: densitatea de jucarie pe cutia AABB le-ar fi dat 4 kg.
+const BUMP_OPTS := {
+	"snow_pole": {"max_height": 2.6, "mass": 1.0,
+		"box": AABB(Vector3(-0.08, 0.0, -0.08), Vector3(0.16, 2.0, 0.16))},
+	"ice_road_sign": {"max_height": 2.4, "mass": 2.0},
+	"ice_road_marker": {"mass": 0.6},
+}
+
 ## Modul "bump_parts": ca BUMP_PARTS, dar cerut de piesa (metadata `coliziune`), nu de modelul
 ## in sine, si cu optiuni per parte (`BumpProp.wrap(part, opts)`): masa si `home`. Cheia e stem-ul
 ## .glb-ului, apoi prefixul numelui nodului. Tuk-tuk-ul Angkorului (brief §3): remorca si
@@ -4288,7 +4310,7 @@ func _build_collision() -> void:
 		elif mode == "bump_parts":
 			mode = "hull"
 		if mode == "bump":
-			if BumpProp.wrap(model) != null:
+			if BumpProp.wrap(model, BUMP_OPTS.get(stem_bp, {})) != null:
 				continue
 			mode = "hull"
 		var body := StaticBody3D.new()

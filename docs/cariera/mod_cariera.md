@@ -1,4 +1,4 @@
-# Modul Carieră — „Turul lumii” — v0.13 (brief de design; pasul 0 retunat, pașii 1, 2, 4a, 4b și 5 construiți; punctaj în loc de ștampile după sesiunea la volan; mașinile se câștigă în carieră)
+# Modul Carieră — „Turul lumii” — v0.14 (brief de design; pasul 0 retunat, pașii 1, 2, 4a, 4b și 5 construiți; punctaj în loc de ștampile după sesiunea la volan; a patra lume; mașinile se câștigă în carieră)
 
 > Cerut de dezvoltator pe 16 oct 2026, în perioada de polish pentru release:
 > „pornind de la modul Adventure din Crash Team Racing, ce idei ai pentru
@@ -143,7 +143,20 @@
 > verificări, cu sabotaj (pragul lumii 2 mutat la 6 → 4 picări). Nerulat la
 > volan: fluxul cursă → „+3 · CHALLENGE +1” → raft.
 >
-> **v0.13 (19 nov 2026), mașinile se câștigă în carieră.** Dezvoltatorul, ca
+> **v0.13 (19 nov 2026), decizia dezvoltatorului:** a patra lume — **Ha
+> Long, Carrara, San Francisco, Angkor**, în ordinea asta
+> (`data/world_4.tres`); aceleași patru piste sunt și a patra cupă din WORLD
+> CUP (#704). Cariera are acum 4 lumi × 4 piste = cele 16 piste de lansare.
+> Ce NU a decis dezvoltatorul și e pus provizoriu: numele („LUMEA 4”, ca
+> celelalte), pragul de deblocare (**28**, pe pasul 8 / 18 / 28) și numele
+> cupei („WONDERS CUP”). Cele patru piste intră **fără provocare** (cer
+> contracte și, pe unele, semnale noi — §4.3), deci dau maxim 3 puncte, nu
+> 4: `Career.max_track_points(id)` socotește bonusul doar unde există, iar
+> maximul carierei e 12 × 4 + 4 × 3 = **60**, nu 64. Fără asta pașaportul ar
+> fi arătat un total pe care nimeni nu-l poate atinge. Salvarea e
+> neschimbată (progresul e pe pistă). Fără rival pentru lumea 4.
+>
+> **v0.14 (19 nov 2026), mașinile se câștigă în carieră.** Dezvoltatorul, ca
 > jucător: „n-am niciun motiv să joc cariera când pot juca World Cup pentru tot
 > ce e disponibil; nu e progresie, nimic care să mă țină”. Verificat în cod:
 > punctele deschideau doar cutia următoare, toate cele 10 mașini erau alese din
@@ -170,8 +183,11 @@
 >   | Autobuzul | 32 |
 >   | Muscle | 40 |
 >
->   Maximul de azi e 48 (3 lumi × 4 piste × 4). **Pragurile sunt provizorii**:
->   se retunează când cariera trece la 4 lumi (#704). Date, nu cod:
+>   **Pragurile sunt provizorii** și au fost puse când cariera avea 3 lumi
+>   și maximul era 48. Din v0.13 are 4 lumi și maximul e **60**, deci
+>   Muscle la 40 vine acum la două treimi din carieră, nu aproape de
+>   capăt, iar lumea 4 (pragul 28) nu mai aduce nicio mașină după el.
+>   Retunarea pe 4 lumi (#704) e încă de făcut. Date, nu cod:
 >   `CareerConfig.starting_cars` și `car_rewards` (`CareerCarReward`, câte un
 >   `.tres` în `scenes/career/data/car_rewards/`). O mașină din garaj care nu e
 >   în nicio listă e deschisă (ca o pistă în nicio lume).
@@ -845,7 +861,7 @@ Rămase:
    pe cutie, deci decide și iconografia raftului.
 2. ~~**Garajul de start**: Buggy + Taxi, sau o singură mașină (progresie mai
    lungă, început mai sărac).~~ **Construit (19 nov 2026):** Taxi + Buggy; restul
-   mașinilor se câștigă în carieră, la praguri de puncte (v0.13). Că mașinile
+   mașinilor se câștigă în carieră, la praguri de puncte (v0.14). Că mașinile
    se câștigă e decizia dezvoltatorului; **perechea de start și pragurile le-a
    ales coordonatorul** (propunerea din §5) și așteaptă confirmarea lui la
    volan — sunt date în `career_config.tres`, nu cod.
@@ -859,8 +875,10 @@ Rămase:
    mecanică (v0.12); pot rămâne ca grafică a pașaportului.
 6. **Sens invers** — intră sau nu în v1 după ce `ProbeRace` îl rulează pe
    fiecare pistă.
-7. **Ha Long** — când intră în carieră și în ce lume (a patra cutie, sau a
-   cincea pistă a uneia existente; `CareerWorld.tracks` nu are limită).
+7. ~~**Ha Long** — când intră în carieră și în ce lume~~ — decis pe 19 nov
+   2026 (v0.13): a patra cutie, cu Carrara, San Francisco și Angkor. Rămân
+   deschise pentru lumea 4: numele, pragul (28, provizoriu), provocările
+   celor patru piste și dacă are rival.
 8. **Turul fals după repunere** (§2.1): issue separat, de verificat înainte
    ca recordurile de carieră să conteze — o repunere peste linie nu are
    voie să numere un tur.

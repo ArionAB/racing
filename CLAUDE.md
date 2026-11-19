@@ -90,11 +90,14 @@ pur plus haosul fizic, nu proiectilele.
     închisă a scurtăturii): lista e la `AIController._reads_hazard`. După o
     repunere pilotul citește hazardul care tocmai l-a prins (fără bucle de
     repuneri). Garda: `ProbeAiDice` (în verify, 4 sabotaje).
-- **World Cup** ✔ (oct 2026): 3 cupe × 4 curse (`scenes/world_cup/data/`),
-  puncte cumulate 6-5-4-3-2-1 (`GameState.CHAMP_POINTS`). La fiecare cupă
-  nouă adversarii sunt trași aleatoriu din garaj, **niciodată aceeași mașină
-  de două ori** (nici a jucătorului) — `GameState.draw_ai_lineup`. Pe dinafară:
-  Dunele, Okinawa manual, Ha Long, Carrara. Garda: `ProbeWorldCup`.
+- **World Cup** ✔ (oct 2026; a patra cupă nov 2026): 4 cupe × 4 curse
+  (`scenes/world_cup/data/`) = cele 16 piste de lansare, puncte cumulate
+  6-5-4-3-2-1 (`GameState.CHAMP_POINTS`). La fiecare cupă nouă adversarii
+  sunt trași aleatoriu din garaj, **niciodată aceeași mașină de două ori**
+  (nici a jucătorului) — `GameState.draw_ai_lineup`. Pe dinafară doar
+  bancurile de test: Dunele, Okinawa manual. A patra cupă (Ha Long, Carrara,
+  San Francisco, Angkor) e și lumea 4 a carierei
+  (`scenes/career/data/world_4.tres`). Garda: `ProbeWorldCup`.
 - Touch controls: **numai butoane** — ◀ ▶ viraj (stânga-jos), ▲ gaz și ▼
   frână/marșarier (dreapta-jos, ca o pereche de pedale), TURBO/DRIFT pe rândul
   de deasupra lor ✔ — validat pe iPhone (oct 2026, trei iterații).

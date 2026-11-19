@@ -136,18 +136,21 @@ const TRACK_NAMES: Array[String] = [
 	"Angkor", "San Francisco",
 ]
 
-## Cupele din WORLD CUP (decizia dezvoltatorului, 30 oct 2026): trei cupe de
-## cate patru curse, puncte cumulate. Raman PE DINAFARA Dunele si Okinawa
-## manual (pistele vechi de test, indicii 0-1), Ha Long, Carrara, Angkor si San
-## Francisco (doar cursa rapida pana decide dezvoltatorul, brief angkor.md §8,
-## san_francisco.md §8). Cele 12
-## piste ramase sunt impartite pe geografie, ALTFEL decat lumile carierei, ca
-## modul sa nu fie aceeasi grila jucata a doua oara; fiecare cupa se deschide
-## cu o pista din lumea 1 a carierei (cea mai blanda).
+## Cupele din WORLD CUP: patru cupe de cate patru curse, puncte cumulate —
+## toate cele 16 piste de lansare (#704). Raman PE DINAFARA doar bancurile de
+## test, Dunele si Okinawa manual (indicii 0-1).
+##
+## Primele trei (decizia dezvoltatorului, 30 oct 2026) impart 12 piste pe
+## geografie, ALTFEL decat lumile carierei, ca modul sa nu fie aceeasi grila
+## jucata a doua oara; fiecare se deschide cu o pista din lumea 1 a carierei
+## (cea mai blanda). A patra (decizia dezvoltatorului, 19 nov 2026) e Ha Long,
+## Carrara, San Francisco, Angkor, in ordinea asta — aceleasi patru piste ca
+## lumea 4 a carierei, deci regula „altfel decat cariera" nu i se aplica.
 const WORLD_CUPS: Array[Resource] = [
 	preload("res://scenes/world_cup/data/asia_cup.tres"),
 	preload("res://scenes/world_cup/data/europe_cup.tres"),
 	preload("res://scenes/world_cup/data/frontier_cup.tres"),
+	preload("res://scenes/world_cup/data/wonders_cup.tres"),
 ]
 
 

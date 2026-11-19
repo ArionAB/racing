@@ -41,7 +41,8 @@ const MEDAL_GOLD := 3
 ## (implicit, rivalii nu sunt construiti — brief §12).
 const CHALLENGE_POINTS := 1
 const RIVAL_POINTS := 3
-## Maximul pe o pista: locul 1 + bonusul.
+## Maximul pe o pista CU provocare: locul 1 + bonusul. Pentru o pista anume
+## se intreaba `max_track_points(id)`: fara provocare, maximul e doar locul 1.
 const MAX_TRACK_POINTS := MEDAL_GOLD + CHALLENGE_POINTS
 
 var config: CareerConfig
@@ -238,10 +239,14 @@ static func medal_for_position(position: int) -> int:
 ## Punctele unei piste: locul (3/2/1) + bonusul provocarii. Fiecare componenta
 ## isi tine maximul separat: locul 1 fara provocare intr-o cursa si locul 3 cu
 ## provocarea reusita in alta dau impreuna 3 + 1 — bonusul se poate vana si
-## intr-o cursa ulterioara, nu doar in cea cu locul cel mai bun.
+## intr-o cursa ulterioara, nu doar in cea cu locul cel mai bun. Bifa conteaza
+## doar cat pista ARE provocare: una ramasa in salvare pe o pista fara
+## provocare nu aduce nimic, deci punctele nu trec niciodata de
+## `max_track_points`.
 func track_points(id: StringName) -> int:
 	var state := track_state(id)
-	return int(state.race_medal) + (CHALLENGE_POINTS if bool(state.challenge) else 0)
+	var bonus := bool(state.challenge) and challenge_for(id) != null
+	return int(state.race_medal) + (CHALLENGE_POINTS if bonus else 0)
 
 
 ## Punctele castigate: pe pistele din lumi (o pista fara lume nu conteaza),
@@ -257,10 +262,19 @@ func points() -> int:
 	return total
 
 
+## Cat se poate strange pe pista `id`: locul 1, plus bonusul DOAR daca pista
+## are provocare. Lumea 4 (Ha Long, Carrara, San Francisco, Angkor) a intrat in
+## cariera fara provocari: cu 4 puncte socotite pe fiecare, pasaportul ar fi
+## aratat un maxim pe care nimeni nu-l poate atinge.
+func max_track_points(id: StringName) -> int:
+	return MEDAL_GOLD + (CHALLENGE_POINTS if challenge_for(id) != null else 0)
+
+
 func max_points() -> int:
 	var total := 0
 	for world in config.worlds:
-		total += MAX_TRACK_POINTS * world.tracks.size()
+		for track_id in world.tracks:
+			total += max_track_points(track_id)
 		if world.rival != &"":
 			total += RIVAL_POINTS
 	return total

@@ -111,7 +111,7 @@ func _refresh() -> void:
 		_medals_row.add_child(_label("x %d" % int(counts[entry[0]]), 20,
 			TrackCard.TEXT_DIM))
 
-	# Lumile se reconstruiesc intregi: sunt 3 cutii, iar o deblocare schimba
+	# Lumile se reconstruiesc intregi: sunt 4 cutii, iar o deblocare schimba
 	# structura (carduri in loc de lacat), nu doar un text.
 	for child in _worlds_box.get_children():
 		child.free()
@@ -245,10 +245,11 @@ func _open_sheet(track_id: StringName) -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(title)
 
-	# RACE: locul cel mai bun si punctele stranse pe pista (loc + bonus) din 4.
+	# RACE: locul cel mai bun si punctele stranse pe pista (loc + bonus) din
+	# maximul EI: 4 cu provocare, 3 fara (bonusul nu exista pe pista aia).
 	var race_btn := _sheet_button("RACE", "%s  ·  %d / %d PTS" % [
 		_place_name(int(state.race_medal)), Career.track_points(track_id),
-		Career.MAX_TRACK_POINTS])
+		Career.max_track_points(track_id)])
 	race_btn.name = "RaceButton"
 	race_btn.pressed.connect(func() -> void:
 		Career.start_track(track_id, Career.Mode.RACE))

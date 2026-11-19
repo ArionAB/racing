@@ -100,7 +100,7 @@ func _build_track_panel() -> Control:
 	panel.back_pressed.connect(_show_main)
 	return panel
 
-## Cupa lumii: cele trei cupe, cu pistele in ordinea curselor.
+## Cupa lumii: cupele, cu pistele in ordinea curselor.
 func _build_world_cup_panel() -> Control:
 	var panel := WorldCupPanel.new()
 	panel.visible = false

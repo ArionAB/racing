@@ -60,7 +60,7 @@ func _build_cup(cup: WorldCup) -> Control:
 	box.name = "Cup_%s" % cup.id
 	var style := StyleBoxFlat.new()
 	style.bg_color = CareerPanel.BOX_COLOR
-	# Conturul in culoarea cupei, cu banda lata in stanga: cele trei cutii se
+	# Conturul in culoarea cupei, cu banda lata in stanga: cutiile se
 	# deosebesc dintr-o privire, fara sa citesti titlul.
 	style.border_color = cup.accent.darkened(0.15)
 	style.set_border_width_all(2)

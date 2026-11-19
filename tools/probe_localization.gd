@@ -2,7 +2,7 @@ extends Node
 ## ProbeLocalization — garda localizarii (nov 2026). Merge HEADLESS.
 ##
 ## Rulare (ca SCENA: autoload-urile nu se rezolva cu --script):
-##   godot --headless --path . res://tools/ProbeLocalization.tscn
+##   godot --headless --fixed-fps 60 --path . res://tools/ProbeLocalization.tscn
 ##   ... -- --sabotaj=catalog     un .po stricat in memorie: trebuie sa pice A
 ##   ... -- --sabotaj=scurgere    „PAUSED" scos din ja.po: trebuie sa pice B
 ##   ... -- --sabotaj=glife       fara Noto Sans JP in coada fonturilor: pica C
@@ -26,7 +26,10 @@ extends Node
 ##      glifa in lantul de fonturi al Control-ului, asa cum e livrat
 ##      (`Font.get_rids()`: fontul + fallback-urile lui), nu in fonturile
 ##      sistemului. Se verifica pe textul MODELAT (TextServer): glifa trebuie
-##      sa vina dintr-un RID al lantului.
+##      sa vina dintr-un RID al lantului. Noto Sans JP e in lantul fonturilor
+##      de text doar in japoneza (altfel fiecare eticheta Barlow creste in
+##      inaltime si in engleza), iar lista de limbi din SETTINGS il are mereu
+##      („日本語" se vede in orice limba).
 ##   D. INCADRARE: in fiecare limba, la 1280x720 si 1280x960 (4:3 cu
 ##      `canvas_items` + `expand`), niciun text nu iese din viewport (pe
 ##      verticala, doar listele derulabile au voie sa continue sub ecran),
@@ -92,6 +95,7 @@ const JA_LATIN_OK := {
 const GLYPH_SYSTEM_OK := {
 	"⚡": "fulgerul barii de turbo din HUD (RaceHUD._charge_bolt): nici Barlow, nici Noto Sans JP nu-l au",
 	"↺": "sageata butonului RESET din HUD: nici Barlow, nici Noto Sans JP n-o au",
+	"✓": "bifa „asta e masina mea\" din garaj: Barlow n-o are; in japoneza vine din Noto, in rest din sistem (ca inainte de localizare)",
 }
 
 var _sabotage: String = ""
@@ -127,18 +131,25 @@ func _ready() -> void:
 	_check_catalog()
 
 	print("== B/C/D. ecranele, in fiecare limba si la fiecare rezolutie")
-	await _load_race()
-	for s in SIZES:
-		_size_tag = "%dx%d" % [s.x, s.y]
-		get_window().size = s
-		await _frames(3)
-		var vp := get_viewport().get_visible_rect().size
-		_expect("D", vp.is_equal_approx(Vector2(s)),
-			"%s: viewportul logic e %s, nu %s — garda ar masura alt ecran" % [_size_tag, vp, s])
-		# Engleza INTAI: ea da suprapunerile de baza pentru D.
-		for loc in Localization.LOCALES:
-			_set_locale(loc)
+	# Engleza INTAI: ea da suprapunerile de baza pentru D. Cursa se incarca din
+	# nou in fiecare limba: in joc limba nu se schimba in cursa, iar HUD-ul isi
+	# aseaza unele randuri o data, la construire, dupa inaltimea fontului (in
+	# japoneza, cu Noto in lant, randurile sunt mai inalte).
+	for loc in Localization.LOCALES:
+		_set_locale(loc)
+		await _load_race()
+		for s in SIZES:
+			_size_tag = "%dx%d" % [s.x, s.y]
+			get_window().size = s
+			await _frames(3)
+			var vp := get_viewport().get_visible_rect().size
+			_expect("D", vp.is_equal_approx(Vector2(s)),
+				"%s: viewportul logic e %s, nu %s — garda ar masura alt ecran" % [_size_tag, vp, s])
 			await _check_screens()
+		get_tree().paused = false
+		_race.free()
+		_race = null
+		await _frames(2)
 	_set_locale("en")
 	print("== E. limba: telefon, alegere, save, schimbare pe loc")
 	await _check_language()
@@ -162,7 +173,17 @@ func _expect(contract: String, ok: bool, msg: String) -> void:
 
 func _set_locale(loc: String) -> void:
 	_locale = loc
-	TranslationServer.set_locale(loc)
+	Localization.set_locale(loc)
+	if _sabotage == "glife":
+		for f: Font in [Localization.FONT_BOLD, Localization.FONT_MEDIUM,
+				ThemeDB.fallback_font]:
+			f.fallbacks = []
+	# Noto e in lantul fonturilor de text DOAR in japoneza: altfel fiecare
+	# eticheta Barlow ar creste in inaltime si in engleza (Font.get_height ia
+	# maximul pe tot lantul).
+	if _sabotage != "glife":
+		_expect("C", (Localization.FONT_JP in Localization.FONT_BOLD.fallbacks) == (loc == "ja"),
+			"%s: Noto Sans JP %s in coada lui Barlow" % [loc, "lipseste" if loc == "ja" else "e (n-ar trebui)"])
 
 
 func _isolate() -> void:
@@ -214,7 +235,7 @@ func _restore() -> void:
 	GameState.tutorial_done = _saved["tutorial_done"]
 	TutorialInvite.offered = _saved["offered"]
 	AiSkillSelector.persist = _saved["persist"]
-	TranslationServer.set_locale(_saved["locale"])
+	Localization.set_locale(_saved["locale"])
 	get_window().size = _saved["window"]
 	ProbeTmp.remove(_tmp_dir)
 
@@ -228,10 +249,6 @@ func _apply_sabotage() -> void:
 	match _sabotage:
 		"scurgere":
 			TranslationServer.get_translation_object("ja").erase_message("PAUSED")
-		"glife":
-			for f: Font in [Localization.FONT_BOLD, Localization.FONT_MEDIUM,
-					ThemeDB.fallback_font]:
-				f.fallbacks = []
 		"incadrare":
 			TranslationServer.get_translation_object("de").add_message("Kyoto",
 				"Kyoto, die alte Kaiserstadt am Kamo")
@@ -415,14 +432,22 @@ func _load_race() -> void:
 	GameState.champ_active = false
 	GameState.tutorial_run = false
 	GameState.selected_track = TrackInfo.index_of_id(&"kyoto")
-	# Numele cele mai lungi pe grila (rezultatele): Macaraua la jucator,
-	# Ambulanta, Monster, Pompierii, Hot rod, Autobuzul la adversari.
+	# Numele cele mai lungi pe grila (rezultatele): Tow Truck la jucator,
+	# Ambulance, Monster, Fire Truck, Hot rod, Bus la adversari.
 	GameState.selected_car = _car_index(&"tow_truck")
 	GameState.ai_cars_override = [_car_index(&"ambulance"), _car_index(&"monster"),
 		_car_index(&"firetruck"), _car_index(&"hotrod"), _car_index(&"bus")]
+	var t0 := Time.get_ticks_msec()
 	_race = (load(RACE_SCENE) as PackedScene).instantiate() as Race
+	# Sonda e PROCESS_MODE_ALWAYS, iar copiii mostenesc: fara asta cursa ar
+	# merge si „in pauza" (numaratoarea, ceasul de offroad) peste starile de aici.
+	_race.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(_race)
+	# Pauza IMEDIAT: numaratoarea cursei nu are voie sa scrie peste starile
+	# construite aici (HUD-ul merge si in pauza).
+	get_tree().paused = true
 	await _frames(3)
+	print("  cursa incarcata in %.1f s (%s)" % [(Time.get_ticks_msec() - t0) / 1000.0, _locale])
 	# Cursa sta pe loc (HUD-ul ruleaza si in pauza); urma incarcarii se inchide,
 	# ca SETTINGS din joc sa nu arate o incarcare „neterminata".
 	get_tree().paused = true
@@ -483,6 +508,15 @@ func _check_screens() -> void:
 	var settings := SettingsPanel.new()
 	_host.add_child(settings)
 	await _inspect("setari", settings)
+	# Lista de limbi: fiecare nume in scrisul lui, in orice limba a jocului.
+	var lang := settings.find_child("LanguageChoice", true, false) as OptionButton
+	_expect("C", lang != null, "SETTINGS n-are randul LANGUAGE")
+	if lang != null:
+		for i in lang.item_count:
+			for f: Font in [lang.get_theme_font("font"), lang.get_popup().get_theme_font("font")]:
+				var miss := _missing_glyphs(f, 20, lang.get_item_text(i))
+				_expect("C", miss == "", "%s %s: lista de limbi, \"%s\" fara glifa: %s" % [
+					_locale, _size_tag, lang.get_item_text(i), miss])
 	settings.free()
 
 	var credits := CreditsPanel.new()
@@ -535,17 +569,21 @@ func _check_hud() -> void:
 	hud.set_ghost_time(83456)
 	hud.set_sealed_turbo(true)
 	hud.set_challenge("NO TUK-TUK HITS")
-	hud.set_challenge_progress(tr_n("LAP %d: %d PLATE", "LAP %d: %d PLATES", 12) % [3, 12])
-	hud.set_offroad_clock(2.5)
-	hud.set_wrong_way(true)
+	# Numaratoarea: cu ce se vede pe grila (telemetria, linia de mod), nu cu
+	# ceasul de offroad sau contrasensul, care pe grila nu pot aparea.
 	hud.show_countdown("READY?")
-	hud.position_popup.show_change(3, 4)
-	await _inspect("hud/cursa", hud, obstacles.call(), dev)
+	await _inspect("hud/numaratoare", hud, obstacles.call(), dev)
 	hud.show_countdown("GO!")
-	hud.set_wrong_way(false)
-	hud.set_offroad_clock(-1.0)
 	await _inspect("hud/go", hud, obstacles.call(), dev)
 	hud.show_countdown("")
+	# In cursa: offroad + contrasens + popup-ul de depasire odata (cel mai
+	# incarcat centru de ecran).
+	hud.set_offroad_clock(2.5)
+	hud.set_wrong_way(true)
+	hud.position_popup.show_change(3, 4)
+	await _inspect("hud/cursa", hud, obstacles.call(), dev)
+	hud.set_wrong_way(false)
+	hud.set_offroad_clock(-1.0)
 	hud.set_sealed_turbo(false)
 	hud.set_ghost_time(0)
 	# Mesajele: cele legate de semnalele masinii trec prin codul real din Race.
@@ -566,10 +604,30 @@ func _check_hud() -> void:
 		flashes[i].call()
 		await _inspect("hud/mesaj%d" % i, hud, obstacles.call(), dev)
 	dummy.queue_free()
+	# Fiecare provocare a carierei, cu progresul in forma regulii ei (cel mai
+	# lung caz: ultimul tur, multe evenimente), pe linia de deasupra barii.
+	for idx in QuickRaceTracks.indices():
+		var ch := Career.challenge_for(TrackInfo.for_track(idx).id)
+		if ch == null:
+			continue
+		hud.set_challenge(ch.title)
+		var progress := ""
+		match ch.rule:
+			CareerChallenge.Rule.AT_LEAST:
+				progress = "%d / %d" % [ch.count, ch.count]
+			CareerChallenge.Rule.EVERY_LAP:
+				progress = tr("LAP %d") % 3 + " ✓"
+			CareerChallenge.Rule.CLEAN_LAP:
+				progress = tr_n("LAP %d: %d PLATE", "LAP %d: %d PLATES", 12) % [3, 12]
+		hud.set_challenge_progress(progress)
+		await _inspect("hud/provocare_%s" % ch.track, hud, obstacles.call(), dev)
 	hud.set_challenge_failed()
 	await _inspect("hud/provocare_picata", hud, obstacles.call(), dev)
 
 	# Pauza si setarile din pauza (fara randul de limba).
+	# Mesajele de mai sus se sting in 1,7 s; aici starile vin la doua cadre,
+	# deci ultimul mesaj s-ar vedea si peste pauza (in joc, nu).
+	hud.flash_message("")
 	hud.position_popup.hide_now()
 	hud.call("_open_pause")
 	await _inspect("hud/pauza", hud, [], dev)
@@ -582,6 +640,8 @@ func _check_hud() -> void:
 			"setarile din pauza au randul LANGUAGE (trebuia ascuns)")
 	hud.call("_close_pause")
 	get_tree().paused = true
+	# Cadrul fara pauza a lasat numaratoarea cursei sa scrie o cifra.
+	hud.show_countdown("")
 
 	# Rezultatele: cursa rapida (cu sosirea reala si mesajul FINISH)...
 	GameState.champ_active = false
@@ -686,16 +746,21 @@ func _inspect(screen: String, root: Node, obstacles: Array = [], dev: Array = []
 		var cut := _cut_by(c, r)
 		_expect("D", cut == "", "%s: \"%s\" e taiat (%s)" % [tag, _short(shown), cut])
 	# --- D: suprapuneri noi fata de engleza
+	# Cu partea care chiar se deseneaza: un rand de lista derulat sub fereastra
+	# listei e decupat, nu acopera butonul de sub lista.
+	var vis: Array[Rect2] = []
+	for i in texts.size():
+		vis.append(_visible_part(texts[i], rects[i]))
 	var pairs := {}
 	for i in texts.size():
 		for j in range(i + 1, texts.size()):
 			if texts[i].is_ancestor_of(texts[j]) or texts[j].is_ancestor_of(texts[i]):
 				continue
-			if rects[i].intersection(rects[j]).get_area() > 4.0:
+			if vis[i].intersection(vis[j]).get_area() > 4.0:
 				pairs["%s | %s" % [paths[i], paths[j]]] = [texts[i], texts[j]]
 		for o in obstacles:
 			var orect: Rect2 = o[1] if o[1] is Rect2 else (o[1] as Control).get_global_rect()
-			if rects[i].intersection(orect).get_area() > 4.0:
+			if vis[i].intersection(orect).get_area() > 4.0:
 				pairs["%s | %s" % [paths[i], o[0]]] = [texts[i], o[0]]
 	var key := "%s@%s" % [screen, _size_tag]
 	if _locale == "en":
@@ -747,6 +812,17 @@ func _ink_rect(c: Control) -> Rect2:
 	var ay := [0.0, 0.5, 1.0, 0.0][l.vertical_alignment] as float
 	return Rect2(r.position + Vector2((r.size.x - w) * ax, (r.size.y - h) * ay),
 		Vector2(minf(w, r.size.x), minf(h, r.size.y)))
+
+
+## `r` taiat de fiecare parinte care decupeaza (gol daca nu se vede deloc).
+func _visible_part(c: Control, r: Rect2) -> Rect2:
+	var n := c.get_parent()
+	while n != null:
+		var a := n as Control
+		if a != null and (a.clip_contents or a.clip_children != CanvasItem.CLIP_CHILDREN_DISABLED):
+			r = r.intersection(a.get_global_rect())
+		n = n.get_parent()
+	return r
 
 
 ## Opacitatea efectiva: un mesaj stins de tween ramane `visible`, dar nu se vede.

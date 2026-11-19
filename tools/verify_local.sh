@@ -329,7 +329,7 @@ run_step "Credite: sursa in export, inventar, ecran, layout" credits.log 'VERDIC
 # sistem; textele incap la 1280x720, 4:3 si pe iPhone in fiecare limba; limba
 # telefonului, alegerea salvata si schimbarea pe loc din SETTINGS.
 run_step "Localizare: catalog, scurgeri, glife, incadrare, limba" localization.log 'VERDICT:' -- \
-	--headless --path . res://tools/ProbeLocalization.tscn
+	--headless --fixed-fps 60 --path . res://tools/ProbeLocalization.tscn
 # QUICK RACE (#680): grila arata exact pistele de lansare, fara bancurile de
 # test (Dunele, Okinawa manual), fara doua cartonase "Okinawa"; cariera si
 # cupele nu trimit pe un banc de test; registrul TRACK_SCENES nu s-a tasat.

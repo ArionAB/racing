@@ -253,6 +253,10 @@ const SPANS_ROAD_PREFIXES: Array[String] = [
 	# Angkor (Track24, kit val 1): portile prin care trece soseaua (coliziune `mesh`;
 	# golurile masurate in measure_angkor_w1a/w1b.py, banda verificata de ProbeLaneClear).
 	"PoartaDeSud", "GopuraVest", "GopuraNord", "PoartaCopac",
+	# Angkor, templul prin care se trece (19 nov 2026): `angkor_wat_drive.glb` e doar vizual
+	# (`none`), modelat in jurul tubului din cod; golul e pazit de tools/blender/measure_angkor_drive.py
+	# (nimic in volumul carosabil) si de tools/probe_angkor_templu.gd.
+	"AngkorWat",
 ]
 
 ## Piese de MARGINE: originea sta pe marginea asfaltului prin proiect (zid de

@@ -693,17 +693,33 @@ if OUT_PATH:
 
     def IDXs(sv):
         return r3(F_s(sv)[0])
-    width_segments = [
-        (IDXs(S_PORTAL_W - 29.0), IDXs(S_PORTAL_W + 2.0), NAVE_HW),
-        (IDXs(S_PORTAL_W + 2.0), IDXs(S_PORTAL_N - 8.0), HALL_HW),
-        (IDXs(S_PORTAL_N - 8.0), IDXs(S_PORTAL_N + 22.0), NAVE_HW),
+    FLOW_PIECES = [(S_PORTAL_W - 29.0, S_PORTAL_W + 2.0, NAVE_HW),
+                   (S_PORTAL_W + 2.0, S_PORTAL_N - 8.0, HALL_HW),
+                   (S_PORTAL_N - 8.0, S_PORTAL_N + 22.0, NAVE_HW)]
+    FLOW_S0, FLOW_S1 = S_PORTAL_W - 64.0, tag_s["B cale N sfarsit"] + 48.0
+    S_BAKHENG = tag_s["B cale N sfarsit"] + 15.0   # de aici sectorul de 7 m al lui C
+
+    def hw_at(sv):
+        """Semilatimea soselei la `sv` metri pe axa: regula ferestrei de curgere din Track (anvelopa de jos
+        a bucatilor, panta 1/15). In afara ferestrei, latimea globala (caile A, D, H, unde stau balustradele)."""
+        sv = sv % total
+        if not (FLOW_S0 <= sv <= FLOW_S1):
+            return HALF_WIDTH
+        pieces = list(FLOW_PIECES) + [(0.0, FLOW_PIECES[0][0], HALF_WIDTH),
+                                      (FLOW_PIECES[-1][1], S_BAKHENG, HALF_WIDTH), (S_BAKHENG, FLOW_S1 + 200.0, 3.5)]
+        out = 1e9
+        for a_, b_, w_ in pieces:
+            d_ = a_ - sv if sv < a_ else (sv - b_ if sv > b_ else 0.0)
+            out = min(out, w_ + d_ / 15.0)
+        return out
+    width_segments = [(IDXs(a_), IDXs(b_), w_) for a_, b_, w_ in FLOW_PIECES] + [
         # C: Bakheng, 7 m (urcarea, platforma, coborarea pana la calea uriasilor).
         (IDX("B cale N sfarsit", 15.0), IDX("D cale inceput", -20.0), 3.5),
         # E: terasa Bayonului, 14 m (turnurile cu fete stau PE ea, pasul 6).
         (IDX("E terasa V", -10.0), IDX("E terasa E", 10.0), 7.0),
     ]
     # Fereastra: de pe calea de vest (9 m constant) pana in sectorul Bakheng (7 m constant).
-    flow_windows = [(IDXs(S_PORTAL_W - 64.0), IDX("B cale N sfarsit", 48.0))]
+    flow_windows = [(IDXs(FLOW_S0), IDXs(FLOW_S1))]
     # Poarta de Sud: deschiderea de 7 m (pilonii in afara benzii, brief §7 pasul 1, ProbeLaneClear).
     pinches = [(IDX("D poarta", -8.0), IDX("D poarta", 8.0), 3.5)]
 
@@ -775,6 +791,10 @@ if OUT_PATH:
         # latura -1, golul mai departe
         # golul de pe -1 era la -95: cu malul mutat la -104 cadea pe uscat (val 1) -> -140
         (lenx(-198.0), lenx(-140.0 - GAP / 2), -1, 3), (lenx(-140.0 + GAP / 2), lenx(-MOAT_IN_W - 2.0), -1, 3),
+        # curtea de vest a templului (B), ambele laturi: de la iesirea din gopura pana la aripile portalului
+        # (care incep la x -66 si sunt din model, pe corpul tubului). Aici soseaua se largeste de la 9 la ~11 m:
+        # zidul din cod urmeaza marginea reala, iar pielea naga la fel (`hw_at`).
+        (lenx(-89.5), lenx(-67.5), 0, 3),
         # calea de nord (B), ambele laturi, de la gopura de nord (fata ei de N la y ~74) pana la capatul caii:
         # balustrada naga peste sant, ca la A si D. Desfacuta spre masinile care ies din gopura.
         (LENp(0.0, GOPURA_N_Y + 6.5), LENp(0.0, 103.0), 0, 3),
@@ -1033,7 +1053,7 @@ blend_time = 0.35
             tx, ty = tx / n, ty / n
             k = min(1.0, max(0.0, u - s_first) / 16.0)
             fl = 2.5 * (1.0 - (k * k * (3.0 - 2.0 * k)))
-            off = HALF_WIDTH + 0.25 + 0.25 + fl + extra
+            off = hw_at(u) + 0.25 + 0.25 + fl + extra
             # dreapta sensului pe harta: (ty, -tx)
             return px + ty * sign * off, py - tx * sign * off
         x0, y0 = raw(sv)
@@ -1168,6 +1188,19 @@ look_height = 1.0
 ceiling = 6.6
 ceiling_dist = 12.0
 blend_time = 0.35
+"""
+    # Raza din sanctuar: turnul central e gol, iar lumina „cade” pe piedestalul cu gongul cel mare, in
+    # spatele arcadei de pe exteriorul virajului (un con aditiv, `LightShaft`, tiparul cavernei Cappadocia;
+    # nodul sta la capatul de SUS si coboara `length`). Sanctuarul nu e carosabil.
+    if TEMPLE_GLB_OK:
+        cam_txt += f"""
+[node name="RazaSanctuar" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, {r2(Y_GAL + 18.0)}, 0)
+script = ExtResource("56_shaft")
+top_radius = 2.0
+bottom_radius = 4.4
+length = 18.0
+strength = 0.11
 """
     # ---- VAL 3-4 (kit §1.2, §1.4-§1.7): piesele mari ale locului. Decor (coliziune "none") in afara
     # benzii, cu exceptia templului (corp pe carcasa; e departe de drum, in mijlocul inelului de sant).
@@ -1621,6 +1654,7 @@ material = SubResource("Mat_macheta")
 [ext_resource type="AudioStream" path="res://assets/audio/jungle_bed.wav" id="53_jungle"]
 [ext_resource type="AudioStream" path="res://assets/audio/rain_leaves.wav" id="54_rainleaves"]
 [ext_resource type="Script" path="res://scenes/hazards/tunnel_signal_hazard.gd" id="55_signal"]
+[ext_resource type="Script" path="res://scenes/props/light_shaft.gd" id="56_shaft"]
 {zone_ext}
 [sub_resource type="StandardMaterial3D" id="Mat_macheta"]
 albedo_color = Color(0.72, 0.64, 0.52, 1)

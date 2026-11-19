@@ -5,4 +5,4 @@
 [resource]
 script = ExtResource("1")
 car = &"tow_truck"
-points = 14
+points = 17

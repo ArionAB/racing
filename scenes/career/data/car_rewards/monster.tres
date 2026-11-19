@@ -5,4 +5,4 @@
 [resource]
 script = ExtResource("1")
 car = &"monster"
-points = 25
+points = 33

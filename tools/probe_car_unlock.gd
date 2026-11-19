@@ -390,7 +390,7 @@ func _check_garage() -> void:
 	panel._show(muscle)
 	_check("4", panel._name_label.text == "MUSCLE",
 		"Muscle incuiata se vede in panou (%s)" % panel._name_label.text)
-	_check("4", panel._select.disabled and panel._select.text == "CAREER: 40 MORE PTS",
+	_check("4", panel._select.disabled and panel._select.text == "CAREER: 53 MORE PTS",
 		"SELECT pe Muscle: stins, '%s'" % panel._select.text)
 	if _sabotage == "garaj":
 		GameState.dev_unlock_all_cars = true # garda ocolita

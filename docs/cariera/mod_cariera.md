@@ -176,18 +176,19 @@
 >   |---|---|
 >   | Ambulanța | 3 |
 >   | Poliția | 6 |
->   | Hot rod | 10 |
->   | Macaraua | 14 |
->   | Pompierii | 19 |
->   | Monster | 25 |
->   | Autobuzul | 32 |
->   | Muscle | 40 |
+>   | Hot rod | 11 |
+>   | Macaraua | 17 |
+>   | Pompierii | 24 |
+>   | Monster | 33 |
+>   | Autobuzul | 43 |
+>   | Muscle | 53 |
 >
->   **Pragurile sunt provizorii** și au fost puse când cariera avea 3 lumi
->   și maximul era 48. Din v0.13 are 4 lumi și maximul e **60**, deci
->   Muscle la 40 vine acum la două treimi din carieră, nu aproape de
->   capăt, iar lumea 4 (pragul 28) nu mai aduce nicio mașină după el.
->   Retunarea pe 4 lumi (#704) e încă de făcut. Date, nu cod:
+>   **Pragurile sunt provizorii** (alese de coordonator, neconfirmate de
+>   dezvoltator). Primele au fost puse când cariera avea 3 lumi și maximul
+>   era 48 (Muscle la 40); odată cu a patra lume (v0.13, maxim 60) au fost
+>   întinse pe toată cariera, în aceeași proporție: lumea 1 aduce trei
+>   mașini, lumile 2 și 3 câte două, iar Muscle (53) cere și lumea 4.
+>   Date, nu cod:
 >   `CareerConfig.starting_cars` și `car_rewards` (`CareerCarReward`, câte un
 >   `.tres` în `scenes/career/data/car_rewards/`). O mașină din garaj care nu e
 >   în nicio listă e deschisă (ca o pistă în nicio lume).

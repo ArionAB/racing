@@ -35,7 +35,7 @@ func _build() -> void:
 	# In joc butoiul se imprastie ca restul decorului mic (BumpProp: 0,6 x 0,9 m,
 	# ~4 kg — chiar greutatea de jucarie pentru care e calibrata densitatea de
 	# acolo). Fara plafon de piese, sau in editor, ramane colizorul static.
-	if not Engine.is_editor_hint() and BumpProp.wrap(mi) != null:
+	if not Engine.is_editor_hint() and BumpProp.wrap(mi, {"shape": "cylinder"}) != null:
 		return
 	var shape := CollisionShape3D.new()
 	var cyl := CylinderShape3D.new()

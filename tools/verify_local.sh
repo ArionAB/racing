@@ -363,6 +363,9 @@ run_step "Transfagarasan: conurile din tunel se imprastie" tf_cones.log 'VERDICT
 # `--min` e numarul de piese asezate: una cazuta tacut pe "hull" pica pasul.
 run_step "Fiordland: jaloanele se imprastie" bump_fiord.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeBumpProps.tscn -- --track=Track16 --min=47
 run_step "Serengeti: chevroanele se imprastie" bump_ser.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeBumpProps.tscn -- --track=Track14 --min=28
+# Decor lovibil, valul 2: formele care se rostogolesc (`BumpProp` cu `shape`): butoiul si sfera
+# ruleaza, se opresc pe panta lina, se duc la vale pe cea abrupta; conul e infasuratoare convexa.
+run_step "Decor lovibil: piesele rotunde se rostogolesc" bump_roll.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeBumpRoll.tscn
 
 # Uneltele nu-si numesc pista cu un numar scris in cod (#718). Cu 18 piste, 12
 # e indexul Monument Valley, dar scena Track12 e Chongqing; resolve_track_index

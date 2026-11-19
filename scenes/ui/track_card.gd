@@ -13,6 +13,9 @@ const OUTLINE_HOVER := Color(0.45, 0.55, 0.72)
 const OUTLINE_FOCUS := Color(0.95, 0.83, 0.48)
 const TEXT_DIM := Color(0.62, 0.68, 0.78)
 const RADIUS := 8
+## Marimea numelui pistei pe cartonas, si cat poate scadea ca sa incapa intreg.
+const TITLE_SIZE := 22
+const TITLE_MIN_SIZE := 14
 
 var track_index: int = 0
 var _outline_box: StyleBoxFlat
@@ -158,9 +161,10 @@ func _build_footer(info: TrackInfo) -> Control:
 	names.add_theme_constant_override("separation", 2)
 	row.add_child(names)
 	# Numele si regiunea sunt in engleza in TrackInfo; se traduc la afisare.
-	var title := _label(tr(info.display_name).to_upper(), 22, Color.WHITE)
+	var title := _label(tr(info.display_name).to_upper(), TITLE_SIZE, Color.WHITE)
 	title.clip_text = true
 	title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	title.resized.connect(_fit_title.bind(title))
 	names.add_child(title)
 	var region_row := HBoxContainer.new()
 	region_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -178,6 +182,23 @@ func _build_footer(info: TrackInfo) -> Control:
 	_add_record(row, "LAP", GameState.best_lap(track_index))
 	_add_record(row, "RACE", GameState.best_race(track_index))
 	return margin
+
+
+## Numele pistei incape INTREG: cand nu are loc, fontul scade, pana la
+## `TITLE_MIN_SIZE`; elipsa ramane doar ultima plasa. La 1280x720 (si mai rau
+## pe telefoanele 20:9, unde grila are patru coloane) „MONUMENT VALLEY" iesea
+## „MONUMENT VALL…" chiar si in engleza, iar „TRANSFAGARASAN" / numele in
+## katakana pierdeau si mai mult (garda: ProbeLocalization, contractul D).
+func _fit_title(title: Label) -> void:
+	if title.size.x <= 0.0:
+		return
+	var font := title.get_theme_font("font")
+	var fs := TITLE_SIZE
+	while fs > TITLE_MIN_SIZE and font.get_string_size(title.text,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > title.size.x:
+		fs -= 1
+	if title.get_theme_font_size("font_size") != fs:
+		title.add_theme_font_size_override("font_size", fs)
 
 
 func _add_record(row: HBoxContainer, caption: String, ms: int) -> void:

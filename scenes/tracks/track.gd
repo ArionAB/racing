@@ -17123,14 +17123,14 @@ func _build_mine(frac: float, side_sign: float) -> void:
 ## arata a greseala de paleta.
 const _MINE_CAMP := [
 	# Punctul de descarcare, langa vagonet: doua butoaie si o lada.
-	{"node": "Barrel_A", "toward": 4.3, "along": 4.5, "yaw": 15.0, "bump": true},
-	{"node": "Barrel_B", "toward": 3.5, "along": 5.4, "yaw": -40.0, "bump": true},
+	{"node": "Barrel_A", "toward": 4.3, "along": 4.5, "yaw": 15.0, "bump": true, "shape": "cylinder"},
+	{"node": "Barrel_B", "toward": 3.5, "along": 5.4, "yaw": -40.0, "bump": true, "shape": "cylinder"},
 	{"node": "Crate_A", "toward": 5.4, "along": 5.1, "yaw": 24.0, "bump": true},
 	{"node": "Tarp_A", "toward": 4.9, "along": 6.3, "yaw": -8.0},
 	# Depozitul, lipit de peretele minei, pe partea cealalta a sinei.
-	{"node": "TyreStack", "toward": 7.6, "along": -3.4, "yaw": 0.0, "bump": true},
+	{"node": "TyreStack", "toward": 7.6, "along": -3.4, "yaw": 0.0, "bump": true, "shape": "cylinder"},
 	{"node": "Crate_B", "toward": 9.2, "along": -2.6, "yaw": -18.0, "bump": true},
-	{"node": "Tyre", "toward": 6.0, "along": -4.5, "yaw": 0.0, "bump": true},
+	{"node": "Tyre", "toward": 6.0, "along": -4.5, "yaw": 0.0, "bump": true, "shape": "cylinder"},
 	{"node": "Container_A", "toward": 8.4, "along": -4.6, "yaw": 8.0},
 ]
 
@@ -17162,9 +17162,10 @@ func _build_mine_camp(stand: Vector3, side: Vector3) -> void:
 		piece.rotation.y = base_yaw + deg_to_rad(float(item["yaw"]))
 		# Butoaiele, lazile si cauciucurile se imprastie (#7, #489): pana acum
 		# erau fantome — masina trecea prin ele. Prelata (plata) si containerul
-		# (prea mare pentru pragul din BumpProp) raman cum erau.
+		# (prea mare pentru pragul din BumpProp) raman cum erau. Butoaiele si
+		# cauciucurile sunt cilindri (`shape`): lovite, se rostogolesc; lazile raman cutii.
 		if bool(item.get("bump", false)):
-			BumpProp.wrap(piece)
+			BumpProp.wrap(piece, {"shape": String(item.get("shape", "box"))})
 
 ## Tabel de landmark-uri hero. id -> model GLB + cum se aseaza:
 ##   gap    = cat de departe de marginea soselei sta (m)

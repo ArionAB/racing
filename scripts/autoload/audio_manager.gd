@@ -86,6 +86,17 @@ const SFX: Dictionary = {
 	&"root_creak": preload("res://assets/audio/root_creak.wav"),
 	&"jungle_bed": preload("res://assets/audio/jungle_bed.wav"),
 	&"rain_leaves": preload("res://assets/audio/rain_leaves.wav"),
+	# San Francisco (Track25, tools/generate_sfx.gd `_save_sf_sounds`): clopotul celor doua
+	# tramvaie (BusHazard.bell_sfx: doua lovituri rare pe urcare, trei dese la gura), zumzetul
+	# cablului (bucla, AmbienceBed cu `zone_line`), scandurile pontonului (bucla de suprafata
+	# a CarAudio, doar unde pista cere `wood_deck_voice`) si golful (AmbienceCalls).
+	&"cable_bell_climb": preload("res://assets/audio/cable_bell_climb.wav"),
+	&"cable_bell_mouth": preload("res://assets/audio/cable_bell_mouth.wav"),
+	&"cable_hum": preload("res://assets/audio/cable_hum.wav"),
+	&"plank_rattle": preload("res://assets/audio/plank_rattle.wav"),
+	&"gull_call": preload("res://assets/audio/gull_call.wav"),
+	&"sea_lion_bark": preload("res://assets/audio/sea_lion_bark.wav"),
+	&"parrot_squawk": preload("res://assets/audio/parrot_squawk.wav"),
 }
 
 ## Fluxul brut al unui sunet, pentru cine si-l reda singur.
@@ -121,7 +132,8 @@ func _ready() -> void:
 	# ramuri care adauga bucle sa nu se calce pe aceleasi randuri.
 	for car_loop: StringName in [&"engine_whine", &"engine_whirr", &"skid_gravel",
 			&"roll_grass", &"roll_gravel", &"roll_water", &"kerb_rattle",
-			&"wind_loop", &"turbo_whoosh", &"jungle_bed", &"rain_leaves"]:
+			&"wind_loop", &"turbo_whoosh", &"jungle_bed", &"rain_leaves",
+			&"cable_hum", &"plank_rattle"]:
 		var cwav := SFX[car_loop] as AudioStreamWAV
 		if cwav != null:
 			cwav.loop_mode = AudioStreamWAV.LOOP_FORWARD

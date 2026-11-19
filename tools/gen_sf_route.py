@@ -1116,6 +1116,7 @@ def faces_branch(k, side):
 
 
 wall_runs = {1.0: [], -1.0: []}
+ENTRY_STRIP = []     # (gx, gz, s pe banda, latura): mijlocul fasiei retrase de la intrare (pasul 8e)
 for side in (1.0, -1.0):
     run = []
     for k in range(0, len(DENSE), 3):
@@ -1139,6 +1140,10 @@ for side in (1.0, -1.0):
                     break
         if ok:
             run.append((gx, DENSE_G[k][1], gz))
+            if si <= ENTRY_WALL_SEGS:
+                # pasul 8e: fasia retrasa de la intrarea in serpentine (gradinita); centrul fasiei de 4 m
+                cgx, _cy, cgz = s2g(xs + lx * (BW + 2.2), zs + lz * (BW + 2.2), 0.0)
+                ENTRY_STRIP.append((cgx, cgz, sk, side))
         else:
             if len(run) >= 2:
                 wall_runs[side].append(run)
@@ -1678,6 +1683,20 @@ V3_CAPS = _v3_flag("SF_V3_CAPS")              # I: zidurile moi ale podului pe b
 V3_SABOTAJ = VAL3 and os.environ.get("SF_V3_SABOTAJ", "0") == "1"
 
 
+# SUNETUL (pasul 8e, brief §5.6): SF_SUNET=0 = scena de dinainte, octet cu octet. Clopotul celor doua
+# tramvaie (`BusHazard.bell_sfx`), scandurile pontonului (`custom_wood_deck_voice`), zumzetul cablului
+# pe strada tramvaiului 1 (`AmbienceBed` cu `zone_line`) si golful (`AmbienceCalls`). Blocul cu
+# locurile e mai jos, langa scrierea scenei.
+SUNET = os.environ.get("SF_SUNET", "1") == "1"
+TRAM_BELLS = {"Tramvai1": "cable_bell_climb", "Tramvai2": "cable_bell_mouth"}
+# Tramvaiul gurii suna de mai departe: din serpentine, la raza implicita de 90 m, clopotul venea
+# abia la 2,0-2,6 s inainte de gura (ProbeSfSunet). La 130 m (si 0 dB la sursa, ca sa se auda
+# de acolo) avansul creste; urcarea ramane la 90 m (3,5 s la 28 m/s, vagonul e in fata ta). Pauza de
+# 20 s: serpentinele fac zig-zag, distanta trecea peste raza + rearmare intre doua ace si clopotul
+# suna a doua oara la 8 s, cu vagonul deja plecat (masurat). 20 s < ciclul de 29 s: o trecere, un clopot.
+TRAM_BELL_EXTRA = {"Tramvai2": ["bell_range_m = 130.0", "bell_db = 0.0", "bell_min_gap_s = 20.0"]}
+
+
 def _tram_node(name, curve_id, speed, period, phase, reach=0.0):
     b = "true" if TRAM_AI else "false"
     lines = [
@@ -1697,6 +1716,8 @@ def _tram_node(name, curve_id, speed, period, phase, reach=0.0):
     if TRAM_MODEL:
         # fata vagonului (clopotul, maneta) e pe -Z in GLB, deci fara corectie de orientare
         lines += ['model = ExtResource("%s")' % TRAM_MODEL, "model_yaw = 0.0"]
+    if SUNET and name in TRAM_BELLS:
+        lines += ['bell_sfx = &"%s"' % TRAM_BELLS[name]] + TRAM_BELL_EXTRA.get(name, [])
     return chr(10) + chr(10).join(lines) + chr(10)
 
 
@@ -4171,6 +4192,612 @@ if V3_SABOTAJ:
             _v3_body(body, "Sabotaj", (1.5, 1.5, 1.5), (1.0, 0.0, 0.0), (0.0, 0.0, 1.0),
                      (x_, road_at(x_, MK["far1"][3])[1] + 0.75, -MK["far1"][3] - (-1.5 + 3.0 * k_ % 6.0)))
     print("SABOTAJ: cutiile corpurilor noi pe dreapta de start")
+# =============================================================================================
+# PASUL 8e (17 nov 2026): TEATRUL — ultimele modele ale foii, asezate pe Track25 (brief §7 „8e").
+# Modelele vin de pe `sanfrancisco/pas8e-modele` (tools/blender/build_sf_pas8e.py, garda
+# measure_sf_pas8e.py). Familii:
+#   POARTA (`sf_dragon_gate`, H5): la capatul unei linii de vedere, cu fata spre camera care vine,
+#     in afara carosabilului si a trotuarelor; locul din `SF_POARTA_LOC` (candidatele in GATE_SITES,
+#     clasate in brief cu capturi). Coliziunea implicita a WorldProp (un hull pe stalp + unul pe cadru).
+#     Podeaua: cea mai joasa cota a terenului sub cele patru socluri (nimic in aer); cat se ingroapa
+#     soclul de pe partea inalta se raporteaza si e plafonat la GATE_BURY_MAX.
+#   LAMPIOANELE (`sf_lantern_string`, M9): module de 7 m inlantuite peste strada vazuta odata cu
+#     poarta, prinse de fatade la LANTERN_HANG m peste drum; punctul cel mai jos la >= LANTERN_CLEAR.
+#   PESCARUSII (T2): pe acoperisurile magaziilor, pe stalpii pontonului si pe parapetul capului de pod
+#     (alb pe ceva inchis), plus cativa in zbor jos peste apa (vazuti de pe chei pe fondul apei).
+#   PAPAGALII (T2): pe casele pictate (coame, cornise, pridvoare) si pe bancile din fata lor, plus un
+#     grup in zbor peste parc, pe cer. Nu in chiparosi (masurat la modele: verdele dispare acolo).
+#   VELIERELE si FERIBOTUL (T3): `PathMover` fara coliziune, pe bucle lente in golf, departe de ponton
+#     si de orice loc unde poate cadea o masina.
+#   GRADINITA (N2) in fata fatadei retrase de la intrarea in serpentine.
+# PICIOARELE pasarilor: pe suprafata VIZUALA reala, din `tools/data/sf_8e_perch.tsv`
+# (`ProbeSfTeatru --dump-perch`: raze verticale pe triunghiurile modelelor din scena, nu pe teren).
+# Generatorul scrie cererile in `tools/data/sf_8e_perch_req.tsv`; o cerere fara raspuns e sarita (si
+# tiparita), deci dupa o schimbare de locuri: generator -> sonda -> generator.
+#   SF_PAS8E=0  scena de dinainte (cu sunet), octet cu octet;  SF_8E_POARTA / _LAMPIOANE / _PESCARUSI /
+#   _PAPAGALI / _BARCI / _GRADINA = 0 sting cate o familie.  SF_8E_SABOTAJ=1: poarta pe dreapta de
+#   start (contorul de contacte TREBUIE sa numere).
+# =============================================================================================
+P8E = os.environ.get("SF_PAS8E", "1") == "1" and B200 and VAL3
+
+
+def _e8_flag(name):
+    return P8E and os.environ.get(name, "1") == "1"
+
+
+E8_POARTA = _e8_flag("SF_8E_POARTA")
+E8_LAMP = _e8_flag("SF_8E_LAMPIOANE")
+E8_PESC = _e8_flag("SF_8E_PESCARUSI")
+E8_PAPA = _e8_flag("SF_8E_PAPAGALI")
+E8_BARCI = _e8_flag("SF_8E_BARCI")
+E8_GRADINA = _e8_flag("SF_8E_GRADINA")
+E8_SABOTAJ = P8E and os.environ.get("SF_8E_SABOTAJ", "0") == "1"
+POARTA_LOC = os.environ.get("SF_POARTA_LOC", "b_sus")
+E8_NODES, E8_ROOT = [], []
+E8_STATS = {}
+E8_GROUND_PATH = os.path.join(HERE, "data", "sf_8e_ground.tsv")
+E8_PERCH_PATH = os.path.join(HERE, "data", "sf_8e_perch.tsv")
+E8_REQ_PATH = os.path.join(HERE, "data", "sf_8e_perch_req.tsv")
+_E8G = {}
+if P8E and os.path.exists(E8_GROUND_PATH):
+    for _l in open(E8_GROUND_PATH, encoding="utf-8"):
+        _tk = _l.split()
+        if len(_tk) == 3:
+            _E8G[(int(_tk[0]), int(_tk[1]))] = float(_tk[2])
+
+
+def e8_ground(mx, my):
+    """Terenul: hartile de pana acum, apoi `sf_8e_ground.tsv` (capul strazii tramvaiului si coama)."""
+    v = v3_ground(mx, my)
+    return v if v is not None else _spate_h(_E8G, mx, my)
+
+
+# --- cererile de cocotare: (cheie, x0, z0, x1, z1, n) Godot; sonda intoarce cel mai inalt punct
+E8_REQ = []
+E8_PERCH = {}
+if P8E and os.path.exists(E8_PERCH_PATH):
+    for _l in open(E8_PERCH_PATH, encoding="utf-8"):
+        _tk = _l.split()
+        if len(_tk) >= 5:
+            E8_PERCH[_tk[0]] = (float(_tk[1]), float(_tk[2]), float(_tk[3]), _tk[4])
+
+
+def e8_perch(key, x0, z0, x1=None, z1=None, n=1):
+    """Punctul de cocotare (x, y, z) Godot sau None (cerere fara raspuns inca)."""
+    E8_REQ.append((key, x0, z0, x0 if x1 is None else x1, z0 if z1 is None else z1, n))
+    v = E8_PERCH.get(key)
+    return None if v is None else (v[0], v[1], v[2])
+
+
+# --- POARTA
+GATE_HALF_W, GATE_HALF_D = 6.0, 1.83
+GATE_PLINTHS = [(-5.10, 0.66, 1.40), (-3.40, 0.80, 2.20), (3.40, 0.80, 2.20), (5.10, 0.66, 1.40)]  # x, latime, adancime
+GATE_PLINTH_H = 0.20
+GATE_BURY_MAX = 0.35       # cat poate intra in teren soclul de pe partea inalta (soclu 0,20 + blocul de piatra)
+GATE_ROAD_GAP = 3.0        # amprenta la atat dincolo de marginea carosabilului
+# (centrul pe harta, yaw-ul latimii: 0 = latimea pe E-V, 90 = pe N-S, descrierea)
+GATE_SITES = {
+    "b_sus": ((152.0, -146.0), 0.0, "capatul strazii tramvaiului 1, drept inainte dupa coltul spre coama"),
+    "chei": ((-124.7, 463.5), 0.0, "capatul strazii spre N a ocolului, drept inainte spre chei"),
+    "ocol_v": ((-148.0, 315.0), 90.0, "capatul strazii spre V a ocolului, drept inainte"),
+}
+if E8_POARTA and _p7_glb("structures/sf_dragon_gate.glb", "e8_gate"):
+    (gmx, gmy), gyaw, gdesc = GATE_SITES[POARTA_LOC]
+    if E8_SABOTAJ:
+        gmx, gmy, gyaw, gdesc = MK["far1"][2] - 60.0, MK["far1"][3] + 3.4, 90.0, "SABOTAJ: pe dreapta de start, stalpul interior pe ax"
+    ca, sa = math.cos(math.radians(gyaw)), math.sin(math.radians(gyaw))
+
+    def _gl(lx, lz):
+        # local X (latimea) -> harta (ca, sa); local Z (adancimea) -> harta (-sa, ca)
+        return (gmx + ca * lx - sa * lz, gmy + sa * lx + ca * lz)
+    gs = []
+    for px_, bx_, by_ in GATE_PLINTHS:
+        for dx in (-bx_ / 2.0, 0.0, bx_ / 2.0):
+            for dz in (-by_ / 2.0, 0.0, by_ / 2.0):
+                v = e8_ground(*_gl(px_ + dx, dz))
+                if E8_SABOTAJ:
+                    v = road_at(gmx, gmy)[1]        # pe tablier: cota drumului
+                if v is None:
+                    raise SystemExit("8e: poarta (%s) iese din hartile de teren" % POARTA_LOC)
+                gs.append(v)
+    gy = min(gs)
+    bury = max(gs) - gy
+    if bury > GATE_BURY_MAX and not E8_SABOTAJ:
+        raise SystemExit("8e: poarta (%s) pe panta: soclul se ingroapa %.2f m (plafon %.2f)" % (POARTA_LOC, bury, GATE_BURY_MAX))
+    fp = [_gl(sx * GATE_HALF_W, sz * GATE_HALF_D) for sx, sz in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+    d_road = min(_poly_line(fp, list(PTS) + [PTS[0]]), _poly_line(fp, [(g[0], -g[2]) for g in DENSE_G]))
+    d_pave = min((1 for p_ in _edge_pts(fp) if pave_y(*p_) is not None), default=0)
+    d_tram = min(_poly_line(fp, TRAM1_MAP), _poly_line(fp, TRAM2_MAP))
+    if not E8_SABOTAJ and (d_road < HW + GATE_ROAD_GAP or d_pave or d_tram < 1.25 + 0.5):
+        raise SystemExit("8e: poarta (%s) prea aproape: axa la %.1f m, trotuar %s, tramvai la %.1f m"
+                         % (POARTA_LOC, d_road, bool(d_pave), d_tram))
+    for L in LIPS:
+        lx_, ly_ = PTS[L]
+        if any(abs(p_[0] - lx_) < 30.0 and ly_ <= p_[1] <= ly_ + 45.0 for p_ in fp):
+            raise SystemExit("8e: poarta in zona de aterizare a unei muchii")
+    _v3_inst("Poarta", "PoartaDragonului", "structures/sf_dragon_gate.glb", "e8_gate",
+             _v2_xf(gyaw, 1.0, (gmx, gy, -gmy)), coll="hull", extra="metadata/sf_poarta = true\n")
+    E8_STATS["poarta"] = (POARTA_LOC, gdesc, gmx, gmy, gy, bury, d_road, d_tram)
+    print("poarta (8e): %s — %s; centrul (%.1f, %.1f), yaw %.0f, podeaua %.2f (soclul de pe partea inalta "
+          "intra %.2f m), amprenta la %.1f m de axa buclei, %.1f m de tramvaie" % (
+              POARTA_LOC, gdesc, gmx, gmy, gyaw, gy, bury, d_road, d_tram))
+
+# --- CURTEA PORTII (pasul 8e, a doua trecere, decizia dezvoltatorului): o poarta e o intrare, deci
+# ii trebuie ceva in spate. Pavaj (curtea dinaintea portii + ulita prin ea, ~35 m dupa ea) pe
+# materialul trotuarului (`paved_patches`, NU drum), cate un rand de case de fiecare parte a ulitei,
+# ghirlande peste ulita, doua felinare, doua banci, doi arbori de strada de-o parte si de alta a
+# curtii. Casele stau LATERAL fata de poarta (fatadele la CURTE_FACADE m de axa ulitei, dincolo de
+# carligele ei de 6 m): din urcare, creasta in trepte a portii ramane pe cer, nu pe fatade.
+# Masurat pe capturi (120 / 60 / 40 / 26 m de pe linia de cursa): cu fatadele la 9 m si prima casa la
+# 12 m dupa poarta, casa roz din dreapta statea in spatele acoperisului lateral al portii la 120 m, iar
+# la 60 / 40 m ambele case atingeau streasina. Mutate INAPOI (de la 18 m) si IN LATURI (fatadele la
+# 11,5 m), doua pe latura in loc de trei (mai departe terenul cade spre E peste fusta casei: la 20 m
+# sau la 12 m de ax, casa E1 cadea 2,5 m); pavajul ramane cat era, cu o fasie de iarba pana la fatade.
+#   SF_8E_CURTE=0  curtea si pasarile vizibile (blocurile de mai jos) stinse: scena de pe ramura
+#                  dinainte (commit 887956c1), octet cu octet
+E8_CURTE = P8E and os.environ.get("SF_8E_CURTE", "1") == "1"
+CURTE_FACADE = 11.5       # fatadele ulitei fata de axa ei (poarta are carligele la 6,0)
+CURTE_PAVE_HALF = 9.3     # pavajul: 18,6 m, cat poarta cu socluri si streasina (+ ~3 m pe latura)
+CURTE_END = 32.0          # ulita se termina la ultimele case (dincolo terenul cade ~17 %, prea putin pt. scara)
+CURTE_HOUSE0 = 18.0       # prima casa incepe la atatia m dupa poarta
+CURTE_N = 2               # case pe latura: doua case de capat
+CURTE_LIFT = 0.08         # pavajul peste teren
+CURTE_ROAD_GAP = 3.0      # curtea incepe la atat dincolo de marginea carosabilului
+CURTE_LAMP_IN = 0.6       # felinarele si bancile pe marginea pavajului (nu la fatade)
+CURTE_GHIRLANDA_H = 6.0   # prinderea ghirlandelor peste pavaj
+E8_PATCH = []             # triunghiuri (Godot) pentru `paved_patches`
+CURTE_HOUSES = []
+CURTE_LAMPS = []          # (x, y, z) Godot, pentru papagali
+if E8_CURTE and "poarta" in E8_STATS and not E8_SABOTAJ:
+    _loc, _d, gmx, gmy, gy, _b, _dr, _dt = E8_STATS["poarta"]
+    # ulita merge spre S (harta -y) pe x = gmx; curtea incepe unde toata latura ei de N e la
+    # CURTE_ROAD_GAP dincolo de marginea carosabilului
+    y_n = gmy + 1.83
+    while y_n < gmy + 30.0:
+        y_try = y_n + 0.5
+        if min(road_at(gmx + dx, y_try)[0] for dx in (-CURTE_PAVE_HALF, -4.0, 0.0, 4.0, CURTE_PAVE_HALF)) \
+                < HW + CURTE_ROAD_GAP:
+            break
+        y_n = y_try
+    y_s = gmy - CURTE_END
+    # grila de pavaj (1,5 m), pe teren + CURTE_LIFT
+    nx = int(math.ceil(2.0 * CURTE_PAVE_HALF / 1.5))
+    ny = int(math.ceil((y_n - y_s) / 1.5))
+    grid = {}
+    for i in range(nx + 1):
+        for j in range(ny + 1):
+            mx = gmx - CURTE_PAVE_HALF + 2.0 * CURTE_PAVE_HALF * i / nx
+            my = y_n - (y_n - y_s) * j / ny
+            g_ = e8_ground(mx, my)
+            if g_ is None:
+                raise SystemExit("8e: curtea iese din hartile de teren la (%.1f, %.1f)" % (mx, my))
+            grid[(i, j)] = (mx, g_ + CURTE_LIFT, -my)
+    for i in range(nx):
+        for j in range(ny):
+            a, b, c, d = grid[(i, j)], grid[(i + 1, j)], grid[(i + 1, j + 1)], grid[(i, j + 1)]
+            # fata in sus = normala dupa regula mainii drepte in JOS (conventia benzilor din track.gd)
+            for tri in ((a, b, c), (a, c, d)):
+                u = (tri[1][0] - tri[0][0], tri[1][1] - tri[0][1], tri[1][2] - tri[0][2])
+                v = (tri[2][0] - tri[0][0], tri[2][1] - tri[0][1], tri[2][2] - tri[0][2])
+                ny_ = u[2] * v[0] - u[0] * v[2]
+                E8_PATCH.extend(tri if ny_ < 0.0 else (tri[0], tri[2], tri[1]))
+    # casele: CURTE_N pe latura, de la CURTE_HOUSE0 dupa poarta spre S, fatada spre ulita
+    for side_, nm_ in ((1.0, "E"), (-1.0, "V")):
+        for k_ in range(CURTE_N):
+            tc = CURTE_HOUSE0 + CASE_W * (k_ + 0.5)
+            yc_f = gmy - tc                                   # mijlocul fatadei (harta)
+            xf_ = gmx + side_ * CURTE_FACADE
+            nrm = (side_, 0.0)                                # spre casa
+            samples = [e8_ground(xf_, yc_f + dy) for dy in (-3.5, -1.75, 0.0, 1.75, 3.5)]
+            back = [e8_ground(xf_ + side_ * dd, yc_f + dy) for dd in (0.0, 6.0, 12.0) for dy in (-3.5, 3.5)]
+            if any(v_ is None for v_ in samples + back):
+                raise SystemExit("8e: casa curtii %s%d iese din hartile de teren" % (nm_, k_))
+            floor_ = max(samples) + CURTE_LIFT + 0.10
+            low = min(samples + back)
+            if floor_ - low > CASE_SKIRT - 0.05:
+                raise SystemExit("8e: casa curtii %s%d cade %.2f m" % (nm_, k_, floor_ - low))
+            ctr = (xf_ + side_ * CASE_D / 2.0, yc_f)
+            Z = (nrm[0], 0.0, -nrm[1])
+            X = (Z[2], 0.0, -Z[0])
+            Xm = (X[0], -X[2])
+            end_dir = None
+            if k_ == 0:
+                end_dir = (0.0, 1.0)                          # spre poarta (N)
+            elif k_ == CURTE_N - 1:
+                end_dir = (0.0, -1.0)
+            letter = "abc"[(k_ + (0 if side_ > 0 else 1)) % 3]
+            if end_dir is not None:
+                base_ok = (-Xm[0] * end_dir[0] - Xm[1] * end_dir[1]) > 0.0
+                file_ = "sf_row_end_%s%s" % (letter, "" if base_ok else "_m")
+            else:
+                stem = KIT_SEQ[(k_ * 2 + (0 if side_ > 0 else 3)) % len(KIT_SEQ)]
+                file_ = stem + ("_m" if side_ < 0 else "")
+            pastel = (k_ * 2 + (0 if side_ > 0 else 1)) % len(PASTELS)
+            fp = [(xf_, yc_f - 3.5), (xf_, yc_f + 3.5), (xf_ + side_ * CASE_D, yc_f + 3.5), (xf_ + side_ * CASE_D, yc_f - 3.5)]
+            CURTE_HOUSES.append(dict(name="Curte%s%d" % (nm_, k_), file=file_, X=X, Z=Z,
+                                     o=(ctr[0], floor_, -ctr[1]), floor=floor_, drop=floor_ - low, pastel=pastel, fp=fp))
+    # vecinii: pastel diferit
+    for a_h, b_h in zip(CURTE_HOUSES, CURTE_HOUSES[1:]):
+        if a_h["name"][5] == b_h["name"][5] and a_h["pastel"] == b_h["pastel"]:
+            raise SystemExit("8e: casele curtii %s / %s au acelasi pastel" % (a_h["name"], b_h["name"]))
+    _ml = list(PTS) + [PTS[0]]
+    for h in CURTE_HOUSES:
+        d_ = _poly_line(h["fp"], _ml)
+        dt_ = min(_poly_line(h["fp"], TRAM1_MAP), _poly_line(h["fp"], TRAM2_MAP))
+        if d_ < CASE_ROAD_MIN or dt_ < CASE_TRAM_MIN or any(pave_y(*p_) is not None for p_ in _edge_pts(h["fp"])):
+            raise SystemExit("8e: casa curtii %s prea aproape de drum (%.1f) / tramvai (%.1f) / trotuar" % (h["name"], d_, dt_))
+        rid = _p7_glb("%s/%s.glb" % (CASE_DIR, h["file"]), "p8_" + h["file"])
+        if rid is None:
+            continue
+        X, Z, o = h["X"], h["Z"], h["o"]
+        _v3_dir("CurtePoarta")
+        V3_NODES.append('[node name="%s" parent="DecorManual/CurtePoarta" instance=ExtResource("%s")]\n'
+                        'transform = Transform3D(%.5f, 0, %.5f, 0, 1, 0, %.5f, 0, %.5f, %.3f, %.3f, %.3f)\n'
+                        'metadata/coliziune = "none"\nmetadata/contact = "none"\nmetadata/wall_class = "%s"\n'
+                        'metadata/sf_case = "P"\nmetadata/sf_case_w = 7.0\n'
+                        % (h["name"], rid, X[0], Z[0], X[2], Z[2], o[0], o[1], o[2], PASTELS[h["pastel"]]))
+        _v3_body("CurtePoartaCorpuri", "Corp_%s" % h["name"], (CASE_W, CASE_SKIRT + CASE_EAVE, CASE_D), X, Z,
+                 (o[0], o[1] - CASE_SKIRT + (CASE_SKIRT + CASE_EAVE) / 2.0, o[2]))
+    # ghirlandele peste ulita, intre fatade (inaltimea peste pavaj); felinare si banci la fatade;
+    # doi arbori de strada de-o parte si de alta a curtii, in afara latimii portii
+    if _p7_glb("props/sf_lantern_string.glb", "e8_lant"):
+        for k_, dy in enumerate((CURTE_HOUSE0 + 3.5, CURTE_HOUSE0 + CASE_W * CURTE_N - 3.5)):
+            my = gmy - dy
+            L_ = 2.0 * CURTE_FACADE
+            n_ = max(1, int(round(L_ / 7.0)))
+            sx = L_ / (7.0 * n_)
+            g_ = e8_ground(gmx, my) + CURTE_LIFT
+            for m_ in range(n_):
+                cx = gmx - CURTE_FACADE + (m_ + 0.5) * 7.0 * sx
+                xf = "Transform3D(%.5f, 0, %.5f, 0, 1, 0, %.5f, 0, %.5f, %.3f, %.3f, %.3f)" % (
+                    sx, 0.0, 0.0, 1.0, cx, g_ + CURTE_GHIRLANDA_H, -my)
+                _v3_inst("CurtePoarta", "Ghirlanda%d_%d" % (k_, m_), "props/sf_lantern_string.glb", "e8_lant", xf,
+                         extra="metadata/ancora_sol = Vector3(0, %.2f, 0)\nmetadata/sf_curte_ghirlanda = %.2f\n"
+                               % (-CURTE_GHIRLANDA_H, g_))
+    if _p7_glb("props/sf_street_lamp.glb", "v2_lamp"):
+        for k_, (side_, dy) in enumerate(((1.0, CURTE_HOUSE0 - 6.0), (-1.0, CURTE_HOUSE0 + CASE_W))):
+            mx, my = gmx + side_ * (CURTE_PAVE_HALF - CURTE_LAMP_IN), gmy - dy
+            g_ = e8_ground(mx, my) + CURTE_LIFT
+            _v3_inst("CurtePoarta", "Felinar%d" % k_, "props/sf_street_lamp.glb", "v2_lamp",
+                     _v2_xf(0.0, 1.0, (mx, g_ - 0.05, -my)), coll="trunk")
+            CURTE_LAMPS.append((mx, g_, -my))
+    if _p7_glb("props/sf_bench.glb", "v3_bench"):
+        for k_, (side_, dy) in enumerate(((-1.0, CURTE_HOUSE0 - 3.0), (1.0, CURTE_HOUSE0 + CASE_W * 1.5))):
+            mx, my = gmx + side_ * (CURTE_PAVE_HALF - CURTE_LAMP_IN - 0.7), gmy - dy
+            g_ = e8_ground(mx, my) + CURTE_LIFT
+            X_, Z_ = _v3_frame((-side_, 0.0))
+            _v3_inst("CurtePoarta", "Banca%d" % k_, "props/sf_bench.glb", "v3_bench", _v3_xf(X_, Z_, (mx, g_ - 0.03, -my)))
+    if _p7_glb("plants/sf_street_tree.glb", "v2_tree"):
+        for k_, side_ in enumerate((1.0, -1.0)):
+            mx, my = gmx + side_ * 11.0, gmy + 4.5
+            if road_at(mx, my)[0] < HW + 5.0:
+                continue
+            g_ = e8_ground(mx, my)
+            _v3_inst("CurtePoarta", "Arbore%d" % k_, "plants/sf_street_tree.glb", "v2_tree",
+                     _v2_xf(360.0 * _v2_hash(mx, my, 3.0), 1.0, (mx, g_ - 0.15, -my)), coll="trunk",
+                     extra="metadata/sf_shade = true\n")
+    meta.append("paved_patches = PackedVector3Array(%s)" % ", ".join("%.3f, %.3f, %.3f" % p_ for p_ in E8_PATCH))
+    E8_STATS["curte"] = (y_n, y_s, len(E8_PATCH) // 3, len(CURTE_HOUSES))
+    print("curtea portii (8e): pavaj y %.1f..%.1f (harta), %d triunghiuri, latime %.1f m; %d case (%s), "
+          "fatadele la %.1f m de axa ulitei; podele %.2f..%.2f, cadere max %.2f" % (
+              y_n, y_s, len(E8_PATCH) // 3, 2.0 * CURTE_PAVE_HALF, len(CURTE_HOUSES),
+              " ".join(h["file"].replace("sf_row_", "") for h in CURTE_HOUSES), CURTE_FACADE,
+              min(h["floor"] for h in CURTE_HOUSES), max(h["floor"] for h in CURTE_HOUSES),
+              max(h["drop"] for h in CURTE_HOUSES)))
+
+# --- LAMPIOANELE: (strada, punct de ancora A pe harta, punct B pe harta, cota drumului) — module de 7 m
+LANTERN_HANG = 8.0         # prinderea, peste drum
+LANTERN_SAG = 1.55
+LANTERN_CLEAR = 6.0        # punctul cel mai jos al ghirlandei peste drum (camionul de pe pod 4,6, saritura nu e aici)
+if E8_LAMP and E8_POARTA and _p7_glb("props/sf_lantern_string.glb", "e8_lant"):
+    spans = []
+    if POARTA_LOC == "b_sus":
+        for y_ in (-58.0, -76.0):
+            spans.append((y_, (X_T - CASE_SETBACK_PARKED, y_), (X_T + CASE_SETBACK_PARKED, y_)))
+    elif POARTA_LOC == "chei":
+        _xe = -RB - BYP_A - RB
+        for y_ in (420.0, 432.0):
+            spans.append((y_, (_xe - CASE_SETBACK, y_), (_xe + CASE_SETBACK, y_)))
+    elif POARTA_LOC == "ocol_v":
+        _ye = F_Y + RB
+        for x_ in (-85.0, -100.0):
+            spans.append((x_, (x_, _ye - HW - 4.0), (x_, _ye + CASE_SETBACK)))
+    n_mod = 0
+    lows = []
+    for k_, (tag, a_, b_) in enumerate(spans):
+        L_ = math.dist(a_, b_)
+        n_ = max(1, int(round(L_ / 7.0)))
+        sx = L_ / (7.0 * n_)
+        dx, dy = (b_[0] - a_[0]) / L_, (b_[1] - a_[1]) / L_
+        yaw = math.degrees(math.atan2(dy, dx))
+        ry = road_at((a_[0] + b_[0]) / 2.0, (a_[1] + b_[1]) / 2.0)[1]
+        for m_ in range(n_):
+            t_ = (m_ + 0.5) * 7.0 * sx
+            cx, cy = a_[0] + dx * t_, a_[1] + dy * t_
+            yh = ry + LANTERN_HANG
+            c_, s_ = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
+            xf = "Transform3D(%.5f, 0, %.5f, 0, 1, 0, %.5f, 0, %.5f, %.3f, %.3f, %.3f)" % (
+                c_ * sx, s_, -s_ * sx, c_, cx, yh, -cy)
+            # `ancora_sol` (probe_manual): ghirlanda atarna intre fatade, deci „solul" ei e drumul de sub
+            # ea; inaltimea fata de drum o masoara ProbeSfTeatru (LANTERN_CLEAR)
+            _v3_inst("Lampioane", "Ghirlanda%d_%d" % (k_, m_), "props/sf_lantern_string.glb", "e8_lant", xf,
+                     extra="metadata/ancora_sol = Vector3(0, %.2f, 0)\n" % (ry - yh))
+            n_mod += 1
+            lows.append(yh - LANTERN_SAG - ry)
+    if lows and min(lows) < LANTERN_CLEAR:
+        raise SystemExit("8e: lampioanele la %.2f m peste drum (prag %.1f)" % (min(lows), LANTERN_CLEAR))
+    E8_STATS["lampioane"] = (n_mod, len(spans), min(lows) if lows else 0.0)
+    print("lampioane (8e): %d module pe %d siruri, prinse la +%.1f, cel mai jos punct la %.2f m peste drum" % (
+        n_mod, len(spans), LANTERN_HANG, min(lows) if lows else 0.0))
+
+
+def _e8_flock(name, rel, rid, pts, scale=(0.9, 1.15), seed=1, extra=""):
+    if not pts or _p7_glb(rel, rid) is None:
+        return 0
+    if not any("e8_flock" in l_ for l_ in P7_EXT):
+        P7_EXT.append('[ext_resource type="Script" path="res://scenes/props/flock.gd" id="e8_flock"]\n')
+    yaws = [round(360.0 * _v2_hash(p_[0], p_[2], 17.0 + seed), 1) for p_ in pts]
+    E8_ROOT.append('[node name="%s" type="MultiMeshInstance3D" parent="."]\nscript = ExtResource("e8_flock")\n'
+                   'model = ExtResource("%s")\npositions = PackedVector3Array(%s)\nyaws = PackedFloat32Array(%s)\n'
+                   'scale_min = %.2f\nscale_max = %.2f\nseed_value = %d\nmetadata/sf_8e_stol = "%s"\n%s'
+                   % (name, rid, ", ".join("%.3f, %.3f, %.3f" % p_ for p_ in pts),
+                      ", ".join("%.4f" % math.radians(y_) for y_ in yaws), scale[0], scale[1], 20261117 + seed,
+                      rel, extra))
+    return len(pts)
+
+
+def _e8_mover(name, rel, rid, node_, pts, speed, phase, scale=1.0, over_road=False):
+    """Un `PathMover` fara coliziune pe o bucla inchisa (puncte Godot); parintele e `PasariZbor`."""
+    if not pts or _p7_glb(rel, rid) is None:
+        return 0
+    if not any("e8_mover" in l_ for l_ in P7_EXT):
+        P7_EXT.append('[ext_resource type="Script" path="res://scenes/props/path_mover.gd" id="e8_mover"]\n')
+    if not any('[node name="PasariZbor"' in l_ for l_ in E8_ROOT):
+        E8_ROOT.append('[node name="PasariZbor" type="Node3D" parent="."]\n')
+    c0 = pts[0]
+    E8_ROOT.append('[node name="%s" type="Path3D" parent="PasariZbor"]\ntransform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, '
+                   '%.3f, %.3f, %.3f)\nscript = ExtResource("e8_mover")\nmodel = ExtResource("%s")\nmodel_node = "%s"\n'
+                   'model_scale = %.2f\ncollide = false\npoints = PackedVector3Array(%s)\nspeed = %.1f\nphase = %.3f\n'
+                   'stick_to_ground = false\nbob_amplitude = 0.15\nsway_frequency = 1.6\nmetadata/sf_8e_zbor = %s\n'
+                   % (name, c0[0], c0[1], c0[2], rid, node_, scale,
+                      ", ".join("%.2f, %.2f, %.2f" % (p_[0] - c0[0], p_[1] - c0[1], p_[2] - c0[2]) for p_ in pts),
+                      speed, phase, "true" if over_road else "false"))
+    return 1
+
+
+def _e8_ellipse(cx, cy, cz, ax, az, n=20, reverse=False):
+    out = []
+    for k_ in range(n + 1):
+        a_ = 2.0 * math.pi * k_ / n * (-1.0 if reverse else 1.0)
+        out.append((cx + ax * math.cos(a_), cy, cz + az * math.sin(a_)))
+    return out
+
+
+# --- PESCARUSII: cocotati (acoperisurile magaziilor, stalpii pontonului, parapetul capului de pod)
+GULL_SCALE = (0.9, 1.15)
+if E8_PESC:
+    perch = []
+    for k_, (kind, xc) in enumerate(SHED_PLAN):
+        _f, body_l, edge_ = SHED_DIM[kind]
+        z_a, z_b = -(SHED_EDGE_Y + 0.5), -(SHED_EDGE_Y + 2.0 * edge_ - 0.5)
+        for j_, fx in enumerate((0.15, 0.45, 0.8)):
+            if kind == "S" and j_ == 1:
+                continue
+            zq = z_a + (z_b - z_a) * fx
+            p_ = e8_perch("magazia%d_%d" % (k_, j_), xc - 1.0, zq, xc + 1.0, zq, 9)
+            if p_:
+                perch.append(p_)
+    for k_, (x_, y_, z_) in enumerate(BOLLARDS):
+        if k_ % 2 == 0:
+            p_ = e8_perch("stalp_ponton%d" % k_, x_ - 0.25, z_, x_ + 0.25, z_, 5)
+            if p_:
+                perch.append(p_)
+    # parapetul capului de V al podului (spre golf), pe ambele margini ale tablierului; a doua trecere:
+    # pe felinarele tablierului (la 13,6 m de ax, langa benzi, in conul camerei), nu pe parapetul departat
+    # (cererile raman si cand nu se folosesc, ca SF_8E_CURTE=0 sa gaseasca punctele in fisierul de cocotari)
+    for k_, x_ in enumerate((266.0, 272.0, 279.0)):
+        for s_, z_ in ((0, -239.0), (1, -218.0)):
+            p_ = e8_perch("parapet%d_%d" % (k_, s_), x_, z_ - 2.0, x_, z_ + 2.0, 17)
+            if p_ and not E8_CURTE:
+                perch.append(p_)
+    if E8_CURTE:
+        for k_, (x_, z_) in enumerate(((275.0, -242.226), (315.0, -242.226), (355.0, -242.226), (395.0, -242.226),
+                                       (455.0, -215.026), (415.0, -215.026), (375.0, -215.026), (335.0, -215.026))):
+            p_ = e8_perch("felinar_pod%d" % k_, x_ - 0.6, z_, x_ + 0.6, z_, 13)
+            if p_:
+                perch.append(p_)
+        # primii stalpi ai parapetului, pe latura fiecarei benzi, unde intra camera pe tablier (banda de N
+        # intra pe la V, cea de S pe la E). Picioarele turnurilor n-au polita la cota tablierului: soclul
+        # de beton e la 16 m sub el (masurat pe sf_bridge_tower.glb), nu se vede de pe pod.
+        for k_, (x_, z_) in enumerate(((273.0, -241.0), (277.5, -241.0), (467.0, -216.25), (462.5, -216.25))):
+            p_ = e8_perch("parapet_cap%d" % k_, x_, z_ - 0.4, x_, z_ + 0.4, 9)
+            if p_:
+                perch.append(p_)
+    n_p = _e8_flock("PescarusiCocotati", "animals/sf_gull_perch.glb", "e8_gull_p", perch, GULL_SCALE, 1)
+    # in zbor: jos peste apa, la N de chei (vazuti de pe chei si de pe ponton pe fondul apei), si langa
+    # capul de V al podului, sub tablier
+    glide = []
+    for k_, (x_, z_, h_) in enumerate(((-55.0, -512.0, 4.5), (-20.0, -518.0, 6.0), (5.0, -506.0, 3.8),
+                                       (60.0, -490.0, 5.2), (95.0, -499.0, 4.2), (130.0, -486.0, 6.5),
+                                       (300.0, -300.0, 8.0), (318.0, -292.0, 10.5), (296.0, -318.0, 7.0))):
+        if E8_CURTE and x_ > 250.0:
+            continue        # peste stramtoare nu se disting (masurat); in locul lor, pescarusii in miscare de langa pod
+        glide.append((x_, SEA_Y + h_, z_))
+    n_g = _e8_flock("PescarusiInZbor", "animals/sf_gull_glide.glb", "e8_gull_g", glide, GULL_SCALE, 2)
+    n_m = 0
+    if E8_CURTE:
+        # in MISCARE, langa tablier, la ~6-8 m in afara parapetului, la cota tablierului, pe fondul apei,
+        # in sensul traficului de pe latura lor (pe pod se circula pe stanga: banda de N spre E)
+        # (ambele bucle in sens invers: latura dinspre pod merge spre E la N si spre V la S, ca benzile).
+        # Trei pe bucla, cu fazele la o treime: pe orice bucata a podului e cel putin unul pe latura
+        # dinspre tablier (cu doi, la 0 / 0,12, capturile prindeau des ambii pe latura departata).
+        # Latura dinspre pod la ~13,5 m de axa benzii (7 m in afara parapetului), cea departata la 20 m mai
+        # incolo; scara 2,0: la 1,1, de la 30-35 m, pescarusul in zbor era un punct de cativa pixeli.
+        for k_, (cz, ph) in enumerate(((-258.5, 0.0), (-258.5, 0.333), (-258.5, 0.667),
+                                       (-199.0, 0.167), (-199.0, 0.5), (-199.0, 0.833))):
+            pts_ = _e8_ellipse(370.0, DECK_Y + 2.0 + 0.6 * (k_ % 3), cz, 112.0, 10.0, 24, True)
+            n_m += _e8_mover("PescarusPod%d" % k_, "animals/sf_gull_glide.glb", "e8_gull_g", "Gull_Glide", pts_,
+                             13.0, ph, 2.0)
+    E8_STATS["pescarusi"] = (n_p, n_g + n_m)
+    print("pescarusi (8e): %d cocotati, %d in zbor (din care %d in miscare langa tablier)" % (n_p, n_g + n_m, n_m))
+
+# --- PAPAGALII: pe casele pictate si pe bancile coamei; in zbor peste parc
+# Scara papagalilor: la 0,9-1,15 (cea a modelului) pe banci se citeau ca puncte cu rosu; la 1,5-1,7 ca
+# papagali (corp verde, cap rosu) din camera de joc (p8e_asezat_papagali*.png). SF_PAPAGAL_SCARA=a,b.
+PARROT_SCALE = tuple(float(v) for v in os.environ.get("SF_PAPAGAL_SCARA", "1.6,1.8").split(","))
+if E8_PAPA:
+    perch = []
+    y_f = Y_COAMA + LADY_SETBACK
+    x_e = LADY_X_MID + 8 * CASE_W / 2.0
+    for k_ in range(1, 7):
+        xc = x_e - CASE_W * (k_ + 0.5)
+        zf = -y_f                    # fatada (Godot z)
+        # coama: in lungul axei casei, cel mai inalt punct; cornisa de sus a fatadei; acoperisul pridvorului
+        for key, (x0, z0, x1, z1, n_) in (("coama", (xc - 0.4, zf - 1.0, xc + 0.6, zf - 9.0, 17)),
+                                         ("cornisa", (xc + 1.6, zf + 0.15, xc + 1.6, zf - 0.6, 7)),
+                                         ("pridvor", (xc - 1.8, zf + 0.4, xc - 1.8, zf + 1.4, 7))):
+            if (k_ + len(key)) % 2 == 0 and key != "coama":
+                continue
+            p_ = e8_perch("papagal_%s%d" % (key, k_), x0, z0, x1, z1, n_)
+            if p_:
+                perch.append(p_)
+    for nm_, mx_ in (("BancaCoama1", 62.0), ("BancaCoama2", 90.5)):
+        zb = -(Y_COAMA + HW + 1.2)
+        for j_, dx in enumerate((-0.6, 0.5)):
+            p_ = e8_perch("papagal_%s_%d" % (nm_, j_), mx_ + dx, zb - 0.6, mx_ + dx, zb + 0.6, 9)
+            if p_:
+                perch.append(p_)
+    if E8_CURTE:
+        # unde se uita deja camera: poarta (coama acoperisului central, colturile ridicate, capacele stalpilor
+        # exteriori), cablul ghirlandelor de pe B, bratele semafoarelor de pe muchia 1 si de la capatul
+        # strazii tramvaiului, capetele felinarelor ulitei
+        if "poarta" in E8_STATS:
+            _loc, _d, gmx_, gmy_, _gy, _b, _dr, _dt = E8_STATS["poarta"]
+            for key, (x0, z0, x1, z1, n_) in (("poarta_coama0", (gmx_ - 3.0, -gmy_ - 0.4, gmx_ - 3.0, -gmy_ + 0.4, 9)),
+                                             ("poarta_coama1", (gmx_ + 2.0, -gmy_ - 0.4, gmx_ + 2.0, -gmy_ + 0.4, 9)),
+                                             ("poarta_colt0", (gmx_ - 4.9, -gmy_ + 1.2, gmx_ - 4.5, -gmy_ + 1.6, 5)),
+                                             ("poarta_colt1", (gmx_ + 4.5, -gmy_ + 1.2, gmx_ + 4.9, -gmy_ + 1.6, 5)),
+                                             ("poarta_stalp0", (gmx_ - 5.6, -gmy_ - 0.2, gmx_ - 5.6, -gmy_ + 0.2, 5)),
+                                             ("poarta_stalp1", (gmx_ + 5.6, -gmy_ - 0.2, gmx_ + 5.6, -gmy_ + 0.2, 5))):
+                p_ = e8_perch("papagal_%s" % key, x0, z0, x1, z1, n_)
+                if p_:
+                    perch.append(p_)
+        for k_, (x_, my_) in enumerate(((X_T - 5.5, -58.0), (X_T + 6.0, -76.0))):
+            p_ = e8_perch("papagal_ghirlanda%d" % k_, x_, -my_ - 0.4, x_, -my_ + 0.4, 17)
+            if p_:
+                perch.append(p_)
+        for k_, (x_, z_, dx) in enumerate(((PTS[LIPS[0]][0] + MAST_LAT - 2.0, -PTS[LIPS[0]][1], -2.5),
+                                           (X_T - SEMAFOR_B1_LAT + 6.0, -102.0, 2.0))):
+            p_ = e8_perch("papagal_semafor%d" % k_, x_, z_ - 0.3, x_ + dx, z_ + 0.3, 11)
+            if p_:
+                perch.append(p_)
+        for k_, (x_, y_, z_) in enumerate(CURTE_LAMPS):
+            p_ = e8_perch("papagal_felinar_curte%d" % k_, x_ - 0.3, z_, x_ + 0.3, z_, 9)
+            if p_:
+                perch.append(p_)
+    n_p = _e8_flock("PapagaliCocotati", "animals/sf_parrot_perch.glb", "e8_par_p", perch, PARROT_SCALE, 3)
+    fly = []
+    for k_, (x_, z_, h_) in enumerate(() if E8_CURTE else ((66.0, 104.0, 15.0), (72.0, 100.0, 16.5), (78.0, 106.0, 14.5),
+                                       (69.0, 109.0, 16.0), (83.0, 101.0, 15.5))):
+        g_ = e8_ground(x_, -z_)
+        if g_ is not None:
+            fly.append((x_, g_ + h_, z_))
+    n_f = _e8_flock("PapagaliInZbor", "animals/sf_parrot_fly.glb", "e8_par_f", fly, PARROT_SCALE, 4)
+    if E8_CURTE:
+        # in MISCARE, peste strada coamei, in fata camerei: o bucla ingusta care traverseaza strada de doua ori
+        # (spre S si inapoi), la 4,5-6,5 m peste drum; patru papagali in grup (faze apropiate)
+        _cy = -Y_COAMA
+        ry_ = road_at(81.0, Y_COAMA)[1]
+        for k_ in range(4):
+            pts_ = _e8_ellipse(84.0 + 1.0 * (k_ % 2), ry_ + 4.5 + 0.6 * k_, _cy + 2.0, 4.0, 11.0, 20, k_ % 2 == 1)
+            n_f += _e8_mover("PapagalZbor%d" % k_, "animals/sf_parrot_fly.glb", "e8_par_f", "Parrot_Fly", pts_,
+                             9.0, 0.02 * k_ if k_ % 2 == 0 else 0.5 + 0.02 * k_, sum(PARROT_SCALE) / 2.0, True)
+    E8_STATS["papagali"] = (n_p, n_f, PARROT_SCALE)
+    print("papagali (8e): %d cocotati, %d in zbor, scara %.2f..%.2f" % (n_p, n_f, PARROT_SCALE[0], PARROT_SCALE[1]))
+
+# --- VELIERELE si FERIBOTUL: PathMover fara coliziune, bucle inchise (Godot, Y la apa)
+BOATS = []
+if E8_BARCI:
+    def _ellipse(cx, cz, ax, az, n=16, rot=0.0):
+        out = []
+        for k_ in range(n + 1):
+            a_ = 2.0 * math.pi * k_ / n
+            x_, z_ = ax * math.cos(a_), az * math.sin(a_)
+            c_, s_ = math.cos(math.radians(rot)), math.sin(math.radians(rot))
+            out.append((cx + c_ * x_ - s_ * z_, SEA_Y, cz + s_ * x_ + c_ * z_))
+        return out
+    BOATS = [
+        ("Velier1", "vehicles/sf_sailboat.glb", "e8_sail", "Sailboat", _ellipse(345.0, -330.0, 45.0, 22.0, 16, 20.0), 2.6, 0.0),
+        ("Velier2", "vehicles/sf_sailboat.glb", "e8_sail", "Sailboat", _ellipse(410.0, -395.0, 38.0, 20.0, 16, -15.0), 2.2, 0.45),
+        ("Velier3", "vehicles/sf_sailboat.glb", "e8_sail", "Sailboat", _ellipse(230.0, -555.0, 50.0, 24.0, 16, 5.0), 2.4, 0.7),
+        ("Feribot", "@okinawa/vehicles/island_ferry.glb", "e8_ferry", "Island_Ferry", _ellipse(170.0, -650.0, 260.0, 40.0, 24, 0.0), 3.2, 0.2),
+    ]
+    if not any("e8_mover" in l_ for l_ in P7_EXT):
+        P7_EXT.append('[ext_resource type="Script" path="res://scenes/props/path_mover.gd" id="e8_mover"]\n')
+    nb = 0
+    for nm_, rel_, rid_, node_, pts_, spd_, ph_ in BOATS:
+        if rel_.startswith("@"):
+            path_ = "res://assets/models/" + rel_[1:]
+            if not os.path.exists(os.path.join(ROOT, "assets", "models", *rel_[1:].split("/"))):
+                continue
+            line = '[ext_resource type="PackedScene" path="%s" id="%s"]\n' % (path_, rid_)
+            if line not in P7_EXT:
+                P7_EXT.append(line)
+        elif _p7_glb(rel_, rid_) is None:
+            continue
+        c0 = pts_[0]
+        E8_ROOT.append('[node name="%s" type="Path3D" parent="Barci"]\ntransform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, '
+                       '%.3f, %.3f, %.3f)\nscript = ExtResource("e8_mover")\nmodel = ExtResource("%s")\nmodel_node = "%s"\n'
+                       'collide = false\npoints = PackedVector3Array(%s)\nspeed = %.1f\nphase = %.2f\nstick_to_ground = false\n'
+                       'bob_amplitude = 0.06\nrock_amplitude = 0.03\nmetadata/sf_8e_barca = true\n'
+                       % (nm_, c0[0], c0[1], c0[2], rid_, node_,
+                          ", ".join("%.2f, %.2f, %.2f" % (p_[0] - c0[0], p_[1] - c0[1], p_[2] - c0[2]) for p_ in pts_),
+                          spd_, ph_))
+        nb += 1
+    if nb:
+        E8_ROOT.insert(0, '[node name="Barci" type="Node3D" parent="."]\n')
+    E8_STATS["barci"] = nb
+    print("barci (8e): %s" % "; ".join("%s centrul (%.0f, %.0f) %.1f m/s" % (
+        b_[0], sum(p_[0] for p_ in b_[4]) / len(b_[4]), -sum(p_[2] for p_ in b_[4]) / len(b_[4]), b_[5]) for b_ in BOATS))
+
+# --- GRADINITA de la intrarea in serpentine: in fasia de 4 m dintre banda si fatada retrasa
+ENTRY_GARDEN_SPOTS = []
+if E8_GRADINA and len(ENTRY_STRIP) >= 2:
+    # module de 7 m la mijlocul fasiei, cu latura lunga in lungul ei, din 7,5 in 7,5 m
+    _es = sorted(ENTRY_STRIP, key=lambda e_: e_[2])
+    _s0 = _es[0][2] + 4.0
+    for e_a, e_b in zip(_es, _es[1:]):
+        if e_a[3] != e_b[3]:
+            continue
+        while e_a[2] <= _s0 <= e_b[2] and _s0 <= _es[-1][2] - 4.0:
+            f_ = (_s0 - e_a[2]) / max(e_b[2] - e_a[2], 1e-6)
+            gx_ = e_a[0] + (e_b[0] - e_a[0]) * f_
+            gz_ = e_a[1] + (e_b[1] - e_a[1]) * f_
+            yaw_ = math.degrees(math.atan2(-(e_b[1] - e_a[1]), e_b[0] - e_a[0]))
+            ENTRY_GARDEN_SPOTS.append((gx_, gz_, yaw_, 0.0))
+            _s0 += 7.5
+if E8_GRADINA and ENTRY_GARDEN_SPOTS and _p7_glb("props/sf_front_garden.glb", "v3_garden"):
+    ng = 0
+    for k_, (gx, gz, yaw, wall_y) in enumerate(ENTRY_GARDEN_SPOTS):
+        g_ = e8_ground(gx, -gz)
+        if g_ is None:
+            continue
+        _v3_inst("GradinaSerpentine", "Gradina%d" % k_, "props/sf_front_garden.glb", "v3_garden",
+                 _v2_xf(yaw, 1.0, (gx, g_ - 0.02, gz)))
+        ng += 1
+    E8_STATS["gradina"] = ng
+    print("gradinita (8e): %d module la intrarea in serpentine" % ng)
+
+if P8E and not DRY:
+    with open(E8_REQ_PATH, "w", encoding="utf-8", newline="\n") as f_:
+        for r_ in E8_REQ:
+            f_.write("%s %.3f %.3f %.3f %.3f %d\n" % r_)
+_miss = [r_[0] for r_ in E8_REQ if r_[0] not in E8_PERCH]
+if _miss:
+    print("ATENTIE 8e: %d cocotari fara raspuns (%s...) — ruleaza ProbeSfTeatru --dump-perch si regenereaza"
+          % (len(_miss), ", ".join(_miss[:4])))
+V3_ROOT_NODES += E8_ROOT
+
 P7_NODES += V3_NODES + V3_ROOT_NODES
 P6_SUB += V3_SUB
 
@@ -4203,6 +4830,71 @@ if P7_NODES:
 # fara niciun model, scena iese octet cu octet ca la pasul 6
 P7_TAIL = (chr(10) + chr(10).join(P7_NODES)) if P7_NODES else ""
 
+# =============================================================================================
+# SUNETUL (pasul 8e, brief §5.6). Tot ce urmeaza e gol cu SF_SUNET=0 (scena de dinainte).
+#   - zumzetul cablului: AmbienceBed cu `zone_line` pe axa strazii tramvaiului 1, de la baza
+#     urcarii (B0) pana unde iese tramvaiul; plin la <= 14 m de axa (banda + trotuarul), mut de la
+#     45 m (coama, dupa colt, e deja la > 45 m dupa ~50 m de mers spre V);
+#   - golful: AmbienceCalls, locuri fixe (nu modele): pescarusi peste chei si peste capul de V al
+#     podului, leii de mare pe pluta lor (LIONS_AT), papagalii in parcul cu chiparosi de pe coama.
+#     Pozitiile sunt in raportul pasului 8e (brief §7), ca stolurile sa fie puse unde e sunetul.
+# =============================================================================================
+SUNET_EXT, SUNET_PROPS, SUNET_NODES = [], [], []
+if SUNET:
+    SUNET_PROPS.append("custom_wood_deck_voice = true")
+    SUNET_EXT += [
+        '[ext_resource type="Script" path="res://scenes/hazards/ambience_bed.gd" id="s8e_bed"]\n',
+        '[ext_resource type="AudioStream" path="res://assets/audio/cable_hum.wav" id="s8e_hum"]\n',
+        '[ext_resource type="Script" path="res://scenes/hazards/ambience_calls.gd" id="s8e_calls"]\n',
+    ]
+    _hum_line = [godot((MK["B0"][2], MK["B0"][3]), DECK_Y), TRAM1_G[-1]] if B200 else [TRAM1_G[2], TRAM1_G[-1]]
+    _yq = Y_LOW + 9.0
+    SF_SPOTS = [
+        # (nume, pozitie Godot, sunet, raza m, interval s, dB)
+        ("pescarusi chei V", (-30.0, _yq, -470.0), "gull_call", 80.0, (5.0, 11.0), -9.0),
+        ("pescarusi ponton", (80.0, _yq, -468.0), "gull_call", 80.0, (6.0, 12.0), -9.0),
+        ("pescarusi capul de pod", (250.0, DECK_Y + 10.0, -228.6), "gull_call", 80.0, (7.0, 14.0), -10.0),
+        ("leii de mare", (LIONS_AT[0], SEA_Y + 1.5, -LIONS_AT[1]), "sea_lion_bark", 75.0, (6.0, 13.0), -6.0),
+        ("papagali parc S", (50.0, 58.0, 40.0), "parrot_squawk", 65.0, (8.0, 16.0), -10.0),
+        ("papagali parc N", (70.0, 58.0, 85.0), "parrot_squawk", 65.0, (9.0, 17.0), -10.0),
+    ]
+    if E8_CURTE and "poarta" in E8_STATS:
+        # pasul 8e, a doua trecere: unde se vad pasarile se si aud (poarta cu papagalii, tablierul cu pescarusii)
+        # papagalii din parcul de S nu mai au pasari la mai putin de 59 m: locul lor se muta pe ghirlandele
+        # de pe B, unde stau acum papagalii (y 58 si 76 pe harta)
+        SF_SPOTS = [("papagali ghirlande B", (X_T, 58.0, 67.0)) + sp[2:] if sp[0] == "papagali parc S" else sp
+                    for sp in SF_SPOTS]
+        SF_SPOTS += [
+            ("papagali poarta", (E8_STATS["poarta"][2], 60.0, -E8_STATS["poarta"][3] - 6.0), "parrot_squawk", 65.0, (10.0, 18.0), -10.0),
+            ("pescarusi tablier", (370.0, DECK_Y + 6.0, -228.6), "gull_call", 80.0, (8.0, 15.0), -10.0),
+        ]
+    SUNET_NODES.append("\n".join([
+        '[node name="Sunet" type="Node" parent="."]',
+        "",
+        '[node name="ZumzetCablu" type="Node" parent="Sunet"]',
+        'script = ExtResource("s8e_bed")',
+        'bed_stream = ExtResource("s8e_hum")',
+        "bed_db = -14.0",
+        "fade_seconds = 0.8",
+        "zone_line = PackedVector3Array(%s)" % ", ".join("%.3f, %.3f, %.3f" % tuple(v) for v in _hum_line),
+        "zone_full_m = 14.0",
+        "zone_silent_m = 45.0",
+        "",
+        '[node name="Golful" type="Node" parent="Sunet"]',
+        'script = ExtResource("s8e_calls")',
+        "spot_pos = PackedVector3Array(%s)" % ", ".join("%.3f, %.3f, %.3f" % sp[1] for sp in SF_SPOTS),
+        "spot_sfx = Array[StringName]([%s])" % ", ".join('&"%s"' % sp[2] for sp in SF_SPOTS),
+        "spot_radius = PackedFloat32Array(%s)" % ", ".join("%.1f" % sp[3] for sp in SF_SPOTS),
+        "spot_gap = PackedVector2Array(%s)" % ", ".join("%.1f, %.1f" % sp[4] for sp in SF_SPOTS),
+        "spot_db = PackedFloat32Array(%s)" % ", ".join("%.1f" % sp[5] for sp in SF_SPOTS),
+        "",
+    ]))
+    print("sunetul (8e): clopot pe %s; zumzet pe %s; locuri: %s" % (
+        ", ".join("%s=%s" % kv for kv in TRAM_BELLS.items()),
+        " -> ".join("(%.0f, %.0f)" % (v[0], v[2]) for v in _hum_line),
+        "; ".join("%s (%.0f, %.0f, %.0f)" % (sp[0], *sp[1]) for sp in SF_SPOTS)))
+SUNET_TAIL = (chr(10) + chr(10).join(SUNET_NODES)) if SUNET_NODES else ""
+
 tscn = f"""[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
@@ -4210,7 +4902,7 @@ tscn = f"""[gd_scene format=3]
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="3_branch"]
 [ext_resource type="ArrayMesh" path="res://{OBJ_REL}" id="4_gri"]
 [ext_resource type="Script" path="res://scenes/hazards/bus_hazard.gd" id="5_bus"]
-{POD_EXT}{"".join(P6_EXT)}{"".join(P7_EXT)}
+{POD_EXT}{"".join(P6_EXT)}{"".join(P7_EXT)}{"".join(SUNET_EXT)}
 [sub_resource type="Curve3D" id="Curve3D_sf"]
 closed = true
 _data = {{
@@ -4255,7 +4947,7 @@ custom_width_segments = Array[Vector3]([{", ".join(V3(*w_) for w_ in width_segme
 custom_sun_rotation_deg = Vector3({SUN_ELEV}, {SUN_AZ}, 0)
 branch_smooth_level = true
 terrain_pad_m = 120.0
-{chr(10).join(POD_PROPS + P6_PROPS + meta)}
+{chr(10).join(POD_PROPS + P6_PROPS + SUNET_PROPS + meta)}
 
 [node name="Path" type="Path3D" parent="."]
 curve = SubResource("Curve3D_sf")
@@ -4281,7 +4973,7 @@ material_override = SubResource("Mat_gri")
 [node name="Tramvaie" type="Node3D" parent="."]
 {tram_nodes}
 {chr(10).join(POD_NODES)}
-{chr(10).join(P6_NODES)}{P7_TAIL}"""
+{chr(10).join(P6_NODES)}{P7_TAIL}{SUNET_TAIL}"""
 with open(os.devnull if DRY else OUT_TSCN, "w", encoding="utf-8", newline="\n") as f:
     f.write(tscn)
 print(f"scris {os.path.relpath(OUT_TSCN, ROOT)}; sea_level_offset {SEA_OFFSET}")

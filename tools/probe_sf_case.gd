@@ -112,7 +112,7 @@ func _ground(x: float, z: float) -> float:
 ## suprafata cea mai de sus dintre ele; terenul de sub trotuar e ascuns. Trotuarul e in `Shoulders`
 ## sau, cu `paved_level_color`, in corpul lui (`Trotuar`).
 func _surface(x: float, z: float) -> float:
-	return _first(x, z, ["TerrainBody", "Shoulders", "Trotuar"])
+	return _first(x, z, ["TerrainBody", "Shoulders", "Trotuar", "TrotuarCurte"])
 
 
 func _first(x: float, z: float, names: Array) -> float:
@@ -227,6 +227,7 @@ func _check(track: Track) -> int:
 	var dm := track.get_node_or_null(^"DecorManual")
 	var corp := track.get_node_or_null(^"CaseCorpuri")
 	var corp_pl := track.get_node_or_null(^"CasePictateCorpuri")
+	var corp_cu := track.get_node_or_null(^"CurtePoartaCorpuri")     # pasul 8e: casele ulitei portii
 	if dm == null:
 		print("FARA DecorManual")
 		return 1
@@ -378,7 +379,7 @@ func _check(track: Track) -> int:
 				why.append("se suprapune cu %s" % houses[hj].name)
 		# 5: cutia
 		var body: Node = null
-		for cb: Node in [corp, corp_pl]:
+		for cb: Node in [corp, corp_pl, corp_cu]:
 			if cb != null and body == null:
 				body = cb.get_node_or_null(NodePath("Corp_%s" % h.name))
 		# casele pictate: cutia are si adancimea pridvorului (spre -Z, in fata fatadei)

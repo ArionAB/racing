@@ -89,6 +89,9 @@ func _init() -> void:
 	# Sunetul Angkorului (Track24). Generator PROPRIU (`rng_an`), apelat dupa toate
 	# celelalte: nu consuma din `rng` / `rng_ev`, deci nicio alta intrare nu se rescrie.
 	_save_angkor_sounds()
+	# Sunetul San Francisco-ului (Track25). Generator PROPRIU (`rng_sf`), apelat ultimul:
+	# nu consuma din celelalte siruri, deci niciun fisier de mai sus nu se rescrie.
+	_save_sf_sounds()
 	print("SFX generate in res://assets/audio/")
 	quit()
 
@@ -1267,3 +1270,232 @@ func _rain_leaves() -> PackedFloat32Array:
 		drop *= 0.985
 		raw[i] = band * 0.8 + _an_noise() * drop * 0.5
 	return _peak_norm(_loop_crossfade(raw, n, fade), 0.6)
+
+
+# ======================================================================
+# SAN FRANCISCO (Track25, brief san_francisco.md §5.6): clopotul celor doua
+# tramvaie, zumzetul cablului din canal, scandurile pontonului, golful
+# (pescarusi, lei de mare, papagali). Generator PROPRIU (`rng_sf`), apelat ultimul.
+# Nimic esantionat, nicio melodie: clopotul e un gong mecanic lovit de doua sau
+# de trei ori pe aceeasi nota.
+# ======================================================================
+
+var rng_sf := RandomNumberGenerator.new()
+
+
+func _save_sf_sounds() -> void:
+	rng_sf.seed = 20261117
+	_save("cable_bell_climb", _cable_bell(640.0, [0.0, 0.24], [1.0, 0.85]))
+	_save("cable_bell_mouth", _cable_bell(880.0, [0.0, 0.15, 0.30], [1.0, 0.8, 0.9]))
+	_save("cable_hum", _cable_hum())
+	_save("plank_rattle", _plank_rattle())
+	_save("gull_call", _gull_call())
+	_save("sea_lion_bark", _sea_lion_bark())
+	_save("parrot_squawk", _parrot_squawk())
+
+
+func _sf_noise() -> float:
+	return rng_sf.randf() * 2.0 - 1.0
+
+
+## Clopotul tramvaiului: un gong mic de bronz lovit de un ciocanel, de 2-3 ori pe ACEEASI
+## nota (fara melodie). Fiecare lovitura = cinci moduri nearmonice (rapoartele unui clopot
+## mic: 1 / 2,02 / 2,76 / 4,07 / 5,40), cele de sus se sting mai repede, plus clicul
+## metalic al ciocanelului (zgomot derivat, ~3 ms). Telefonul nu reda sub ~300 Hz, deci
+## nota sta la 640 Hz (urcarea, doua lovituri rare) si la 880 Hz (gura, trei dese): cele
+## doua tramvaie se deosebesc dupa ureche. Coada se topeste pe ultimele 0,25 s.
+func _cable_bell(f0: float, strikes: Array, gains: Array) -> PackedFloat32Array:
+	var dur := float(strikes[strikes.size() - 1]) + 1.3
+	var n := int(RATE * dur)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var ratios := [1.0, 2.02, 2.76, 4.07, 5.40]
+	var amps := [1.0, 0.55, 0.42, 0.24, 0.16]
+	var decays := [3.0, 4.2, 5.8, 8.5, 12.0]
+	for k in strikes.size():
+		var i0 := int(RATE * float(strikes[k]))
+		var g := float(gains[k])
+		var prev := 0.0
+		for j in n - i0:
+			var t := float(j) / float(RATE)
+			var v := 0.0
+			for m in 5:
+				v += sin(TAU * f0 * float(ratios[m]) * t + float(m) * 0.9) \
+					* float(amps[m]) * exp(-t * float(decays[m]))
+			var nz := _sf_noise()
+			var click := (nz - prev) * exp(-t * 330.0) * 0.6
+			prev = nz
+			out[i0 + j] += (v * minf(t / 0.002, 1.0) + click) * g
+	for i in n:
+		var t := float(i) / float(RATE)
+		out[i] *= clampf((dur - t) / 0.25, 0.0, 1.0)
+	return _peak_norm(out, 0.85)
+
+
+## Zumzetul cablului din canalul dintre sine, 4 s IN BUCLA: cablul de otel care alearga
+## pe role sub strada. Un huruit cu fundamentala de 110 Hz si sapte armonice tari (telefonul
+## aude 220-770 Hz), batut lent (0,5 Hz) si tremurat de role (6 Hz), un sisait de banda
+## (zgomot trece-banda) si un tic moale de rola la fiecare 0,5 s. Toate componentele
+## tonale au un numar INTREG de cicluri in 4 s; zgomotul se inchide prin suprapunerea
+## capetelor. Varful la 0,5, ca jungla Angkorului: e strat de fundal.
+func _cable_hum() -> PackedFloat32Array:
+	const DUR := 4.0
+	var n := int(RATE * DUR)
+	var fade := int(n * 0.15)
+	var raw := PackedFloat32Array()
+	raw.resize(n + fade)
+	var lp1 := 0.0
+	var lp2 := 0.0
+	var tick := 0.0
+	var tick_every := int(RATE * 0.5)
+	for i in n + fade:
+		var t := float(i % n) / float(RATE)
+		var beat := 0.75 + 0.25 * sin(TAU * 0.5 * t)
+		var flutter := 0.85 + 0.15 * sin(TAU * 6.0 * t + 0.7)
+		var hum := 0.0
+		for h in range(1, 8):
+			hum += sin(TAU * 110.0 * float(h) * t + float(h) * 1.3) / pow(float(h), 0.6)
+		var nz := _sf_noise()
+		lp1 += 0.35 * (nz - lp1)
+		lp2 += 0.05 * (nz - lp2)
+		var band := lp1 - lp2
+		if (i % n) % tick_every == 0:
+			tick = 1.0
+		tick *= 0.9975
+		var tick_v := sin(TAU * 340.0 * t) * tick * tick * 0.35
+		raw[i] = hum * 0.42 * beat * flutter + band * 0.55 * beat + tick_v
+	return _peak_norm(_loop_crossfade(raw, n, fade), 0.5)
+
+
+## Scandurile pontonului sub roti, 1 s IN BUCLA (la pitch 1: ~16 batai/s; CarAudio urca
+## pitch-ul cu viteza, deci si ritmul): fiecare scandura = un toc de lemn (doua
+## rezonante, ~360 si ~860 Hz: lemn mic, de jucarie, peste ce reda un telefon) cu un
+## clic de zgomot, cu tempo si volum usor neregulate si cate o scandura slaba care bate de doua ori. Peste ele, un
+## scartait lent al pontonului (dinte de fierastrau 140 -> 175 Hz, cu poarta). Cozile
+## care trec de capat se aduna la inceput (bucla fara pocnet).
+func _plank_rattle() -> PackedFloat32Array:
+	const DUR := 1.0
+	const TAIL := 0.1
+	var n := int(RATE * DUR)
+	var total := n + int(RATE * TAIL)
+	var buf := PackedFloat32Array()
+	buf.resize(total)
+	var knocks := 16
+	for k in knocks:
+		var t0 := clampf((float(k) + 0.25 * _sf_noise()) / float(knocks), 0.0, DUR - 0.001)
+		var g := 0.7 + 0.3 * rng_sf.randf()
+		var hits := 2 if rng_sf.randf() < 0.22 else 1
+		var f1 := 340.0 + 40.0 * rng_sf.randf()
+		var f2 := 820.0 + 90.0 * rng_sf.randf()
+		for hh in hits:
+			var i0 := int(RATE * (t0 + float(hh) * 0.018))
+			var gh := g * (1.0 if hh == 0 else 0.45)
+			for j in int(RATE * 0.06):
+				if i0 + j >= total:
+					break
+				var t := float(j) / float(RATE)
+				var wood := sin(TAU * f1 * t) * exp(-t * 45.0) + sin(TAU * f2 * t) * exp(-t * 70.0) * 0.6
+				var click := _sf_noise() * exp(-t * 600.0) * 0.5
+				buf[i0 + j] += (wood + click) * gh
+	var ph := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		ph += lerpf(140.0, 175.0, t / DUR) / float(RATE)
+		var saw := fposmod(ph, 1.0) * 2.0 - 1.0
+		var gate := sin(PI * clampf((t - 0.35) / 0.4, 0.0, 1.0))
+		buf[i] += saw * gate * gate * 0.12
+	var out := PackedFloat32Array()
+	out.resize(n)
+	for i in total:
+		out[i % n] += buf[i]
+	return _peak_norm(out, 0.6)
+
+
+## Pescarusul: trei strigate, primul lung (0,32 s), apoi doua scurte. Fiecare = o nota
+## bogata in armonice care urca scurt (1500 -> 1900 Hz) si cade (-> 1100 Hz), cu
+## rugozitate (modulatie de amplitudine la 55 Hz) si suflu. Fara bas: se aude din cer.
+func _gull_call() -> PackedFloat32Array:
+	var cries := [[0.0, 0.32, 1.0], [0.40, 0.18, 0.8], [0.64, 0.2, 0.7]]
+	var n := int(RATE * 1.1)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	for c in cries:
+		var i0 := int(RATE * float(c[0]))
+		var ln := float(c[1])
+		var ph := 0.0
+		var lp := 0.0
+		for j in int(RATE * ln):
+			if i0 + j >= n:
+				break
+			var t := float(j) / float(RATE)
+			var u := t / ln
+			var f: float = lerpf(1500.0, 1900.0, u / 0.2) if u < 0.2 \
+				else lerpf(1900.0, 1100.0, (u - 0.2) / 0.8)
+			ph += f / float(RATE)
+			var v := 0.0
+			for h in range(1, 7):
+				if f * float(h) < 10000.0:
+					v += sin(TAU * ph * float(h)) / pow(float(h), 0.9)
+			var rough := 0.65 + 0.35 * sin(TAU * 55.0 * t)
+			lp += 0.4 * (_sf_noise() - lp)
+			var env := sin(PI * u) * minf(u / 0.08, 1.0)
+			out[i0 + j] += (v * rough * 0.4 + lp * 0.15) * env * float(c[2])
+	return _peak_norm(out, 0.8)
+
+
+## Leul de mare: trei latraturi scurte (~0,18 s), nota joasa si aspra (260 -> 200 Hz)
+## cu armonice pana la ~2 kHz (pe telefon se aude prin ele), mormait de 35 Hz pe
+## amplitudine si suflu ragusit. Al doilea si al treilea, mai slabe.
+func _sea_lion_bark() -> PackedFloat32Array:
+	var barks := [[0.0, 0.2, 1.0, 260.0], [0.32, 0.17, 0.85, 245.0], [0.62, 0.19, 0.75, 255.0]]
+	var n := int(RATE * 1.1)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	for b in barks:
+		var i0 := int(RATE * float(b[0]))
+		var ln := float(b[1])
+		var ph := 0.0
+		var lp := 0.0
+		for j in int(RATE * ln):
+			if i0 + j >= n:
+				break
+			var t := float(j) / float(RATE)
+			var u := t / ln
+			ph += lerpf(float(b[3]), 200.0, u) / float(RATE)
+			var v := 0.0
+			for h in range(1, 10):
+				v += sin(TAU * ph * float(h) + float(h) * 0.4) / float(h)
+			var growl := 0.6 + 0.4 * sin(TAU * 35.0 * t)
+			lp += 0.25 * (_sf_noise() - lp)
+			var env := minf(u / 0.1, 1.0) * pow(1.0 - u, 1.5)
+			out[i0 + j] += (v * growl * 0.5 + lp * 0.35) * env * float(b[2])
+	return _peak_norm(out, 0.8)
+
+
+## Papagalul: doua tipete aspre (1,8 -> 2,7 kHz, cu vibrato rapid de 30 Hz si zgomot) si
+## un sporovait de trei ciripituri scurte. Strident, dar scurt: se aude doar langa parc.
+func _parrot_squawk() -> PackedFloat32Array:
+	var calls := [[0.0, 0.2, 1.0, 1800.0, 2700.0], [0.27, 0.24, 0.9, 2100.0, 2500.0],
+		[0.62, 0.05, 0.6, 2600.0, 3100.0], [0.70, 0.05, 0.55, 2400.0, 2900.0],
+		[0.78, 0.06, 0.5, 2700.0, 3200.0]]
+	var n := int(RATE * 0.95)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	for c in calls:
+		var i0 := int(RATE * float(c[0]))
+		var ln := float(c[1])
+		var ph := 0.0
+		var lp := 0.0
+		for j in int(RATE * ln):
+			if i0 + j >= n:
+				break
+			var t := float(j) / float(RATE)
+			var u := t / ln
+			ph += lerpf(float(c[3]), float(c[4]), sin(PI * u)) * (1.0 + 0.15 * sin(TAU * 30.0 * t)) \
+				/ float(RATE)
+			var v := 0.0
+			for h in range(1, 4):
+				v += sin(TAU * ph * float(h)) / float(h)
+			lp += 0.6 * (_sf_noise() - lp)
+			out[i0 + j] += (v * 0.45 + lp * 0.3) * sin(PI * u) * float(c[2])
+	return _peak_norm(out, 0.75)

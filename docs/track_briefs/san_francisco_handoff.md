@@ -1,8 +1,8 @@
 # San Francisco (Track25) — handoff for the next session
 
-Updated 16 Nov 2026, after step 8d (pavements, solid poles, sheds, stairs).
-Open PRs, stacked, none merged: #740 ⊂ #741 ⊂ #742 ⊂ #743 ⊂ #744 (wave 3), and
-step 8d on top of #744 from branch `sanfrancisco/pas8d-trotuare`.
+Updated 17 Nov 2026, after step 8e (sound, gate, birds, boats, garden).
+Steps 7–8d are in `main` since 17 Nov 2026 (#740–#744 and #746). Step 8e is on
+branch `sanfrancisco/pas8e-teatru` (worktree `D:/GameDev/wt-sf-pas7`).
 Read this first, then the brief (`docs/track_briefs/san_francisco.md`; §7 is the
 step plan, and "pasul 7" there has the full results). Project rules are in
 `CLAUDE.md`; the running memory is `san-francisco-track-project.md` in the
@@ -118,8 +118,48 @@ of step 8. No iOS build since #723 (build 54) — **start one only when they ask
      the shared world material (the mask stores strength in alpha; a builder saw
      full grain on a zero-strength slot). Project-wide, unverified, the
      developer's call.
-   Still missing: the gate (H5), the garden of the switchback-entrance
-   house, gulls/parrots, sails and the ferry, sound.
+   **Also DONE, on branch `sanfrancisco/pas8e-teatru` (17 Nov 2026) — step 8e**
+   (brief §7 "8e" has the numbers; `SF_PAS8E=0` and `SF_SUNET=0` reproduce the
+   scenes from before):
+   - **Sound**, all synthesised (`tools/generate_sfx.gd`, `_save_sf_sounds`): a
+     bell per cable car (rings once on approach: 90 m on the climb, 130 m at the
+     shortcut mouth), the cable hum along the tram street, plank rattle on the
+     pontoon, gulls / sea lions / parrots as sparse positional calls. Guard
+     `ProbeSfSunet`. **To listen:** run `res://tools/AscultaSfSunet.tscn` with a
+     window. Whether it sounds right is the developer's ear, not the probe's.
+   - **The gate** stands at the top of the tram street, straight ahead after the
+     corner onto the ridge, at map (152, 146), not on the side street of the
+     inventory: a gate beside the street is seen edge-on and was invisible at
+     40 m. It is solid; 0 contacts in two batches. Lantern strings across B.
+     **It is the entrance to a short lane** (second pass, `SF_8E_CURTE`): a paved
+     forecourt and 32 m of lane through the gate (`Track.paved_patches`, own
+     body `TrotuarCurte`, not road), four kit houses set back 18 m and out
+     11.5 m so the gate's roofline stays against the sky, lanterns, lamps,
+     benches, trees. The ground falls to the east: the houses cannot go further.
+   - **Birds** sit where the race camera looks: gulls on the shed roofs, the
+     pontoon bollards, the bridge deck's lamp heads and first parapet posts;
+     parrots on the gate, the lantern cables on B, the signal mast arms, the
+     courtyard lamps and the painted ladies' benches, at scale 1.6–1.8, **not in
+     the cypresses** (green on green vanishes). The flying ones move on
+     `PathMover` loops: four parrots across the ridge street, six gulls (scale
+     2.0) alongside the bridge deck. They read, but small; the flying gulls are
+     not in every frame. Each bird spot has its sound spot (8 in all).
+   - **Boats**: three sailboats and the Okinawa ferry on `PathMover` loops, no
+     collision. The garden at the switchback entrance. Guard `ProbeSfTeatru`.
+   - **Phone-profile cost on desktop** (a proxy, not an iPhone measurement):
+     169 / 306 draws mean / peak, 367 MultiMesh buffers (budget 2,500).
+     `ProbePerf --attrib` reads 0 for baked `DecorManual` groups; use
+     `--no-manual-batch` to attribute them.
+   Open, for the developer:
+   - **The landing thud** plays four times in about 6 s on the jump chain, within
+     1 dB, louder than the engine. A per-track variation is proposed, not built.
+   - **Street trees on B stand 9 m from the axis, on pavement that now drives
+     like road.** One at map (153, 51) was hit at 32–34 m/s in two seeds, once
+     with an ejection. Proposal on the table: move them to about 10.8 m.
+   Decided by the developer on 17 Nov 2026: the landing thud stays as it is and
+   the B street trees stay where they are.
+   Still missing: nothing from the inventory's must-have list. Not measured:
+   anything on an iPhone.
 1. **(Done — kept for the rules.)** All seven houses, each with a truly
    mirrored `_m` file, are done and accepted on `sanfrancisco/pas7b-case`
    (14 GLBs; mixed kit on `SfLoc --glb=kit`: pastel 40.3 % of house pixels,

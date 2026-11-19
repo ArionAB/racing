@@ -15788,6 +15788,11 @@ const SHOULDER_ZONE_RAMP: float = 12.0
 ## maro-bej (~0,45 pe ecran), la fel de inchis ca nisipul; trotuarul cere beton DESCHIS fara sa
 ## schimbe umerii de pe restul pistei. Componente > 1 sunt voite: dala are media ~0,63.
 @export var paved_level_color: Color = Color(0, 0, 0, 0)
+## PLACI de pavaj in afara traseului (triunghiuri in coordonate de lume, cate trei puncte), desenate
+## in plasa si corpul lor (`TrotuarCurte`, acelasi material ca `Trotuar`) cand pista ii da culoare
+## (`paved_level_color`). NU sunt drum: `is_on_road` citeste doar `paved_level_zones`. Nascute pe SF
+## (pasul 8e): curtea si ulita portii de la capatul strazii tramvaiului. Gol = nimic schimbat.
+@export var paved_patches: PackedVector3Array = PackedVector3Array()
 
 
 ## Latimea pragului plat la un index (0 in afara ferestrelor), cu rampa
@@ -16159,6 +16164,27 @@ func _build_shoulders() -> void:
 			_tex(String(theme_flag("shoulder_texture",
 				"res://assets/textures/surface_gravel.png"))), 1.0, 0.5,
 			BaseMaterial3D.CULL_BACK, null, null, true, null, "Trotuar")
+	if pav_own and paved_patches.size() >= 3:
+		# placile din afara traseului: plasa si corpul LOR (`TrotuarCurte`), cu exact aceleasi argumente
+		# de material ca trotuarul (aceeasi cheie de cache, deci acelasi material). Separat, nu in plasa
+		# `Trotuar`: lipite acolo, ii largeau cutia si Jolt cuantiza altfel varfurile, iar o cusatura
+		# dintre doua patrulatere de pe B se deschidea cu ~0,25 mm (ProbeSfTrotuar, nisip peste placa).
+		var st_pp := SurfaceTool.new()
+		st_pp.begin(Mesh.PRIMITIVE_TRIANGLES)
+		var pt := paved_level_tint
+		for k in range(0, paved_patches.size() - 2, 3):
+			for v: Vector3 in [paved_patches[k], paved_patches[k + 1], paved_patches[k + 2]]:
+				st_pp.set_color(pt)
+				st_pp.set_uv(Vector2(v.x, v.z) / tile)
+				st_pp.add_vertex(v)
+		st_pp.index()
+		st_pp.generate_normals()
+		var pc2 := paved_level_color
+		pc2.a = 1.0
+		_add_mesh_with_collision(st_pp.commit(), pc2,
+			_tex(String(theme_flag("shoulder_texture",
+				"res://assets/textures/surface_gravel.png"))), 1.0, 0.5,
+			BaseMaterial3D.CULL_BACK, null, null, true, null, "TrotuarCurte")
 
 
 ## Un patrulater al trotuarului (`paved_level_zones`): `a0`/`a1` marginea dinspre
@@ -18402,6 +18428,22 @@ func ice_grip() -> float:
 
 func is_ice_at(frac: float) -> bool:
 	return _frac_in_ranges(frac, _ice_ranges())
+
+
+## Puntea de lemn de la fractia data SUNA a scandura (bucla `plank_rattle` a CarAudio)? Doar
+## daca tema / pista o cere (`wood_deck_voice`, San Francisco: pontonul); altfel nu, deci
+## puntea Kiyomizu de pe Kyoto ramane cum era. Intervalele sunt aceleasi cu ale mesh-ului
+## (`wood_deck_ranges`): sunetul urmeaza exact scandura desenata. Cache la primul apel:
+## CarAudio intreaba la fiecare tick.
+func is_wood_deck_voice_at(frac: float) -> bool:
+	if _wood_voice_ranges.is_empty() and not _wood_voice_ready:
+		_wood_voice_ready = true
+		if bool(theme_flag("wood_deck_voice", false)):
+			_wood_voice_ranges = _wood_deck_ranges()
+	return not _wood_voice_ranges.is_empty() and _frac_in_ranges(frac, _wood_voice_ranges)
+
+var _wood_voice_ranges: Array[Vector2] = []
+var _wood_voice_ready: bool = false
 
 
 ## Cat de putin tine cenusa / nisipul adanc. Reper: asfalt 8, ud 3.6, drift 2.

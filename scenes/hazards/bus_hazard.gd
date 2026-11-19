@@ -149,6 +149,24 @@ extends "res://scenes/props/path_mover.gd"
 ## dupa colt il prindeau mai tarziu: contactele au urcat ~10% -> ~15%, la limita zgomotului).
 @export_range(0.0, 200.0, 1.0) var ai_branch_reach_m: float = 0.0
 
+## CLOPOTUL (San Francisco, brief §5.6 „telegraful gurii"): gol = vehicul mut, deci Carrara,
+## Machu Picchu si Fiordland raman cum erau (playerul nici nu se creeaza). Cu un nume din
+## AudioManager.SFX, vagonul suna O DATA cand masina JUCATORULUI se apropie de corpul lui
+## VIZIBIL: distanta sub `bell_range_m` si scade cu cel putin `bell_closing_mps`. Dupa asta
+## tace pana cand jucatorul se indeparteaza peste `bell_range_m + bell_rearm_m` sau vagonul se
+## ascunde (o noua aparitie e o noua apropiere), si niciodata mai des decat `bell_min_gap_s`.
+## Asa clopotul inseamna „e un vagon aici, inaintea ta", nu un metronom: cine sta in spatele
+## lui sau l-a depasit nu-l mai aude. Avansul, la viteza de cursa, e masurat in
+## tools/probe_sf_sunet.gd (sectiunea „tur").
+@export var bell_sfx: StringName = &""
+@export_range(10.0, 200.0, 1.0) var bell_range_m: float = 90.0
+@export_range(0.0, 100.0, 1.0) var bell_rearm_m: float = 30.0
+@export_range(0.0, 10.0, 0.1) var bell_closing_mps: float = 2.0
+@export_range(0.0, 30.0, 0.5) var bell_min_gap_s: float = 8.0
+@export_range(-24.0, 6.0, 0.5) var bell_db: float = -3.0
+@export_range(1.0, 60.0, 1.0) var bell_unit_size: float = 20.0
+@export_range(20.0, 300.0, 5.0) var bell_max_distance: float = 170.0
+
 ## Culorile cutiei placeholder (fara model). Implicit galben + bot portocaliu, ca pana acum
 ## (Carrara si Machu Picchu au model, deci nu le folosesc). Tramvaiele SF le dau gri pana vine
 ## `cable_car.glb` (brief san_francisco.md §7 pasul 5).
@@ -194,6 +212,20 @@ var _prev_pos: Vector3 = Vector3.ZERO
 var _has_prev: bool = false
 var _box_center: Vector3 = Vector3.ZERO
 var _pitch: float = 0.0
+
+## Clopotul: playerul 3D (doar cu `bell_sfx`), starea apropierii si jurnalul pentru sonde.
+var bell_player: AudioStreamPlayer3D = null
+## Cate ori a sunat clopotul, si cand / de unde: {t, dist, closing}. Sondele il citesc.
+var bells_rung: int = 0
+var bell_log: Array[Dictionary] = []
+## Masina pe care o asculta clopotul. Gasita singura (grupul `cars`, `is_player`); o sonda
+## o poate da direct.
+var bell_listener: Node3D = null
+var _bell_armed: bool = true
+var _bell_prev_d: float = -1.0
+var _bell_closing: float = 0.0
+var _bell_last_t: float = -1.0e9
+var _bell_find_left: float = 0.0
 
 
 ## Cutia autobuzului, nu tractorul din PathMover.
@@ -241,6 +273,8 @@ func _build_body() -> void:
 		_body.set_meta(&"soft_hit_crush", soft_crush_s)
 	if ai_reads_lane:
 		add_to_group(AI_GROUP)
+	if bell_sfx != &"" and not Engine.is_editor_hint():
+		_build_bell()
 
 
 ## Fata oblica din fata (-Z local) + flancul care inchide triunghiul.
@@ -352,6 +386,8 @@ func _physics_process(delta: float) -> void:
 	_apply_sway()
 	if not Engine.is_editor_hint():
 		_shove_cars(delta)
+		if bell_player != null:
+			_tick_bell(delta)
 	last_tick_usec = int(Time.get_ticks_usec() - t0)
 
 
@@ -514,3 +550,63 @@ func _shove_cars(delta: float) -> void:
 			if audio != null:
 				audio.hazard_contact(contact_sfx,
 					car.global_position + Vector3.UP * 0.5, car.is_player)
+
+
+# ------------------------------------------------------------------ clopotul
+
+## Un AudioStreamPlayer3D pe corp (merge cu vagonul), pe bus-ul SFX. Streamul se cere prin
+## arbore (ca `gion_matsuri_hazard.gd::_sfx`), nu prin identificatorul autoload.
+func _build_bell() -> void:
+	var manager := get_node_or_null(^"/root/AudioManager")
+	var snd: AudioStream = manager.call("stream", bell_sfx) if manager != null else null
+	if snd == null:
+		push_warning("BusHazard %s: bell_sfx %s lipseste din AudioManager" % [name, bell_sfx])
+		return
+	bell_player = AudioStreamPlayer3D.new()
+	bell_player.name = "Clopot"
+	bell_player.stream = snd
+	bell_player.bus = &"SFX" if AudioServer.get_bus_index(&"SFX") >= 0 else &"Master"
+	bell_player.volume_db = bell_db
+	bell_player.unit_size = bell_unit_size
+	bell_player.max_distance = bell_max_distance
+	bell_player.position = _box_center + Vector3.UP * (_box_size.y * 0.5)
+	_body.add_child(bell_player)
+
+
+## Apropierea jucatorului de corpul VIZIBIL (vezi `bell_sfx`). Fara alocari pe cadru: masina
+## se cauta in grup doar cat nu o avem, cel mult o data pe secunda.
+func _tick_bell(delta: float) -> void:
+	if bell_listener == null or not is_instance_valid(bell_listener):
+		bell_listener = null
+		_bell_find_left -= delta
+		if _bell_find_left > 0.0:
+			return
+		_bell_find_left = 1.0
+		for n in get_tree().get_nodes_in_group(&"cars"):
+			if bool(n.get(&"is_player")):
+				bell_listener = n as Node3D
+				break
+		if bell_listener == null:
+			return
+	if _hidden:
+		# Ascuns: nu e acolo. Urmatoarea aparitie e o apropiere noua.
+		_bell_armed = true
+		_bell_prev_d = -1.0
+		_bell_closing = 0.0
+		return
+	var d := bell_listener.global_position.distance_to(_body.global_position)
+	if _bell_prev_d >= 0.0 and delta > 0.0:
+		_bell_closing = lerpf(_bell_closing, (_bell_prev_d - d) / delta, 0.25)
+	_bell_prev_d = d
+	if d > bell_range_m + bell_rearm_m:
+		_bell_armed = true
+		return
+	if _bell_armed and d <= bell_range_m and _bell_closing >= bell_closing_mps \
+			and _time - _bell_last_t >= bell_min_gap_s:
+		_bell_armed = false
+		_bell_last_t = _time
+		bells_rung += 1
+		bell_log.append({"t": _time, "dist": d, "closing": _bell_closing})
+		if bell_log.size() > 64:
+			bell_log.pop_front()
+		bell_player.play()

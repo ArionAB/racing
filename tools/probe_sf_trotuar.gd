@@ -31,7 +31,7 @@ extends Node
 const CAR_SCENE: String = "res://scenes/cars/Car.tscn"
 const STEP_MAX: float = 0.15
 const PROFILE_MAX: float = 0.05
-const WALK: Array[String] = ["RoadTop", "RoadSides", "Trotuar", "Shoulders", "TerrainBody"]
+const WALK: Array[String] = ["RoadTop", "RoadSides", "Trotuar", "TrotuarCurte", "Shoulders", "TerrainBody"]
 
 var _sabotage := false
 var _space: PhysicsDirectSpaceState3D
@@ -172,7 +172,7 @@ func _check_step(zones: Array[Vector4]) -> void:
 		% [n_pts, worst, worst_at.x, worst_at.y, worst_at.z, STEP_MAX, n_bad_step])
 	print("   profilul placii: salt maxim intre vecini (0,25 m) %.3f m la (%.0f, %.1f, %.0f) [prag %.2f], peste prag %d; nisip peste placa %d%s"
 		% [prof_worst, prof_at.x, prof_at.y, prof_at.z, PROFILE_MAX, n_bad_prof, n_sand,
-			(" la " + ", ".join(sand_at.map(func(v: Vector3) -> String: return "(%.0f,%.0f)" % [v.x, v.z]))) if n_sand > 0 else ""])
+			(" la " + ", ".join(sand_at.map(func(v: Vector3) -> String: return "(%.2f,%.2f,%.2f)" % [v.x, v.y, v.z]))) if n_sand > 0 else ""])
 	if n_pts == 0 or n_bad_step > 0 or n_bad_prof > 0 or n_sand > 0:
 		_fails += 1
 		print("   PICA: treapta / profil / nisip")

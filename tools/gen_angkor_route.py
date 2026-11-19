@@ -671,6 +671,16 @@ TEMPLE_GLB_OK = os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__fi
 TEMPLE_TUBE_HW = 6.0        # semilatimea minima a tubului (peretii urmeaza soseaua unde e mai lata)
 TEMPLE_CEIL = 10.0          # tavanul navelor
 TEMPLE_HALL_CEIL = 15.0     # tavanul salii centrale (unde soseaua e cea mai lata)
+# HAZARDUL DIN TEMPLU: gongurile (`GongHazard`, pendul fizic: neatins sta, lovit se leagana inainte-inapoi,
+# iar cat pierzi depinde de masa — autobuzul ~5%, buggy-ul ~25%, tuk-tuk-ul ~65% la 25 m/s, ProbeGong).
+# (metri pe axa de la portalul de vest, lateral + = dreapta sensului = EXTERIORUL virajului, nota)
+# Linia curata exista si se citeste: pe exterior pe langa primul, apex, apoi prin golul din mijlocul
+# portii si pe stanga ultimului. Cine iese larg din drift le ia pe rand pe cele de pe dreapta.
+#   - 28 m: in mijloc, la intrarea in arc (zona de franare): te obliga sa alegi o parte;
+#   - 66 m: pe exterior, la iesirea din arc: pedeapsa iesirii largi;
+#   - 74 m: POARTA, doua gonguri la +-3,6 m: golul din mijloc are 4,6 m;
+#   - 87 m: chiar inaintea portalului de nord, pe dreapta: stanga ramane libera (in prelungirea golului).
+TEMPLE_GONGS = [(28.0, 0.0, 0.75), (66.0, 5.0, 0.84), (74.0, -3.6, 1.0), (74.0, 3.6, 1.12), (87.0, 2.2, 1.26)]
 
 if OUT_PATH:
     def pva(seq):
@@ -913,6 +923,29 @@ hall_to_m = {r2(tube_len_)}
 """ + ("tube_visible = false\n" if TEMPLE_GLB_OK else "")
     print(f"  templu: portal V s {S_PORTAL_W:.1f} (idx {IDXs(S_PORTAL_W)}), portal N s {S_PORTAL_N:.1f} "
           f"(idx {IDXs(S_PORTAL_N)}), tub {tube_len_:.1f} m")
+    # Gongurile: nodul sta PE asfalt sub disc, cu -Z local pe sensul de mers (baza pe randuri, ca perdeaua).
+    # `ceiling_height` = tavanul tubului in acel loc (franghiile urca pana la el).
+    for k_, (gm_, glat_, gpitch_) in enumerate(TEMPLE_GONGS):
+        gs2_ = S_PORTAL_W + gm_
+        ga_, gb_ = pos_at(gs2_ - 1.0), pos_at(gs2_ + 1.0)
+        gfx_, gfz_ = gb_[0] - ga_[0], -(gb_[1] - ga_[1])
+        gfl_ = math.hypot(gfx_, gfz_)
+        gfx_, gfz_ = gfx_ / gfl_, gfz_ / gfl_
+        gzx_, gzz_ = -gfx_, -gfz_                # basis.z = -inainte
+        gxx_, gxz_ = gzz_, -gzx_                 # basis.x = up x basis.z = dreapta sensului
+        gcx_, gcy_ = pos_at(gs2_)
+        gwx_, gwz_ = gcx_ + gxx_ * glat_, -gcy_ + gxz_ * glat_
+        gw_ = max(TEMPLE_TUBE_HW, hw_at(gs2_))
+        gceil_ = TEMPLE_CEIL + (TEMPLE_HALL_CEIL - TEMPLE_CEIL) * max(0.0, min(1.0, (gw_ - TEMPLE_TUBE_HW) / (
+            HALL_HW - TEMPLE_TUBE_HW)))
+        hz_txt += f"""
+[node name="Gong{k_}" type="Node3D" parent="Hazarduri"]
+transform = Transform3D({r3(gxx_)}, 0, {r3(gzx_)}, 0, 1, 0, {r3(gxz_)}, 0, {r3(gzz_)}, {r2(gwx_)}, {r2(elev_at(gs2_))}, {r2(gwz_)})
+script = ExtResource("57_gong")
+ceiling_height = {r2(gceil_)}
+pitch = {gpitch_}
+"""
+        print(f"  gong {k_}: {gm_:.0f} m de portal, lateral {glat_:+.1f} (semilatime {hw_at(gs2_):.2f}), tavan {gceil_:.1f} m")
     # ---- PASUL 6: turnurile Bayonului (corpuri statice cu nume, ca ProbeLaneClear sa le raporteze
     # pe nume). Corpul ramane si dupa hero-asset: `bayon_face_tower_a` (pasul 7) e doar vizualul,
     # in DecorManual, ca la stalpii Carrara.
@@ -1655,6 +1688,7 @@ material = SubResource("Mat_macheta")
 [ext_resource type="AudioStream" path="res://assets/audio/rain_leaves.wav" id="54_rainleaves"]
 [ext_resource type="Script" path="res://scenes/hazards/tunnel_signal_hazard.gd" id="55_signal"]
 [ext_resource type="Script" path="res://scenes/props/light_shaft.gd" id="56_shaft"]
+[ext_resource type="Script" path="res://scenes/hazards/gong_hazard.gd" id="57_gong"]
 {zone_ext}
 [sub_resource type="StandardMaterial3D" id="Mat_macheta"]
 albedo_color = Color(0.72, 0.64, 0.52, 1)

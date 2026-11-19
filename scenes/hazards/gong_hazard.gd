@@ -57,7 +57,7 @@ extends Node3D
 ## Unghiul raportat (`swing_angle`) e pozitiv cand discul a plecat INAINTE (spre -Z).
 ##
 ## [b]Paleta[/b] (zero materiale noi, tot pe `Palette.world_material()`): bronzul discului
-## `LARCH_RUST` (#A8683A), butonul din mijloc si inelul de pe fata `SAND_LIGHT` (#E8C074,
+## (buza si inelul de pe fata) `LARCH_RUST` (#A8683A), fata si butonul din mijloc `SAND_LIGHT` (#E8C074,
 ## auriu), franghiile `DRY_VEGETATION` (#AF9F4E, canepa), grinda de sus `LOG_DARK` (#4A3526,
 ## aceeasi scoarta ca creanga perdelei de liane).
 
@@ -340,9 +340,9 @@ func _build_static() -> void:
 func _disc_mesh(st: SurfaceTool) -> void:
 	var t := thickness * 0.5
 	_cyl(st, radius, -t - 0.02, t + 0.02, Palette.LARCH_RUST, 0.62)        # buza
-	_cyl(st, radius * 0.92, -t, t, Palette.LARCH_RUST, 0.9)                # fata
+	_cyl(st, radius * 0.92, -t, t, Palette.SAND_LIGHT, 0.95)               # fata (aurie: bronzul inchis se pierdea in nava intunecata)
 	for sz: float in [-1.0, 1.0]:
-		_ring_band(st, radius * 0.55, radius * 0.62, sz * (t + 0.005), Palette.SAND_LIGHT, 0.85)
+		_ring_band(st, radius * 0.55, radius * 0.62, sz * (t + 0.005), Palette.LARCH_RUST, 0.8)
 		var z0 := sz * t
 		var z1 := sz * (t + 0.09)
 		_cyl(st, radius * 0.24, minf(z0, z1), maxf(z0, z1), Palette.SAND_LIGHT, 1.0)

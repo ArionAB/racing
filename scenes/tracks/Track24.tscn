@@ -55,6 +55,7 @@
 [ext_resource type="AudioStream" path="res://assets/audio/rain_leaves.wav" id="54_rainleaves"]
 [ext_resource type="Script" path="res://scenes/hazards/tunnel_signal_hazard.gd" id="55_signal"]
 [ext_resource type="Script" path="res://scenes/props/light_shaft.gd" id="56_shaft"]
+[ext_resource type="Script" path="res://scenes/hazards/gong_hazard.gd" id="57_gong"]
 [ext_resource type="Script" path="res://scenes/props/flock.gd" id="flock_script"]
 [ext_resource type="Script" path="res://scenes/props/mesh_forest.gd" id="mf_script"]
 [ext_resource type="Script" path="res://scenes/props/mesh_forest_zone.gd" id="mf_zone"]
@@ -4377,6 +4378,36 @@ wing_end_height_m = 1.1
 hall_ceiling = 15.0
 hall_from_m = 0.0
 hall_to_m = 91.34
+
+[node name="Gong0" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(0.203, 0, -0.979, 0, 1, 0, 0.979, 0, 0.203, -24.01, 4.0, -0.48)
+script = ExtResource("57_gong")
+ceiling_height = 15.0
+pitch = 0.75
+
+[node name="Gong1" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(0.999, 0, -0.037, 0, 1, 0, 0.037, 0, 0.999, 4.64, 4.0, -26.48)
+script = ExtResource("57_gong")
+ceiling_height = 14.14
+pitch = 0.84
+
+[node name="Gong2" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(0.999, 0, -0.037, 0, 1, 0, 0.037, 0, 0.999, -3.66, 4.0, -34.79)
+script = ExtResource("57_gong")
+ceiling_height = 12.81
+pitch = 1.0
+
+[node name="Gong3" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(0.999, 0, -0.037, 0, 1, 0, 0.037, 0, 0.999, 3.54, 4.0, -34.52)
+script = ExtResource("57_gong")
+ceiling_height = 12.81
+pitch = 1.12
+
+[node name="Gong4" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, -0.0, 0, 1.0, 2.2, 4.0, -47.66)
+script = ExtResource("57_gong")
+ceiling_height = 10.64
+pitch = 1.26
 
 [node name="Muson" type="Node" parent="Hazarduri"]
 script = ExtResource("7_rain")

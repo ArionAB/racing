@@ -339,6 +339,14 @@ var tutorial_run: bool = false
 ## particulele. Persistat ca sa nu-l repornesti la fiecare build.
 var show_perf: bool = false
 
+## Comutatorul ascuns de dezvoltator (19 nov 2026): toate masinile din garaj
+## deschise, fara sa le castigi in cariera. Se aprinde cu 7 atingeri pe titlul
+## GARAGE in 3 secunde (GaragePanel), deci exista si in build-ul de release de
+## pe telefon (iOS e `--export-release`). Nu scrie NIMIC in progresul carierei:
+## `Career.is_car_unlocked` il citeste, garajul castigat ramane neatins.
+## Persistat, ca sa nu-l reaprinzi la fiecare pornire.
+var dev_unlock_all_cars: bool = false
+
 ## Telemetria de pozitie (LocationTelemetry): unde e masina pe pista, in
 ## coordonatele uneltelor (`--frac`, index, metri, lateral). F3 in cursa sau
 ## din SETARI pe telefon. Persistata, ca si contorul.
@@ -918,6 +926,7 @@ func load_settings() -> void:
 	cam_follow_scale = clampf(
 		float(cfg.get_value("camera", "follow_scale", 1.0)), 0.4, 2.5)
 	show_perf = bool(cfg.get_value("debug", "show_perf", false))
+	dev_unlock_all_cars = bool(cfg.get_value("debug", "unlock_all_cars", false))
 	show_location = bool(cfg.get_value("debug", "show_location", false))
 	real_headlight = bool(cfg.get_value("debug", "real_headlight", true))
 	gfx_tier = clampi(int(cfg.get_value("video", "gfx_tier", 1)), 0, 2)
@@ -947,6 +956,7 @@ func save_settings() -> void:
 	cfg.set_value("camera", "fov_scale", cam_fov_scale)
 	cfg.set_value("camera", "follow_scale", cam_follow_scale)
 	cfg.set_value("debug", "show_perf", show_perf)
+	cfg.set_value("debug", "unlock_all_cars", dev_unlock_all_cars)
 	cfg.set_value("debug", "show_location", show_location)
 	cfg.set_value("debug", "real_headlight", real_headlight)
 	cfg.set_value("video", "gfx_tier", gfx_tier)

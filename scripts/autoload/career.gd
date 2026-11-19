@@ -9,6 +9,12 @@ extends Node
 ##     lume, o regrupare le-ar pierde. Singura cheie pe lume e cupa.
 ##  2. Punctele se CALCULEAZA din progres, nu se stocheaza. Un total salvat
 ##     separat se poate desincroniza de medalii; unul derivat nu.
+##     EXCEPTIA deliberata: masinile castigate (19 nov 2026). Pragurile lor sunt
+##     date de tuning care se vor muta (cariera trece la 4 lumi, #704), iar un
+##     prag ridicat sau o regrupare ar putea lasa punctele calculate sub prag. O
+##     masina castigata nu se ia inapoi: cand punctele ating pragul, id-ul ei se
+##     ZAVORASTE in `_garage_unlocked` (salvat in `[garage] unlocked`) si de
+##     acolo nu mai iese. Vezi `_latch_cars`.
 ##
 ## Punctajul (decizia dezvoltatorului, 25 oct 2026, dupa sesiunea la volan):
 ## locul 1/2/3 = 3/2/1 puncte (= valoarea medaliei), provocarea gimmick-ului
@@ -17,6 +23,8 @@ extends Node
 ## da puncte pana nu are tinte (brief §4.2).
 
 signal progress_changed
+## O masina tocmai castigata (zavorata de `_changed`, nu de incarcarea unui save).
+signal car_unlocked(car_id: StringName)
 
 ## RACE poarta si provocarea pistei (bonus +1, vezi `challenge_to_track`).
 enum Mode { RACE, TIME_TRIAL }
@@ -58,8 +66,12 @@ var _saved_ai_count: int = -1
 var _tracks: Dictionary = {} # id -> {race_medal, tt_medal, tt_best_ms, challenge}
 var _rivals: Dictionary = {} # id -> true cand e batut
 var _cups: Dictionary = {} # id lume -> true cand e castigata
-## Masinile deblocate, pe `CarData.id` (niciodata pe index in CAR_DATA).
+## Masinile castigate, pe `CarData.id` (niciodata pe index in CAR_DATA). Doar
+## cresc: vezi regula 2 din antet si `_latch_cars`.
 var _garage_unlocked: Array[String] = []
+## Masinile castigate de cel mai recent `finish_active` (golita la `start_track`
+## si la inceputul lui `finish_active`). Ecranul de rezultate o citeste.
+var last_unlocked_cars: Array[StringName] = []
 ## Fisierul de pe disc e de la o versiune mai noua: nu incarcam nimic si nu
 ## salvam peste el, ca sa nu-l corupem.
 var _read_only: bool = false
@@ -129,7 +141,36 @@ func validate(cfg: CareerConfig = null) -> PackedStringArray:
 				challenge.track, challenge.fail_event])
 		if challenge.event == &"wall_hit" and challenge.zone == &"":
 			problems.append("provocarea %s: wall_hit cere o zona" % challenge.track)
+	_validate_cars(target, problems)
 	return problems
+
+
+## Garajul de start si masinile castigate. O masina din CAR_DATA care lipseste
+## din ambele liste e deschisa — nu e o problema (vezi `CareerConfig`).
+func _validate_cars(target: CareerConfig, problems: PackedStringArray) -> void:
+	var garage: Dictionary = {}
+	for res in GameState.CAR_DATA:
+		garage[(res as CarData).id] = true
+	for car_id in target.starting_cars:
+		if not garage.has(car_id):
+			problems.append("masina de start %s nu exista in CAR_DATA" % car_id)
+	var rewarded: Dictionary = {}
+	for reward in target.car_rewards:
+		if reward == null:
+			problems.append("o recompensa de masina e goala")
+			continue
+		if not garage.has(reward.car):
+			problems.append("recompensa %s: masina nu exista in CAR_DATA" % reward.car)
+		if target.starting_cars.has(reward.car):
+			problems.append("masina %s e si de start si recompensa" % reward.car)
+		if rewarded.has(reward.car):
+			problems.append("doua recompense pentru masina %s" % reward.car)
+		rewarded[reward.car] = true
+		if reward.points < 1:
+			problems.append("recompensa %s: points trebuie >= 1, e %d" % [
+				reward.car, reward.points])
+	if not target.car_rewards.is_empty() and target.starting_cars.is_empty():
+		problems.append("exista masini de castigat, dar starting_cars e gol")
 
 
 ## Provocarea pistei `track_id`, sau null daca pista n-are una.
@@ -258,6 +299,117 @@ func garage_unlocked() -> Array[String]:
 	return _garage_unlocked
 
 
+# ------------------------------------------------------------ masinile
+
+## SINGURA verificare de lacat a unei masini: garajul, selectia si orice alt
+## ecran trec pe aici. Comutatorul de dezvoltator deschide tot fara sa scrie
+## nimic; restul regulilor (start, recompensa, zavor — si mai tarziu cumparare
+## sau rivali) stau in `is_car_earned`.
+func is_car_unlocked(car_id: StringName) -> bool:
+	return GameState.dev_unlock_all_cars or is_car_earned(car_id)
+
+
+## Masina e a jucatorului fara comutatorul de dezvoltator: e de start, n-are
+## recompensa (continut nou, inca neasezat = deschis) sau a fost castigata.
+## Pasaportul numara pe asta, ca sa arate progresul real si cu comutatorul aprins.
+func is_car_earned(car_id: StringName) -> bool:
+	if config.starting_cars.has(car_id):
+		return true
+	if car_reward_for(car_id) == null:
+		return true
+	return _garage_unlocked.has(String(car_id))
+
+
+## Recompensa masinii `car_id`, sau null daca nu se castiga in cariera.
+func car_reward_for(car_id: StringName) -> CareerCarReward:
+	for reward in config.car_rewards:
+		if reward != null and reward.car == car_id:
+			return reward
+	return null
+
+
+## Cate puncte de cariera mai lipsesc pana la masina (0 = deschisa).
+func points_missing_for_car(car_id: StringName) -> int:
+	if is_car_unlocked(car_id):
+		return 0
+	var reward := car_reward_for(car_id)
+	return maxi(0, reward.points - points()) if reward != null else 0
+
+
+## Urmatoarea masina de castigat: pragul cel mai mic inca necastigat (null =
+## toate castigate). Pe progresul real, nu pe comutatorul de dezvoltator.
+func next_car_reward() -> CareerCarReward:
+	var best: CareerCarReward = null
+	for reward in config.car_rewards:
+		if reward == null or is_car_earned(reward.car):
+			continue
+		if best == null or reward.points < best.points:
+			best = reward
+	return best
+
+
+## Masinile din garaj castigate (sau deschise), pentru pasaport.
+func earned_car_count() -> int:
+	var count := 0
+	for res in GameState.CAR_DATA:
+		if is_car_earned((res as CarData).id):
+			count += 1
+	return count
+
+
+func garage_size() -> int:
+	return GameState.CAR_DATA.size()
+
+
+## Numele de afis al masinii `car_id` (id-ul brut daca nu e in garaj).
+static func car_display_name(car_id: StringName) -> String:
+	var index := SaveSchema.index_of(GameState.CAR_DATA, car_id)
+	if index < 0:
+		return String(car_id)
+	return (GameState.CAR_DATA[index] as CarData).display_name
+
+
+## Daca masina selectata e incuiata, selectia trece pe prima masina de start
+## din garaj si setarile se salveaza. Se cheama DOAR din `MainMenu._ready()`
+## (si din garaj, la stingerea comutatorului): nu din `_ready()`-ul carierei si
+## nici din `race.gd`, fiindca zeci de sonde incarca `Race.tscn` direct cu
+## `selected_car = 0` (Muscle, incuiata pe un save gol) si liniile lor de baza
+## nu au voie sa se mute.
+## Un id dormant (masina dintr-un build mai nou, selectia cazuta pe 0) se pierde
+## aici: in build-ul asta masina efectiva era oricum cea de pe 0, incuiata.
+func ensure_selected_car() -> void:
+	var current := SaveSchema.id_at(GameState.CAR_DATA, GameState.selected_car)
+	if current != &"" and is_car_unlocked(current):
+		return
+	for car_id in config.starting_cars:
+		var index := SaveSchema.index_of(GameState.CAR_DATA, car_id)
+		if index >= 0:
+			GameState.selected_car = index
+			GameState.save_settings()
+			return
+
+
+## Zavorul: fiecare recompensa al carei prag e atins si inca nezavorata intra in
+## `_garage_unlocked`. Intoarce masinile zavorate ACUM, in ordinea pragurilor.
+## Doar adauga — nimic nu scoate o masina castigata (regula 2 din antet).
+func _latch_cars() -> Array[StringName]:
+	var latched: Array[StringName] = []
+	var rewards: Array[CareerCarReward] = []
+	for reward in config.car_rewards:
+		if reward != null:
+			rewards.append(reward)
+	if rewards.is_empty():
+		return latched
+	rewards.sort_custom(func(a: CareerCarReward, b: CareerCarReward) -> bool:
+		return a.points < b.points)
+	var total := points()
+	for reward in rewards:
+		if total >= reward.points and not _garage_unlocked.has(String(reward.car)):
+			_garage_unlocked.append(String(reward.car))
+			latched.append(reward.car)
+	return latched
+
+
 func _state_for(id: StringName) -> Dictionary:
 	if not _tracks.has(id):
 		_tracks[id] = {"race_medal": 0, "tt_medal": 0, "tt_best_ms": 0,
@@ -266,8 +418,12 @@ func _state_for(id: StringName) -> Dictionary:
 
 
 func _changed() -> void:
+	var latched := _latch_cars()
+	last_unlocked_cars.append_array(latched)
 	save_progress()
 	progress_changed.emit()
+	for car_id in latched:
+		car_unlocked.emit(car_id)
 
 
 # ----------------------------------------------------- cursa de cariera
@@ -280,6 +436,7 @@ func start_track(id: StringName, mode: Mode = Mode.RACE) -> void:
 	# Un start nou peste un contratimp neinchis nu are voie sa piarda valoarea
 	# originala a lui ai_count: restauram inainte sa re-salvam.
 	_restore_ai_count()
+	last_unlocked_cars.clear()
 	active = true
 	active_track = id
 	active_mode = mode
@@ -307,6 +464,7 @@ func start_track(id: StringName, mode: Mode = Mode.RACE) -> void:
 func finish_active(position: int, challenge_done: bool = false) -> int:
 	if not active:
 		return 0
+	last_unlocked_cars.clear()
 	var medal := medal_for_position(position)
 	set_race_medal(active_track, medal)
 	var bonus := 0
@@ -447,7 +605,13 @@ func load_progress() -> void:
 			if bool(cfg.get_value(section, "won", false)):
 				_cups[StringName(section.trim_prefix("cup:"))] = true
 	for entry in cfg.get_value("garage", "unlocked", []):
-		_garage_unlocked.append(String(entry))
+		if not _garage_unlocked.has(String(entry)):
+			_garage_unlocked.append(String(entry))
+	# Un save cu puncte de dinainte de masinile castigate (sau un prag coborat
+	# intre timp) isi primeste masinile aici, in tacere: fara anunt, si scris
+	# pe disc doar daca s-a zavorat ceva. Un fisier read-only a iesit mai sus.
+	if not _latch_cars().is_empty():
+		save_progress()
 
 
 func save_progress() -> void:

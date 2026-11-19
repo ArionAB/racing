@@ -29,6 +29,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/angkor/kit/vault_intact.glb" id="27_vault"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/kit/vault_broken.glb" id="28_vault_b"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/kit/giant_root_ramp.glb" id="29_ramp"]
+[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/angkor_wat_drive.glb" id="30_temple"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/kit/gallery_column.glb" id="31_gcol"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/kit/gallery_roof.glb" id="32_groof"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/kit/gallery_relief_wall.glb" id="33_gwall"]
@@ -4378,6 +4379,7 @@ wing_end_height_m = 1.1
 hall_ceiling = 15.0
 hall_from_m = 0.0
 hall_to_m = 91.34
+tube_visible = false
 
 [node name="Gong0" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(0.203, 0, -0.979, 0, 1, 0, 0.979, 0, 0.203, -24.01, 4.0, -0.48)
@@ -5635,6 +5637,11 @@ metadata/camera_blocker = true
 [node name="RadacinaRampa" parent="DecorManual" instance=ExtResource("29_ramp")]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 126.0, 7.16, 12.57)
 metadata/coliziune = "mesh"
+
+[node name="AngkorWat" parent="DecorManual" instance=ExtResource("30_temple")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0, 0.0, 0.0)
+metadata/coliziune = "none"
+metadata/ancora_sol = Vector3(-60.0, 4.1, 30.0)
 
 [node name="BakhengAltar0" parent="DecorManual" instance=ExtResource("34_shrine")]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -148.0, 31.0, -220.0)
@@ -8572,5 +8579,14 @@ look_height = 1.0
 ceiling = 6.6
 ceiling_dist = 12.0
 blend_time = 0.35
+
+[node name="RazaSanctuar" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 22.0, 0)
+script = ExtResource("56_shaft")
+top_radius = 2.0
+bottom_radius = 4.4
+length = 18.0
+strength = 0.22
+fade_m = Vector2(1.5, 5.0)
 
 [node name="Machete" type="Node3D" parent="."]

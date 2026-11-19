@@ -1233,7 +1233,8 @@ script = ExtResource("56_shaft")
 top_radius = 2.0
 bottom_radius = 4.4
 length = 18.0
-strength = 0.11
+strength = 0.22
+fade_m = Vector2(1.5, 5.0)
 """
     # ---- VAL 3-4 (kit §1.2, §1.4-§1.7): piesele mari ale locului. Decor (coliziune "none") in afara
     # benzii, cu exceptia templului (corp pe carcasa; e departe de drum, in mijlocul inelului de sant).

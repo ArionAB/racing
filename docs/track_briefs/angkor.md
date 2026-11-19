@@ -1102,7 +1102,7 @@ bucată de tur **în** templu și **un hazard** în el.
 
 | | înainte | acum |
 |---|---|---|
-| B | gopura de vest → arc R 30 pe gazon → spre nord pe x = −56 | gopura de vest → **drept pe axă, prin portalul de vest** (x = −52) → navă → **viraj de 90° la stânga în sala centrală** (R 28,2, cu centrul lângă turnul de NV, la 11,7 m de axa turnului central) → navă → **portalul de nord** (y = +52) → gopura de nord → calea de nord, acum pe x = 0 |
+| B | gopura de vest → arc R 30 pe gazon → spre nord pe x = −56 | gopura de vest → **drept pe axă, prin portalul de vest** (x = −52) → navă → **viraj de 90° la stânga în sala centrală** (R 28,2, cu centrul lângă turnul de NV, la 11,7 m de axa turnului central) → navă → **portalul de nord** (y = +52) → calea de nord, acum pe x = 0 |
 | legătura spre C | calea de nord dădea direct în urcarea Bakheng | o diagonală lungă prin junglă (două coturi de ~33°, R 40) până pe linia veche a urcării |
 | axă în masiv | 0 m | **90,7 m** (tubul are 91,3 m) |
 | lățime | 8 m | portal de vest 12,9 m, **sala 16 m**, portal de nord 12,1 m |
@@ -1117,6 +1117,15 @@ bucată de tur **în** templu și **un hazard** în el.
   nou (`FRAC_BASE = 2`); grupurile de decor lovibil (`roadside/Track24.tres`) sunt mutate.
 - **Lățimea** e declarată într-o fereastră de curgere (`width_flow_windows`, tiparul sălii
   Carrara): nicio margine nu e treaptă.
+- **Gopura de nord a ieșit.** Portalul de nord al templului e poarta; gopura cădea la 10 m după el,
+  cu golul abia cât portalul și cu aripile portalului deschizându-se spre stâlpii ei (3 ejectări în
+  16 curse). Balustrada căii de nord pornește acum dinăuntrul aripilor portalului, ca să nu aibă
+  capătul în pâlnie (încă 2 ejectări până la mutare).
+- **Gopura de vest e lată de 1,25 ori** (golul 12,5 m), ca fosta gopură de nord: mașinile nu mai
+  frânează acolo pentru arc, deci plutonul din turul 1 trece prin ea cu ~40 m/s.
+- **Culoarul AI de la Bayon** (`custom_lane_bias`) începe la 60 m înaintea primului turn (era 45):
+  pe traseul prin templu plutonul ajunge la Bayon altfel grupat și intra drept în primul turn (9
+  ejectări în 64 de curse, față de 0 în 32 pe traseul vechi; după: 2 și 2 în câte 16).
 
 ### 10.2 Cum e făcut templul
 
@@ -1136,7 +1145,15 @@ bucată de tur **în** templu și **un hazard** în el.
   vârful central +36, colțurile +30. Modelul vechi (`angkor_wat_temple.glb`) rămâne în repo,
   nefolosit de pistă.
 - **Sanctuarul** de sub turnul central nu e carosabil: e în spatele arcadei de pe exteriorul
-  virajului, cu gongul cel mare pe piedestal și o rază de lumină (`LightShaft`) din turnul gol.
+  virajului (7 travee deschise, între 28 și 61 m de portal), cu gongul cel mare pe piedestal de lotus
+  și o rază de lumină (`RazaSanctuar`, un `LightShaft`) care cade prin turnul gol.
+- **Interiorul**: stâlpi la 4,7 m cu fața în planul peretelui, soclu continuu pe plan, panouri cu
+  apsare și nișe cu lămpi în registrul de jos, ferestre cu baluștri sus (reale pe pereții pe care îi
+  ajunge soarele: sudul navei de vest și vestul navei de nord), boltă în trepte cu nervuri. 148.620
+  de triunghiuri (136.836 pe piatră), 10,7 MB.
+- **Abatere cunoscută**: rama portalului de vest are 12,0 m (cât `tunnel_half_width`), iar șoseaua
+  are acolo 12,9 m — 0,44 m de asfalt pe fiecare parte trec pe sub ușori. Aripile portalului duc
+  mașinile în gol; ProbeRace n-a găsit nimic la portal.
 - **În jur** (`zona_b.py`): curtea de vest e gazon (două luminișuri noi), cu balustradă naga până la
   aripile portalului, altare cu tămâie de o parte și de alta a intrării, călugări departe de bandă;
   lotușii șanțului de nord s-au mutat cu calea de nord.
@@ -1148,7 +1165,10 @@ tavan, jos peste drum. **Pendul fizic, nu ceas**: neatins stă; lovit, se leagă
 (~15 s până se liniștește), deci cine vine în urma ta întâlnește un obstacol care se mișcă —
 plutonul își face singur hazardul. Cât pierzi depinde de **masă** (principiul 1): la 25 m/s
 autobuzul păstrează 95% din viteză, buggy-ul 74%, tuk-tuk-ul 34% (`tools/ProbeGong.tscn`).
-AI-ul nu-l citește: e un corp cinstit în care intră sau pe lângă care trece.
+**Nu aruncă șoferul**: discul poartă meta `no_eject` (`Car.SOFT_BODY_NO_EJECT_META`), care deschide
+aceeași fereastră de 0,6 s fără ejectare ca turma din #614 — un gong te încetinește și te poate
+abate în perete, dar nu te repune. AI-ul nu-l citește: e un corp cinstit în care intră sau pe lângă
+care trece.
 
 Cinci gonguri (metri de la portalul de vest; lateral + = exteriorul virajului):
 
@@ -1182,8 +1202,26 @@ falsă) și nici din joc (toate celelalte hazarde sunt ceasuri cinematice).
 - Repunerile în plus față de traseul vechi nu sunt în templu: sunt la creastă, la Bayon și la
   zidurile Ta Prohm, pe geometrie **identică** — plutonul ajunge acolo în alt moment al ploii. Se
   confirmă sau nu pe seed-uri noi (memoria `proberace-nedeterminism`).
-- Ejectarea de pe gong: un gong încetinește după masă, nu repune (ca turma din #614). Vezi
-  antetul `gong_hazard.gd` pentru starea regulii „gongul nu aruncă șoferul”.
+- Ejectarea de pe gong (rularea de mai sus, înaintea regulii): gongul încetinise mașina și o
+  abătuse în peretele de lângă portalul de nord. Discul singur nu poate arunca (cel mult 14 m/s
+  schimbare de viteză pe tick, din 174 de lovituri măsurate; pragul e 26); peretele de după el, da.
+  De aici regula „nu aruncă șoferul” din §10.3, păzită de contractul (g) din ProbeGong.
+
+**Starea finală** (gongul care nu aruncă, gopura de nord scoasă, balustrada din aripi, gopura de
+vest lărgită, culoarul Bayonului de la 60 m), pe **seed-uri noi** (49–64), față de traseul vechi
+rulat cu același cod pe trei seturi de câte 16 seed-uri (1–16, 17–32, 33–48):
+
+| ejectări în 16 curse | traseul vechi (3 seturi) | prin templu, starea finală |
+|---|---|---|
+| total | 3 / 6 / 9 | **5** |
+| în templu și în jurul lui (B) | 0 / 0 / 1 | **0** |
+| turnurile Bayonului | 0 / 0 / 1 | 2 |
+| zidurile Ta Prohm (neschimbate, datorie veche) | 3 / 5 / 4 | 3 |
+| `[blocaj]` în A și B | 0 / 0 / 0 | **0** |
+| `[blocaj]` total (la elefant) | 29 / 15 / 9 | 19 |
+
+Turul: minim 79,1 s (mediana), mediu 85,4 s. Dominoul, creasta și perdeaua: neschimbate (10,7%
+striviri, airtime 0,65 s, 24 de zboruri pe cursă).
 
 ### 10.5 Gărzi
 
@@ -1192,18 +1230,27 @@ falsă) și nici din joc (toate celelalte hazarde sunt ceasuri cinematice).
   singură piele (modelul fără corp, tubul ascuns; fără model în scenă garda pică); (d) zona de
   cameră cu tavan declarat și întuneric; (e) sala ≥ 15 m, portalurile ≥ 11,5 m; (f) ≥ 3 gonguri, în
   tub, pe carosabil, pe sensul de mers, cu o trecere curată de ≥ 3,2 m pe fiecare rând.
-- `tools/ProbeGong.tscn` (nouă): repaus, masa decide, leagăn, fără praștie, bandă, sunet.
+- `tools/ProbeGong.tscn` (nouă, 7 contracte cu sabotaj): repaus, masa decide, leagăn, fără
+  praștie, bandă, sunet, fără ejectare (189 de scenarii la viteză maximă, inclusiv cu perete după
+  disc).
+- `tools/blender/measure_angkor_drive.py` (nouă, 6 verificări cu sabotaj): vârfurile turnurilor,
+  nimic în volumul carosabil, pereți fără goluri la înălțimea mașinii, tavan închis, portaluri,
+  amprentă.
+- Amândouă gărzile de joc sunt în `tools/verify_local.sh`.
 - `ProbeLaneClear`: linia de bază Angkor **41 → 48** (10 pe turnurile Bayonului în loc de 7 —
   aceleași corpuri, alte stații ale sondei pe un tur mai lung — și 4 pe gonguri, numite).
 - `tools/angkor_race_run.sh` / `angkor_race_sum.py`: ferestrele mutate pe traseul nou (elefant
-  0,378–0,399, creastă 0,606–0,643, bandă nouă `blocaje_B` pentru templu).
+  0,378–0,399, creastă 0,606–0,643, bandă nouă `blocaje_B` pentru templu); `SEED_FROM=17` rulează
+  seed-urile 17–32 (un exces se confirmă doar pe seed-uri noi).
 - Neschimbate și verzi: ProbeLayout, ProbeBuried, `probe_manual`, ProbeAngkorPas6.
 
 ### 10.6 Ce rămâne al dezvoltatorului
 
 1. **Verdictul la volan**: sala, driftul printre gonguri, cât de tare lovește un gong tuk-tuk-ul
    (masa, `GongHazard.mass`, e un singur număr) și dacă gongurile ar trebui să se și legene singure
-   (`idle_swing_deg`, acum 0).
+   (`idle_swing_deg`, acum 0). De știut: la o lovitură piezișă foarte tare (135 kg la 36 m/s, peste
+   50° față de bandă) balamaua cedează lateral 0,8–1,5 m și discul revine; la loviturile de cursă
+   (25 m/s, din față) rămâne la 8 cm.
 2. **Lungimea turului** (mai sus).
 3. **Recordurile** de pe Angkor sunt ținute pe `angkor` fără versiune de traseu: timpii vechi (tur de
    2.415 m) rămân în `records.cfg` și sunt imbatabili pe traseul nou. De șters sau de versionat.

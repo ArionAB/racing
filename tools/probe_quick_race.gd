@@ -7,7 +7,8 @@ extends Node
 ##   1. `QuickRaceTracks.indices()` are exact pistele din EXPECTED (15 la
 ##      10 nov 2026), fara dubluri de index si fara doua cartonase cu acelasi
 ##      nume afisat ("Okinawa" era pe Track08 SI pe Track20); ordinea: pistele
-##      cupelor, cupa cu cupa, apoi restul in ordinea registrului;
+##      cupelor, cupa cu cupa, apoi restul in ordinea registrului (din 19 nov
+##      2026 toate cele 16 sunt in cupe, deci „restul" e gol);
 ##   2. `TrackSelectPanel` real: cartonasele din grila sunt exact lista de mai
 ##      sus, in aceeasi ordine; focusul la prima pornire (`selected_track` = 0,
 ##      adica Dunele) cade pe un cartonas jucabil, iar dupa o cursa pe pista

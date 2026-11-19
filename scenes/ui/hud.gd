@@ -500,13 +500,25 @@ func _build_results_panel(root: Control) -> void:
 	margin.add_child(_results_box)
 
 ## rows: {name, color, right, is_player} in ordinea afisarii.
-func show_results(title: String, rows: Array[Dictionary], primary_label: String) -> void:
+## `banner`: randul de vestire de sub titlu (masina castigata in cariera,
+## „NEW CAR: POLITIA"), auriu, ca sa nu se piarda in titlu; gol = fara rand,
+## panoul arata ca inainte. Sta pe pozitia 1, inaintea randurilor clasamentului
+## (sondele citesc titlul pe pozitia 0 si randurile ca HBoxContainer).
+func show_results(title: String, rows: Array[Dictionary], primary_label: String,
+		banner: String = "") -> void:
 	for child in _results_box.get_children():
 		child.free()
 	var title_label := _make_label(34)
 	title_label.text = title
 	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_results_box.add_child(title_label)
+	if banner != "":
+		var banner_label := _make_label(32)
+		banner_label.name = "NewCarLabel"
+		banner_label.text = banner
+		banner_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		banner_label.add_theme_color_override("font_color", Color(1.0, 0.78, 0.22))
+		_results_box.add_child(banner_label)
 	for row in rows:
 		var line := HBoxContainer.new()
 		line.add_theme_constant_override("separation", 12)

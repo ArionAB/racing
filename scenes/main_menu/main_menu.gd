@@ -7,6 +7,11 @@ var _panels: Array[Control] = []
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# Masinile se castiga in cariera (19 nov 2026): o selectie incuiata (save gol
+	# cu implicitul Muscle, sau comutatorul de dezvoltator stins) trece pe prima
+	# masina de start, inainte ca garajul sa citeasca selectia. Doar aici, nu in
+	# Career._ready / race.gd — vezi nota de la `Career.ensure_selected_car`.
+	Career.ensure_selected_car()
 
 	var bg := ColorRect.new()
 	bg.color = Color(0.10, 0.12, 0.18)
@@ -100,7 +105,7 @@ func _build_track_panel() -> Control:
 	panel.back_pressed.connect(_show_main)
 	return panel
 
-## Cupa lumii: cele trei cupe, cu pistele in ordinea curselor.
+## Cupa lumii: cupele, cu pistele in ordinea curselor.
 func _build_world_cup_panel() -> Control:
 	var panel := WorldCupPanel.new()
 	panel.visible = false
@@ -120,7 +125,8 @@ func _build_career_panel() -> Control:
 
 ## Garajul: vitrina 3D + statistici + banda de selectie, pe ecran intreg
 ## (GaragePanel). A inlocuit lista de butoane-text, unde cifrele brute nu
-## spuneau nimic si nu vedeai masina pe care o alegi.
+## spuneau nimic si nu vedeai masina pe care o alegi. Masinile incuiate se vad
+## (vitrina, bare), dar nu se pot alege: se castiga in cariera.
 func _build_garage_panel() -> Control:
 	var panel := GaragePanel.new()
 	panel.visible = false

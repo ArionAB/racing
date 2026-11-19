@@ -296,6 +296,13 @@ run_step "Serengeti: animalele nu stau in copaci si stanci" animal_overlap.log '
 # regruparea fara pierderi, raftul numarat in scena si lacatul cursei.
 run_step "Cariera: config, persistenta, gating, raft" career.log 'VERDICT:' -- \
 	--headless --path . res://tools/ProbeCareer.tscn -- --check
+# Masinile se castiga in cariera (19 nov 2026): garajul de start Taxi + Buggy,
+# restul la praguri de puncte si zavorate (nu se mai pierd), comutatorul de
+# dezvoltator fara scrieri, SELECT refuza o masina incuiata, selectia cade pe
+# garajul de start, regulile noi din validate() si textele (rezultate,
+# pasaport). Fiecare contract are un --sabotaj=... care il pica.
+run_step "Cariera: masini castigate, zavor, garaj, texte" car_unlock.log 'VERDICT:' -- \
+	--headless --path . res://tools/ProbeCarUnlock.tscn
 # Save-ul (#690): id-uri stabile, migrarea v0 -> v1 cu copie .bak-v0,
 # idempotenta, id-uri dormante, fisiere stricate / mai noi, garaj reordonat si
 # pista redenumita fara pierderi.

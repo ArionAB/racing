@@ -136,18 +136,21 @@ const TRACK_NAMES: Array[String] = [
 	"Angkor", "San Francisco",
 ]
 
-## Cupele din WORLD CUP (decizia dezvoltatorului, 30 oct 2026): trei cupe de
-## cate patru curse, puncte cumulate. Raman PE DINAFARA Dunele si Okinawa
-## manual (pistele vechi de test, indicii 0-1), Ha Long, Carrara, Angkor si San
-## Francisco (doar cursa rapida pana decide dezvoltatorul, brief angkor.md §8,
-## san_francisco.md §8). Cele 12
-## piste ramase sunt impartite pe geografie, ALTFEL decat lumile carierei, ca
-## modul sa nu fie aceeasi grila jucata a doua oara; fiecare cupa se deschide
-## cu o pista din lumea 1 a carierei (cea mai blanda).
+## Cupele din WORLD CUP: patru cupe de cate patru curse, puncte cumulate —
+## toate cele 16 piste de lansare (#704). Raman PE DINAFARA doar bancurile de
+## test, Dunele si Okinawa manual (indicii 0-1).
+##
+## Primele trei (decizia dezvoltatorului, 30 oct 2026) impart 12 piste pe
+## geografie, ALTFEL decat lumile carierei, ca modul sa nu fie aceeasi grila
+## jucata a doua oara; fiecare se deschide cu o pista din lumea 1 a carierei
+## (cea mai blanda). A patra (decizia dezvoltatorului, 19 nov 2026) e Ha Long,
+## Carrara, San Francisco, Angkor, in ordinea asta — aceleasi patru piste ca
+## lumea 4 a carierei, deci regula „altfel decat cariera" nu i se aplica.
 const WORLD_CUPS: Array[Resource] = [
 	preload("res://scenes/world_cup/data/asia_cup.tres"),
 	preload("res://scenes/world_cup/data/europe_cup.tres"),
 	preload("res://scenes/world_cup/data/frontier_cup.tres"),
+	preload("res://scenes/world_cup/data/wonders_cup.tres"),
 ]
 
 
@@ -338,6 +341,14 @@ var tutorial_run: bool = false
 ## are cifra, iar cifra e singura care spune DACA sunt umbrele, ceata sau
 ## particulele. Persistat ca sa nu-l repornesti la fiecare build.
 var show_perf: bool = false
+
+## Comutatorul ascuns de dezvoltator (19 nov 2026): toate masinile din garaj
+## deschise, fara sa le castigi in cariera. Se aprinde cu 7 atingeri pe titlul
+## GARAGE in 3 secunde (GaragePanel), deci exista si in build-ul de release de
+## pe telefon (iOS e `--export-release`). Nu scrie NIMIC in progresul carierei:
+## `Career.is_car_unlocked` il citeste, garajul castigat ramane neatins.
+## Persistat, ca sa nu-l reaprinzi la fiecare pornire.
+var dev_unlock_all_cars: bool = false
 
 ## Telemetria de pozitie (LocationTelemetry): unde e masina pe pista, in
 ## coordonatele uneltelor (`--frac`, index, metri, lateral). F3 in cursa sau
@@ -918,6 +929,7 @@ func load_settings() -> void:
 	cam_follow_scale = clampf(
 		float(cfg.get_value("camera", "follow_scale", 1.0)), 0.4, 2.5)
 	show_perf = bool(cfg.get_value("debug", "show_perf", false))
+	dev_unlock_all_cars = bool(cfg.get_value("debug", "unlock_all_cars", false))
 	show_location = bool(cfg.get_value("debug", "show_location", false))
 	real_headlight = bool(cfg.get_value("debug", "real_headlight", true))
 	gfx_tier = clampi(int(cfg.get_value("video", "gfx_tier", 1)), 0, 2)
@@ -947,6 +959,7 @@ func save_settings() -> void:
 	cfg.set_value("camera", "fov_scale", cam_fov_scale)
 	cfg.set_value("camera", "follow_scale", cam_follow_scale)
 	cfg.set_value("debug", "show_perf", show_perf)
+	cfg.set_value("debug", "unlock_all_cars", dev_unlock_all_cars)
 	cfg.set_value("debug", "show_location", show_location)
 	cfg.set_value("debug", "real_headlight", real_headlight)
 	cfg.set_value("video", "gfx_tier", gfx_tier)

@@ -884,6 +884,9 @@ func _finish_race() -> void:
 		_career_points = Career.finish_active(player.race_position, _bonus_kept)
 	if GameState.champ_active:
 		GameState.record_results(_final_order)
+		# Pe disc imediat, cu cursa urmatoare (sau cupa stearsa dupa ultima):
+		# ecranul de rezultate poate fi ultimul lucru pe care il vede aplicatia.
+		GameState.champ_save_progress()
 	if _race_record_new:
 		hud.flash_message("FINISH — %s place!\nRACE RECORD %s" % [
 			_ordinal(player.race_position), _fmt_ms(_player_race_ms)])

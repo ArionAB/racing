@@ -34,11 +34,14 @@ extends RefCounted
 ##                              deblocat (`[garage] unlocked`) poarta CarData.id
 ##   ghosts/<id>.bin Career   — fantomele contratimpului, GhostData v2 (masina pe
 ##                              id; v1 tinea indexul si se citeste prin V0_CAR_ORDER)
+##   world_cup.cfg WorldCupSave — cupele WORLD CUP in desfasurare (CONTINUE),
+##                              `[meta] version=1`, sectiuni `cup:<WorldCup.id>`
+##                              cu adversarii si masina pe CarData.id si nivelul
+##                              AI pe numele fisierului de nivel (`aur`)
 ##   incarcare.cfg LoadingScreen — cache de durate pe numele scenei; nu e save
 ##                              (pierderea lui doar reface estimarea barei)
 ##   load_trace.txt GameState — urma ultimei incarcari (diagnostic)
 ##   location_pins.txt LocationTelemetry — unealta de dezvoltare (F5)
-## Starea WORLD CUP traieste doar in memorie (iesirea in MENU abandoneaza cupa).
 
 const SETTINGS_VERSION := 1
 const RECORDS_VERSION := 1
@@ -59,7 +62,7 @@ const LEGACY_RECORDS_SECTION := "legacy_records"
 const LEGACY_RACE_RECORDS_SECTION := "legacy_race_records"
 
 ## Directorul save-urilor pentru sonde si `verify_local.sh`: cu variabila de
-## mediu asta setata (doar in build de debug), GameState si Career citesc si
+## mediu asta setata (doar in build de debug), GameState, Career si WorldCupSave citesc si
 ## scriu acolo in loc de `user://`, inclusiv la `_ready` — singurul fel in care
 ## o rulare headless nu atinge save-ul real al dezvoltatorului.
 const DIR_OVERRIDE_ENV := "TOY_RACER_SAVE_DIR"

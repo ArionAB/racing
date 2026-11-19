@@ -523,7 +523,7 @@ msgstr "NOUVELLE VOITURE : %s"
 #. Garage SELECT button on a car not earned yet. One line, it must not widen the button.
 #: scenes/ui/garage_panel.gd:487
 msgid "CAREER: LOCKED"
-msgstr "CARRIÈRE : VERROUILLÉ"
+msgstr "CARRIÈRE : VERROUILLÉE"
 
 #. Garage SELECT button on a locked car: career points still missing. One line.
 #: scenes/ui/garage_panel.gd:488
@@ -554,7 +554,7 @@ msgstr[1] "%d COURSES"
 #. Button that starts a cup.
 #: scenes/ui/world_cup_panel.gd:178
 msgid "START"
-msgstr "DÉPART"
+msgstr "DÉMARRER"
 
 #: scenes/ui/track_select_panel.gd:122
 msgid "CHOOSE A TRACK"

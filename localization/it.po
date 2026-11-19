@@ -78,20 +78,20 @@ msgstr "Riduci i lampi"
 
 #: scenes/ui/settings_panel.gd:91
 msgid "Camera: distance"
-msgstr "Camera: distanza"
+msgstr "Telecamera: distanza"
 
 #: scenes/ui/settings_panel.gd:95
 msgid "Camera: height"
-msgstr "Camera: altezza"
+msgstr "Telecamera: altezza"
 
 #: scenes/ui/settings_panel.gd:99
 msgid "Camera: field of view"
-msgstr "Camera: campo visivo"
+msgstr "Telecamera: campo visivo"
 
 #. How fast the camera settles behind the car.
 #: scenes/ui/settings_panel.gd:103
 msgid "Camera: follow speed"
-msgstr "Camera: inseguimento"
+msgstr "Telecamera: velocità"
 
 #: scenes/ui/settings_panel.gd:109
 msgid "Graphics"
@@ -130,11 +130,11 @@ msgstr "RIPETI IL TUTORIAL"
 
 #: scenes/ui/settings_panel.gd:151
 msgid "CREDITS & LICENSES"
-msgstr "RICONOSCIMENTI E LICENZE"
+msgstr "CREDITI E LICENZE"
 
 #: scenes/ui/settings_panel.gd:158
 msgid "RESET CAMERA"
-msgstr "RIPRISTINA CAMERA"
+msgstr "RIPRISTINA TELECAMERA"
 
 #: scenes/ui/career_panel.gd:291
 #: scenes/ui/settings_panel.gd:173
@@ -339,7 +339,7 @@ msgstr "NESSUNA MEDAGLIA"
 #. Time — medal reached (GOLD/SILVER/BRONZE/NO MEDAL).
 #: scenes/race/race.gd:934
 msgid "TIME TRIAL — %s — %s"
-msgstr "A CRONOMETRO — %s — %s"
+msgstr "PROVA A TEMPO — %s — %s"
 
 #: scenes/race/race.gd:935
 msgid "NEW GHOST"
@@ -481,7 +481,7 @@ msgstr "(ancora nessun obiettivo)"
 
 #: scenes/ui/career_panel.gd:285
 msgid "TIME TRIAL"
-msgstr "A CRONOMETRO"
+msgstr "PROVA A TEMPO"
 
 #: scenes/ui/career_panel.gd:320
 msgid "1ST PLACE"
@@ -598,7 +598,7 @@ msgstr "VELOCITÀ"
 #. Acceleration, abbreviated.
 #: scenes/ui/garage_panel.gd:223
 msgid "ACCEL"
-msgstr "ACCELERAZ."
+msgstr "ACCEL."
 
 #: scenes/ui/garage_panel.gd:223
 msgid "GRIP"
@@ -697,7 +697,7 @@ msgstr "Verde"
 
 #: scenes/ui/credits_panel.gd:66
 msgid "CREDITS"
-msgstr "RICONOSCIMENTI"
+msgstr "CREDITI"
 
 #: scenes/ui/credits_panel.gd:66
 msgid "LICENSES & THANKS"

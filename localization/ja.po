@@ -242,7 +242,7 @@ msgstr "ハンドル反転  <=>"
 
 #: scenes/race/race.gd:307
 msgid "ON FIRE!"
-msgstr "炎上中！"
+msgstr "燃えてる！"
 
 #: scenes/race/race.gd:483
 msgid "ROCKET START!"
@@ -1102,7 +1102,7 @@ msgstr "氷を1枚も割らずに1周しよう。"
 #. Career challenge (bonus +1): title in capitals, hint as a sentence.
 #: scenes/career/data/challenges/cappadocia.tres:8
 msgid "CLEAN SPIRAL"
-msgstr "ノーミスらせん"
+msgstr "クリーンスパイラル"
 
 #. Career challenge (bonus +1): title in capitals, hint as a sentence.
 #: scenes/career/data/challenges/cappadocia.tres:9
@@ -1112,7 +1112,7 @@ msgstr "壁に当たらずにらせんを走り抜けよう。"
 #. Career challenge (bonus +1): title in capitals, hint as a sentence.
 #: scenes/career/data/challenges/chongqing.tres:8
 msgid "ALL ABOARD"
-msgstr "全員乗車"
+msgstr "出発進行"
 
 #. Career challenge (bonus +1): title in capitals, hint as a sentence.
 #: scenes/career/data/challenges/chongqing.tres:9

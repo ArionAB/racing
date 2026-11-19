@@ -456,7 +456,7 @@ msgstr "%s  ·  %d / %d PTS"
 #. %s = challenge title.
 #: scenes/ui/career_panel.gd:266
 msgid "BONUS +%d  ·  %s"
-msgstr "EXTRA +%d  ·  %s"
+msgstr "BONUS +%d  ·  %s"
 
 #: scenes/ui/career_panel.gd:268
 msgid "DONE"
@@ -598,7 +598,7 @@ msgstr "VELOCIDAD"
 #. Acceleration, abbreviated.
 #: scenes/ui/garage_panel.gd:223
 msgid "ACCEL"
-msgstr "ACELERAC."
+msgstr "ACELERACIÓN"
 
 #: scenes/ui/garage_panel.gd:223
 msgid "GRIP"

@@ -91,7 +91,7 @@ msgstr "Kamera: Sichtfeld"
 #. How fast the camera settles behind the car.
 #: scenes/ui/settings_panel.gd:103
 msgid "Camera: follow speed"
-msgstr "Kamera: Nachführung"
+msgstr "Kamera: Folgetempo"
 
 #: scenes/ui/settings_panel.gd:109
 msgid "Graphics"
@@ -194,7 +194,7 @@ msgstr "BESTZEIT  %s"
 #. Big countdown shown while the car is off the road.
 #: scenes/ui/hud.gd:838
 msgid "OFF ROAD"
-msgstr "IM GELÄNDE"
+msgstr "NEBEN DER STRECKE"
 
 #. Time of the saved ghost car.
 #: scenes/ui/hud.gd:876
@@ -204,17 +204,17 @@ msgstr "GEIST %s"
 #. %d = bonus points, %s = challenge title.
 #: scenes/ui/hud.gd:897
 msgid "CHALLENGE +%d: %s"
-msgstr "AUFGABE +%d: %s"
+msgstr "CHALLENGE +%d: %s"
 
 #: scenes/race/race.gd:806
 #: scenes/race/race.gd:970
 #: scenes/ui/hud.gd:902
 msgid "CHALLENGE FAILED"
-msgstr "AUFGABE VERFEHLT"
+msgstr "CHALLENGE GESCHEITERT"
 
 #: scenes/race/race.gd:969
 msgid "CHALLENGE +%d"
-msgstr "AUFGABE +%d"
+msgstr "CHALLENGE +%d"
 
 #. Countdown, very large text: keep it as short as possible.
 #: scenes/race/race.gd:222

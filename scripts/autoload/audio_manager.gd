@@ -86,6 +86,9 @@ const SFX: Dictionary = {
 	&"root_creak": preload("res://assets/audio/root_creak.wav"),
 	&"jungle_bed": preload("res://assets/audio/jungle_bed.wav"),
 	&"rain_leaves": preload("res://assets/audio/rain_leaves.wav"),
+	# Gongul de bronz din nava templului (GongHazard), pozitional, o data per lovitura; se
+	# acordeaza din `GongHazard.pitch`.
+	&"gong_hit": preload("res://assets/audio/gong_hit.wav"),
 	# San Francisco (Track25, tools/generate_sfx.gd `_save_sf_sounds`): clopotul celor doua
 	# tramvaie (BusHazard.bell_sfx: doua lovituri rare pe urcare, trei dese la gura), zumzetul
 	# cablului (bucla, AmbienceBed cu `zone_line`), scandurile pontonului (bucla de suprafata

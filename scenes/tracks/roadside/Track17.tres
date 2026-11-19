@@ -1,0 +1,164 @@
+[gd_resource type="Resource" script_class="RoadsideSet" format=3]
+
+[ext_resource type="Script" path="res://scenes/props/roadside_set.gd" id="1_ls426"]
+
+[resource]
+script = ExtResource("1_ls426")
+pieces = {
+"matka": {
+"glb": "res://assets/models/jodhpur/props/knock_jodhpur.glb",
+"mass": 1.5,
+"node": "Matka",
+"scale": 1.4,
+"shape": "sphere"
+},
+"sack": {
+"glb": "res://assets/models/jodhpur/props/knock_jodhpur.glb",
+"mass": 2.5,
+"node": "SpiceSack",
+"scale": 1.4,
+"shape": "box"
+},
+"spice": {
+"glb": "res://assets/models/jodhpur/props/knock_jodhpur.glb",
+"mass": 1.0,
+"node": "SpiceBasket",
+"scale": 1.4,
+"shape": "cylinder"
+}
+}
+groups = Array[Dictionary]([{
+"count": 3,
+"frac": 0.031400000000000004,
+"gap": 1.2,
+"note": "straight, viraj 0 grade",
+"pattern": "cluster",
+"piece": ["spice", "matka", "sack"],
+"side": -1
+}, {
+"count": 3,
+"frac": 0.11380000000000001,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -54 grade",
+"pattern": "pyramid",
+"piece": "sack",
+"side": -1
+}, {
+"count": 5,
+"frac": 0.1384,
+"gap": 1.2,
+"note": "exit, viraj -85 grade",
+"pattern": "cluster",
+"piece": ["spice", "matka", "sack"],
+"side": -1
+}, {
+"count": 4,
+"frac": 0.2306,
+"gap": 1.2,
+"note": "open, viraj 0 grade",
+"pattern": "cluster",
+"piece": ["spice", "matka", "sack"],
+"side": 1
+}, {
+"count": 3,
+"frac": 0.2738,
+"gap": 1.2,
+"note": "exit, viraj -79 grade",
+"pattern": "wall",
+"piece": "sack",
+"rows": 2,
+"side": -1
+}, {
+"count": 3,
+"frac": 0.315,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -51 grade",
+"pattern": "pyramid",
+"piece": "sack",
+"side": -1
+}, {
+"count": 4,
+"frac": 0.3945,
+"gap": 1.2,
+"note": "exit, viraj 91 grade",
+"pattern": "cluster",
+"piece": ["spice", "matka", "sack"],
+"side": 1
+}, {
+"count": 3,
+"frac": 0.4711,
+"gap": 1.2,
+"note": "outside, viraj 42 grade",
+"pattern": "row",
+"piece": "matka",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.5535,
+"gap": 1.2,
+"note": "exit, viraj 102 grade",
+"pattern": "wall",
+"piece": "sack",
+"rows": 1,
+"side": 1
+}, {
+"count": 4,
+"frac": 0.6192000000000001,
+"gap": 1.2,
+"note": "outside, viraj -79 grade",
+"pattern": "taper",
+"piece": "spice",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.686,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj 141 grade",
+"pattern": "pyramid",
+"piece": "sack",
+"side": 1
+}, {
+"count": 2,
+"frac": 0.7193,
+"gap": 1.2,
+"note": "exit, viraj -97 grade",
+"pattern": "cluster",
+"piece": ["spice", "matka", "sack"],
+"side": -1
+}, {
+"count": 3,
+"frac": 0.7576,
+"gap": 1.2,
+"note": "open, viraj -11 grade",
+"pattern": "row",
+"piece": "sack",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.8606,
+"gap": 1.2,
+"note": "straight, viraj 0 grade",
+"pattern": "row",
+"piece": "sack",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.9156000000000001,
+"gap": 1.2,
+"note": "exit, viraj -75 grade",
+"pattern": "wall",
+"piece": "sack",
+"rows": 1,
+"side": -1
+}, {
+"count": 4,
+"frac": 0.9421,
+"gap": 1.2,
+"note": "open, viraj -0 grade",
+"pattern": "cluster",
+"piece": ["spice", "matka", "sack"],
+"side": -1
+}])

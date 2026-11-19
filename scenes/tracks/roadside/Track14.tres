@@ -1,0 +1,165 @@
+[gd_resource type="Resource" script_class="RoadsideSet" format=3]
+
+[ext_resource type="Script" path="res://scenes/props/roadside_set.gd" id="1_ekck1"]
+
+[resource]
+script = ExtResource("1_ekck1")
+pieces = {
+"crate": {
+"glb": "res://assets/models/serengeti/props/knock_serengeti.glb",
+"mass": 2.0,
+"node": "SupplyCrate",
+"scale": 1.4,
+"shape": "box"
+},
+"drum": {
+"glb": "res://assets/models/serengeti/props/knock_serengeti.glb",
+"node": "OilDrum",
+"scale": 1.4,
+"shape": "cylinder"
+},
+"jerry": {
+"glb": "res://assets/models/serengeti/props/knock_serengeti.glb",
+"mass": 1.0,
+"node": "Jerrycan",
+"scale": 1.4,
+"shape": "box"
+}
+}
+groups = Array[Dictionary]([{
+"count": 4,
+"frac": 0.0173,
+"gap": 1.2,
+"note": "open, viraj 0 grade",
+"pattern": "cluster",
+"piece": ["drum", "crate", "jerry"],
+"side": -1
+}, {
+"count": 4,
+"frac": 0.07010000000000001,
+"gap": 1.2,
+"note": "straight, viraj 0 grade",
+"pattern": "cluster",
+"piece": ["drum", "crate", "jerry"],
+"side": -1
+}, {
+"count": 3,
+"frac": 0.1699,
+"gap": 1.2,
+"lying": true,
+"note": "outside, viraj -28 grade",
+"pattern": "row",
+"piece": "drum",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.23800000000000002,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -87 grade",
+"pattern": "pyramid",
+"piece": "drum",
+"side": -1
+}, {
+"count": 5,
+"frac": 0.26780000000000004,
+"gap": 1.2,
+"note": "exit, viraj 96 grade",
+"pattern": "cluster",
+"piece": ["drum", "crate", "jerry"],
+"side": 1
+}, {
+"count": 2,
+"frac": 0.3388,
+"gap": 1.2,
+"lying": true,
+"note": "open, viraj -20 grade",
+"pattern": "row",
+"piece": "drum",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.4098,
+"gap": 1.2,
+"note": "exit, viraj -41 grade",
+"pattern": "wall",
+"piece": "crate",
+"rows": 2,
+"side": -1
+}, {
+"count": 3,
+"frac": 0.4405,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -51 grade",
+"pattern": "pyramid",
+"piece": "drum",
+"side": -1
+}, {
+"count": 4,
+"frac": 0.5441,
+"gap": 1.2,
+"note": "outside, viraj 30 grade",
+"pattern": "taper",
+"piece": "jerry",
+"side": 1
+}, {
+"count": 3,
+"frac": 0.6132000000000001,
+"gap": 1.2,
+"lying": true,
+"note": "outside, viraj -153 grade",
+"pattern": "row",
+"piece": "drum",
+"side": -1
+}, {
+"count": 4,
+"frac": 0.6852,
+"gap": 1.2,
+"note": "exit, viraj 154 grade",
+"pattern": "row",
+"piece": ["drum", "crate", "jerry"],
+"side": 1
+}, {
+"count": 3,
+"frac": 0.7169,
+"gap": 1.2,
+"note": "exit, viraj -177 grade",
+"pattern": "wall",
+"piece": "crate",
+"rows": 2,
+"side": -1
+}, {
+"count": 4,
+"frac": 0.7927000000000001,
+"gap": 1.2,
+"note": "outside, viraj 36 grade",
+"pattern": "taper",
+"piece": "jerry",
+"side": 1
+}, {
+"count": 2,
+"frac": 0.8205,
+"gap": 1.2,
+"note": "inside, viraj 40 grade",
+"pattern": "row",
+"piece": "jerry",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.9117000000000001,
+"gap": 1.2,
+"note": "open, viraj -1 grade",
+"pattern": "row",
+"piece": "drum",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.9597,
+"gap": 1.2,
+"lying": true,
+"note": "outside, viraj -34 grade",
+"pattern": "row",
+"piece": "drum",
+"side": -1
+}])

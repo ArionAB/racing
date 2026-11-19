@@ -366,6 +366,13 @@ run_step "Transfagarasan: conurile din tunel se imprastie" tf_cones.log 'VERDICT
 # `--min` e numarul de piese asezate: una cazuta tacut pe "hull" pica pasul.
 run_step "Fiordland: jaloanele se imprastie" bump_fiord.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeBumpProps.tscn -- --track=Track16 --min=47
 run_step "Serengeti: chevroanele se imprastie" bump_ser.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeBumpProps.tscn -- --track=Track14 --min=28
+# Decor lovibil, valul 2: formele care se rostogolesc (`BumpProp` cu `shape`): butoiul si sfera
+# ruleaza, se opresc pe panta lina, se duc la vale pe cea abrupta; conul e infasuratoare convexa.
+run_step "Decor lovibil: piesele rotunde se rostogolesc" bump_roll.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeBumpRoll.tscn
+# Decor lovibil, valul 3: grupurile asezate pe marginea drumului din scenes/tracks/roadside/*.tres.
+# Pe fiecare pista cu fisier: toate piesele au loc bun, dorm si nu se misca neatinse, niciuna pe
+# carosabil, pista sub plafonul de corpuri.
+run_step "Decor lovibil: grupurile de pe marginea drumului (toate pistele)" roadside.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeRoadside.tscn -- --all
 
 # Uneltele nu-si numesc pista cu un numar scris in cod (#718). Cu 18 piste, 12
 # e indexul Monument Valley, dar scena Track12 e Chongqing; resolve_track_index

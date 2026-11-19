@@ -1,0 +1,139 @@
+[gd_resource type="Resource" script_class="RoadsideSet" format=3]
+
+[ext_resource type="Script" path="res://scenes/props/roadside_set.gd" id="1_t3bpk"]
+
+[resource]
+script = ExtResource("1_t3bpk")
+pieces = {
+"apples": {
+"glb": "res://assets/models/cappadocia/props/knock_cappadocia.glb",
+"mass": 1.5,
+"node": "AppleCrate",
+"scale": 1.4,
+"shape": "box"
+},
+"pot": {
+"glb": "res://assets/models/cappadocia/props/knock_cappadocia.glb",
+"mass": 2.5,
+"node": "ClayPot",
+"scale": 1.4,
+"shape": "cylinder"
+},
+"pumpkin": {
+"glb": "res://assets/models/cappadocia/props/knock_cappadocia.glb",
+"mass": 1.5,
+"node": "Pumpkin",
+"scale": 1.4,
+"shape": "sphere"
+}
+}
+groups = Array[Dictionary]([{
+"count": 4,
+"frac": 0.019200000000000002,
+"gap": 1.2,
+"note": "open, viraj 1 grade",
+"pattern": "row",
+"piece": ["pot", "pumpkin", "apples"],
+"side": -1
+}, {
+"count": 3,
+"frac": 0.0825,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -40 grade",
+"pattern": "pyramid",
+"piece": "apples",
+"side": -1
+}, {
+"count": 2,
+"frac": 0.1477,
+"gap": 1.2,
+"lying": true,
+"note": "open, viraj -0 grade",
+"pattern": "row",
+"piece": "pot",
+"side": -1
+}, {
+"count": 5,
+"frac": 0.2416,
+"gap": 1.2,
+"note": "exit, viraj -117 grade",
+"pattern": "cluster",
+"piece": ["pot", "pumpkin", "apples"],
+"side": -1
+}, {
+"count": 3,
+"frac": 0.2848,
+"gap": 1.2,
+"note": "open, viraj 4 grade",
+"pattern": "row",
+"piece": "apples",
+"side": -1
+}, {
+"count": 2,
+"frac": 0.325,
+"gap": 1.2,
+"note": "inside, viraj 48 grade",
+"pattern": "row",
+"piece": "pumpkin",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.38730000000000003,
+"gap": 1.2,
+"note": "exit, viraj 82 grade",
+"pattern": "wall",
+"piece": "apples",
+"rows": 2,
+"side": 1
+}, {
+"count": 3,
+"frac": 0.45830000000000004,
+"gap": 1.2,
+"layers": 2,
+"note": "exit, viraj -97 grade",
+"pattern": "pyramid",
+"piece": "apples",
+"side": -1
+}, {
+"count": 5,
+"frac": 0.5407000000000001,
+"gap": 1.2,
+"note": "exit, viraj -87 grade",
+"pattern": "cluster",
+"piece": ["pot", "pumpkin", "apples"],
+"side": -1
+}, {
+"count": 4,
+"frac": 0.5695,
+"gap": 1.2,
+"note": "open, viraj -0 grade",
+"pattern": "cluster",
+"piece": ["pot", "pumpkin", "apples"],
+"side": 1
+}, {
+"count": 2,
+"frac": 0.627,
+"gap": 1.2,
+"lying": true,
+"note": "open, viraj 6 grade",
+"pattern": "row",
+"piece": "pot",
+"side": -1
+}, {
+"count": 3,
+"frac": 0.7162000000000001,
+"gap": 1.2,
+"note": "open, viraj 10 grade",
+"pattern": "row",
+"piece": "apples",
+"side": 1
+}, {
+"count": 4,
+"frac": 0.7632,
+"gap": 1.2,
+"note": "open, viraj 8 grade",
+"pattern": "cluster",
+"piece": ["pot", "pumpkin", "apples"],
+"side": -1
+}])

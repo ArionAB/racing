@@ -56,7 +56,46 @@ const PropDebris := preload("res://scenes/props/prop_debris.gd")
 const HOME_DELAY_S: float = 5.0
 const HOME_CLEAR_M: float = 30.0
 
+## Formele de coliziune (`opts.shape`). Cutia e implicitul si ramane neschimbata; celelalte sunt
+## pentru piese care trebuie sa se ROSTOGOLEASCA (decor lovibil, valul 2, nov 2026): pana aici
+## orice piesa era o cutie, deci un butoi lovit aluneca pe o muchie ca o caramida.
+##   "cylinder"  cilindru pe axa verticala a modelului: butoaie, cauciucuri, teancuri;
+##   "sphere"    sfera: tumbleweed, baloane, bolovani de jucarie;
+##   "hull"      infasuratoarea convexa a modelului: conul de trafic (se rastoarna si se
+##               rostogoleste in arc, in jurul varfului).
+const SHAPES: Array[String] = ["box", "cylinder", "sphere", "hull"]
+## Amortizarea pieselor care se rostogolesc. Jolt nu are rezistenta la rulare: o piesa rotunda
+## se opreste DOAR din amortizare, care e proportionala cu viteza — deci taie tocmai loviturile
+## tari. Prima incercare (0,7 liniar) dadea piese care mergeau MAI PUTIN decat cutia la viteza de
+## cursa. Liniara ramane cea a cutiei (0,3), iar unghiulara e mult sub a ei (0,6), altfel rotirea
+## se stinge inainte ca piesa sa apuce sa ruleze. Masurat cu tools/ProbeBumpRoll.tscn: impins cu
+## 6 m/s pe plat, butoiul culcat ajunge la 6,7 m invartindu-se (17 rad); aceeasi piesa cu cutie
+## aluneca 3,6 m fara sa se invarta.
+const ROLL_LINEAR_DAMP: float = 0.3
+const ROLL_ANGULAR_DAMP: float = 0.2
+## „Rezistenta la rulare" de jucarie, in doua trepte. Sub `ROLL_REST_SPEED` amortizarea liniara
+## sare la `ROLL_REST_DAMP` (piesa incetineste vizibil, nu ingheata din mers), iar dupa `SETTLE_S`
+## secunde sub `SETTLE_SPEED` e adormita. Fara asta, pe orice panta ar cobori la nesfarsit,
+## treaza, adica platita la fiecare pas de fizica.
+## Ce iese din cifre (cilindru; sfera e aproape la fel): o piesa care ruleaza REPEDE pe o panta
+## de peste ~5 grade nu mai coboara sub prag si se duce la vale — asta e de dorit, e un butoi pe
+## un deal — pana da de plat sau de un perete. Pe pante mai line incetineste si se opreste. In
+## aer pragurile nu conteaza: gravitatia adauga 9,8 m/s in secunda de asteptare.
+const ROLL_REST_SPEED: float = 2.0
+const ROLL_REST_DAMP: float = 3.0
+const SETTLE_SPEED: float = 0.6
+const SETTLE_S: float = 1.0
+
 var _spawn_y: float = 0.0
+var _rolls: bool = false
+## Saltul la lovitura (`opts.pop`, m/s): la primul contact cu o masina piesa primeste viteza asta
+## in SUS, deci zboara peste capota in loc sa fie impinsa pe sol in fata barei. E un reglaj de
+## feel (decor lovibil, valul 3), nu o reparatie masurata: pe ProbeBumpProps viteza masinii dupa
+## lovitura a iesit la fel cu si fara el. 0 = fara (tot ce exista dinainte de valul 3).
+var _pop: float = 0.0
+var _pop_ready: bool = true
+const POP_COOLDOWN_S: float = 0.6
+var _settle_t: float = 0.0
 var _home: Transform3D = Transform3D.IDENTITY
 var _home_back: bool = false
 var _home_pending: bool = false
@@ -83,6 +122,9 @@ var _home_pending: bool = false
 ##           dar coliziunea trebuie sa ramana cea masurata (masinile parcate San Francisco, valul
 ##           2: modelele GLB inlocuiesc placeholderul, iar contactele pasului 6 sunt pe cutiile
 ##           lui — tools/ProbeSfParked.tscn --boxes).
+##   "shape" forma de coliziune, din `SHAPES`; implicit "box". Vezi constanta.
+##   "pop"   viteza in sus (m/s) primita la primul contact cu o masina; vezi `_pop`.
+##   "bounce" cat sare piesa (0..1) in locul implicitului de 0,2: mingea de plaja, geamandura.
 static func wrap(model: Node3D, opts: Dictionary = {}) -> BumpProp:
 	# In editor (Track e @tool) nu: fara simulare, corpul ar fi doar zgomot in
 	# arbore, iar scriptul asta nu ruleaza acolo.
@@ -128,35 +170,69 @@ func _setup(model: Node3D, opts: Dictionary = {}) -> void:
 	var aabb := Track.model_aabb(model)
 	if opts.has("box"):
 		aabb = model.transform * (opts["box"] as AABB)
-	var box := BoxShape3D.new()
+	var kind := String(opts.get("shape", "box"))
+	if not SHAPES.has(kind):
+		push_warning("BumpProp %s: forma necunoscuta '%s', ramane cutie" % [name, kind])
+		kind = "box"
 	# Putin sub vizual, ca sa nu se agate de colturi invizibile, si cu talpa
 	# ridicata cu SPAWN_LIFT_M: piesele sunt asezate pe teren cu talpa la cota
 	# solului, iar pe o panta sau langa o vecina cutia intra cativa cm in ele.
 	# Solverul o scotea afara la nastere, o trezea, si teancul de oale de la
 	# capatul randului din Cappadocia aluneca 1,38 m singur (ProbeBumpProps).
-	var foot := Vector2(aabb.size.x, aabb.size.z) * 0.85
 	var height := maxf(aabb.size.y - SPAWN_LIFT_M, aabb.size.y * 0.5)
-	box.size = Vector3(foot.x, height, foot.y)
 	var shape := CollisionShape3D.new()
-	shape.shape = box
 	shape.position = aabb.get_center() + Vector3(0.0, (aabb.size.y - height) * 0.5, 0.0)
+	match kind:
+		"cylinder":
+			# Raza INTREAGA, nu 85% ca la cutie: piesa e rotunda, deci n-are colturi
+			# invizibile, iar o raza mai mica ar ingropa butoiul in sol cand ruleaza culcat.
+			var cyl := CylinderShape3D.new()
+			cyl.radius = (aabb.size.x + aabb.size.z) * 0.25
+			cyl.height = height
+			shape.shape = cyl
+		"sphere":
+			var ball := SphereShape3D.new()
+			ball.radius = (aabb.size.x + aabb.size.y + aabb.size.z) / 6.0
+			shape.shape = ball
+			shape.position = aabb.get_center()
+		"hull":
+			var hull := _hull_shape(model)
+			if hull == null:
+				kind = "box"
+			else:
+				shape.shape = hull
+				shape.position = Vector3.ZERO
+	if kind == "box":
+		var box := BoxShape3D.new()
+		var foot := Vector2(aabb.size.x, aabb.size.z) * 0.85
+		box.size = Vector3(foot.x, height, foot.y)
+		shape.shape = box
 	add_child(shape)
-	center_of_mass_mode = RigidBody3D.CENTER_OF_MASS_MODE_CUSTOM
-	center_of_mass = shape.position
+	_rolls = kind != "box"
+	# Centrul de masa: la mijlocul formei, nu in originea corpului (talpa modelului). La
+	# infasuratoare il calculeaza Jolt din forma — conul il are jos, la un sfert din inaltime.
+	if kind != "hull":
+		center_of_mass_mode = RigidBody3D.CENTER_OF_MASS_MODE_CUSTOM
+		center_of_mass = shape.position
 	mass = clampf(aabb.size.x * aabb.size.y * aabb.size.z * 0.5 * DENSITY,
 		MIN_MASS, MAX_MASS)
 	if opts.has("mass"):
 		mass = float(opts["mass"])
 	_home_back = bool(opts.get("home", false))
+	_pop = maxf(0.0, float(opts.get("pop", 0.0)))
+	if _pop > 0.0:
+		contact_monitor = true
+		max_contacts_reported = 2
+		body_entered.connect(_on_body_entered)
 	var mat := PhysicsMaterial.new()
 	# 0,35, nu 0,7: un teanc inalt de 4 kg lovit jos se rastoarna peste capota
 	# si, cu frecare mare, se freca sub caroserie — masina cadea de la 13 la
 	# 5,8 m/s pe o oala (ProbeBumpProps, Cappadocia). La 0,35 pierde ~20%.
 	mat.friction = 0.35
-	mat.bounce = 0.2
+	mat.bounce = clampf(float(opts.get("bounce", 0.2)), 0.0, 1.0)
 	physics_material_override = mat
-	linear_damp = 0.3
-	angular_damp = 0.6
+	linear_damp = ROLL_LINEAR_DAMP if _rolls else 0.3
+	angular_damp = ROLL_ANGULAR_DAMP if _rolls else 0.6
 	_spawn_y = global_position.y
 	# Aschii si praf la lovitura (things-fly): managerul comun, nu noduri proprii.
 	PropDebris.watch(self)
@@ -173,6 +249,35 @@ func _setup(model: Node3D, opts: Dictionary = {}) -> void:
 	get_tree().physics_frame.connect(func() -> void:
 		_home = global_transform
 		sleeping = true, CONNECT_ONE_SHOT)
+
+
+func _on_body_entered(body: Node) -> void:
+	if not _pop_ready or not body.is_in_group(&"cars"):
+		return
+	_pop_ready = false
+	var v := linear_velocity
+	v.y = maxf(v.y, _pop)
+	linear_velocity = v
+	get_tree().create_timer(POP_COOLDOWN_S).timeout.connect(func() -> void: _pop_ready = true)
+
+
+## O singura infasuratoare convexa peste toate mesh-urile VIZIBILE ale modelului, in spatiul
+## corpului (modelul e copilul lui). Null daca modelul n-are varfuri.
+static func _hull_shape(model: Node3D) -> ConvexPolygonShape3D:
+	var pts := PackedVector3Array()
+	for entry in TrackDecor.visible_meshes(model, model.transform):
+		var mi: MeshInstance3D = entry[0]
+		var xform: Transform3D = entry[1]
+		var src := mi.mesh.create_convex_shape(true, false) as ConvexPolygonShape3D
+		if src == null:
+			continue
+		for p in src.points:
+			pts.append(xform * p)
+	if pts.size() < 4:
+		return null
+	var hull := ConvexPolygonShape3D.new()
+	hull.points = pts
+	return hull
 
 
 ## Piesa cu `home`: la 5 s dupa ce a adormit, daca s-a mutat si nicio masina nu e la mai putin de
@@ -203,6 +308,20 @@ func _try_home() -> void:
 
 ## Ruleaza doar cat corpul e treaz: piesa aruncata peste o faleza se sterge
 ## cand iese din lume, ca sa nu cada la infinit pe solver.
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if global_position.y < _spawn_y - LOST_BELOW_M:
 		queue_free()
+		return
+	if not _rolls:
+		return
+	var v2 := linear_velocity.length_squared()
+	linear_damp = ROLL_REST_DAMP if v2 < ROLL_REST_SPEED * ROLL_REST_SPEED else ROLL_LINEAR_DAMP
+	if v2 >= SETTLE_SPEED * SETTLE_SPEED:
+		_settle_t = 0.0
+		return
+	_settle_t += delta
+	if _settle_t >= SETTLE_S:
+		_settle_t = 0.0
+		linear_velocity = Vector3.ZERO
+		angular_velocity = Vector3.ZERO
+		sleeping = true

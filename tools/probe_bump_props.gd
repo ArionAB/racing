@@ -27,6 +27,9 @@ var _v_after := -1.0
 var _hit_t := -1.0
 var _fails: PackedStringArray = []
 var _ai_mode := false
+## `--min=N`: pista trebuie sa aiba cel putin N piese (decor lovibil, valul 1): prinde o piesa
+## care a cazut tacut pe "hull" (prea inalta fara `max_height`, metadata intoarsa de un generator).
+var _min_props := 0
 const TRIES := 4
 var _tried := 0
 var _hits := 0
@@ -50,6 +53,9 @@ func _ready() -> void:
 	# `--ai`: plutonul complet, fara lovitura sondei — cate piese imprastie AI-ul
 	# in primele 40 s (gimmick-ul de la Cappadocia, #508).
 	_ai_mode = OS.get_cmdline_user_args().has("--ai")
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--min="):
+			_min_props = int(arg.trim_prefix("--min="))
 	GameState.ai_count = 5 if _ai_mode else 0
 	_race = (load(RACE_SCENE) as PackedScene).instantiate() as Race
 	add_child(_race)
@@ -68,6 +74,8 @@ func _physics_process(delta: float) -> void:
 		print("[bump-props] %s: %d piese (plafon %d)" % [
 			GameState.track_label(GameState.selected_track), _props.size(),
 			BumpProp.MAX_PER_TRACK])
+		if _props.size() < _min_props:
+			_fails.append("%d piese bump-abile, sub cele %d asteptate" % [_props.size(), _min_props])
 		if _props.is_empty():
 			_fails.append("nicio piesa bump-abila pe pista")
 			_finish()

@@ -150,12 +150,13 @@ const TRI := {
 ## Coliziunea per model (decor_manual.md: hull/trunk/mesh/none). `beech_*` pe
 ## trunk (memoria comuna a zonelor Fiordland); `scree_slab` placa pe panta =
 ## `none` (contract explicit sectiunea E: "placa, `none`"); `tussock_clump`,
-## `chevron_sign`, `road_sign_blank`, `snow_pole` = `none` (nu opresc masina);
+## `chevron_sign`, `road_sign_blank` = `none` (nu opresc masina); `snow_pole` = `bump`
+## (jalon lovibil, nov 2026);
 ## `guard_rock`/`moss_boulder_*`/`fern_cluster` = `hull` implicit.
 const COLLISION := {
 	"chevron_sign": "none",
 	"road_sign_blank": "none",
-	"snow_pole": "none",
+	"snow_pole": "bump",
 	"scree_slab": "none",
 	"tussock_clump": "none",
 	"beech_a": "trunk", "beech_b": "trunk", "beech_c": "trunk",

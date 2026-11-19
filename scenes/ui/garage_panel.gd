@@ -39,6 +39,15 @@ extends Control
 ##    n-are statistici — e o alegere de langa figurina, nu de langa bare. Ca si
 ##    masina, se COMITE abia la SELECT — un singur buton salveaza amandoua
 ##    alegerile, ca sa nu existe doua reguli pe acelasi ecran.
+##
+## 5. MASINILE INCUIATE (19 nov 2026: masinile se castiga in cariera). O masina
+##    incuiata se vede intreaga — vitrina, bare, fantoma, in culori pline: e
+##    jucaria de pe raft pe care o vrei. Doar cartonasul ei e mai stins si
+##    poarta un lacat (desenat, nu un glif: Barlow n-are lacat) in locul bifei,
+##    iar SELECT e stins si spune ce lipseste pe UN rand („CAREER: 4 MORE PTS")
+##    — panoul nu are voie sa creasca (vezi nota 4). Lacatul il decide numai
+##    `Career.is_car_unlocked`. Comutatorul ascuns de dezvoltator: 7 atingeri pe
+##    titlu in 3 secunde (exista si in release; vezi `_register_title_tap`).
 
 signal back_pressed
 
@@ -66,6 +75,11 @@ const CARD_SIZE := Vector2(190, 132)
 const STATS_W := 470.0
 ## Latura butoanelor de sageata din bara DRIVER: tinta de deget, nu de mouse.
 const ARROW_SIZE := 56.0
+## Comutatorul de dezvoltator: atatea atingeri pe titlu, in fereastra asta.
+const DEV_TAPS := 7
+const DEV_TAP_WINDOW_MS := 3000
+## Cat de stins e cartonasul unei masini incuiate (doar cartonasul, nu lacatul).
+const LOCKED_CARD_ALPHA := 0.5
 
 var _preview: CarPreview
 var _driver_name: Label
@@ -80,6 +94,12 @@ var _cards: Array[Button] = []
 ## Bifa „asta e masina mea", cate una per cartonas. Stare separata de bordura:
 ## vezi nota de la `_refresh_cards`.
 var _card_marks: Array[Label] = []
+## Lacatul, cate unul per cartonas, in locul bifei. Vizibil = masina incuiata.
+var _card_locks: Array[Control] = []
+var _title: Label
+var _select: Button
+## Momentele (ms) ultimelor atingeri pe titlu, pentru comutatorul ascuns.
+var _dev_taps: Array[int] = []
 ## Masina din vitrina. Poate diferi de `GameState.selected_car`: te uiti la una
 ## si inca n-ai apasat SELECT.
 var _shown: int = 0
@@ -113,6 +133,9 @@ func _ready() -> void:
 	_build_card_strip()
 
 	_show(_shown)
+	# Un punct castigat (sau o masina zavorata) schimba lacatele chiar daca
+	# garajul e deja construit.
+	Career.progress_changed.connect(_refresh_locks)
 
 
 ## Intervalele reale ale garajului. Daca cineva adauga un .tres nou in
@@ -139,11 +162,13 @@ func _compute_ranges() -> void:
 
 func _build_header() -> void:
 	var title := _make_label(44, true)
-	title.text = "GARAGE"
+	title.text = _title_text()
 	title.add_theme_color_override("font_color", TITLE_COLOR)
+	_title = title
 	var title_panel := PanelContainer.new()
 	title_panel.add_theme_stylebox_override("panel", _panel_style(16))
 	title_panel.position = Vector2(28, 22)
+	title_panel.gui_input.connect(_on_title_input)
 	add_child(title_panel)
 	var tm := MarginContainer.new()
 	tm.add_theme_constant_override("margin_left", 26)
@@ -220,8 +245,16 @@ func _build_stats_panel() -> void:
 	select.add_theme_stylebox_override("pressed",
 		_panel_style(14, ACCENT.darkened(0.18), Color(1, 1, 1, 0.0)))
 	select.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	# Incuiata: aceeasi inaltime, alt ton. Textul („CAREER: 4 MORE PTS") sta pe
+	# un rand si e taiat, nu impins: un buton mai lat ar fi latit panoul.
+	select.add_theme_stylebox_override("disabled",
+		_panel_style(14, Color(0.16, 0.18, 0.24, 0.92), Color(1, 1, 1, 0.10)))
+	select.add_theme_color_override("font_disabled_color", DIM)
+	select.clip_text = true
+	select.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	select.pressed.connect(_on_select_pressed)
 	box.add_child(select)
+	_select = select
 
 
 # --------------------------------------------------------------- bara DRIVER
@@ -362,6 +395,13 @@ func _build_card_strip() -> void:
 		card.add_child(mark)
 		_card_marks.append(mark)
 
+		# Lacatul sta in acelasi colt ca bifa (o masina incuiata nu poate fi a ta).
+		var lock := LockMark.new()
+		lock.position = Vector2(CARD_SIZE.x - 32.0, 8.0)
+		lock.visible = false
+		card.add_child(lock)
+		_card_locks.append(lock)
+
 
 # ------------------------------------------------------------------ stare
 
@@ -392,6 +432,7 @@ func _show(index: int) -> void:
 		_mass_offset(data.mass_factor), _mass_word(data.mass_factor),
 		_mass_offset(current.mass_factor) if ghost else -2.0)
 
+	_refresh_select()
 	_refresh_cards()
 
 
@@ -421,10 +462,47 @@ func _refresh_cards() -> void:
 		_cards[i].add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 		_cards[i].add_theme_color_override("font_color",
 			TITLE_COLOR if looking else DIM)
-		_card_marks[i].visible = chosen
+		# Incuiata: cartonasul stins (self_modulate nu atinge copiii, deci
+		# lacatul ramane citet) si lacatul in locul bifei.
+		var locked := not _is_unlocked(i)
+		_cards[i].self_modulate = Color(1, 1, 1, LOCKED_CARD_ALPHA) if locked \
+			else Color.WHITE
+		_card_locks[i].visible = locked
+		_card_marks[i].visible = chosen and not locked
 
 
+## SELECT dupa masina din vitrina: activ pe o masina deschisa, stins si cu ce
+## lipseste pe una incuiata.
+func _refresh_select() -> void:
+	var car_id := (GameState.CAR_DATA[_shown] as CarData).id
+	_select.disabled = not Career.is_car_unlocked(car_id)
+	_select.text = locked_select_text(Career.points_missing_for_car(car_id)) \
+		if _select.disabled else "SELECT"
+
+
+## Textul lui SELECT pe o masina incuiata, pe un singur rand.
+static func locked_select_text(missing: int) -> String:
+	if missing <= 0:
+		return "CAREER: LOCKED"
+	return "CAREER: %d MORE %s" % [missing, "PT" if missing == 1 else "PTS"]
+
+
+func _is_unlocked(index: int) -> bool:
+	return Career.is_car_unlocked((GameState.CAR_DATA[index] as CarData).id)
+
+
+## Lacatele si SELECT, fara sa reconstruiasca vitrina.
+func _refresh_locks() -> void:
+	_title.text = _title_text()
+	_refresh_select()
+	_refresh_cards()
+
+
+## Garda sta AICI, nu doar in `disabled`: o tasta, o sonda sau un buton viitor
+## care cheama functia direct nu au voie sa aleaga o masina incuiata.
 func _on_select_pressed() -> void:
+	if not _is_unlocked(_shown):
+		return
 	GameState.selected_car = _shown
 	GameState.selected_driver = _shown_driver
 	GameState.save_settings()
@@ -435,7 +513,44 @@ func _on_select_pressed() -> void:
 ## panoul, ca sa nu ramana pe ce te uitai data trecuta fara sa fi apasat SELECT.
 func reopen() -> void:
 	_shown_driver = GameState.selected_driver
+	_title.text = _title_text()
 	_show(GameState.selected_car)
+
+
+# ------------------------------------------- comutatorul ascuns de dezvoltator
+
+func _title_text() -> String:
+	return "GARAGE · ALL CARS" if GameState.dev_unlock_all_cars else "GARAGE"
+
+
+## Doar butonul de mouse: pe telefon atingerea vine si ca mouse emulat
+## (`emulate_mouse_from_touch`), iar pe desktop click-ul vine si ca atingere
+## emulata (`emulate_touch_from_mouse` in project.godot) — numarand ambele, un
+## tap ar fi contat de doua ori.
+func _on_title_input(event: InputEvent) -> void:
+	var button := event as InputEventMouseButton
+	if button != null and button.pressed and button.button_index == MOUSE_BUTTON_LEFT:
+		_register_title_tap(Time.get_ticks_msec())
+
+
+## 7 atingeri in 3 secunde comuta `GameState.dev_unlock_all_cars`. Ascuns, dar
+## NU legat de `OS.is_debug_build()`: build-ul de iOS e `--export-release`, iar
+## dezvoltatorul il foloseste pe telefon. Intoarce true cand a comutat.
+func _register_title_tap(now_ms: int) -> bool:
+	_dev_taps.append(now_ms)
+	while not _dev_taps.is_empty() and now_ms - _dev_taps[0] > DEV_TAP_WINDOW_MS:
+		_dev_taps.pop_front()
+	if _dev_taps.size() < DEV_TAPS:
+		return false
+	_dev_taps.clear()
+	GameState.dev_unlock_all_cars = not GameState.dev_unlock_all_cars
+	GameState.save_settings()
+	# Stins cu o masina necastigata selectata: selectia cade pe garajul de start.
+	if not GameState.dev_unlock_all_cars:
+		Career.ensure_selected_car()
+	_title.text = _title_text()
+	_show(_shown)
+	return true
 
 
 # ------------------------------------------------------------ normalizare
@@ -498,6 +613,27 @@ func _make_label(font_size: int, bold: bool) -> Label:
 	label.add_theme_font_override("font", FONT_BOLD if bold else FONT_MEDIUM)
 	label.add_theme_font_size_override("font_size", font_size)
 	return label
+
+
+# ------------------------------------------------- lacatul (clasa interna)
+
+## Lacat mic pe cartonas: toarta + corp + gaura cheii, desenat ca lacatul
+## lumilor sigilate din CareerPanel. Desenat, nu glif: Barlow Condensed n-are
+## lacat, iar un emoji ar depinde de fontul sistemului.
+class LockMark extends Control:
+	func _init() -> void:
+		custom_minimum_size = Vector2(24, 30)
+		size = custom_minimum_size
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _draw() -> void:
+		var col := GaragePanel.TITLE_COLOR
+		var cx := size.x * 0.5
+		draw_arc(Vector2(cx, 11.0), 7.0, PI, TAU, 14, col, 3.0, true)
+		draw_line(Vector2(cx - 7.0, 11.0), Vector2(cx - 7.0, 15.0), col, 3.0, true)
+		draw_line(Vector2(cx + 7.0, 11.0), Vector2(cx + 7.0, 15.0), col, 3.0, true)
+		draw_rect(Rect2(cx - 11.0, 15.0, 22.0, 15.0), col)
+		draw_circle(Vector2(cx, 21.5), 2.5, Color(0.04, 0.05, 0.08))
 
 
 # ------------------------------------------- bara de statistica (clasa interna)

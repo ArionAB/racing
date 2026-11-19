@@ -329,6 +329,11 @@ var cam_fov_scale: float = 1.0
 ## Cat de repede se aseaza camera in spatele masinii. Sub 1.0 = mai lenesa.
 var cam_follow_scale: float = 1.0
 
+## Limba aleasa in SETTINGS: un cod din `Localization.LOCALES`, sau "" = limba
+## telefonului. Se tine EXACT cum a venit de pe disc (si un cod pe care build-ul
+## asta nu-l stie ramane, dormant); limba efectiva o decide `Localization.resolve`.
+var language: String = ""
+
 ## Turul ghidat (#678) a fost terminat SAU sarit: nu se mai ofera la pornire
 ## (se reia din SETTINGS). Persistat. Logica sta in TutorialDirector.
 var tutorial_done: bool = false
@@ -435,6 +440,9 @@ func _ready() -> void:
 	load_settings()
 	load_records()
 	apply_gfx_tier()
+	# Inainte de orice ecran: fontul japonez in coada fonturilor, apoi limba.
+	Localization.install_fonts()
+	Localization.apply(language)
 
 
 ## URMA INCARCARII (nov 2026). Kyoto se inchidea pe iPhone cu bara la ~40% si
@@ -929,6 +937,7 @@ func load_settings() -> void:
 	ai_level = clampi(int(cfg.get_value("game", "ai_level", AiSkill.DEFAULT_LEVEL)),
 		0, AiSkill.LEVEL_PATHS.size() - 1)
 	tutorial_done = bool(cfg.get_value("game", "tutorial_done", false))
+	language = String(cfg.get_value("game", "language", ""))
 
 func save_settings() -> void:
 	if _settings_read_only:
@@ -957,6 +966,7 @@ func save_settings() -> void:
 	cfg.set_value("video", "reduce_flashes", reduce_flashes)
 	cfg.set_value("game", "ai_level", ai_level)
 	cfg.set_value("game", "tutorial_done", tutorial_done)
+	cfg.set_value("game", "language", language)
 	cfg.save(settings_path)
 
 

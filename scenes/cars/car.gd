@@ -354,6 +354,14 @@ const OFFROAD_SPEED_DEFAULT: float = 0.45
 const SOFT_CRUSH_FACTOR: float = 0.6
 ## Meta pe corpurile animalelor de turma; ejectarea le ignora (`ignore_animal_eject`).
 const HERD_ANIMAL_META := &"herd_animal"
+## Meta pe corpurile RIGIDE care costa viteza dupa masa dar nu arunca soferul (gongul de
+## templu, `GongHazard`). Contactul cu un astfel de corp deschide aceeasi fereastra ca o
+## lovitura de animal (`_animal_grace`, `ANIMAL_EJECT_GRACE`, sub `ignore_animal_eject`).
+## Pe Track24 (ProbeRace) un Muscle a fost ejectat „perete” 37,2 m/s chiar la un gong. Discul
+## singur nu ajunge la prag (ProbeGong (g): <= ~18 m/s intr-un tick); ejecteaza un contact
+## static (zid, prag) in fereastra de dupa disc. Fara meta (popicele, `BumpProp`), nimic nu
+## se schimba.
+const SOFT_BODY_NO_EJECT_META := &"no_eject"
 ## Viteza de cadere (m/s) la aterizare peste care soferul zboara.
 ## Masurat cu ProbeRace pe Alpii (garaj deschis, 150 s): SARITURA PROIECTATA
 ## peste gol (frac 0.71) ateriza la 24-30 m/s, si la pragul de 24 fiecare
@@ -1551,6 +1559,8 @@ func _process_contacts(delta: float) -> void:
 		if body is Car:
 			cars_hit.append(body as Car)
 		elif body is RigidBody3D:
+			if body.has_meta(SOFT_BODY_NO_EJECT_META):
+				_animal_grace = ANIMAL_EJECT_GRACE
 			# Popice & co: imprastiate cu un impuls scalat cu masa noastra —
 			# autobuzul le trimite mai departe decat un sport.
 			var dir := (body as Node3D).global_position - global_position

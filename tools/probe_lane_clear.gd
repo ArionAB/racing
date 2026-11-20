@@ -381,7 +381,14 @@ const BASELINE := {
 	# Kitul Angkor (val 2, 6 nov 2026): +34 pe radacina-rampa de la iesirea scurtaturii
 	# (`RadacinaRampa_col`, suprafata de rulare, scuzata pe nume ca podea): toate pe testul INAINTE la
 	# h 0,4/1,0 — raza orizontala loveste panta de 17% in fata, ca la `FlyoffRamp`. 7 + 34 = 41.
-	"Angkor (Track24)": 41,
+	# Prin templu (19 nov 2026, B rescris: soseaua trece prin Angkor Wat, turul are 207 puncte de
+	# control in loc de 201): 41 -> 48. Turnurile Bayonului dau acum 10 raportari in loc de 7 (aceleasi
+	# trei corpuri, neatinse; statiile sondei cad in alte locuri pe un tur mai lung), iar cele 5
+	# gonguri din templu dau 4 (`GongDisc`, frac 0.085 si 0.105): hazardul cerut de dezvoltator, pus PE
+	# carosabil dinadins, cu o trecere curata pe fiecare rand (`tools/probe_angkor_templu.gd`, (f)).
+	# In tub (0.076-0.113) nimic altceva: peretii stau pe marginea soselei. 34 + 10 + 4 = 48, masurat
+	# de 2 ori.
+	"Angkor (Track24)": 48,
 	# San Francisco (Track25), armata la pasul 2 (brief san_francisco.md §7, 11 nov 2026): traseul
 	# gol, plus geometria gri a serpentinelor (straturile retrase 2 m, fatadele la 1 m, acostamentul
 	# la cota drumului — `SerpentineGri`). 0 raportari, masurate de 2 ori. Baza = 0, fara marja: orice

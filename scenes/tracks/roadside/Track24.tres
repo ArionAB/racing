@@ -30,7 +30,7 @@ pieces = {
 }
 groups = Array[Dictionary]([{
 "count": 4,
-"frac": 0.011600000000000001,
+"frac": 0.0113,
 "gap": 1.2,
 "note": "open, viraj 0 grade",
 "pattern": "cluster",
@@ -38,16 +38,16 @@ groups = Array[Dictionary]([{
 "side": -1
 }, {
 "count": 3,
-"frac": 0.0829,
+"frac": 0.145,
 "gap": 1.2,
 "layers": 2,
-"note": "exit, viraj 80 grade",
+"note": "exit, cotul legaturii spre Bakheng (fost arcul R30 din B)",
 "pattern": "pyramid",
 "piece": "rice",
 "side": 1
 }, {
 "count": 5,
-"frac": 0.1824,
+"frac": 0.2061,
 "gap": 1.2,
 "note": "exit, viraj 84 grade",
 "pattern": "cluster",
@@ -55,7 +55,7 @@ groups = Array[Dictionary]([{
 "side": 1
 }, {
 "count": 4,
-"frac": 0.21230000000000002,
+"frac": 0.2351,
 "gap": 1.2,
 "note": "exit, viraj 103 grade",
 "pattern": "row",
@@ -63,7 +63,7 @@ groups = Array[Dictionary]([{
 "side": 1
 }, {
 "count": 3,
-"frac": 0.28190000000000004,
+"frac": 0.3027,
 "gap": 1.2,
 "layers": 2,
 "note": "exit, viraj -87 grade",
@@ -72,7 +72,7 @@ groups = Array[Dictionary]([{
 "side": -1
 }, {
 "count": 3,
-"frac": 0.3723,
+"frac": 0.3905,
 "gap": 1.2,
 "lying": true,
 "note": "outside, viraj -30 grade",
@@ -81,7 +81,7 @@ groups = Array[Dictionary]([{
 "side": -1
 }, {
 "count": 5,
-"frac": 0.3914,
+"frac": 0.409,
 "gap": 1.2,
 "note": "exit, viraj -88 grade",
 "pattern": "cluster",
@@ -89,7 +89,7 @@ groups = Array[Dictionary]([{
 "side": -1
 }, {
 "count": 3,
-"frac": 0.49250000000000005,
+"frac": 0.5072,
 "gap": 1.2,
 "note": "outside, viraj -37 grade",
 "pattern": "row",
@@ -97,7 +97,7 @@ groups = Array[Dictionary]([{
 "side": -1
 }, {
 "count": 4,
-"frac": 0.5406000000000001,
+"frac": 0.5539,
 "gap": 1.2,
 "note": "exit, viraj -48 grade",
 "pattern": "row",
@@ -105,7 +105,7 @@ groups = Array[Dictionary]([{
 "side": -1
 }, {
 "count": 4,
-"frac": 0.5796,
+"frac": 0.5918,
 "gap": 1.2,
 "note": "straight, viraj 0 grade",
 "pattern": "cluster",
@@ -113,7 +113,7 @@ groups = Array[Dictionary]([{
 "side": -1
 }, {
 "count": 3,
-"frac": 0.6667000000000001,
+"frac": 0.6764,
 "gap": 1.2,
 "layers": 2,
 "note": "exit, viraj 50 grade",
@@ -122,7 +122,7 @@ groups = Array[Dictionary]([{
 "side": 1
 }, {
 "count": 5,
-"frac": 0.7048,
+"frac": 0.7134,
 "gap": 1.2,
 "note": "exit, viraj -84 grade",
 "pattern": "cluster",
@@ -130,7 +130,7 @@ groups = Array[Dictionary]([{
 "side": -1
 }, {
 "count": 4,
-"frac": 0.7695000000000001,
+"frac": 0.7762,
 "gap": 1.2,
 "note": "exit, viraj -72 grade",
 "pattern": "row",
@@ -138,7 +138,7 @@ groups = Array[Dictionary]([{
 "side": -1
 }, {
 "count": 2,
-"frac": 0.8408,
+"frac": 0.8454,
 "gap": 1.2,
 "lying": true,
 "note": "straight, viraj 0 grade",
@@ -147,7 +147,7 @@ groups = Array[Dictionary]([{
 "side": -1
 }, {
 "count": 4,
-"frac": 0.9254,
+"frac": 0.9276,
 "gap": 1.2,
 "note": "outside, viraj -45 grade",
 "pattern": "taper",
@@ -155,7 +155,7 @@ groups = Array[Dictionary]([{
 "side": -1
 }, {
 "count": 3,
-"frac": 0.9436,
+"frac": 0.9452,
 "gap": 1.2,
 "layers": 2,
 "note": "exit, viraj -75 grade",

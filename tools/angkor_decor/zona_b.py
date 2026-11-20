@@ -2,139 +2,113 @@
 # Un fisier per POI ca constructorii din gauntlet sa lucreze in paralel fara conflicte
 # (docs/track_briefs/angkor_poi_gauntlet.md). Generatorul ramane sursa de adevar: Track24.tscn
 # se regenereaza (`python tools/gen_angkor_route.py scenes/tracks/Track24.tscn`), nu se editeaza de mana.
-# Fractiile zonei (pe INDEX): 0.058-0.114.
 #
-# ITEMS: (nume, glb, frac pe INDEX, lateral, yaw[, optiuni])
-#   nume     unic pe TOATA pista, prefixat cu litera zonei ("B_...")
-#   glb      relativ la res://assets/models/angkor/ ("kit/naga_head.glb") sau cale res:// completa (reuse)
-#   lateral  metri la DREAPTA sensului de cursa (negativ = stanga), fata de axa drumului
-#   yaw      grade, + = spre STANGA, relativ la directia drumului (-Z al piesei spre inainte la 0)
-#   optiuni  dict, toate optionale:
-#     "along"      m inainte pe axa fata de frac (negativ = inapoi)
-#     "scale"      uniform
-#     "y"          cota ABSOLUTA; altfel KIT_Y[nume]; altfel cota drumului + "dy" (implicit -0,3)
-#     "dy"         decalaj fata de cota drumului in punctul de pe axa
-#     "world"      (x, z) in Godot, absolut: ignora frac/lateral; yaw devine absolut (0 = -Z al piesei spre nord, -Z)
-#     "coliziune"  "hull" (implicit in world_prop) / "mesh" / "trunk" / "none"
-#     "anchor"     (x, y, z) local = metadata/ancora_sol pentru probe_manual (piese cu originea in aer)
-#     "scufundat"  True: infipta prin proiect (probe_manual o iarta daca varful iese din teren)
-# KIT_Y: cotele MASURATE (terenul minim de sub amprenta - 3 cm), din
-#   `godot --headless --path . res://tools/ProbeCarraraMontaj.tscn -- --track=16 --decor`.
-# FOREST: zone MeshForest (fantome, fara coliziune) — vezi jungla.py; FOREST_GLBS = stem -> glb.
-
-ITEMS = [
-]
-
-KIT_Y = {
-}
-
+# B = PRIN TEMPLU (19 nov 2026). Pana atunci soseaua cotea spre nord pe gazon, la 55 m de turnuri, si tot
+# decorul zonei (calea procesionala, terasele, molozul de pe gazon, lotusii santului de nord) era asezat pe
+# acel drum; a fost rescris de la zero. Templul insusi (navele, sala, sanctuarul) e `angkor_wat_drive.glb`,
+# pus de generator; aici ramane doar ce sta IN JURUL lui.
+#
+# FRAC_BASE = 2: fractiile de mai jos sunt pe traseul NOU (207 puncte de control, 12 m fiecare:
+# frac = s / 12 / 207, cu s = metri pe axa de la start). Generatorul nu le mai traduce.
+#
+# ITEMS: (nume, glb, frac pe INDEX, lateral, yaw[, optiuni]) — formatul din celelalte fisiere de zona:
+#   "world" (x, z) Godot absolut (z = -y de pe harta), yaw absolut (0 = -Z al piesei spre nord)
+#   "y" cota absoluta, "scale", "coliziune" ("hull" / "mesh" / "trunk" / "none"), "scufundat"
+# SMOKE: (frac, lateral, dy) surse de fum de tamaie (un singur emitator pe pista).
 import math
 import random
 
-# ---- B: prin Angkor Wat ----------------------------------------------------------------------------------
-# Geometria (harta, x spre E, y spre N; Godot z = -y): gopura de vest la x -97,5; arcul R30 cu centrul in
-# (-86, 30) de la (-86, 0) la (-56, 30); apoi dreapta spre N la x = -56 pana la y 104. Templul in origine,
-# +-32 m. Gazonul = luminisul junglei (disc r 78 la origine), plat la ~3,65-3,70 (masurat cu ProbeCarraraMontaj
-# pe o grila de piese de proba). Santul de nord (apa la 0,5) intre frac ~0,1025 si ~0,111.
-# Regula de 18 m: pe INTERIORUL arcului (la <= 12 m de centrul (-86, 30)) nimic cu corp; nimic nou in gopura.
-# Tot ce e langa banda (< 10 m de margine) e fara coliziune; corpurile (terase) stau la >= 12 m.
-M_PER_FRAC = 2406.0
+FRAC_BASE = 2
+
+N_CTRL = 207
+CTRL_STEP = 12.0
 WATER_Y = 0.5
-G_LAWN = 3.62            # teren minim al gazonului - ~3 cm
-G_GAL = 3.67             # in galerie (terenul 3,70)
-AXIS_X = -56.0           # axa caii de nord
-
-# Linia malului santului de nord (frac, lateral m de la axa pana la apa), din grila de proba (t_med < 0,5 + 1,5 m)
-BANK = [(0.1025, 24.0), (0.1040, 17.5), (0.1055, 16.0), (0.1070, 16.0), (0.1085, 18.0), (0.1100, 25.0), (0.1110, 40.0)]
-F0, F1 = 0.1030, 0.1105
+G_LAWN = 3.62            # gazonul incintei (teren minim ~3,65), masurat la gauntlet
+TEMPLE_HALF = 52.0       # fatadele masivului
+MOAT_IN, MOAT_OUT = 66.0, 104.0
 
 
-def _bank(f):
-    f = min(max(f, BANK[0][0]), BANK[-1][0])
-    for (fa, la), (fb, lb) in zip(BANK, BANK[1:]):
-        if fa <= f <= fb:
-            return la + (lb - la) * (f - fa) / (fb - fa)
-    return BANK[-1][1]
-
-
-def _none(name, glb, f, lat, yaw, **opt):
-    return (name, glb, f, lat, yaw, dict({"coliziune": "none"}, **opt))
+def fr(s):
+    """Fractia pe INDEX la s metri pe axa de la start (calea de vest: x = -240 + s)."""
+    return s / CTRL_STEP / N_CTRL
 
 
 def _w(name, glb, x, y, yaw, gy=G_LAWN, **opt):
-    """Piesa pe harta (x, y harta), yaw absolut (0 = spre N, + = spre V), fara coliziune implicit."""
+    """Piesa pe harta (x est, y nord), yaw absolut, fara coliziune implicit."""
     return (name, glb, 0.0, 0.0, yaw, dict({"coliziune": "none", "world": (x, -y), "y": gy}, **opt))
 
 
 ITEMS = []
-_rng = random.Random(2458)
+SMOKE = []
+_rng = random.Random(1911)
 
-# 1) Calea procesionala a templului: doua balustrade naga joase (fara coliziune) pe y = +-3,2, de la x -58 la
-#    capatul scarii (x -34), cu capete naga la templu. La >= 9 m de marginea exterioara a arcului.
-BAL_X = [-56.0 + 4.0 * k for k in range(6)]
-for side, tag in ((1, "N"), (-1, "S")):
-    for k, x in enumerate(BAL_X):
-        ITEMS.append(_w(f"B_Naga{tag}{k}", "kit/naga_balustrade.glb", x, side * 3.2, 90.0, gy=G_LAWN + 0.03))
-    ITEMS.append(_w(f"B_NagaCap{tag}", "kit/naga_head.glb", -33.6, side * 3.2, 90.0, gy=G_LAWN + 0.03))
+# 1) Curtea de vest (intre gopura de la x -97,5 si fatada de la x -52). Soseaua se largeste aici de la 9 la
+#    13 m si e marginita de aripile portalului (din model, pe corpul tubului) de la x -66. Tot ce e aici sta
+#    la >= 12 m de axa: plutonul din turul 1 trece pe aici gramada.
+#    Altare cu tamaie de o parte si de alta a portalului (tiparul Bayonului, zona_e): bloc de gresie +
+#    lespede de laterita, fumul la 1,1 m peste drum.
+for k, side in enumerate((-1.0, 1.0)):
+    ax, ay = -57.0, side * 12.5
+    ITEMS.append(_w(f"B_Altar{k}", "props/fallen_block.glb", ax, ay, 90.0, gy=G_LAWN + 0.02, scale=0.4))
+    ITEMS.append(_w(f"B_AltarJar{k}", "props/laterite_block.glb", ax, ay, 90.0, gy=G_LAWN + 0.95, scale=0.6))
+    # lateral + = dreapta sensului; pe calea de vest (spre est) dreapta e sudul
+    SMOKE.append((fr(240.0 + ax), -ay, 1.3))
 
-# 2) Macaci pe balustrade (teatru, statici): sus pe balustrada (baza + 1,03)
-for k, (x, side, yw) in enumerate(((-54.0, 1, 40.0), (-49.5, -1, -30.0), (-45.0, 1, 100.0), (-41.0, -1, 20.0),
-                                   (-37.0, 1, -50.0), (-52.0, -1, 150.0))):
-    ITEMS.append(_w(f"B_Macac{k}", "res://assets/models/halong/animals/macaque.glb", x + 0.6, side * 3.2, yw,
-                    gy=G_LAWN + 0.03 + 1.0, scale=1.9))
-
-# 3) Calugari in sofran la scara templului, pe gazon in fata treptelor, departe de banda (>= 18 m)
-for k, (x, y, yw) in enumerate(((-36.0, -5.5, 90.0), (-35.0, -2.0, 60.0), (-36.5, 1.5, 100.0), (-35.5, 5.0, 80.0),
-                                (-44.0, 8.0, -90.0))):
+#    Calugari in sofran pe treptele curtii, departe de banda, privind spre drum.
+for k, (x, y, yw) in enumerate(((-58.5, 15.5, 200.0), (-60.0, 17.0, 170.0), (-59.0, -16.0, 20.0),
+                                (-74.0, 24.0, 180.0), (-76.0, -26.0, 0.0))):
     ITEMS.append(_w(f"B_Calugar{k}", "animals/monk_standing.glb", x, y, yw, scale=1.25))
 
-# 4) Terase etajate pe dreapta (baze de turn, prea aproape ca sa incapa): trepte de gresie la x -38, dincolo de
-#    10 m de banda; corp (hull) doar pe nivelul de jos
-for k, y in enumerate((40.0, 48.0, 56.0)):
-    ITEMS.append(("B_TerasaJos%d" % k, "kit/bakheng_terrace_tier.glb", 0.0, 0.0, 90.0,
-                  {"world": (-38.0, -y), "y": G_LAWN, "scufundat": True}))
-    ITEMS.append(_w(f"B_TerasaSus{k}", "kit/bakheng_terrace_tier.glb", -38.0, y, 90.0, gy=G_LAWN + 1.45, scale=0.7))
-# (gopura de nord ocupa x -82..-30, y 62..74: restaurarea si blocul cazut stau la sud de ea)
-ITEMS.append(_w("B_Restaurare0", "props/restoration_prop.glb", -46.0, 58.0, 20.0, coliziune="hull"))
-
-# 5) Blocuri, moloz si blocuri numerotate pe gazon (jos, fara coliziune), in afara arcului si pe dreapta
-_lawn_spots = [(-47.0, 10.0), (-44.0, 18.0), (-49.5, 26.0), (-46.0, 33.0), (-43.0, -9.0), (-50.0, -6.0),
-               (-40.0, 24.0), (-47.0, 44.0), (-48.5, 52.0), (-45.0, 60.0), (-42.0, 32.0), (-46.0, -14.0),
-               (-38.0, -12.0), (-40.5, 12.0), (-33.0, 17.0), (-34.0, -17.0)]
-for k, (x, y) in enumerate(_lawn_spots):
-    glb = ("props/rubble_pile.glb", "props/laterite_block.glb", "props/numbered_block.glb")[k % 3]
-    ITEMS.append(_w(f"B_Gazon{k}", glb, x, y, _rng.random() * 360.0, scale=round(1.0 + _rng.random() * 0.5, 2),
+#    Blocuri de restaurare pe gazon (jos, fara corp), la marginea curtii.
+_court = [(-88.0, 30.0), (-80.0, 36.0), (-70.0, 40.0), (-86.0, -32.0), (-76.0, -38.0), (-66.0, -34.0),
+          (-92.0, 44.0), (-94.0, -46.0)]
+for k, (x, y) in enumerate(_court):
+    glb = ("props/numbered_block.glb", "props/rubble_pile.glb", "props/laterite_block.glb")[k % 3]
+    ITEMS.append(_w(f"B_Curte{k}", glb, x, y, _rng.random() * 360.0, scale=round(1.0 + _rng.random() * 0.5, 2),
                     scufundat=True))
-for k, (x, y) in enumerate(((-31.0, 56.0), (-44.0, 40.0), (-35.0, -26.0))):
-    ITEMS.append(_w(f"B_BlocCazut{k}", "props/fallen_block.glb", x, y, _rng.random() * 360.0, scale=0.8,
-                    coliziune="hull", scufundat=True))
+ITEMS.append(_w("B_Restaurare0", "props/restoration_prop.glb", -56.5, 30.0, 90.0, coliziune="hull"))
 
-# 6) Moloz in culoarul galeriei (intre stalpi si zid), joase, la ~8 m de axa pe stanga
-for k, y in enumerate((30.0, 38.0, 45.0, 53.0, 60.0)):
-    ITEMS.append(_w(f"B_GalMoloz{k}", "props/rubble_pile.glb" if k % 2 == 0 else "props/numbered_block.glb",
-                    -64.0 + _rng.random() * 0.8, y, _rng.random() * 360.0, gy=G_GAL, scale=1.1, scufundat=True))
+# 2) Santul de nord, pe ambele parti ale caii de nord (x = 0): lotusi si nuferi in derive, ca la A. Apa
+#    (la 0,5) NU incepe la piciorul caii: rapa are umeri lati, iar malul e la 16-25 m de axa. Linia malului
+#    de mai jos e cea masurata la gauntlet pe calea veche (x = -56), mutata pe y: santul e generat la fel
+#    fata de drum (rapa 1, aceleasi latimi), deci profilul e acelasi.
+BANK = [(76.0, 24.0), (79.7, 17.5), (83.3, 16.0), (86.9, 16.0), (90.6, 18.0), (94.2, 25.0), (96.6, 40.0)]
+Y0, Y1 = 77.0, 95.5
 
-# 7) Calea de nord: balustrada naga (cu coliziune, stil 3) si gopura de nord sunt in GENERATOR (`parapets`,
-#    `GopuraNord`); aici raman doar lotusii pe apa ambelor bazine (tiparul lui A). Cota bazei dupa terenul medru
-#    de sub umarul caii era 3,50 la intrare, 3,12 pe sant, 3,75 la iesire (masurat).
-_f_bal0, _f_bal1 = 0.0995, 0.1148
 
-for side, tag in ((-1, "L"), (1, "R")):
+def _bank(y):
+    y = min(max(y, BANK[0][0]), BANK[-1][0])
+    for (ya, la), (yb, lb) in zip(BANK, BANK[1:]):
+        if ya <= y <= yb:
+            return la + (lb - la) * (y - ya) / (yb - ya)
+    return BANK[-1][1]
+
+
+for side, tag in ((-1.0, "V"), (1.0, "E")):
     n = 0
     for k in range(10):
-        fc = F0 + (F1 - F0) * (k + _rng.random() * 0.8) / 10.0
+        yc = Y0 + (Y1 - Y0) * (k + _rng.random() * 0.8) / 10.0
         dist = 2.5 + (_rng.random() ** 1.5) * 14.0
         for j in range(_rng.randint(6, 10)):
             a = _rng.random() * 2 * math.pi
             r = (2.5 + _rng.random() * 2.5) * math.sqrt(_rng.random())
-            f = fc + r * math.cos(a) / M_PER_FRAC
-            if not (F0 - 0.0005 <= f <= F1 + 0.0005):
+            y = yc + r * math.cos(a)
+            if not (Y0 - 1.2 <= y <= Y1 + 1.2):
                 continue
-            lat = side * (_bank(f) + max(2.0, dist + r * math.sin(a)))
+            x = side * (_bank(y) + max(2.0, dist + r * math.sin(a)))
             flower = _rng.random() < 0.42
             sc = (1.4 + _rng.random()) if flower else (1.8 + _rng.random() * 1.6)
-            ITEMS.append(_none(f"B_Lot{tag}{n}", "plants/lotus_cluster.glb" if flower else "plants/water_lily_pads.glb",
-                               f, lat, _rng.random() * 360.0, scale=round(sc, 2), y=WATER_Y))
+            ITEMS.append(_w(f"B_Lot{tag}{n}", "plants/lotus_cluster.glb" if flower else "plants/water_lily_pads.glb",
+                            x, y, _rng.random() * 360.0, gy=WATER_Y, scale=round(sc, 2)))
             n += 1
+
+# 3) Curtea de vest e GAZON, nu jungla: luminisul templului (disc r 78 in origine, jungla.py) se opreste la
+#    x -78, iar intre el si gopura (x -97,5) subarboretul si trunchiurile cresteau pana in balustrada. Doua
+#    discuri pe axa lasa curtea libera pana la ~30 m de drum; mai departe jungla ramane rama portii.
+#    (center = (x, z) Godot, z = -y.)
+FOREST = [
+    dict(label='curtea de vest N', kind='disc', center=(-90.0, -15.0), radius=21.0, claim=True),
+    dict(label='curtea de vest S', kind='disc', center=(-90.0, 15.0), radius=21.0, claim=True),
+]
 
 KIT_Y = {}

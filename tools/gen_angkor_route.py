@@ -12,8 +12,12 @@
 # Sens ORAR, jungla in interiorul buclei (brief §2). Angkor Wat sta in coltul de SV, cu
 # turnul central in originea hartii:
 #   A calea de vest (spre E, soarele din VSV in spate, turnurile in fata) -> B prin gopura
-#   de vest, pe dinauntrul galeriei (colonada pe stanga, turnurile pe dreapta), iesire prin
-#   gopura de nord, calea de nord -> C Phnom Bakheng (la NV de Angkor Wat): urcarea pe flancul
+#   de vest si apoi PRIN TEMPLU (19 nov 2026, cererea dezvoltatorului: „for a map that the main
+#   attraction is the temple we are not even going through the temple”): drept pe axa, prin
+#   portalul de vest al masivului, nava de vest, viraj de 90 de grade la stanga in SALA CENTRALA
+#   de sub turnul gol (gongurile), nava de nord, portalul de nord, gopura de nord, calea de nord
+#   (acum pe x = 0) si o diagonala lunga pana pe flancul de est al dealului -> C Phnom Bakheng
+#   (la NV de Angkor Wat): urcarea pe flancul
 #   de est si pe muchia de nord, platforma spre SUD (DEZVALUIREA: Angkor Wat in stanga-fata,
 #   virajul de intrare cu concavitatea spre el), coborarea pe flancul de vest -> D calea
 #   uriasilor spre N + Poarta de Sud + piata elefantului -> E Bayon spre E (terasa de 14 m)
@@ -50,17 +54,42 @@ Y_POARTA = 14.0  # brief: +6; cetatea Angkor Thom pe un dam, vezi D
 Y_BAYON = 20.0
 Y_TERASA = 18.0
 
+# Templul (B). Vezi comentariul de la waypoints pentru TEMPLE_TURN_R.
+TEMPLE_FLAT_X = -240.0 + 154.0 + 7.5 * math.pi   # -62.438: de aici spre E drumul e plat la Y_GAL
+TEMPLE_TURN_R = 28.215482931080942
+TEMPLE_HALF = 52.0          # fatadele masivului la +-52 (portalurile: V la x -52, N la y +52)
+# Traseul vechi (201 puncte de control) si cel nou (207): fractiile pe INDEX scrise de mana in
+# fisierele de zona, pe traseul vechi, se traduc cu `remap_idx` (mai jos, la decorul per POI).
+OLD_CTRL_N = 201
+OLD_SPLIT_A = 13            # pana aici (x <= -84) punctele de control sunt aceleasi
+OLD_SPLIT_B = 33            # de aici incolo punctul vechi k e punctul nou k + 6
+
 # (x, y, fillet_r, cota, eticheta). `cota` None = interpolata pe lungime intre ancore.
 WPTS = [
     # A: calea de vest, spre E, in axul turnului central (originea hartii). Linia de start la frac 0,
     # la 240 m de turn (brief §2.0: turnul de 32 m incape intreg in cadru de la >= 240 m).
     (-240.0, 0.0, 0, Y_CALE, "A start"),
-    # B: un SINGUR arc (R 30) imediat dupa gopura, apoi spre N pe dinauntrul galeriei de vest:
-    # colonada pe stanga, terasele si turnurile pe dreapta, la ~55 m. Trei colturi de 90 de grade la
-    # 12 m (prima varianta) taiau "ritm si viteza" (brief §2, randul B); un arc pus in coltul galeriei
-    # trecea la 25 m de turnuri (ele ocupa +-30 m).
-    (-56.0, 0.0, 30, Y_GAL, "B arc galerie"),
-    (-56.0, 104.0, 0, Y_GAL, "B cale N sfarsit"),
+    # B: PRIN TEMPLU. Pana la 19 nov 2026 soseaua cotea spre N la x = -56 (un arc R 30 pe gazon, la
+    # 55 m de turnuri) si templul ramanea decor. Acum merge drept pe axa pana sub turnul central si
+    # coteste la stanga in sala centrala, cu centrul arcului langa turnul de NV.
+    #   - pinii (raza -1) sunt ancore de cota / etichete pe o latura dreapta, nu colturi (fillet_loop);
+    #   - "B portal V": de aici drumul e plat la +4 (aceeasi panta pe calea de vest ca inainte: ancora
+    #     veche era mijlocul arcului R 30, la 154 + 7,5*pi m de start);
+    #   - raza din sala (TEMPLE_TURN_R) NU e aleasa din ochi: e solutia pentru care traseul creste cu
+    #     EXACT 72 m (6 puncte de control), deci toate punctele de control de la "C racord" incolo
+    #     cad pe pozitiile lor vechi (abatere 1e-12 m, masurat) si tot ce e asezat pe C..H ramane
+    #     unde era. Daca muti ceva in B, rezolv-o din nou (cauta RS pentru care punctul de control
+    #     39 = (-56, 224.9749...)).
+    (TEMPLE_FLAT_X, 0.0, -1, Y_GAL, "B portal V"),
+    (0.0, 0.0, TEMPLE_TURN_R, Y_GAL, "B sanctuar"),
+    (0.0, 104.0, -1, Y_GAL, "B cale N sfarsit"),
+    # Legatura spre Bakheng: o diagonala lunga (doua coturi de ~33 de grade, R 40) de la capatul caii
+    # de nord la linia veche x = -56 a urcarii. Cotele curg liniar de la +4 la cota veche a racordului.
+    (0.0, 116.0, 40, None, "B legatura S"),
+    (-56.0, 202.0, 40, None, "B legatura N"),
+    # "C racord" = fostul punct de control 33 al traseului vechi, cu cota lui: de aici incolo traseul
+    # e cel de dinainte, punct cu punct.
+    (-56.0, 224.9749200366107, -1, 17.289365494533058, "C racord"),
     # C: Phnom Bakheng. Urcarea pe flancul de est (spre N) si pe muchia de nord (spre V).
     (-56.0, 250.0, 24, None, "C colt NE"),
     (-138.0, 258.0, 18, None, "C colt NV"),
@@ -129,14 +158,20 @@ def norm(a):
     return (a[0] / l, a[1] / l)
 
 
-def fillet_loop(wpts):
+def fillet_loop(wpts_all):
+    # Pinii (raza < 0) sunt ancore de cota / etichete PE o latura dreapta: nu sunt colturi, deci nu
+    # scurteaza laturile vecinilor (limita `lim1/lim2` de mai jos). Se insereaza ca varfuri la sfarsit.
+    corners = [(w, i) for i, w in enumerate(wpts_all) if w[2] >= 0]
+    wpts = [w for w, _i in corners]
+    orig = [i_ for _w, i_ in corners]
     n = len(wpts)
     pts = []
-    for i in range(n):
-        p_prev = wpts[(i - 1) % n][:2]
-        p = wpts[i][:2]
-        p_next = wpts[(i + 1) % n][:2]
-        r = wpts[i][2]
+    for ci in range(n):
+        i = orig[ci]
+        p_prev = wpts[(ci - 1) % n][:2]
+        p = wpts[ci][:2]
+        p_next = wpts[(ci + 1) % n][:2]
+        r = wpts[ci][2]
         d1, d2 = norm(v(p, p_prev)), norm(v(p, p_next))
         cosang = max(-1.0, min(1.0, d1[0] * d2[0] + d1[1] * d2[1]))
         ang = math.acos(cosang)
@@ -150,7 +185,7 @@ def fillet_loop(wpts):
         if t > min(lim1, lim2) + 1e-6:
             t = min(lim1, lim2)
             r = t * math.tan(ang / 2.0)
-            print(f"  ATENTIE: raza la '{wpts[i][4]}' redusa la {r:.1f} m (laturi prea scurte)")
+            print(f"  ATENTIE: raza la '{wpts[ci][4]}' redusa la {r:.1f} m (laturi prea scurte)")
         t1 = (p[0] + d1[0] * t, p[1] + d1[1] * t)
         t2 = (p[0] + d2[0] * t, p[1] + d2[1] * t)
         bis = norm((d1[0] + d2[0], d1[1] + d2[1]))
@@ -179,6 +214,21 @@ def fillet_loop(wpts):
     if len(out) > 1 and math.hypot(out[0][0] - out[-1][0],
                                    out[0][1] - out[-1][1]) < 1.0:
         out.pop()
+    for i, w in enumerate(wpts_all):
+        if w[2] >= 0:
+            continue
+        best, bj, bt = 1e18, 0, 0.0
+        for j in range(len(out)):
+            a, b = out[j], out[(j + 1) % len(out)]
+            dx, dy = b[0] - a[0], b[1] - a[1]
+            t = max(0.0, min(1.0, ((w[0] - a[0]) * dx + (w[1] - a[1]) * dy) / max(1e-9, dx * dx + dy * dy)))
+            d = math.hypot(a[0] + t * dx - w[0], a[1] + t * dy - w[1])
+            if d < best:
+                best, bj, bt = d, j, t
+        if best > 0.05:
+            print(f"  ATENTIE: pinul '{w[4]}' e la {best:.2f} m de traseu")
+        a, b = out[bj], out[(bj + 1) % len(out)]
+        out.insert(bj + 1, (a[0] + bt * (b[0] - a[0]), a[1] + bt * (b[1] - a[1]), i))
     return out
 
 
@@ -253,6 +303,7 @@ ctrl = resample(pts, elevs, CTRL_STEP)
 if math.hypot(ctrl[0][0] - ctrl[-1][0], ctrl[0][1] - ctrl[-1][1]) < CTRL_STEP * 0.5:
     ctrl.pop()
 ctrl_tag = [None] * len(ctrl)
+wp_ctrl = {}   # waypoint -> punctul lui de control (doua etichete pot cadea pe acelasi punct)
 for j, p in enumerate(pts):
     if p[2] is None:
         continue
@@ -262,6 +313,7 @@ for j, p in enumerate(pts):
         if d < bd:
             best, bd = k, d
     ctrl_tag[best] = p[2]
+    wp_ctrl[p[2]] = best
 pts = [(q[0], q[1], ctrl_tag[k]) for k, q in enumerate(ctrl)]
 elevs = [q[2] for q in ctrl]
 
@@ -280,10 +332,8 @@ print(f"puncte de control: {len(pts)} (pas {CTRL_STEP} m)   lungime: {total:.0f}
 
 frac = {}
 for i, w in enumerate(WPTS):
-    for j, p in enumerate(pts):
-        if p[2] == i:
-            frac[w[4]] = cum[j] / total
-            break
+    if i in wp_ctrl:
+        frac[w[4]] = cum[wp_ctrl[i]] / total
 
 
 def signed_area(seq):
@@ -468,10 +518,8 @@ print(f"\nharta de fractii coapte: {'%d puncte' % len(fmap) if fmap else 'LIPSA 
 
 tag_s = {}
 for i, w in enumerate(WPTS):
-    for j, p in enumerate(pts):
-        if p[2] == i:
-            tag_s[w[4]] = cum[j]
-            break
+    if i in wp_ctrl:
+        tag_s[w[4]] = cum[wp_ctrl[i]]
 
 
 def pos_at(sv):
@@ -562,7 +610,13 @@ MOAT_W_OUT = 200.0      # malul de vest al bratului de V
 # galeriile, cu gopura pe dreapta (x -103..-92), inaintea arcului.
 MOAT_IN_W = 104.0
 GOPURA_X = -97.5
-GOPURA_N_Y = 68.0        # gopura de nord (B): peste calea de nord, imediat dupa capatul galeriei (y 62), inaintea santului
+# Gopura de vest LATA de 1,25 ori (golul 12,5 m pe drumul de 9 m), ca cea de nord. Pana la 19 nov 2026 masinile
+# franau aici pentru arcul R 30 de dupa ea; acum soseaua merge drept in templu si plutonul din turul 1 trece
+# prin gopura cu ~40 m/s (ProbeRace pe seed-uri noi: o ejectare pe stalp la 40,1 m/s, t = 9 s; pe traseul
+# vechi, 0 in 32 de seed-uri). X al modelului e lungimea lui, de-a curmezisul drumului.
+GOPURA_W_SCALE = 1.25
+GOPURA_N_Y = 68.0        # unde statea gopura de nord (scoasa, vezi mai jos); balustrada caii de nord incepe la +3 m,
+                         # unde se termina aripile portalului de nord al templului
 TREE_GATE_S = 26.0      # poarta-copac pe ramura. 14 m: ramura inca se racorda la bucla (ProbeLaneClear pe banda
                         # -1,5). 22 m: aripa de est la ~4 m de virajul buclei (ProbeRace val 1: 1 ejectare + 1 blocaj
                         # langa ea). 26 m: primul bloc al dominoului se muta de la 30 la 33 m (in spatele portii).
@@ -615,6 +669,24 @@ RAIN_FIRST_AT = 50.0
 # bifurcatie jucatorul vede un „zid verde” pe ocol si galeria cu dominoul pe coarda: hazardul fals
 # contra celui real. (s dupa "G ocol intrare").
 CURTAIN_AFTER_FORK = float(os.environ.get("ANGKOR_CURTAIN_AFTER_FORK", "40.0"))
+# Templul prin care se trece (B). Tubul din cod (`TunnelSignalHazard` doar-tub, tiparul salii Carrara)
+# da peretii pe marginea soselei, tavanul, fatadele, zona de camera si intunericul; GLB-ul il imbraca.
+TEMPLE_GLB = "structures/angkor_wat_drive.glb"
+TEMPLE_GLB_OK = os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "models",
+                                            "angkor", *TEMPLE_GLB.split("/")))
+TEMPLE_TUBE_HW = 6.0        # semilatimea minima a tubului (peretii urmeaza soseaua unde e mai lata)
+TEMPLE_CEIL = 10.0          # tavanul navelor
+TEMPLE_HALL_CEIL = 15.0     # tavanul salii centrale (unde soseaua e cea mai lata)
+# HAZARDUL DIN TEMPLU: gongurile (`GongHazard`, pendul fizic: neatins sta, lovit se leagana inainte-inapoi,
+# iar cat pierzi depinde de masa — autobuzul ~5%, buggy-ul ~25%, tuk-tuk-ul ~65% la 25 m/s, ProbeGong).
+# (metri pe axa de la portalul de vest, lateral + = dreapta sensului = EXTERIORUL virajului, nota)
+# Linia curata exista si se citeste: pe exterior pe langa primul, apex, apoi prin golul din mijlocul
+# portii si pe stanga ultimului. Cine iese larg din drift le ia pe rand pe cele de pe dreapta.
+#   - 28 m: in mijloc, la intrarea in arc (zona de franare): te obliga sa alegi o parte;
+#   - 66 m: pe exterior, la iesirea din arc: pedeapsa iesirii largi;
+#   - 74 m: POARTA, doua gonguri la +-3,6 m: golul din mijloc are 4,6 m;
+#   - 87 m: chiar inaintea portalului de nord, pe dreapta: stanga ramane libera (in prelungirea golului).
+TEMPLE_GONGS = [(28.0, 0.0, 0.75), (66.0, 5.0, 0.84), (74.0, -3.6, 1.0), (74.0, 3.6, 1.12), (87.0, 2.2, 1.26)]
 
 if OUT_PATH:
     def pva(seq):
@@ -625,14 +697,45 @@ if OUT_PATH:
     main_pts = [godot(p, elevs[j]) for j, p in enumerate(pts)]
 
     # ---- latimi (idx). Jumatati de latime; globalul 4.5 (9 m) e A, D, F, G, H.
-    width_segments = [
-        # B: prin templu, 8 m (de la arcul de dupa gopura pana la capatul caii de nord).
-        (IDX("B arc galerie", -40.0), IDX("B cale N sfarsit"), 4.0),
+    # B: prin templu. Profilul se declara intr-o FEREASTRA DE CURGERE (`width_flow_windows`, tiparul
+    # salii Carrara): latimea e anvelopa de jos a bucatilor, cu panta 1/15, deci trecerile se fac in
+    # bucata mai lata si nicio margine nu e treapta. Bucatile (lungimi pe axa, de la start):
+    #   159..190  nava de vest, 13 m  (drumul se largeste de la 9 m intre x -81 si portalul de la x -52)
+    #   190..272  sala centrala, 16 m (plina pe arc: 212..250)
+    #   272..302  nava de nord, 13 m  (drumul se strange spre 9 m pana dupa gopura de nord: la gopura ~9,8 m)
+    S_PORTAL_W = s_near(-TEMPLE_HALF, 0.0)
+    S_PORTAL_N = s_near(0.0, TEMPLE_HALF)
+    NAVE_HW, HALL_HW = 6.5, 8.0
+
+    def IDXs(sv):
+        return r3(F_s(sv)[0])
+    FLOW_PIECES = [(S_PORTAL_W - 29.0, S_PORTAL_W + 2.0, NAVE_HW),
+                   (S_PORTAL_W + 2.0, S_PORTAL_N - 8.0, HALL_HW),
+                   (S_PORTAL_N - 8.0, S_PORTAL_N + 22.0, NAVE_HW)]
+    FLOW_S0, FLOW_S1 = S_PORTAL_W - 64.0, tag_s["B cale N sfarsit"] + 48.0
+    S_BAKHENG = tag_s["B cale N sfarsit"] + 15.0   # de aici sectorul de 7 m al lui C
+
+    def hw_at(sv):
+        """Semilatimea soselei la `sv` metri pe axa: regula ferestrei de curgere din Track (anvelopa de jos
+        a bucatilor, panta 1/15). In afara ferestrei, latimea globala (caile A, D, H, unde stau balustradele)."""
+        sv = sv % total
+        if not (FLOW_S0 <= sv <= FLOW_S1):
+            return HALF_WIDTH
+        pieces = list(FLOW_PIECES) + [(0.0, FLOW_PIECES[0][0], HALF_WIDTH),
+                                      (FLOW_PIECES[-1][1], S_BAKHENG, HALF_WIDTH), (S_BAKHENG, FLOW_S1 + 200.0, 3.5)]
+        out = 1e9
+        for a_, b_, w_ in pieces:
+            d_ = a_ - sv if sv < a_ else (sv - b_ if sv > b_ else 0.0)
+            out = min(out, w_ + d_ / 15.0)
+        return out
+    width_segments = [(IDXs(a_), IDXs(b_), w_) for a_, b_, w_ in FLOW_PIECES] + [
         # C: Bakheng, 7 m (urcarea, platforma, coborarea pana la calea uriasilor).
         (IDX("B cale N sfarsit", 15.0), IDX("D cale inceput", -20.0), 3.5),
         # E: terasa Bayonului, 14 m (turnurile cu fete stau PE ea, pasul 6).
         (IDX("E terasa V", -10.0), IDX("E terasa E", 10.0), 7.0),
     ]
+    # Fereastra: de pe calea de vest (9 m constant) pana in sectorul Bakheng (7 m constant).
+    flow_windows = [(IDXs(FLOW_S0), IDXs(FLOW_S1))]
     # Poarta de Sud: deschiderea de 7 m (pilonii in afara benzii, brief §7 pasul 1, ProbeLaneClear).
     pinches = [(IDX("D poarta", -8.0), IDX("D poarta", 8.0), 3.5)]
 
@@ -641,7 +744,7 @@ if OUT_PATH:
         # 0: bratul de V al santului Angkor Wat, pe ambele parti ale caii de vest.
         (LENp(-MOAT_W_OUT, 0.0), LENp(-MOAT_IN_W, 0.0), 20, 0),
         # 1: bratul de N, pe ambele parti ale caii de nord.
-        (LENp(-56.0, MOAT_IN), LENp(-56.0, MOAT_OUT), 20, 0),
+        (LENp(0.0, MOAT_IN), LENp(0.0, MOAT_OUT), 20, 0),
         # 2: bratul de S, pe DREAPTA lui H (spre V, dreapta = N): turnurile oglindite.
         (LENp(MOAT_OUT, -112.0), LENp(-MOAT_W_OUT, -112.0), 20, 1),
         # 3: Srah Srang, pe STANGA lui H, imediat dupa coltul de SE.
@@ -669,8 +772,7 @@ if OUT_PATH:
 
     # ---- sol (idx): laterita (praf) pe tot turul MINUS caile si terasele de piatra (brief §7 pasul 2).
     stone = sorted([
-        (IDX("A start", -30.0), IDX("B arc galerie", 30.0)),         # calea de vest + gopura
-        (IDXp(-56.0, 40.0), IDXp(-56.0, 112.0)),                     # gopura N + calea de nord
+        (IDX("A start", -30.0), IDXp(0.0, 112.0)),   # calea de vest, gopura, TEMPLUL, gopura N, calea de nord
         (IDX("D cale inceput"), IDX("D colt piata", -20.0)),         # calea uriasilor + poarta
         (IDX("E rampa V jos"), IDX("E rampa E jos")),               # terasa Bayonului
         (IDX("F colt terasa"), IDX("F coama sfarsit")),             # Terasa Elefantilor
@@ -705,9 +807,17 @@ if OUT_PATH:
         # latura -1, golul mai departe
         # golul de pe -1 era la -95: cu malul mutat la -104 cadea pe uscat (val 1) -> -140
         (lenx(-198.0), lenx(-140.0 - GAP / 2), -1, 3), (lenx(-140.0 + GAP / 2), lenx(-MOAT_IN_W - 2.0), -1, 3),
+        # curtea de vest a templului (B), ambele laturi: de la iesirea din gopura pana la aripile portalului
+        # (care incep la x -66 si sunt din model, pe corpul tubului). Aici soseaua se largeste de la 9 la ~11 m:
+        # zidul din cod urmeaza marginea reala, iar pielea naga la fel (`hw_at`).
+        (lenx(-89.5), lenx(-67.5), 0, 3),
         # calea de nord (B), ambele laturi, de la gopura de nord (fata ei de N la y ~74) pana la capatul caii:
         # balustrada naga peste sant, ca la A si D. Desfacuta spre masinile care ies din gopura.
-        (LENp(-56.0, GOPURA_N_Y + 6.5), LENp(-56.0, 103.0), 0, 3),
+        # Incepe la y 60, INAUNTRUL aripilor portalului de nord (care se deschid de la 6 m lateral la y 54,5 la
+        # 9,5 m la y 69,7): capatul desfacut al balustradei (2,5 m in afara) sta in spatele aripii si iese de sub
+        # ea pe la y ~63, in unghi mic. Pornita de la capatul aripilor (y 71), avea capatul la 7,7 m lateral, adica
+        # IN palnie: ProbeRace, seed-urile 33-48, 2 ejectari „perete” la 29-39 m/s fix pe capat, la (-6..-9, 70).
+        (LENp(0.0, 60.0), LENp(0.0, 103.0), 0, 3),
         # calea uriasilor, ambele laturi, pana inaintea pilonilor portii
         (LEN("D cale inceput", 2.0), LEN("D poarta", -10.0), 0, 3),
         # Srah Srang, STANGA (spre bazin), de la iesirea din coltul de SE pana dupa bazin. Prima
@@ -800,6 +910,52 @@ sweep_speed = 3.0
 ai_yields = true
 contact_sfx = &"elephant_trumpet"
 """ + (f"sweep_phase = {ELEPHANT_PHASE}\n" if ELEPHANT_PHASE >= 0.0 else "")
+    # ---- TEMPLUL (B): tubul. Originea la portalul de vest, +Z local = sensul de mers (spre est acolo).
+    # Sala (`hall_*`) e pe TOT tubul: peretii stau pe marginea soselei oriunde e mai lata decat
+    # TEMPLE_TUBE_HW, iar tavanul urca de la TEMPLE_CEIL la TEMPLE_HALL_CEIL odata cu largirea.
+    tpx_, tpy_ = pos_at(S_PORTAL_W)
+    tube_len_ = S_PORTAL_N - S_PORTAL_W
+    hz_txt += f"""
+[node name="TunelTemplu" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, {r2(tpx_)}, {r2(elev_at(S_PORTAL_W))}, {r2(-tpy_)})
+script = ExtResource("55_signal")
+tunnel_length = {r2(tube_len_)}
+tunnel_half_width = {TEMPLE_TUBE_HW}
+tunnel_ceiling = {TEMPLE_CEIL}
+camera_tail_m = 12.0
+tube_only = true
+tube_class = "angkor_sandstone"
+frame_class = "angkor_sandstone"
+wing_end_height_m = 1.1
+hall_ceiling = {TEMPLE_HALL_CEIL}
+hall_from_m = 0.0
+hall_to_m = {r2(tube_len_)}
+""" + ("tube_visible = false\n" if TEMPLE_GLB_OK else "")
+    print(f"  templu: portal V s {S_PORTAL_W:.1f} (idx {IDXs(S_PORTAL_W)}), portal N s {S_PORTAL_N:.1f} "
+          f"(idx {IDXs(S_PORTAL_N)}), tub {tube_len_:.1f} m")
+    # Gongurile: nodul sta PE asfalt sub disc, cu -Z local pe sensul de mers (baza pe randuri, ca perdeaua).
+    # `ceiling_height` = tavanul tubului in acel loc (franghiile urca pana la el).
+    for k_, (gm_, glat_, gpitch_) in enumerate(TEMPLE_GONGS):
+        gs2_ = S_PORTAL_W + gm_
+        ga_, gb_ = pos_at(gs2_ - 1.0), pos_at(gs2_ + 1.0)
+        gfx_, gfz_ = gb_[0] - ga_[0], -(gb_[1] - ga_[1])
+        gfl_ = math.hypot(gfx_, gfz_)
+        gfx_, gfz_ = gfx_ / gfl_, gfz_ / gfl_
+        gzx_, gzz_ = -gfx_, -gfz_                # basis.z = -inainte
+        gxx_, gxz_ = gzz_, -gzx_                 # basis.x = up x basis.z = dreapta sensului
+        gcx_, gcy_ = pos_at(gs2_)
+        gwx_, gwz_ = gcx_ + gxx_ * glat_, -gcy_ + gxz_ * glat_
+        gw_ = max(TEMPLE_TUBE_HW, hw_at(gs2_))
+        gceil_ = TEMPLE_CEIL + (TEMPLE_HALL_CEIL - TEMPLE_CEIL) * max(0.0, min(1.0, (gw_ - TEMPLE_TUBE_HW) / (
+            HALL_HW - TEMPLE_TUBE_HW)))
+        hz_txt += f"""
+[node name="Gong{k_}" type="Node3D" parent="Hazarduri"]
+transform = Transform3D({r3(gxx_)}, 0, {r3(gzx_)}, 0, 1, 0, {r3(gxz_)}, 0, {r3(gzz_)}, {r2(gwx_)}, {r2(elev_at(gs2_))}, {r2(gwz_)})
+script = ExtResource("57_gong")
+ceiling_height = {r2(gceil_)}
+pitch = {gpitch_}
+"""
+        print(f"  gong {k_}: {gm_:.0f} m de portal, lateral {glat_:+.1f} (semilatime {hw_at(gs2_):.2f}), tavan {gceil_:.1f} m")
     # ---- PASUL 6: turnurile Bayonului (corpuri statice cu nume, ca ProbeLaneClear sa le raporteze
     # pe nume). Corpul ramane si dupa hero-asset: `bayon_face_tower_a` (pasul 7) e doar vizualul,
     # in DecorManual, ca la stalpii Carrara.
@@ -843,19 +999,14 @@ metadata/coliziune = "mesh"
     gpx_, gpy_ = pos_at(gs_)
     decor_txt += f"""
 [node name="GopuraVest" parent="DecorManual" instance=ExtResource("15_gopura")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, {r2(gpx_)}, {r2(elev_at(gs_))}, {r2(-gpy_)})
+transform = Transform3D(0, 0, -1, 0, 1, 0, {GOPURA_W_SCALE}, 0, 0, {r2(gpx_)}, {r2(elev_at(gs_))}, {r2(-gpy_)})
 metadata/coliziune = "mesh"
 """
-    # Gopura de nord (B): aceeasi piesa ca la vest, LATA de 1,25 ori (golul 12,5 m; la 1,0 ProbeRace a dat o ejectare pe
-    # stalpul drept la 27,6 m/s: dupa arcul R30 masinile ajung la gopura cu doar ~30 m de dreapta). Soseaua
-    # merge spre -Z Godot, adica exact pe -Z al modelului: rotatie identitate, lungimea (X, 52 m) de-a curmezisul.
-    gns_ = s_near(-56.0, GOPURA_N_Y)
-    gnx_, gny_ = pos_at(gns_)
-    decor_txt += f"""
-[node name="GopuraNord" parent="DecorManual" instance=ExtResource("15_gopura")]
-transform = Transform3D(1.25, 0, 0, 0, 1, 0, 0, 0, 1, {r2(gnx_)}, {r2(elev_at(gns_))}, {r2(-gny_)})
-metadata/coliziune = "mesh"
-"""
+    # Gopura de nord (B) A IESIT (20 nov 2026). Pe traseul vechi statea peste calea de nord, la 30 m dupa
+    # arcul de pe gazon. Acum portalul de nord al templului (y +52..54,5) e poarta, iar gopura cadea la doar
+    # 10 m dupa el, cu golul (12,5 m) abia cat portalul (12,1 m) si cu aripile portalului DESCHIZANDU-SE spre
+    # ea: masina care iesea pe langa perete nimerea stalpul. ProbeRace, seed-urile 33-48: 3 ejectari „perete”
+    # la 31-42 m/s, toate la (-6, 61). Doua porti la 10 m una de alta erau oricum una in plus.
     # Poarta-copac: la intrarea ramurii, care merge spre S (+Z Godot) -> rotatie de 180 de grade, LATA de
     # 1,45 ori (golul 9,9 m; la 1,2 ProbeRace val 3 mai gasea 2 ejectari pe stalpi). Istoric:
     # 1,2 ori de-a curmezisul (golul 6,8 -> 8,2 m): ProbeRace val 2, masinile care intra in ramura pe
@@ -890,16 +1041,6 @@ script = ExtResource("17_camzone")
 frac_from = {r3(F_s(gs_ - 16.0)[0])}
 frac_to = {r3(F_s(gs_ + 12.0)[0])}
 size = Vector3(28.0, 10.0, 14.0)
-ceiling = 9.0
-ceiling_dist = 22.0
-blend_time = 0.35
-
-[node name="CameraGopuraNord" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {r2(gnx_)}, {r2(elev_at(gns_))}, {r2(-gny_)})
-script = ExtResource("17_camzone")
-frac_from = {r3(F_s(gns_ - 16.0)[0])}
-frac_to = {r3(F_s(gns_ + 12.0)[0])}
-size = Vector3(14.0, 10.0, 28.0)
 ceiling = 9.0
 ceiling_dist = 22.0
 blend_time = 0.35
@@ -940,7 +1081,7 @@ blend_time = 0.35
             tx, ty = tx / n, ty / n
             k = min(1.0, max(0.0, u - s_first) / 16.0)
             fl = 2.5 * (1.0 - (k * k * (3.0 - 2.0 * k)))
-            off = HALF_WIDTH + 0.25 + 0.25 + fl + extra
+            off = hw_at(u) + 0.25 + 0.25 + fl + extra
             # dreapta sensului pe harta: (ty, -tx)
             return px + ty * sign * off, py - tx * sign * off
         x0, y0 = raw(sv)
@@ -1076,6 +1217,20 @@ ceiling = 6.6
 ceiling_dist = 12.0
 blend_time = 0.35
 """
+    # Raza din sanctuar: turnul central e gol, iar lumina „cade” pe piedestalul cu gongul cel mare, in
+    # spatele arcadei de pe exteriorul virajului (un con aditiv, `LightShaft`, tiparul cavernei Cappadocia;
+    # nodul sta la capatul de SUS si coboara `length`). Sanctuarul nu e carosabil.
+    if TEMPLE_GLB_OK:
+        cam_txt += f"""
+[node name="RazaSanctuar" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, {r2(Y_GAL + 18.0)}, 0)
+script = ExtResource("56_shaft")
+top_radius = 2.0
+bottom_radius = 4.4
+length = 18.0
+strength = 0.22
+fade_m = Vector2(1.5, 5.0)
+"""
     # ---- VAL 3-4 (kit §1.2, §1.4-§1.7): piesele mari ale locului. Decor (coliziune "none") in afara
     # benzii, cu exceptia templului (corp pe carcasa; e departe de drum, in mijlocul inelului de sant).
     # Junglă in masa (scatter) = pasul 8 al brief-ului; aici doar reperele asezate de mana.
@@ -1094,18 +1249,12 @@ blend_time = 0.35
     # fata cu scara (+Y Blender = -Z model) spre VEST, spre calea de start.
     # Soclul in trepte e ingropat ~4 m (terenul are +4 in centrul inelului), ca si machetele: varfurile
     # raman la +36 / +30, cotele verificate in brief §2.0. Ancora de sol pe treapta soclului.
-    decor_txt += put("AngkorWat", "30_temple", R90P, 0.0, 0.0, 0.0, col="hull", anchor=(31.0, 4.1, 0.0))
-
-    # Galeria de vest a incintei, pe stanga lui B (spre vest), pe uscat intre arc si santul de nord
-    # (y 24..60): stalpi la x = -62, acoperisul pe ei, zidul cu basorelief la -66,3, relieful spre drum.
-    for k_ in range(9):
-        gy_ = 26.0 + 4.0 * k_
-        ge_ = Y_GAL
-        decor_txt += put(f"GalStalp{k_}", "31_gcol", RID, -62.0, ge_, -gy_)
-        decor_txt += put(f"GalAcoperis{k_}", "32_groof", RID, -64.0, ge_ + 3.5, -(gy_ + 2.0),
-                         anchor=(1.75, -3.5, 0.0))
-        decor_txt += put(f"GalZid{k_}", "33_gwall", R90N, -66.3, ge_, -(gy_ + 2.0))
-    decor_txt += put("GalStalpN", "31_gcol", RID, -62.0, Y_GAL, -(26.0 + 36.0))
+    # TEMPLUL NOU (19 nov 2026): `angkor_wat_drive.glb` e modelat in cadrul HARTII (X Blender = est,
+    # Y Blender = nord), deci sta in origine cu transformarea identitate. E doar VIZUAL (`none`):
+    # peretii, tavanul si fatadele au corp din tubul `TunelTemplu` (hazarduri), ascuns, pe care
+    # modelul il imbraca. Pana exista GLB-ul, tubul ramane vizibil si templul lipseste.
+    if TEMPLE_GLB_OK:
+        decor_txt += put("AngkorWat", "30_temple", RID, 0.0, 0.0, 0.0, col="none", anchor=(-60.0, 4.1, 30.0))
 
     # Phnom Bakheng: platforma de sus (+31), turnulete-altar si scari pe margini, in afara benzii (7 m).
     for k_, (bx_, by_) in enumerate(((-148.0, 220.0), (-148.0, 200.0), (-128.0, 220.0), (-128.0, 200.0))):
@@ -1169,6 +1318,26 @@ blend_time = 0.35
         fr = fr % 1.0
         return min(_idx_tab, key=lambda t: min(abs(t[1] - fr), 1.0 - abs(t[1] - fr)))[0]
 
+    # Fractiile pe INDEX din fisierele de zona sunt scrise de mana pe traseul VECHI (201 puncte de
+    # control; fractia pe index e uniforma pe punct de control: 6 puncte coapte fiecare). Traseul nou
+    # are 207, cu primele 13 identice si cu vechiul k >= 33 pe pozitia noului k + 6, deci traducerea e
+    # exacta in afara lui B; intre ele (B vechi, unde nu mai e drum) e o intindere liniara, folosita
+    # doar de benzile de padure. Un fisier rescris pe traseul nou declara `FRAC_BASE = 2`.
+    _n_new = len(pts)
+
+    def remap_idx(f):
+        if f >= 1.0:
+            return f
+        c = f * OLD_CTRL_N
+        if c <= OLD_SPLIT_A:
+            cn = c
+        elif c >= OLD_SPLIT_B:
+            cn = c + (_n_new - OLD_CTRL_N)
+        else:
+            cn = OLD_SPLIT_A + (c - OLD_SPLIT_A) * (OLD_SPLIT_B + _n_new - OLD_CTRL_N - OLD_SPLIT_A) / (
+                OLD_SPLIT_B - OLD_SPLIT_A)
+        return cn / _n_new
+
     def road_frame(fr, lat, along=0.0):
         """(gx, gy_drum, gz, tx, ty, s): punctul la (frac pe INDEX, lateral + dreapta, along m inainte)."""
         sv = s_of_idx(fr) + along
@@ -1214,8 +1383,14 @@ blend_time = 0.35
         zm_ = importlib.import_module(f"angkor_decor.{zf_}")
         items_ = list(getattr(zm_, "ITEMS", []))
         kit_y_ = dict(getattr(zm_, "KIT_Y", {}))
+        fmap_ = remap_idx if int(getattr(zm_, "FRAC_BASE", 1)) < 2 else (lambda f: f)
         for d_ in getattr(zm_, "FOREST", []):
-            forest_zones.append(dict(d_, label=d_.get("label", zf_)))
+            d_ = dict(d_, label=d_.get("label", zf_))
+            if "frac_from" in d_:
+                d_["frac_from"], d_["frac_to"] = fmap_(d_["frac_from"]), fmap_(d_["frac_to"])
+            if "at" in d_:
+                d_["at"] = (fmap_(d_["at"][0]), d_["at"][1])
+            forest_zones.append(d_)
         forest_glbs.update(getattr(zm_, "FOREST_GLBS", {}))
         forest_settings.update(getattr(zm_, "FOREST_SETTINGS", {}))
         # Teatrul (brief §3): SMOKE = [(frac, lateral, dy[, along])] surse de fum de tamaie, ROOSTS =
@@ -1223,10 +1398,10 @@ blend_time = 0.35
         # in COORDONATE DE LUME, ca emitatorul/stolul sa stea la origine (un singur nod pentru toate).
         for it_ in getattr(zm_, "SMOKE", []):
             along_ = float(it_[3]) if len(it_) > 3 else 0.0
-            gx_, gy0_, gz_, _tx, _ty, _sv = road_frame(it_[0], it_[1], along_)
+            gx_, gy0_, gz_, _tx, _ty, _sv = road_frame(fmap_(it_[0]), it_[1], along_)
             smoke_pts.append((gx_, gy0_ + float(it_[2]), gz_))
         for it_ in getattr(zm_, "ROOSTS", []):
-            gx_, gy0_, gz_, _tx, _ty, _sv = road_frame(it_[0], it_[1])
+            gx_, gy0_, gz_, _tx, _ty, _sv = road_frame(fmap_(it_[0]), it_[1])
             roost_pts.append((gx_, gy0_ + float(it_[2]), gz_))
         if not items_:
             continue
@@ -1243,7 +1418,7 @@ blend_time = 0.35
                 gy0_ = elev_at(sv_)
                 fx_, fz_ = 0.0, -1.0
             else:
-                gx_, gy0_, gz_, tx_, ty_, sv_ = road_frame(fr_, lat_, float(opt_.get("along", 0.0)))
+                gx_, gy0_, gz_, tx_, ty_, sv_ = road_frame(fmap_(fr_), lat_, float(opt_.get("along", 0.0)))
                 fx_, fz_ = tx_, -ty_
             gy_ = opt_.get("y", kit_y_.get(nm_, gy0_ + float(opt_.get("dy", -0.3))))
             X_, Y_, Z_ = yaw_basis(fx_, fz_, float(yaw_), k_)
@@ -1351,8 +1526,13 @@ zones = Array[ExtResource("mf_zone")]([{zones_txt}])
         print(f"  pasari la tunet: {len(roost_pts)} cuiburi")
     zone_ext += "".join(f'[ext_resource type="PackedScene" path="{p_}" id="{r_}"]\n' for p_, r_ in zone_glb.items())
     # ==== sfarsit DECORUL PER POI ========================================================================
-    bias = [(IDX("E terasa V", BAYON_TOWERS[0][0] - 45.0),
-             IDX("E terasa V", BAYON_TOWERS[-1][0] + 8.0), BAYON_BIAS)]
+    # De la 60 m inaintea primului turn (era 45), scris cu 4 zecimale. Regula din brief §7 pasul 1 („culoarul
+    # incepe la >= 60 m inainte”: AI-ul il citeste la indexul CURENT) nu fusese aplicata pana la capat, iar
+    # rotunjirea la 0,001 (2,5 m) mai lua 3 m pe traseul nou: 44,8 m. Pe traseul prin templu plutonul ajunge la
+    # Bayon altfel grupat si ProbeRace a numarat 9 ejectari pe turnuri in 64 de curse (traseul vechi: 0 in 32),
+    # cu masina intrand drept in primul turn la 31-44 m/s.
+    bias = [(round(F_s(tag_s["E terasa V"] + BAYON_TOWERS[0][0] - 60.0)[0], 4),
+             round(F_s(tag_s["E terasa V"] + BAYON_TOWERS[-1][0] + 8.0)[0], 4), BAYON_BIAS)]
 
     # ---- PASUL 6: musonul + fulgerul. RainCycle e metronomul (singura cale de ud: `track.rain_wet`);
     # LightningFlash se aboneaza la el (grupul `rain_cycle`) si ruleaza DUPA el.
@@ -1434,8 +1614,8 @@ material = SubResource("Mat_macheta")
     # (macheta fetei de vest a iesit la val 2: modulele terasei, in DecorManual)
 
     # zonele pentru sonde (fractii pe INDEX)
-    zz = [("A", IDX("A start"), IDX("B arc galerie", -40.0)),
-          ("B", IDX("B arc galerie", -40.0), IDX("B cale N sfarsit")),
+    zz = [("A", IDX("A start"), IDXp(-102.0, 0.0)),
+          ("B", IDXp(-102.0, 0.0), IDX("B cale N sfarsit")),
           ("C", IDX("B cale N sfarsit"), IDX("D cale inceput")),
           ("D", IDX("D cale inceput"), IDX("E rampa V jos")),
           ("E", IDX("E rampa V jos"), IDX("F colt piata")),
@@ -1450,6 +1630,8 @@ material = SubResource("Mat_macheta")
     zones_meta += (f"metadata/jump_crests = [Vector2({IDX(CREST_TAG, -2.0)}, "
                    f"{IDX(CREST_TAG, 2 * CTRL_STEP + 2.0)})]\n")
 
+    temple_ext = (f'[ext_resource type="PackedScene" path="res://assets/models/angkor/{TEMPLE_GLB}" id="30_temple"]\n'
+                  if TEMPLE_GLB_OK else "")
     tscn = f"""[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
@@ -1481,8 +1663,7 @@ material = SubResource("Mat_macheta")
 [ext_resource type="PackedScene" path="res://assets/models/angkor/kit/vault_intact.glb" id="27_vault"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/kit/vault_broken.glb" id="28_vault_b"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/kit/giant_root_ramp.glb" id="29_ramp"]
-[ext_resource type="PackedScene" path="res://assets/models/angkor/structures/angkor_wat_temple.glb" id="30_temple"]
-[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/gallery_column.glb" id="31_gcol"]
+{temple_ext}[ext_resource type="PackedScene" path="res://assets/models/angkor/kit/gallery_column.glb" id="31_gcol"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/kit/gallery_roof.glb" id="32_groof"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/kit/gallery_relief_wall.glb" id="33_gwall"]
 [ext_resource type="PackedScene" path="res://assets/models/angkor/kit/bakheng_shrine_tower.glb" id="34_shrine"]
@@ -1506,6 +1687,9 @@ material = SubResource("Mat_macheta")
 [ext_resource type="Script" path="res://scenes/hazards/ambience_bed.gd" id="52_ambience"]
 [ext_resource type="AudioStream" path="res://assets/audio/jungle_bed.wav" id="53_jungle"]
 [ext_resource type="AudioStream" path="res://assets/audio/rain_leaves.wav" id="54_rainleaves"]
+[ext_resource type="Script" path="res://scenes/hazards/tunnel_signal_hazard.gd" id="55_signal"]
+[ext_resource type="Script" path="res://scenes/props/light_shaft.gd" id="56_shaft"]
+[ext_resource type="Script" path="res://scenes/hazards/gong_hazard.gd" id="57_gong"]
 {zone_ext}
 [sub_resource type="StandardMaterial3D" id="Mat_macheta"]
 albedo_color = Color(0.72, 0.64, 0.52, 1)
@@ -1545,6 +1729,7 @@ custom_ravine_water = Array[Vector3]([{", ".join(V3(*w_) for w_ in water)}])
 custom_water_styles = Array[Dictionary]([{JADE_STYLE}])
 custom_width_segments = Array[Vector3]([{", ".join(V3(*w_) for w_ in width_segments)}])
 custom_width_pinches = Array[Vector3]([{", ".join(V3(*w_) for w_ in pinches)}])
+width_flow_windows = Array[Vector2]([{", ".join(V2(a, b) for a, b in flow_windows)}])
 custom_parapets = Array[Vector4]([{", ".join(V4(*p_) for p_ in parapets)}])
 custom_lane_bias = Array[Vector3]([{", ".join(V3(*b_) for b_ in bias)}])
 custom_bench_patches = Array[Dictionary]([{", ".join(

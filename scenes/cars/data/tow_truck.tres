@@ -7,7 +7,7 @@
 [resource]
 script = ExtResource("1")
 id = &"tow_truck"
-display_name = "Macaraua"
+display_name = "Tow Truck"
 color = Color(0.95, 0.82, 0.24, 1)
 max_speed = 34.5
 acceleration = 14.5

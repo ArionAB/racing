@@ -585,21 +585,21 @@ func _check_texts() -> void:
 	var panel := CareerPanel.new()
 	add_child(panel)
 	await get_tree().process_frame
-	_check("7", panel._next_car_label.text == "NEXT CAR  AMBULANTA  ·  3 MORE POINTS",
+	_check("7", panel._next_car_label.text == "NEXT CAR  AMBULANCE  ·  3 MORE POINTS",
 		"pasaport, save gol: '%s'" % panel._next_car_label.text)
 	_check("7", panel._cars_label.text == "CARS  2 / 10",
 		"pasaport, save gol: '%s'" % panel._cars_label.text)
 	# 5 puncte (aur + argint): urmeaza Politia, la 1 punct.
 	Career.set_race_medal(w[0], Career.MEDAL_GOLD)
 	Career.set_race_medal(w[1], Career.MEDAL_SILVER)
-	_check("7", panel._next_car_label.text == "NEXT CAR  POLITIA  ·  1 MORE POINT",
+	_check("7", panel._next_car_label.text == "NEXT CAR  POLICE  ·  1 MORE POINT",
 		"pasaport la 5 puncte: '%s'" % panel._next_car_label.text)
 	_check("7", panel._cars_label.text == "CARS  3 / 10",
 		"pasaport la 5 puncte: '%s'" % panel._cars_label.text)
 	# Comutatorul nu minte pasaportul: progresul real ramane.
 	GameState.dev_unlock_all_cars = true
 	panel._refresh()
-	_check("7", "POLITIA" in panel._next_car_label.text and panel._cars_label.text == "CARS  3 / 10",
+	_check("7", "POLICE" in panel._next_car_label.text and panel._cars_label.text == "CARS  3 / 10",
 		"comutatorul aprins nu schimba pasaportul ('%s', '%s')"
 			% [panel._next_car_label.text, panel._cars_label.text])
 	GameState.dev_unlock_all_cars = false
@@ -612,7 +612,7 @@ func _check_texts() -> void:
 	if _sabotage == "text":
 		Career.last_unlocked_cars.clear()
 	var banner := Race.new_cars_text(Career.last_unlocked_cars)
-	_check("7", banner == "NEW CAR: POLITIA", "randul de rezultate: '%s'" % banner)
+	_check("7", banner == "NEW CAR: POLICE", "randul de rezultate: '%s'" % banner)
 	var hud := RaceHUD.new()
 	add_child(hud)
 	await get_tree().process_frame
@@ -621,7 +621,7 @@ func _check_texts() -> void:
 	hud.show_results("RESULTS — TEST\n3RD PLACE +1  =  1 PTS", rows, "BACK TO CAREER", banner)
 	var box: VBoxContainer = hud.get("_results_box")
 	var label := box.get_node_or_null("NewCarLabel") as Label
-	_check("7", label != null and label.visible and "POLITIA" in label.text,
+	_check("7", label != null and label.visible and "POLICE" in label.text,
 		"eticheta NewCarLabel din RaceHUD arata Politia ('%s')"
 			% (label.text if label != null else "<lipsa>"))
 	_check("7", box.get_child(0) is Label and box.get_child(1) == label,
@@ -630,7 +630,7 @@ func _check_texts() -> void:
 	hud.show_results("RESULTS — TEST", rows, "RESTART")
 	_check("7", box.get_node_or_null("NewCarLabel") == null,
 		"fara masina noua panoul nu are randul NEW CAR")
-	_check("7", Race.new_cars_text([&"hotrod", &"tow_truck"]) == "NEW CAR: HOT ROD\nNEW CAR: MACARAUA",
+	_check("7", Race.new_cars_text([&"hotrod", &"tow_truck"]) == "NEW CAR: HOT ROD\nNEW CAR: TOW TRUCK",
 		"doua praguri odata: doua randuri ('%s')"
 			% Race.new_cars_text([&"hotrod", &"tow_truck"]).replace("\n", " | "))
 	hud.queue_free()

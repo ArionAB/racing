@@ -50,7 +50,11 @@ fi
 
 # Ce are voie sa intre in export la nivelul de sus. Continut nou de joc sub
 # unul din astea nu cere nimic; un folder NOU de top cere o decizie aici.
-ALLOW_TOP="addons assets scenes scripts project.godot"
+# `localization` (nov 2026): traducerile .po, citite din project.godot
+# (internationalization/locale/translations) — fara ele jocul exportat ar
+# ramane in engleza in orice limba. `toy_racer.pot` e numarat si el aici, desi
+# Godot nu-l exporta (nu e resursa): garda greseste spre prudenta.
+ALLOW_TOP="addons assets scenes scripts localization project.godot"
 
 # Tipare de cale care nu au ce cauta in build (fara majuscule, glob ca la
 # Godot). Imaginile de referinta stau intr-un folder cu .gdignore; demo-urile

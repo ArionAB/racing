@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1")
 id = &"world_1"
-display_name = "LUMEA 1"
+display_name = "WORLD 1"
 tracks = Array[StringName]([&"monument_valley", &"kyoto", &"cappadocia", &"serengeti"])
 free = true
 points_to_unlock = 0

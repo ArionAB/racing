@@ -166,8 +166,9 @@ REPORT=$(awk -F'\t' -v veto="$VETO_PCT" -v order="$TRACKS" -v equal="${EQUAL:-za
 	}
 	END {
 		n = split(order, ord, " ")
-		# Ordinea masinilor ca in garaj (CAR_DATA): Muscle, Politia, Taxi, Autobuzul, Pompierii, Buggy.
-		split("Muscle Politia Taxi Autobuzul Pompierii Buggy", garage, " ")
+		# Ordinea masinilor ca in garaj (CAR_DATA): Muscle, Police, Taxi, Bus, Fire Truck, Buggy
+		# (separate cu |: „Fire Truck" are spatiu).
+		split("Muscle|Police|Taxi|Bus|Fire Truck|Buggy", garage, "|")
 		m = 0
 		for (i = 1; i <= 6; i++) if (garage[i] in cars) rows[++m] = garage[i]
 		for (c = 1; c <= ncars; c++) { found = 0; for (i = 1; i <= m; i++) if (rows[i] == carlist[c]) found = 1; if (!found) rows[++m] = carlist[c] }

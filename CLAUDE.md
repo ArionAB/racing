@@ -150,6 +150,19 @@ pur plus haosul fizic, nu proiectilele.
   Singurul lacăt: `Career.is_car_unlocked`; datele în `career_config.tres`
   (`starting_cars`, `car_rewards`). Comutator ascuns: 7 atingeri pe titlul
   GARAGE. Garda: `ProbeCarUnlock` (cu sabotaj pe fiecare contract).
+- **Șapte limbi** ✔ (nov 2026, decizia dezvoltatorului): engleză (sursa),
+  spaniolă, portugheză braziliană, germană, franceză, italiană, japoneză.
+  **Fără română**, nici ca limbă, nici ca text rămas în UI. Textele stau în
+  `localization/` ca gettext (`toy_racer.pot` + un `.po` per limbă, msgid =
+  textul englezesc). Un Label/Button cu text simplu se traduce singur; un text
+  **compus** trece prin `tr()` pe șablonul întreg, niciodată pe bucăți lipite;
+  numele din resurse (piste, mașini, cupe, bonusul carierei) rămân în engleză în
+  `.tres` și se traduc la afișare. Jocul urmează limba telefonului, cu rândul
+  LANGUAGE din SETTINGS (doar din meniul principal) pentru alegere manuală.
+  Japoneza are fontul ei (Noto Sans JP), pus în lanțul de fonturi **doar** în
+  japoneză — altfel înalță fiecare rând și în engleză. Text nou pe ecran =
+  intrare nouă în `.pot` și în toate cele șase `.po`. Garda: `ProbeLocalization`
+  (catalog, text netradus, glife, încadrare, limbă; cinci sabotaje).
 - **Bonusul carierei „NO RETRY”** ✔ (19 nov 2026, în locul provocărilor per
   pistă, scoase): +1 pe orice pistă dacă termini cursa fără să fii aruncat
   (`Car.ejected`) și fără un RESET cerut care a pornit o repunere. Izbiturile,

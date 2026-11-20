@@ -224,7 +224,10 @@ func _text(prop: String) -> String:
 	if config == null:
 		return ""
 	var v: Variant = config.get(prop)
-	return String(v) if v != null else ""
+	# Textele din TutorialConfig sunt msgid-uri (engleza); traducerea se face
+	# INAINTE de inlocuirea {steer_left} & co., care raman in traduceri.
+	var s := String(v) if v != null else ""
+	return tr(s) if s != "" else ""
 
 
 ## Prima tasta a actiunii din InputMap, cu majuscule („W", „SHIFT", „SPACE").

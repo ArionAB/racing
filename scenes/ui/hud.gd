@@ -111,6 +111,8 @@ func _ready() -> void:
 	_build_pause_panel(root)
 	_build_results_panel(root)
 	_settings = SettingsPanel.new()
+	# Limba se schimba doar din meniul principal (vezi SettingsPanel.show_language).
+	_settings.show_language = false
 	_settings.visible = false
 	_settings.back_pressed.connect(func() -> void:
 		_settings.visible = false
@@ -576,6 +578,7 @@ func _open_pause() -> void:
 	_touch.visible = false
 	_pause_button.visible = false
 	_respawn_button.visible = false
+	_set_bottom_row(false)
 	_pause_panel.visible = true
 
 func _close_pause() -> void:
@@ -583,8 +586,18 @@ func _close_pause() -> void:
 	_touch.visible = true
 	_pause_button.visible = true
 	_respawn_button.visible = true
+	_set_bottom_row(true)
 	_pause_panel.visible = false
 	_settings.visible = false
+
+
+## Randul de jos (bara de turbo si linia SEALED / GHOST / CHALLENGE) se ascunde
+## in pauza, ca butoanele touch: e construit dupa panourile de pauza, deci se
+## desena PESTE ele — in limbile cu randuri mai inalte (japoneza) sau cu texte
+## mai late, peste BACK / RESET CAMERA din setari (ProbeLocalization, D).
+func _set_bottom_row(on: bool) -> void:
+	_charge_bg.get_parent().visible = on
+	_sealed_label.get_parent().visible = on
 
 func _unhandled_input(event: InputEvent) -> void:
 	# ESC comuta pauza — util pe desktop in timpul dezvoltarii.
@@ -760,10 +773,10 @@ func set_info(position: int, total_cars: int, lap: int, total_laps: int,
 		speed_kmh: float, lap_time: String, best_lap: String) -> void:
 	_pos_label.text = str(position)
 	_pos_total.text = "/%d" % total_cars
-	_lap_label.text = "LAP %d/%d" % [lap, total_laps]
-	_speed_label.text = "%.0f km/h" % speed_kmh
+	_lap_label.text = tr("LAP %d/%d") % [lap, total_laps]
+	_speed_label.text = tr("%.0f km/h") % speed_kmh
 	_time_label.text = lap_time
-	_best_label.text = "BEST  %s" % best_lap
+	_best_label.text = tr("BEST  %s") % best_lap
 
 
 ## Linia de dezvoltare de sub panou (recorduri, pista, taste). Ascunsa in
@@ -837,7 +850,7 @@ func set_offroad_clock(seconds: float) -> void:
 		_offroad_label.visible = false
 		return
 	_offroad_label.visible = true
-	_offroad_label.text = "OFF ROAD\n%.1f" % maxf(seconds, 0.0)
+	_offroad_label.text = tr("OFF ROAD") + "\n%.1f" % maxf(seconds, 0.0)
 	_offroad_label.add_theme_color_override("font_color",
 		Color(1.0, 0.3, 0.2) if seconds < 1.0 else Color(1.0, 0.82, 0.25))
 
@@ -886,12 +899,12 @@ func set_sealed_turbo(on: bool) -> void:
 func set_ghost_time(ms: int) -> void:
 	_ghost_label.visible = ms > 0
 	if ms > 0:
-		_ghost_label.text = "GHOST %s" % TrackCard._format_ms(ms)
+		_ghost_label.text = tr("GHOST %s") % TrackCard._format_ms(ms)
 
 ## Bonusul carierei (+1 in cursa RACE de cariera): "BONUS +1: NO RETRY", verde
 ## cat il mai ai. Titlul vine din `CareerConfig.bonus_title`.
 func set_bonus(title: String) -> void:
-	_bonus_label.text = "BONUS +%d: %s" % [Career.BONUS_POINTS, title]
+	_bonus_label.text = tr("BONUS +%d: %s") % [Career.BONUS_POINTS, tr(title)]
 	_bonus_label.modulate = BONUS_COLOR
 	_bonus_label.visible = true
 

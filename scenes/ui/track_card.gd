@@ -13,6 +13,9 @@ const OUTLINE_HOVER := Color(0.45, 0.55, 0.72)
 const OUTLINE_FOCUS := Color(0.95, 0.83, 0.48)
 const TEXT_DIM := Color(0.62, 0.68, 0.78)
 const RADIUS := 8
+## Marimea numelui pistei pe cartonas, si cat poate scadea ca sa incapa intreg.
+const TITLE_SIZE := 22
+const TITLE_MIN_SIZE := 14
 
 var track_index: int = 0
 var _outline_box: StyleBoxFlat
@@ -130,7 +133,7 @@ func _build_thumb(info: TrackInfo) -> Control:
 	hint.alignment = BoxContainer.ALIGNMENT_CENTER
 	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	thumb.add_child(hint)
-	var big := _label(info.display_name.to_upper(), 30, Color(1, 1, 1, 0.22))
+	var big := _label(tr(info.display_name).to_upper(), 30, Color(1, 1, 1, 0.22))
 	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_child(big)
 	var path := _label(TrackInfo.thumb_path(track_index).trim_prefix("res://"),
@@ -157,9 +160,11 @@ func _build_footer(info: TrackInfo) -> Control:
 	names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	names.add_theme_constant_override("separation", 2)
 	row.add_child(names)
-	var title := _label(info.display_name.to_upper(), 22, Color.WHITE)
+	# Numele si regiunea sunt in engleza in TrackInfo; se traduc la afisare.
+	var title := _label(tr(info.display_name).to_upper(), TITLE_SIZE, Color.WHITE)
 	title.clip_text = true
 	title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	title.resized.connect(_fit_title.bind(title))
 	names.add_child(title)
 	var region_row := HBoxContainer.new()
 	region_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -168,7 +173,7 @@ func _build_footer(info: TrackInfo) -> Control:
 	var dot := _Dot.new()
 	dot.color = info.accent
 	region_row.add_child(dot)
-	region_row.add_child(_label(info.region, 14, TEXT_DIM))
+	region_row.add_child(_label(tr(info.region), 14, TEXT_DIM))
 
 	var clock := _Clock.new()
 	clock.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -177,6 +182,23 @@ func _build_footer(info: TrackInfo) -> Control:
 	_add_record(row, "LAP", GameState.best_lap(track_index))
 	_add_record(row, "RACE", GameState.best_race(track_index))
 	return margin
+
+
+## Numele pistei incape INTREG: cand nu are loc, fontul scade, pana la
+## `TITLE_MIN_SIZE`; elipsa ramane doar ultima plasa. La 1280x720 (si mai rau
+## pe telefoanele 20:9, unde grila are patru coloane) „MONUMENT VALLEY" iesea
+## „MONUMENT VALL…" chiar si in engleza, iar „TRANSFAGARASAN" / numele in
+## katakana pierdeau si mai mult (garda: ProbeLocalization, contractul D).
+func _fit_title(title: Label) -> void:
+	if title.size.x <= 0.0:
+		return
+	var font := title.get_theme_font("font")
+	var fs := TITLE_SIZE
+	while fs > TITLE_MIN_SIZE and font.get_string_size(title.text,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > title.size.x:
+		fs -= 1
+	if title.get_theme_font_size("font_size") != fs:
+		title.add_theme_font_size_override("font_size", fs)
 
 
 func _add_record(row: HBoxContainer, caption: String, ms: int) -> void:

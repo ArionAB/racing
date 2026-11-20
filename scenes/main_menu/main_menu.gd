@@ -65,6 +65,7 @@ func _ready() -> void:
 	add_child(settings)
 	_panels.append(settings)
 	settings.back_pressed.connect(_show_main)
+	settings.language_changed.connect(_reload_for_language)
 	settings_btn.pressed.connect(func() -> void: _show_panel(settings))
 
 	# Dupa o cursa de cariera revenim direct pe raft, nu pe meniul principal.
@@ -75,6 +76,9 @@ func _ready() -> void:
 	elif GameState.menu_open_panel == &"world_cup":
 		GameState.menu_open_panel = &""
 		_show_panel(cup_panel)
+	elif GameState.menu_open_panel == &"settings":
+		GameState.menu_open_panel = &""
+		_show_panel(settings)
 
 	# Prima pornire: invitatia la turul ghidat (#678), o data pe sesiune.
 	TutorialInvite.offer_if_needed(self)
@@ -95,6 +99,34 @@ func _show_main() -> void:
 	_main_box.visible = true
 	for p in _panels:
 		p.visible = false
+
+## Limba noua din SETTINGS: meniul se reconstruieste de la zero, cu SETTINGS
+## deschis, ca TOATE textele (si cele compuse din cod, care nu se traduc singure
+## la schimbarea limbii) sa iasa in limba noua, fara repornirea aplicatiei.
+## Amanat: semnalul vine din mijlocul OptionButton-ului din panou.
+func _reload_for_language() -> void:
+	GameState.menu_open_panel = &"settings"
+	if get_tree().current_scene == self:
+		get_tree().reload_current_scene.call_deferred()
+	else:
+		# Meniul nu e scena curenta (o sonda il tine sub scena ei): acelasi
+		# lucru, de mana — un meniu nou in locul lui.
+		_replace_with_fresh_menu.call_deferred()
+
+
+func _replace_with_fresh_menu() -> void:
+	var fresh: Node
+	if scene_file_path != "":
+		fresh = (load(scene_file_path) as PackedScene).instantiate()
+	else:
+		fresh = (get_script() as GDScript).new()
+	var parent := get_parent()
+	var at := get_index()
+	parent.remove_child(self)
+	parent.add_child(fresh)
+	parent.move_child(fresh, at)
+	queue_free()
+
 
 ## Alegerea pistei pentru cursa rapida: grila de cartonase pe ecran intreg.
 func _build_track_panel() -> Control:

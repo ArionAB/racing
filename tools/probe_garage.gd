@@ -155,11 +155,11 @@ func _run_checks(panel: GaragePanel) -> void:
 		_fails.append(("masa: cea mai grea masina (%s) da offset %.2f, "
 			+ "nu pozitiv") % [heaviest_name, heavy])
 	# Cuvantul trebuie sa urmeze semnul, altfel eticheta minte.
-	if panel._mass_word(lightest_mass) != "USOARA":
-		_fails.append("masa: %s (%.2f) e etichetata „%s”, nu USOARA" % [
+	if panel._mass_word(lightest_mass) != "LIGHT":
+		_fails.append("masa: %s (%.2f) e etichetata „%s”, nu LIGHT" % [
 			lightest_name, lightest_mass, panel._mass_word(lightest_mass)])
-	if panel._mass_word(heaviest_mass) != "GREA":
-		_fails.append("masa: %s (%.2f) e etichetata „%s”, nu GREA" % [
+	if panel._mass_word(heaviest_mass) != "HEAVY":
+		_fails.append("masa: %s (%.2f) e etichetata „%s”, nu HEAVY" % [
 			heaviest_name, heaviest_mass, panel._mass_word(heaviest_mass)])
 
 	# --- 4: fantoma poate cadea si la stanga capatului plin ---

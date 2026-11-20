@@ -11,7 +11,7 @@ extends Control
 ## fiecare cutie (20 nov 2026: o cupa inceputa pe BRONZE nu se termina pe GOLD).
 ## Cu save pe nivelul ales, butonul devine CONTINUE (acelasi loc, aceeasi
 ## marime), langa el un RESET mai mic, iar sub titlu un rand de stare —
-## „RACE 3 / 4  ·  2ND  ·  11 PTS  ·  AUTOBUZUL" (nivelul il arata selectorul).
+## „RACE 3 / 4  ·  2ND  ·  11 PTS  ·  BUS" (nivelul il arata selectorul).
 ## Fara save pe nivelul ales: START, cupa noua pe nivelul acela, fara sa atinga
 ## save-urile celorlalte niveluri. Daca cupa are save pe ALTE niveluri, un rand
 ## stins o spune: „ALSO IN PROGRESS: GOLD" (doar informatie, nu buton).
@@ -33,7 +33,8 @@ const START_TEXT := "START"
 const CONTINUE_TEXT := "CONTINUE"
 const RESET_TEXT := "RESET"
 const RESET_CONFIRM_TEXT := "SURE?"
-const OTHER_LEVELS_PREFIX := "ALSO IN PROGRESS: "
+## Sablon intreg, tradus ca atare (in japoneza doua-punctele difera).
+const OTHER_LEVELS_TEXT := "ALSO IN PROGRESS: %s"
 const RESET_ARMED_BG := Color(0.62, 0.13, 0.12)
 const RESET_ARMED_BORDER := Color(1.0, 0.42, 0.36)
 
@@ -84,8 +85,9 @@ func _ready() -> void:
 	content.add_theme_constant_override("separation", 20)
 	pad.add_child(content)
 
-	var rules := _label("POINTS PER RACE  6 · 5 · 4 · 3 · 2 · 1     ·     "
-		+ "NEW RIVALS EVERY CUP, NEVER THE SAME CAR TWICE", 18,
+	# Doua propozitii separate (fiecare tradusa intreaga), lipite cu punct.
+	var rules := _label(tr("POINTS PER RACE  6 · 5 · 4 · 3 · 2 · 1") + "     ·     "
+		+ tr("NEW RIVALS EVERY CUP, NEVER THE SAME CAR TWICE"), 18,
 		TrackCard.TEXT_DIM)
 	rules.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content.add_child(rules)
@@ -119,9 +121,9 @@ func _build_cup(cup: WorldCup) -> Control:
 	var title_row := HBoxContainer.new()
 	title_row.add_theme_constant_override("separation", 14)
 	column.add_child(title_row)
-	var title := _label(cup.display_name, 30, Color.WHITE)
+	var title := _label(tr(cup.display_name), 30, Color.WHITE)
 	title_row.add_child(title)
-	var count := _label("%d RACES" % cup.tracks.size(), 18,
+	var count := _label(tr_n("%d RACE", "%d RACES", cup.tracks.size()) % cup.tracks.size(), 18,
 		TrackSelectPanel.SUBTITLE_COLOR)
 	count.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	title_row.add_child(count)
@@ -225,7 +227,7 @@ func _build_tile(race_no: int, track_index: int, accent: Color) -> Control:
 	row.add_theme_constant_override("separation", 10)
 	footer.add_child(row)
 	row.add_child(_label(str(race_no), 20, accent.lightened(0.35)))
-	var name_label := _label(info.display_name.to_upper(), 18, Color.WHITE)
+	var name_label := _label(tr(info.display_name).to_upper(), 18, Color.WHITE)
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_label.clip_text = true
 	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -307,15 +309,15 @@ func _refresh_box(box: Dictionary) -> void:
 	_disarm(cup)
 
 
-## „RACE 3 / 4  ·  2ND  ·  11 PTS  ·  AUTOBUZUL": cursa care urmeaza, locul
+## „RACE 3 / 4  ·  2ND  ·  11 PTS  ·  BUS": cursa care urmeaza, locul
 ## jucatorului dupa puncte, punctele lui, masina cupei. Nivelul nu: il arata
 ## selectorul, si cutia arata mereu save-ul nivelului ales.
 static func status_text(entry: WorldCupSave.Entry) -> String:
 	var car := GameState.CAR_DATA[entry.player_car] as CarData
-	return "RACE %d / %d  ·  %s  ·  %d PTS  ·  %s" % [
+	return _tr("RACE %d / %d  ·  %s  ·  %d PTS  ·  %s") % [
 		entry.next_race + 1, entry.cup.tracks.size(),
 		Race._ordinal(entry.player_rank()).to_upper(), entry.points[0],
-		car.display_name.to_upper()]
+		_tr(car.display_name).to_upper()]
 
 
 ## „ALSO IN PROGRESS: BRONZE, GOLD" — nivelurile cu save in afara celui ales,
@@ -324,8 +326,13 @@ static func other_levels_text(levels: Array[int], selected: int) -> String:
 	var names := PackedStringArray()
 	for level in levels:
 		if level != selected:
-			names.append(AiSkill.LEVEL_NAMES[level])
-	return OTHER_LEVELS_PREFIX + ", ".join(names) if not names.is_empty() else ""
+			names.append(_tr(AiSkill.LEVEL_NAMES[level]))
+	return _tr(OTHER_LEVELS_TEXT) % ", ".join(names) if not names.is_empty() else ""
+
+
+## `tr()` pentru functiile statice (n-au obiect).
+static func _tr(text: String) -> String:
+	return String(TranslationServer.translate(text))
 
 
 ## START porneste o cupa noua pe nivelul ales; CONTINUE o reia pe cea salvata

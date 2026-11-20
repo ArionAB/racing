@@ -56,6 +56,21 @@ fontul distribuit — pe telefon fontul e in pachet, deci nota sta aici. Conditi
 pe care le respectam: fontul nu se vinde separat, iar numele rezervat („Barlow")
 nu se foloseste pentru o versiune modificata — si nu modificam nimic.
 
+### Noto Sans JP
+- **Author:** Google / Adobe (Noto CJK, derived from Source Han Sans)
+- **Copyright:** 2014-2021 Adobe
+- **License:** OFL-1.1 (SIL Open Font License 1.1)
+- **Source:** https://github.com/notofonts/noto-cjk
+
+Fontul textelor in japoneza (localizarea, nov 2026): un singur fisier,
+`NotoSansJP-Medium.otf` (SubsetOTF, versiunea 2.004), original, nemodificat,
+nesubsetat. Cand jocul e in japoneza sta ca FALLBACK in spatele lui Barlow si
+al fontului implicit al temei (`Localization.set_locale`), deci intra doar pe
+glifele pe care Barlow nu le are; in orice limba, il foloseste lista de limbi
+din SETTINGS („日本語"). Textul integral al licentei e in
+`assets/fonts/LICENSE_notosansjp_OFL.txt`. Aceleasi conditii OFL ca la Barlow;
+numele rezervat de licenta e „Source".
+
 ## Audio
 
 ### Sound effects

@@ -23,7 +23,7 @@ extends Control
 ##    stiluri, nu upgrade-uri). Desenata ca bara care creste, ar fi spus ca
 ##    autobuzul e „cel mai bun la masa" si Politia o masina stricata. Deci se
 ##    deseneaza ca indicator CENTRAT: cursorul pleaca din mijloc spre stanga
-##    (usoara) sau spre dreapta (grea), cu eticheta USOARA/MEDIE/GREA.
+##    (usoara) sau spre dreapta (grea), cu eticheta LIGHT/MEDIUM/HEAVY.
 ##
 ## 3. Conturul-fantoma arata valoarea masinii ACUM selectate, cat timp te uiti
 ##    la alta din banda. Poate aparea si la stanga capatului plin (masina din
@@ -334,7 +334,8 @@ func _driver_scene(index: int) -> PackedScene:
 func _refresh_driver_row() -> void:
 	var skin := GameState.DRIVER_DATA[_shown_driver] as DriverData
 	var chosen := _shown_driver == GameState.selected_driver
-	_driver_name.text = skin.display_name.to_upper() + (" ✓" if chosen else "")
+	# Numele din .tres e in engleza; se traduce la afisare (Localization).
+	_driver_name.text = tr(skin.display_name).to_upper() + (" ✓" if chosen else "")
 	# Pe o caroserie inchisa figurina nu se vede, deci n-ai ce compara aici;
 	# alegerea ramane valabila pentru masinile deschise, doar bara se stinge.
 	var open := (GameState.CAR_DATA[_shown] as CarData).open_cockpit
@@ -414,7 +415,7 @@ func _show(index: int) -> void:
 
 	_preview.show_car(data, _driver_scene(_shown_driver))
 	_preview.reset_spin()
-	_name_label.text = data.display_name.to_upper()
+	_name_label.text = tr(data.display_name).to_upper()
 	_refresh_driver_row()
 
 	# Fantoma arata masina selectata ACUM — si doar cand te uiti la alta.
@@ -483,8 +484,9 @@ func _refresh_select() -> void:
 ## Textul lui SELECT pe o masina incuiata, pe un singur rand.
 static func locked_select_text(missing: int) -> String:
 	if missing <= 0:
-		return "CAREER: LOCKED"
-	return "CAREER: %d MORE %s" % [missing, "PT" if missing == 1 else "PTS"]
+		return String(TranslationServer.translate("CAREER: LOCKED"))
+	return String(TranslationServer.translate_plural("CAREER: %d MORE PT",
+		"CAREER: %d MORE PTS", missing)) % missing
 
 
 func _is_unlocked(index: int) -> bool:
@@ -583,10 +585,10 @@ func _mass_offset(mass: float) -> float:
 func _mass_word(mass: float) -> String:
 	var t := _mass_offset(mass)
 	if t < -0.33:
-		return "USOARA"
+		return "LIGHT"
 	if t > 0.33:
-		return "GREA"
-	return "MEDIE"
+		return "HEAVY"
+	return "MEDIUM"
 
 
 # ------------------------------------------------------------------ stil

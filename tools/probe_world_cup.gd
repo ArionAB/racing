@@ -247,7 +247,7 @@ func _check_race() -> void:
 	race.call("_show_champion")
 	var rows := _results_rows(race)
 	var first := rows[0] if rows.size() > 0 else ""
-	_check(first.contains(race.cars[hi].pilot_name),
+	_check(first.contains(race.pilot_label(race.cars[hi])),
 		"egalitate la 30: %s (locul 2 in ultima cursa) e inaintea lui %s — \"%s\""
 			% [race.cars[hi].pilot_name, race.cars[lo].pilot_name, first])
 	_check(_results_title(race).begins_with(cup.display_name + " WINNER"),

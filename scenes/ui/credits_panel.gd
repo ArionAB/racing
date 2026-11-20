@@ -76,6 +76,11 @@ func _ready() -> void:
 	_scroll.add_child(pad)
 	_content = VBoxContainer.new()
 	_content.add_theme_constant_override("separation", 12)
+	# Corpul creditelor ramane in engleza in orice limba (licentele, numele,
+	# sursele): fara traducere automata, ca un titlu care se nimereste sa fie si
+	# msgid sa nu fie tradus pe jumatate. Antetul si butoanele SHOW/HIDE se
+	# traduc (explicit, mai jos).
+	_content.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	pad.add_child(_content)
 
 	var groups := parse_credits(_read_source())
@@ -230,7 +235,7 @@ func _add_license_texts(used_licenses: Array[String]) -> void:
 	var info := Engine.get_license_info()
 	for id in used_licenses:
 		var btn := Button.new()
-		btn.text = "SHOW  " + id
+		btn.text = tr("SHOW  %s") % id
 		btn.toggle_mode = true
 		btn.focus_mode = Control.FOCUS_NONE
 		btn.custom_minimum_size = Vector2(0, 48)
@@ -245,7 +250,7 @@ func _add_license_texts(used_licenses: Array[String]) -> void:
 			if holder.get_child_count() == 0:
 				holder.add_child(_label(text.strip_edges(), body_font_size - 2, TEXT_DIM))
 			holder.visible = on
-			btn.text = ("HIDE  " if on else "SHOW  ") + id)
+			btn.text = (tr("HIDE  %s") if on else tr("SHOW  %s")) % id)
 
 
 func _group_header(text: String) -> Label:

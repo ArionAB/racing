@@ -78,6 +78,12 @@ reset={
 
 pointing/emulate_touch_from_mouse=true
 
+[internationalization]
+
+locale/translations=PackedStringArray("res://localization/es.po", "res://localization/pt_BR.po", "res://localization/de.po", "res://localization/fr.po", "res://localization/it.po", "res://localization/ja.po")
+locale/fallback="en"
+locale/include_text_server_data=true
+
 [layer_names]
 
 3d_physics/layer_8="camera_blockers"

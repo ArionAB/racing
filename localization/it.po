@@ -1,0 +1,1115 @@
+# Toy Racer — Italian.
+msgid ""
+msgstr ""
+"Project-Id-Version: Toy Racer\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8-bit\n"
+"Language: it\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. Subtitle under the title TOY RACER (which is never translated).
+#: scenes/main_menu/main_menu.gd:31
+msgid "toy cars, drifting and bumping"
+msgstr "macchinine, derapate e sportellate"
+
+#: scenes/main_menu/main_menu.gd:37
+#: scenes/ui/track_select_panel.gd:122
+msgid "QUICK RACE"
+msgstr "GARA VELOCE"
+
+#: scenes/main_menu/main_menu.gd:40
+#: scenes/ui/world_cup_panel.gd:31
+msgid "WORLD CUP"
+msgstr "COPPA DEL MONDO"
+
+#: scenes/main_menu/main_menu.gd:42
+#: scenes/ui/career_panel.gd:47
+msgid "CAREER"
+msgstr "CARRIERA"
+
+#: scenes/main_menu/main_menu.gd:44
+#: scenes/ui/garage_panel.gd:525
+msgid "GARAGE"
+msgstr "GARAGE"
+
+#: scenes/main_menu/main_menu.gd:46
+#: scenes/ui/hud.gd:464
+#: scenes/ui/settings_panel.gd:40
+msgid "SETTINGS"
+msgstr "OPZIONI"
+
+#. Desktop only.
+#: scenes/main_menu/main_menu.gd:51
+msgid "QUIT"
+msgstr "ESCI"
+
+#. Settings row label. Shown as "<translation> / Language" when the game is not in English.
+#: scenes/ui/settings_panel.gd:327
+#: scenes/ui/settings_panel.gd:328
+msgid "Language"
+msgstr "Lingua"
+
+#. Language choice: follow the device language. The language names themselves are never translated.
+#: scenes/ui/settings_panel.gd:336
+msgid "AUTO"
+msgstr "AUTO"
+
+#: scenes/ui/settings_panel.gd:61
+msgid "Steering sensitivity"
+msgstr "Sensibilità dello sterzo"
+
+#: scenes/ui/settings_panel.gd:65
+msgid "Effects volume"
+msgstr "Volume effetti"
+
+#: scenes/ui/settings_panel.gd:70
+msgid "Engine volume"
+msgstr "Volume motore"
+
+#: scenes/ui/settings_panel.gd:76
+msgid "Vibration"
+msgstr "Vibrazione"
+
+#. Accessibility (photosensitivity): the storm lightning stops whitening the screen.
+#: scenes/ui/settings_panel.gd:82
+msgid "Reduce flashes"
+msgstr "Riduci i lampi"
+
+#: scenes/ui/settings_panel.gd:91
+msgid "Camera: distance"
+msgstr "Telecamera: distanza"
+
+#: scenes/ui/settings_panel.gd:95
+msgid "Camera: height"
+msgstr "Telecamera: altezza"
+
+#: scenes/ui/settings_panel.gd:99
+msgid "Camera: field of view"
+msgstr "Telecamera: campo visivo"
+
+#. How fast the camera settles behind the car.
+#: scenes/ui/settings_panel.gd:103
+msgid "Camera: follow speed"
+msgstr "Telecamera: velocità"
+
+#: scenes/ui/settings_panel.gd:109
+msgid "Graphics"
+msgstr "Grafica"
+
+#. Graphics quality.
+#: scripts/autoload/game_state.gd:384
+msgid "Low"
+msgstr "Bassa"
+
+#. Graphics quality.
+#: scripts/autoload/game_state.gd:384
+msgid "Normal"
+msgstr "Normale"
+
+#. Graphics quality.
+#: scripts/autoload/game_state.gd:384
+msgid "High"
+msgstr "Alta"
+
+#: scenes/ui/settings_panel.gd:114
+msgid "Performance counter"
+msgstr "Contatore prestazioni"
+
+#: scenes/ui/settings_panel.gd:121
+msgid "Location telemetry (tap it to copy)"
+msgstr "Telemetria di posizione (tocca per copiare)"
+
+#: scenes/ui/settings_panel.gd:136
+msgid "Real headlight at night (test)"
+msgstr "Faro vero di notte (test)"
+
+#: scenes/race/tutorial/tutorial_director.gd:25
+msgid "REPLAY TUTORIAL"
+msgstr "RIPETI IL TUTORIAL"
+
+#: scenes/ui/settings_panel.gd:151
+msgid "CREDITS & LICENSES"
+msgstr "CREDITI E LICENZE"
+
+#: scenes/ui/settings_panel.gd:158
+msgid "RESET CAMERA"
+msgstr "RIPRISTINA TELECAMERA"
+
+#: scenes/ui/career_panel.gd:291
+#: scenes/ui/settings_panel.gd:173
+msgid "BACK"
+msgstr "INDIETRO"
+
+#: scenes/ui/track_select_panel.gd:158
+msgid "<  BACK"
+msgstr "<  INDIETRO"
+
+#. Button: put the car back on the track.
+#: scenes/ui/hud.gd:135
+msgid "↺  RESET"
+msgstr "↺  RIPOSIZIONA"
+
+#: scenes/ui/hud.gd:180
+msgid "WRONG WAY"
+msgstr "CONTROMANO"
+
+#. Time trial: the turbo tank is sealed (it does not refill).
+#: scenes/ui/hud.gd:407
+msgid "SEALED"
+msgstr "SIGILLATO"
+
+#: scenes/ui/hud.gd:457
+msgid "PAUSED"
+msgstr "PAUSA"
+
+#: scenes/ui/hud.gd:461
+msgid "RESUME"
+msgstr "RIPRENDI"
+
+#: scenes/race/race.gd:898
+#: scenes/ui/hud.gd:469
+msgid "RESTART"
+msgstr "RICOMINCIA"
+
+#: scenes/ui/hud.gd:474
+#: scenes/ui/hud.gd:550
+msgid "MENU"
+msgstr "MENU"
+
+#: scenes/ui/hud.gd:761
+msgid "LAP %d/%d"
+msgstr "GIRO %d/%d"
+
+#. Speed. km/h is the SI unit symbol and stays in Latin letters in every language.
+#: scenes/ui/hud.gd:762
+msgid "%.0f km/h"
+msgstr "%.0f km/h"
+
+#. Best lap time.
+#: scenes/ui/hud.gd:764
+msgid "BEST  %s"
+msgstr "MIGLIORE  %s"
+
+#. Big countdown shown while the car is off the road.
+#: scenes/ui/hud.gd:838
+msgid "OFF ROAD"
+msgstr "FUORI PISTA"
+
+#. Time of the saved ghost car.
+#: scenes/ui/hud.gd:876
+msgid "GHOST %s"
+msgstr "FANTASMA %s"
+
+#. Countdown, very large text: keep it as short as possible.
+#: scenes/race/race.gd:222
+msgid "READY?"
+msgstr "PRONTO?"
+
+#. Countdown, very large text. Japanese: the classic start call よーい、ドン.
+#: scenes/race/race.gd:468
+msgid "GO!"
+msgstr "VIA!"
+
+#. After the car fell off the track and was put back.
+#: scenes/race/race.gd:280
+msgid "MISSED — back on track"
+msgstr "MANCATO — di nuovo in pista"
+
+#. The toy driver was thrown out of the car.
+#: scenes/race/race.gd:293
+msgid "EJECTED!"
+msgstr "SBALZATO FUORI!"
+
+#: scenes/race/race.gd:302
+msgid "STEERING REVERSED  <=>"
+msgstr "STERZO INVERTITO  <=>"
+
+#: scenes/race/race.gd:307
+msgid "ON FIRE!"
+msgstr "IN FIAMME!"
+
+#: scenes/race/race.gd:483
+msgid "ROCKET START!"
+msgstr "PARTENZA A RAZZO!"
+
+#: scenes/race/race.gd:486
+msgid "Too early..."
+msgstr "Troppo presto..."
+
+#: scenes/race/race.gd:773
+msgid "NEW LAP RECORD! %s"
+msgstr "NUOVO RECORD SUL GIRO! %s"
+
+#. %s = one of the ordinals 1st..6th below.
+#: scenes/race/race.gd:867
+#: scenes/race/race.gd:871
+msgid "FINISH — %s place!"
+msgstr "TRAGUARDO — %s posto!"
+
+#: scenes/race/race.gd:868
+msgid "RACE RECORD %s"
+msgstr "RECORD DI GARA %s"
+
+#. Finishing position. Only ever used in front of the word for "place" ("FINISH — %s place!", "%s PLACE +%d"); agree with it.
+#: scenes/race/race.gd:20
+msgid "1st"
+msgstr "1º"
+
+#. Finishing position. Only ever used in front of the word for "place" ("FINISH — %s place!", "%s PLACE +%d"); agree with it.
+#: scenes/race/race.gd:20
+msgid "2nd"
+msgstr "2º"
+
+#. Finishing position. Only ever used in front of the word for "place" ("FINISH — %s place!", "%s PLACE +%d"); agree with it.
+#: scenes/race/race.gd:20
+msgid "3rd"
+msgstr "3º"
+
+#. Finishing position. Only ever used in front of the word for "place" ("FINISH — %s place!", "%s PLACE +%d"); agree with it.
+#: scenes/race/race.gd:20
+msgid "4th"
+msgstr "4º"
+
+#. Finishing position. Only ever used in front of the word for "place" ("FINISH — %s place!", "%s PLACE +%d"); agree with it.
+#: scenes/race/race.gd:20
+msgid "5th"
+msgstr "5º"
+
+#. Finishing position. Only ever used in front of the word for "place" ("FINISH — %s place!", "%s PLACE +%d"); agree with it.
+#: scenes/race/race.gd:20
+msgid "6th"
+msgstr "6º"
+
+#: scenes/race/race.gd:885
+msgid "+%d pts  (total %d)"
+msgstr "+%d pt  (totale %d)"
+
+#: scenes/race/race.gd:889
+msgid "RECORD!"
+msgstr "RECORD!"
+
+#. %s = track name.
+#: scenes/race/race.gd:897
+msgid "RESULTS — %s"
+msgstr "RISULTATI — %s"
+
+#: scenes/race/race.gd:902
+#: scenes/race/race.gd:906
+msgid "BACK TO CAREER"
+msgstr "TORNA ALLA CARRIERA"
+
+#. Cup name — race number / races in the cup — track name.
+#: scenes/race/race.gd:910
+msgid "%s — RACE %d/%d — %s"
+msgstr "%s — GARA %d/%d — %s"
+
+#: scenes/race/race.gd:912
+msgid "FINAL STANDINGS"
+msgstr "CLASSIFICA FINALE"
+
+#: scenes/race/race.gd:913
+msgid "NEXT RACE"
+msgstr "PROSSIMA GARA"
+
+#: scenes/race/race.gd:930
+msgid "NO TARGET YET"
+msgstr "ANCORA NESSUN OBIETTIVO"
+
+#: scenes/race/race.gd:933
+#: scenes/race/race.gd:959
+msgid "NO MEDAL"
+msgstr "NESSUNA MEDAGLIA"
+
+#. Time — medal reached (GOLD/SILVER/BRONZE/NO MEDAL).
+#: scenes/race/race.gd:934
+msgid "TIME TRIAL — %s — %s"
+msgstr "PROVA A TEMPO — %s — %s"
+
+#: scenes/race/race.gd:935
+msgid "NEW GHOST"
+msgstr "NUOVO FANTASMA"
+
+#. Both the medal and the hardest rivals level.
+#: scenes/cars/ai_skill/ai_skill.gd:111
+#: scenes/race/race.gd:942
+#: scenes/race/race.gd:956
+#: scenes/ui/career_panel.gd:310
+msgid "GOLD"
+msgstr "ORO"
+
+#. Both the medal and the medium rivals level.
+#: scenes/cars/ai_skill/ai_skill.gd:111
+#: scenes/race/race.gd:943
+#: scenes/race/race.gd:957
+#: scenes/ui/career_panel.gd:311
+msgid "SILVER"
+msgstr "ARGENTO"
+
+#. Both the medal and the easiest rivals level.
+#: scenes/cars/ai_skill/ai_skill.gd:111
+#: scenes/race/race.gd:944
+#: scenes/race/race.gd:958
+#: scenes/ui/career_panel.gd:312
+msgid "BRONZE"
+msgstr "BRONZO"
+
+#. %s = ordinal (1st..6th) in capitals, %d = points. Japanese: the ordinal 1位 already says "place".
+#: scenes/race/race.gd:966
+msgid "%s PLACE +%d"
+msgstr "%s POSTO +%d"
+
+#: scenes/race/race.gd:971
+msgid "%s  =  %d PTS"
+msgstr "%s  =  %d PT"
+
+#: scenes/race/race.gd:1009
+msgid "%d point"
+msgid_plural "%d points"
+msgstr[0] "%d punto"
+msgstr[1] "%d punti"
+
+#. Cup name, then the pilot who won it.
+#: scenes/race/race.gd:1014
+msgid "%s WINNER: %s!"
+msgstr "%s — VINCITORE: %s!"
+
+#: scenes/race/race.gd:1018
+msgid "PLAY AGAIN"
+msgstr "GIOCA ANCORA"
+
+#. The player's name in the results table.
+#: scenes/race/race.gd:1179
+msgid "You"
+msgstr "Tu"
+
+#. Rival pilot's name: keep it, only transliterate where the script differs.
+#: scenes/race/race.gd:17
+msgid "Robo"
+msgstr "Robo"
+
+#. Rival pilot's name: keep it, only transliterate where the script differs.
+#: scenes/race/race.gd:17
+msgid "Vex"
+msgstr "Vex"
+
+#. Rival pilot's name: keep it, only transliterate where the script differs.
+#: scenes/race/race.gd:17
+msgid "Luna"
+msgstr "Luna"
+
+#. Rival pilot's name: keep it, only transliterate where the script differs.
+#: scenes/race/race.gd:17
+msgid "Kai"
+msgstr "Kai"
+
+#. Rival pilot's name: keep it, only transliterate where the script differs.
+#: scenes/race/race.gd:17
+msgid "Nyx"
+msgstr "Nyx"
+
+#: scenes/ui/career_panel.gd:47
+msgid "CHOOSE A WORLD"
+msgstr "SCEGLI UN MONDO"
+
+#: scenes/ui/career_panel.gd:99
+msgid "POINTS  %d / %d"
+msgstr "PUNTI  %d / %d"
+
+#: scenes/ui/career_panel.gd:148
+msgid "FREE"
+msgstr "GRATIS"
+
+#. A locked career world and the points still needed to open it.
+#: scenes/ui/career_panel.gd:188
+msgid "SEALED — %d MORE POINT"
+msgid_plural "SEALED — %d MORE POINTS"
+msgstr[0] "SIGILLATO — MANCA %d PUNTO"
+msgstr[1] "SIGILLATO — MANCANO %d PUNTI"
+
+#. Both the career race button and the small caption above a track's best race time.
+#: scenes/ui/career_panel.gd:252
+#: scenes/ui/track_card.gd:183
+msgid "RACE"
+msgstr "GARA"
+
+#. %s = best place (1ST PLACE / NO PODIUM YET), then points earned / points possible.
+#: scenes/ui/career_panel.gd:252
+msgid "%s  ·  %d / %d PTS"
+msgstr "%s  ·  %d / %d PT"
+
+#. %s = challenge title.
+#: scenes/ui/career_panel.gd:266
+msgid "BONUS +%d  ·  %s"
+msgstr "BONUS +%d  ·  %s"
+
+#: scenes/ui/career_panel.gd:268
+msgid "DONE"
+msgstr "FATTO"
+
+#: scenes/ui/career_panel.gd:275
+msgid "NO TIME YET"
+msgstr "ANCORA NESSUN TEMPO"
+
+#. Best time · medal.
+#: scenes/ui/career_panel.gd:277
+msgid "BEST %s · %s"
+msgstr "MIGLIORE %s · %s"
+
+#: scenes/ui/career_panel.gd:282
+msgid "GHOST"
+msgstr "FANTASMA"
+
+#: scenes/ui/career_panel.gd:284
+msgid "(no targets yet)"
+msgstr "(ancora nessun obiettivo)"
+
+#: scenes/ui/career_panel.gd:285
+msgid "TIME TRIAL"
+msgstr "PROVA A TEMPO"
+
+#: scenes/ui/career_panel.gd:320
+msgid "1ST PLACE"
+msgstr "1º POSTO"
+
+#: scenes/ui/career_panel.gd:321
+msgid "2ND PLACE"
+msgstr "2º POSTO"
+
+#: scenes/ui/career_panel.gd:322
+msgid "3RD PLACE"
+msgstr "3º POSTO"
+
+#: scenes/ui/career_panel.gd:323
+msgid "NO PODIUM YET"
+msgstr "ANCORA NESSUN PODIO"
+
+#. Career: cars earned / cars in the garage.
+#: scenes/ui/career_panel.gd:101
+msgid "CARS  %d / %d"
+msgstr "AUTO  %d / %d"
+
+#: scenes/ui/career_panel.gd:128
+msgid "ALL CARS EARNED"
+msgstr "TUTTE LE AUTO VINTE"
+
+#. %s = car name in capitals, %d = career points still missing.
+#: scenes/ui/career_panel.gd:131
+msgid "NEXT CAR  %s  ·  %d MORE POINT"
+msgid_plural "NEXT CAR  %s  ·  %d MORE POINTS"
+msgstr[0] "PROSSIMA AUTO  %s  ·  MANCA %d PUNTO"
+msgstr[1] "PROSSIMA AUTO  %s  ·  MANCANO %d PUNTI"
+
+#. Results screen, one line per car just earned in the career.
+#: scenes/race/race.gd:922
+msgid "NEW CAR: %s"
+msgstr "NUOVA AUTO: %s"
+
+#. Garage SELECT button on a car not earned yet. One line, it must not widen the button.
+#: scenes/ui/garage_panel.gd:487
+msgid "CAREER: LOCKED"
+msgstr "CARRIERA: BLOCCATA"
+
+#. Garage SELECT button on a locked car: career points still missing. One line.
+#: scenes/ui/garage_panel.gd:488
+msgid "CAREER: %d MORE PT"
+msgid_plural "CAREER: %d MORE PTS"
+msgstr[0] "CARRIERA: MANCA %d PT"
+msgstr[1] "CARRIERA: MANCANO %d PT"
+
+#: scenes/ui/world_cup_panel.gd:31
+msgid "CHOOSE A CUP"
+msgstr "SCEGLI UNA COPPA"
+
+#: scenes/ui/world_cup_panel.gd:48
+msgid "POINTS PER RACE  6 · 5 · 4 · 3 · 2 · 1"
+msgstr "PUNTI PER GARA  6 · 5 · 4 · 3 · 2 · 1"
+
+#. Rule: in one cup no two cars on the grid are the same model.
+#: scenes/ui/world_cup_panel.gd:49
+msgid "NEW RIVALS EVERY CUP, NEVER THE SAME CAR TWICE"
+msgstr "RIVALI NUOVI A OGNI COPPA, MAI DUE AUTO UGUALI"
+
+#: scenes/ui/world_cup_panel.gd:84
+msgid "%d RACE"
+msgid_plural "%d RACES"
+msgstr[0] "%d GARA"
+msgstr[1] "%d GARE"
+
+#. Button that starts a cup.
+#: scenes/ui/world_cup_panel.gd:178
+msgid "START"
+msgstr "INIZIA"
+
+#: scenes/ui/track_select_panel.gd:122
+msgid "CHOOSE A TRACK"
+msgstr "SCEGLI UNA PISTA"
+
+#. Small caption above a track's best lap time.
+#: scenes/ui/track_card.gd:182
+msgid "LAP"
+msgstr "GIRO"
+
+#: scenes/ui/ai_skill_selector.gd:37
+msgid "RIVALS"
+msgstr "RIVALI"
+
+#: scenes/ui/ai_skill_selector.gd:20
+msgid "Relaxed rivals: they brake early and make mistakes."
+msgstr "Rivali tranquilli: frenano presto e sbagliano."
+
+#: scenes/ui/ai_skill_selector.gd:21
+msgid "Solid rivals: clean lines, the occasional slip."
+msgstr "Rivali solidi: traiettorie pulite, qualche sbavatura."
+
+#: scenes/ui/ai_skill_selector.gd:22
+msgid "Flat out: they use every bit of their car."
+msgstr "A tutta: spremono la loro auto fino in fondo."
+
+#: scenes/ui/garage_panel.gd:234
+#: scenes/ui/garage_panel.gd:481
+msgid "SELECT"
+msgstr "SCEGLI"
+
+#. The toy figure sitting in the car (a skin).
+#: scenes/ui/garage_panel.gd:290
+msgid "DRIVER"
+msgstr "PILOTA"
+
+#: scenes/ui/garage_panel.gd:223
+msgid "SPEED"
+msgstr "VELOCITÀ"
+
+#. Acceleration, abbreviated.
+#: scenes/ui/garage_panel.gd:223
+msgid "ACCEL"
+msgstr "ACCEL."
+
+#: scenes/ui/garage_panel.gd:223
+msgid "GRIP"
+msgstr "ADERENZA"
+
+#. Car weight: decides who pushes whom.
+#: scenes/ui/garage_panel.gd:709
+msgid "MASS"
+msgstr "PESO"
+
+#. Weight value; agree with the word for MASS.
+#: scenes/ui/garage_panel.gd:588
+msgid "LIGHT"
+msgstr "LEGGERO"
+
+#. Weight value; agree with the word for MASS.
+#: scenes/ui/garage_panel.gd:591
+msgid "MEDIUM"
+msgstr "MEDIO"
+
+#. Weight value; agree with the word for MASS.
+#: scenes/ui/garage_panel.gd:590
+msgid "HEAVY"
+msgstr "PESANTE"
+
+#. Car name (garage card, results).
+#: scenes/cars/data/muscle.tres:10
+msgid "Muscle"
+msgstr "Muscle"
+
+#. Car name (garage card, results).
+#: scenes/cars/data/police_sports.tres:10
+msgid "Police"
+msgstr "Polizia"
+
+#. Car name (garage card, results).
+#: scenes/cars/data/taxi.tres:10
+msgid "Taxi"
+msgstr "Taxi"
+
+#. Car name (garage card, results).
+#: scenes/cars/data/bus.tres:10
+#: scenes/props/world_prop.gd:1265
+msgid "Bus"
+msgstr "Autobus"
+
+#. Car name (garage card, results).
+#: scenes/cars/data/firetruck.tres:10
+msgid "Fire Truck"
+msgstr "Pompieri"
+
+#. Car name (garage card, results).
+#: scenes/cars/data/buggy.tres:10
+msgid "Buggy"
+msgstr "Buggy"
+
+#. Car name (garage card, results).
+#: scenes/cars/data/ambulance.tres:10
+msgid "Ambulance"
+msgstr "Ambulanza"
+
+#. Car name (garage card, results).
+#: scenes/cars/data/hotrod.tres:10
+msgid "Hot rod"
+msgstr "Hot rod"
+
+#. Car name (garage card, results).
+#: scenes/cars/data/monster.tres:10
+msgid "Monster"
+msgstr "Monster"
+
+#. Car name (garage card, results).
+#: scenes/cars/data/tow_truck.tres:10
+msgid "Tow Truck"
+msgstr "Carro attrezzi"
+
+#. Driver skin name (the colour of the toy figure).
+#: scenes/cars/data/drivers/driver_blue.tres:9
+msgid "Blue"
+msgstr "Blu"
+
+#. Driver skin name (the colour of the toy figure).
+#: scenes/cars/data/drivers/driver_red.tres:9
+msgid "Red"
+msgstr "Rosso"
+
+#. Driver skin name (the colour of the toy figure).
+#: scenes/cars/data/drivers/driver_yellow.tres:9
+msgid "Yellow"
+msgstr "Giallo"
+
+#. Driver skin name (the colour of the toy figure).
+#: scenes/cars/data/drivers/driver_green.tres:9
+msgid "Green"
+msgstr "Verde"
+
+#: scenes/ui/credits_panel.gd:66
+msgid "CREDITS"
+msgstr "CREDITI"
+
+#: scenes/ui/credits_panel.gd:66
+msgid "LICENSES & THANKS"
+msgstr "LICENZE E RINGRAZIAMENTI"
+
+#. %s = licence identifier (MIT, OFL-1.1...), never translated.
+#: scenes/ui/credits_panel.gd:238
+#: scenes/ui/credits_panel.gd:253
+msgid "SHOW  %s"
+msgstr "MOSTRA  %s"
+
+#. %s = licence identifier, never translated.
+#: scenes/ui/credits_panel.gd:253
+msgid "HIDE  %s"
+msgstr "NASCONDI  %s"
+
+#: scenes/ui/loading_screen.gd:269
+msgid "TRACK"
+msgstr "PISTA"
+
+#: scenes/ui/loading_screen.gd:58
+msgid "Hold TURBO in the last second of the countdown for a rocket start."
+msgstr "Tieni premuto TURBO nell'ultimo secondo del conto alla rovescia per una partenza a razzo."
+
+#: scenes/ui/loading_screen.gd:59
+msgid "Drifting fills the turbo bar much faster than driving straight."
+msgstr "Derapare riempie la barra del turbo molto più in fretta che andare dritti."
+
+#: scenes/ui/loading_screen.gd:60
+msgid "Turbo is yours to spend: save it for a long straight or right before a jump."
+msgstr "Il turbo lo usi quando vuoi: tienilo per un lungo rettilineo o subito prima di un salto."
+
+#: scenes/ui/loading_screen.gd:61
+msgid "Heavy cars push, light cars fly. Pick your fights wisely."
+msgstr "Le auto pesanti spingono, quelle leggere volano. Scegli bene le tue battaglie."
+
+#: scenes/ui/loading_screen.gd:62
+msgid "Grass slows you down, but some shortcuts are still worth the risk."
+msgstr "L'erba ti rallenta, ma certe scorciatoie valgono comunque il rischio."
+
+#. Position pop-up after an overtake (P3 = 3rd place).
+#: scenes/ui/position_popup.gd:61
+msgid "P%d"
+msgstr "P%d"
+
+#: scenes/race/tutorial/tutorial_config.gd:49
+msgid "TUTORIAL"
+msgstr "TUTORIAL"
+
+#: scenes/race/tutorial/tutorial_config.gd:50
+msgid "Follow the hints.\nEach one goes away once you've done it."
+msgstr "Segui i suggerimenti.\nOgnuno sparisce appena l'hai fatto."
+
+#: scenes/race/tutorial/tutorial_config.gd:51
+msgid "STEER"
+msgstr "STERZARE"
+
+#. Touch screen: the two steering buttons are arrows.
+#: scenes/race/tutorial/tutorial_config.gd:52
+msgid "Hold the LEFT and the RIGHT arrow"
+msgstr "Tieni premuta la freccia SINISTRA e quella DESTRA"
+
+#. Keyboard. {steer_left} etc. are replaced with key names: keep them exactly.
+#: scenes/race/tutorial/tutorial_config.gd:53
+msgid "Hold {steer_left} and {steer_right} to steer"
+msgstr "Tieni premuto {steer_left} e {steer_right} per sterzare"
+
+#: scenes/race/tutorial/tutorial_config.gd:54
+msgid "GAS"
+msgstr "GAS"
+
+#: scenes/race/tutorial/tutorial_config.gd:55
+msgid "Hold the green arrow to drive"
+msgstr "Tieni premuta la freccia verde per partire"
+
+#: scenes/race/tutorial/tutorial_config.gd:56
+msgid "Hold {accelerate} to drive"
+msgstr "Tieni premuto {accelerate} per partire"
+
+#: scenes/race/tutorial/tutorial_config.gd:57
+msgid "DRIFT"
+msgstr "DERAPATA"
+
+#: scenes/race/tutorial/tutorial_config.gd:58
+msgid "Hold DRIFT while you turn.\nDrifting fills the turbo bar fast!"
+msgstr "Tieni premuto DERAPATA mentre sterzi.\nDerapare riempie in fretta la barra del turbo!"
+
+#: scenes/race/tutorial/tutorial_config.gd:59
+msgid "Hold {drift} while you turn.\nDrifting fills the turbo bar fast!"
+msgstr "Tieni premuto {drift} mentre sterzi.\nDerapare riempie in fretta la barra del turbo!"
+
+#: scenes/race/tutorial/tutorial_config.gd:60
+msgid "Faster! You need speed to drift"
+msgstr "Più veloce! Ti serve velocità per derapare"
+
+#: scenes/race/tutorial/tutorial_config.gd:61
+msgid "Now turn while you hold it"
+msgstr "Ora sterza tenendolo premuto"
+
+#: scenes/race/tutorial/tutorial_config.gd:62
+msgid "TURBO"
+msgstr "TURBO"
+
+#: scenes/race/tutorial/tutorial_config.gd:63
+msgid "Hold TURBO (the flame) to burn the bar"
+msgstr "Tieni premuto TURBO (la fiamma) per bruciare la barra"
+
+#: scenes/race/tutorial/tutorial_config.gd:64
+msgid "Hold {turbo} to burn the bar"
+msgstr "Tieni premuto {turbo} per bruciare la barra"
+
+#: scenes/race/tutorial/tutorial_config.gd:65
+msgid "Bar empty: drift to fill it"
+msgstr "Barra vuota: fai una derapata per riempirla"
+
+#: scenes/race/tutorial/tutorial_config.gd:66
+msgid "YOU'RE READY!"
+msgstr "SEI PRONTO!"
+
+#: scenes/race/tutorial/tutorial_config.gd:67
+msgid "Drift fills the bar. TURBO burns it, you pick the moment.\nTIP: hold TURBO as the countdown ends for a ROCKET START."
+msgstr "La derapata riempie la barra. TURBO la brucia, il momento lo scegli tu.\nCONSIGLIO: tieni premuto TURBO alla fine del conto alla rovescia per una PARTENZA A RAZZO."
+
+#: scenes/race/tutorial/tutorial_config.gd:68
+#: scenes/ui/tutorial_overlay.gd:110
+msgid "SKIP TUTORIAL"
+msgstr "SALTA IL TUTORIAL"
+
+#: scenes/race/tutorial/tutorial_config.gd:69
+#: scenes/ui/tutorial_overlay.gd:113
+msgid "CONTINUE"
+msgstr "CONTINUA"
+
+#: scenes/race/tutorial/tutorial_config.gd:72
+msgid "FIRST TIME HERE?"
+msgstr "PRIMA VOLTA QUI?"
+
+#: scenes/race/tutorial/tutorial_config.gd:73
+msgid "Take a one-minute test drive:\nsteering, gas, drift and turbo."
+msgstr "Fai un giro di prova di un minuto:\nsterzo, gas, derapata e turbo."
+
+#: scenes/race/tutorial/tutorial_config.gd:74
+msgid "TEST DRIVE"
+msgstr "GIRO DI PROVA"
+
+#: scenes/race/tutorial/tutorial_config.gd:75
+msgid "SKIP"
+msgstr "SALTA"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track01.tres:8
+msgid "The Dunes"
+msgstr "Le Dune"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track08.tres:8
+#: scenes/tracks/info/Track20.tres:8
+#: scripts/autoload/game_state.gd:135
+#: scripts/save_schema.gd:93
+msgid "Okinawa"
+msgstr "Okinawa"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track09.tres:8
+msgid "The Alps"
+msgstr "Le Alpi"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track10.tres:8
+#: scripts/autoload/game_state.gd:133
+#: scripts/save_schema.gd:83
+msgid "Baikal"
+msgstr "Bajkal"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track11.tres:8
+#: scripts/autoload/game_state.gd:133
+#: scripts/save_schema.gd:84
+msgid "Stromboli"
+msgstr "Stromboli"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track12.tres:8
+#: scripts/autoload/game_state.gd:134
+#: scripts/save_schema.gd:85
+msgid "Chongqing"
+msgstr "Chongqing"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track13.tres:8
+#: scripts/autoload/game_state.gd:134
+#: scripts/save_schema.gd:86
+msgid "Cappadocia"
+msgstr "Cappadocia"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track14.tres:8
+#: scripts/autoload/game_state.gd:134
+#: scripts/save_schema.gd:87
+msgid "Serengeti"
+msgstr "Serengeti"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track15.tres:8
+#: scripts/autoload/game_state.gd:134
+#: scripts/save_schema.gd:88
+msgid "Machu Picchu"
+msgstr "Machu Picchu"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track16.tres:8
+#: scripts/autoload/game_state.gd:134
+#: scripts/save_schema.gd:89
+msgid "Fiordland"
+msgstr "Fiordland"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track17.tres:8
+#: scripts/autoload/game_state.gd:135
+#: scripts/save_schema.gd:90
+msgid "Jodhpur"
+msgstr "Jodhpur"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track18.tres:8
+#: scripts/autoload/game_state.gd:135
+#: scripts/save_schema.gd:91
+msgid "Kyoto"
+msgstr "Kyoto"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track19.tres:8
+#: scripts/autoload/game_state.gd:135
+#: scripts/save_schema.gd:92
+msgid "Monument Valley"
+msgstr "Monument Valley"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track21.tres:8
+#: scripts/autoload/game_state.gd:133
+#: scripts/save_schema.gd:82
+msgid "Transfagarasan"
+msgstr "Transfagarasan"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track22.tres:8
+#: scripts/autoload/game_state.gd:135
+#: scripts/save_schema.gd:94
+msgid "Ha Long"
+msgstr "Ha Long"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track23.tres:8
+#: scripts/autoload/game_state.gd:135
+#: scripts/save_schema.gd:95
+msgid "Carrara"
+msgstr "Carrara"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track24.tres:8
+#: scripts/autoload/game_state.gd:136
+#: scripts/save_schema.gd:96
+msgid "Angkor"
+msgstr "Angkor"
+
+#. Track name (place). Use the language's usual name for the place.
+#: scenes/tracks/info/Track25.tres:8
+#: scripts/autoload/game_state.gd:136
+msgid "San Francisco"
+msgstr "San Francisco"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track01.tres:9
+msgid "DESERT"
+msgstr "DESERTO"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track08.tres:9
+#: scenes/tracks/info/Track18.tres:9
+#: scenes/tracks/info/Track20.tres:9
+msgid "JAPAN"
+msgstr "GIAPPONE"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track09.tres:9
+#: scenes/tracks/info/Track21.tres:9
+msgid "EUROPE"
+msgstr "EUROPA"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track10.tres:9
+msgid "RUSSIA"
+msgstr "RUSSIA"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track11.tres:9
+#: scenes/tracks/info/Track23.tres:9
+msgid "ITALY"
+msgstr "ITALIA"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track12.tres:9
+msgid "CHINA"
+msgstr "CINA"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track13.tres:9
+msgid "TURKEY"
+msgstr "TURCHIA"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track14.tres:9
+msgid "TANZANIA"
+msgstr "TANZANIA"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track15.tres:9
+msgid "PERU"
+msgstr "PERÙ"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track16.tres:9
+msgid "NEW ZEALAND"
+msgstr "NUOVA ZELANDA"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track17.tres:9
+msgid "INDIA"
+msgstr "INDIA"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track19.tres:9
+#: scenes/tracks/info/Track25.tres:9
+msgid "USA"
+msgstr "USA"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track22.tres:9
+msgid "ASIA"
+msgstr "ASIA"
+
+#. Track region (country or area), in capitals.
+#: scenes/tracks/info/Track24.tres:9
+msgid "CAMBODIA"
+msgstr "CAMBOGIA"
+
+#. World Cup cup name. FRONTIER = wild, far-away lands; WONDERS = wonders of the world (Ha Long, Carrara, San Francisco, Angkor).
+#: scenes/world_cup/data/asia_cup.tres:8
+msgid "ASIA CUP"
+msgstr "COPPA D'ASIA"
+
+#. World Cup cup name. FRONTIER = wild, far-away lands; WONDERS = wonders of the world (Ha Long, Carrara, San Francisco, Angkor).
+#: scenes/world_cup/data/europe_cup.tres:8
+msgid "EUROPE CUP"
+msgstr "COPPA EUROPA"
+
+#. World Cup cup name. FRONTIER = wild, far-away lands; WONDERS = wonders of the world (Ha Long, Carrara, San Francisco, Angkor).
+#: scenes/world_cup/data/frontier_cup.tres:8
+msgid "FRONTIER CUP"
+msgstr "COPPA FRONTIERA"
+
+#. World Cup cup name. FRONTIER = wild, far-away lands; WONDERS = wonders of the world (Ha Long, Carrara, San Francisco, Angkor).
+#: scenes/world_cup/data/wonders_cup.tres:8
+msgid "WONDERS CUP"
+msgstr "COPPA MERAVIGLIE"
+
+#. Career world (a group of four tracks).
+#: scenes/career/data/world_1.tres:8
+msgid "WORLD 1"
+msgstr "MONDO 1"
+
+#. Career world (a group of four tracks).
+#: scenes/career/data/world_2.tres:8
+msgid "WORLD 2"
+msgstr "MONDO 2"
+
+#. Career world (a group of four tracks).
+#: scenes/career/data/world_3.tres:8
+msgid "WORLD 3"
+msgstr "MONDO 3"
+
+#. Career world (a group of four tracks).
+#: scenes/career/data/world_4.tres:8
+msgid "WORLD 4"
+msgstr "MONDO 4"
+
+#. HUD line above the turbo bar in a career race. %d = bonus points, %s = bonus title.
+#: scenes/ui/hud.gd:885
+msgid "BONUS +%d: %s"
+msgstr "BONUS +%d: %s"
+
+#. The career bonus was lost (ejected, or RESET pressed).
+#: scenes/race/race.gd:797
+#: scenes/ui/hud.gd:893
+msgid "BONUS LOST"
+msgstr "BONUS PERSO"
+
+#. Career bonus title (+1 on every track), in capitals: finish without
+#. being ejected and without pressing RESET.
+#: scenes/career/career_config.gd:10
+msgid "NO RETRY"
+msgstr "SENZA RIPROVE"
+
+#. Career bonus hint, as a sentence. RESET is the in-race button "↺  RESET":
+#. use its translation.
+#: scenes/career/career_config.gd:11
+msgid "Finish without an eject or a RESET."
+msgstr "Finisci senza essere sbalzato fuori né usare RIPOSIZIONA."
+
+#. World Cup: button that deletes the saved cup on this AI level (asks SURE? first).
+#: scenes/ui/world_cup_panel.gd:34
+msgid "RESET"
+msgstr "CANCELLA"
+
+#. World Cup: the RESET button asking for a second tap. Very short.
+#: scenes/ui/world_cup_panel.gd:35
+msgid "SURE?"
+msgstr "SICURO?"
+
+#. World Cup: other AI levels with a saved cup. %s = level names (BRONZE, GOLD).
+#: scenes/ui/world_cup_panel.gd:37
+msgid "ALSO IN PROGRESS: %s"
+msgstr "ANCHE IN CORSO: %s"
+
+#. World Cup saved cup: next race / races, player's place (2ND), points,
+#. the player's car name.
+#: scenes/ui/world_cup_panel.gd:317
+msgid "RACE %d / %d  ·  %s  ·  %d PTS  ·  %s"
+msgstr "GARA %d / %d  ·  %s  ·  %d PTI  ·  %s"
+

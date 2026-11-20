@@ -123,8 +123,8 @@ func _test_impact_matrix() -> void:
 					loss_by_car[key] = r.loss_pct
 	_check(not any_race_flip, "nicio masina de cursa nu se rastoarna la impact")
 	# Tintele explicite ale brief-ului, la 30 m/s bot-in-spate.
-	var sport_loss: float = float(loss_by_car.get("Politia|bot-spate", -1.0))
-	var bus_loss: float = float(loss_by_car.get("Autobuzul|bot-spate", -1.0))
+	var sport_loss: float = float(loss_by_car.get("Police|bot-spate", -1.0))
+	var bus_loss: float = float(loss_by_car.get("Bus|bot-spate", -1.0))
 	if sport_loss >= 0.0:
 		_check(sport_loss <= 25.0,
 			"Politia pierde <= 25%% la 30 m/s bot-in-spate (masurat %.1f%%)" % sport_loss)

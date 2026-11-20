@@ -12,7 +12,12 @@ const ImpactSoundScript := preload("res://scenes/race/impact_sound.gd")
 const RocketStartAudioScript := preload("res://scenes/race/rocket_start_audio.gd")
 const SpeedLinesScript := preload("res://scenes/ui/speed_lines.gd")
 ## Pilotii sunt stabili intre curse (punctele de campionat raman pe slot).
+## Numele de aici sunt INTERNE (jurnalele AI-ului, samanta `_exc_rng` din
+## AIController le folosesc); pe ecran ajung prin `pilot_label`, tradus.
 const PILOTS: Array[String] = ["Tu", "Robo", "Vex", "Luna", "Kai", "Nyx"]
+## Locurile 1-6 ca texte INTREGI de tradus (nu sufix lipit): in franceza „1re",
+## in japoneza „1位". Grila are cel mult 6 masini.
+const ORDINALS: Array[String] = ["1st", "2nd", "3rd", "4th", "5th", "6th"]
 ## Lineup-ul AI: masina (index in GameState.CAR_DATA) + culoarea per slot.
 ##
 ## Garajul are 4 masini non-player, iar adversarii sunt 5: ultimul repeta un
@@ -769,7 +774,7 @@ func _on_player_lap(laps: int) -> void:
 		# Recordurile din GameState sunt ale cursei normale; cu rezervor sigilat
 		# regula e alta si timpii nu sunt comparabili, deci nu se scriu.
 		if not Career.is_time_trial() and GameState.try_record(GameState.selected_track, lap_ms):
-			hud.flash_message("NEW LAP RECORD! " + _fmt_ms(lap_ms))
+			hud.flash_message(tr("NEW LAP RECORD! %s") % _fmt_ms(lap_ms))
 			AudioManager.play_sfx(&"drift_level", 1.5)
 		lap_completed.emit(laps, lap_ms)
 	_lap_start_ms = now
@@ -819,12 +824,18 @@ func _take_bonus_announcement() -> bool:
 	return true
 
 
+## Doua randuri, fiecare tradus intreg (nu bucati dintr-o fraza).
 static func eject_flash_text(bonus_lost_now: bool) -> String:
-	return "EJECTED!" + ("\n" + BONUS_LOST_TEXT if bonus_lost_now else "")
+	return _t("EJECTED!") + ("\n" + _t(BONUS_LOST_TEXT) if bonus_lost_now else "")
 
 
 static func respawn_flash_text(bonus_note: bool) -> String:
-	return RESPAWN_TEXT + ("\n" + BONUS_LOST_TEXT if bonus_note else "")
+	return _t(RESPAWN_TEXT) + ("\n" + _t(BONUS_LOST_TEXT) if bonus_note else "")
+
+
+## `tr()` pentru functiile statice (n-au obiect).
+static func _t(text: String) -> String:
+	return String(TranslationServer.translate(text))
 
 
 var _ghost_recorder: GhostRecorder
@@ -889,11 +900,11 @@ func _finish_race() -> void:
 		# ecranul de rezultate poate fi ultimul lucru pe care il vede aplicatia.
 		GameState.champ_save_progress()
 	if _race_record_new:
-		hud.flash_message("FINISH — %s place!\nRACE RECORD %s" % [
-			_ordinal(player.race_position), _fmt_ms(_player_race_ms)])
+		hud.flash_message(tr("FINISH — %s place!") % _ordinal(player.race_position)
+			+ "\n" + tr("RACE RECORD %s") % _fmt_ms(_player_race_ms))
 		AudioManager.play_sfx(&"drift_level", 1.5)
 	else:
-		hud.flash_message("FINISH — %s place!" % _ordinal(player.race_position))
+		hud.flash_message(tr("FINISH — %s place!") % _ordinal(player.race_position))
 	get_tree().create_timer(1.5, false).timeout.connect(_show_results)
 	race_finished.emit(player.race_position, _player_race_ms)
 
@@ -907,19 +918,19 @@ func _show_results() -> void:
 			# Sub baremul de puncte nu se mai da nimic — vezi record_results.
 			var gained: int = GameState.CHAMP_POINTS[rank] \
 				if rank < GameState.CHAMP_POINTS.size() else 0
-			right = "+%d pts  (total %d)" % [gained, GameState.champ_points[slot]]
+			right = tr("+%d pts  (total %d)") % [gained, GameState.champ_points[slot]]
 		# Timpul tau pe toata cursa, si daca e record pe pista (#498).
 		if car.is_player and _player_race_ms >= 0:
 			var time_text := _fmt_ms(_player_race_ms) \
-				+ ("  RECORD!" if _race_record_new else "")
+				+ ("  " + tr("RECORD!") if _race_record_new else "")
 			right = time_text if right == "" else right + "   " + time_text
 		rows.append({
-			"name": "%d. %s (%s)" % [rank + 1, car.pilot_name, car.car_name],
+			"name": "%d. %s (%s)" % [rank + 1, pilot_label(car), tr(car.car_name)],
 			"color": car.body_color,
 			"right": right,
 			"is_player": car.is_player,
 		})
-	var title := "RESULTS — " + _track_title()
+	var title := tr("RESULTS — %s") % _track_title()
 	var primary := "RESTART"
 	var banner := ""
 	if Career.is_time_trial():
@@ -932,31 +943,32 @@ func _show_results() -> void:
 		# Masinile castigate de cursa asta (zavorate de finish_active).
 		banner = new_cars_text(Career.last_unlocked_cars)
 	if GameState.champ_active:
-		title = "%s — RACE %d/%d — %s" % [GameState.champ_cup.display_name,
+		title = tr("%s — RACE %d/%d — %s") % [tr(GameState.champ_cup.display_name),
 			GameState.champ_round + 1, GameState.champ_rounds(), _track_title()]
 		primary = "FINAL STANDINGS" if GameState.champ_is_last_round() \
 			else "NEXT RACE"
 	hud.show_results(title, rows, primary, banner)
 
 
-## „NEW CAR: POLITIA", cate un rand per masina castigata (o cursa poate trece
-## doua praguri odata). Gol cand n-a castigat nimic.
+## „NEW CAR: POLICE", cate un rand per masina castigata (o cursa poate trece
+## doua praguri odata). Gol cand n-a castigat nimic. Tradus (sablon + nume).
 static func new_cars_text(car_ids: Array[StringName]) -> String:
 	var lines := PackedStringArray()
 	for car_id in car_ids:
-		lines.append("NEW CAR: %s" % Career.car_display_name(car_id).to_upper())
+		lines.append(String(TranslationServer.translate("NEW CAR: %s")) % String(
+			TranslationServer.translate(Career.car_display_name(car_id))).to_upper())
 	return "\n".join(lines)
 
 ## Titlul: TIME TRIAL - 3:12.4 - SILVER, sau NO TARGET YET (pista n-are
 ## tinte) / NO MEDAL (peste bronz).
 func _time_trial_title() -> String:
 	var info := TrackInfo.for_track(GameState.selected_track)
-	var verdict := "NO TARGET YET"
+	var verdict := tr("NO TARGET YET")
 	if info.has_targets():
 		verdict = _career_medal_text(_career_medal) if _career_medal > 0 \
-			else "NO MEDAL"
-	return "TIME TRIAL — %s — %s%s" % [_fmt_ms(_player_race_ms), verdict,
-		" · NEW GHOST" if _ghost_saved else ""]
+			else tr("NO MEDAL")
+	return tr("TIME TRIAL — %s — %s") % [_fmt_ms(_player_race_ms), verdict] \
+		+ (" · " + tr("NEW GHOST") if _ghost_saved else "")
 
 
 ## Cele trei tinte sub randul jucatorului: `right` = timpul tinta,
@@ -967,7 +979,7 @@ func _append_time_trial_targets(rows: Array[Dictionary]) -> void:
 			["SILVER", info.tt_silver_ms, CareerPanel.SILVER],
 			["BRONZE", info.tt_bronze_ms, CareerPanel.BRONZE]]:
 		rows.append({
-			"name": entry[0],
+			"name": tr(entry[0]),
 			"color": entry[2],
 			"right": _fmt_ms(int(entry[1])) if int(entry[1]) > 0 else "--",
 			"is_player": false,
@@ -977,22 +989,22 @@ func _append_time_trial_targets(rows: Array[Dictionary]) -> void:
 ## Contratimp: culoarea tintei atinse.
 func _career_medal_text(medal: int) -> String:
 	match medal:
-		Career.MEDAL_GOLD: return "GOLD"
-		Career.MEDAL_SILVER: return "SILVER"
-		Career.MEDAL_BRONZE: return "BRONZE"
-	return "NO MEDAL"
+		Career.MEDAL_GOLD: return tr("GOLD")
+		Career.MEDAL_SILVER: return tr("SILVER")
+		Career.MEDAL_BRONZE: return tr("BRONZE")
+	return tr("NO MEDAL")
 
 
 ## Cursa de cariera: „1ST PLACE +3  ·  NO RETRY +1  =  4 PTS", sau
 ## „1ST PLACE +3  ·  BONUS LOST  =  3 PTS". Sub podium locul da +0. Spune ce a
 ## facut cursa asta, nu cat e pe raft (asta o spune raftul).
 func _career_points_text() -> String:
-	var text := "%s PLACE +%d" % [_ordinal(player.race_position).to_upper(),
+	var text := tr("%s PLACE +%d") % [_ordinal(player.race_position).to_upper(),
 		maxi(_career_medal, 0)]
 	if _bonus_tracker != null:
-		text += "  ·  " + ("%s +%d" % [Career.config.bonus_title, Career.BONUS_POINTS]
-			if _bonus_kept else BONUS_LOST_TEXT)
-	return "%s  =  %d PTS" % [text, _career_points]
+		text += "  ·  " + (tr(Career.config.bonus_title) + " +%d" % Career.BONUS_POINTS
+			if _bonus_kept else tr(BONUS_LOST_TEXT))
+	return tr("%s  =  %d PTS") % [text, _career_points]
 
 func _on_results_primary() -> void:
 	if Career.active:
@@ -1028,14 +1040,15 @@ func _show_champion() -> void:
 		var slot: int = slots[rank]
 		var car := cars[slot]
 		rows.append({
-			"name": "%d. %s (%s)" % [rank + 1, car.pilot_name, car.car_name],
+			"name": "%d. %s (%s)" % [rank + 1, pilot_label(car), tr(car.car_name)],
 			"color": car.body_color,
-			"right": "%d points" % GameState.champ_points[slot],
+			"right": tr_n("%d point", "%d points", GameState.champ_points[slot]) \
+				% GameState.champ_points[slot],
 			"is_player": car.is_player,
 		})
 	var champion := cars[slots[0]]
-	var title := "%s WINNER: %s!" % [GameState.champ_cup.display_name,
-		champion.pilot_name]
+	var title := tr("%s WINNER: %s!") % [tr(GameState.champ_cup.display_name),
+		pilot_label(champion)]
 	AudioManager.play_sfx(&"go_beep", 1.3)
 	# PLAY AGAIN = aceeasi cupa de la capat, cu adversari trasi din nou.
 	hud.show_results(title, rows, "PLAY AGAIN")
@@ -1195,7 +1208,8 @@ func _update_hud() -> void:
 ## Numele pistei pentru jucator: cel din TrackInfo (tradus), nu
 ## `GameState.TRACK_NAMES` — acelea sunt si chei in fisierul de recorduri, deci
 ## raman cum sunt.
-## Cache: HUD-ul il cere in fiecare cadru.
+## Cache: HUD-ul il cere in fiecare cadru. Se tine numele ENGLEZESC si se
+## traduce la fiecare cerere, ca o schimbare de limba sa nu ramana in cache.
 var _track_title_cache: String = ""
 
 func _track_title() -> String:
@@ -1203,18 +1217,20 @@ func _track_title() -> String:
 		var info := TrackInfo.for_track(GameState.selected_track)
 		_track_title_cache = info.display_name \
 			if info != null and info.display_name != "" else track.track_name
-	return _track_title_cache
+	return tr(_track_title_cache)
 
 
-## 1st, 2nd, 3rd, 4th... (11-13 sunt „th").
+## Numele de pe ecran al pilotului: „You" pentru jucator, altfel numele din
+## PILOTS — amandoua traduse (in japoneza se scriu in katakana).
+func pilot_label(car: Car) -> String:
+	return tr("You") if car.is_player else tr(car.pilot_name)
+
+
+## 1st, 2nd... 6th, traduse ca texte intregi (vezi ORDINALS).
 static func _ordinal(n: int) -> String:
-	var suffix := "th"
-	if n % 100 < 11 or n % 100 > 13:
-		match n % 10:
-			1: suffix = "st"
-			2: suffix = "nd"
-			3: suffix = "rd"
-	return "%d%s" % [n, suffix]
+	if n >= 1 and n <= ORDINALS.size():
+		return String(TranslationServer.translate(ORDINALS[n - 1]))
+	return str(n)
 
 func _fmt_ms(ms: int) -> String:
 	@warning_ignore("integer_division")

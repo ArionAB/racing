@@ -7,7 +7,7 @@
 [resource]
 script = ExtResource("1")
 id = &"police_sports"
-display_name = "Politia"
+display_name = "Police"
 color = Color(0.25, 0.45, 0.95, 1)
 max_speed = 34.5
 acceleration = 17.0

@@ -18,7 +18,7 @@ const BRONZE := Color(0.75, 0.50, 0.30)
 
 ## Referinte pastrate pentru reimprospatare (si pentru sonda).
 var _points_label: Label
-## „NEXT CAR  POLITIA  ·  2 MORE POINTS": urmatorul lucru de castigat, vizibil
+## „NEXT CAR  POLICE  ·  2 MORE POINTS": urmatorul lucru de castigat, vizibil
 ## si la trei minute distanta — carligul carierei (19 nov 2026).
 var _next_car_label: Label
 ## „CARS  3 / 10".
@@ -96,9 +96,9 @@ func _build_passport() -> Control:
 
 
 func _refresh() -> void:
-	_points_label.text = "POINTS  %d / %d" % [Career.points(), Career.max_points()]
+	_points_label.text = tr("POINTS  %d / %d") % [Career.points(), Career.max_points()]
 	_next_car_label.text = next_car_text()
-	_cars_label.text = "CARS  %d / %d" % [Career.earned_car_count(), Career.garage_size()]
+	_cars_label.text = tr("CARS  %d / %d") % [Career.earned_car_count(), Career.garage_size()]
 
 	for child in _medals_row.get_children():
 		child.free()
@@ -125,11 +125,12 @@ func _refresh() -> void:
 static func next_car_text() -> String:
 	var reward := Career.next_car_reward()
 	if reward == null:
-		return "ALL CARS EARNED"
+		return _tr("ALL CARS EARNED")
 	var missing := maxi(0, reward.points - Career.points())
-	return "NEXT CAR  %s  ·  %d MORE %s" % [
-		Career.car_display_name(reward.car).to_upper(), missing,
-		"POINT" if missing == 1 else "POINTS"]
+	# Sablonul intreg, cu plural (nu „POINT"/„POINTS" lipit la coada).
+	return String(TranslationServer.translate_plural("NEXT CAR  %s  ·  %d MORE POINT",
+		"NEXT CAR  %s  ·  %d MORE POINTS", missing)) % [
+		_tr(Career.car_display_name(reward.car)).to_upper(), missing]
 
 
 func _build_world(world: CareerWorld) -> Control:
@@ -142,7 +143,7 @@ func _build_world(world: CareerWorld) -> Control:
 	var title_row := HBoxContainer.new()
 	title_row.add_theme_constant_override("separation", 14)
 	column.add_child(title_row)
-	title_row.add_child(_label(world.display_name, 30, Color.WHITE))
+	title_row.add_child(_label(tr(world.display_name), 30, Color.WHITE))
 	if world.free:
 		title_row.add_child(_label("FREE", 18, TrackSelectPanel.SUBTITLE_COLOR))
 
@@ -183,8 +184,9 @@ func _build_sealed(world: CareerWorld) -> Control:
 	row.add_theme_constant_override("separation", 16)
 	row.custom_minimum_size = Vector2(0, 56)
 	row.add_child(_Lock.new())
-	var label := _label("SEALED — %d MORE POINTS" % Career.points_missing(world),
-		22, TrackCard.TEXT_DIM)
+	var missing := Career.points_missing(world)
+	var label := _label(tr_n("SEALED — %d MORE POINT", "SEALED — %d MORE POINTS",
+		missing) % missing, 22, TrackCard.TEXT_DIM)
 	label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(label)
 	return row
@@ -241,13 +243,13 @@ func _open_sheet(track_id: StringName) -> void:
 	column.add_theme_constant_override("separation", 14)
 	box.get_child(0).add_child(column)
 
-	var title := _label(info.display_name, 36, TrackSelectPanel.TITLE_COLOR)
+	var title := _label(tr(info.display_name), 36, TrackSelectPanel.TITLE_COLOR)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(title)
 
 	# RACE: locul cel mai bun si punctele stranse pe pista (loc + bonus) din 4
 	# (bonusul NO RETRY exista pe fiecare pista).
-	var race_btn := _sheet_button("RACE", "%s  ·  %d / %d PTS" % [
+	var race_btn := _sheet_button(tr("RACE"), tr("%s  ·  %d / %d PTS") % [
 		_place_name(int(state.race_medal)), Career.track_points(track_id),
 		Career.MAX_TRACK_POINTS])
 	race_btn.name = "RaceButton"
@@ -259,23 +261,23 @@ func _open_sheet(track_id: StringName) -> void:
 	# nu un buton. Acelasi pe fiecare pista (NO RETRY, 19 nov 2026).
 	column.add_child(bonus_label(Career.has_bonus(track_id)))
 
-	var tt_sub := "NO TIME YET"
+	var tt_sub := tr("NO TIME YET")
 	if int(state.tt_best_ms) > 0:
-		tt_sub = "BEST %s · %s" % [TrackCard._format_ms(int(state.tt_best_ms)),
+		tt_sub = tr("BEST %s · %s") % [TrackCard._format_ms(int(state.tt_best_ms)),
 			_medal_name(int(state.tt_medal))]
 	# Doar existenta fisierului, nu parsarea lui (~100 KB): foaia se reface la
 	# fiecare deschidere. Un fisier corupt iese oricum curat la start (load_ghost).
 	if FileAccess.file_exists(Career.ghost_path(track_id)):
-		tt_sub += " · GHOST"
+		tt_sub += " · " + tr("GHOST")
 	if not info.has_targets():
-		tt_sub += "  (no targets yet)"
-	var tt_btn := _sheet_button("TIME TRIAL", tt_sub)
+		tt_sub += "  " + tr("(no targets yet)")
+	var tt_btn := _sheet_button(tr("TIME TRIAL"), tt_sub)
 	tt_btn.name = "TimeTrialButton"
 	tt_btn.pressed.connect(func() -> void:
 		Career.start_track(track_id, Career.Mode.TIME_TRIAL))
 	column.add_child(tt_btn)
 
-	var back_btn := _sheet_button("BACK", "")
+	var back_btn := _sheet_button(tr("BACK"), "")
 	back_btn.name = "BackButton"
 	back_btn.pressed.connect(_close_sheet)
 	column.add_child(back_btn)
@@ -296,8 +298,9 @@ func bonus_label(done: bool) -> Label:
 
 
 static func bonus_sheet_text(done: bool) -> String:
-	var head := "BONUS +%d  ·  %s" % [Career.BONUS_POINTS, Career.config.bonus_title]
-	return head + ("  ·  DONE" if done else "\n" + Career.config.bonus_hint)
+	var head := _tr("BONUS +%d  ·  %s") % [Career.BONUS_POINTS,
+		_tr(Career.config.bonus_title)]
+	return head + ("  ·  " + _tr("DONE") if done else "\n" + _tr(Career.config.bonus_hint))
 
 
 func _close_sheet() -> void:
@@ -309,12 +312,12 @@ func _close_sheet() -> void:
 		_first_card.grab_focus.call_deferred()
 
 
-## Pentru contratimp (tinte de timp): culoarea medaliei.
+## Pentru contratimp (tinte de timp): culoarea medaliei, tradusa.
 static func _medal_name(medal: int) -> String:
 	match medal:
-		Career.MEDAL_GOLD: return "GOLD"
-		Career.MEDAL_SILVER: return "SILVER"
-		Career.MEDAL_BRONZE: return "BRONZE"
+		Career.MEDAL_GOLD: return _tr("GOLD")
+		Career.MEDAL_SILVER: return _tr("SILVER")
+		Career.MEDAL_BRONZE: return _tr("BRONZE")
 	return "—"
 
 
@@ -322,10 +325,15 @@ static func _medal_name(medal: int) -> String:
 ## gandeste in locuri si puncte, nu in culori.
 static func _place_name(medal: int) -> String:
 	match medal:
-		Career.MEDAL_GOLD: return "1ST PLACE"
-		Career.MEDAL_SILVER: return "2ND PLACE"
-		Career.MEDAL_BRONZE: return "3RD PLACE"
-	return "NO PODIUM YET"
+		Career.MEDAL_GOLD: return _tr("1ST PLACE")
+		Career.MEDAL_SILVER: return _tr("2ND PLACE")
+		Career.MEDAL_BRONZE: return _tr("3RD PLACE")
+	return _tr("NO PODIUM YET")
+
+
+## `tr` din functiile statice (n-au obiect pe care sa-l cheme).
+static func _tr(text: String) -> String:
+	return String(TranslationServer.translate(text))
 
 
 ## Buton mare (>= 64 px) cu titlu si, daca e, un subtitlu pe al doilea rand.

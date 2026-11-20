@@ -4,6 +4,14 @@ extends PanelContainer
 ## Slidere mari (tinte de touch), salvare imediata la fiecare schimbare.
 
 signal back_pressed
+## Jucatorul a ales alta limba. Cine a deschis panoul reface ecranul (MainMenu
+## isi reincarca scena), ca si textele compuse din cod sa iasa in limba noua.
+signal language_changed
+
+## Randul LANGUAGE. Din pauza e ascuns (HUD il stinge): o schimbare de limba
+## acolo ar lasa cursa pe jumatate in limba veche (mesajele, rezultatele si
+## numele deja compuse) pana la iesirea in meniu.
+var show_language: bool = true
 
 func _ready() -> void:
 	_build()
@@ -48,6 +56,8 @@ func _build() -> void:
 	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(box)
 
+	if show_language:
+		_add_language_row(box)
 	_add_slider(box, "Steering sensitivity", 0.6, 1.4, GameState.steer_sensitivity,
 		func(v: float) -> void:
 			GameState.steer_sensitivity = v
@@ -302,6 +312,43 @@ func _add_slider(parent: VBoxContainer, label_text: String,
 	slider.value_changed.connect(func(v: float) -> void:
 		value_label.text = "%d%%" % roundi(v * 100.0)
 		on_change.call(v))
+
+
+## LANGUAGE: AUTO (limba telefonului) + limbile jocului, fiecare cu numele ei
+## IN LIMBA EI, netradus — cine a nimerit din greseala in japoneza isi gaseste
+## „English". De aceea lista n-are traducere automata; doar AUTO se traduce.
+## Eticheta randului e in engleza si in limba curenta („LANGUAGE / 言語"), ca
+## randul sa se gaseasca si cand nu citesti limba curenta.
+func _add_language_row(parent: VBoxContainer) -> void:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	parent.add_child(row)
+	var name_label := Label.new()
+	var here := tr("Language")
+	name_label.text = "Language" if here == "Language" else "%s / Language" % here
+	name_label.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	name_label.add_theme_font_size_override("font_size", 22)
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(name_label)
+	var choice := OptionButton.new()
+	choice.name = "LanguageChoice"
+	choice.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	choice.add_item(tr("AUTO"))
+	for code in Localization.LOCALES:
+		choice.add_item(String(Localization.NATIVE_NAMES[code]))
+	choice.selected = Localization.LOCALES.find(GameState.language) + 1
+	choice.custom_minimum_size = Vector2(160, 44)
+	choice.add_theme_font_size_override("font_size", 20)
+	# „日本語" trebuie sa se vada si cand jocul e in engleza (Noto e in lantul
+	# fonturilor de text doar in japoneza): lista are fontul ei.
+	choice.add_theme_font_override("font", Localization.language_menu_font())
+	choice.get_popup().add_theme_font_override("font", Localization.language_menu_font())
+	row.add_child(choice)
+	choice.item_selected.connect(func(i: int) -> void:
+		GameState.language = "" if i == 0 else Localization.LOCALES[i - 1]
+		GameState.save_settings()
+		Localization.apply(GameState.language)
+		language_changed.emit())
 
 
 ## Alegere dintr-o lista scurta (OptionButton), pe acelasi rand cu eticheta.

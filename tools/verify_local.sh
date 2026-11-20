@@ -321,6 +321,13 @@ run_step "Save: id-uri, migrare v0 -> v1, dormante, reordonare" save_migration.l
 # baremul 6-5-4-3-2-1 si o cursa reala in cupa (grila, titlu, departajare).
 run_step "World Cup: cupe, adversari unici, puncte, cursa" world_cup.log 'VERDICT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeWorldCup.tscn
+# WORLD CUP salvata (CONTINUE / RESET, 19 nov 2026): scrisa la rezultatele
+# fiecarei curse cu cursa urmatoare, nimic inainte de prima cursa terminata,
+# stearsa dupa ultima; id-uri pe disc; CONTINUE reface cupa, masina si nivelul
+# intr-o cursa reala; RESET in doua atingeri, doar pe cupa ei; save-urile
+# invalide = absente, versiunea viitoare neatinsa. Sabotaj pe fiecare contract.
+run_step "World Cup: cupa salvata, CONTINUE, RESET" world_cup_save.log 'VERDICT:' -- \
+	--headless --fixed-fps 60 --path . res://tools/ProbeWorldCupSave.tscn
 # Nivelurile AI (#682), partea ieftina: profilul implicit = AI-ul de dinainte
 # camp cu camp (pe el stau liniile de baza ale ProbeRace si ale carierei),
 # firul GameState -> Race -> fiecare AIController (cariera ramane implicita),

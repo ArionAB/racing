@@ -18,6 +18,12 @@ extends Node
 ##
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeWorldCup.tscn
 ##   ... -- --no-race   # fara pasul 4 (doar date si aritmetica)
+##
+## Cursa terminata din pasul 4 scrie cupa pe disc (`WorldCupSave`, CONTINUE):
+## fisierul merge in `user://probe_tmp/world_cup_<pid>/`, nu in save-ul real.
+## Persistenta are garda ei: ProbeWorldCupSave.
+
+const ProbeTmp := preload("res://tools/probe_tmp.gd")
 
 const EXCLUDED: Array[String] = ["Track01", "Track08"]
 const CUP_COUNT := 4
@@ -28,6 +34,7 @@ const FOURTH_CUP: Array[StringName] = [&"halong", &"carrara", &"san_francisco", 
 const RACE_BENCH := "res://scenes/tracks/Track01.tscn"
 
 var _failed: bool = false
+var _tmp_dir: String = ""
 
 
 func _check(ok: bool, what: String) -> void:
@@ -38,6 +45,8 @@ func _check(ok: bool, what: String) -> void:
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_tmp_dir = ProbeTmp.make("world_cup")
+	WorldCupSave.path_override = _tmp_dir + WorldCupSave.FILE_NAME
 	print("")
 	print("=== World Cup ===")
 	_check_cups()
@@ -264,6 +273,18 @@ func _results_rows(race: Race) -> Array[String]:
 
 func _finish() -> void:
 	GameState.champ_active = false
+	_remove_tmp()
 	print("")
 	print("VERDICT: ", "PROBLEMA" if _failed else "OK")
 	get_tree().quit(1 if _failed else 0)
+
+
+func _remove_tmp() -> void:
+	WorldCupSave.path_override = ""
+	if _tmp_dir != "":
+		ProbeTmp.remove(_tmp_dir)
+		_tmp_dir = ""
+
+
+func _exit_tree() -> void:
+	_remove_tmp()

@@ -296,8 +296,11 @@ func selected_driver_model() -> PackedScene:
 	return (DRIVER_DATA[selected_driver] as DriverData).model
 
 # Campionat (WORLD CUP): cursele cupei, punctaj cumulat per "slot"
-# (0 = jucatorul, 1.. = AI). Traieste doar in memorie: iesirea in MENU
-# abandoneaza cupa.
+# (0 = jucatorul, 1.. = AI). In memorie cat se joaca; dupa fiecare cursa
+# terminata cupa se scrie pe disc (`WorldCupSave`, `champ_save_progress`), cate
+# un save per cupa SI per nivel AI, iar din meniu se reia cu CONTINUE
+# (`continue_championship`). Iesirea in MENU in mijlocul cursei nu scrie nimic:
+# CONTINUE reporneste cursa aceea de pe grila.
 var champ_active: bool = false
 var champ_round: int = 0
 ## Cupa in desfasurare (una din WORLD_CUPS).
@@ -827,6 +830,46 @@ func start_championship(cup: WorldCup = champ_cup) -> void:
 	start_race()
 
 
+## Reia cupa salvata pe nivelul `level` (CONTINUE din WorldCupPanel, cu nivelul
+## din selector): cursa, punctele, adversarii si MASINA cu care a fost inceputa
+## (adversarii au fost trasi fara ea, iar punctele sunt ale ei). Cursa ruleaza
+## pe nivelul save-ului — `race_ai_level` vine din el, deci punctele lui nu pot
+## ajunge in save-ul altui nivel. False daca nu e nimic valid de reluat pe
+## nivelul acela — apelantul porneste atunci o cupa noua.
+func continue_championship(cup: WorldCup, level: int) -> bool:
+	var entry := WorldCupSave.load_entry(cup, level)
+	if entry == null:
+		return false
+	Career.leave()
+	champ_active = true
+	champ_cup = cup
+	champ_round = entry.next_race
+	champ_points = entry.points
+	champ_ai_cars = entry.ai_cars
+	race_ai_level = entry.ai_level
+	if selected_car != entry.player_car:
+		selected_car = entry.player_car
+		save_settings() # ca garajul de pe disc sa nu contrazica memoria
+	selected_track = cup.track_index(champ_round)
+	start_race()
+	return true
+
+
+## Rezultatele cursei de cupa tocmai s-au numarat (`Race._finish_race`):
+## cupa se scrie cu cursa URMATOARE, ca o aplicatie omorata pe ecranul de
+## rezultate sa nu piarda si sa nu rejoace cursa. Dupa ultima cursa cupa e
+## terminata si se sterge din fisier. Nivelul e `race_ai_level` — cel pe care
+## a rulat cursa — NICIODATA `ai_level` (ce arata selectorul acum).
+func champ_save_progress() -> void:
+	if not champ_active or champ_cup == null:
+		return
+	if champ_is_last_round():
+		WorldCupSave.erase(champ_cup.id, race_ai_level)
+	else:
+		WorldCupSave.store(champ_cup, race_ai_level, champ_round + 1, champ_points,
+			champ_ai_cars, selected_car)
+
+
 ## Masinile adversarilor pentru o cupa noua: `count` indici din CAR_DATA, in
 ## ordine aleatorie, fara repetare si fara masina jucatorului — pe grila nu
 ## apar niciodata doua taxiuri sau doua autobuze. Daca garajul ar avea mai
@@ -873,8 +916,16 @@ func champ_next_race() -> void:
 
 func start_race() -> void:
 	reset_touch()
+	if race_starter.is_valid():
+		race_starter.call()
+		return
 	_loading_screen = true
 	get_tree().change_scene_to_file(RACE_SCENE)
+
+## Cine porneste efectiv cursa in locul schimbarii de scena. Gol = jocul;
+## sonda il inlocuieste ca sa apese START / CONTINUE din panou fara sa-si
+## piarda propria scena (acelasi tipar ca `Career.race_starter`).
+var race_starter: Callable = Callable()
 
 ## Cursa pornita din joc trece prin ecranul de incarcare. Race citeste flagul
 ## o singura data, in _ready, si il sterge; sondele care instantiaza Race

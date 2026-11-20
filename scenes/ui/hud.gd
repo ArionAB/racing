@@ -561,8 +561,17 @@ func show_results(title: String, rows: Array[Dictionary], primary_label: String,
 	_respawn_button.visible = false
 	_touch.visible = false
 
+## Dupa sosire pauza ramane inchisa: rezultatele sunt deja numarate (cupa e
+## si pe disc), iar un RESTART din pauza ar rejuca aceeasi cursa peste punctele
+## ei. Fereastra era cat tine mesajul de FINISH, pana apare panoul de rezultate.
+var _pause_locked: bool = false
+
+func lock_pause() -> void:
+	_pause_locked = true
+	_pause_button.visible = false
+
 func _open_pause() -> void:
-	if _results_panel.visible:
+	if _results_panel.visible or _pause_locked:
 		return
 	get_tree().paused = true
 	GameState.reset_touch() # altfel virajul "ramane apasat" peste pauza

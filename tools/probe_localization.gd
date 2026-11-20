@@ -614,6 +614,10 @@ func _check_hud() -> void:
 	# deci ultimul mesaj s-ar vedea si peste pauza (in joc, nu).
 	hud.flash_message("")
 	hud.position_popup.hide_now()
+	# Aceeasi cursa trece prin toate formatele, iar `_finish_race` (mai jos) o
+	# incuie (RaceHUD.lock_pause, #757): fara deblocare, de la al doilea format
+	# pauza nu se mai deschide si HUD-ul ramane sub setari.
+	hud.set("_pause_locked", false)
 	hud.call("_open_pause")
 	await _inspect("hud/pauza", hud, [], dev)
 	var pause_settings := hud.get("_settings") as SettingsPanel

@@ -89,7 +89,7 @@ const GOLD := 2
 ## Adversarii pe grila in sonda (cursele sunt mai scurte); sloturi = 3.
 const AI := 2
 ## Randul de stare asteptat, LITERAL (vezi `_check_panel`).
-const STATUS_EXPECTED := "RACE 3 / 4  ·  2ND  ·  11 PTS  ·  AUTOBUZUL"
+const STATUS_EXPECTED := "RACE 3 / 4  ·  2ND  ·  11 PTS  ·  BUS"
 
 var _sabotage: String = ""
 var _checks: int = 0
@@ -877,7 +877,7 @@ func _check_per_level() -> void:
 		"%s fara niciun save: START, fara ALSO IN PROGRESS" % _cup_b.id)
 	await _pick_level(panel, GOLD)
 	_check("j", primary.text == "CONTINUE" and reset.visible and status.visible
-		and status.text == "RACE 4 / 4  ·  2ND  ·  12 PTS  ·  AUTOBUZUL",
+		and status.text == "RACE 4 / 4  ·  2ND  ·  12 PTS  ·  BUS",
 		"selector GOLD: CONTINUE, '%s'" % status.text)
 	_check("j", others.visible and others.text == "ALSO IN PROGRESS: BRONZE",
 		"GOLD: un alt nivel: '%s'" % others.text)

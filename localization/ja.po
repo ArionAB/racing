@@ -1087,3 +1087,24 @@ msgstr "やり直しなし"
 msgid "Finish without an eject or a RESET."
 msgstr "放り出されず、リセットも使わずにゴールしよう。"
 
+#. World Cup: button that deletes the saved cup on this AI level (asks SURE? first).
+#: scenes/ui/world_cup_panel.gd:34
+msgid "RESET"
+msgstr "リセット"
+
+#. World Cup: the RESET button asking for a second tap. Very short.
+#: scenes/ui/world_cup_panel.gd:35
+msgid "SURE?"
+msgstr "本当に？"
+
+#. World Cup: other AI levels with a saved cup. %s = level names (BRONZE, GOLD).
+#: scenes/ui/world_cup_panel.gd:37
+msgid "ALSO IN PROGRESS: %s"
+msgstr "進行中：%s"
+
+#. World Cup saved cup: next race / races, player's place (2ND), points,
+#. the player's car name.
+#: scenes/ui/world_cup_panel.gd:317
+msgid "RACE %d / %d  ·  %s  ·  %d PTS  ·  %s"
+msgstr "レース %d / %d  ·  %s  ·  %d ポイント  ·  %s"
+

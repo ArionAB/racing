@@ -146,13 +146,18 @@ pur plus haosul fizic, nu proiectilele.
   `localization/` ca gettext (`toy_racer.pot` + un `.po` per limbă, msgid =
   textul englezesc). Un Label/Button cu text simplu se traduce singur; un text
   **compus** trece prin `tr()` pe șablonul întreg, niciodată pe bucăți lipite;
-  numele din resurse (piste, mașini, cupe, provocări) rămân în engleză în
+  numele din resurse (piste, mașini, cupe, bonusul carierei) rămân în engleză în
   `.tres` și se traduc la afișare. Jocul urmează limba telefonului, cu rândul
   LANGUAGE din SETTINGS (doar din meniul principal) pentru alegere manuală.
   Japoneza are fontul ei (Noto Sans JP), pus în lanțul de fonturi **doar** în
   japoneză — altfel înalță fiecare rând și în engleză. Text nou pe ecran =
   intrare nouă în `.pot` și în toate cele șase `.po`. Garda: `ProbeLocalization`
   (catalog, text netradus, glife, încadrare, limbă; cinci sabotaje).
+- **Bonusul carierei „NO RETRY”** ✔ (19 nov 2026, în locul provocărilor per
+  pistă, scoase): +1 pe orice pistă dacă termini cursa fără să fii aruncat
+  (`Car.ejected`) și fără un RESET cerut care a pornit o repunere. Izbiturile,
+  hazardele și repunerile automate nu costă nimic. Maximul carierei: 64. Doar
+  în cursa RACE de carieră (`BonusTracker`). Garda: `ProbeCareerBonus`.
 
 ## Post-MVP (nu implementa fără să fie cerut)
 

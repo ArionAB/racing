@@ -79,10 +79,10 @@ func _ready() -> void:
 	_refresh_outline()
 
 
-## Medaliile pistei in colt dreapta-sus: cursa, contratimp, provocare. Folosit
+## Medaliile pistei in colt dreapta-sus: cursa, contratimp, bonusul. Folosit
 ## doar de raftul carierei. Se poate chema si inainte, si dupa `_ready`.
-func set_medals(race: int, tt: int, challenge: bool) -> void:
-	_medal_state = [race, tt, challenge]
+func set_medals(race: int, tt: int, bonus: bool) -> void:
+	_medal_state = [race, tt, bonus]
 	if is_node_ready():
 		_apply_medals()
 
@@ -255,19 +255,19 @@ class _Clock extends Control:
 
 
 ## Trei discuri in colt: medalia cursei, a contratimpului (auriu/argintiu/
-## bronz; gol = doar contur) si provocarea (verde plin cand e facuta).
+## bronz; gol = doar contur) si bonusul (verde plin cand e luat).
 ## Desenat, fara texturi.
 class _Medals extends Control:
 	const GOLD := Color(0.95, 0.78, 0.25)
 	const SILVER := Color(0.80, 0.83, 0.88)
 	const BRONZE := Color(0.75, 0.50, 0.30)
-	const CHALLENGE := Color(0.35, 0.80, 0.45)
+	const BONUS := Color(0.35, 0.80, 0.45)
 	const RADIUS := 9.0
 	const GAP := 6.0
 
 	var race: int = 0
 	var tt: int = 0
-	var challenge: bool = false
+	var bonus: bool = false
 
 	func _init() -> void:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -283,7 +283,7 @@ class _Medals extends Control:
 	func set_state(race_medal: int, tt_medal: int, done: bool) -> void:
 		race = race_medal
 		tt = tt_medal
-		challenge = done
+		bonus = done
 		queue_redraw()
 
 	static func medal_color(medal: int) -> Color:
@@ -294,7 +294,7 @@ class _Medals extends Control:
 		return Color(0, 0, 0, 0)
 
 	func _draw() -> void:
-		var values: Array = [race, tt, challenge]
+		var values: Array = [race, tt, bonus]
 		for i in 3:
 			var c := Vector2(RADIUS + i * (RADIUS * 2.0 + GAP), RADIUS)
 			var filled := false
@@ -304,7 +304,7 @@ class _Medals extends Control:
 				color = medal_color(int(values[i]))
 			else:
 				filled = bool(values[i])
-				color = CHALLENGE
+				color = BONUS
 			if filled:
 				draw_circle(c, RADIUS, color)
 			else:

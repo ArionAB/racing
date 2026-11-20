@@ -84,7 +84,7 @@ var _race_clock: float = 0.0
 var _player_race_ms: int = -1
 
 ## Tur terminat de jucator (numarul de tururi facute si timpul turului).
-## Pentru ChallengeTracker (cariera, pasul 4); nimic nu o asculta inca in joc.
+## Nimic din joc nu o asculta inca (sondele, da).
 signal lap_completed(laps: int, lap_ms: int)
 ## Cursa jucatorului s-a terminat (pozitia finala si timpul total).
 signal race_finished(position: int, race_ms: int)
@@ -218,7 +218,7 @@ func _setup_race() -> void:
 	add_child(loc)
 	if _ghost_car != null:
 		hud.set_ghost_time(_ghost_car.data.total_ms)
-	_setup_challenge()
+	_setup_bonus()
 	hud.show_countdown("READY?")
 	_setup_windshield_wipers()
 	# Reactia la izbituri (kick directional, hit-stop, cine a lovit pe cine):
@@ -277,7 +277,8 @@ func _setup_race() -> void:
 		camera.snap_behind()
 		camera.add_trauma(0.22)
 		hud.recovery_fade_out()
-		hud.flash_message("MISSED — back on track"))
+		hud.flash_message(respawn_flash_text(_bonus_note_on_respawn))
+		_bonus_note_on_respawn = false)
 	# Tranzitia de dinaintea repunerii (#495): ecranul se intuneca cat clipeste
 	# masina; `respawned` de mai sus il limpezeste dupa teleport.
 	player.recovery_started.connect(func(_c: Car, seconds: float) -> void:
@@ -290,7 +291,10 @@ func _setup_race() -> void:
 		camera.focus_on(rag.focus_node() if rag != null else ragdoll,
 			c.eject_hold + 0.6)
 		camera.add_trauma(0.45)
-		hud.flash_message("EJECTED!"))
+		# BonusTracker a notat deja aruncarea (s-a abonat inaintea noastra, in
+		# `_setup_bonus`): daca ea a costat bonusul, mesajul o spune acum.
+		var lost_now := _take_bonus_announcement()
+		hud.flash_message(eject_flash_text(lost_now)))
 	# Strivit / ars: shake proportional cu severitatea. Semnalul exista de la
 	# bolovani (#242), dar nu fusese legat la camera; lava il refoloseste.
 	player.crushed.connect(func(_c: Car, severity: float) -> void:
@@ -782,28 +786,56 @@ func _on_player_lap(laps: int) -> void:
 var _career_medal: int = -1
 ## Punctele facute de cursa asta (loc + bonus), pentru ecranul de rezultate.
 var _career_points: int = 0
-var _challenge_tracker: ChallengeTracker
-var _challenge_done: bool = false
+## Bonusul NO RETRY (null in afara unei curse RACE de cariera).
+var _bonus_tracker: BonusTracker
+var _bonus_kept: bool = false
+## Prima pierdere a fost anuntata, iar repunerea care urmeaza (dupa aruncare
+## sau dupa RESET) o repeta in mesajul ei: „MISSED" ar acoperi altfel „BONUS
+## LOST" dupa ~1 s. Doar pentru acea repunere; se stinge in `respawned`.
+var _bonus_note_on_respawn: bool = false
 
-## Provocarea gimmick-ului e bonus (+1) in cursa normala de cariera: tracker-ul
-## asculta semnalele hazardelor si ale jucatorului; HUD-ul arata eticheta si o
-## pica o singura data. Nu in contratimp (vezi `Career.challenge_to_track`).
-func _setup_challenge() -> void:
-	var challenge := Career.challenge_to_track()
-	if challenge == null:
+const BONUS_LOST_TEXT := "BONUS LOST"
+const RESPAWN_TEXT := "MISSED — back on track"
+
+## Bonusul carierei (+1, acelasi pe fiecare pista): pastrat daca termini fara
+## aruncare si fara RESET (vezi BonusTracker). Doar in cursa RACE de cariera
+## (`Career.bonus_active`): nu in contratimp, Quick Race, World Cup, tur ghidat.
+##
+## Chemat INAINTE sa legam handler-ul nostru de `player.ejected`: tracker-ul se
+## aboneaza primul, deci la aruncare pierderea e notata cand scriem „EJECTED!".
+func _setup_bonus() -> void:
+	if not Career.bonus_active():
 		return
-	_challenge_tracker = ChallengeTracker.new()
-	_challenge_tracker.name = "ChallengeTracker"
-	add_child(_challenge_tracker)
-	_challenge_tracker.setup(challenge, player, track)
-	hud.set_challenge(challenge.title)
-	_challenge_tracker.progress_changed.connect(hud.set_challenge_progress)
-	hud.set_challenge_progress(_challenge_tracker.progress_text())
-	lap_completed.connect(func(laps: int, _ms: int) -> void:
-		_challenge_tracker.notify_lap(laps))
-	_challenge_tracker.failed_changed.connect(func(_failed: bool) -> void:
-		hud.set_challenge_failed()
-		hud.flash_message("CHALLENGE FAILED"))
+	_bonus_tracker = BonusTracker.new()
+	_bonus_tracker.name = "BonusTracker"
+	add_child(_bonus_tracker)
+	_bonus_tracker.setup(player)
+	hud.set_bonus(Career.config.bonus_title)
+	_bonus_tracker.lost_changed.connect(func(_cause: StringName) -> void:
+		hud.set_bonus_lost())
+
+
+## true o singura data, la prima pierdere; si arma nota pentru repunerea care
+## urmeaza. Fara tracker (in afara carierei) mereu false.
+func _take_bonus_announcement() -> bool:
+	if _bonus_tracker == null or not _bonus_tracker.take_announcement():
+		return false
+	_bonus_note_on_respawn = true
+	return true
+
+
+## Doua randuri, fiecare tradus intreg (nu bucati dintr-o fraza).
+static func eject_flash_text(bonus_lost_now: bool) -> String:
+	return _t("EJECTED!") + ("\n" + _t(BONUS_LOST_TEXT) if bonus_lost_now else "")
+
+
+static func respawn_flash_text(bonus_note: bool) -> String:
+	return _t(RESPAWN_TEXT) + ("\n" + _t(BONUS_LOST_TEXT) if bonus_note else "")
+
+
+## `tr()` pentru functiile statice (n-au obiect).
+static func _t(text: String) -> String:
+	return String(TranslationServer.translate(text))
 
 
 var _ghost_recorder: GhostRecorder
@@ -858,9 +890,9 @@ func _finish_race() -> void:
 					GameState.selected_car, GameState.total_laps,
 					_player_race_ms), _player_race_ms, previous_best)
 	elif Career.active:
-		_challenge_done = _challenge_tracker != null and _challenge_tracker.evaluate()
+		_bonus_kept = _bonus_tracker != null and _bonus_tracker.evaluate()
 		_career_medal = Career.medal_for_position(player.race_position)
-		_career_points = Career.finish_active(player.race_position, _challenge_done)
+		_career_points = Career.finish_active(player.race_position, _bonus_kept)
 	if GameState.champ_active:
 		GameState.record_results(_final_order)
 	if _race_record_new:
@@ -959,15 +991,15 @@ func _career_medal_text(medal: int) -> String:
 	return tr("NO MEDAL")
 
 
-## Cursa de cariera: „1ST PLACE +3  ·  CHALLENGE +1  =  4 PTS". Sub podium
-## locul da +0; fara provocare pe pista, doar locul. Spune ce a facut cursa
-## asta, nu cat e pe raft (asta o spune raftul).
+## Cursa de cariera: „1ST PLACE +3  ·  NO RETRY +1  =  4 PTS", sau
+## „1ST PLACE +3  ·  BONUS LOST  =  3 PTS". Sub podium locul da +0. Spune ce a
+## facut cursa asta, nu cat e pe raft (asta o spune raftul).
 func _career_points_text() -> String:
 	var text := tr("%s PLACE +%d") % [_ordinal(player.race_position).to_upper(),
 		maxi(_career_medal, 0)]
-	if _challenge_tracker != null:
-		text += "  ·  " + (tr("CHALLENGE +%d") % Career.CHALLENGE_POINTS
-			if _challenge_done else tr("CHALLENGE FAILED"))
+	if _bonus_tracker != null:
+		text += "  ·  " + (tr(Career.config.bonus_title) + " +%d" % Career.BONUS_POINTS
+			if _bonus_kept else tr(BONUS_LOST_TEXT))
 	return tr("%s  =  %d PTS") % [text, _career_points]
 
 func _on_results_primary() -> void:
@@ -1075,10 +1107,21 @@ func _swap_player_car(index: int) -> void:
 ##
 ## Tot ce urmeaza dupa e deja legat: `respawned` trage camera in spate, adauga
 ## trauma si scrie mesajul pe ecran.
+##
+## Bonusul NO RETRY se pierde doar daca apasarea a PORNIT chiar acum o
+## repunere: refuzata (cursa nu ruleaza, ai terminat, cooldown, in aruncare)
+## nu costa nimic, iar o apasare peste o repunere deja in curs (automata sau
+## ceruta) nu e un al doilea „retry". Prima pierdere se anunta pe loc; mesajul
+## repunerii (dupa `Car.RECOVER_S`) o repeta, ca sa nu o acopere.
 func _on_respawn_requested() -> void:
 	if state != State.RUNNING or player.finished:
 		return
+	var was_recovering := player.is_recovering()
 	player.recover()
+	if _bonus_tracker != null and not was_recovering and player.is_recovering():
+		_bonus_tracker.note_reset()
+		if _take_bonus_announcement():
+			hud.flash_message(BONUS_LOST_TEXT)
 
 
 func _fit_camera_to_player() -> void:

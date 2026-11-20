@@ -201,21 +201,6 @@ msgstr "FUORI PISTA"
 msgid "GHOST %s"
 msgstr "FANTASMA %s"
 
-#. %d = bonus points, %s = challenge title.
-#: scenes/ui/hud.gd:897
-msgid "CHALLENGE +%d: %s"
-msgstr "SFIDA +%d: %s"
-
-#: scenes/race/race.gd:806
-#: scenes/race/race.gd:970
-#: scenes/ui/hud.gd:902
-msgid "CHALLENGE FAILED"
-msgstr "SFIDA FALLITA"
-
-#: scenes/race/race.gd:969
-msgid "CHALLENGE +%d"
-msgstr "SFIDA +%d"
-
 #. Countdown, very large text: keep it as short as possible.
 #: scenes/race/race.gd:222
 msgid "READY?"
@@ -743,17 +728,6 @@ msgstr "L'erba ti rallenta, ma certe scorciatoie valgono comunque il rischio."
 msgid "P%d"
 msgstr "P%d"
 
-#: scenes/career/challenge_tracker.gd:104
-msgid "LAP %d"
-msgstr "GIRO %d"
-
-#. Baikal challenge progress: ice plates broken on this lap.
-#: scenes/career/challenge_tracker.gd:107
-msgid "LAP %d: %d PLATE"
-msgid_plural "LAP %d: %d PLATES"
-msgstr[0] "GIRO %d: %d LASTRA"
-msgstr[1] "GIRO %d: %d LASTRE"
-
 #: scenes/race/tutorial/tutorial_config.gd:49
 msgid "TUTORIAL"
 msgstr "TUTORIAL"
@@ -1095,123 +1069,26 @@ msgstr "MONDO 3"
 msgid "WORLD 4"
 msgstr "MONDO 4"
 
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/baikal.tres:8
-msgid "THIN ICE"
-msgstr "GHIACCIO SOTTILE"
+#. HUD line above the turbo bar in a career race. %d = bonus points, %s = bonus title.
+#: scenes/ui/hud.gd:885
+msgid "BONUS +%d: %s"
+msgstr "BONUS +%d: %s"
 
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/baikal.tres:9
-msgid "One lap without breaking a plate."
-msgstr "Un giro senza rompere nessuna lastra."
+#. The career bonus was lost (ejected, or RESET pressed).
+#: scenes/race/race.gd:797
+#: scenes/ui/hud.gd:893
+msgid "BONUS LOST"
+msgstr "BONUS PERSO"
 
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/cappadocia.tres:8
-msgid "CLEAN SPIRAL"
-msgstr "SPIRALE PULITA"
+#. Career bonus title (+1 on every track), in capitals: finish without
+#. being ejected and without pressing RESET.
+#: scenes/career/career_config.gd:10
+msgid "NO RETRY"
+msgstr "SENZA RIPROVE"
 
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/cappadocia.tres:9
-msgid "Drive the spiral without hitting the wall."
-msgstr "Percorri la spirale senza toccare il muro."
-
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/chongqing.tres:8
-msgid "ALL ABOARD"
-msgstr "TUTTI A BORDO"
-
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/chongqing.tres:9
-msgid "Catch the cable car every lap."
-msgstr "Prendi la funivia a ogni giro."
-
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/fiordland.tres:8
-msgid "OLD ROAD"
-msgstr "STRADA VECCHIA"
-
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/fiordland.tres:9
-msgid "Take the shortcut every lap."
-msgstr "Prendi la scorciatoia a ogni giro."
-
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/jodhpur.tres:8
-msgid "NO TUK-TUK HITS"
-msgstr "NESSUN TUK-TUK URTATO"
-
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/jodhpur.tres:9
-msgid "Finish without hitting a single tuk-tuk."
-msgstr "Arriva senza urtare nemmeno un tuk-tuk."
-
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/kyoto.tres:8
-msgid "NO THROWS"
-msgstr "NESSUN VOLO"
-
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/kyoto.tres:9
-msgid "Do not get thrown by the Gion float or the shishimai."
-msgstr "Non farti sbalzare dal carro di Gion né dallo shishimai."
-
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/machu_picchu.tres:8
-msgid "NO SHOVES"
-msgstr "NIENTE SPINTONI"
-
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/machu_picchu.tres:9
-msgid "Pass the bus without being shoved."
-msgstr "Supera l'autobus senza farti spingere."
-
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/monument_valley.tres:8
-msgid "NO CRUSHING"
-msgstr "NIENTE SCHIACCIAMENTI"
-
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/monument_valley.tres:9
-msgid "Pass the boulders without getting crushed."
-msgstr "Supera i massi senza farti schiacciare."
-
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/okinawa.tres:8
-msgid "DRY RUN"
-msgstr "ALL'ASCIUTTO"
-
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/okinawa.tres:9
-msgid "Finish without the wave surge taking you."
-msgstr "Arriva senza farti travolgere dall'onda."
-
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/serengeti.tres:8
-msgid "NO ANIMAL HITS"
-msgstr "NESSUN ANIMALE URTATO"
-
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/serengeti.tres:9
-msgid "Finish without hitting a single animal."
-msgstr "Arriva senza urtare nemmeno un animale."
-
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/stromboli.tres:8
-msgid "NO FIREBALLS"
-msgstr "NIENTE PALLE DI FUOCO"
-
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/stromboli.tres:9
-msgid "Finish all laps without a single fireball hit."
-msgstr "Completa tutti i giri senza prendere nemmeno una palla di fuoco."
-
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/transfagarasan.tres:8
-msgid "RED RUNNER"
-msgstr "PASSA COL ROSSO"
-
-#. Career challenge (bonus +1): title in capitals, hint as a sentence.
-#: scenes/career/data/challenges/transfagarasan.tres:9
-msgid "Run the tunnel light 3 times without the bus hitting you."
-msgstr "Passa col rosso al tunnel 3 volte senza che l'autobus ti colpisca."
+#. Career bonus hint, as a sentence. RESET is the in-race button "↺  RESET":
+#. use its translation.
+#: scenes/career/career_config.gd:11
+msgid "Finish without an eject or a RESET."
+msgstr "Finisci senza essere sbalzato fuori né usare RIPOSIZIONA."
 

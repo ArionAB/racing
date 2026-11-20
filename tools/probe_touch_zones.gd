@@ -276,17 +276,17 @@ static func _visible_union(box: Control) -> Rect2:
 ## turul), randul ei (fulger + jgheab) si linia etichetelor de mod deasupra.
 func _bar_rects(hud: RaceHUD) -> Dictionary:
 	var row := (hud.get("_charge_bg") as Control).get_parent() as Control
-	var line := (hud.get("_challenge_label") as Control).get_parent() as Control
+	var line := (hud.get("_bonus_label") as Control).get_parent() as Control
 	return {"jgheab": hud.turbo_bar_rect(), "rand": _visible_union(row),
 		"linie": _visible_union(line)}
 
 
-## Starile: cursa obisnuita, contratimp cu fantoma, provocarea de cariera cu
-## cel mai lung titlu si cel mai lung progres (combinatie mai lunga decat orice
-## pista reala: marginea de sus). Pana la #719 etichetele stateau pe randul
-## barii si, la provocare, il impingeau in ▶ (46 px) si in frana (52 px) pe
-## orice canvas de 1280.
-const BAR_STATES := ["cursa", "fantoma", "provocare"]
+## Starile: cursa obisnuita, contratimp cu fantoma, bonusul de cariera cu un
+## titlu mult mai lung decat cel real (NO RETRY): textul vechii provocari
+## per pista, pastrat ca margine de sus (garda nu slabeste odata cu textul).
+## Pana la #719 etichetele stateau pe randul barii si, la provocare, il
+## impingeau in ▶ (46 px) si in frana (52 px) pe orice canvas de 1280.
+const BAR_STATES := ["cursa", "fantoma", "bonus"]
 
 ## Jgheabul barii, masurat pe main inainte de #719. Nu are voie sa se miste nici
 ## un pixel, in NICIO stare: telefonul si 1280x720 au fost judecate pe device,
@@ -303,11 +303,10 @@ const PINNED_TROUGH := {
 
 func _set_bar_state(hud: RaceHUD, state: String) -> void:
 	hud.set_ghost_time(192400 if state == "fantoma" else 0)
-	if state == "provocare":
-		hud.set_challenge("NO TUK-TUK HITS")
-		hud.set_challenge_progress("LAP 3: 12 PLATES")
+	if state == "bonus":
+		hud.set_bonus("NO TUK-TUK HITS   LAP 3: 12 PLATES")
 	else:
-		(hud.get("_challenge_label") as Control).visible = false
+		(hud.get("_bonus_label") as Control).visible = false
 
 
 ## Verifica un element fata de zone; intoarce numarul de esecuri.
@@ -372,12 +371,12 @@ func _check_hud_layout() -> int:
 		await _frames(1)
 
 	# Redimensionarea (rotire, fereastra trasa pe desktop): ACELASI HUD trecut
-	# prin toate rezolutiile, cu provocarea afisata, trebuie sa aiba bara exact
+	# prin toate rezolutiile, cu bonusul afisat, trebuie sa aiba bara exact
 	# unde o are unul nou-nascut acolo, si linia tot deasupra ei.
 	print("")
 	var made := _make_hud(Vector2i(1280, 720))
 	var hud: RaceHUD = made[1]
-	_set_bar_state(hud, "provocare")
+	_set_bar_state(hud, "bonus")
 	await _frames(3)
 	var order: Array = DEVICE_SIZES.map(func(e: Array) -> Vector2i: return e[0])
 	order.reverse()

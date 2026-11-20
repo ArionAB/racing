@@ -353,10 +353,13 @@ run_step "Id-uri de pista: explicite, unice, inghetate" track_ids.log 'VERDICT:'
 # dupa aceea: padurea Lerai ajunsese la 20-30 m sub peretele craterului.
 run_step "Serengeti: niciun decor ingropat sub teren" decor_buried.log 'VERDICT:|PICAT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeDecorBuried.tscn -- --track=7 --no-batch
-# Cariera pasul 4a: provocarea gimmick-ului. Tracker-ul numara doar evenimentele
-# jucatorului (cu contra-probe pe alte masini), datele sabotate dau cate o
-# problema, foaia pistei se activeaza, pistele reale au sursa semnalului.
-run_step "Provocari: tracker-ul numara doar ce trebuie" challenge.log 'VERDICT:' -- 	--headless --path . res://tools/ProbeChallenge.tscn
+# Bonusul carierei (19 nov 2026, in locul provocarilor per pista): NO RETRY pe
+# fiecare pista. Aruncarea si RESET-ul cerut pierd bonusul, repunerile automate
+# nu; regula pe un Race real de cariera, maximul 64, bifa veche pastrata,
+# textele de pe ecran si nimic in afara carierei. Fiecare contract are un
+# --sabotaj=... care il pica.
+run_step "Cariera: bonusul NO RETRY (aruncare, RESET, texte)" career_bonus.log 'VERDICT:' -- \
+	--headless --fixed-fps 60 --path . res://tools/ProbeCareerBonus.tscn
 # Torentul Fiordland (#493): fizica doar in puls + efect mic in CALM (sabotaj: --calm-zero pica).
 run_step "Torent Fiordland: CALM simtit, SURGE mai dur" torrent_b.log 'REZULTAT FINAL' -- --headless --fixed-fps 60 --path . res://tools/ProbeFiordTorent.tscn -- --only=b
 

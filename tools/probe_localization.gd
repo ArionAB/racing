@@ -47,8 +47,7 @@ extends Node
 ## butonul DRIFT), Label3D-urile din lume, cerneala reala a literelor (masoara
 ## dreptunghiurile Control-urilor, nu pixelii), aglomerarea vizuala fara
 ## suprapunere, elementele din popup-uri nedeschise (lista OptionButton-ului),
-## starile neconstruite aici (o provocare anume pe HUD e una singura, cea mai
-## lunga; cariera cu toate medaliile luate nu e construita) si alte formate
+## starile neconstruite aici (cariera cu toate medaliile luate nu e construita) si alte formate
 ## decat cele trei de mai jos. Pe langa 1280x720 si 1280x960 (4:3, iPad) se
 ## masoara si iPhone-ul in landscape (2532x1170 -> 1558x720): canvasul e mai
 ## LAT, dar grilele de piste trec acolo pe patru coloane, deci cartonasele sunt
@@ -568,7 +567,7 @@ func _check_hud() -> void:
 	hud.set_info(6, 6, 3, 3, 188.0, "1:23.4", "1:21.9")
 	hud.set_ghost_time(83456)
 	hud.set_sealed_turbo(true)
-	hud.set_challenge("NO TUK-TUK HITS")
+	hud.set_bonus(Career.config.bonus_title)
 	# Numaratoarea: cu ce se vede pe grila (telemetria, linia de mod), nu cu
 	# ceasul de offroad sau contrasensul, care pe grila nu pot aparea.
 	hud.show_countdown("READY?")
@@ -597,32 +596,18 @@ func _check_hud() -> void:
 		func() -> void: player.ejected.emit(player, dummy),
 		func() -> void: hud.flash_message("ROCKET START!"),
 		func() -> void: hud.flash_message("Too early..."),
-		func() -> void: hud.flash_message("CHALLENGE FAILED"),
+		func() -> void: hud.flash_message(Race.eject_flash_text(true)),
+		func() -> void: hud.flash_message(Race.respawn_flash_text(true)),
 		func() -> void: hud.flash_message(tr("NEW LAP RECORD! %s") % "1:21.9"),
 	]
 	for i in flashes.size():
 		flashes[i].call()
 		await _inspect("hud/mesaj%d" % i, hud, obstacles.call(), dev)
 	dummy.queue_free()
-	# Fiecare provocare a carierei, cu progresul in forma regulii ei (cel mai
-	# lung caz: ultimul tur, multe evenimente), pe linia de deasupra barii.
-	for idx in QuickRaceTracks.indices():
-		var ch := Career.challenge_for(TrackInfo.for_track(idx).id)
-		if ch == null:
-			continue
-		hud.set_challenge(ch.title)
-		var progress := ""
-		match ch.rule:
-			CareerChallenge.Rule.AT_LEAST:
-				progress = "%d / %d" % [ch.count, ch.count]
-			CareerChallenge.Rule.EVERY_LAP:
-				progress = tr("LAP %d") % 3 + " ✓"
-			CareerChallenge.Rule.CLEAN_LAP:
-				progress = tr_n("LAP %d: %d PLATE", "LAP %d: %d PLATES", 12) % [3, 12]
-		hud.set_challenge_progress(progress)
-		await _inspect("hud/provocare_%s" % ch.track, hud, obstacles.call(), dev)
-	hud.set_challenge_failed()
-	await _inspect("hud/provocare_picata", hud, obstacles.call(), dev)
+	# Bonusul carierei (NO RETRY), pierdut: eticheta rosie de pe linia de
+	# deasupra barii (cea verde e deja in toate starile de mai sus).
+	hud.set_bonus_lost()
+	await _inspect("hud/bonus_pierdut", hud, obstacles.call(), dev)
 
 	# Pauza si setarile din pauza (fara randul de limba).
 	# Mesajele de mai sus se sting in 1,7 s; aici starile vin la doua cadre,
@@ -666,7 +651,7 @@ func _check_hud() -> void:
 	await _inspect("hud/campion", hud, [], dev)
 	_race.set("_champion_shown", false)
 	GameState.champ_active = false
-	# ...contratimpul (titlu + tintele) si cariera (locul, provocarea, punctele).
+	# ...contratimpul (titlu + tintele) si cariera (locul, bonusul, punctele).
 	_race.set("_career_medal", Career.MEDAL_SILVER)
 	_race.set("_ghost_saved", true)
 	var rows: Array[Dictionary] = []
@@ -675,9 +660,17 @@ func _check_hud() -> void:
 	await _inspect("hud/contratimp", hud, [], dev)
 	_race.set("_career_points", 4)
 	var no_rows: Array[Dictionary] = []
-	hud.show_results(tr("RESULTS — %s") % String(_race.call("_track_title")) + "\n"
-		+ String(_race.call("_career_points_text")), no_rows, "BACK TO CAREER")
-	await _inspect("hud/cariera", hud, [], dev)
+	# Cu bonusul pastrat si pierdut (randul punctelor ia ambele forme).
+	var bonus_stub := BonusTracker.new()
+	_race.set("_bonus_tracker", bonus_stub)
+	for kept in [true, false]:
+		_race.set("_bonus_kept", kept)
+		hud.show_results(tr("RESULTS — %s") % String(_race.call("_track_title")) + "\n"
+			+ String(_race.call("_career_points_text")), no_rows, "BACK TO CAREER")
+		await _inspect("hud/cariera_bonus_%s" % ("pastrat" if kept else "pierdut"),
+			hud, [], dev)
+	_race.set("_bonus_tracker", null)
+	bonus_stub.free()
 	# Cu masini castigate in cursa (randul NEW CAR, cele mai lungi nume).
 	hud.show_results(String(_race.call("_career_points_text")), no_rows, "BACK TO CAREER",
 		Race.new_cars_text([&"tow_truck", &"ambulance"]))

@@ -11,6 +11,10 @@ extends HBoxContainer
 ## Touch-first: butoane de 56 px inaltime (ca BACK si START), fara focus de
 ## tastatura, ca sa nu fure navigarea cu sageti de pe cartonasele de pista.
 
+## Jucatorul a ales alt nivel (dupa ce `GameState.ai_level` s-a schimbat). WORLD
+## CUP il asculta: nivelul alege ce save arata fiecare cupa.
+signal level_changed(level: int)
+
 ## Culoarea fiecarui nivel, ca medaliile.
 const LEVEL_COLORS: Array[Color] = [
 	Color(0.80, 0.52, 0.28), Color(0.76, 0.80, 0.86), Color(0.96, 0.79, 0.30),
@@ -98,3 +102,4 @@ func _select(level: int, save: bool) -> void:
 		GameState.ai_level = level
 		if persist:
 			GameState.save_settings()
+		level_changed.emit(level)

@@ -35,9 +35,10 @@ extends RefCounted
 ##   ghosts/<id>.bin Career   — fantomele contratimpului, GhostData v2 (masina pe
 ##                              id; v1 tinea indexul si se citeste prin V0_CAR_ORDER)
 ##   world_cup.cfg WorldCupSave — cupele WORLD CUP in desfasurare (CONTINUE),
-##                              `[meta] version=1`, sectiuni `cup:<WorldCup.id>`
-##                              cu adversarii si masina pe CarData.id si nivelul
-##                              AI pe numele fisierului de nivel (`aur`)
+##                              `[meta] version=1`, o sectiune per cupa si nivel
+##                              AI, `cup:<WorldCup.id>:<nivel>` (nivelul = numele
+##                              fisierului de nivel, `aur`), cu adversarii si
+##                              masina pe CarData.id
 ##   incarcare.cfg LoadingScreen — cache de durate pe numele scenei; nu e save
 ##                              (pierderea lui doar reface estimarea barei)
 ##   load_trace.txt GameState — urma ultimei incarcari (diagnostic)

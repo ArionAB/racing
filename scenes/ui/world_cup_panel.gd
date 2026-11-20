@@ -6,15 +6,22 @@ extends Control
 ## Pe ecran intreg, cu antet fix; doar continutul deruleaza. Acelasi tipar ca
 ## TrackSelectPanel si CareerPanel, al caror antet si cutii le refoloseste.
 ##
-## Cupa cu save (`WorldCupSave`, scris dupa fiecare cursa terminata): butonul
-## devine CONTINUE (acelasi loc, aceeasi marime), langa el un RESET mai mic, iar
-## sub titlu un rand de stare — „RACE 3 / 4  ·  2ND  ·  11 PTS  ·  AUTOBUZUL  ·
-## GOLD". RESET cere DOUA atingeri: prima il face SURE? (rosu) pentru
-## `RESET_CONFIRM_S`, a doua in fereastra sterge DOAR cupa aceea, iar cutia
-## revine pe START pe loc, fara dialog si fara reconstruirea panoului.
-## Selectorul de nivel AI de sus se aplica doar cupelor NOI: cupa reluata isi
-## pastreaza nivelul salvat. Cutiile se reimprospateaza de fiecare data cand
-## panoul devine vizibil (intoarcerea din cursa arata CONTINUE).
+## Save-urile (`WorldCupSave`, scrise dupa fiecare cursa terminata) sunt per
+## cupa SI per nivel AI, iar SELECTORUL de nivel de sus alege pe care il arata
+## fiecare cutie (20 nov 2026: o cupa inceputa pe BRONZE nu se termina pe GOLD).
+## Cu save pe nivelul ales, butonul devine CONTINUE (acelasi loc, aceeasi
+## marime), langa el un RESET mai mic, iar sub titlu un rand de stare —
+## „RACE 3 / 4  ·  2ND  ·  11 PTS  ·  AUTOBUZUL" (nivelul il arata selectorul).
+## Fara save pe nivelul ales: START, cupa noua pe nivelul acela, fara sa atinga
+## save-urile celorlalte niveluri. Daca cupa are save pe ALTE niveluri, un rand
+## stins o spune: „ALSO IN PROGRESS: GOLD" (doar informatie, nu buton).
+## RESET cere DOUA atingeri: prima il face SURE? (rosu) pentru
+## `RESET_CONFIRM_S`, a doua in fereastra sterge DOAR (cupa, nivelul ales), iar
+## cutia se reface pe loc, fara dialog si fara reconstruirea panoului. Schimbarea
+## nivelului dezarmeaza orice RESET armat: a doua atingere nu poate sterge alt
+## save decat cel la care se uita jucatorul. Cutiile se reimprospateaza la
+## schimbarea nivelului si de fiecare data cand panoul devine vizibil
+## (intoarcerea din cursa arata CONTINUE).
 
 signal back_pressed
 
@@ -26,18 +33,23 @@ const START_TEXT := "START"
 const CONTINUE_TEXT := "CONTINUE"
 const RESET_TEXT := "RESET"
 const RESET_CONFIRM_TEXT := "SURE?"
+const OTHER_LEVELS_PREFIX := "ALSO IN PROGRESS: "
 const RESET_ARMED_BG := Color(0.62, 0.13, 0.12)
 const RESET_ARMED_BORDER := Color(1.0, 0.42, 0.36)
 
 ## Butonul principal al fiecarei cupe (START / CONTINUE), in ordinea WORLD_CUPS.
 var _start_buttons: Array[Button] = []
-## cup.id -> {"cup", "primary", "reset", "status"}: nodurile care se schimba
-## la reimprospatare, fara sa se reconstruiasca cutia.
+## cup.id -> {"cup", "primary", "reset", "status", "others"}: nodurile care
+## se schimba la reimprospatare, fara sa se reconstruiasca cutia.
 var _boxes: Dictionary = {}
 ## cup.id -> generatia armarii RESET (0 = nearmat). Expirarea unei armari
 ## vechi nu are voie sa dezarmeze una noua.
 var _reset_armed: Dictionary = {}
+## cup.id -> nivelul pe care a fost armat RESET-ul. A doua atingere sterge doar
+## daca selectorul arata tot nivelul acela (plasa sub dezarmarea la schimbare).
+var _reset_level: Dictionary = {}
 var _reset_generation: int = 0
+var _selector: AiSkillSelector
 
 
 func _ready() -> void:
@@ -56,7 +68,9 @@ func _ready() -> void:
 
 	root.add_child(TrackSelectPanel.build_header("WORLD CUP", "CHOOSE A CUP",
 		back_pressed.emit))
-	root.add_child(AiSkillSelector.new())
+	_selector = AiSkillSelector.new()
+	_selector.level_changed.connect(_on_level_changed)
+	root.add_child(_selector)
 
 	var scroll := TouchScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -130,7 +144,14 @@ func _build_cup(cup: WorldCup) -> Control:
 	status.clip_text = true
 	status.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	column.add_child(status)
-	_boxes[cup.id] = {"cup": cup, "primary": start, "reset": reset, "status": status}
+	# Save-urile cupei pe ALTE niveluri decat cel ales (ascuns cand nu sunt).
+	var others := _label("", 18, TrackCard.TEXT_DIM)
+	others.name = "OtherLevelsLabel"
+	others.clip_text = true
+	others.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	column.add_child(others)
+	_boxes[cup.id] = {"cup": cup, "primary": start, "reset": reset, "status": status,
+		"others": others}
 
 	var tiles := HBoxContainer.new()
 	tiles.add_theme_constant_override("separation", 14)
@@ -263,7 +284,8 @@ func _style_reset(button: Button, accent: Color, armed: bool) -> void:
 	button.add_theme_stylebox_override("focus", focus)
 
 
-## Cutiile dupa save-ul de pe disc: START, sau CONTINUE + RESET + starea.
+## Cutiile dupa save-urile de pe disc, pe nivelul din selector: START, sau
+## CONTINUE + RESET + starea; plus randul celorlalte niveluri.
 func refresh() -> void:
 	for id: StringName in _boxes:
 		_refresh_box(_boxes[id])
@@ -271,48 +293,70 @@ func refresh() -> void:
 
 func _refresh_box(box: Dictionary) -> void:
 	var cup := box.cup as WorldCup
-	var entry := WorldCupSave.load_entry(cup)
+	var level := GameState.ai_level
+	var entry := WorldCupSave.load_entry(cup, level)
 	var primary := box.primary as Button
 	var status := box.status as Label
 	primary.text = CONTINUE_TEXT if entry != null else START_TEXT
 	(box.reset as Button).visible = entry != null
 	status.visible = entry != null
 	status.text = status_text(entry) if entry != null else ""
+	var others := box.others as Label
+	others.text = other_levels_text(WorldCupSave.levels_in_progress(cup), level)
+	others.visible = others.text != ""
 	_disarm(cup)
 
 
-## „RACE 3 / 4  ·  2ND  ·  11 PTS  ·  AUTOBUZUL  ·  GOLD": cursa care urmeaza,
-## locul jucatorului dupa puncte, punctele lui, masina cupei, nivelul AI.
+## „RACE 3 / 4  ·  2ND  ·  11 PTS  ·  AUTOBUZUL": cursa care urmeaza, locul
+## jucatorului dupa puncte, punctele lui, masina cupei. Nivelul nu: il arata
+## selectorul, si cutia arata mereu save-ul nivelului ales.
 static func status_text(entry: WorldCupSave.Entry) -> String:
 	var car := GameState.CAR_DATA[entry.player_car] as CarData
-	return "RACE %d / %d  ·  %s  ·  %d PTS  ·  %s  ·  %s" % [
+	return "RACE %d / %d  ·  %s  ·  %d PTS  ·  %s" % [
 		entry.next_race + 1, entry.cup.tracks.size(),
 		Race._ordinal(entry.player_rank()).to_upper(), entry.points[0],
-		car.display_name.to_upper(), AiSkill.LEVEL_NAMES[entry.ai_level]]
+		car.display_name.to_upper()]
 
 
-## START porneste o cupa noua; CONTINUE o reia pe cea salvata. Starea se
-## citeste la apasare, nu din eticheta: un save disparut intre timp porneste o
-## cupa noua in loc sa nu faca nimic.
+## „ALSO IN PROGRESS: BRONZE, GOLD" — nivelurile cu save in afara celui ales,
+## in ordinea nivelurilor; "" cand nu e niciunul.
+static func other_levels_text(levels: Array[int], selected: int) -> String:
+	var names := PackedStringArray()
+	for level in levels:
+		if level != selected:
+			names.append(AiSkill.LEVEL_NAMES[level])
+	return OTHER_LEVELS_PREFIX + ", ".join(names) if not names.is_empty() else ""
+
+
+## START porneste o cupa noua pe nivelul ales; CONTINUE o reia pe cea salvata
+## pe nivelul ales. Starea se citeste la apasare, nu din eticheta: un save
+## disparut intre timp porneste o cupa noua in loc sa nu faca nimic.
 func _on_primary_pressed(cup: WorldCup) -> void:
-	if not GameState.continue_championship(cup):
+	if not GameState.continue_championship(cup, GameState.ai_level):
 		GameState.start_championship(cup)
 
 
+## Alt nivel in selector: alte save-uri in cutii, iar orice RESET armat se
+## dezarmeaza (`_refresh_box`).
+func _on_level_changed(_level: int) -> void:
+	refresh()
+
+
 ## Prima atingere armeaza (SURE? pentru `RESET_CONFIRM_S`), a doua sterge
-## cupa — doar pe ea — si cutia revine pe START, pe loc.
+## save-ul (cupa, nivelul ales) — doar pe el — si cutia se reface pe loc.
 func _on_reset_pressed(cup: WorldCup) -> void:
 	var box: Dictionary = _boxes.get(cup.id, {})
 	if box.is_empty():
 		return
-	if is_reset_armed(cup):
-		WorldCupSave.erase(cup.id)
+	if is_reset_armed(cup) and int(_reset_level.get(cup.id, -1)) == GameState.ai_level:
+		WorldCupSave.erase(cup.id, GameState.ai_level)
 		_refresh_box(box)
 		(box.primary as Button).grab_focus()
 		return
 	_reset_generation += 1
 	var generation := _reset_generation
 	_reset_armed[cup.id] = generation
+	_reset_level[cup.id] = GameState.ai_level
 	var reset := box.reset as Button
 	reset.text = RESET_CONFIRM_TEXT
 	_style_reset(reset, cup.accent, true)

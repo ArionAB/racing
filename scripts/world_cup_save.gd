@@ -2,8 +2,12 @@ class_name WorldCupSave
 extends RefCounted
 ## Cupa WORLD CUP in desfasurare, pe disc (19 nov 2026, cererea dezvoltatorului:
 ## „un buton de continue si unul de reset"). Un fisier, `world_cup.cfg`, cu
-## cate o sectiune per cupa (`[cup:<WorldCup.id>]`): fiecare cutie din panou isi
-## are propria cupa de continuat.
+## cate o sectiune per cupa SI per nivel AI (`[cup:<WorldCup.id>:<nivel>]`):
+## Asia Cup pe BRONZE si Asia Cup pe GOLD sunt doua cupe in desfasurare, fiecare
+## cu cursa, punctele, adversarii si masina ei (20 nov 2026, cererea
+## dezvoltatorului: „sa nu poti juca prima harta pe bronz si apoi sa treci pe
+## aur"). Nivelul e DOAR in numele sectiunii — o singura sursa; selectorul de
+## nivel din panou alege ce save arata fiecare cutie.
 ##
 ## CAND se scrie (vezi `GameState.champ_save_progress`):
 ##   - la inregistrarea rezultatelor unei curse de cupa, cu `next_race` = cursa
@@ -18,21 +22,27 @@ extends RefCounted
 ## Tot pe ID STABIL (regula din `SaveSchema`): adversarii si masina jucatorului
 ## pe `CarData.id`, nivelul AI pe numele fisierului de nivel (`bronz` / `argint`
 ## / `aur`, din `AiSkill.LEVEL_PATHS`), cupa pe `WorldCup.id`. Un save care nu
-## se mai potriveste cu jocul (cupa, masina sau nivel necunoscut, alt numar de
-## adversari, cursa in afara cupei) e ca si ABSENT: fara CONTINUE, fara crash.
-## Sectiunea ramane pe disc, dormanta, pana la urmatorul RESET/final al cupei.
+## se mai potriveste cu jocul (masina necunoscuta, alt numar de adversari, cursa
+## in afara cupei) e ca si ABSENT: fara CONTINUE, fara crash. O sectiune cu cupa
+## sau nivel necunoscut nu se potriveste cu nicio cutie: ramane pe disc,
+## dormanta. Una nepotrivita ramane si ea, pana la urmatorul RESET/final.
 ## Un fisier cu versiune mai mare decat stim nu se citeste si nu se suprascrie
 ## (aceeasi regula ca `career.cfg`): cupele se joaca, doar nu se salveaza.
 ##
-## Exemplu (o cupa la a treia cursa, 5 adversari):
+## Exemplu (Asia Cup pe ARGINT la a treia cursa si pe AUR la a doua, 5
+## adversari):
 ##   [meta]
 ##   version=1
-##   [cup:asia_cup]
+##   [cup:asia_cup:argint]
 ##   next_race=2
 ##   points=[11, 7, 6, 3, 2, 1]
 ##   rivals=["bus", "taxi", "monster", "hotrod", "buggy"]
 ##   car="muscle"
-##   ai_level="aur"
+##   [cup:asia_cup:aur]
+##   next_race=1
+##   points=[2, 6, 5, 4, 3, 1]
+##   rivals=["police_sports", "hotrod", "buggy", "taxi", "tow_truck"]
+##   car="bus"
 
 const VERSION := 1
 const FILE_NAME := "world_cup.cfg"
@@ -54,7 +64,7 @@ class Entry:
 	## Indici in `GameState.CAR_DATA`, unul per slot AI.
 	var ai_cars: Array[int] = []
 	var player_car: int = 0
-	## Index in `AiSkill.LEVEL_PATHS`.
+	## Index in `AiSkill.LEVEL_PATHS`: nivelul din numele sectiunii.
 	var ai_level: int = 0
 
 	## Locul jucatorului dupa puncte: 1 + sloturile cu STRICT mai multe puncte.
@@ -79,27 +89,46 @@ static func is_read_only() -> bool:
 	return cfg.load(path()) == OK and SaveSchema.file_version(cfg) > VERSION
 
 
-## Cupa salvata, sau null (lipsa, fisier mai nou / stricat, sau save care nu
-## se mai potriveste cu jocul).
-static func load_entry(cup: WorldCup) -> Entry:
-	if cup == null:
+## Numele sectiunii (cupa, nivel): `cup:asia_cup:aur`; "" pentru un nivel in
+## afara listei.
+static func section_name(cup_id: StringName, level: int) -> String:
+	var lid := level_id(level)
+	if cup_id == &"" or lid == "":
+		return ""
+	return "%s%s:%s" % [SECTION_PREFIX, cup_id, lid]
+
+
+## Cupa salvata pe nivelul `level`, sau null (lipsa, fisier mai nou / stricat,
+## nivel necunoscut, sau save care nu se mai potriveste cu jocul).
+static func load_entry(cup: WorldCup, level: int) -> Entry:
+	var cfg := _open_for_read()
+	if cup == null or cfg == null:
 		return null
-	var cfg := ConfigFile.new()
-	if cfg.load(path()) != OK or SaveSchema.file_version(cfg) > VERSION:
-		return null
-	return _parse(cfg, cup)
+	return _parse(cfg, cup, level)
 
 
-static func has_entry(cup: WorldCup) -> bool:
-	return load_entry(cup) != null
+static func has_entry(cup: WorldCup, level: int) -> bool:
+	return load_entry(cup, level) != null
 
 
-## Scrie cupa dupa o cursa terminata. False daca n-a scris (fisier mai nou,
-## nivel necunoscut, eroare de disc).
-static func store(cup: WorldCup, next_race: int, points: Array[int],
-		ai_cars: Array[int], player_car: int, ai_level: int) -> bool:
-	var level := level_id(ai_level)
-	if cup == null or cup.id == &"" or level == "":
+## Nivelurile (in ordinea lor) pe care cupa are un save VALID.
+static func levels_in_progress(cup: WorldCup) -> Array[int]:
+	var out: Array[int] = []
+	var cfg := _open_for_read()
+	if cup == null or cfg == null:
+		return out
+	for level in AiSkill.LEVEL_PATHS.size():
+		if _parse(cfg, cup, level) != null:
+			out.append(level)
+	return out
+
+
+## Scrie cupa, pe nivelul ei, dupa o cursa terminata. False daca n-a scris
+## (fisier mai nou, nivel necunoscut, eroare de disc).
+static func store(cup: WorldCup, level: int, next_race: int, points: Array[int],
+		ai_cars: Array[int], player_car: int) -> bool:
+	var section := section_name(cup.id if cup != null else &"", level)
+	if section == "":
 		return false
 	var cfg := _open_for_write()
 	if cfg == null:
@@ -111,20 +140,21 @@ static func store(cup: WorldCup, next_race: int, points: Array[int],
 		rivals.append(String(SaveSchema.id_at(GameState.CAR_DATA, index)))
 	var plain_points: Array = []
 	plain_points.assign(points)
-	var section := SECTION_PREFIX + String(cup.id)
 	if cfg.has_section(section):
 		cfg.erase_section(section)
 	cfg.set_value(section, "next_race", next_race)
 	cfg.set_value(section, "points", plain_points)
 	cfg.set_value(section, "rivals", rivals)
 	cfg.set_value(section, "car", String(SaveSchema.id_at(GameState.CAR_DATA, player_car)))
-	cfg.set_value(section, "ai_level", level)
 	return cfg.save(path()) == OK
 
 
-## Sterge cupa `cup_id` (RESET, sau cupa terminata). Celelalte cupe raman.
-static func erase(cup_id: StringName) -> bool:
-	var section := SECTION_PREFIX + String(cup_id)
+## Sterge cupa `cup_id` de pe nivelul `level` (RESET, sau cupa terminata).
+## Celelalte cupe si celelalte niveluri ale aceleiasi cupe raman.
+static func erase(cup_id: StringName, level: int) -> bool:
+	var section := section_name(cup_id, level)
+	if section == "":
+		return false
 	var cfg := _open_for_write()
 	if cfg == null:
 		return false
@@ -141,13 +171,12 @@ static func level_id(level: int) -> String:
 	return AiSkill.LEVEL_PATHS[level].get_file().get_basename()
 
 
-static func level_of_id(id: String) -> int:
-	if id == "":
-		return -1
-	for i in AiSkill.LEVEL_PATHS.size():
-		if level_id(i) == id:
-			return i
-	return -1
+## Fisierul citit, sau null (lipsa, stricat, sau de la un build mai nou).
+static func _open_for_read() -> ConfigFile:
+	var cfg := ConfigFile.new()
+	if cfg.load(path()) != OK or SaveSchema.file_version(cfg) > VERSION:
+		return null
+	return cfg
 
 
 ## Fisierul existent (ca celelalte cupe sa ramana), sau unul gol; null daca e
@@ -166,14 +195,15 @@ static func _open_for_write() -> ConfigFile:
 	return cfg
 
 
-## Sectiunea cupei, validata camp cu camp. Orice nepotrivire -> null.
-static func _parse(cfg: ConfigFile, cup: WorldCup) -> Entry:
-	var section := SECTION_PREFIX + String(cup.id)
-	if not cfg.has_section(section):
+## Sectiunea (cupa, nivel), validata camp cu camp. Orice nepotrivire -> null.
+static func _parse(cfg: ConfigFile, cup: WorldCup, level: int) -> Entry:
+	var section := section_name(cup.id, level)
+	if section == "" or not cfg.has_section(section):
 		return null
 	var slots := GameState.ai_count + 1
 	var entry := Entry.new()
 	entry.cup = cup
+	entry.ai_level = level
 	var next: Variant = cfg.get_value(section, "next_race", null)
 	if typeof(next) != TYPE_INT or int(next) < 1 or cup.track_index(int(next)) < 0:
 		return null
@@ -202,11 +232,5 @@ static func _parse(cfg: ConfigFile, cup: WorldCup) -> Entry:
 		return null
 	entry.player_car = SaveSchema.index_of(GameState.CAR_DATA, StringName(car))
 	if entry.player_car < 0:
-		return null
-	var level: Variant = cfg.get_value(section, "ai_level", null)
-	if typeof(level) != TYPE_STRING and typeof(level) != TYPE_STRING_NAME:
-		return null
-	entry.ai_level = level_of_id(String(level))
-	if entry.ai_level < 0:
 		return null
 	return entry

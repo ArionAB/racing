@@ -289,6 +289,14 @@ run_step "Garajul: bare, masa si incadrarea vitrinei" garage.log 'probe_garage:'
 run_step "Serengeti: traversarile calca pe sol, cu fata inainte" hazard_ground.log 'VERDICT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeHazardGround.tscn -- --track=7
 run_step "Angkor: elefantul se intoarce doar vizual, cu fata inainte" hazard_ground_angkor.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeHazardGround.tscn -- --track=angkor
+# Angkor, templul prin care se trece (19 nov 2026, cererea dezvoltatorului): soseaua sta >= 85 m in
+# masiv, inchisa de tub, cu modelul ca singura piele, camera si intunericul puse, sala lata si
+# gongurile pe carosabil cu o trecere curata. Si gongul insusi: pendul fizic, masa decide, nu arunca
+# soferul. Amandoua au sabotaj pe fiecare contract (`-- --sabotaj=<nume>`).
+run_step "Angkor: soseaua trece prin templu, cu gongurile in el" angkor_templu.log 'VERDICT:' -- \
+	--headless --fixed-fps 60 --path . res://tools/ProbeAngkorTemplu.tscn
+run_step "Gongul de templu: masa decide, nu arunca soferul" gong.log 'PROBE GONG:' -- \
+	--headless --fixed-fps 60 --path . res://tools/ProbeGong.tscn
 run_step "Serengeti: animalele nu stau in copaci si stanci" animal_overlap.log 'VERDICT:|PICAT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeAnimalOverlap.tscn -- --track=7 --no-batch
 # Cariera pasul 1: config validat (cu sabotaj), persistenta pe pista, stampile

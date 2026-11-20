@@ -2443,6 +2443,8 @@ const CLASSES_ANGKOR := {
 	"aw_west_gopura": {"Gopura_Stone": _ANK_SANDSTONE},
 	"ta_prohm_tree_gate": {"TreeGate_Stone": _ANK_SANDSTONE},
 	"angkor_wat_temple": {"Temple_Stone": _ANK_SANDSTONE},
+	# Templul prin care se trece (19 nov 2026): acelasi contract de noduri, alt prefix.
+	"angkor_wat_drive": {"TempleDrive_Stone": _ANK_SANDSTONE},
 	"gallery_column": {"GalleryColumn_Stone": _ANK_SANDSTONE},
 	"gallery_roof": {"GalleryRoof_Stone": _ANK_SANDSTONE},
 	"gallery_relief_wall": {"GalleryRelief_Stone": _ANK_SANDSTONE},

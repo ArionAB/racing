@@ -13627,6 +13627,10 @@ var _tunnel_hall: Dictionary = {}
 ## lateral_max). Gol = tavan intreg (bit-identic). Plin doar pentru `TunnelSignalHazard.shaft_*`.
 var _tunnel_shaft: Dictionary = {}
 
+## Tuburile care NU se deseneaza, per tunel (aceeasi cheie): doar corp, vizualul vine dintr-un GLB
+## (`TunnelSignalHazard.tube_visible = false`, templul Angkor). Gol = toate desenate (bit-identic).
+var _tunnel_hidden: Dictionary = {}
+
 
 ## Tunelurile declarate ca noduri [TunnelSignalHazard], in aceleasi patru
 ## numere. Cautare recursiva si manuala, ca la varfuri.
@@ -13654,6 +13658,8 @@ func _collect_tunnels(node: Node, out: Array[Vector4]) -> void:
 				_tunnel_frame_class[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = sig.frame_class
 			if sig.wing_end_height_m >= 0.0:
 				_tunnel_wing_end_h[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = sig.wing_end_height_m
+			if not sig.tube_visible:
+				_tunnel_hidden[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = true
 			if sig.hall_ceiling > 0.0 and sig.hall_to_m > sig.hall_from_m:
 				_tunnel_hall[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = Vector3(
 					sig.hall_from_m, sig.hall_to_m, sig.hall_ceiling)
@@ -13826,8 +13832,9 @@ func _build_tunnel(spec: Vector4) -> void:
 			float(_tunnel_wing_end_h.get(spec.x, TUNNEL_WING_HEIGHT_M)))
 
 	rock.generate_normals()
+	var drawn := not _tunnel_hidden.has(spec.x)
 	_add_mesh_with_collision(rock.commit(), Color.WHITE, null, 0.9, 0.5,
-		BaseMaterial3D.CULL_DISABLED, null, null, true,
+		BaseMaterial3D.CULL_DISABLED, null, null, drawn,
 		Palette.triplanar_class_material(String(_tunnel_tube_class.get(spec.x, "wet_gneiss"))),
 		"TunnelBore")
 	concrete.generate_normals()
@@ -13836,7 +13843,7 @@ func _build_tunnel(spec: Vector4) -> void:
 	var frame_cls := String(_tunnel_frame_class.get(spec.x, ""))
 	_add_mesh_with_collision(concrete.commit(), Palette.color(Palette.CONCRETE),
 		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
-		null, null, true,
+		null, null, drawn,
 		Palette.triplanar_class_material(frame_cls) if frame_cls != "" else null,
 		"TunnelPortal")
 	if shaft_k0 >= 0:

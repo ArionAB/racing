@@ -17,10 +17,14 @@ def parse(path):
     m = re.search(r"ejectari: (\d+) \(perete (\d+), aterizare (\d+)\)", t)
     d["ejectari"] = int(m[1]) if m else None
     d["blocaje"] = len(re.findall(r"^\[blocaj\]", t, re.M))
+    # Ferestrele sunt pe traseul prin templu (19 nov 2026, 207 puncte de control): A <= 0.056,
+    # B (templul) 0.056-0.135, E 0.42-0.51.
     d["blocaje_E"] = len([x for x in re.findall(r"^\[blocaj\].*?frac=([\d.]+)", t, re.M)
-                          if 0.40 <= float(x) <= 0.50])
+                          if 0.42 <= float(x) <= 0.51])
     d["blocaje_A"] = len([x for x in re.findall(r"^\[blocaj\].*?frac=([\d.]+)", t, re.M)
-                          if float(x) <= 0.08])
+                          if float(x) <= 0.056])
+    d["blocaje_B"] = len([x for x in re.findall(r"^\[blocaj\].*?frac=([\d.]+)", t, re.M)
+                          if 0.056 < float(x) <= 0.135])
     m = re.search(r"galerie: treceri=(\d+) striviri_galerie=(\d+)", t)
     if m:
         d["gal_treceri"], d["gal_striviri"] = int(m[1]), int(m[2])
@@ -66,7 +70,7 @@ na = sys.argv[3] if len(sys.argv) > 3 else "A"
 nb = sys.argv[4] if len(sys.argv) > 4 else "B"
 ra, rb = summarize(A), summarize(B)
 print(f"seed-uri: {na} {len(ra)}, {nb} {len(rb)}")
-keys = ["tur_min", "tur_med", "repuneri", "ejectari", "blocaje", "blocaje_A", "blocaje_E", "pereti_E",
+keys = ["tur_min", "tur_med", "repuneri", "ejectari", "blocaje", "blocaje_A", "blocaje_B", "blocaje_E", "pereti_E",
         "gal_treceri", "gal_striviri", "zboruri", "airtime", "elefant_s", "perdea_treceri",
         "perdea_med", "perdea_min", "perdea_sub98", "perdea_rafale", "erori"]
 print(f"{'metrica':16s} | {na:>28s} | {nb:>28s}")

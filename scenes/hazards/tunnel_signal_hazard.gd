@@ -452,6 +452,15 @@ func _build_bus() -> void:
 @export var shaft_to_m: float = 0.0
 @export var shaft_lateral: Vector2 = Vector2(-3.5, 2.5)
 
+## Tubul se DESENEAZA? `false` (Angkor, templul prin care se trece, 19 nov 2026): tubul ramane
+## doar corp — peretii pe marginea soselei, tavanul, capacele, ramele si aripile portalurilor —
+## iar tot ce se vede vine dintr-un GLB modelat in jurul lui (`angkor_wat_drive.glb`, construit
+## din geometria exportata de `tools/probe_angkor_temple_shell.gd`). Asa interiorul poate avea
+## nise, ferestre si bolta in trepte, pe care un tub extrudat nu le are, fara ca vreun perete
+## desenat sa fie altundeva decat peretele in care se loveste masina. Zona de camera si
+## intunericul raman. `true` (implicit) = ca inainte, bit-identic pe toate celelalte piste.
+@export var tube_visible: bool = true
+
 ## Pe ce banda a tunelului merge autocarul, fata de AXA drumului (m, semn
 ## local X — acelasi semn ca `TrackRoute.side_at` / `lateral_distance`:
 ## POZITIV = dreapta SENSULUI de mers al masinilor, NEGATIV = stanga).

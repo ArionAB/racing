@@ -11069,6 +11069,8 @@ func _build_branch_fence(r: TrackRoute) -> void:
 	for side_sign: float in [-1.0, 1.0]:
 		# Stalpii unei laturi; `null` acolo unde stalpul ar cadea pe sosea.
 		var posts: Array = []
+		# Piciorul peretelui la fiecare stalp (vezi `_fence_wall_foot`).
+		var feet: Array = []
 		# Primul si ultimul stalp ASEZAT pe latura asta (nu capetele benzii):
 		# latura dinspre sosea incepe mai tarziu, iar peretele trebuie sa se
 		# retraga fata de stalpul ei real, nu fata de `trim`.
@@ -11079,6 +11081,7 @@ func _build_branch_fence(r: TrackRoute) -> void:
 			var p := _fence_point(r, d, lat * side_sign)
 			var ok := _branch_rail_clear(p)
 			posts.append(p if ok else null)
+			feet.append(_fence_wall_foot(r, d, lat * side_sign, p))
 			if ok:
 				d_first = minf(d_first, d)
 				d_last = maxf(d_last, d)
@@ -11106,10 +11109,11 @@ func _build_branch_fence(r: TrackRoute) -> void:
 			# Peretele: doar intre `lead` de la primul si ultimul stalp.
 			var d0 := trim + step * float(k)
 			if solid and d0 >= d_first + lead - 0.01 					and d0 + step <= d_last - lead + 0.01:
-				var down := Vector3.UP * BRANCH_FENCE_WALL_SINK
 				var up := Vector3.UP * BRANCH_FENCE_WALL_H
-				walls.add_vertex(p - down); walls.add_vertex(p + up); walls.add_vertex(q - down)
-				walls.add_vertex(p + up); walls.add_vertex(q + up); walls.add_vertex(q - down)
+				var pb: Vector3 = feet[k]
+				var qb: Vector3 = feet[k + 1]
+				walls.add_vertex(pb); walls.add_vertex(p + up); walls.add_vertex(qb)
+				walls.add_vertex(p + up); walls.add_vertex(q + up); walls.add_vertex(qb)
 				any_wall = true
 	var holder := Node3D.new()
 	holder.name = "BranchFence_%s" % r.label
@@ -11139,6 +11143,34 @@ func _build_branch_fence(r: TrackRoute) -> void:
 		walls.generate_normals()
 		_add_mesh_with_collision(walls.commit(), Color.WHITE, null, 1.0, 0.5,
 			BaseMaterial3D.CULL_DISABLED, null, null, false, null, "BranchFence")
+
+
+## Piciorul peretelui gardului: sub suprafata benzii cu BRANCH_FENCE_WALL_SINK,
+## dar si pana sub TEREN, daca terenul de langa banda e mai jos.
+##
+## De ce pana la teren: o banda de pamant e o foaie de coliziune, fara volum. Pe
+## dig, unde terenul de alaturi e cu 0,5-1,3 m mai jos (golful dintre banda si
+## sosea, adancit de sapatura benzii), sub marginea foii ramane un gol in care
+## intra o masina venita pe dedesubt — si ramane acolo. Masurat cu ProbeRace pe
+## Ha Long (nov 2026, 8 seed-uri): 10 blocaje la (-133, -236), toate „atinge:
+## BranchDirt, TerrainBody", 0 pe main. Peretele coborat pana in teren e
+## flancul digului: inchide golul pe toata lungimea gardului.
+##
+## Terenul se citeste si la FENCE_WALL_PROBE m in afara liniei gardului: sub
+## banda insasi terenul e ridicat/sapat la cota ei, deci golul se vede abia
+## dincolo de margine.
+func _fence_wall_foot(r: TrackRoute, d: float, lat: float, p: Vector3) -> Vector3:
+	var y := p.y - BRANCH_FENCE_WALL_SINK
+	if _sampler != null:
+		var out_lat := lat + signf(lat) * FENCE_WALL_PROBE
+		var o := _fence_point(r, d, out_lat)
+		var g := minf(_sampler.ground_y(p.x, p.z), _sampler.ground_y(o.x, o.z))
+		y = minf(y, g - BRANCH_FENCE_WALL_SINK)
+	return Vector3(p.x, y, p.z)
+
+
+## Vezi `_fence_wall_foot`.
+const FENCE_WALL_PROBE: float = 1.5
 
 
 ## Nodurile de mesh ale unui GLB de gard, pe nume: [mesh, transformul local].

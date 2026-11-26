@@ -241,6 +241,12 @@ const ROUTE_FILM_OVER: float = 0.12
 ## exact „banda albastra peste scurtatura" din verdictul de la volan. Peretii
 ## laterali ai foii stau astfel sub marginea coborata a benzii, nevazuti.
 const ROUTE_FILM_INSET: float = 0.3
+## Adancimea apei pe dig la maree plina, in unitatile shaderului marii (alfa de
+## vertex): mica, ca sa iasa jadul de langa mal, nu albastrul de larg.
+const ROUTE_FILM_DEPTH: float = 0.3
+## Pe cati metri de la capetele foii adancimea urca de la spuma la
+## ROUTE_FILM_DEPTH.
+const ROUTE_FILM_FADE: float = 10.0
 ## Cat sta pelicula de „banda uda" peste planul benzii (m).
 const ROUTE_PUDDLE_LIFT: float = 0.05
 ## Cati metri de langa soseaua principala raman fara apa (capetele benzii stau
@@ -289,13 +295,21 @@ func fit_to_route(track: Node3D) -> void:
 	film.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var puddle := SurfaceTool.new()
 	puddle.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var deep := Color(0.30, 0.55, 0.90, 1.0)
 	var shallow := Color(0.30, 0.55, 0.90, FILM_DEPTH)
+	# Adancimea foii (alfa = contractul shaderului marii): de la `FILM_DEPTH`
+	# la capete (nisip ud cu spuma, deci capatul taiat drept nu se vede ca o
+	# muchie) la ROUTE_FILM_DEPTH pe ROUTE_FILM_FADE metri. Apa de pe dig e mica:
+	# cu adancime 1 iesea albastrul de larg, nu jadul de langa mal.
+	var d_first: float = r.dists[keep[0]]
+	var d_last: float = r.dists[keep[keep.size() - 1]]
 	var prev: Array = []
 	for i: int in keep:
 		var c: Vector3 = track.to_global(r.baked[i])
 		var side: Vector3 = (track.global_transform.basis * r.side_at(i)).normalized()
 		var top_y: float = c.y + ROUTE_FILM_OVER
+		var from_end: float = minf(r.dists[i] - d_first, d_last - r.dists[i])
+		var col := Color(0.30, 0.55, 0.90, lerpf(FILM_DEPTH, ROUTE_FILM_DEPTH,
+			smoothstep(0.0, ROUTE_FILM_FADE, from_end)))
 		var row := [
 			_local_at(c - side * hw, top_y), _local_at(c + side * hw, top_y),
 			_local_at(c - side * hw, 0.0), _local_at(c + side * hw, 0.0),
@@ -308,11 +322,14 @@ func fit_to_route(track: Node3D) -> void:
 			var out_l: Vector3 = row[0] - row[1]
 			out_l.y = 0.0
 			out_l = out_l.normalized()
-			_quad(film, prev[0], row[0], prev[1], row[1], Vector3.UP, deep)
-			_quad(film, prev[2], row[2], prev[0], row[0], out_l, deep)
-			_quad(film, prev[1], row[1], prev[3], row[3], -out_l, deep)
-			_quad(puddle, prev[4], row[4], prev[5], row[5], Vector3.UP, shallow)
+			var pc: Color = prev[7]
+			_quad(film, prev[0], row[0], prev[1], row[1], Vector3.UP, pc, col)
+			_quad(film, prev[2], row[2], prev[0], row[0], out_l, pc, col)
+			_quad(film, prev[1], row[1], prev[3], row[3], -out_l, pc, col)
+			_quad(puddle, prev[4], row[4], prev[5], row[5], Vector3.UP,
+				shallow, shallow)
 		row.append(i)
+		row.append(col)
 		prev = row
 	var film_mesh := film.commit()
 	var puddle_mesh := puddle.commit()
@@ -344,23 +361,24 @@ func _local_at(p: Vector3, y_over_sea: float) -> Vector3:
 ## in care a fost desenata banda, iar shaderul marii e `cull_back`, deci o fata
 ## intoarsa ar fi apa invizibila exact din masina. Fata din fata in Godot e cea
 ## cu varfurile in sensul acelor de ceas, adica normala (c - a) x (b - a).
+## `c0` = culoarea randului precedent (a0, b0), `c1` = a randului curent.
 static func _quad(st: SurfaceTool, a0: Vector3, a1: Vector3, b0: Vector3,
-		b1: Vector3, want: Vector3, col: Color) -> void:
-	_tri(st, a0, a1, b0, want, col)
-	_tri(st, b0, a1, b1, want, col)
+		b1: Vector3, want: Vector3, c0: Color, c1: Color) -> void:
+	_tri(st, [a0, a1, b0], [c0, c1, c0], want)
+	_tri(st, [b0, a1, b1], [c0, c1, c1], want)
 
 
-static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3,
-		want: Vector3, col: Color) -> void:
-	var front := (c - a).cross(b - a)
-	if front.dot(want) < 0.0:
-		var t := b
-		b = c
-		c = t
-	for v: Vector3 in [a, b, c]:
-		st.set_color(col)
+static func _tri(st: SurfaceTool, v: Array, c: Array, want: Vector3) -> void:
+	var a: Vector3 = v[0]
+	var b: Vector3 = v[1]
+	var d: Vector3 = v[2]
+	var order := [0, 1, 2]
+	if (d - a).cross(b - a).dot(want) < 0.0:
+		order = [0, 2, 1]
+	for k: int in order:
+		st.set_color(c[k])
 		st.set_normal(want)
-		st.add_vertex(v)
+		st.add_vertex(v[k])
 
 
 ## Apa de maree taie grip-ul, dar NU imbranceste: nu e un val care trece, e o

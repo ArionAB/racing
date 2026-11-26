@@ -11071,6 +11071,8 @@ func _build_branch_fence(r: TrackRoute) -> void:
 		var posts: Array = []
 		# Piciorul peretelui la fiecare stalp (vezi `_fence_wall_foot`).
 		var feet: Array = []
+		# Marginea benzii in dreptul fiecarui stalp: de acolo coboara fusta.
+		var edges: Array = []
 		# Primul si ultimul stalp ASEZAT pe latura asta (nu capetele benzii):
 		# latura dinspre sosea incepe mai tarziu, iar peretele trebuie sa se
 		# retraga fata de stalpul ei real, nu fata de `trim`.
@@ -11082,6 +11084,7 @@ func _build_branch_fence(r: TrackRoute) -> void:
 			var ok := _branch_rail_clear(p)
 			posts.append(p if ok else null)
 			feet.append(_fence_wall_foot(r, d, lat * side_sign, p))
+			edges.append(_fence_point(r, d, (r.half_width + 0.02) * side_sign))
 			if ok:
 				d_first = minf(d_first, d)
 				d_last = maxf(d_last, d)
@@ -11114,6 +11117,17 @@ func _build_branch_fence(r: TrackRoute) -> void:
 				var qb: Vector3 = feet[k + 1]
 				walls.add_vertex(pb); walls.add_vertex(p + up); walls.add_vertex(qb)
 				walls.add_vertex(p + up); walls.add_vertex(q + up); walls.add_vertex(qb)
+				# FUSTA digului: de la marginea benzii pana sub teren. Peretele de
+				# mai sus sta pe linia stalpilor, cu 0,4 m in interiorul marginii,
+				# deci sub foaia benzii ramanea o streasina de 0,4 m: o masina venita
+				# din golful de alaturi intra cu acoperisul sub ea si se intepenea
+				# (masurat: tot blocajele la (-133, -236), dupa coborarea peretelui).
+				var pe: Vector3 = edges[k]
+				var qe: Vector3 = edges[k + 1]
+				var pef := Vector3(pe.x, pb.y, pe.z)
+				var qef := Vector3(qe.x, qb.y, qe.z)
+				walls.add_vertex(pef); walls.add_vertex(pe); walls.add_vertex(qef)
+				walls.add_vertex(pe); walls.add_vertex(qe); walls.add_vertex(qef)
 				any_wall = true
 	var holder := Node3D.new()
 	holder.name = "BranchFence_%s" % r.label

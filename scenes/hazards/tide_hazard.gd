@@ -73,6 +73,17 @@ enum Phase {JOS, URCA, SUS, COBOARA}
 ## golful Tonkin e 3-4 m; in joc e „scara e decizie" (§8) — 1.5 m e destul ca
 ## banda sa fie impracticabila si putin pentru ca pereţii sa nu para inundati.
 @export_range(0.3, 4.0, 0.1) var rise_m: float = 1.5
+## Plafonul de viteza prin apa, din plafonul NOMINAL al masinii (cererea
+## dezvoltatorului, 26 nov 2026: „80% din viteza cat conduci prin apa"). Cu
+## digul imprejmuit, alunecarea singura nu mai costa nimic — gardul te tine pe
+## banda — deci banda inundata era aproape gratis. Taie si turbo-ul (vezi
+## `Car._current_max_speed`).
+##
+## 0.70, nu 0.80, MASURAT (`ProbeMareeVad`): pe digul uscat masinile nu-si
+## ating plafonul nominal (taxi 30.0 din 35 m/s, cu gaz tinut), deci un plafon
+## de 0.80 (28 m/s) costa doar ~7%. Cu 0.70 viteza prin apa iese 81-82% din cea
+## de pe uscat (taxi, buggy) si 87% la autobuz, care e oricum mai lent pe dig.
+@export_range(0.3, 1.0, 0.05) var wade_speed_factor: float = 0.7
 
 signal phase_changed(phase: Phase)
 
@@ -252,6 +263,10 @@ const ROUTE_PUDDLE_LIFT: float = 0.05
 ## Cati metri de langa soseaua principala raman fara apa (capetele benzii stau
 ## pe axa soselei: apa de pe banda nu trebuie sa curga peste asfaltul buclei).
 const ROUTE_ROAD_CLEAR: float = 1.0
+## Lungimea unei cutii din zona de pe banda (m) si inaltimea ei: de la 0.5 m sub
+## banda pana peste apa plina si acoperisul masinii.
+const ZONE_SEG_M: float = 8.0
+const ZONE_HEIGHT: float = 4.0
 
 
 ## Muleaza apa pe banda REALA, pe care o construieste pista (`Track.routes`).
@@ -268,8 +283,9 @@ const ROUTE_ROAD_CLEAR: float = 1.0
 ## marii la orice nivel, marginea de sus urca cu nivelul. Doar amprenta se
 ## schimba: o panglica pe banda, intre garduri, cu pereti laterali pana la mare.
 ##
-## Zona de aderenta (`_zone`) ramane cutia de pe coarda: e gameplay, nu vizual,
-## si nu se schimba odata cu decorul.
+## Zona care te prinde (`_zone`: alunecare + plafon de viteza) urmeaza si ea
+## banda, din 26 nov 2026 (vezi `_fit_zone`): de cand apa te si franeaza,
+## nepotrivirea dintre ce vezi si ce te prinde nu mai e un detaliu.
 func fit_to_route(track: Node3D) -> void:
 	var routes: Array = track.get("routes")
 	if routes == null or branch_index >= routes.size():
@@ -289,6 +305,7 @@ func fit_to_route(track: Node3D) -> void:
 			keep.append(i)
 	if keep.size() < 3:
 		return
+	_fit_zone(track, r, keep)
 	var hw: float = r.half_width - ROUTE_FILM_INSET
 	var phw: float = r.half_width - ROUTE_FILM_INSET
 	var film := SurfaceTool.new()
@@ -347,6 +364,55 @@ func fit_to_route(track: Node3D) -> void:
 	_update_film()
 
 
+## Zona care te prinde (alunecare + plafon) pe banda REALA, nu pe coarda.
+##
+## Cutia veche statea pe coarda dreapta dintre capete, iar banda se arcuieste
+## ~6 m in afara ei: la capete erai in apa cu aderenta plina, sau iti taia
+## aderenta pe uscat. Pe un hazard de timing, ce vezi trebuie sa fie ce te
+## prinde (vezi `WaterHazard._build_wet_patch`) — deci zona urmeaza aceleasi
+## puncte ca foaia: o cutie la ~`ZONE_SEG_M` metri, latimea intreaga a benzii.
+func _fit_zone(track: Node3D, r, keep: Array[int]) -> void:
+	if _zone == null:
+		return
+	for c in _zone.get_children():
+		_zone.remove_child(c)
+		c.queue_free()
+	var inv := global_transform.affine_inverse()
+	var i0: int = keep[0]
+	var prev: int = keep[0]
+	for k in range(1, keep.size()):
+		var i: int = keep[k]
+		var gap: bool = i != prev + 1
+		var last: bool = k == keep.size() - 1
+		var end_i: int = prev if gap else i
+		if gap or last or r.dists[i] - r.dists[i0] >= ZONE_SEG_M:
+			_add_zone_box(track, r, i0, end_i, inv)
+			i0 = i if gap else end_i
+		prev = i
+
+
+func _add_zone_box(track: Node3D, r, i0: int, i1: int, inv: Transform3D) -> void:
+	if i1 <= i0:
+		return
+	var a: Vector3 = track.to_global(r.baked[i0])
+	var b: Vector3 = track.to_global(r.baked[i1])
+	var fwd := b - a
+	fwd.y = 0.0
+	if fwd.length() < 0.1:
+		return
+	var box := BoxShape3D.new()
+	# +1 m pe lungime: cutiile vecine se suprapun, ca un viraj sa nu lase
+	# o pana uscata intre ele.
+	box.size = Vector3(r.half_width * 2.0, ZONE_HEIGHT, fwd.length() + 1.0)
+	var shape := CollisionShape3D.new()
+	shape.shape = box
+	# Ca la `_build_wet_patch`: cutia incepe cu o jumatate de metru sub banda.
+	var center := (a + b) * 0.5 + Vector3.UP * (ZONE_HEIGHT * 0.5 - 0.5)
+	shape.transform = inv * Transform3D(
+		Basis.looking_at(fwd.normalized(), Vector3.UP), center)
+	_zone.add_child(shape)
+
+
 ## Un punct de lume in coordonatele foii, cu cota data fata de MARE (y = 0 pe
 ## cota marii), cum o cere scalarea de la baza din `_update_film`.
 func _local_at(p: Vector3, y_over_sea: float) -> Vector3:
@@ -381,11 +447,12 @@ static func _tri(st: SurfaceTool, v: Array, c: Array, want: Vector3) -> void:
 		st.add_vertex(v[k])
 
 
-## Apa de maree taie grip-ul, dar NU imbranceste: nu e un val care trece, e o
-## foaie care sta. (Valul de pe Okinawa impinge si franeaza — vezi
-## `WaveSurge._touch_car`.)
+## Apa de maree taie grip-ul si te tine in loc (plafon la `wade_speed_factor`),
+## dar NU imbranceste: nu e un val care trece, e o foaie care sta. (Valul de pe
+## Okinawa impinge — vezi `WaveSurge._touch_car`.)
 func _touch_car(car: Car, _delta: float) -> void:
 	car.apply_slip()
+	car.apply_wade(wade_speed_factor)
 
 
 # ---------------------------------------------------------- poarta de banda

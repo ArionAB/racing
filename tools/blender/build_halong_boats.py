@@ -299,8 +299,13 @@ def build_junk():
         h1 = 1.30 + (1.0 - t1) * 1.00
         y0 = 1.10 + t0 * 0.70
         y1 = 1.10 + t1 * 0.70
-        sl.prism([(-h0, y0), (h0, y0), (h1, y1), (-h1, y1)], 0.06, HL_SAIL,
-                 center=(0.0, 0.0, (z0 + z1) * 0.5))
+        # Conturul lui `prism` e in planul XZ (x, z), extrudat pe Y. Prima
+        # versiune dadea (x, y) drept contur si centrul pe z: fiecare panou iesea
+        # o FASIE orizontala de 0,18 m, ridicata cu y0 peste verga — vazuta de
+        # pe sosea (nov 2026, digul de maree), jonca avea catargul gol si cateva
+        # dungi rosii in aer. Panoul real umple golul dintre doua vergi.
+        sl.prism([(-h0, z0), (h0, z0), (h1, z1), (-h1, z1)], 0.06, HL_SAIL,
+                 center=(0.0, (y0 + y1) * 0.5, 0.0))
     o_sail = sl.to_object("Sail")
 
     objs = [o_hull, o_sail, o_rig]

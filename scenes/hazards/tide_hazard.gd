@@ -80,6 +80,9 @@ var _time: float = 0.0
 var _phase: Phase = Phase.URCA
 var _level: float = 0.0
 var _film: MeshInstance3D
+## Foaia a fost reconstruita PE BANDA (`fit_to_route`): mesh-ul are baza la
+## cota marii (y = 0 local), deci se scaleaza de la baza, nu din centru.
+var _film_on_route: bool = false
 
 
 func _ready() -> void:
@@ -168,7 +171,11 @@ func _update_film() -> void:
 	# la `k` sta la `k * rise_m / 2` peste baza, nu la `rise_m / 2`.
 	var k := maxf(_level, 0.001)
 	_film.scale.y = k
-	_film.position.y = _sea_offset_y() + k * rise_m * 0.5
+	if _film_on_route:
+		# Mesh-ul are baza la y = 0, deci baza ramane pe mare la orice `k`.
+		_film.position.y = _sea_offset_y()
+	else:
+		_film.position.y = _sea_offset_y() + k * rise_m * 0.5
 
 
 ## Cota marii in coordonatele LOCALE ale hazardului. Nodul `Maree` sta la 1.493
@@ -222,6 +229,138 @@ func apply_film_material(mat: Material) -> void:
 		var mi := c as MeshInstance3D
 		if mi != null:
 			mi.material_override = mat
+
+
+## Cat trece apa peste planul benzii la maree plina (m). Destul ca banda sa
+## para acoperita, putin cat stalpii gardului (1,25 m) sa ramana in apa pana
+## la genunchi, nu ingropati — se vede pe unde era drumul.
+const ROUTE_FILM_OVER: float = 0.12
+## Cat de IN INTERIORUL marginii benzii sta marginea foii (m). Apa ramane intre
+## garduri, pe drum: o foaie mai lata decat banda iesea, pe portiunea de dig
+## peste mare, ca o placa albastra ridicata la 1,7 m peste apa adevarata —
+## exact „banda albastra peste scurtatura" din verdictul de la volan. Peretii
+## laterali ai foii stau astfel sub marginea coborata a benzii, nevazuti.
+const ROUTE_FILM_INSET: float = 0.3
+## Cat sta pelicula de „banda uda" peste planul benzii (m).
+const ROUTE_PUDDLE_LIFT: float = 0.05
+## Cati metri de langa soseaua principala raman fara apa (capetele benzii stau
+## pe axa soselei: apa de pe banda nu trebuie sa curga peste asfaltul buclei).
+const ROUTE_ROAD_CLEAR: float = 1.0
+
+
+## Muleaza apa pe banda REALA, pe care o construieste pista (`Track.routes`).
+##
+## De ce: foaia si pelicula erau o cutie si o elipsa DREPTE, pe coarda benzii
+## (`span_m` x `lane_width`), cu nodul pus la mijlocul ei. Banda e insa o curba:
+## capetele ei stau la ~6 m lateral de coarda. Cat timp banda era ingropata sub
+## nisipul platoului (masurat, nov 2026: terenul la 1,65-1,88 m, banda la
+## 1,43-1,53), nici apa nu se vedea, deci nepotrivirea nu se vedea nici ea. De
+## cand banda e un dig de pamant deasupra platoului, apa dreapta iesea pe
+## langa drum, peste nisip.
+##
+## Contractul foii ramane acelasi (sonda `probe_maree`, garda 7): baza pe cota
+## marii la orice nivel, marginea de sus urca cu nivelul. Doar amprenta se
+## schimba: o panglica pe banda, intre garduri, cu pereti laterali pana la mare.
+##
+## Zona de aderenta (`_zone`) ramane cutia de pe coarda: e gameplay, nu vizual,
+## si nu se schimba odata cu decorul.
+func fit_to_route(track: Node3D) -> void:
+	var routes: Array = track.get("routes")
+	if routes == null or branch_index >= routes.size():
+		return
+	var r = routes[branch_index]
+	var main = routes[0]
+	var n: int = r.count()
+	if n < 3:
+		return
+	# Punctele benzii care NU stau pe soseaua principala: capetele benzii sunt
+	# pe axa buclei, iar apa nu trebuie sa curga peste asfalt.
+	var keep: Array[int] = []
+	for i in n:
+		var g: Vector3 = track.to_global(r.baked[i])
+		var mi: int = main.closest_index_global(r.baked[i])
+		if main.lateral_distance(mi, r.baked[i]) 				> float(track.call("width_at_index", mi)) + r.half_width * 0.5 				+ ROUTE_ROAD_CLEAR:
+			keep.append(i)
+	if keep.size() < 3:
+		return
+	var hw: float = r.half_width - ROUTE_FILM_INSET
+	var phw: float = r.half_width - ROUTE_FILM_INSET
+	var film := SurfaceTool.new()
+	film.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var puddle := SurfaceTool.new()
+	puddle.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var deep := Color(0.30, 0.55, 0.90, 1.0)
+	var shallow := Color(0.30, 0.55, 0.90, FILM_DEPTH)
+	var prev: Array = []
+	for i: int in keep:
+		var c: Vector3 = track.to_global(r.baked[i])
+		var side: Vector3 = (track.global_transform.basis * r.side_at(i)).normalized()
+		var top_y: float = c.y + ROUTE_FILM_OVER
+		var row := [
+			_local_at(c - side * hw, top_y), _local_at(c + side * hw, top_y),
+			_local_at(c - side * hw, 0.0), _local_at(c + side * hw, 0.0),
+			to_local(c - side * phw + Vector3.UP * ROUTE_PUDDLE_LIFT),
+			to_local(c + side * phw + Vector3.UP * ROUTE_PUDDLE_LIFT),
+		]
+		if not prev.is_empty() and i == int(prev[6]) + 1:
+			# Fata de sus (in sus), apoi peretii laterali (spre exterior).
+			# Shaderul marii e `cull_back`: winding-ul decide daca se vede.
+			var out_l: Vector3 = row[0] - row[1]
+			out_l.y = 0.0
+			out_l = out_l.normalized()
+			_quad(film, prev[0], row[0], prev[1], row[1], Vector3.UP, deep)
+			_quad(film, prev[2], row[2], prev[0], row[0], out_l, deep)
+			_quad(film, prev[1], row[1], prev[3], row[3], -out_l, deep)
+			_quad(puddle, prev[4], row[4], prev[5], row[5], Vector3.UP, shallow)
+		row.append(i)
+		prev = row
+	var film_mesh := film.commit()
+	var puddle_mesh := puddle.commit()
+	if film_mesh.get_surface_count() == 0:
+		return
+	if _film == null:
+		_film = get_node_or_null("TideFilm") as MeshInstance3D
+	if _film != null:
+		_film.mesh = film_mesh
+		_film.position = Vector3.ZERO
+		_film_on_route = true
+	if _puddle != null and puddle_mesh.get_surface_count() > 0:
+		_puddle.mesh = puddle_mesh
+		_puddle.position = Vector3.ZERO
+	_update_film()
+
+
+## Un punct de lume in coordonatele foii, cu cota data fata de MARE (y = 0 pe
+## cota marii), cum o cere scalarea de la baza din `_update_film`.
+func _local_at(p: Vector3, y_over_sea: float) -> Vector3:
+	var l := to_local(p)
+	l.y = y_over_sea
+	return l
+
+
+## Un patrulater (a0 a1 b0 b1, a = randul precedent) cu fata spre `want`.
+##
+## Winding-ul se ALEGE, nu se presupune: semnul lui `side_at` depinde de sensul
+## in care a fost desenata banda, iar shaderul marii e `cull_back`, deci o fata
+## intoarsa ar fi apa invizibila exact din masina. Fata din fata in Godot e cea
+## cu varfurile in sensul acelor de ceas, adica normala (c - a) x (b - a).
+static func _quad(st: SurfaceTool, a0: Vector3, a1: Vector3, b0: Vector3,
+		b1: Vector3, want: Vector3, col: Color) -> void:
+	_tri(st, a0, a1, b0, want, col)
+	_tri(st, b0, a1, b1, want, col)
+
+
+static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3,
+		want: Vector3, col: Color) -> void:
+	var front := (c - a).cross(b - a)
+	if front.dot(want) < 0.0:
+		var t := b
+		b = c
+		c = t
+	for v: Vector3 in [a, b, c]:
+		st.set_color(col)
+		st.set_normal(want)
+		st.add_vertex(v)
 
 
 ## Apa de maree taie grip-ul, dar NU imbranceste: nu e un val care trece, e o

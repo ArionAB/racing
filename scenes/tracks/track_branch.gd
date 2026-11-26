@@ -151,9 +151,85 @@ enum Surface { THEME, SAND, DIRT_ROAD, GRAVEL, DECK }
 ## ca banda sa nu schimbe feel-ul pana nu ceri).
 @export_range(0.0, 0.10, 0.005, "suffix:m") var bumpiness: float = 0.0
 
+## Cat coboara MARGINEA benzii de pamant sub planul ei (m), la DIRT_ROAD si
+## GRAVEL, si in vizual si in coliziune. Negativ = constanta clasei
+## (`Track.BRANCH_EDGE_SINK`, 0,35 m): marginea se ingroapa in pajiste si
+## drumul pare calcat, nu lipit.
+##
+## Pe un DIG (Ha Long) marginea ingropata e o panta spre apa. Masurat cu
+## ProbeRace (nov 2026), 8 seed-uri: tablierul plat de dinainte prindea masinile
+## care taiau coltul dintre gura benzii si sosea; cu marginea coborata ele
+## alunecau in golful dintre banda si sosea, iar repunerile de la gura au
+## crescut de la 35 la 51-55. Digul are margine DREAPTA: 0.
+@export_range(-1.0, 0.6, 0.05, "suffix:m") var edge_sink: float = -1.0
+
 ## Iarba densa (smocuri) pe margini si pe brazda, doar la DIRT_ROAD.
 ## Se stinge daca vrei banda curata sau daca numeri triunghiuri.
 @export var tufts: bool = true
+
+@export_group("Gard")
+
+## Gardul de pe AMBELE margini ale benzii: un GLB cu trei noduri —
+## `Fence_Post` (stalpul, originea la baza lui), `Fence_Rails` (riglele, de la x = 0
+## la x = pasul modelului) si, optional, `Fence_Board` (panoul cu chevroane,
+## pe gol). Gol = fara gard (implicit: toate benzile de dinainte raman
+## neschimbate). Vezi `Track._build_branch_fence`.
+##
+## De ce exista (Ha Long, nov 2026): scurtatura de maree nu se citea ca drum
+## (#594). Asfaltul cu marcaje o facea „drum”, dar o fasie gri pe nisip si apa
+## arata gresit; ce face un dig de pamant sa se citeasca drum e gardul cu
+## chevroane de pe margini — se vede de la furca, inaintea suprafetei.
+@export var edge_fence: PackedScene
+
+## Distanta dintre doi stalpi, masurata pe banda (m). Se ajusteaza putin ca
+## pe fiecare latura sa intre un numar intreg de goluri.
+@export_range(1.0, 6.0, 0.1, "suffix:m") var edge_fence_spacing: float = 2.4
+
+## Cat de IN INTERIORUL marginii benzii sta linia gardului (m). Marginea benzii
+## de pamant coboara in teren (`Track.BRANCH_EDGE_SINK`), iar pe un dig peste
+## apa dincolo de ea e gol — deci gardul sta pe banda, nu langa ea.
+@export_range(0.0, 2.0, 0.05, "suffix:m") var edge_fence_inset: float = 0.4
+
+## Cati metri de la fiecare capat al benzii raman FARA gard. Capetele benzii
+## stau pe axa soselei; gardul incepe abia dupa ce banda s-a desprins de ea
+## (si oricum niciodata pe carosabilul buclei — `Track._branch_rail_clear`).
+@export_range(0.0, 40.0, 0.5, "suffix:m") var edge_fence_trim: float = 8.0
+
+## Cat se ingroapa modulul sub suprafata benzii (m): originea GLB-ului e baza
+## stalpului (contractul kitului), iar partea de jos a stalpului trebuie sa
+## intre in pamant, altfel pe marginea coborata a benzii ramane aer sub el.
+@export_range(0.0, 1.0, 0.05, "suffix:m") var edge_fence_sink: float = 0.3
+
+## Un panou cu chevroane la fiecare atatea goluri (1 = pe toate, 0 = deloc).
+@export_range(0, 8, 1) var edge_fence_board_every: int = 2
+
+## Gardul OPRESTE masinile: un perete continuu, nevazut, pe linia stalpilor
+## (nu cate un corp pe stalp — un stalp lovit din unghi e un colt in care se
+## agata masina; un perete continuu te lasa sa aluneci pe el). Peretele incepe
+## si se termina cu `edge_fence_solid_lead` metri dupa primul / inaintea
+## ultimului stalp, ca masina care intra in unghi sa nu loveasca un capat de
+## perete chiar in gura benzii.
+@export var edge_fence_solid: bool = true
+
+## Vezi `edge_fence_solid`.
+@export_range(0.0, 20.0, 0.5, "suffix:m") var edge_fence_solid_lead: float = 4.0
+
+
+## Specificatia gardului, cum o citeste [Track] (cheia `fence` din spec).
+## Gol = fara gard.
+func fence_spec() -> Dictionary:
+	if edge_fence == null:
+		return {}
+	return {
+		"scene": edge_fence,
+		"spacing": edge_fence_spacing,
+		"inset": edge_fence_inset,
+		"trim": edge_fence_trim,
+		"board_every": edge_fence_board_every,
+		"sink": edge_fence_sink,
+		"solid": edge_fence_solid,
+		"solid_lead": edge_fence_solid_lead,
+	}
 
 
 ## Numele retetei, cum il citeste [Track] (cheia `surface` din spec).

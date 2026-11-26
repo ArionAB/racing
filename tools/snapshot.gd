@@ -67,6 +67,8 @@ extends Node
 ##                             0.25 = la capatul maturarii, 0.12 = la jumatatea
 ##                             traversarii. Fara el, captura o prinde mereu pe
 ##                             mijlocul drumului si nu se vede niciodata trecerea.
+##   --tide-at=25              MAREEA (TideHazard, Ha Long) la N secunde in ciclu:
+##                             0-11 urca, 11-41 apa SUS, 41-52 coboara, rest jos.
 ##   --wave-at=0.30           la fel, pentru valul care spala soseaua: 0 = abia
 ##                             intrat in cadru dinspre larg, ~0.30 = pe axa
 ##                             soselei, peste ~0.60 = in larg, invizibil.
@@ -435,6 +437,7 @@ func _ready() -> void:
 	var bridge_at := -1.0
 	var typhoon_at := -1.0
 	var wave_at := -1.0
+	var tide_at := -1.0
 	var dirt_ranges: Array[Vector2] = []
 	var rock_at := -1.0
 	var crane_at := -1.0
@@ -580,6 +583,8 @@ func _ready() -> void:
 			typhoon_at = float(arg.trim_prefix("--typhoon-at="))
 		elif arg.begins_with("--wave-at="):
 			wave_at = float(arg.trim_prefix("--wave-at="))
+		elif arg.begins_with("--tide-at="):
+			tide_at = float(arg.trim_prefix("--tide-at="))
 		elif arg.begins_with("--dirt="):
 			for seg in arg.trim_prefix("--dirt=").split(";"):
 				var ab := seg.split(",")
@@ -818,6 +823,8 @@ func _ready() -> void:
 		_set_typhoon_phase(track, typhoon_at)
 	if wave_at >= 0.0:
 		_set_wave_phase(track, wave_at)
+	if tide_at >= 0.0:
+		_set_tide_time(track, tide_at)
 	if rock_at >= 0.0:
 		# Metronomul eruptiei isi resincronizeaza bombele AMANAT (dupa ce
 		# pista le construieste) si le-ar calca ceasul pus de --rock-at:
@@ -2177,6 +2184,20 @@ func _set_wave_phase(root: Node, at: float) -> void:
 		wave.call("_advance", 0.0)
 		found += 1
 	print("--wave-at=%.2f: %d valuri mutate in ciclu" % [at, found])
+
+
+## Mareea (TideHazard, Ha Long) la N SECUNDE in ciclul ei. Cu `phase` 0 si
+## fractiile implicite (80 s): 0-11 urca, 11-41 apa SUS (banda inchisa), 41-52
+## coboara, restul jos. Fara flag, ceasul porneste in telegraf si captura
+## prinde o pelicula subtire — niciodata apa plina.
+func _set_tide_time(root: Node, at: float) -> void:
+	var found := 0
+	for node in root.find_children("*", "TideHazard", true, false):
+		var tide := node as TideHazard
+		tide.set_clock(at)
+		tide.call("_advance", 0.0)
+		found += 1
+	print("--tide-at=%.1f: %d maree mutate in ciclu" % [at, found])
 
 
 ## Muta podul mobil intr-un moment ales din ciclul lui.

@@ -81,12 +81,17 @@ check() {  # check <cale> <buget> [flag...]
 # Garda per-nod ar raporta "baza nu e la Y=0" aratand spre vegetatie. E exact
 # cazul declarat la §0 pentru piesele compuse.
 echo "== hero: turnurile de carst =="
-check "rocks/karst_tower_a.glb"              900 --origin=assembly
-check "rocks/karst_tower_b.glb"              900 --origin=assembly
-check "rocks/karst_tower_c.glb"             1000 --origin=assembly
-check "rocks/karst_stack_a.glb"              400 --origin=assembly
-check "rocks/karst_stack_b.glb"              400 --origin=assembly
-check "rocks/shore_boulder.glb"              150
+# Bugetele turnurilor au crescut de ~12 ori la v2 (26 nov 2026): jungla e
+# facuta din coroane suprapuse (20 tri fiecare), ca in banda de orizont, iar
+# roca are 44 de coloane netede in loc de 13 fatete. Triunghiurile nu mai au
+# plafon (CLAUDE.md); cifra de aici prinde doar o regenerare scapata de sub
+# control (o icosfera lasata la subdiviziune mare), nu forma.
+check "rocks/karst_tower_a.glb"            16000 --origin=assembly
+check "rocks/karst_tower_b.glb"            16000 --origin=assembly
+check "rocks/karst_tower_c.glb"            18000 --origin=assembly
+check "rocks/karst_stack_a.glb"             9000 --origin=assembly
+check "rocks/karst_stack_b.glb"             6000 --origin=assembly
+check "rocks/shore_boulder.glb"              400
 
 echo
 echo "== grota =="

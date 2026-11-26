@@ -55,6 +55,8 @@ exec(open(os.path.join(_here_gr, "okinawa_shapes.py")).read())
 import bmesh
 from mathutils import Vector, Matrix
 
+exec(open(os.path.join(_here_gr, "halong_karst_shapes.py"), encoding="utf-8").read())
+
 clear_built()
 
 HL_ROCK = MARBLE_GREY        # 29: calcar (corpul si interiorul — AO-ul face umbra)
@@ -178,7 +180,22 @@ MASSIF_PROFILE = [
 MASSIF_H = 46.0
 
 
+def _plan_dist_to_axis(c):
+    """Distanta in plan de la `c` la cel mai apropiat punct al axei soselei."""
+    best = 1e9
+    for pos, _side, _hw, _f in AXIS:
+        dx, dy = c.x - pos.x, c.y - pos.y
+        best = min(best, dx * dx + dy * dy)
+    return math.sqrt(best)
+
+
 def build_massif():
+    """V2 (26 nov 2026): acelasi generator ca turnurile din kit
+    (halong_karst_shapes.py — lobi, caneluri, creasta zimtata, mantie de
+    jungla), pe profilul de USCAT si alungit pe directia tunelului. V1 era o
+    prisma de 22 de coloane, fatetata, cu doua caciuli de roca si 16 tufe-
+    bolovan: langa turnurile noi si banda de orizont citea "simplu si
+    colturos" (verdictul dezvoltatorului)."""
     p0, p1 = axis_at(F0)[0], axis_at(F1)[0]
     chord = (p1 - p0)
     chord.z = 0.0
@@ -189,46 +206,20 @@ def build_massif():
     # Raza pe lungime: gurile cad pe F0/F1 la cota tunelului (profil ~0,95-1,0).
     rx = half_len * 1.02
     ry = 32.0
-    rings = []
-    for (zf, rf) in MASSIF_PROFILE:
-        rings.append((zf * MASSIF_H, rf * rx, rf * ry, 0.0, 0.0))
-    pts, _ = ring_points(rings, 22, 4402, 0.09)
-    rot = Matrix.Rotation(yaw, 3, "Z")
-    pts = [[center + rot @ v for v in ring] for ring in pts]
-    b = Builder()
-    faceted_shell(b, pts, HL_ROCK)
-    rock = b.to_object("Grotto_Rock")
+    xform = Matrix.Translation(center) @ Matrix.Rotation(yaw, 4, "Z")
 
-    # Creasta dubla + capac verde + tufe agatate: semnatura turnului Ha Long.
-    s = Builder()
-    rnd = _ok_rand(4403)
-    top = MASSIF_H
-    for i, along in enumerate((-0.45, 0.35)):
-        c = center + rot @ Vector((along * rx, (rnd() - 0.5) * 6.0, 0.0))
-        size = 14.0 + 4.0 * rnd()
-        chunk(s, (c.x, c.y, top - size * 0.15), (size, size * 0.85, size * 0.9),
-              4410 + i, HL_ROCK, seg=8, nr=3, jag=0.18)
-    for i in range(16):
-        u = (rnd() - 0.5) * 1.5
-        v = (rnd() - 0.5) * 1.2
-        c = center + rot @ Vector((u * rx * 0.55, v * ry * 0.5, 0.0))
-        sz = 6.0 + 5.0 * rnd()
-        chunk(s, (c.x, c.y, top + 2.0 + rnd() * 4.0), (sz, sz * 0.9, sz * 0.5),
-              4420 + i, HL_SCRUB, seg=6, nr=2, jag=0.26)
-    for i in range(14):
-        a = 2.0 * math.pi * rnd()
-        zf = 0.45 + 0.42 * rnd()
-        rr = 0.99
-        loc = center + rot @ Vector((math.cos(a) * rx * rr, math.sin(a) * ry * rr, 0.0))
-        loc.z = zf * MASSIF_H
-        sz = 2.5 + 2.5 * rnd()
-        # Nu peste gurile tunelului: acolo atarna stalactite, nu tufe.
-        if abs(math.sin(a)) < 0.35 and zf < 0.35:
-            continue
-        chunk(s, (loc.x, loc.y, loc.z), (sz, sz * 0.9, sz * 0.6), 4440 + i,
-              HL_SCRUB, seg=5, nr=2, jag=0.3)
-    scrub = s.to_object("Grotto_Scrub")
-    return rock, scrub
+    def skip(c, r):
+        # Nimic agatat deasupra soselei, la gurile tunelului: acolo e buza
+        # boltii (si stalactitele), iar camera coboara sub tavanul de 11 m.
+        return c.z < 19.0 and _plan_dist_to_axis(c) < 13.0 + r
+
+    spec = dict(seed=4402, h=MASSIF_H, r_mid=rx, ratio=ry / rx, prof=MASSIF_PROFILE,
+                seg=64, rings=30, lobe=0.10, flute=0.05, ledge=0.03,
+                crest=0.12, twin=0.5, crown=2.6, wall_veg=0.6,
+                names=("Grotto_Rock", "Grotto_Scrub"), xform=xform, veg_skip=skip)
+    rock, scrub, _top = karst_body(spec)
+    print("  masiv: %d coroane" % spec["_crowns"])
+    return rock, scrub, spec
 
 
 def build_drips():
@@ -273,7 +264,7 @@ def boolean_difference(target, cutter):
 
 
 cutter = build_cutter()
-rock, scrub = build_massif()
+rock, scrub, mspec = build_massif()
 boolean_difference(rock, cutter)
 bpy.data.objects.remove(cutter, do_unlink=True)
 drips = build_drips()
@@ -281,6 +272,7 @@ drips = build_drips()
 objs = [rock, scrub, drips]
 total = 0
 for o in objs:
+    # V2: roca NETEDA (62 de grade, ca turnurile), vegetatia si stalactitele plate.
     if o is not rock:
         _split_all_edges(o)
     # AO: raza mare, ca tunelul sa iasa intunecat din geometria lui (tavanul
@@ -288,9 +280,14 @@ for o in objs:
     # sub soarele de ora de aur (inelul de la nisa turnurilor).
     st = finish(o, bevel=0.0, ao=dict(samples=24, dist=14.0, gradient="vertical",
                                       low=0.5, high=1.0, power=0.8, floor=0.18),
-                origin=None, smooth_angle=None)
+                origin=None, smooth_angle=62.0 if o is rock else None)
     if o is not rock:
         _flatten_ao(o)
+    if o is rock:
+        # masivul sta pe uscat: fara banda uda de la linia apei
+        tint_rock(o, MASSIF_H, mspec["r_mid"] * 0.6, mspec["seed"], wet_band=False)
+    elif o is scrub:
+        tint_veg(o, 14.0, mspec["seed"])
     total += st["tris"]
     print("  %-14s %6d tri  ao %.2f-%.2f" % (o.name, st["tris"], st["ao_min"], st["ao_max"]))
 

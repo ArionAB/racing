@@ -1120,11 +1120,17 @@ const CLASS_TINT := {
 	# (0.624, 0.565, 0.434) => multiplicator liniar (0.92, 0.87, 0.65) = in sRGB
 	# (0.965, 0.94, 0.825). INCEPUT DE CALIBRARE, de masurat pe captura de joc.
 	"ok_limestone": Color(0.988, 0.988, 0.945),
-	# Calcarul de carst: gri-crem MAI RECE decat Okinawa, #C4BEAE (196,190,174).
-	# Aceeasi dala ridicata ca `ok_limestone` (media liniara 0.676, 0.651, 0.670);
-	# tinta liniara (0.552, 0.515, 0.423) => multiplicator liniar (0.817, 0.791,
-	# 0.631) = in sRGB (0.92, 0.905, 0.82). INCEPUT DE CALIBRARE, de masurat in joc.
-	"karst_limestone": Color(0.920, 0.905, 0.820),
+	# Calcarul de carst: GRI RECE, #ADADA7 (173,173,167). Prima calibrare tintea
+	# #C4BEAE (tenta 0.92, 0.905, 0.82) si in joc, sub soarele cald al temei,
+	# turnurile ieseau BEJ — aceeasi familie cu plaja de langa ele, deci roca nu
+	# se mai citea ca roca (verdictul dezvoltatorului, 26 nov 2026, pe captura cu
+	# banda de orizont: turnurile din banda sunt gri cu dungi, cele de langa drum
+	# "simple si colturoase"). Aceeasi dala ridicata ca `ok_limestone` (media
+	# liniara 0.676, 0.651, 0.670); tinta liniara (0.418, 0.418, 0.386) =>
+	# multiplicator liniar (0.618, 0.642, 0.576) = in sRGB (0.81, 0.83, 0.79).
+	# Dungile de scurgere, banda uda si muschiul vin peste ea din vertex color
+	# (build_halong_karst.py, `tint_rock`).
+	"karst_limestone": Color(0.810, 0.830, 0.790),
 	# Olanele (#B8452E = 184,69,46). Dala `roof_tiles` ridicata la 0.60 are media
 	# liniara (0.599, 0.303, 0.153); tinta liniara (0.479, 0.060, 0.027) =>
 	# multiplicator liniar (0.80, 0.20, 0.18) = in sRGB (0.906, 0.48, 0.46).

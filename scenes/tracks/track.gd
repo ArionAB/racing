@@ -4247,7 +4247,22 @@ static func themes() -> Dictionary:
 		# la orizont (#F2DCB4). Gradientul asta e ce deosebeste ora de aur de
 		# amiaza — nu intensitatea soarelui, ci cerul cald jos.
 		"sky_top": Color.html("5E92C8"),
-		"sky_horizon": Color.html("F2DCB4"),
+		# Orizontul = AERUL din banda pictata (HAZE in build_halong_sky_band.py):
+		# turnurile departate se spala exact in culoarea pe care o deseneaza cerul
+		# in spatele lor, deci banda n-are margine. Palid si rece, nu chihlimbar:
+		# departarea se raceste chiar si la ora de aur (memoria
+		# ceata-in-familia-solului); caldura ramane in soare si pe nisip.
+		"sky_horizon": Color.html("DCE5E3"),
+		# BANDA DE ORIZONT (nov 2026, referinta cu golful turcoaz si turnurile
+		# impadurite pana la orizont): randata in Blender din
+		# tools/blender/build_halong_sky_band.py, lipita pe cer de
+		# `_sky_band_material`. lat_min/lat_max sunt cele din randare (8192 x 512 =
+		# 22,5 grade); `below` e ultimul rand al benzii, marea de sub ea.
+		"sky_band": {
+			"texture": "res://assets/textures/sky/halong_horizon_band.png",
+			"lat_min": -7.5, "lat_max": 15.0,
+			"below": Color.html("3E9A92"),
+		},
 		# Ceata 120 -> 340: aici e MECANICA DE COMPOZITIE, nu doar atmosfera —
 		# e ce separa turnurile in straturi de adancime pe belvedere (brief §2.0,
 		# memoria scara-de-adancime-are-gol). Reperele stau sub fog_end, iar
@@ -4262,10 +4277,16 @@ static func themes() -> Dictionary:
 		# joasa, deci departarea se spala in auriu, nu in gri. Intervalul
 		# 120 -> 340 ramane neatins: el e mecanica de compozitie, verificata de
 		# garzile de mai sus.
-		"fog": Color.html("E8D9BC"),
-		# Okinawa a coborat `fog_sky_affect` ca sa-si arate cerul; Ha Long ramane
-		# pe implicitul 1.0, cerul lui de golf cetos E ceata.
-		"fog_sky_affect": 1.0,
+		#
+		# Cu banda de orizont (nov 2026) ceata nu mai acopera cerul: cu
+		# `fog_sky_affect` 1.0 banda iesea o pata bej uniforma — exact ce se vedea
+		# pe telefon. Aerul e deja copt in banda. `fog_aerial` 1.0 trage geometria
+		# departata spre CERUL din spatele ei (banda, estompata), nu spre o culoare
+		# plata: apa de la 340 m intra in marea pictata, turnul de la 300 m in
+		# aerul pictat. `fog` ramane doar ca rezerva (fara banda) si e tot aerul.
+		"fog": Color.html("DCE5E3"),
+		"fog_sky_affect": 0.0,
+		"fog_aerial": 1.0,
 		# Fundalul: `halong_horizon.glb`, kit propriu (brief §1.9). Inelul si
 		# modelul lui Okinawa raman GOLITE in sensul ca nu se mostenesc —
 		# altfel ar aparea insula Ie si Kerama in golful vietnamez.
@@ -4298,19 +4319,15 @@ static func themes() -> Dictionary:
 		# podet, mal). Pe nisip marginea asfaltului e libera — vezi
 		# `walls_water_only` in `_build_walls`.
 		"walls_water_only": true,
-		"horizon_rings": [
-			# Baza se aseaza pe OGLINDA APEI (sau pe teren, daca e mai sus) in
-			# modul amprenta, deci `dy` nu mai compenseaza fundul marii. Vechiul
-			# +21 era calculat pentru un fund de ~-24 (`tools/sv_halong_oriz.gd`)
-			# si ridica in aer sirurile cazute pe uscat. Cu +1, baza intra 3 m
-			# in apa si varful ajunge la ~37-60 m peste ea.
-			{"near": 260.0, "far": 340.0, "count": 4, "scale": 1.0,
-				"clear": 120.0, "dy": 1.0, "picks": ["KarstRow_A"]},
-			{"near": 340.0, "far": 460.0, "count": 4, "scale": 1.15,
-				"clear": 150.0, "dy": 1.0, "picks": ["KarstRow_B"]},
-			{"near": 460.0, "far": 620.0, "count": 4, "scale": 1.3,
-				"clear": 180.0, "dy": 1.0, "picks": ["KarstRow_C"]},
-		],
+		# Inelele 3D de fundal (KarstRow_A/B/C, 260-620 m) sunt SCOASE din nov
+		# 2026: departarea o da banda de orizont (`sky_band`), cu turnuri
+		# impadurite pana la 6,5 km. Prismele gri stateau in fata ei ca niste
+		# fantome albastrui (si erau „blocurile gri urate" de la volan, oct 2026);
+		# inelul C, la 460-620 m, era oricum dincolo de FAR_PLANE 380. Lista goala,
+		# NU `horizon_model` gol: modelul gol porneste siluetele de rezerva
+		# (`_build_horizon_fallback`). `tools/probe_horizon_clear.gd --track=22`
+		# nu mai are ce masura pe pista asta.
+		"horizon_rings": [],
 		# Scatterul si props-urile Okinawa se sting: vocabularul (fukugi, pin
 		# ryukyu, pandanus) e japonez. Decorul se pune de mana, pe POI, ca la
 		# Cappadocia / Serengeti / Machu Picchu (memoria
@@ -6261,6 +6278,49 @@ func _azimuth_sky_texture(cfg: Dictionary) -> ImageTexture:
 			img.set_pixel(x, y, Color(col.r, col.g, col.b, a))
 	return ImageTexture.create_from_image(img)
 
+## Cerul temei cu BANDA DE ORIZONT: `ProceduralSkyMaterial`-ul deja configurat,
+## copiat camp cu camp in `sky_band.gdshader`, plus felia pictata.
+##
+## De ce o imagine pe cer si nu geometrie de fundal: ce sta la 1-6 km nu are
+## paralaxa pe un circuit de cateva sute de metri, iar geometria reala acolo ar fi
+## taiata oricum de ChaseCamera.FAR_PLANE (380 m) si de ceata. Pe cer nu e taiata
+## de nimic si costa o citire de textura pe pixelii de cer.
+##
+## Cheile: `texture` (equirectangulara cu alfa, u = 0,5 spre -Z), `lat_min` /
+## `lat_max` (grade; trebuie sa fie exact cele din randare), `below` (marea de sub
+## banda), `yaw_deg` (rotatie). Banda se coace cu HAZE = `sky_horizon` al temei,
+## deci departarea ei se topeste exact in gradientul desenat aici.
+##
+## Ceata trebuie sa-si lase cerul: `fog_sky_affect` mic (altfel banda e acoperita
+## complet, ca orice cer de tema — memoria cerul-temei-ascuns-de-ceata), iar cu
+## `fog_aerial` 1.0 geometria departata se spala spre CERUL din spatele ei, adica
+## spre banda — apa jocului de la 340 m intra in marea pictata, fara cusatura.
+func _sky_band_material(sky_mat: ProceduralSkyMaterial, cfg: Dictionary) -> ShaderMaterial:
+	var tex := _tex(str(cfg.get("texture", "")))
+	var shader := load("res://scenes/tracks/sky_band.gdshader") as Shader
+	if tex == null or shader == null:
+		push_warning("sky_band: lipseste textura sau shaderul, raman pe cerul procedural")
+		return null
+	var m := ShaderMaterial.new()
+	m.shader = shader
+	m.set_shader_parameter("sky_top_color", sky_mat.sky_top_color)
+	m.set_shader_parameter("sky_horizon_color", sky_mat.sky_horizon_color)
+	m.set_shader_parameter("sky_curve", sky_mat.sky_curve)
+	m.set_shader_parameter("sky_energy", sky_mat.sky_energy_multiplier)
+	m.set_shader_parameter("sky_cover", sky_mat.sky_cover)
+	m.set_shader_parameter("sky_cover_modulate", sky_mat.sky_cover_modulate)
+	m.set_shader_parameter("ground_bottom_color", sky_mat.ground_bottom_color)
+	m.set_shader_parameter("ground_horizon_color", sky_mat.ground_horizon_color)
+	m.set_shader_parameter("ground_curve", sky_mat.ground_curve)
+	m.set_shader_parameter("sun_angle_max", deg_to_rad(sky_mat.sun_angle_max))
+	m.set_shader_parameter("sun_curve", sky_mat.sun_curve)
+	m.set_shader_parameter("band", tex)
+	m.set_shader_parameter("band_lat_min", deg_to_rad(float(cfg.get("lat_min", -7.5))))
+	m.set_shader_parameter("band_lat_max", deg_to_rad(float(cfg.get("lat_max", 15.0))))
+	m.set_shader_parameter("band_yaw", float(cfg.get("yaw_deg", 0.0)) / 360.0)
+	m.set_shader_parameter("band_below_color", cfg.get("below", sky_mat.ground_horizon_color))
+	return m
+
 ## Lumea pistei: cer, soare, teren si dealuri/dune de fundal — tematice.
 func _build_environment() -> void:
 	var sky_mat := ProceduralSkyMaterial.new()
@@ -6298,6 +6358,20 @@ func _build_environment() -> void:
 		sky_mat.sun_angle_max = 0.0
 	var sky := Sky.new()
 	sky.sky_material = sky_mat
+	# BANDA DE ORIZONT (opt-in, cheia de tema `sky_band`): acelasi cer, rescris ca
+	# shader (`sky_band.gdshader`), plus o felie pictata cu ce e la kilometri —
+	# turnuri, mare, vapoare. Vezi `_sky_band_material`. Tema fara cheie ramane pe
+	# `ProceduralSkyMaterial`, bit-identic (si DuskCycle/RainCycle, care il cer).
+	var band_cfg: Variant = theme_flag("sky_band", null)
+	if band_cfg is Dictionary:
+		var band_mat := _sky_band_material(sky_mat, band_cfg as Dictionary)
+		if band_mat != null:
+			sky.sky_material = band_mat
+			# Ceata cu `fog_aerial` citeste cerul din harta de radianta, nu din
+			# banda. La 256 (implicit) marea pictata se intindea peste orizont si
+			# un deal de la 300 m iesea verde-inchis. Se calculeaza o data la
+			# incarcare (cerul nu are TIME), deci nu costa pe cadru.
+			sky.radiance_size = int(band_cfg.get("radiance", Sky.RADIANCE_SIZE_256))
 	var env := Environment.new()
 	env.background_mode = Environment.BG_SKY
 	env.sky = sky

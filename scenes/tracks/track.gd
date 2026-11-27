@@ -3673,6 +3673,20 @@ static func themes() -> Dictionary:
 			"sky_horizon": Color.html("C08752"),
 			# Norii doar sugerati: la 0.35 stratul adunat spala tot gradientul.
 			"sky_cover_alpha": 0.10,
+			# BANDA DE ORIZONT (nov 2026, reteta Monument Valley pe uscat):
+			# platourile de tuf cu faleze in dungi pastel, vaile cu cosuri de zana,
+			# Uchisar si, departe spre ESE, Erciyes cu zapada — randate in Blender
+			# din tools/blender/build_cappadocia_sky_band.py si lipite pe cer de
+			# `_sky_band_material`. HAZE-ul randarii = `sky_horizon` de mai sus.
+			# Podeaua benzii e acelasi tuf ca terenul jocului, luminat de acelasi
+			# soare si spalat de acelasi aer rece (`fog` de mai jos); marginea ei
+			# de jos e `below`, si `fog` = aceeasi culoare, ca terenul cetos sa
+			# intre in podeaua pictata fara dunga.
+			"sky_band": {
+				"texture": "res://assets/textures/sky/cappadocia_horizon_band.png",
+				"lat_min": -7.5, "lat_max": 15.0,
+				"below": Color.html("BFA89C"),
+			},
 			# CEATA RECE, si asta e o schimbare deliberata fata de versiunea
 			# calda (0.92, 0.79, 0.63) — care era in familia orizontului.
 			#
@@ -3692,8 +3706,21 @@ static func themes() -> Dictionary:
 			#
 			# Nu e gri: pastreaza o urma de roz de zori (rosul putin peste
 			# verde), ca sa nu contrazica cerul de rasarit de deasupra.
-			"fog": Color(0.72, 0.74, 0.80),
-			"fog_aerial": 0.35,
+			#
+			# CU BANDA (nov 2026), masurat pe capturi --gamecam: ceata NU mai e
+			# (0.72, 0.74, 0.80) pur. Departarea se spala acum spre PODEAUA benzii
+			# (`fog` = `below`), care e tuful jocului dupa ACELASI aer rece — deci
+			# ramane mai palida si mai rece decat tuful din prim-plan (lectia de mai
+			# sus se pastreaza), dar terenul de la 300 m intra in banda fara dunga.
+			# - `fog_sky_affect` 0: altfel ceata acopera banda (pata uniforma).
+			# - `fog_aerial` 0,3 (era 0,35), ca pe Monument Valley: ceata citeste
+			#   cerul din harta de radianta ESTOMPATA, iar pe uscat, mai sus, aduce
+			#   albastrul de sus sub orizont (teren mov sub podeaua benzii).
+			# - `fog_max` 0,85: la FAR_PLANE terenul e aproape tot banda.
+			"fog": Color.html("BFA89C"),
+			"fog_sky_affect": 0.0,
+			"fog_aerial": 0.3,
+			"fog_max": 0.85,
 			"hill_color": Color(0.82, 0.70, 0.56),
 			# ZORI: soare CALD, si mai TARE decat pana acum — 0.95, urcat de la
 			# 0.85 impreuna cu coborarea ambientului la 0.26 (runda 13).
@@ -4034,12 +4061,14 @@ static func themes() -> Dictionary:
 			# amandoua inelele, si toate cele sase siluete se aseaza. Pragul e
 			# egal fiindca slotul cel mai strans (100,2 m) il fixeaza: orice
 			# valoare peste el lasa iar un gol in orizont.
-			"horizon_rings": [
-				{"near": 190.0, "far": 240.0, "count": 3, "scale": 0.42,
-					"clear": 100.0, "picks": ["Erciyes"]},
-				{"near": 240.0, "far": 290.0, "count": 3, "scale": 0.60,
-					"clear": 100.0, "picks": ["Erciyes"]},
-			],
+			# SCOASE din nov 2026 (`horizon_rings: []`, NU `horizon_model` gol, care
+			# porneste siluetele de rezerva): departarea o da banda de orizont
+			# (`sky_band`), cu UN Erciyes la 30 km spre ESE, cum e in realitate.
+			# Cele sase copii de 50-110 m de la 190-290 m stateau ca fantome cenusii
+			# in fata benzii (alta ceata decat ea) si sase vulcani mint despre loc.
+			# Istoricul de mai sus (scale/clear) ramane ca nota, pentru cine le
+			# readuce.
+			"horizon_rings": [],
 			# FARA GARD, ca pe Alpi si pe Stromboli — dar aici e chiar mecanica
 			# pistei, nu doar tonul ei: brief §2 POI C cere cornisa Vaii Rosii
 			# "fara parapet pe dreapta". O panglica rosie pe buza vaii ar fi

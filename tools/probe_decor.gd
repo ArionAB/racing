@@ -614,6 +614,9 @@ func _source_of(mi: Node, track: Node) -> String:
 		# peisajul de canion
 		"cliff_wall", "rock_cluster", "canyon_rocks", "desert_scatter", "butte",
 		"wood_fence", "train",
+		# Gardul digului de maree Ha Long (TrackBranch.edge_fence): MultiMesh-uri
+		# construite de Track._build_branch_fence, botezate dupa GLB.
+		"causeway_fence",
 		# Kitul Machu Picchu (assets/models/machupicchu/, PR #386). Aceeasi
 		# capcana ca la tuful Cappadociei si la pinii alpini: fara numele
 		# astea, cele 39 de piese asezate de mana intra corect in TOTALURI dar

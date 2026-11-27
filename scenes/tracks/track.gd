@@ -5659,6 +5659,7 @@ func _collect_branches(node: Node, out: Array[Dictionary]) -> void:
 				"edge_noise": br.edge_noise,
 				"bumpiness": br.bumpiness,
 				"tufts": br.tufts,
+				"edge_sink": br.edge_sink,
 				"elevated": br.elevated,
 				"lure_before_entry_only": br.lure_before_entry_only,
 			}
@@ -5672,6 +5673,9 @@ func _collect_branches(node: Node, out: Array[Dictionary]) -> void:
 				spec["surface"] = br.surface_name()
 			if br.tint.a > 0.0:
 				spec["tint"] = br.tint
+			var fence := br.fence_spec()
+			if not fence.is_empty():
+				spec["fence"] = fence
 			out.append(spec)
 		_collect_branches(child, out)
 
@@ -6156,6 +6160,8 @@ func _wire_scene_water_hazards() -> void:
 			continue
 		tide.film_material = mat
 		tide.apply_film_material(mat)
+		# Apa pe banda REALA, nu pe coarda ei (vezi TideHazard.fit_to_route).
+		tide.fit_to_route(self)
 
 
 ## Linia discontinua de mijloc, din geometrie (fara texturi): placute albe
@@ -10915,6 +10921,8 @@ func _build_branch_surfaces() -> void:
 				_build_branch_sand(r)
 		if r.elevated:
 			_build_branch_rails(r)
+		if not r.fence.is_empty():
+			_build_branch_fence(r)
 
 
 ## Cat de aproape de capetele unei benzi in aer NU se pune parapet.
@@ -10997,6 +11005,241 @@ func _branch_rail_clear(p: Vector3) -> bool:
 	var i := routes[0].closest_index_global(p)
 	var lat := routes[0].lateral_distance(i, p)
 	return lat > width_at_index(i) + BRANCH_RAIL_CLEAR
+
+
+## Inaltimea peretelui nevazut al gardului de banda (m peste sol). Cat sa
+## opreasca o masina, nu cat sa para un zid: un gard de 1,25 m e trecut peste
+## doar dintr-o saritura, si atunci e corect sa fie trecut.
+const BRANCH_FENCE_WALL_H: float = 1.3
+## Cat coboara peretele sub sol, ca o roata care a urcat pe marginea ingropata
+## a benzii sa nu se strecoare pe sub el.
+const BRANCH_FENCE_WALL_SINK: float = 0.5
+
+
+## Gardul de pe marginile unei benzi (`TrackBranch.edge_fence`).
+##
+## De ce in Track si nu asezat de mana: linia gardului e marginea benzii pe
+## care o construieste CHIAR codul asta — capetele vin de pe bucla, la
+## fractiile de racord (`_make_branch`), nu din cele 5 puncte desenate. Un gard
+## asezat de mana ar ramane in urma la prima ajustare de traseu, exact ca un
+## capat de banda desenat de mana (antetul lui TrackBranch).
+##
+## Vizualul: cate un [MultiMeshInstance3D] pe nod de GLB (stalpi, rigle,
+## panouri), pe materialul lumii — trei desene pe toata banda, zero materiale
+## in plus. Riglele si panourile se intind pe golul REAL dintre doi stalpi
+## (scale.x), deci pe curba nu raman fante si nu se suprapun.
+##
+## Coliziunea (optionala, `solid`): un perete CONTINUU pe linia stalpilor, nu
+## un corp pe stalp — vezi `TrackBranch.edge_fence_solid`.
+func _build_branch_fence(r: TrackRoute) -> void:
+	var spec := r.fence
+	var scene := spec.get("scene") as PackedScene
+	var n := r.count()
+	if scene == null or n < 3:
+		return
+	var parts := _fence_parts(scene)
+	if not parts.has("Fence_Post") or not parts.has("Fence_Rails"):
+		push_warning("Track: gardul '%s' n-are Fence_Post/Fence_Rails — se ignora"
+			% scene.resource_path)
+		return
+	# Lungimea modelului = cat acopera riglele lui pe X (de la stalp la stalp).
+	var rails_mesh := (parts["Fence_Rails"] as Array)[0] as Mesh
+	var model_span := maxf(rails_mesh.get_aabb().end.x, 0.5)
+	var total: float = r.dists[n - 1]
+	var trim := float(spec.get("trim", 8.0))
+	var run := total - 2.0 * trim
+	if run < 2.0:
+		return
+	var bays := maxi(1, int(round(run / maxf(float(spec.get("spacing", 2.4)), 0.5))))
+	var step := run / float(bays)
+	var lat := r.half_width - float(spec.get("inset", 0.4))
+	var board_every := int(spec.get("board_every", 2))
+	# Modulul coboara cu `sink` sub suprafata: stalpul e ingropat, deci pe
+	# marginea coborata a benzii nu ramane aer sub el (vezi TrackBranch).
+	var sink := Vector3.DOWN * float(spec.get("sink", 0.3))
+	var stem := scene.resource_path.get_file().get_basename()
+	var xf_post: Array[Transform3D] = []
+	var xf_rail: Array[Transform3D] = []
+	var xf_board: Array[Transform3D] = []
+	var walls := SurfaceTool.new()
+	walls.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var any_wall := false
+	var solid := bool(spec.get("solid", true))
+	var lead := float(spec.get("solid_lead", 4.0))
+	for side_sign: float in [-1.0, 1.0]:
+		# Stalpii unei laturi; `null` acolo unde stalpul ar cadea pe sosea.
+		var posts: Array = []
+		# Piciorul peretelui la fiecare stalp (vezi `_fence_wall_foot`).
+		var feet: Array = []
+		# Marginea benzii in dreptul fiecarui stalp: de acolo coboara fusta.
+		var edges: Array = []
+		# Primul si ultimul stalp ASEZAT pe latura asta (nu capetele benzii):
+		# latura dinspre sosea incepe mai tarziu, iar peretele trebuie sa se
+		# retraga fata de stalpul ei real, nu fata de `trim`.
+		var d_first := INF
+		var d_last := -INF
+		for k in bays + 1:
+			var d := trim + step * float(k)
+			var p := _fence_point(r, d, lat * side_sign)
+			var ok := _branch_rail_clear(p)
+			posts.append(p if ok else null)
+			feet.append(_fence_wall_foot(r, d, lat * side_sign, p))
+			edges.append(_fence_point(r, d, (r.half_width + 0.02) * side_sign))
+			if ok:
+				d_first = minf(d_first, d)
+				d_last = maxf(d_last, d)
+		for k in posts.size():
+			if posts[k] == null:
+				continue
+			var p: Vector3 = posts[k]
+			# Directia stalpului: media golurilor vecine, ca pe curba sa nu
+			# para rotit fata de rigle.
+			var a: Vector3 = posts[k - 1] if k > 0 and posts[k - 1] != null else p
+			var b: Vector3 = posts[k + 1] if k + 1 < posts.size() \
+				and posts[k + 1] != null else p
+			var dir := Vector3(b.x - a.x, 0.0, b.z - a.z)
+			if dir.length_squared() < 0.0001:
+				continue
+			xf_post.append(Transform3D(_fence_basis(dir, 1.0), p + sink))
+			if k + 1 >= posts.size() or posts[k + 1] == null:
+				continue
+			var q: Vector3 = posts[k + 1]
+			var seg := q - p
+			var xf := Transform3D(_fence_basis(seg, seg.length() / model_span), p + sink)
+			xf_rail.append(xf)
+			if board_every > 0 and k % board_every == 0:
+				xf_board.append(xf)
+			# Peretele: doar intre `lead` de la primul si ultimul stalp.
+			var d0 := trim + step * float(k)
+			if solid and d0 >= d_first + lead - 0.01 					and d0 + step <= d_last - lead + 0.01:
+				var up := Vector3.UP * BRANCH_FENCE_WALL_H
+				var pb: Vector3 = feet[k]
+				var qb: Vector3 = feet[k + 1]
+				walls.add_vertex(pb); walls.add_vertex(p + up); walls.add_vertex(qb)
+				walls.add_vertex(p + up); walls.add_vertex(q + up); walls.add_vertex(qb)
+				# FUSTA digului: de la marginea benzii pana sub teren. Peretele de
+				# mai sus sta pe linia stalpilor, cu 0,4 m in interiorul marginii,
+				# deci sub foaia benzii ramanea o streasina de 0,4 m: o masina venita
+				# din golful de alaturi intra cu acoperisul sub ea si se intepenea
+				# (masurat: tot blocajele la (-133, -236), dupa coborarea peretelui).
+				var pe: Vector3 = edges[k]
+				var qe: Vector3 = edges[k + 1]
+				var pef := Vector3(pe.x, pb.y, pe.z)
+				var qef := Vector3(qe.x, qb.y, qe.z)
+				walls.add_vertex(pef); walls.add_vertex(pe); walls.add_vertex(qef)
+				walls.add_vertex(pe); walls.add_vertex(qe); walls.add_vertex(qef)
+				any_wall = true
+	var holder := Node3D.new()
+	holder.name = "BranchFence_%s" % r.label
+	add_child(holder)
+	var lists := {"Fence_Post": xf_post, "Fence_Rails": xf_rail,
+		"Fence_Board": xf_board}
+	for part: String in lists:
+		var xfs: Array[Transform3D] = lists[part]
+		if xfs.is_empty() or not parts.has(part):
+			continue
+		var pm: Array = parts[part]
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = pm[0] as Mesh
+		mm.instance_count = xfs.size()
+		var local: Transform3D = pm[1]
+		for i in xfs.size():
+			mm.set_instance_transform(i, xfs[i] * local)
+		var mmi := MultiMeshInstance3D.new()
+		# Prefixul = numele GLB-ului: `probe_decor._source_of` atribuie vizualul
+		# dupa el (altfel gardul s-ar raporta drept "procedural").
+		mmi.name = "%s_%s" % [stem, part]
+		mmi.multimesh = mm
+		mmi.material_override = Palette.world_material()
+		holder.add_child(mmi)
+	if any_wall:
+		walls.generate_normals()
+		_add_mesh_with_collision(walls.commit(), Color.WHITE, null, 1.0, 0.5,
+			BaseMaterial3D.CULL_DISABLED, null, null, false, null, "BranchFence")
+
+
+## Piciorul peretelui gardului: sub suprafata benzii cu BRANCH_FENCE_WALL_SINK,
+## dar si pana sub TEREN, daca terenul de langa banda e mai jos.
+##
+## De ce pana la teren: o banda de pamant e o foaie de coliziune, fara volum. Pe
+## dig, unde terenul de alaturi e cu 0,5-1,3 m mai jos (golful dintre banda si
+## sosea, adancit de sapatura benzii), sub marginea foii ramane un gol in care
+## intra o masina venita pe dedesubt — si ramane acolo. Masurat cu ProbeRace pe
+## Ha Long (nov 2026, 8 seed-uri): 10 blocaje la (-133, -236), toate „atinge:
+## BranchDirt, TerrainBody", 0 pe main. Peretele coborat pana in teren e
+## flancul digului: inchide golul pe toata lungimea gardului.
+##
+## Terenul se citeste si la FENCE_WALL_PROBE m in afara liniei gardului: sub
+## banda insasi terenul e ridicat/sapat la cota ei, deci golul se vede abia
+## dincolo de margine.
+func _fence_wall_foot(r: TrackRoute, d: float, lat: float, p: Vector3) -> Vector3:
+	var y := p.y - BRANCH_FENCE_WALL_SINK
+	if _sampler != null:
+		var out_lat := lat + signf(lat) * FENCE_WALL_PROBE
+		var o := _fence_point(r, d, out_lat)
+		var g := minf(_sampler.ground_y(p.x, p.z), _sampler.ground_y(o.x, o.z))
+		y = minf(y, g - BRANCH_FENCE_WALL_SINK)
+	return Vector3(p.x, y, p.z)
+
+
+## Vezi `_fence_wall_foot`.
+const FENCE_WALL_PROBE: float = 1.5
+
+
+## Nodurile de mesh ale unui GLB de gard, pe nume: [mesh, transformul local].
+func _fence_parts(scene: PackedScene) -> Dictionary:
+	var out := {}
+	var root := scene.instantiate() as Node3D
+	if root == null:
+		return out
+	for node in root.find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		if mi.mesh == null:
+			continue
+		# Transformul relativ la radacina GLB-ului (de regula identitatea).
+		var xf := mi.transform
+		var par := mi.get_parent()
+		while par != null and par != root and par is Node3D:
+			xf = (par as Node3D).transform * xf
+			par = par.get_parent()
+		out[String(mi.name)] = [mi.mesh, xf]
+	root.free()
+	return out
+
+
+## Baza unui modul de gard: X pe `dir` (scalat cu `stretch`), Y in sus,
+## dreapta (fara oglindire — instantele oglindite de MultiMesh sunt culled).
+static func _fence_basis(dir: Vector3, stretch: float) -> Basis:
+	var x := dir.normalized()
+	var z := x.cross(Vector3.UP).normalized()
+	var y := z.cross(x).normalized()
+	return Basis(x * stretch, y, z)
+
+
+## Punctul de gard la distanta `d` pe banda si la `lat` metri lateral (semnul =
+## latura), pe suprafata vazuta: planul benzii, coborat cat coboara marginea
+## benzii de pamant acolo (`BRANCH_EDGE_SINK`), dar niciodata sub teren.
+func _fence_point(r: TrackRoute, d: float, lat: float) -> Vector3:
+	var n := r.count()
+	var i := 0
+	while i < n - 2 and r.dists[i + 1] < d:
+		i += 1
+	var span := maxf(r.dists[i + 1] - r.dists[i], 0.001)
+	var t := clampf((d - r.dists[i]) / span, 0.0, 1.0)
+	var c := r.baked[i].lerp(r.baked[i + 1], t)
+	var side := r.side_at(i).lerp(r.side_at(i + 1), t).normalized()
+	var p := c + side * lat
+	var y := c.y
+	if r.surface == "dirt_road" or r.surface == "gravel":
+		var flat := RUT_GAUGE * 0.5 + RUT_HALF_W + RUT_SHOULDER
+		var k := clampf((absf(lat) - flat) / maxf(r.half_width - flat, 0.01), 0.0, 1.0)
+		var sink_e := r.edge_sink if r.edge_sink >= 0.0 else BRANCH_EDGE_SINK
+		y += BRANCH_LIFT - sink_e * k
+	if _sampler != null:
+		y = maxf(y, _sampler.ground_y(p.x, p.z))
+	p.y = y
+	return p
 
 
 ## Reteta "sand": banda plata, doi vertecsi transversal, culoarea + granulatia
@@ -11313,10 +11556,13 @@ func _build_branch_dirt(r: TrackRoute, with_ruts: bool) -> void:
 		0.0, rc - rw, rc, rc + rw, rc + rw + sh, hw]
 	# Adancimea la fiecare pozitie de profil (0 = planul benzii): fagasele
 	# doar vizual, marginile (ingropate in teren) si in coliziune.
-	var dips: Array[float] = [-BRANCH_EDGE_SINK, 0.0, 0.0, -depth, 0.0, 0.0,
-		0.0, -depth, 0.0, 0.0, -BRANCH_EDGE_SINK]
-	var col_dips: Array[float] = [-BRANCH_EDGE_SINK, 0.0, 0.0, 0.0, 0.0, 0.0,
-		0.0, 0.0, 0.0, 0.0, -BRANCH_EDGE_SINK]
+	# `edge_sink` < 0 = constanta clasei; o banda o poate suprascrie (digul de
+	# maree Ha Long: margine dreapta, vezi TrackBranch.edge_sink).
+	var sink_e := r.edge_sink if r.edge_sink >= 0.0 else BRANCH_EDGE_SINK
+	var dips: Array[float] = [-sink_e, 0.0, 0.0, -depth, 0.0, 0.0,
+		0.0, -depth, 0.0, 0.0, -sink_e]
+	var col_dips: Array[float] = [-sink_e, 0.0, 0.0, 0.0, 0.0, 0.0,
+		0.0, 0.0, 0.0, 0.0, -sink_e]
 	# Zgomotele, toate in coordonate de LUME (vezi punctul 3 din antet).
 	var edge_noise := FastNoiseLite.new()
 	edge_noise.seed = _world_seed() ^ 0xB0A7
@@ -11575,6 +11821,8 @@ func _make_branch(spec: Dictionary) -> TrackRoute:
 	route.own_ends = bool(spec.get("own_ends", false))
 	if spec.has("tint"):
 		route.tint = spec["tint"] as Color
+	route.fence = spec.get("fence", {}) as Dictionary
+	route.edge_sink = float(spec.get("edge_sink", -1.0))
 	return route
 
 ## Capatul unei benzi pe bucla principala: AXA soselei, sau — pentru o banda

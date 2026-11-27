@@ -4,6 +4,7 @@
   halong/structures/grotto_portal.glb       gura grotei, gol 9 x 7 m   (§1.2)
   halong/structures/coast_parapet.glb       parapet, modul 6 m         (§1.5)
   halong/structures/stone_dike.glb          dig, modul 8 m             (§1.5)
+  halong/structures/causeway_fence.glb      gardul digului de maree, modul 2,4 m
   halong/plants/karst_ficus_a.glb           ficus cu radacini aeriene  (§1.6)
   halong/plants/karst_ficus_b.glb           varianta, coroana deschisa (§1.6)
   halong/plants/bamboo_clump.glb            palc de bambus, 7 m        (§1.6)
@@ -330,6 +331,100 @@ def build_stone_dike():
     emit_hl([o], "structures/stone_dike.glb", _ao(dist=1.6), keep_xy=True,
             budget=250)
     _drop([o])
+
+
+# ---------------------------------------------------------------------------
+# causeway_fence — gardul de lemn al digului de maree (scurtatura Ha Long)
+# ---------------------------------------------------------------------------
+
+# Pasul modulului: un stalp la fiecare FENCE_SPAN metri. Track il intinde pe
+# lungimea reala a golului dintre doi stalpi (scale.x), deci e o tinta, nu o
+# constrangere: 2,4 m e ritmul gardului din plansa de referinta.
+FENCE_SPAN = 2.4
+
+
+def _fence_chevron(cx, cz, w, h):
+    """Sageata-chevron spre +X, ca lista (x, z) — aceeasi forma ca semnul
+    Stromboli (build_chevron_post.py): sase puncte, hexagon concav."""
+    hw, hh = w * 0.5, h * 0.5
+    notch = w * 0.42
+    return [
+        (cx - hw, cz + hh),
+        (cx - hw + notch, cz + hh),
+        (cx + hw, cz),
+        (cx - hw + notch, cz - hh),
+        (cx - hw, cz - hh),
+        (cx - hw + notch * 0.52, cz),
+    ]
+
+
+def build_causeway_fence():
+    """Gardul digului de maree, in TREI noduri pe care Track le insira separat
+    (`Track._build_branch_fence`, cate un MultiMesh pe nod):
+
+      Fence_Post   stalpul, originea la baza lui; ingropat SOL m de Track
+      Fence_Rails  cele doua rigle, de la x = 0 la x = FENCE_SPAN — se intind
+                   pe golul real dintre doi stalpi
+      Fence_Board  panoul alb cu chevroane rosii, centrat pe gol
+
+    Referinta (cererea dezvoltatorului, nov 2026): scurtatura trebuie sa se
+    citeasca drept DRUM prin garduri pe ambele parti, nu prin asfalt.
+
+    PANOUL E PE AMBELE FETE, si de aici vine faptul ca un singur model merge
+    pe ambele margini fara oglindire: varful chevronului sta la +X in lume,
+    deci din orice parte l-ai privi sageata arata tot spre +X — sensul de mers,
+    cum il orienteaza Track. Oglindirea (scale.x = -1) ar fi fost altfel
+    singura cale, si instantele oglindite de MultiMesh sunt culled (memoria
+    `multimesh-oglindire-culling`).
+
+    Panoul e mai GROS (0,12) decat riglele (0,09): riglele intra in el, deci
+    nu se bat fete coplanare (z-fighting) acolo unde trec prin panou."""
+    # Proportii de JUCARIE, nu de gard real: prima versiune (stalp 0,16, rigla
+    # 0,07) se citea ca o linie subtire de la furca, iar in plansa de referinta
+    # gardul e gros si panourile acopera aproape tot golul.
+    # SOL = cota la care Track pune suprafata benzii (`edge_fence_sink`): stalpul
+    # incepe la z = 0 (contractul de origine al kitului), dar SOL m din el stau
+    # ingropati, ca pe marginea coborata a benzii sa nu ramana gol sub stalp.
+    SOL = 0.3
+    POST_H, POST_T = 1.25 + SOL, 0.21
+    RAIL_T, RAIL_H = 0.09, 0.13
+    RAILS_Z = (SOL + 0.52, SOL + 1.02)
+    BOARD_X0, BOARD_X1 = 0.20, FENCE_SPAN - 0.20
+    BOARD_Z0, BOARD_Z1 = SOL + 0.42, SOL + 1.12
+    BOARD_T = 0.12
+
+    p = Builder()
+    p.box((0.0, 0.0, POST_H * 0.5), (POST_T, POST_T, POST_H),
+          HL_WOOD)
+    # capacul stalpului, putin mai lat si mai inchis: altfel stalpul e o bara
+    # taiata drept, iar la 20 m nu se mai citeste ca lemn de gard.
+    p.box((0.0, 0.0, POST_H + 0.03), (POST_T + 0.04, POST_T + 0.04, 0.06),
+          HL_LEAF_DARK)
+    o_post = p.to_object("Fence_Post")
+
+    r = Builder()
+    for z in RAILS_Z:
+        r.box((FENCE_SPAN * 0.5, 0.0, z), (FENCE_SPAN, RAIL_T, RAIL_H), HL_WOOD)
+    o_rails = r.to_object("Fence_Rails")
+
+    bd = Builder()
+    bw = BOARD_X1 - BOARD_X0
+    bh = BOARD_Z1 - BOARD_Z0
+    bz = (BOARD_Z0 + BOARD_Z1) * 0.5
+    bd.box(((BOARD_X0 + BOARD_X1) * 0.5, 0.0, bz), (bw, BOARD_T, bh), HL_LIME)
+    # Trei sageti pe fiecare fata, extrudate 0,012 peste panou.
+    aw = bw * 0.24
+    for face in (1.0, -1.0):
+        fy = face * (BOARD_T * 0.5 + 0.006)
+        for k in range(3):
+            cx = BOARD_X0 + bw * (0.20 + 0.30 * k)
+            bd.prism(_fence_chevron(cx, 0.0, aw, bh * 0.74), 0.012, KERB_RED,
+                     center=(0.0, fy, bz))
+    o_board = bd.to_object("Fence_Board")
+
+    emit_hl([o_post, o_rails, o_board], "structures/causeway_fence.glb",
+            _ao(dist=1.0), keep_xy=True, keep_z=True, budget=260)
+    _drop([o_post, o_rails, o_board])
 
 
 # ---------------------------------------------------------------------------
@@ -808,6 +903,8 @@ if _want("coast_parapet"):
     build_coast_parapet()
 if _want("stone_dike"):
     build_stone_dike()
+if _want("causeway_fence"):
+    build_causeway_fence()
 if _want("karst_ficus_a"):
     build_ficus("a")
 if _want("karst_ficus_b"):

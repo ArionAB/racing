@@ -109,6 +109,12 @@ var lure_before_entry_only: bool = false
 ## o treapta de ~6 m (adica exact o semilatime) acolo unde capetele erau de
 ## fapt pe axa la 0.00 m.
 var own_ends: bool = false
+## Gardul de pe marginile benzii, ca specificatie (`TrackBranch.fence_spec`).
+## Gol = fara gard. Il construieste `Track._build_branch_fence`.
+var fence: Dictionary = {}
+## Cat coboara marginea benzii de pamant (m); < 0 = `Track.BRANCH_EDGE_SINK`.
+## Vezi `TrackBranch.edge_sink`.
+var edge_sink: float = -1.0
 
 
 func count() -> int:

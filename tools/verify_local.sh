@@ -214,6 +214,7 @@ run_step "Reintrarea pe sosea dupa iesirea pe nisip" reentry.log 'VERDICT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeReentry.tscn -- --mode=drive --track=0
 run_step "Camera in caverna (tot intervalul de slidere)" cavecam.log 'TOATE OK|PICAT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeCavecam.tscn
+run_step "Mareea Ha Long: zona pe banda, prin apa ~80% din viteza" maree_vad.log 'REZULTAT FINAL:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeMareeVad.tscn
 run_step "Strivit: turbo-ul nu scoate masina din strivire" crush_turbo.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeCrushTurbo.tscn
 run_step "Feed-ul de contact: perete, razuire, masina" contact_feed.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeContactFeed.tscn
 run_step "Motor cu trepte si sarcina (sunet): caderi la schimbare, zumzet sub gaz" engine_voice.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeEngineVoice.tscn

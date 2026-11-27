@@ -32,6 +32,9 @@
 [ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_b.glb" id="41_tower_b"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_c.glb" id="42_tower_c"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/structures/grotto_massif.glb" id="50_grotto"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/structures/causeway_fence.glb" id="51_fence"]
+[ext_resource type="PackedScene" path="res://assets/models/plants/tropical_shrub.glb" id="52_shrub"]
+[ext_resource type="PackedScene" path="res://assets/models/plants/fern_cluster.glb" id="53_fern"]
 
 [sub_resource type="Curve3D" id="Curve3D_main"]
 closed = true
@@ -237,8 +240,15 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -111.496, 1.577, -227.431)
 curve = SubResource("Curve3D_banda")
 script = ExtResource("16_branch")
 branch_half_width = 4.0
-surface = 4
-tint = Color(0.46, 0.48, 0.45, 1)
+surface = 2
+tint = Color(0.76, 0.64, 0.50, 1)
+rut_depth = 0.02
+grass_center = 0.0
+edge_noise = 0.0
+edge_sink = 0.0
+tufts = false
+edge_fence = ExtResource("51_fence")
+edge_fence_board_every = 1
 
 [node name="CameraGrota" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -183.951, 2.632, 250.060)
@@ -1211,7 +1221,7 @@ transform = Transform3D(1.29859, 0, 1.89833, 0, 2.3, 0, -1.89833, 0, 1.29859, -2
 transform = Transform3D(1.89833, 0, -1.29859, 0, 2.3, 0, 1.29859, 0, 1.89833, -273.22, 11.34, -261.13)
 
 [node name="VegGP03" parent="DecorManual" instance=ExtResource("32_ficus_a")]
-transform = Transform3D(0.61428, 0, 1.25804, 0, 1.4, 0, -1.25804, 0, 0.61428, -129.63, 1.66, -246.33)
+transform = Transform3D(0.61428, 0, 1.25804, 0, 1.4, 0, -1.25804, 0, 0.61428, -129.63, 1.06, -246.33)
 
 [node name="VegGP04" parent="DecorManual" instance=ExtResource("35_scrub")]
 transform = Transform3D(1.34093, 0, 0.40236, 0, 1.4, 0, -0.40236, 0, 1.34093, -135.03, 1.77, -252.31)
@@ -1277,7 +1287,7 @@ transform = Transform3D(1.08155, 0, -0.88896, 0, 1.4, 0, 0.88896, 0, 1.08155, -2
 transform = Transform3D(-0.07724, 0, -1.39787, 0, 1.4, 0, 1.39787, 0, -0.07724, -213.24, 1.50, -280.04)
 
 [node name="VegGP25" parent="DecorManual" instance=ExtResource("34_bamboo")]
-transform = Transform3D(-1.07501, 0, -0.89686, 0, 1.4, 0, 0.89686, 0, -1.07501, -216.95, 1.57, -272.96)
+transform = Transform3D(-1.07501, 0, -0.89686, 0, 1.4, 0, 0.89686, 0, -1.07501, -216.95, 0.97, -272.96)
 
 [node name="VegGP29" parent="DecorManual" instance=ExtResource("34_bamboo")]
 transform = Transform3D(1.35227, 0, -0.36245, 0, 1.4, 0, 0.36245, 0, 1.35227, -257.32, 1.43, -258.51)
@@ -2326,10 +2336,68 @@ transform = Transform3D(-0.99205, 0, -0.12588, 0, 1.0, 0, 0.12588, 0, -0.99205, 
 [node name="VegF12" parent="DecorManual" instance=ExtResource("32_ficus_a")]
 transform = Transform3D(-0.44200, 0, 0.89701, 0, 1.0, 0, -0.89701, 0, -0.44200, -33.87, 1.08, -260.42)
 
-[node name="PorticScurtaturaA" parent="DecorManual" instance=ExtResource("34_bamboo")]
-transform = Transform3D(2.45, 0, 0.40, 0, 2.5, 0, -0.40, 0, 2.45, -120.77, 1.52, -232.84)
+[node name="RocaGura0" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(1.50351, 0, -0.54723, 0, 1.6, 0, 0.54723, 0, 1.50351, -110.00, -1.50, -219.40)
 metadata/coliziune = "none"
 
-[node name="PorticScurtaturaB" parent="DecorManual" instance=ExtResource("34_bamboo")]
-transform = Transform3D(-2.45, 0, -0.40, 0, 2.5, 0, 0.40, 0, -2.45, -122.00, 1.52, -225.14)
+[node name="RocaGura1" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.35912, 0, -0.98668, 0, 1.05, 0, 0.98668, 0, -0.35912, -113.20, -1.00, -221.20)
 metadata/coliziune = "none"
+
+[node name="RocaGura2" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.89271, 0, 0.32492, 0, 0.95, 0, -0.32492, 0, -0.89271, -107.40, -1.20, -221.00)
+metadata/coliziune = "none"
+
+[node name="RocaGura3" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.40000, 0, -0.69282, 0, 0.8, 0, 0.69282, 0, 0.40000, -115.80, -0.90, -221.60)
+metadata/coliziune = "none"
+
+[node name="RocaDig0" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.73612, 0, -0.42500, 0, 0.85, 0, 0.42500, 0, -0.73612, -124.80, -1.20, -222.60)
+metadata/coliziune = "none"
+
+[node name="RocaDig1" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.60622, 0, -0.35000, 0, 0.7, 0, 0.35000, 0, 0.60622, -126.90, -1.00, -222.40)
+metadata/coliziune = "none"
+
+[node name="RocaDig2" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.15628, 0, -0.88633, 0, 0.9, 0, 0.88633, 0, 0.15628, -124.00, -1.20, -234.60)
+metadata/coliziune = "none"
+
+[node name="RocaDig3" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.25652, 0, 0.70477, 0, 0.75, 0, -0.70477, 0, -0.25652, -121.50, -1.30, -234.00)
+metadata/coliziune = "none"
+
+[node name="TufaGura0" parent="DecorManual" instance=ExtResource("52_shrub")]
+transform = Transform3D(0.90000, 0, -0.00000, 0, 0.9, 0, 0.00000, 0, 0.90000, -107.80, 0.25, -223.40)
+metadata/coliziune = "none"
+
+[node name="TufaGura1" parent="DecorManual" instance=ExtResource("53_fern")]
+transform = Transform3D(0.51303, 0, -1.40954, 0, 1.5, 0, 1.40954, 0, 0.51303, -108.30, 0.10, -217.10)
+metadata/coliziune = "none"
+
+[node name="TufaGura2" parent="DecorManual" instance=ExtResource("52_shrub")]
+transform = Transform3D(-0.65114, 0, -0.54637, 0, 0.85, 0, 0.54637, 0, -0.65114, -115.80, 0.10, -232.00)
+metadata/coliziune = "none"
+
+[node name="TufaGura3" parent="DecorManual" instance=ExtResource("53_fern")]
+transform = Transform3D(-1.21244, 0, 0.70000, 0, 1.4, 0, -0.70000, 0, -1.21244, -117.50, 0.45, -235.60)
+metadata/coliziune = "none"
+
+[node name="TufaIesire0" parent="DecorManual" instance=ExtResource("52_shrub")]
+transform = Transform3D(0.77942, 0, -0.45000, 0, 0.9, 0, 0.45000, 0, 0.77942, -243.00, 0.85, -264.00)
+metadata/coliziune = "none"
+
+[node name="TufaIesire1" parent="DecorManual" instance=ExtResource("53_fern")]
+transform = Transform3D(-1.31557, 0, -0.47883, 0, 1.4, 0, 0.47883, 0, -1.31557, -245.00, 0.95, -266.50)
+metadata/coliziune = "none"
+
+[node name="TufaIesire2" parent="DecorManual" instance=ExtResource("52_shrub")]
+transform = Transform3D(-0.14760, 0, 0.83709, 0, 0.85, 0, -0.83709, 0, -0.14760, -233.00, 1.00, -272.00)
+metadata/coliziune = "none"
+
+[node name="JoncaGolf0" parent="DecorManual" instance=ExtResource("15_boat")]
+transform = Transform3D(0.28470, 0, -1.06252, 0, 1.1, 0, 1.06252, 0, 0.28470, -143.00, 0.00, -213.00)
+
+[node name="JoncaGolf1" parent="DecorManual" instance=ExtResource("15_boat")]
+transform = Transform3D(-0.35923, 0, -0.77036, 0, 0.85, 0, 0.77036, 0, -0.35923, -150.00, 0.00, -195.00)

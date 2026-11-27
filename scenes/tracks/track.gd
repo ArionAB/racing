@@ -2879,18 +2879,30 @@ static func themes() -> Dictionary:
 			# stinsi: la 0.35 stratul de nori ADUNAT peste gradientul intunecat
 			# facea o pata alburie la zenit.
 			"sky_sun_disc": false,
-			# FARA oras pictat in cer, si merita spus de ce ca sa nu se
-			# reincerce: s-a construit (PR #365), arata bine din vederile
-			# libere, si NU SE VEDE DE LA VOLAN. Cifra o spunea de la inceput —
-			# `ChaseCamera` vede ~5 grade deasupra orizontalei (brief §2.0),
-			# adica 14 px din cei 256 ai semisferei, iar banda aia e exact
-			# acolo unde stau terenul, cladirile si parapetul. Turnurile
-			# pictate incepeau de la 1.2 grade, deci partea lor vizibila era
-			# integral ACOPERITA de geometrie.
+			# ORASUL DE PE CER (nov 2026): banda de orizont, randata din
+			# tools/blender/build_chongqing_sky_band.py si lipita pe cer de
+			# `_sky_band_material`. Turnuri pe dealuri cu ferestre aprinse in
+			# ciorchini, neon pe acoperisuri, poduri luminate peste culoarele de
+			# rau (V 280, SSV 200, E 100 — chiar pe axele lungi ale pistei),
+			# dealurile impadurite cu sate, si pacla calda de deasupra orasului
+			# (alfa partial peste gradientul de mai sus). HAZE-ul randarii =
+			# `sky_horizon`.
 			#
-			# Adancimea la orizont, daca se mai vrea, trebuie sa vina din ceva
-			# ce intra in frustum: siluete 3D APROAPE (sub 5 grade, deci sub
-			# ~20 m la 250 m distanta) sau nimic. Un strat de cer nu poate.
+			# Istoric, ca sa nu se repete greseala: PR #365 pictase un oras
+			# direct in cerul procedural si NU SE VEDEA DE LA VOLAN — turnurile
+			# incepeau la 1,2 grade, iar `ChaseCamera` vede ~5 grade deasupra
+			# orizontalei, unde stau terenul si cladirile 3D. Banda de acum are
+			# planul 0 (`NEAR`, 0,6-0,76 km) care urca 4-9 grade pe azimuturile
+			# masurate ale camerei, iar ceata nu mai acopera cerul
+			# (`fog_sky_affect` 0 de mai jos) — inainte cerul de pe ecran era
+			# culoarea cetii, oricat de bine ar fi fost pictat.
+			"sky_band": {
+				"texture": "res://assets/textures/sky/chongqing_horizon_band.png",
+				"lat_min": -7.5,
+				"lat_max": 15.0,
+				"below": Color(0.165, 0.16, 0.17),
+			},
+			"fog_sky_affect": 0.0,
 			"sky_cover_alpha": 0.08,
 			"sun_color": Color(0.78, 0.84, 1.0),
 			"sun_energy": 0.35,
@@ -2904,7 +2916,18 @@ static func themes() -> Dictionary:
 			"fog_depth": true,
 			"fog_begin": 150.0,
 			"fog_end": 250.0,
-			# Fara insule pe orizont: siluetele de turnuri vin din DecorManual.
+			# PERSPECTIVA AERIANA 1.0 (nov 2026, cu banda), ca pe pistele de apa
+			# (Ha Long, Fiordland). Masurat pe capturi A/B la 0,27 si 0,90: cu 0
+			# ceata ramane culoarea `fog` (lavanda) si tot ce trece de 250 m —
+			# inelul de turnuri 3D de pe malul opus, lagunea departata, culmea
+			# terenului — iese o silueta PALIDA in fata unui oras pictat mai
+			# intunecat: fantome, adancime inversata. Cu 1.0 ceata ia culoarea
+			# cerului din spatele ei, adica a benzii (raul negru, orasul cu
+			# lumini, smogul cald), si turnurile 3D se lipesc de oras ca un plan
+			# mai apropiat. `fog` de mai sus ramane, dar nu mai ajunge pe ecran.
+			"fog_aerial": 1.0,
+			# Fara insule pe orizont: siluetele de turnuri vin din DecorManual,
+			# iar departarea din banda (`sky_band`).
 			"horizon_rings": [],
 			"walls": false,
 			"deck_rails": true,
@@ -6667,7 +6690,7 @@ func _build_environment() -> void:
 	# Ceata pe inaltime cere FOG_MODE_EXPONENTIAL, adica renuntarea la
 	# inceputul/sfarsitul explicit pe care se bazeaza ChaseCamera.far.
 	# Din sep 2026 temele de zi o declara la 0.35 (Serengeti 0.20, cerul de
-	# furtuna e deja in ceata; Chongqing 0, noaptea n-are cer de amestecat):
+	# furtuna e deja in ceata; Chongqing 1.0 din nov 2026, cu banda de orizont):
 	# obiectele departate se trag spre culoarea cerului DE DEASUPRA lor, nu
 	# spre o singura culoare de ceata — muntele intra in cer, nu se lipeste
 	# de o panza plata. E aceeasi formula de ceata, deci nu costa nimic.

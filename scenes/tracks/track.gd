@@ -1764,11 +1764,41 @@ static func themes() -> Dictionary:
 			"sky_top": Color.html("8DB8E8"),
 			"sky_horizon": Color.html("F2E2C2"),
 			"sky_cover_alpha": 0.0,
+			# BANDA DE ORIZONT (nov 2026, reteta Ha Long / MV / Machu Picchu):
+			# dealurile din jurul bazinului, randate in Blender din
+			# tools/blender/build_kyoto_sky_band.py si lipite pe cer de
+			# `_sky_band_material`: Higashiyama la E (cupole joase, Hiei-zan in
+			# spate), Kitayama la N (creste de cedri), Arashiyama la V (cele mai
+			# rosii), la S bazinul cu acoperisuri de kawara si To-ji, cateva
+			# pagode si temple mici pe poale. Padure amestecata, coroana cu
+			# coroana, in culorile kitului (artari carmin / rosu-portocaliu /
+			# ruginii, ginkgo, cedri). Planul 0: opt umeri de deal la 0,64-0,82 km
+			# pe directiile camerei (sonda pe Track18.baked), sudul ramane deschis.
+			# HAZE-ul randarii = `sky_horizon`. `below` = randul de jos al benzii
+			# (#C2B397, campul olive pe jumatate in ceata, la ~150 m sub ochi).
+			"sky_band": {
+				"texture": "res://assets/textures/sky/kyoto_horizon_band.png",
+				"lat_min": -7.5, "lat_max": 15.0,
+				"below": Color.html("C2B397"),
+			},
 			# Ceata: pacla calda a unei dupa-amiezi senine, fog_end 340 (mai
-			# limpede ca Jodhpur, 300). Inelele de fundal vor respecta
-			# < 340 < FAR_PLANE 380 (memoria efecte-de-fundal-cote-legate).
+			# limpede ca Jodhpur, 300).
+			#
+			# Cu banda (nov 2026), masurat pe capturi --gamecam:
+			# - `fog_sky_affect` 0,10 -> 0: altfel ceata acopera banda.
+			# - `fog_aerial` 0,3 (uscat, ca MV): ceata trage 30% din cerul din
+			#   spate, adica din banda, nu din albastrul de sus.
+			# - `fog` RAMANE pacla calda E9D6BC, deci NU e egal cu `below`, spre
+			#   deosebire de MV. Pe Kyoto ce se lipeste de banda nu e campul de
+			#   la -7,5 grade, ci umarul exterior al terenului la fog_max, care
+			#   iese pe ecran (233, 220, 198) la 0,88 / 0,03: o fasie de pacla pe
+			#   linia orizontului (era si inainte de banda). Banda pune picioarele
+			#   dealurilor in ceata joasa de aceeasi culoare (MIST in script), deci
+			#   fasia continua in ceata din vai. Cu ceata subtiata in banda (v5)
+			#   aceeasi fasie iesea dunga alba intre teren si dealuri.
 			"fog": Color.html("E9D6BC"),
-			"fog_sky_affect": 0.10,
+			"fog_sky_affect": 0.0,
+			"fog_aerial": 0.3,
 			"fog_depth": true,
 			"fog_begin": 100.0,
 			"fog_end": 340.0,
@@ -1857,14 +1887,13 @@ static func themes() -> Dictionary:
 			"horizon_picks": [["Higashiyama_A", "Higashiyama_B"],
 				["Arashiyama_A"], ["FarRoofs_A"]],
 			"horizon_class": "",
-			"horizon_rings": [
-				{"near": 340.0, "far": 460.0, "count": 5, "scale": 0.8,
-					"clear": 170.0, "picks": ["Higashiyama_A", "Higashiyama_B"]},
-				{"near": 360.0, "far": 470.0, "count": 2, "scale": 0.45,
-					"clear": 190.0, "picks": ["Arashiyama_A"]},
-				{"near": 330.0, "far": 450.0, "count": 3, "scale": 1.3,
-					"clear": 150.0, "picks": ["FarRoofs_A"]},
-			],
+			# Inelele 3D (5 Higashiyama, 2 Arashiyama, 3 FarRoofs la 330-470 m,
+			# ~17k triunghiuri pe LOD0, 10 instante) SCOASE din nov 2026: departarea
+			# o da banda de orizont (`sky_band`), iar inelele, spalate de ceata de
+			# 0,85, stateau ca dealuri-fantoma albe in fata dealurilor pictate
+			# (capturile de la 0,28 si 0,88). `horizon_rings: []`, NU
+			# `horizon_model` gol (ar porni siluetele de rezerva).
+			"horizon_rings": [],
 			"walls": false,
 			# Balustrada de tablier pe viaducte (scena Kiyomizu, Tsutenkyo,
 			# Togetsukyo), ca Chongqing: brief §2 „pe laturi scena are balustrada,

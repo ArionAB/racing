@@ -58,6 +58,13 @@ Un inel per creastă, azimut fix, lungimea paralelă cu drumul cel mai apropiat:
 0 mesh-uri de fundal care aruncă umbră. Pe starea dinaintea legării sonda PICĂ (0 creste,
 5 fracții fără creastă).
 
+> **Retrasă (27 nov 2026).** Inelele crestelor au fost scoase din tema `carrara`
+> (`horizon_rings: []`): departarea o dă banda de orizont pe cer,
+> `tools/blender/build_carrara_sky_band.py` (PR #771). `ProbeCarraraHorizon`
+> (`.tscn`, `probe_carrara_horizon.gd`, `.uid`) a fost ștearsă odată cu banda, fiindcă
+> măsura inele care nu mai există. `carrara_horizon.glb` rămâne în repo
+> (`horizon_model` e păstrat ca să nu pornească siluetele de rezervă).
+
 Capturi înainte/după (`--gamecam`, `docs/asset_briefs/img/carrara_fidelity/ingame/`,
 `horizon_ab_fXXX.png` = înainte | după): pixelii schimbați stau toți în banda de sus;
 **sub 45% din înălțimea cadrului se schimbă 0–1 pixeli** la toate cele 6 fracții, deci

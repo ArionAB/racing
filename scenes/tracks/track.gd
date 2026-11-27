@@ -4655,13 +4655,36 @@ static func themes() -> Dictionary:
 		"sky_top": Color.html("2A5BA6"),
 		"sky_horizon": Color.html("EDE6D8"),
 		"sky_cover_alpha": 0.0,
-		"fog": Color.html("E2DCD0"),
-		"fog_sky_affect": 0.10,
+		# BANDA DE ORIZONT (nov 2026, reteta Ha Long / MV / Machu Picchu): Alpii Apuani
+		# randati in Blender din tools/blender/build_carrara_sky_band.py si lipiti pe cer
+		# de `_sky_band_material`. Creste de calcar cu CARIERE terasate pe flancuri (fete
+		# de marmura crem, aceeasi ca `carrara_marble`, nu alb), ravaneti sub ele,
+		# castani jos; spre SV-V valea coboara spre campie si Marea Ligurica. Planul 0:
+		# cinci masive la 0,64-0,78 km pe directiile camerei (E la start, V de pe cariera
+		# de sus, N de pe bucla de vest), niciunul in spatele MasivGalerie / MasivMarmifera.
+		# HAZE-ul randarii = `sky_horizon`. Soarele randarii = `custom_sun_rotation_deg`
+		# din Track23.tscn (busola 190), nu cel din tema.
+		# Podeaua benzii e praful carierei luminat de acelasi soare: marginea ei de jos
+		# iese #AC9F88; `below` = acel rand.
+		"sky_band": {
+			"texture": "res://assets/textures/sky/carrara_horizon_band.png",
+			"lat_min": -7.5, "lat_max": 15.0,
+			"below": Color.html("AC9F88"),
+		},
+		# Ceata cu banda (ca pe MV, prima pista de uscat): `fog_sky_affect` 0 (altfel
+		# ceata acopera banda), `fog` = podeaua benzii (#AC9F88), deci terenul cetos de la
+		# fog_end are culoarea pe care o continua banda; `fog_aerial` 0,3 (la 1,0 cerul
+		# estompat aduce albastru sub orizont, teren mov); `fog_max` 0,85 (era 0,62), ca
+		# taietura terenului de la FAR_PLANE sa nu se vada. Inainte de banda ceata era
+		# alb-cald (#E2DCD0) si inchidea orizontul intr-un zid palid.
+		"fog": Color.html("AC9F88"),
+		"fog_sky_affect": 0.0,
+		"fog_aerial": 0.3,
 		"fog_depth": true,
 		"fog_begin": 150.0,
 		"fog_end": 300.0,
 		"fog_curve": 1.4,
-		"fog_max": 0.62,
+		"fog_max": 0.85,
 		"shadows": true,
 		"shadow_opacity": 0.65,
 		"shadow_distance": 120.0,
@@ -4704,23 +4727,18 @@ static func themes() -> Dictionary:
 		# la baza, FARA calota (calota = Alpi). Clasa goala = atlasul modelului: sloturile
 		# pictate (29/19/21/13) raman; o clasa de roca le-ar sterge.
 		#
-		# Un inel per creasta, cu azimut FIX (conventia `_build_horizon`: cos pe X, sin pe Z
-		# fata de centroid; E = 0, S = +90, N = -90) si lungimea TANGENTA la cerc
-		# (`yaw_deg` = 90 - unghi), alese cu tools/ProbeCarraraHorizon.tscn ca fiecare din
-		# fractiile de contract (A 0.02, E 0.62, F 0.70, G 0.80, G 0.88) sa aiba o creasta
-		# in cadrul camerei de joc, neacoperita de teren. Cotele legate (memoria
-		# efecte-de-fundal-cote-legate): fog_end 300 < FAR_PLANE 380; `_build_horizon`
-		# stinge aruncarea de umbra (memoria caster-departat-fura-umbra).
+		# INLOCUITE DE BANDA (27 nov 2026): cele trei inele cu cate o creasta (ApuanRidge_C
+		# la -60, _A la 128, _B la 185, cu azimut fix, ca fiecare fractie de contract —
+		# A 0.02, E 0.62, F 0.70, G 0.80, G 0.88 — sa aiba o creasta in cadru) sunt scoase.
+		# Departarea o da banda de orizont (`sky_band` mai sus), randata din
+		# tools/blender/build_carrara_sky_band.py: Apuanii cu cariere pana la orizont, plus
+		# planul 0 (masive la 0,64-0,78 km pe aceleasi directii ale camerei). In fata benzii
+		# crestele 3D ieseau fantome palide (alta ceata decat banda), ca pe Ha Long / MV /
+		# Fiordland. `horizon_rings: []`, NU `horizon_model: ""` (ar porni siluetele de
+		# rezerva). Sonda inelelor (ProbeCarraraHorizon) a fost retrasa odata cu ele.
 		"horizon_model": "res://assets/models/carrara/effects/carrara_horizon.glb",
 		"horizon_class": "",
-		"horizon_rings": [
-			{"near": 200.0, "far": 300.0, "count": 1, "scale": 0.9, "clear": 130.0,
-				"picks": ["ApuanRidge_C"], "angle_deg": -60.0, "yaw_deg": 0.0},
-			{"near": 230.0, "far": 330.0, "count": 1, "scale": 0.9, "clear": 140.0,
-				"picks": ["ApuanRidge_A"], "angle_deg": 128.0, "yaw_deg": 0.0},
-			{"near": 300.0, "far": 480.0, "count": 1, "scale": 0.85, "clear": 170.0,
-				"picks": ["ApuanRidge_B"], "angle_deg": 185.0, "yaw_deg": 90.0},
-		],
+		"horizon_rings": [],
 		"walls": false,
 		"kerbs": false,
 		"cliffs": false,
@@ -4754,8 +4772,30 @@ static func themes() -> Dictionary:
 			"away_color": Color(0.15, 0.09, 0.26), "away_alpha": 0.90, "away_height": 1.2,
 			"mottle": 0.25,
 		},
+		# BANDA DE ORIZONT (nov 2026, reteta Monument Valley / Serengeti): campia Cambodgiei
+		# la amurg — marea de coronament, orezarii inundate cu palmieri de zahar spre V,
+		# barayul de vest cu West Mebon, Phnom Krom (SV) si Phnom Bok (NE) cu cate un prang
+		# mic, platoul Kulen la NE, si sapte palcuri de copaci URIASI la 0,6-0,75 km pe
+		# directiile camerei (scara) — randata din tools/blender/build_angkor_sky_band.py si
+		# lipita pe cer de `_sky_band_material`. Cerul pe azimut (`sky_azimuth`) trece
+		# NESCHIMBAT in shaderul benzii (acelasi `sky_cover`), iar aerul benzii e refacut cu
+		# aceeasi formula pe busola: departarea se topeste in piersica spre V si in violet
+		# spre E, fara margine. `below` = podeaua benzii = ceata temei (vezi `fog`).
+		"sky_band": {
+			"texture": "res://assets/textures/sky/angkor_horizon_band.png",
+			"lat_min": -7.5, "lat_max": 15.0,
+			"below": Color.html("86727A"),
+		},
+		# Ceata ramane mov-cenusie, de amurg (mai rece si mai palida decat solul de jungla:
+		# memoria `ceata-in-familia-solului`). Reteta Monument Valley `fog` = `below` =
+		# podeaua benzii e respectata invers: podeaua benzii (sub 380 m) E ceata, iar tot ce
+		# sta dincolo in banda poarta cei 60% de ceata pe care ii au copacii reali la
+		# FAR_PLANE (`fog_max`), deci palcurile de la 700 m nu ies mai saturate decat
+		# trunchiurile-fantoma de la 280 m.
+		# `fog_sky_affect` 0 (era 0,10): altfel ceata se aseaza peste banda (pata uniforma,
+		# lectia Ha Long). `fog_aerial` ramane 0,30 (uscat, ca Monument Valley).
 		"fog": Color.html("86727A"),
-		"fog_sky_affect": 0.10,
+		"fog_sky_affect": 0.0,
 		"fog_aerial": 0.30,
 		"fog_depth": true,
 		"fog_begin": 120.0,
@@ -4800,26 +4840,17 @@ static func themes() -> Dictionary:
 		"props": "",
 		"prop_contact_flat": [],
 		"hazard_model": "",
-		# Fundalul (kit §1.8, val 4): coronament, creasta Kulen spre NE, orezarii cu palmieri spre V.
-		# Benzile de furtuna (`StormBand_*`) NU intra: sub camera de joc (marginea de sus a cadrului la
-		# ~31 m peste sol la 240 m) baza lor de 46-54 m iese din cadru, iar coborate citesc platouri
-		# cenusii (Monument Valley in jungla). Furtuna spre est ramane decizie deschisa (kit §3).
+		# Fundalul (kit §1.8, val 4) a fost un inel 3D din `angkor_horizon.glb`: coronament
+		# (Canopy_A/B/C), creasta Kulen spre NE, orezarii spre V, la 200-260 m. Din nov 2026
+		# departarea o da banda de orizont (`sky_band`), deci inelele sunt SCOASE
+		# (`horizon_rings: []`, NU `horizon_model: ""`, care porneste siluetele de rezerva):
+		# pe captura (terasa Elefantilor, 0,58) coroanele inelului ieseau pete verde-lime,
+		# mai aprinse decat jungla cetoasa din jur, iar o creasta de 42 m la 230 m dubla
+		# Kulenul pictat la 20 km. Coronamentul, Kulenul si orezariile sunt acum in banda.
+		# Benzile de furtuna (`StormBand_*`) nu intrasera nici inainte (kit §3).
 		"horizon_model": "res://assets/models/angkor/effects/angkor_horizon.glb",
-		# Degajarea pe TOATA amprenta (tiparul Ha Long): Canopy_A are 196 x 126 m, iar degajarea masurata
-		# in pivot l-a lasat peste calea uriasilor (D, frac 0,345-0,358): o cupola verde pe drum.
-		# Cu amprenta, `clear` e de la MARGINEA piesei, nu din pivot: 120 nu mai lasa nicio silueta (0/12);
-		# 40 lasa 5/12, cea mai apropiata la >= 5 m de drum pe AABB (sonda temporara, 6 nov 2026).
-		"horizon_footprint": true,
-		# Atlasul (coronament verde, orezarii), nu clasa implicita "rock" (iesea maro-portocaliu).
 		"horizon_class": "",
-		"horizon_rings": [
-			{"count": 1, "angle_deg": -52.0, "yaw_deg": 142.0, "near": 200.0, "far": 260.0, "clear": 40.0,
-				"scale": 1.0, "picks": ["KulenRidge"]},
-			{"count": 1, "angle_deg": 180.0, "yaw_deg": -90.0, "near": 200.0, "far": 260.0, "clear": 40.0,
-				"scale": 1.0, "picks": ["Paddies_W"]},
-			{"count": 10, "near": 200.0, "far": 260.0, "clear": 40.0, "scale": 1.0,
-				"picks": ["Canopy_A", "Canopy_B", "Canopy_C"]},
-		],
+		"horizon_rings": [],
 		"water": false,
 	}
 	# SAN FRANCISCO (Track25, docs/track_briefs/san_francisco.md §4; pasul 0 = testul de loc,

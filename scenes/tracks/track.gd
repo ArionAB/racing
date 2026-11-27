@@ -1907,16 +1907,46 @@ static func themes() -> Dictionary:
 			"sky_top": Color.html("3F79C9"),
 			"sky_horizon": Color.html("F1D3AA"),
 			"sky_cover_alpha": 0.0,
-			# Ceata calda: 120 -> 360 m. fog_end 360 < ChaseCamera.FAR_PLANE 380
-			# (memoria efecte-de-fundal-cote-legate); inelele de orizont stau sub
-			# fog_end, la 190-340 m.
-			"fog": Color.html("D9A57A"),
-			"fog_sky_affect": 0.10,
+			# BANDA DE ORIZONT (nov 2026, reteta Ha Long pe prima pista de USCAT):
+			# podisul rosu cu mese, butte-uri si ace la 0,5-15 km, randat in Blender
+			# din tools/blender/build_monument_sky_band.py si lipit pe cer de
+			# `_sky_band_material`. HAZE-ul randarii = `sky_horizon` de mai sus.
+			# Podeaua benzii e acelasi nisip ca terenul jocului, luminat de acelasi
+			# soare: marginea ei de jos iese #7B5038 in textura, adica
+			# (169, 100, 59) pe ecran, cat nisipul jocului (172, 97, 58) — de aceea
+			# nu e dunga intre teren si banda. `below` = acel ultim rand.
+			"sky_band": {
+				"texture": "res://assets/textures/sky/monumentvalley_horizon_band.png",
+				"lat_min": -7.5, "lat_max": 15.0,
+				"below": Color.html("7B5038"),
+			},
+			# Ceata 120 -> 360 m. fog_end 360 < ChaseCamera.FAR_PLANE 380 (memoria
+			# efecte-de-fundal-cote-legate).
+			#
+			# Cu banda (nov 2026), masurat pe capturi --gamecam:
+			# - `fog_sky_affect` 0: altfel ceata acopera banda (pata uniforma).
+			# - Ceata NU mai e un portocaliu-pal (#D9A57A): cu el terenul se oprea
+			#   la 360 m intr-un zid de (231, 178, 125) si banda ar fi stat deasupra
+			#   ca un tapet. Acum departarea se spala spre PODEAUA benzii: `fog` =
+			#   culoarea ei de jos (#7B5038), deci terenul cetos are culoarea pe
+			#   care o continua banda, si orizontul il face banda (care se topeste
+			#   in HAZE).
+			# - `fog_aerial` 0,3, nu 1,0 ca pe Ha Long: ceata citeste cerul din harta
+			#   de radianta ESTOMPATA, iar estomparea amesteca albastrul de sus in
+			#   directiile de sub orizont — la 1,0 terenul de la 200-300 m iesea mov
+			#   (163, 113, 95) sub podeaua rosie a benzii, o dunga vizibila de pe
+			#   cornisa. La 0,5 (168, 110, 80), la 0,3 (169, 107, 76): sub prag.
+			# - `fog_max` 0,85 (era 0,62): la FAR_PLANE terenul e aproape tot banda,
+			#   deci taietura de la 380 m nu se vede; Mittens raman citibili de pe
+			#   coama (~55% ceata la 300 m).
+			"fog": Color.html("7B5038"),
+			"fog_sky_affect": 0.0,
+			"fog_aerial": 0.3,
 			"fog_depth": true,
 			"fog_begin": 120.0,
 			"fog_end": 360.0,
 			"fog_curve": 1.4,
-			"fog_max": 0.62,
+			"fog_max": 0.85,
 			# Umbre PORNITE, shadow_distance 90 (CLAUDE.md: prima setare de stins
 			# pe device). La 18 grade umbra are ~3x inaltimea obiectului.
 			"shadows": true,
@@ -1972,17 +2002,14 @@ static func themes() -> Dictionary:
 			# se poate scutura de clasa; la 190-340 m sub ceata nu se vede.
 			"horizon_model": "res://assets/models/monumentvalley/rocks/horizon_mesas.glb",
 			"horizon_class": "mv_sandstone",
-			"horizon_rings": [
-				# Inelul apropiat: piesele joase/inguste (Stagecoach 30 m, King 32 m,
-				# Spires 34 m). Brigham (37 m x 60 m latime) e la 250+ m: masurat, la
-				# 59 m de sosea un bloc de 33 m citea ca geometrie apropiata, nu ca zare.
-				{"near": 190.0, "far": 260.0, "count": 5, "scale": 1.0,
-					"clear": 100.0, "picks": ["Stagecoach_A", "KingOnThrone_A",
-					"Spires_A"]},
-				{"near": 250.0, "far": 340.0, "count": 6, "scale": 1.1,
-					"clear": 140.0, "picks": ["EagleMesa_A", "BrighamsTomb_A",
-					"FarMesa_A", "FarMesa_B"]},
-			],
+			# Inelele 3D (Stagecoach/King/Spires la 190-260 m, Eagle/Brigham/FarMesa
+			# la 250-340 m) sunt SCOASE din nov 2026: departarea o da banda de
+			# orizont, cu mese pana la 15 km. In fata ei inelul departat citea ca un
+			# gard continuu de prisme cetoase (captura de pe coama), iar ceata spre
+			# podeaua benzii le facea fantome. Lista goala, NU `horizon_model` gol
+			# (acela porneste siluetele de rezerva). Reperele apropiate (Mittens,
+			# Merrick, mesele trecatorii) sunt DecorManual si raman.
+			"horizon_rings": [],
 			# Arcul E': kitul are propriul (`sandstone_arch.glb`, golul masurat
 			# 15,45 m x 8,95 m — docs/asset_briefs/monumentvalley_inventory.md). Clasa
 			# pe PARTI: peretele si grohotisul pe gresie, calota ramane pe atlas (vezi

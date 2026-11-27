@@ -4675,20 +4675,15 @@ static func themes() -> Dictionary:
 		# la baza, FARA calota (calota = Alpi). Clasa goala = atlasul modelului: sloturile
 		# pictate (29/19/21/13) raman; o clasa de roca le-ar sterge.
 		#
-		# Un inel per creasta, cu azimut FIX (conventia `_build_horizon`: cos pe X, sin pe Z
-		# fata de centroid; E = 0, S = +90, N = -90) si lungimea TANGENTA la cerc
-		# (`yaw_deg` = 90 - unghi), alese cu tools/ProbeCarraraHorizon.tscn ca fiecare din
-		# fractiile de contract (A 0.02, E 0.62, F 0.70, G 0.80, G 0.88) sa aiba o creasta
-		# in cadrul camerei de joc, neacoperita de teren. Cotele legate (memoria
-		# efecte-de-fundal-cote-legate): fog_end 300 < FAR_PLANE 380; `_build_horizon`
-		# stinge aruncarea de umbra (memoria caster-departat-fura-umbra).
-		#
-		# Inelele (ApuanRidge_C la -60, _A la 128, _B la 185) sunt SCOASE din nov 2026:
-		# departarea o da banda de orizont (`sky_band`), cu creste si cariere pana la
-		# orizont. In fata benzii crestele 3D ieseau fantome palide (alta ceata decat
-		# banda), ca pe Ha Long / MV / Fiordland. `horizon_rings: []`, NU
-		# `horizon_model: ""` (ar porni siluetele de rezerva). ProbeCarraraHorizon (nu e
-		# in verify) numara inelele vechi si pica de acum; contractul ei il tine banda.
+		# INLOCUITE DE BANDA (27 nov 2026): cele trei inele cu cate o creasta (ApuanRidge_C
+		# la -60, _A la 128, _B la 185, cu azimut fix, ca fiecare fractie de contract —
+		# A 0.02, E 0.62, F 0.70, G 0.80, G 0.88 — sa aiba o creasta in cadru) sunt scoase.
+		# Departarea o da banda de orizont (`sky_band` mai sus), randata din
+		# tools/blender/build_carrara_sky_band.py: Apuanii cu cariere pana la orizont, plus
+		# planul 0 (masive la 0,64-0,78 km pe aceleasi directii ale camerei). In fata benzii
+		# crestele 3D ieseau fantome palide (alta ceata decat banda), ca pe Ha Long / MV /
+		# Fiordland. `horizon_rings: []`, NU `horizon_model: ""` (ar porni siluetele de
+		# rezerva). Sonda inelelor (ProbeCarraraHorizon) a fost retrasa odata cu ele.
 		"horizon_model": "res://assets/models/carrara/effects/carrara_horizon.glb",
 		"horizon_class": "",
 		"horizon_rings": [],

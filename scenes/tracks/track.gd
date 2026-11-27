@@ -2588,9 +2588,41 @@ static func themes() -> Dictionary:
 			"prop_contact_skip": ["vine_row"],
 			"ground_tint": Palette.color(Palette.VOLCANIC_BLACK),
 			"sky_top": Color(0.28, 0.50, 0.82),
+			# Orizontul = AERUL din banda pictata (HAZE in
+			# build_stromboli_sky_band.py): insulele departate se spala exact in
+			# culoarea pe care o deseneaza cerul in spatele lor.
 			"sky_horizon": Color(0.86, 0.89, 0.88),
-			"fog": Color(0.80, 0.85, 0.88),
-			"fog_aerial": 0.35,
+			# BANDA DE ORIZONT (nov 2026, dupa Ha Long / Monument Valley /
+			# Fiordland): tools/blender/build_stromboli_sky_band.py — Tireniana
+			# pana la orizont, celelalte Eoliene (Basiluzzo, Dattilo, Panarea cu
+			# satul alb, Salina cu doua conuri, Lipari, Vulcano, Filicudi cu acul
+			# La Canna, Alicudi), capul Calabriei cu orasul pe faleza, si in fund
+			# coasta Calabriei / Siciliei cu Etna, aproape aer. Vulcanul NU e in
+			# banda: pista urca pe el. Nici Strombolicchio: e piesa 3D.
+			# `below` = ultimul rand al benzii (marea de la ~230 m), pentru
+			# camerele de sus, care vad sub -7,5 grade.
+			"sky_band": {
+				"texture": "res://assets/textures/sky/stromboli_horizon_band.png",
+				"lat_min": -7.5, "lat_max": 15.0,
+				"below": Color.html("2D4358"),
+			},
+			# CEATA CU BANDA (nov 2026), masurat pe capturi --gamecam:
+			# - `fog_sky_affect` 0: altfel ceata acopera banda (pata uniforma).
+			# - Marea jocului se termina la FAR_PLANE (380 m) intr-o muchie
+			#   dreapta; de pe buza craterului (camera la 70 m) muchia e la -10
+			#   grade, in plina mare. Cu `fog_aerial` 1,0 (reteta Ha Long) apa de
+			#   la muchie iesea la ~0,7 din cerul din spatele ei, nu egala cu el
+			#   (masurat: banda (43, 83, 118), apa (34, 62, 83)) — o dunga
+			#   inchisa de-a curmezisul marii, oricat de inchisa ar fi fost banda
+			#   (urmarea doar raportul). Ceata trage deci jumatate spre cer,
+			#   jumatate spre o culoare fixa = albastrul de jos al benzii,
+			#   ridicat cat sa acopere raportul: la muchie apa iese (49, 85, 118)
+			#   langa banda (44, 83, 118); de jos, pe plaja (0,70), (94, 121, 150)
+			#   langa (101, 120, 144). Fosta ceata alb-albastruie (0.80, 0.85,
+			#   0.88) e acum doar jumatate din cer, pe uscat.
+			"fog": Color.html("38516A"),
+			"fog_sky_affect": 0.0,
+			"fog_aerial": 0.5,
 			"hill_color": Color(0.40, 0.44, 0.42),
 			# LUMINA E CE FACEA VULCANUL SA ARATE A PLAJA.
 			#
@@ -2631,19 +2663,20 @@ static func themes() -> Dictionary:
 			"fog_end": 300.0,
 			# Panarea si Salina: doua siluete joase, albastrui, pe orizont.
 			# Refolosesc modelul insulelor Okinawa — la 200+ m prin ceata calda
-			# citesc ca insule vecine, nu ca recif tropical.
+			# citesc ca insule vecine, nu ca recif tropical. INERT din nov 2026
+			# (`horizon_rings` gol, mai jos): insulele sunt in banda.
 			"horizon_model": "res://assets/models/effects/horizon_island.glb",
 			"horizon_picks": [
 				["Island_Ridge", "Island_Low"],
 				["Island_Peak"],
 			],
 			"horizon_class": "coral_rock",
-			"horizon_rings": [
-				{"near": 200.0, "far": 250.0, "count": 2, "scale": 0.85,
-					"clear": 110.0, "picks": ["Island_Ridge", "Island_Low"]},
-				{"near": 250.0, "far": 295.0, "count": 2, "scale": 1.10,
-					"clear": 130.0, "picks": ["Island_Peak"]},
-			],
+			# Inelele 3D (Panarea si Salina din modelul Okinawa, la 200-295 m)
+			# sunt SCOASE din nov 2026: insulele le da banda (`sky_band`), la
+			# scara si pe locul lor. In fata benzii stateau ca niste fantome
+			# cenusii, mai mari decat Salina pictata. Lista goala, NU
+			# `horizon_model` gol: modelul gol porneste siluetele de rezerva.
+			"horizon_rings": [],
 			# TREI ETAJE DE CULOARE PE CON (brief §5.5), nu verde peste tot.
 			#
 			# Prima versiune a copiat `inland_tint` de la Okinawa: verde

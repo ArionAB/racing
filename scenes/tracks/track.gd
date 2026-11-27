@@ -4925,11 +4925,34 @@ static func themes() -> Dictionary:
 		"sky_top": Color.html("3C78C8"),
 		"sky_horizon": Color.html("EAE2D2"),
 		"sky_cover_alpha": 0.0,
+		# BANDA DE ORIZONT (nov 2026, reteta Ha Long / MV / Kyoto): golful si
+		# locul din jur, randate in Blender din tools/blender/build_sanfrancisco_sky_band.py
+		# si lipite pe cer de `_sky_band_material`. Orasul pe dealuri cu case victoriene
+		# pastel pe grila de strazi la S si V, poarta spre ocean la NV (FARA pod: podul e
+		# 3D, pe pista), capul Marin auriu-verde la N-NV cu Tamalpais departe, Angel Island
+		# la N-NE, dealurile aurii ale malului celalalt la E si East Bay peste golf. Planul 0:
+		# dealuri la 0,64-0,76 km pe directiile camerei (sonda pe Track25.baked: V 270,
+		# N 0, E 90, S 180, balonul 217). HAZE-ul randarii = `sky_horizon`. `below` =
+		# randul de jos al benzii (golful la ~230 m, peste tot).
+		"sky_band": {
+			"texture": "res://assets/textures/sky/sanfrancisco_horizon_band.png",
+			"lat_min": -7.5, "lat_max": 15.0,
+			"below": Color.html("7D949F"),
+		},
+		# CEATA CU BANDA, masurat pe capturi --gamecam: `fog_aerial` 1,0 (pista de APA, ca
+		# Ha Long / Fiordland): apa jocului de la 380 m intra in golful pictat fara cusatura,
+		# iar terenul auriu de la marginea lumii trage culoarea benzii din spatele lui
+		# (iarba aurie, ca orasul din banda incepe abia de la ~450 m). Cu 0,3 dealurile 3D
+		# de pe inel si podul de pe chei se spalau spre alb neutru, iar marea de la orizont
+		# iesea o fasie laptoasa. „Fara ceata” ramane: pacla e tot subtire (fog_max 0,40),
+		# fara bancul de ceata de pe Golden Gate.
+		"fog_aerial": 1.0,
 		# Pacla: SUBTIRE si aproape neutra (S 0,03), mai palida si mult mai putin saturata decat
 		# solul auriu si decat apa: departarea se spala spre alb-cald, nu spre bej (memoria
 		# `ceata-in-familia-solului` — o ceata saturata in familia solului nu face adancime).
 		"fog": Color(0.86, 0.855, 0.84),
-		"fog_sky_affect": 0.15,
+		# 0,15 -> 0: altfel ceata acopera banda (memoria `cerul-temei-ascuns-de-ceata`).
+		"fog_sky_affect": 0.0,
 		"fog_depth": true,
 		"fog_begin": 170.0,
 		"fog_end": 360.0,
@@ -4977,18 +5000,18 @@ static func themes() -> Dictionary:
 		# joc, la ~340 m, cadrul vede ~47 m din piesa). Peste apa `dy` ridica baza la nivelul
 		# marii (fundul golfului e la -8). Cotele legate: inel <= ~350 m de privire < fog_end 360
 		# < FAR_PLANE 380 (memoria `efecte-de-fundal-cote-legate`).
+		# Cu banda (nov 2026): orasele generice `City_A/B` SCOASE — orasul il da banda, iar
+		# turnurile cenusii de pe malul auriu stateau ca fantome in fata dealurilor pictate.
+		# Dealurile `Hill_A/B/C` RAMAN: la 250-350 m, cu pacla de 0,40 si `fog_aerial` 1,0,
+		# ies aurii si solide (nu fantome) si dau paralaxa planului apropiat in fata benzii.
 		"horizon_model": "res://assets/models/sanfrancisco/structures/sf_horizon.glb",
 		"horizon_rings": [
 			{"count": 1, "near": 250.0, "far": 350.0, "clear": 150.0, "scale": 1.0, "picks": ["Hill_C"],
 				"at": Vector2(780.0, -380.0), "yaw_deg": 22.5, "dy": 10.0},
 			{"count": 1, "near": 250.0, "far": 350.0, "clear": 150.0, "scale": 1.0, "picks": ["Hill_A"],
 				"at": Vector2(790.0, -150.0), "yaw_deg": 22.5, "dy": 0.0},
-			{"count": 1, "near": 250.0, "far": 350.0, "clear": 150.0, "scale": 0.6, "picks": ["City_A"],
-				"at": Vector2(880.0, -140.0), "yaw_deg": 90.0, "dy": 0.0},
 			{"count": 1, "near": 250.0, "far": 350.0, "clear": 150.0, "scale": 1.15, "picks": ["Hill_B"],
 				"at": Vector2(170.0, 400.0), "yaw_deg": 22.5, "dy": 0.0},
-			{"count": 1, "near": 250.0, "far": 350.0, "clear": 150.0, "scale": 0.8, "picks": ["City_B"],
-				"at": Vector2(95.0, 450.0), "yaw_deg": 0.0, "dy": 0.0},
 		],
 		"horizon_class": "",
 		# Umerii soselei = trotuarul de beton (CONCRETE 8), nu praf colorat.

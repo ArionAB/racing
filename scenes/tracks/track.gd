@@ -1038,10 +1038,27 @@ static func themes() -> Dictionary:
 			"sky_top": Color.html("2A5BA6"),
 			"sky_horizon": Color.html("B9CFE3"),
 			"sky_cover_alpha": 0.12,
+			# BANDA DE ORIZONT (nov 2026, reteta Ha Long / Fiordland / MV): Anzii
+			# din jurul cetatii, randati in Blender din
+			# tools/blender/build_machupicchu_sky_band.py si lipiti pe cer de
+			# `_sky_band_material`. Varfuri abrupte cu padure de nori pana sus si
+			# granit pe creste, ridicate dintr-o MARE DE NORI (valea Urubamba),
+			# benzi de nor pe flancuri, cordiliera cu zapada la S (Salcantay) si
+			# E (Veronica). Planul 0: sase uriasi la 0,65-0,82 km pe directiile
+			# camerei (urcarea spre E, dreapta spre S, valea spre V), niciunul in
+			# spatele lui Huayna Picchu real (NNV-NE ramane jos). HAZE-ul randarii
+			# = `sky_horizon`. Sub orizont banda e norul: marginea ei de jos iese
+			# #B4BFCA, culoarea pe care o are pe ecran terenul cetos de la fog_end,
+			# deci ceata jocului intra in nor fara dunga. `below` = acel rand.
+			"sky_band": {
+				"texture": "res://assets/textures/sky/machupicchu_horizon_band.png",
+				"lat_min": -7.5, "lat_max": 15.0,
+				"below": Color.html("B4BFCA"),
+			},
 			# Ceata e NORUL care urca din defileu: alb-gri, in familia norului, nu
-			# a solului. Cerul isi pastreaza albastrul (fog_sky_affect mic, ca pe
-			# Serengeti — la 1.0 banda de cer iesea culoarea cetii).
-			"fog_sky_affect": 0.15,
+			# a solului. Cu banda, `fog_sky_affect` 0 (altfel ceata acopera banda,
+			# pata uniforma — memoria cerul-temei-ascuns-de-ceata).
+			"fog_sky_affect": 0.0,
 			"fog": Color(0.86, 0.87, 0.89),
 			"fog_aerial": 0.35,
 			# Peretele opus al defileului: padure de nori, verde inchis-albastrui.
@@ -1147,14 +1164,12 @@ static func themes() -> Dictionary:
 			# Scara creste cu distanta ca siluetele sa pastreze aceeasi
 			# inaltime unghiulara; `clear` tine muntele departe de sosea, altfel
 			# o silueta scalata intra peste drum.
-			"horizon_rings": [
-				{"near": 150.0, "far": 195.0, "count": 4, "scale": 0.85,
-					"clear": 95.0, "picks": ["MountainPeak"]},
-				{"near": 195.0, "far": 245.0, "count": 5, "scale": 1.10,
-					"clear": 120.0, "picks": ["MountainPeak"]},
-				{"near": 245.0, "far": 295.0, "count": 4, "scale": 1.40,
-					"clear": 145.0, "picks": ["MountainPeak"]},
-			],
+			# Inelele 3D (MountainPeak la 150-295 m) sunt SCOASE din nov 2026:
+			# departarea o da banda de orizont (`sky_band`). Pe capturi stateau ca
+			# fantome gri-palide in fata varfurilor pictate. Lista goala, NU
+			# `horizon_model` gol (acela porneste siluetele de rezerva). Modelul si
+			# `horizon_picks` raman, ca inelele sa se poata reface dintr-o linie.
+			"horizon_rings": [],
 			"horizon_class": "",
 			"walls": false,
 			"kerbs": false,

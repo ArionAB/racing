@@ -4184,7 +4184,35 @@ static func themes() -> Dictionary:
 		"ambient_energy": 0.30,
 		# Aer de 2000 m: zenit mai saturat decat pe Alpi (#2F6FD0), orizont alb-cald.
 		"sky_top": Color(0.18, 0.44, 0.82),
-		"sky_horizon": Color(0.86, 0.88, 0.90),
+		# Orizontul = AERUL din banda pictata (HAZE in
+		# build_transfagarasan_sky_band.py) = `fog` mostenit din "alpine". Inainte
+		# de banda `fog_sky_affect` era 1 si tot cerul vizibil din camera de joc
+		# iesea exact culoarea cetii (masurat (220, 238, 254) pe ecran); acum cerul
+		# isi arata gradientul, iar orizontul lui ramane acelasi albastru-pal.
+		"sky_horizon": Color(0.72, 0.83, 0.94),
+		# BANDA DE ORIZONT (nov 2026, dupa Ha Long / Monument Valley / Fiordland):
+		# Muntii Fagarasului randati in Blender din
+		# tools/blender/build_transfagarasan_sky_band.py si lipiti pe cer de
+		# `_sky_band_material`: creasta principala (sist, caldari, petice de
+		# zapada) spre E si V, culmile impadurite ale Argesului si marea de nori
+		# spre S/SE, campia Tarii Fagarasului spre N, plus planul 0 — masive mari
+		# la 0,8-1 km pe directiile camerei de joc, care dau scara. Imbinarea cu
+		# terenul jocului se face pe AER: fundul vailor din banda e in pacla de
+		# culoarea cetii (vezi VALLEY_* in script), deci terenul care intra in
+		# ceata la fog_end continua in vaile pictate. `below` = acea pacla.
+		"sky_band": {
+			"texture": "res://assets/textures/sky/transfagarasan_horizon_band.png",
+			"lat_min": -7.5, "lat_max": 15.0,
+			"below": Color(0.72, 0.83, 0.94),
+		},
+		# Cu banda: `fog_sky_affect` 0, altfel ceata acopera banda (pata uniforma).
+		# Restul cetii ramane cel mostenit din "alpine", masurat pe capturi: `fog`
+		# (0.72, 0.83, 0.94) = `sky_horizon` = aerul benzii, `fog_aerial` 0,35 si
+		# opacitate plina la fog_end. Pe uscat nu se urca `fog_aerial` (lectia de
+		# pe Monument Valley: aduce albastrul cerului estompat sub orizont), iar
+		# opacitatea plina e chiar ce leaga terenul de pacla din vaile benzii
+		# (terenul cetos (192, 218, 238) pe ecran, pacla benzii la fel).
+		"fog_sky_affect": 0.0,
 		"fog_begin": 140.0,
 		"fog_end": 370.0,
 		# Apa de lac de munte: transparenta la mal (turcoaz rece), verde-inchis
@@ -4221,23 +4249,15 @@ static func themes() -> Dictionary:
 		"horizon_slot_remap": {29: 11},
 		"horizon_picks": [["FagarasRidge_A"], ["FagarasRidge_B"], ["FagarasRidge_C"],
 			["CloudSea_A"], ["CloudSea_B"], ["FagarasPlain_A"]],
-		# Cotele de fundal pe relieful din nivel-relief (TerrainHollow GolNoriA/B si GolCampie):
-		# norii la dy +10 (la -8 erau ingropati sub podeaua golului); campia la clear 105 si
-		# dy +12, altfel marginea ei de sud cadea peste drum la G (poligoanele mustar, N8).
-		"horizon_rings": [
-			{"near": 200.0, "far": 330.0, "count": 1, "scale": 1.0, "clear": 140.0,
-				"picks": ["FagarasRidge_A"], "angle_deg": 0.0, "yaw_deg": -90.0},
-			{"near": 200.0, "far": 330.0, "count": 1, "scale": 1.0, "clear": 140.0,
-				"picks": ["FagarasRidge_B"], "angle_deg": -35.0, "yaw_deg": -55.0},
-			{"near": 200.0, "far": 330.0, "count": 1, "scale": 1.0, "clear": 140.0,
-				"picks": ["FagarasRidge_C"], "angle_deg": 35.0, "yaw_deg": -125.0},
-			{"near": 240.0, "far": 320.0, "count": 1, "scale": 1.0, "clear": 90.0,
-				"picks": ["CloudSea_A"], "angle_deg": 15.0, "yaw_deg": -105.0, "dy": 10.0},
-			{"near": 240.0, "far": 320.0, "count": 1, "scale": 1.0, "clear": 90.0,
-				"picks": ["CloudSea_B"], "angle_deg": 55.0, "yaw_deg": -145.0, "dy": 10.0},
-			{"near": 280.0, "far": 340.0, "count": 1, "scale": 1.0, "clear": 105.0,
-				"picks": ["FagarasPlain_A"], "angle_deg": -90.0, "yaw_deg": 0.0, "dy": 12.0},
-		],
+		# Inelele 3D de fundal (creasta, marea de nori, campia, 200-340 m) sunt
+		# SCOASE din nov 2026: departarea o da banda de orizont (`sky_band`), iar
+		# siluetele low-poly de la 200-340 m stateau in fata ei cu alt stil si alta
+		# ceata (pe captura de la 0,45 varful inelului acoperea creasta pictata).
+		# Lista goala, NU
+		# `horizon_model` gol (modelul gol porneste siluetele de rezerva) si NU
+		# cheia lipsa (porneste inelele implicite cu modelul de mai sus).
+		# Inelele vechi sunt in istoricul git (inainte de nov 2026).
+		"horizon_rings": [],
 	}, true)
 	# Rampele de saritura (issue #610): piatra de drum de munte, cu buza de beton.
 	tf["ramp_style"] = {"body": "tf_stone", "lip": "concrete"}

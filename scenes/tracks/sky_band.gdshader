@@ -34,6 +34,13 @@ uniform float band_lat_min = -0.1309; // -7,5 grade
 uniform float band_lat_max = 0.2618;  //  15 grade
 uniform float band_yaw = 0.0;         // rotatie a benzii, in ture (0..1)
 uniform vec4 band_below_color : source_color = vec4(0.25, 0.6, 0.57, 1.0);
+// NOAPTEA (opt-in; doar Jodhpur, unde `DuskCycle` duce cursa din apus in
+// noapte): aceeasi felie randata a doua oara, la lumina de noapte (ferestre
+// aprinse, aer indigo), amestecata peste cea de zi cu `band_night_mix` (0 = zi).
+// La 0 ramura nu ruleaza: celelalte piste raman bit cu bit cum erau.
+uniform sampler2D band_night : source_color, filter_linear, repeat_enable, hint_default_transparent;
+uniform float band_night_mix : hint_range(0, 1) = 0.0;
+uniform vec4 band_below_night : source_color = vec4(0.1, 0.1, 0.12, 1.0);
 
 void sky() {
 	float v_angle = acos(clamp(EYEDIR.y, -1.0, 1.0));
@@ -65,17 +72,25 @@ void sky() {
 	float lat = asin(clamp(EYEDIR.y, -1.0, 1.0));
 	if (lat < band_lat_min) {
 		col = band_below_color.rgb;
+		if (band_night_mix > 0.0) {
+			col = mix(col, band_below_night.rgb, band_night_mix);
+		}
 	} else if (lat <= band_lat_max) {
 		float u = fract(atan(EYEDIR.x, -EYEDIR.z) / TAU + 0.5 + band_yaw);
-		float v = (band_lat_max - lat) / (band_lat_max - band_lat_min);
+		float v_raw = (band_lat_max - lat) / (band_lat_max - band_lat_min);
 		// `repeat_enable` e pentru cusatura de pe azimut (u), dar se aplica si pe
 		// v: in ultimul jumatate de pixel filtrul amesteca randul de jos cu cel de
 		// SUS (cer transparent) -> o linie punctata pe mare la -7,5 grade
 		// (vazuta pe Stromboli, de pe buza craterului). Pe v se strange la centrul
 		// primului / ultimului rand.
 		float half_px = 0.5 / float(textureSize(band, 0).y);
-		v = clamp(v, half_px, 1.0 - half_px);
+		float v = clamp(v_raw, half_px, 1.0 - half_px);
 		vec4 b = textureLod(band, vec2(u, v), 0.0);
+		if (band_night_mix > 0.0) {
+			float half_n = 0.5 / float(textureSize(band_night, 0).y);
+			vec4 bn = textureLod(band_night, vec2(u, clamp(v_raw, half_n, 1.0 - half_n)), 0.0);
+			b = mix(b, bn, band_night_mix);
+		}
 		col = mix(col, b.rgb, b.a);
 	}
 	COLOR = col;

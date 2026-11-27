@@ -42,6 +42,9 @@ GROUPS = {
                      "structures/stone_quay"], 11.0),
     "boats": ("vehicles", ["fishing_junk", "sampan_a", "basket_boat"], 10.0),
     "road": ("structures", ["coast_parapet", "stone_dike"], 9.0),
+    # Gardul digului de maree: modul de 2,4 m, deci pas mic, altfel stalpul,
+    # riglele si chevroanele ies cativa pixeli.
+    "fence": ("structures", ["causeway_fence"], 3.0),
     "plants": ("plants", ["karst_ficus_a", "karst_ficus_b", "bamboo_clump",
                           "scrub_tuft"], 7.0),
     "belvedere": ("structures", ["belvedere_pavilion"], 8.0),
@@ -166,5 +169,9 @@ if "MODELS" not in dir():
 exec(open(os.path.join(_HERE, "preview.py")).read())
 OUT = os.path.join(PROJECT, "docs", "asset_briefs", "img")
 os.makedirs(OUT, exist_ok=True)
+# HL_ONLY=<grup> randeaza o singura plansa (ca la build_halong_road.py).
+_only = os.environ.get("HL_ONLY", "")
 for g in GROUPS:
+    if _only and g != _only:
+        continue
     print("plansa", g, sheet(g, os.path.join(OUT, "halong_%s.png" % g)))

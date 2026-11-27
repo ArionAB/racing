@@ -143,6 +143,11 @@ echo
 echo "== drum =="
 check "structures/coast_parapet.glb"         200
 check "structures/stone_dike.glb"            250
+# Gardul digului de maree: trei noduri (stalp, rigle, panou) pe care Track le
+# insira separat, deci originea se ia pe ansamblu (stalpul e ingropat 0,45 m,
+# riglele si panoul nu ating solul). Slotul 7 (KERB_RED) = chevroanele, semnal
+# de gameplay ca vela joncii: spune "drum" de la furca.
+check "structures/causeway_fence.glb"        260 --origin=assembly --allow-slots=7
 
 echo
 echo "== vegetatie =="

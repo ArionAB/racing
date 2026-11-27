@@ -73,6 +73,17 @@ enum Phase {JOS, URCA, SUS, COBOARA}
 ## golful Tonkin e 3-4 m; in joc e „scara e decizie" (§8) — 1.5 m e destul ca
 ## banda sa fie impracticabila si putin pentru ca pereţii sa nu para inundati.
 @export_range(0.3, 4.0, 0.1) var rise_m: float = 1.5
+## Plafonul de viteza prin apa, din plafonul NOMINAL al masinii (cererea
+## dezvoltatorului, 26 nov 2026: „80% din viteza cat conduci prin apa"). Cu
+## digul imprejmuit, alunecarea singura nu mai costa nimic — gardul te tine pe
+## banda — deci banda inundata era aproape gratis. Taie si turbo-ul (vezi
+## `Car._current_max_speed`).
+##
+## 0.70, nu 0.80, MASURAT (`ProbeMareeVad`): pe digul uscat masinile nu-si
+## ating plafonul nominal (taxi 30.0 din 35 m/s, cu gaz tinut), deci un plafon
+## de 0.80 (28 m/s) costa doar ~7%. Cu 0.70 viteza prin apa iese 81-82% din cea
+## de pe uscat (taxi, buggy) si 87% la autobuz, care e oricum mai lent pe dig.
+@export_range(0.3, 1.0, 0.05) var wade_speed_factor: float = 0.7
 
 signal phase_changed(phase: Phase)
 
@@ -80,6 +91,9 @@ var _time: float = 0.0
 var _phase: Phase = Phase.URCA
 var _level: float = 0.0
 var _film: MeshInstance3D
+## Foaia a fost reconstruita PE BANDA (`fit_to_route`): mesh-ul are baza la
+## cota marii (y = 0 local), deci se scaleaza de la baza, nu din centru.
+var _film_on_route: bool = false
 
 
 func _ready() -> void:
@@ -168,7 +182,11 @@ func _update_film() -> void:
 	# la `k` sta la `k * rise_m / 2` peste baza, nu la `rise_m / 2`.
 	var k := maxf(_level, 0.001)
 	_film.scale.y = k
-	_film.position.y = _sea_offset_y() + k * rise_m * 0.5
+	if _film_on_route:
+		# Mesh-ul are baza la y = 0, deci baza ramane pe mare la orice `k`.
+		_film.position.y = _sea_offset_y()
+	else:
+		_film.position.y = _sea_offset_y() + k * rise_m * 0.5
 
 
 ## Cota marii in coordonatele LOCALE ale hazardului. Nodul `Maree` sta la 1.493
@@ -224,11 +242,217 @@ func apply_film_material(mat: Material) -> void:
 			mi.material_override = mat
 
 
-## Apa de maree taie grip-ul, dar NU imbranceste: nu e un val care trece, e o
-## foaie care sta. (Valul de pe Okinawa impinge si franeaza — vezi
-## `WaveSurge._touch_car`.)
+## Cat trece apa peste planul benzii la maree plina (m). Destul ca banda sa
+## para acoperita, putin cat stalpii gardului (1,25 m) sa ramana in apa pana
+## la genunchi, nu ingropati — se vede pe unde era drumul.
+const ROUTE_FILM_OVER: float = 0.12
+## Cat de IN INTERIORUL marginii benzii sta marginea foii (m). Apa ramane intre
+## garduri, pe drum: o foaie mai lata decat banda iesea, pe portiunea de dig
+## peste mare, ca o placa albastra ridicata la 1,7 m peste apa adevarata —
+## exact „banda albastra peste scurtatura" din verdictul de la volan. Peretii
+## laterali ai foii stau astfel sub marginea coborata a benzii, nevazuti.
+const ROUTE_FILM_INSET: float = 0.3
+## Adancimea apei pe dig la maree plina, in unitatile shaderului marii (alfa de
+## vertex): mica, ca sa iasa jadul de langa mal, nu albastrul de larg.
+const ROUTE_FILM_DEPTH: float = 0.3
+## Pe cati metri de la capetele foii adancimea urca de la spuma la
+## ROUTE_FILM_DEPTH.
+const ROUTE_FILM_FADE: float = 10.0
+## Cat sta pelicula de „banda uda" peste planul benzii (m).
+const ROUTE_PUDDLE_LIFT: float = 0.05
+## Cati metri de langa soseaua principala raman fara apa (capetele benzii stau
+## pe axa soselei: apa de pe banda nu trebuie sa curga peste asfaltul buclei).
+const ROUTE_ROAD_CLEAR: float = 1.0
+## Lungimea unei cutii din zona de pe banda (m) si inaltimea ei: de la 0.5 m sub
+## banda pana peste apa plina si acoperisul masinii.
+const ZONE_SEG_M: float = 8.0
+const ZONE_HEIGHT: float = 4.0
+
+
+## Muleaza apa pe banda REALA, pe care o construieste pista (`Track.routes`).
+##
+## De ce: foaia si pelicula erau o cutie si o elipsa DREPTE, pe coarda benzii
+## (`span_m` x `lane_width`), cu nodul pus la mijlocul ei. Banda e insa o curba:
+## capetele ei stau la ~6 m lateral de coarda. Cat timp banda era ingropata sub
+## nisipul platoului (masurat, nov 2026: terenul la 1,65-1,88 m, banda la
+## 1,43-1,53), nici apa nu se vedea, deci nepotrivirea nu se vedea nici ea. De
+## cand banda e un dig de pamant deasupra platoului, apa dreapta iesea pe
+## langa drum, peste nisip.
+##
+## Contractul foii ramane acelasi (sonda `probe_maree`, garda 7): baza pe cota
+## marii la orice nivel, marginea de sus urca cu nivelul. Doar amprenta se
+## schimba: o panglica pe banda, intre garduri, cu pereti laterali pana la mare.
+##
+## Zona care te prinde (`_zone`: alunecare + plafon de viteza) urmeaza si ea
+## banda, din 26 nov 2026 (vezi `_fit_zone`): de cand apa te si franeaza,
+## nepotrivirea dintre ce vezi si ce te prinde nu mai e un detaliu.
+func fit_to_route(track: Node3D) -> void:
+	var routes: Array = track.get("routes")
+	if routes == null or branch_index >= routes.size():
+		return
+	var r = routes[branch_index]
+	var main = routes[0]
+	var n: int = r.count()
+	if n < 3:
+		return
+	# Punctele benzii care NU stau pe soseaua principala: capetele benzii sunt
+	# pe axa buclei, iar apa nu trebuie sa curga peste asfalt.
+	var keep: Array[int] = []
+	for i in n:
+		var g: Vector3 = track.to_global(r.baked[i])
+		var mi: int = main.closest_index_global(r.baked[i])
+		if main.lateral_distance(mi, r.baked[i]) 				> float(track.call("width_at_index", mi)) + r.half_width * 0.5 				+ ROUTE_ROAD_CLEAR:
+			keep.append(i)
+	if keep.size() < 3:
+		return
+	_fit_zone(track, r, keep)
+	var hw: float = r.half_width - ROUTE_FILM_INSET
+	var phw: float = r.half_width - ROUTE_FILM_INSET
+	var film := SurfaceTool.new()
+	film.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var puddle := SurfaceTool.new()
+	puddle.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var shallow := Color(0.30, 0.55, 0.90, FILM_DEPTH)
+	# Adancimea foii (alfa = contractul shaderului marii): de la `FILM_DEPTH`
+	# la capete (nisip ud cu spuma, deci capatul taiat drept nu se vede ca o
+	# muchie) la ROUTE_FILM_DEPTH pe ROUTE_FILM_FADE metri. Apa de pe dig e mica:
+	# cu adancime 1 iesea albastrul de larg, nu jadul de langa mal.
+	var d_first: float = r.dists[keep[0]]
+	var d_last: float = r.dists[keep[keep.size() - 1]]
+	var prev: Array = []
+	for i: int in keep:
+		var c: Vector3 = track.to_global(r.baked[i])
+		var side: Vector3 = (track.global_transform.basis * r.side_at(i)).normalized()
+		var top_y: float = c.y + ROUTE_FILM_OVER
+		var from_end: float = minf(r.dists[i] - d_first, d_last - r.dists[i])
+		var col := Color(0.30, 0.55, 0.90, lerpf(FILM_DEPTH, ROUTE_FILM_DEPTH,
+			smoothstep(0.0, ROUTE_FILM_FADE, from_end)))
+		var row := [
+			_local_at(c - side * hw, top_y), _local_at(c + side * hw, top_y),
+			_local_at(c - side * hw, 0.0), _local_at(c + side * hw, 0.0),
+			to_local(c - side * phw + Vector3.UP * ROUTE_PUDDLE_LIFT),
+			to_local(c + side * phw + Vector3.UP * ROUTE_PUDDLE_LIFT),
+		]
+		if not prev.is_empty() and i == int(prev[6]) + 1:
+			# Fata de sus (in sus), apoi peretii laterali (spre exterior).
+			# Shaderul marii e `cull_back`: winding-ul decide daca se vede.
+			var out_l: Vector3 = row[0] - row[1]
+			out_l.y = 0.0
+			out_l = out_l.normalized()
+			var pc: Color = prev[7]
+			_quad(film, prev[0], row[0], prev[1], row[1], Vector3.UP, pc, col)
+			_quad(film, prev[2], row[2], prev[0], row[0], out_l, pc, col)
+			_quad(film, prev[1], row[1], prev[3], row[3], -out_l, pc, col)
+			_quad(puddle, prev[4], row[4], prev[5], row[5], Vector3.UP,
+				shallow, shallow)
+		row.append(i)
+		row.append(col)
+		prev = row
+	var film_mesh := film.commit()
+	var puddle_mesh := puddle.commit()
+	if film_mesh.get_surface_count() == 0:
+		return
+	if _film == null:
+		_film = get_node_or_null("TideFilm") as MeshInstance3D
+	if _film != null:
+		_film.mesh = film_mesh
+		_film.position = Vector3.ZERO
+		_film_on_route = true
+	if _puddle != null and puddle_mesh.get_surface_count() > 0:
+		_puddle.mesh = puddle_mesh
+		_puddle.position = Vector3.ZERO
+	_update_film()
+
+
+## Zona care te prinde (alunecare + plafon) pe banda REALA, nu pe coarda.
+##
+## Cutia veche statea pe coarda dreapta dintre capete, iar banda se arcuieste
+## ~6 m in afara ei: la capete erai in apa cu aderenta plina, sau iti taia
+## aderenta pe uscat. Pe un hazard de timing, ce vezi trebuie sa fie ce te
+## prinde (vezi `WaterHazard._build_wet_patch`) — deci zona urmeaza aceleasi
+## puncte ca foaia: o cutie la ~`ZONE_SEG_M` metri, latimea intreaga a benzii.
+func _fit_zone(track: Node3D, r, keep: Array[int]) -> void:
+	if _zone == null:
+		return
+	for c in _zone.get_children():
+		_zone.remove_child(c)
+		c.queue_free()
+	var inv := global_transform.affine_inverse()
+	var i0: int = keep[0]
+	var prev: int = keep[0]
+	for k in range(1, keep.size()):
+		var i: int = keep[k]
+		var gap: bool = i != prev + 1
+		var last: bool = k == keep.size() - 1
+		var end_i: int = prev if gap else i
+		if gap or last or r.dists[i] - r.dists[i0] >= ZONE_SEG_M:
+			_add_zone_box(track, r, i0, end_i, inv)
+			i0 = i if gap else end_i
+		prev = i
+
+
+func _add_zone_box(track: Node3D, r, i0: int, i1: int, inv: Transform3D) -> void:
+	if i1 <= i0:
+		return
+	var a: Vector3 = track.to_global(r.baked[i0])
+	var b: Vector3 = track.to_global(r.baked[i1])
+	var fwd := b - a
+	fwd.y = 0.0
+	if fwd.length() < 0.1:
+		return
+	var box := BoxShape3D.new()
+	# +1 m pe lungime: cutiile vecine se suprapun, ca un viraj sa nu lase
+	# o pana uscata intre ele.
+	box.size = Vector3(r.half_width * 2.0, ZONE_HEIGHT, fwd.length() + 1.0)
+	var shape := CollisionShape3D.new()
+	shape.shape = box
+	# Ca la `_build_wet_patch`: cutia incepe cu o jumatate de metru sub banda.
+	var center := (a + b) * 0.5 + Vector3.UP * (ZONE_HEIGHT * 0.5 - 0.5)
+	shape.transform = inv * Transform3D(
+		Basis.looking_at(fwd.normalized(), Vector3.UP), center)
+	_zone.add_child(shape)
+
+
+## Un punct de lume in coordonatele foii, cu cota data fata de MARE (y = 0 pe
+## cota marii), cum o cere scalarea de la baza din `_update_film`.
+func _local_at(p: Vector3, y_over_sea: float) -> Vector3:
+	var l := to_local(p)
+	l.y = y_over_sea
+	return l
+
+
+## Un patrulater (a0 a1 b0 b1, a = randul precedent) cu fata spre `want`.
+##
+## Winding-ul se ALEGE, nu se presupune: semnul lui `side_at` depinde de sensul
+## in care a fost desenata banda, iar shaderul marii e `cull_back`, deci o fata
+## intoarsa ar fi apa invizibila exact din masina. Fata din fata in Godot e cea
+## cu varfurile in sensul acelor de ceas, adica normala (c - a) x (b - a).
+## `c0` = culoarea randului precedent (a0, b0), `c1` = a randului curent.
+static func _quad(st: SurfaceTool, a0: Vector3, a1: Vector3, b0: Vector3,
+		b1: Vector3, want: Vector3, c0: Color, c1: Color) -> void:
+	_tri(st, [a0, a1, b0], [c0, c1, c0], want)
+	_tri(st, [b0, a1, b1], [c0, c1, c1], want)
+
+
+static func _tri(st: SurfaceTool, v: Array, c: Array, want: Vector3) -> void:
+	var a: Vector3 = v[0]
+	var b: Vector3 = v[1]
+	var d: Vector3 = v[2]
+	var order := [0, 1, 2]
+	if (d - a).cross(b - a).dot(want) < 0.0:
+		order = [0, 2, 1]
+	for k: int in order:
+		st.set_color(c[k])
+		st.set_normal(want)
+		st.add_vertex(v[k])
+
+
+## Apa de maree taie grip-ul si te tine in loc (plafon la `wade_speed_factor`),
+## dar NU imbranceste: nu e un val care trece, e o foaie care sta. (Valul de pe
+## Okinawa impinge — vezi `WaveSurge._touch_car`.)
 func _touch_car(car: Car, _delta: float) -> void:
 	car.apply_slip()
+	car.apply_wade(wade_speed_factor)
 
 
 # ---------------------------------------------------------- poarta de banda

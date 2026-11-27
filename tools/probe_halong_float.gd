@@ -18,9 +18,10 @@ extends Node
 var _max_gap: float = 0.5
 var _prefix: String = ""
 var _track: int = 14
-## Nu stau pe teren prin constructie: poarta scurtaturii sta pe tablierul benzii
-## (carosabil, nu teren), `AgatG*` sunt module de faleza suprapuse.
-const SKIP_PREFIXES := ["Portic", "AgatG"]
+## Nu stau pe teren prin constructie: `AgatG*` sunt module de faleza suprapuse.
+## (Poarta de bambus a scurtaturii, `Portic*`, statea pe tablierul benzii; a fost
+## scoasa in nov 2026, odata cu digul de pamant cu gard.)
+const SKIP_PREFIXES := ["AgatG"]
 
 
 func _ready() -> void:

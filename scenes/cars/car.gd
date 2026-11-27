@@ -485,6 +485,11 @@ var crush_time: float = 0.0
 ## in volan (vezi FumaroleHazard).
 var blind_time: float = 0.0
 var crush_factor: float = 1.0
+## Prin apa (mareea de pe Ha Long, vezi `TideHazard`): plafonul de viteza taiat
+## cat mai tine `wade_time`. Ceas propriu, ca `crush_time`, re-armat in fiecare
+## cadru cat stai in apa — iesi din apa, si in 0.25 s plafonul revine.
+var wade_time: float = 0.0
+var wade_factor: float = 1.0
 ## Directia inversata (stanga <-> dreapta) cat mai tine, in secunde. Se pune DOAR
 ## prin `crush(..., invert_steer = true)` (bolovanul care cade din culoarul E de
 ## pe Track19); restul hazardelor cu crush n-o ating. Se aplica in Car, pe comanda
@@ -1144,6 +1149,9 @@ func _physics_process(delta: float) -> void:
 	blind_time = maxf(blind_time - delta, 0.0)
 	if crush_time <= 0.0:
 		crush_factor = 1.0
+	wade_time = maxf(wade_time - delta, 0.0)
+	if wade_time <= 0.0:
+		wade_factor = 1.0
 	burn_time = maxf(burn_time - delta, 0.0)
 	_detect_landing()
 	_update_visual_tilt(delta, steer, fwd_speed)
@@ -1891,7 +1899,8 @@ func _current_max_speed() -> float:
 	vmax += draft * slip_speed_bonus
 	# Strivirea taie plafonul, nu viteza curenta: pierzi timp reaccelerand, exact
 	# ca la offroad. Se aplica DUPA turbo, ca sa nu poti sterge pedeapsa cu boost.
-	return vmax * crush_factor
+	# Apa taie si ea DUPA turbo: prin maree nu treci cu bara arsa la viteza plina.
+	return vmax * crush_factor * wade_factor
 
 # ------------------------------------------------------------------- drift
 
@@ -2019,6 +2028,15 @@ func force_boost(seconds: float) -> void:
 func apply_slip(grip_value: float = SLIP_GRIP_PUDDLE) -> void:
 	slip_time = 0.25
 	slip_grip = grip_value
+
+
+## Prin apa care te tine in loc (mareea de pe Ha Long): plafonul de viteza la
+## `factor` din cel normal. Se APELEAZA IN FIECARE CADRU cat esti in apa, ca
+## `apply_slip`; taie plafonul, nu viteza curenta, deci intri cu viteza si apa te
+## franeaza spre plafon, exact ca iarba.
+func apply_wade(factor: float) -> void:
+	wade_time = 0.25
+	wade_factor = clampf(factor, 0.1, 1.0)
 
 
 ## Prins de o rafala de abur: vezi prost cateva zecimi de secunda, si ATAT.
@@ -2562,6 +2580,8 @@ func respawn(backoff_m: float = 14.0) -> void:
 	slip_time = 0.0
 	crush_time = 0.0
 	crush_factor = 1.0
+	wade_time = 0.0 # repusa pe sosea, afara din apa
+	wade_factor = 1.0
 	steer_invert_left = 0.0 # repusa pe sosea, directia revine la normal
 	# Si turtirea care tinea cat incetinirea: repusa pe sosea, masina apare
 	# intreaga. Fara asta ar rasari latita si ar ramane asa pana expira tween-ul.

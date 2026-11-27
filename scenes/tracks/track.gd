@@ -1530,6 +1530,23 @@ static func themes() -> Dictionary:
 			"sky_top": Color(0.55, 0.28, 0.50),
 			"sky_horizon": Color(1.0, 0.48, 0.22),
 			"sky_cover_alpha": 0.0,
+			# BANDA DE ORIZONT (nov 2026, reteta Monument Valley / Cappadocia pe
+			# uscat): dealurile stancoase de riolit si gresie din jurul orasului, cu
+			# zidul orasului pe creste si casele albastre pe poale, deserul Thar spre
+			# vest, lanturile aride departate si palatul cu cupola pe dealul lui la
+			# SE — randate in Blender din tools/blender/build_jodhpur_sky_band.py si
+			# lipite pe cer de `_sky_band_material`. HAZE-ul randarii = `sky_horizon`
+			# de mai sus. Podeaua benzii e nisipul jocului acoperit de ACEEASI ceata
+			# rece ca terenul de la FAR_PLANE; `below` = mediana randului de jos.
+			# DOUA felii: apusul (dusk 0) si noaptea (dusk 1, ferestre si candele
+			# aprinse), amestecate de DuskCycle (`band_night_mix`, KEY_BAND_NIGHT).
+			"sky_band": {
+				"texture": "res://assets/textures/sky/jodhpur_horizon_band.png",
+				"lat_min": -7.5, "lat_max": 15.0,
+				"below": Color.html("888EA8"),
+				"night_texture": "res://assets/textures/sky/jodhpur_horizon_band_night.png",
+				"below_night": Color.html("463F47"),
+			},
 			# Ceata CALDA de praf (brief §2.0, §4): "vine cu noaptea" e rolul
 			# lui DuskCycle (fog_light_color + fog_depth_end interpolate);
 			# aici e starea de baza (dusk=0, turul 1), fog_end 300.
@@ -1545,7 +1562,17 @@ static func themes() -> Dictionary:
 			# soarelui, ceata DINSPRE soare (F priveste spre SE) ramane rece.
 			# 0,15 -> 0,08 (a doua trecere): ceata albastra, necesara orasului
 			# vazut de pe F, spala mai putin cerul portocaliu.
-			"fog_sky_affect": 0.08,
+			# CU BANDA (nov 2026), masurat pe capturi --gamecam:
+			# - `fog_sky_affect` 0 (era 0,08): altfel ceata acopera banda.
+			# - ceata NU se schimba si NU primeste `fog_aerial` (ramane 0, ca
+			#   inainte), spre deosebire de MV/Cappadocia (0,3): podeaua benzii e
+			#   randata sub ACEEASI ceata (AIR = #8898B8, cu lobul de imprastiere
+			#   spre soare), deci terenul de la FAR_PLANE intra in ea fara dunga
+			#   (de pe bastion: podeaua benzii (171, 174, 206) pe ecran, terenul
+			#   cetos de langa ea (170, 182, 213)). Cu 0,3 imbinarea nu se misca,
+			#   dar orasul vazut de pe F se intuneca si pierde din albastru
+			#   (135, 142, 170) -> (131, 133, 161): exact ce aparase ceata asta.
+			"fog_sky_affect": 0.0,
 			"fog": Color.html("8898B8"),
 			"hill_color": Color(0.58, 0.42, 0.38),
 			# Soare la 8 grade, din VEST (brief §2.0/§4: "azimutul soarelui
@@ -1624,19 +1651,14 @@ static func themes() -> Dictionary:
 			"horizon_model": "res://assets/models/jodhpur/rocks/jodhpur_horizon.glb",
 			"horizon_picks": [["FarCity_A"], ["DesertRidge_A", "DesertRidge_B"],
 				["UmaidBhawan_A"]],
-			"horizon_rings": [
-				{"near": 330.0, "far": 400.0, "count": 5, "scale": 0.8,
-					"clear": 70.0, "picks": ["FarCity_A"]},
-				{"near": 360.0, "far": 440.0, "count": 4, "scale": 0.6,
-					"clear": 120.0, "picks": ["DesertRidge_A", "DesertRidge_B"]},
-				# Palatul: azimut FIX 50 grade (cos pe X, sin pe Z), dincolo de
-				# coltul de sud-est al buclei, pe axa coborarii G si a intrarii pe
-				# H (directia de mers 178-213 grade busola la 0,75-0,90): de la
-				# frac ~0,87 e la ~230 m in fata, in cadru pe azimut, cu varful
-				# sub marginea de sus (10 + 0,092 x 230 = 31 m).
-				{"near": 360.0, "far": 460.0, "count": 1, "scale": 0.65,
-					"clear": 120.0, "angle_deg": 50.0, "picks": ["UmaidBhawan_A"]},
-			],
+			# INELELE SUNT SCOASE din nov 2026: departarea o da banda de orizont
+			# (`sky_band`). Erau 5 benzi de case FarCity_A la 330-400 m, 4 dealuri
+			# DesertRidge la 360-440 si palatul UmaidBhawan_A la busola 140: pe
+			# capturi stateau ca fantome palide in fata benzii (alta ceata decat ea).
+			# Palatul si orasul de dincolo de ceata (cu ferestrele aprinse noaptea)
+			# sunt acum in banda. `[]`, NU `horizon_model: ""` (porneste siluetele
+			# de rezerva).
+			"horizon_rings": [],
 			# Clasele pe nod, nu una pe tot modelul: FarCity_A e 100% FOAM_WHITE
 			# (masurat) si fara `blue_lime_light` casele ies ALBE (PR #424).
 			# Copiii lui poarta acelasi prefix, deci primesc explicit atlasul
@@ -4393,7 +4415,35 @@ static func themes() -> Dictionary:
 		"ambient_energy": 0.30,
 		# Aer de 2000 m: zenit mai saturat decat pe Alpi (#2F6FD0), orizont alb-cald.
 		"sky_top": Color(0.18, 0.44, 0.82),
-		"sky_horizon": Color(0.86, 0.88, 0.90),
+		# Orizontul = AERUL din banda pictata (HAZE in
+		# build_transfagarasan_sky_band.py) = `fog` mostenit din "alpine". Inainte
+		# de banda `fog_sky_affect` era 1 si tot cerul vizibil din camera de joc
+		# iesea exact culoarea cetii (masurat (220, 238, 254) pe ecran); acum cerul
+		# isi arata gradientul, iar orizontul lui ramane acelasi albastru-pal.
+		"sky_horizon": Color(0.72, 0.83, 0.94),
+		# BANDA DE ORIZONT (nov 2026, dupa Ha Long / Monument Valley / Fiordland):
+		# Muntii Fagarasului randati in Blender din
+		# tools/blender/build_transfagarasan_sky_band.py si lipiti pe cer de
+		# `_sky_band_material`: creasta principala (sist, caldari, petice de
+		# zapada) spre E si V, culmile impadurite ale Argesului si marea de nori
+		# spre S/SE, campia Tarii Fagarasului spre N, plus planul 0 — masive mari
+		# la 0,8-1 km pe directiile camerei de joc, care dau scara. Imbinarea cu
+		# terenul jocului se face pe AER: fundul vailor din banda e in pacla de
+		# culoarea cetii (vezi VALLEY_* in script), deci terenul care intra in
+		# ceata la fog_end continua in vaile pictate. `below` = acea pacla.
+		"sky_band": {
+			"texture": "res://assets/textures/sky/transfagarasan_horizon_band.png",
+			"lat_min": -7.5, "lat_max": 15.0,
+			"below": Color(0.72, 0.83, 0.94),
+		},
+		# Cu banda: `fog_sky_affect` 0, altfel ceata acopera banda (pata uniforma).
+		# Restul cetii ramane cel mostenit din "alpine", masurat pe capturi: `fog`
+		# (0.72, 0.83, 0.94) = `sky_horizon` = aerul benzii, `fog_aerial` 0,35 si
+		# opacitate plina la fog_end. Pe uscat nu se urca `fog_aerial` (lectia de
+		# pe Monument Valley: aduce albastrul cerului estompat sub orizont), iar
+		# opacitatea plina e chiar ce leaga terenul de pacla din vaile benzii
+		# (terenul cetos (192, 218, 238) pe ecran, pacla benzii la fel).
+		"fog_sky_affect": 0.0,
 		"fog_begin": 140.0,
 		"fog_end": 370.0,
 		# Apa de lac de munte: transparenta la mal (turcoaz rece), verde-inchis
@@ -4430,23 +4480,15 @@ static func themes() -> Dictionary:
 		"horizon_slot_remap": {29: 11},
 		"horizon_picks": [["FagarasRidge_A"], ["FagarasRidge_B"], ["FagarasRidge_C"],
 			["CloudSea_A"], ["CloudSea_B"], ["FagarasPlain_A"]],
-		# Cotele de fundal pe relieful din nivel-relief (TerrainHollow GolNoriA/B si GolCampie):
-		# norii la dy +10 (la -8 erau ingropati sub podeaua golului); campia la clear 105 si
-		# dy +12, altfel marginea ei de sud cadea peste drum la G (poligoanele mustar, N8).
-		"horizon_rings": [
-			{"near": 200.0, "far": 330.0, "count": 1, "scale": 1.0, "clear": 140.0,
-				"picks": ["FagarasRidge_A"], "angle_deg": 0.0, "yaw_deg": -90.0},
-			{"near": 200.0, "far": 330.0, "count": 1, "scale": 1.0, "clear": 140.0,
-				"picks": ["FagarasRidge_B"], "angle_deg": -35.0, "yaw_deg": -55.0},
-			{"near": 200.0, "far": 330.0, "count": 1, "scale": 1.0, "clear": 140.0,
-				"picks": ["FagarasRidge_C"], "angle_deg": 35.0, "yaw_deg": -125.0},
-			{"near": 240.0, "far": 320.0, "count": 1, "scale": 1.0, "clear": 90.0,
-				"picks": ["CloudSea_A"], "angle_deg": 15.0, "yaw_deg": -105.0, "dy": 10.0},
-			{"near": 240.0, "far": 320.0, "count": 1, "scale": 1.0, "clear": 90.0,
-				"picks": ["CloudSea_B"], "angle_deg": 55.0, "yaw_deg": -145.0, "dy": 10.0},
-			{"near": 280.0, "far": 340.0, "count": 1, "scale": 1.0, "clear": 105.0,
-				"picks": ["FagarasPlain_A"], "angle_deg": -90.0, "yaw_deg": 0.0, "dy": 12.0},
-		],
+		# Inelele 3D de fundal (creasta, marea de nori, campia, 200-340 m) sunt
+		# SCOASE din nov 2026: departarea o da banda de orizont (`sky_band`), iar
+		# siluetele low-poly de la 200-340 m stateau in fata ei cu alt stil si alta
+		# ceata (pe captura de la 0,45 varful inelului acoperea creasta pictata).
+		# Lista goala, NU
+		# `horizon_model` gol (modelul gol porneste siluetele de rezerva) si NU
+		# cheia lipsa (porneste inelele implicite cu modelul de mai sus).
+		# Inelele vechi sunt in istoricul git (inainte de nov 2026).
+		"horizon_rings": [],
 	}, true)
 	# Rampele de saritura (issue #610): piatra de drum de munte, cu buza de beton.
 	tf["ramp_style"] = {"body": "tf_stone", "lip": "concrete"}
@@ -6626,6 +6668,12 @@ func _sky_band_material(sky_mat: ProceduralSkyMaterial, cfg: Dictionary) -> Shad
 	m.set_shader_parameter("band_lat_max", deg_to_rad(float(cfg.get("lat_max", 15.0))))
 	m.set_shader_parameter("band_yaw", float(cfg.get("yaw_deg", 0.0)) / 360.0)
 	m.set_shader_parameter("band_below_color", cfg.get("below", sky_mat.ground_horizon_color))
+	# Felia de NOAPTE (opt-in, `night_texture` + `below_night`): o amesteca
+	# DuskCycle prin `band_night_mix`; fara DuskCycle ramane la 0 (nefolosita).
+	var night := _tex(str(cfg.get("night_texture", "")))
+	if night != null:
+		m.set_shader_parameter("band_night", night)
+		m.set_shader_parameter("band_below_night", cfg.get("below_night", Color(0.1, 0.1, 0.12)))
 	return m
 
 ## Lumea pistei: cer, soare, teren si dealuri/dune de fundal — tematice.

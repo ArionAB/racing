@@ -2521,9 +2521,40 @@ static func themes() -> Dictionary:
 			"prop_contact_skip": ["fence_ranch", "rail_track"],
 			"ground_tint": Palette.color(Palette.DRY_VEGETATION),
 			"sky_top": Color(0.52, 0.66, 0.84),
+			# Orizontul = AERUL din banda pictata (HAZE in build_baikal_sky_band.py):
+			# muntii departati se spala exact in culoarea cerului din spatele lor.
 			"sky_horizon": Color(0.95, 0.88, 0.86),
-			"fog": Color(0.90, 0.90, 0.92),
-			"fog_aerial": 0.35,
+			# BANDA DE ORIZONT (nov 2026, reteta Ha Long): lacul inghetat pana la
+			# orizont, dealurile de taiga de pe mal (planul 0, 0,6-0,8 km, pe
+			# azimuturile masurate ale camerei), capurile de marmura ale Olkhonului,
+			# Primorsky cu zapada spre vest si malul estic abia ghicit peste larg —
+			# randate din tools/blender/build_baikal_sky_band.py si lipite pe cer
+			# de `_sky_band_material`. `below` = podeaua benzii la marginea de jos
+			# (gheata cu zapada, luminata de acelasi soare), pentru camerele de sus.
+			"sky_band": {
+				"texture": "res://assets/textures/sky/baikal_horizon_band.png",
+				"lat_min": -7.5, "lat_max": 15.0,
+				"below": Color.html("B5C8CB"),
+			},
+			# Ceata cu banda (nov 2026), masurat pe capturi --gamecam:
+			# - `fog_sky_affect` 0: altfel ceata acopera banda (pata uniforma).
+			# - `fog_aerial` 0,3, nu 1,0 ca pe Ha Long/Fiordland: la 1,0 ceata
+			#   citeste cerul din harta de radianta estompata si gheata de la
+			#   fog_end iesea gri (181, 188, 192), cu ~45 de trepte sub podeaua
+			#   benzii — o dunga pe toata linia orizontului, pe larg (0,25-0,45).
+			# - `fog` NU e `below`: aceeasi culoare iese pe ecran cu ~10% mai
+			#   luminoasa prin cer (banda) decat prin ceata. Cu fog = below
+			#   (B5C8CB) gheata de la fog_end era (200, 217, 220) sub podeaua
+			#   benzii (221, 234, 237); cu D0E3E6 cele doua se ating fara dunga.
+			#   Ramane rece si palida fata de gheata turcoaz (memoria
+			#   ceata-in-familia-solului).
+			# - `fog_max` 0,85 (era 1,0): la FAR_PLANE gheata e aproape toata
+			#   banda, deci taietura de la 380 m nu se vede, iar banda nu ramane
+			#   „in spatele” unui zid de ceata opaca.
+			"fog_sky_affect": 0.0,
+			"fog": Color.html("D0E3E6"),
+			"fog_aerial": 0.3,
+			"fog_max": 0.85,
 			"hill_color": Color(0.84, 0.87, 0.90),
 			"sun_color": Color(1.0, 0.90, 0.78),
 			"sun_energy": 1.0,
@@ -2539,12 +2570,15 @@ static func themes() -> Dictionary:
 				["MountainPeak"]],
 			"horizon_classes": {"MountainPeak": "tri:snow",
 				"PeakSnow": "tri:snow"},
-			"horizon_rings": [
-				{"near": 190.0, "far": 240.0, "count": 4, "scale": 0.70,
-					"clear": 95.0, "picks": ["MountainPeak"]},
-				{"near": 240.0, "far": 300.0, "count": 5, "scale": 0.90,
-					"clear": 115.0, "picks": ["MountainPeak"]},
-			],
+			# Inelele 3D (9 conuri MountainPeak la 190-300 m) sunt SCOASE din nov
+			# 2026: departarea o da banda. Pe captura de pe larg (0,45) conul de
+			# la dreapta statea ca o piramida gri-alba in fata capului pictat, iar
+			# pe viaduct (0,62-0,70) conurile cetoase erau fantome in fata
+			# dealurilor de taiga. Lista goala, NU `horizon_model` gol (acela
+			# porneste siluetele de rezerva); modelul ramane, ca sa se poata
+			# reface dintr-o linie. Reperele 3D ale pistei (masivul tunelului,
+			# Stanca Samanului, capul grotei) sunt teren/DecorManual si raman.
+			"horizon_rings": [],
 			"walls": false,
 			"kerbs": true,
 			"cliffs": false,

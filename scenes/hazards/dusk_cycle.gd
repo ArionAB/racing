@@ -98,6 +98,14 @@ static var KEY_SKY_HORIZON: Array[Color] = []
 ## 30 de grade (`sun_angle_max` implicit). Raza haloului scade cu ceasul si
 ## dispare noaptea. NEPIVOTATA: tema nu declara unghiul.
 const KEY_SUN_ANGLE_MAX: PackedFloat32Array = [30.0, 18.0, 0.0]
+## BANDA DE ORIZONT (nov 2026, `sky_band` cu `night_texture`): cerul e atunci
+## `sky_band.gdshader` (ShaderMaterial), nu ProceduralSkyMaterial, iar banda are
+## doua felii randate — apusul (dusk 0) si noaptea (dusk 1, ferestre aprinse).
+## `band_night_mix` le amesteca. NU liniar: ceata ceasului (KEY_FOG_COLOR) ramane
+## deschisa pana la 0,5 si abia apoi se inchide, iar podeaua benzii trebuie sa
+## tina pasul cu terenul cetos de sub ea (altfel apare o dunga la imbinare).
+## NEPIVOTATA (tema nu o declara; 0 = felia de zi).
+const KEY_BAND_NIGHT: PackedFloat32Array = [0.0, 0.25, 1.0]
 
 
 ## Ceata: fum albastru-gri stins -> lila-gri -> gri-violet inchis (S <= 0,2
@@ -147,6 +155,9 @@ var _base_ambient_color: Color = Color.WHITE
 var _base_fog_color: Color = Color.WHITE
 var _base_fog_end: float = 300.0
 var _sky_mat: ProceduralSkyMaterial = null
+## Cerul cu banda de orizont (`Track._sky_band_material`): aceleasi canale, ca
+## parametri de shader (`sun_angle_max` in RADIANI acolo), plus `band_night_mix`.
+var _sky_shader: ShaderMaterial = null
 var _base_sky_top: Color = Color.WHITE
 var _base_sky_horizon: Color = Color.WHITE
 var _base_sun_angle_max: float = 0.0
@@ -255,6 +266,11 @@ func _take_base() -> void:
 			_base_sky_top = _sky_mat.sky_top_color
 			_base_sky_horizon = _sky_mat.sky_horizon_color
 			_base_sun_angle_max = _sky_mat.sun_angle_max
+		elif _env.sky != null and _env.sky.sky_material is ShaderMaterial:
+			_sky_shader = _env.sky.sky_material as ShaderMaterial
+			_base_sky_top = _sky_shader.get_shader_parameter("sky_top_color")
+			_base_sky_horizon = _sky_shader.get_shader_parameter("sky_horizon_color")
+			_base_sun_angle_max = rad_to_deg(float(_sky_shader.get_shader_parameter("sun_angle_max")))
 	_base_taken = true
 
 
@@ -300,13 +316,16 @@ func _apply_ambient_and_fog(d: float) -> void:
 ## secunda. 100 de trepte pe o cursa de 2-3 minute = o scriere la ~1,5 s,
 ## sub pragul la care se vede un salt de culoare.
 func _apply_sky(d: float) -> void:
-	if _sky_mat == null:
+	if _sky_mat == null and _sky_shader == null:
 		return
 	if _last_sky_d >= 0.0 and absf(d - _last_sky_d) < 0.01 and d != 0.0 and d != 1.0:
 		return
 	if d == _last_sky_d:
 		return
 	_last_sky_d = d
+	if _sky_shader != null:
+		_apply_sky_shader(d)
+		return
 	_sky_mat.sky_top_color = _lerp_color_key(KEY_SKY_TOP, d, _base_sky_top)
 	var hz := _lerp_color_key(KEY_SKY_HORIZON, d, _base_sky_horizon)
 	_sky_mat.sky_horizon_color = hz
@@ -321,6 +340,25 @@ func _apply_sky(d: float) -> void:
 	# Tema care a stins discul (`sky_sun_disc` false => 0) ramane stinsa.
 	if _base_sun_angle_max > 0.0:
 		_sky_mat.sun_angle_max = maxf(_lerp_key(KEY_SUN_ANGLE_MAX, d, _base_sun_angle_max), 0.0)
+
+
+## Aceleasi canale ca `_apply_sky`, pe cerul-shader cu banda de orizont, plus
+## amestecul feliei de noapte (`KEY_BAND_NIGHT`). Discul: shaderul vrea radiani.
+func _apply_sky_shader(d: float) -> void:
+	_sky_shader.set_shader_parameter("sky_top_color", _lerp_color_key(KEY_SKY_TOP, d, _base_sky_top))
+	var hz := _lerp_color_key(KEY_SKY_HORIZON, d, _base_sky_horizon)
+	_sky_shader.set_shader_parameter("sky_horizon_color", hz)
+	_sky_shader.set_shader_parameter("ground_horizon_color", hz)
+	if _env != null:
+		_sky_shader.set_shader_parameter("ground_bottom_color", _env.fog_light_color.darkened(0.4))
+	if _base_sun_angle_max > 0.0:
+		_sky_shader.set_shader_parameter("sun_angle_max",
+			deg_to_rad(maxf(_lerp_key(KEY_SUN_ANGLE_MAX, d, _base_sun_angle_max), 0.0)))
+	# Fara felie de noapte (alta pista cu banda, adusa sub `--dusk=`) amestecul
+	# ar stinge banda spre transparent: ramane pe 0.
+	if _sky_shader.get_shader_parameter("band_night") != null:
+		_sky_shader.set_shader_parameter("band_night_mix",
+			clampf(_lerp_key(KEY_BAND_NIGHT, d, KEY_BAND_NIGHT[0]), 0.0, 1.0))
 
 
 ## Ultima valoare SCRISA pe `dusk_lamps` (vezi `_apply_lamps`). Exista DOAR

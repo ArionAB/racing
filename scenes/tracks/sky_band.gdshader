@@ -68,6 +68,13 @@ void sky() {
 	} else if (lat <= band_lat_max) {
 		float u = fract(atan(EYEDIR.x, -EYEDIR.z) / TAU + 0.5 + band_yaw);
 		float v = (band_lat_max - lat) / (band_lat_max - band_lat_min);
+		// `repeat_enable` e pentru cusatura de pe azimut (u), dar se aplica si pe
+		// v: in ultimul jumatate de pixel filtrul amesteca randul de jos cu cel de
+		// SUS (cer transparent) -> o linie punctata pe mare la -7,5 grade
+		// (vazuta pe Stromboli, de pe buza craterului). Pe v se strange la centrul
+		// primului / ultimului rand.
+		float half_px = 0.5 / float(textureSize(band, 0).y);
+		v = clamp(v, half_px, 1.0 - half_px);
 		vec4 b = textureLod(band, vec2(u, v), 0.0);
 		col = mix(col, b.rgb, b.a);
 	}

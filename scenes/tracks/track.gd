@@ -4089,22 +4089,36 @@ static func themes() -> Dictionary:
 		#   aceeasi nuanta, doar alta luminozitate. Cald in lumina, rece in umbra
 		#   e contrastul care citeste "soare". Ambientul ramane CULOARE, nu cer
 		#   (memoria ambient-din-cer-respins-masurat), doar mai rece.
-		"fog_sky_affect": 0.2,
 		"sky_top": Color(0.12, 0.36, 0.80),
 		"sky_horizon": Color(0.42, 0.64, 0.90),
-		"fog": Color(0.66, 0.80, 0.93),
 		"sun_color": Color(1.0, 0.90, 0.74),
-		# FUNDALUL (brief §2.0): insula Ie (conul Gusukuyama) pe inelul de NV si
-		# insulele Kerama pe inelul de V/S, din `okinawa_horizon.glb` (noduri copii
-		# directe ale radacinii: IeIsland_A, Kerama_A/B/C). Inelele stau intre 200 si
-		# 340 m, sub fog_end 350 < FAR_PLANE 380 (memoria efecte-de-fundal-cote-legate),
-		# iar `_build_horizon` stinge aruncarea de umbra (caster-departat-fura-umbra)
-		# si piesa nu are coliziune (PROP_COLLISION "none"). `horizon_picks` se
-		# GOLESTE: tema `island` de la care pornim il are setat pe insulele Track08,
-		# iar o lista de tema bate `picks` din inel.
-		#
-		# `horizon_class` gol = atlasul modelului: platoul, padurea si falezele palide
-		# (MARBLE_GREY) sunt pictate in sloturi; `coral_rock` din `island` le-ar sterge.
+		# BANDA DE ORIZONT (nov 2026, ca pe Ha Long / Fiordland): marea pana la
+		# orizont, recifele, Kerama, Ie-jima cu conul, coasta insulei mari si
+		# Yanbaru, randate in Blender din tools/blender/build_okinawa_sky_band.py
+		# si lipite pe cer de `_sky_band_material`. HAZE-ul randarii = `sky_horizon`
+		# de mai sus.
+		"sky_band": {
+			"texture": "res://assets/textures/sky/okinawa_horizon_band.png",
+			"lat_min": -7.5, "lat_max": 15.0,
+			"below": Color.html("344F73"),
+		},
+		# Ceata nu mai acopera cerul (0.2 -> 0): altfel banda iese o pata palida
+		# (memoria cerul-temei-ascuns-de-ceata). `fog_aerial` 1.0 trage marea de la
+		# 350 m spre CERUL din spatele ei, adica spre marea pictata, fara cusatura.
+		"fog_sky_affect": 0.0,
+		"fog_aerial": 1.0,
+		# Ceata ramane la 85% la fog_end (ca pe Fiordland), nu 100%: vaporul,
+		# macaraua podului si coroanele de la 300 m pastreaza ceva din culoarea lor
+		# in loc sa fie decupaje albastre plate, iar dealul de nisip din nord nu se
+		# invineteste. Imbinarea apei nu se misca: si apa isi pastreaza 15% din
+		# culoarea ei, iar `below` / marea benzii sunt alese chiar pe culoarea
+		# masurata a apei jocului la 350 m (49, 97, 158 fata de 50, 96, 158).
+		"fog_max": 0.85,
+		"fog": Color(0.66, 0.80, 0.93),
+		# FUNDALUL: din nov 2026 il da banda de orizont (vezi `sky_band` si
+		# `horizon_rings` gol, mai jos). Modelul si cheile lui raman declarate ca sa
+		# nu se mosteneasca cele din `island` (insulele Track08, clasa
+		# `coral_rock`); fara inele, din el nu se construieste nimic.
 		"horizon_model": "res://assets/models/okinawa/effects/okinawa_horizon.glb",
 		"horizon_picks": [],
 		"horizon_class": "",
@@ -4118,21 +4132,14 @@ static func themes() -> Dictionary:
 		"prop_foot_cache": true,
 		"prop_contact_flat": ["hibiscus_bush", "cycad", "bougainvillea", "pandanus", "fan_palm",
 			"fukugi_tree_a", "fukugi_tree_b", "fukugi_tree_c", "ryukyu_pine", "banyan"],
-		"horizon_rings": [
-			# POZITII FIXE (`"at"`, x/z de lume), alese din harta in MARE, nu pe
-			# raza din centroid (vezi `_build_horizon`). Insula Ie la NV, ~250 m
-			# de aleea B si ~210 m de urcarea C (brief §2.0: cota varfului ramane in
-			# cadru, (45 - 4 - 15) / 300 = 0,087 < tan 5,25 = 0,092). Kerama la V
-			# si S, in fata drumului de pe latura de sud a portului (POI A).
-			{"near": 230.0, "far": 340.0, "count": 1, "scale": 1.0,
-				"clear": 80.0, "picks": ["IeIsland_A"], "at": Vector2(-360.0, -250.0)},
-			{"near": 230.0, "far": 340.0, "count": 1, "scale": 1.0,
-				"clear": 80.0, "picks": ["Kerama_A"], "at": Vector2(-100.0, 450.0)},
-			{"near": 230.0, "far": 340.0, "count": 1, "scale": 1.0,
-				"clear": 80.0, "picks": ["Kerama_B"], "at": Vector2(-300.0, 330.0)},
-			{"near": 230.0, "far": 340.0, "count": 1, "scale": 1.0,
-				"clear": 80.0, "picks": ["Kerama_C"], "at": Vector2(-430.0, 120.0)},
-		],
+		# Inelele 3D de fundal (Ie si trei Kerama, 230-340 m, pozitii fixe in mare)
+		# sunt SCOASE din nov 2026: departarea o da banda de orizont (`sky_band`),
+		# cu Ie-jima si conul ei la NV si Kerama la V-SV, la kilometri. Siluetele 3D
+		# stateau in fata ei ca fantome palide (alt fog decat banda), iar conul 3D
+		# al lui Ie dubla conul pictat din spate. Lista goala, NU `horizon_model`
+		# gol: modelul gol porneste siluetele de rezerva (`_build_horizon_fallback`).
+		# Ha Long porneste din copia temei asteia si isi scrie singura inelele.
+		"horizon_rings": [],
 	}, true)
 	_themes_cache["okinawa"] = oki
 	# TRANSFAGARASAN (Track21, docs/track_briefs/transfagarasan.md §4, pasul 2 din
@@ -4260,7 +4267,9 @@ static func themes() -> Dictionary:
 	# HA LONG (Track22, docs/track_briefs/halong.md §4, pasul 3 din §7): pleaca
 	# din COPIA lui "okinawa", singura tema cu mare cu ADANCIMI (water_*_slot,
 	# water_tint, SEA_NEAR_DEPTH) — iar aici jumatate din pista e pe apa.
-	# "okinawa" NU se editeaza: Track20 trebuie sa ramana bit-identica.
+	# Cheile de cer/ceata/fundal ale lui "okinawa" (`sky_band`, `fog_*`,
+	# `horizon_rings`) se suprascriu TOATE aici: banda Okinawei nu ajunge in golful
+	# vietnamez. O cheie noua in "okinawa" se verifica pe o captura Track22.
 	#
 	# DIFERENTA CENTRALA fata de Okinawa, si principalul risc al temei (brief
 	# §0.1, decizia 3.1.5): Okinawa e TURCOAZ TRANSPARENT de recif, Ha Long e
@@ -4364,6 +4373,9 @@ static func themes() -> Dictionary:
 		"fog": Color.html("DCE5E3"),
 		"fog_sky_affect": 0.0,
 		"fog_aerial": 1.0,
+		# Explicit, fiindca "okinawa" a trecut pe 0.85 odata cu banda ei: golful
+		# ramane pe ceata plina la fog_end, cum a fost calibrat.
+		"fog_max": 1.0,
 		# Fundalul: `halong_horizon.glb`, kit propriu (brief §1.9). Inelul si
 		# modelul lui Okinawa raman GOLITE in sensul ca nu se mostenesc —
 		# altfel ar aparea insula Ie si Kerama in golful vietnamez.

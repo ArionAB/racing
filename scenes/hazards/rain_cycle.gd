@@ -93,9 +93,10 @@ extends Node
 
 @export_group("Cer si ecran")
 ## TELEGRAPH-UL PE CER (brief §2.0: „cerul se inchide" e primul semn, cu 5 s
-## inainte de prima picatura). Pe Fiordland `fog_sky_affect` e 0.20, deci
-## cerul de pe ecran e in mare parte `ProceduralSkyMaterial`-ul temei, nu
-## ceata — culorile lui se pot lerpui la runtime, fara material nou.
+## inainte de prima picatura). Pe Fiordland `fog_sky_affect` e 0 pe uscat (din
+## nov 2026, cu banda de orizont), deci cerul de pe ecran e cerul temei, nu
+## ceata — culorile lui se pot lerpui la runtime, fara material nou (si pe
+## `ProceduralSkyMaterial`, si pe shaderul benzii, vezi `_sky_shader`).
 ## Cerul e INCHIS COMPLET la `rain_factor` = `sky_lead` (implicit la
 ## jumatatea telegraph-ului), inaintea picaturilor: intai se inchide, apoi
 ## ploua. Pe zvantare se deschide ultimul, simetric.
@@ -114,6 +115,13 @@ extends Node
 ## Ambientul in ploaie, ca fractie din cel de baza (cerul inchis lumineaza
 ## mai putin; nu sub 0.7 — brief §4 vrea drumul citibil in ploaie).
 @export_range(0.5, 1.0, 0.01) var ambient_scale_rain: float = 0.85
+## `fog_aerial_perspective` in ploaie; negativ = neatins (implicitul, deci o
+## pista fara cheia asta ramane bit-identica). Pe o pista cu BANDA DE ORIZONT
+## (`sky_band`, Fiordland din nov 2026) ceata uscata are `fog_aerial` 1.0:
+## departarea se spala in cerul pictat din spatele ei, deci `fog_light_color`
+## (pe care ploaia il albeste) nu mai ajunge pe ecran. Coborat in ploaie,
+## relieful departat se albeste odata cu cerul acoperit de ceata.
+@export_range(-1.0, 1.0, 0.01) var fog_aerial_rain: float = -1.0
 ## Ploaia PE ECRAN ([RainScreen], particule in fata camerei). Stins = zero
 ## noduri create; e primul strat de taiat pe device (brief §6).
 @export var screen_rain: bool = true
@@ -157,6 +165,11 @@ var _base_fog_end: float = 0.0
 var _base_fog_color: Color = Color.WHITE
 var _base_sun_energy: float = 1.0
 var _sky: ProceduralSkyMaterial = null
+## Cerul cu banda de orizont (`sky_band.gdshader`, vezi `Track._sky_band_material`)
+## e ShaderMaterial, nu ProceduralSkyMaterial: aceleasi trei culori sunt acolo
+## uniform-uri cu acelasi nume. Fara ramura asta cerul nu s-ar mai inchide.
+var _sky_shader: ShaderMaterial = null
+var _base_fog_aerial: float = 0.0
 var _base_sky_top: Color = Color.WHITE
 var _base_sky_horizon: Color = Color.WHITE
 var _base_sky_cover: Color = Color.WHITE
@@ -194,6 +207,9 @@ func _collect() -> void:
 	_sun = _find_sun()
 	if _env != null and _env.sky != null:
 		_sky = _env.sky.sky_material as ProceduralSkyMaterial
+		var sm := _env.sky.sky_material as ShaderMaterial
+		if sm != null and sm.get_shader_parameter("sky_top_color") != null:
+			_sky_shader = sm
 	_take_base()
 	if screen_rain and _screen == null and not Engine.is_editor_hint():
 		# Copil al metronomului (Node fara transform): RainScreen isi ia
@@ -303,12 +319,17 @@ func _take_base() -> void:
 		_base_fog_color = _env.fog_light_color
 		_base_fog_sky_affect = _env.fog_sky_affect
 		_base_ambient_energy = _env.ambient_light_energy
+		_base_fog_aerial = _env.fog_aerial_perspective
 	else:
 		_base_fog_end = fog_end_dry
 	if _sky != null:
 		_base_sky_top = _sky.sky_top_color
 		_base_sky_horizon = _sky.sky_horizon_color
 		_base_sky_cover = _sky.sky_cover_modulate
+	elif _sky_shader != null:
+		_base_sky_top = _sky_shader.get_shader_parameter("sky_top_color")
+		_base_sky_horizon = _sky_shader.get_shader_parameter("sky_horizon_color")
+		_base_sky_cover = _sky_shader.get_shader_parameter("sky_cover_modulate")
 	if _sun != null:
 		_base_sun_energy = _sun.light_energy
 	else:
@@ -352,8 +373,18 @@ func _apply_sky(amount: float) -> void:
 		var cover := _base_sky_cover
 		var dim := lerpf(1.0, 1.0 - sky_cover_dim_rain, k)
 		_sky.sky_cover_modulate = Color(cover.r * dim, cover.g * dim, cover.b * dim, cover.a)
+	elif _sky_shader != null:
+		_sky_shader.set_shader_parameter("sky_top_color", _base_sky_top.lerp(sky_top_rain, k))
+		_sky_shader.set_shader_parameter("sky_horizon_color",
+			_base_sky_horizon.lerp(sky_horizon_rain, k))
+		var cover2 := _base_sky_cover
+		var dim2 := lerpf(1.0, 1.0 - sky_cover_dim_rain, k)
+		_sky_shader.set_shader_parameter("sky_cover_modulate",
+			Color(cover2.r * dim2, cover2.g * dim2, cover2.b * dim2, cover2.a))
 	if _env != null:
 		_env.fog_sky_affect = lerpf(_base_fog_sky_affect, fog_sky_affect_rain, k)
+		if fog_aerial_rain >= 0.0:
+			_env.fog_aerial_perspective = lerpf(_base_fog_aerial, fog_aerial_rain, k)
 		_env.ambient_light_energy = lerpf(_base_ambient_energy,
 			_base_ambient_energy * ambient_scale_rain, k)
 

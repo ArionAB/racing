@@ -1230,14 +1230,45 @@ static func themes() -> Dictionary:
 			# Cer inchis, printre nori (brief §4: sky_cover_alpha mare) —
 			# gri-albastru sus, alb-gri la orizont.
 			"sky_top": Color.html("6C7C8C"),
+			# Orizontul = AERUL din banda pictata (HAZE in
+			# build_fiordland_sky_band.py): peretii departati se spala exact in
+			# culoarea pe care o deseneaza cerul in spatele lor.
 			"sky_horizon": Color.html("C7D2D8"),
 			"sky_cover_alpha": 0.55,
+			# BANDA DE ORIZONT (nov 2026, pilotul de dupa Ha Long, pe o pista de
+			# munte): tools/blender/build_fiordland_sky_band.py duce fiordul MAI
+			# DEPARTE — peretii, crestele cu zapada din spate, firele de cascada si
+			# norii agatati de pereti, in planuri tot mai palide pana la ~12 km.
+			# Fiordul e stramt (~200 m), deci muntele real e aproape: banda nu
+			# deschide un orizont, il continua. Primul perete pictat sta la
+			# ~0,9 km, ca sub el banda sa fie APA: apa jocului se termina la
+			# FAR_PLANE (380 m, -4,5..-9 grade dupa cota camerei) si intra in apa
+			# pictata, nu in talpa unui perete. `below` = ultimul rand al benzii
+			# (apa departata), pentru camerele de sus, care vad sub -7,5 grade.
+			# Norii temei (`sky_cover`) raman in spatele benzii: shaderul o pune
+			# peste cer, deci crestele ies din nori, nu invers.
+			"sky_band": {
+				"texture": "res://assets/textures/sky/fiordland_horizon_band.png",
+				"lat_min": -7.5, "lat_max": 15.0,
+				"below": Color.html("566266"),
+			},
 			# Ceata in familia apei si a peretelui (gri-verde-albastru,
 			# memoria `ceata-in-familia-solului` cu solul = marea): NU alb
 			# pur, altfel fiordul stramt (~200 m) s-ar inneca prea devreme.
-			"fog_sky_affect": 0.20,
+			#
+			# Cu banda de orizont (nov 2026), ca la Ha Long: `fog_sky_affect`
+			# 0.20 -> 0 (ceata acoperea banda: peretii pictati ieseau o pata
+			# gri), `fog_aerial` 0.35 -> 1.0 (relieful real de la 200-320 m se
+			# spala in CERUL din spatele lui, adica in peretii pictati, nu intr-un
+			# gri plat; masurat pe captura de la 0,95: peretii reali raman MAI
+			# INCHISI decat cei pictati, deci perspectiva aeriana nu se
+			# rastoarna). `fog` ramane rezerva (fara banda) si culoarea pe care o
+			# albeste ploaia; in ploaie RainCycle coboara `fog_aerial` la 0,4
+			# (`fog_aerial_rain` in Track16.tscn), ca departarea sa se albeasca
+			# odata cu cerul.
+			"fog_sky_affect": 0.0,
 			"fog": Color(0.62, 0.68, 0.70),
-			"fog_aerial": 0.35,
+			"fog_aerial": 1.0,
 			# Peretele opus (fjord_far_wall, la 200-250 m): gneis + paduri
 			# negre in benzi — mai inchis decat cerul, ca sa se citeasca sub
 			# linia de orizont.
@@ -1292,12 +1323,16 @@ static func themes() -> Dictionary:
 			# MARBLE_GREY, retag pe treimi de inaltime, vezi masuratoarea) —
 			# o clasa triplanara ar sterge exact benzile astea.
 			"horizon_class": "",
-			"horizon_rings": [
-				{"near": 170.0, "far": 220.0, "count": 3, "scale": 0.55,
-					"clear": 90.0, "picks": ["FarWall_A", "FarWall_B"]},
-				{"near": 220.0, "far": 300.0, "count": 3, "scale": 0.75,
-					"clear": 110.0, "picks": ["SnowRidge_A", "SnowRidge_B"]},
-			],
+			# Inelele 3D de fundal (FarWall_A/B la 170-220 m, SnowRidge_A/B la
+			# 220-300 m) sunt SCOASE din nov 2026: departarea o da banda de
+			# orizont (`sky_band`). Pe captura de la 0,55 conurile de zapada
+			# stateau ca un decupaj alb in fata crestelor pictate, iar la 0,70
+			# panza FarWall iesea o prisma violet-gri langa drum; fara ele cadrul
+			# pierde 1-3 desene si ~2-4k triunghiuri, nimic altceva. Lista goala,
+			# NU `horizon_model` gol: modelul gol porneste siluetele de rezerva
+			# (`_build_horizon_fallback`). Modelul si `horizon_picks` raman, ca o
+			# pista sora sa le poata reface dintr-o linie.
+			"horizon_rings": [],
 			"walls": false,
 			"kerbs": false,
 			"cliffs": false,

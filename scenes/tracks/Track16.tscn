@@ -222,6 +222,7 @@ script = ExtResource("4_rain")
 start_clock = 35.0
 sky_top_rain = Color(0.24313726, 0.2784314, 0.3137255, 1)
 sky_horizon_rain = Color(0.49411765, 0.53333336, 0.5568628, 1)
+fog_aerial_rain = 0.4
 
 [node name="RainFallB1" type="Area3D" parent="Hazarduri" unique_id=1786899748 groups=["rain_falls"]]
 transform = Transform3D(0.6246, 0.0645, 0.7783, 0, 0.9966, -0.0826, -0.781, 0.0516, 0.6225, -90.48, 7.61, -174.99)

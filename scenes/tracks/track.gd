@@ -1825,11 +1825,41 @@ static func themes() -> Dictionary:
 			"sky_top": Color.html("8DB8E8"),
 			"sky_horizon": Color.html("F2E2C2"),
 			"sky_cover_alpha": 0.0,
+			# BANDA DE ORIZONT (nov 2026, reteta Ha Long / MV / Machu Picchu):
+			# dealurile din jurul bazinului, randate in Blender din
+			# tools/blender/build_kyoto_sky_band.py si lipite pe cer de
+			# `_sky_band_material`: Higashiyama la E (cupole joase, Hiei-zan in
+			# spate), Kitayama la N (creste de cedri), Arashiyama la V (cele mai
+			# rosii), la S bazinul cu acoperisuri de kawara si To-ji, cateva
+			# pagode si temple mici pe poale. Padure amestecata, coroana cu
+			# coroana, in culorile kitului (artari carmin / rosu-portocaliu /
+			# ruginii, ginkgo, cedri). Planul 0: opt umeri de deal la 0,64-0,82 km
+			# pe directiile camerei (sonda pe Track18.baked), sudul ramane deschis.
+			# HAZE-ul randarii = `sky_horizon`. `below` = randul de jos al benzii
+			# (#C2B397, campul olive pe jumatate in ceata, la ~150 m sub ochi).
+			"sky_band": {
+				"texture": "res://assets/textures/sky/kyoto_horizon_band.png",
+				"lat_min": -7.5, "lat_max": 15.0,
+				"below": Color.html("C2B397"),
+			},
 			# Ceata: pacla calda a unei dupa-amiezi senine, fog_end 340 (mai
-			# limpede ca Jodhpur, 300). Inelele de fundal vor respecta
-			# < 340 < FAR_PLANE 380 (memoria efecte-de-fundal-cote-legate).
+			# limpede ca Jodhpur, 300).
+			#
+			# Cu banda (nov 2026), masurat pe capturi --gamecam:
+			# - `fog_sky_affect` 0,10 -> 0: altfel ceata acopera banda.
+			# - `fog_aerial` 0,3 (uscat, ca MV): ceata trage 30% din cerul din
+			#   spate, adica din banda, nu din albastrul de sus.
+			# - `fog` RAMANE pacla calda E9D6BC, deci NU e egal cu `below`, spre
+			#   deosebire de MV. Pe Kyoto ce se lipeste de banda nu e campul de
+			#   la -7,5 grade, ci umarul exterior al terenului la fog_max, care
+			#   iese pe ecran (233, 220, 198) la 0,88 / 0,03: o fasie de pacla pe
+			#   linia orizontului (era si inainte de banda). Banda pune picioarele
+			#   dealurilor in ceata joasa de aceeasi culoare (MIST in script), deci
+			#   fasia continua in ceata din vai. Cu ceata subtiata in banda (v5)
+			#   aceeasi fasie iesea dunga alba intre teren si dealuri.
 			"fog": Color.html("E9D6BC"),
-			"fog_sky_affect": 0.10,
+			"fog_sky_affect": 0.0,
+			"fog_aerial": 0.3,
 			"fog_depth": true,
 			"fog_begin": 100.0,
 			"fog_end": 340.0,
@@ -1918,14 +1948,13 @@ static func themes() -> Dictionary:
 			"horizon_picks": [["Higashiyama_A", "Higashiyama_B"],
 				["Arashiyama_A"], ["FarRoofs_A"]],
 			"horizon_class": "",
-			"horizon_rings": [
-				{"near": 340.0, "far": 460.0, "count": 5, "scale": 0.8,
-					"clear": 170.0, "picks": ["Higashiyama_A", "Higashiyama_B"]},
-				{"near": 360.0, "far": 470.0, "count": 2, "scale": 0.45,
-					"clear": 190.0, "picks": ["Arashiyama_A"]},
-				{"near": 330.0, "far": 450.0, "count": 3, "scale": 1.3,
-					"clear": 150.0, "picks": ["FarRoofs_A"]},
-			],
+			# Inelele 3D (5 Higashiyama, 2 Arashiyama, 3 FarRoofs la 330-470 m,
+			# ~17k triunghiuri pe LOD0, 10 instante) SCOASE din nov 2026: departarea
+			# o da banda de orizont (`sky_band`), iar inelele, spalate de ceata de
+			# 0,85, stateau ca dealuri-fantoma albe in fata dealurilor pictate
+			# (capturile de la 0,28 si 0,88). `horizon_rings: []`, NU
+			# `horizon_model` gol (ar porni siluetele de rezerva).
+			"horizon_rings": [],
 			"walls": false,
 			# Balustrada de tablier pe viaducte (scena Kiyomizu, Tsutenkyo,
 			# Togetsukyo), ca Chongqing: brief §2 „pe laturi scena are balustrada,
@@ -4625,13 +4654,36 @@ static func themes() -> Dictionary:
 		"sky_top": Color.html("2A5BA6"),
 		"sky_horizon": Color.html("EDE6D8"),
 		"sky_cover_alpha": 0.0,
-		"fog": Color.html("E2DCD0"),
-		"fog_sky_affect": 0.10,
+		# BANDA DE ORIZONT (nov 2026, reteta Ha Long / MV / Machu Picchu): Alpii Apuani
+		# randati in Blender din tools/blender/build_carrara_sky_band.py si lipiti pe cer
+		# de `_sky_band_material`. Creste de calcar cu CARIERE terasate pe flancuri (fete
+		# de marmura crem, aceeasi ca `carrara_marble`, nu alb), ravaneti sub ele,
+		# castani jos; spre SV-V valea coboara spre campie si Marea Ligurica. Planul 0:
+		# cinci masive la 0,64-0,78 km pe directiile camerei (E la start, V de pe cariera
+		# de sus, N de pe bucla de vest), niciunul in spatele MasivGalerie / MasivMarmifera.
+		# HAZE-ul randarii = `sky_horizon`. Soarele randarii = `custom_sun_rotation_deg`
+		# din Track23.tscn (busola 190), nu cel din tema.
+		# Podeaua benzii e praful carierei luminat de acelasi soare: marginea ei de jos
+		# iese #AC9F88; `below` = acel rand.
+		"sky_band": {
+			"texture": "res://assets/textures/sky/carrara_horizon_band.png",
+			"lat_min": -7.5, "lat_max": 15.0,
+			"below": Color.html("AC9F88"),
+		},
+		# Ceata cu banda (ca pe MV, prima pista de uscat): `fog_sky_affect` 0 (altfel
+		# ceata acopera banda), `fog` = podeaua benzii (#AC9F88), deci terenul cetos de la
+		# fog_end are culoarea pe care o continua banda; `fog_aerial` 0,3 (la 1,0 cerul
+		# estompat aduce albastru sub orizont, teren mov); `fog_max` 0,85 (era 0,62), ca
+		# taietura terenului de la FAR_PLANE sa nu se vada. Inainte de banda ceata era
+		# alb-cald (#E2DCD0) si inchidea orizontul intr-un zid palid.
+		"fog": Color.html("AC9F88"),
+		"fog_sky_affect": 0.0,
+		"fog_aerial": 0.3,
 		"fog_depth": true,
 		"fog_begin": 150.0,
 		"fog_end": 300.0,
 		"fog_curve": 1.4,
-		"fog_max": 0.62,
+		"fog_max": 0.85,
 		"shadows": true,
 		"shadow_opacity": 0.65,
 		"shadow_distance": 120.0,
@@ -4674,23 +4726,18 @@ static func themes() -> Dictionary:
 		# la baza, FARA calota (calota = Alpi). Clasa goala = atlasul modelului: sloturile
 		# pictate (29/19/21/13) raman; o clasa de roca le-ar sterge.
 		#
-		# Un inel per creasta, cu azimut FIX (conventia `_build_horizon`: cos pe X, sin pe Z
-		# fata de centroid; E = 0, S = +90, N = -90) si lungimea TANGENTA la cerc
-		# (`yaw_deg` = 90 - unghi), alese cu tools/ProbeCarraraHorizon.tscn ca fiecare din
-		# fractiile de contract (A 0.02, E 0.62, F 0.70, G 0.80, G 0.88) sa aiba o creasta
-		# in cadrul camerei de joc, neacoperita de teren. Cotele legate (memoria
-		# efecte-de-fundal-cote-legate): fog_end 300 < FAR_PLANE 380; `_build_horizon`
-		# stinge aruncarea de umbra (memoria caster-departat-fura-umbra).
+		# INLOCUITE DE BANDA (27 nov 2026): cele trei inele cu cate o creasta (ApuanRidge_C
+		# la -60, _A la 128, _B la 185, cu azimut fix, ca fiecare fractie de contract —
+		# A 0.02, E 0.62, F 0.70, G 0.80, G 0.88 — sa aiba o creasta in cadru) sunt scoase.
+		# Departarea o da banda de orizont (`sky_band` mai sus), randata din
+		# tools/blender/build_carrara_sky_band.py: Apuanii cu cariere pana la orizont, plus
+		# planul 0 (masive la 0,64-0,78 km pe aceleasi directii ale camerei). In fata benzii
+		# crestele 3D ieseau fantome palide (alta ceata decat banda), ca pe Ha Long / MV /
+		# Fiordland. `horizon_rings: []`, NU `horizon_model: ""` (ar porni siluetele de
+		# rezerva). Sonda inelelor (ProbeCarraraHorizon) a fost retrasa odata cu ele.
 		"horizon_model": "res://assets/models/carrara/effects/carrara_horizon.glb",
 		"horizon_class": "",
-		"horizon_rings": [
-			{"near": 200.0, "far": 300.0, "count": 1, "scale": 0.9, "clear": 130.0,
-				"picks": ["ApuanRidge_C"], "angle_deg": -60.0, "yaw_deg": 0.0},
-			{"near": 230.0, "far": 330.0, "count": 1, "scale": 0.9, "clear": 140.0,
-				"picks": ["ApuanRidge_A"], "angle_deg": 128.0, "yaw_deg": 0.0},
-			{"near": 300.0, "far": 480.0, "count": 1, "scale": 0.85, "clear": 170.0,
-				"picks": ["ApuanRidge_B"], "angle_deg": 185.0, "yaw_deg": 90.0},
-		],
+		"horizon_rings": [],
 		"walls": false,
 		"kerbs": false,
 		"cliffs": false,
